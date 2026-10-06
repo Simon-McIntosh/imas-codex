@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "after arm names zero failures (gate-head.log: 1731 passed, 5 skipped, 1 deselected, EXIT=0, independently reproduced at 9e37b70ab) and the reviewer-measured base arm names zero failures (base-arm.log: 1729 passed, 5 skipped, 1 deselected, EXIT=0 at 1325b8d5), so no failure was added; the reviewed manifest left baseline_suite and after_suite null, so its armed arms are unreadable and the derivation rests on its gate-head.log as the after arm plus a base arm the reviewer measured with the same gate command.",
+  "base_log_revision": "1325b8d5281ac30b20e2b29396301a5f7d816df1",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/ids/workers.py:1071 (route_ids called with cost=state.cost at :1075)",
+    "imas_codex/ids/workers.py:1106 (judge_candidates called with cost=state.cost at :1111)"
+  ],
+  "completed_at": "2026-10-06T21:23:59.949Z",
+  "dispatched_at": "2026-10-06T21:12:49Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T210221981890-candidate-cost/manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite (manifest lines 19-20) are both empty rather than the armed JSON shape (revision, command, exit_status, log_path, completed, failure_count, failure_ids), so the run's own armed arms are unreadable and the added-failure derivation reads gate-head.log only; recording the two arms as JSON with their log paths closes the gap."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T210221981890-candidate-cost/gate-head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head arm's header names revision 1325b8d5 (the pre-commit worktree HEAD) rather than the committed head 9e37b70ab, because the gate ran before the commit; the log therefore cannot be tied to the reviewed revision without the run's stream, and the reviewer's own head-arm.log names 9e37b70ab explicitly to supply that tie."
+    }
+  ],
+  "head_log_revision": "9e37b70aba5a826a5719db643e71ea6db353c341",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "route_ids and judge_candidates have exactly one production call site each, both in candidate_worker (imas_codex/ids/workers.py:1071 and :1106), and both now pass cost=state.cost; the remaining callers are tests, which keep working because the parameter is optional.",
+    "diff": "read commit by commit against base 1325b8d5; the single commit 9e37b70ab changes five files (+166/-55): imas_codex/ids/candidates.py, imas_codex/ids/workers.py, tests/ids/test_candidate_judgment.py, tests/cli/test_discover_map.py and the evidence fragment docs/evidence/fragments/mapping-candidate-selection/candidate-cost.html.",
+    "done_when": "the done-when's three parts hold at head: the gate command is green (1731 passed, 5 skipped, EXIT=0, reproduced), test_candidate_judgment.py shows one route_ids and one judge_candidates call adding their reported cost under candidate_route/candidate_judgment and test_discover_map.py shows the cost limit still halting the loop, and grep -n \"_capture_decisions_cost|candidates.call_decisions =\" imas_codex/ finds nothing (exit 1) where the same grep at base finds five hits.",
+    "goal": "the node's goal is to route the candidate stage's decisions spend through the run's PipelineCost and delete the module-attribute patch; the landed diff adds cost: PipelineCost | None = None to route_ids/judge_candidates and the shared _call_judgment, which adds each request's usage.cost via cost.add(step, spent, 0) under candidate_route/candidate_judgment (imas_codex/ids/candidates.py:292,341,422), passes state.cost at both call sites in candidate_worker, and deletes _capture_decisions_cost (imas_codex/ids/workers.py).",
+    "manifest": "read; it records the commit, both gate commands and results, test_logs, the negative control and its note, and the CANDIDATE_route/jeval step-name decision, but its baseline_suite and after_suite fields are empty (FINDING at manifest.md:19).",
+    "write_paths": "the manifest declares five paths and git show --stat 9e37b70ab lists exactly those five files; the done-when names four code/test paths and the fifth is the docs/evidence fragment the graphics convention requires."
+  },
+  "justifications": {
+    "durability": "the declared mutation (dropping the cost=cost hookup in judge_candidates) reddens exactly test_judge_candidates_adds_reported_cost_to_the_pipeline_cost with KeyError: 'candidate_judgment' and leaves the other 15 tests passing (gate-negative-control.log, EXIT=1), and the cost-limit test now drives the real budget path instead of substituting the deleted seam, closing the untested-wrapper finding section 7 recorded.",
+    "evidence": "the reviewed run's gate-head.log records 1731 passed, 5 skipped, 1 deselected, EXIT=0 and the negative control records 1 failed, 15 passed, EXIT=1; I reproduced the head arm at 9e37b70ab in a scratch tree (1731 passed, EXIT=0, head-arm.log) and measured the base arm at 1325b8d5 (1729 passed, EXIT=0, base-arm.log), so both arms are readable even though the manifest's armed fields are null (FINDING at manifest.md:19).",
+    "fit": "the optional cost: PipelineCost | None = None mirrors the map pipeline's _acall_llm(..., cost=...) idiom section 10 cites, the TYPE_CHECKING import of PipelineCost keeps candidates.py free of a runtime import cycle, and the diff carries no plan, ticket or attribution string.",
+    "goal_fidelity": "imas_codex/ids/candidates.py:306 route_ids and :379 judge_candidates each take a cost keyword and delegate to _call_judgment (:265), which adds the transport's reported spend at :292 under the step names set at :341 and :422; imas_codex/ids/workers.py passes state.cost at both call sites and no longer defines or assigns the module attribute, exactly section 10's three bullets.",
+    "reuse": "the change extends the shared _call_judgment/call_decisions layer and the existing PipelineCost type from imas_codex/ids/mapping.py rather than adding a second tracker or client, and it deletes the global-mutation contextmanager rather than duplicating its effect.",
+    "scope_discipline": "git show --stat 9e37b70ab lists exactly the five paths the manifest declares and no other file changed, the plan's four code/test write paths among them; the evidence fragment is the only non-code path and is the declared docs/evidence artifact."
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 1325b8d5281ac30b20e2b29396301a5f7d816df1\nreviewed_head_sha: 9e37b70aba5a826a5719db643e71ea6db353c341\nVERDICT goal: the node's goal is to route the candidate stage's decisions spend through the run's PipelineCost and delete the module-attribute patch; the landed diff adds cost: PipelineCost | None = None to route_ids/judge_candidates and the shared _call_judgment, which adds each request's usage.cost via cost.add(step, spent, 0) under candidate_route/candidate_judgment (imas_codex/ids/candidates.py:292,341,422), passes state.cost at both call sites in candidate_worker, and deletes _capture_decisions_cost.\nVERDICT done_when: the gate is green (1731 passed, 5 skipped, EXIT=0, reproduced); test_candidate_judgment.py shows one route_ids and one judge_candidates call adding their reported cost and test_discover_map.py shows the cost limit halting the loop; grep -n \"_capture_decisions_cost|candidates.call_decisions =\" imas_codex/ finds nothing at head (exit 1) where base finds five hits.\nVERDICT write_paths: the manifest declares five paths and git show --stat 9e37b70ab lists exactly those five files, the plan's four code/test paths plus the docs/evidence fragment.\nVERDICT manifest: read; it records the commit, both gate commands and results, test_logs, the negative control and its note, and the step-name decision, but baseline_suite and after_suite are empty (FINDING at manifest.md:19).\nVERDICT diff: read commit by commit against base 1325b8d5; 9e37b70ab changes five files (+166/-55).\nCALL_SITES: imas_codex/ids/workers.py:1071, imas_codex/ids/workers.py:1106\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/ids/candidates.py:306 route_ids and :379 judge_candidates each take a cost keyword and delegate to _call_judgment (:265), which adds the transport's reported spend at :292 under the step names set at :341 and :422; imas_codex/ids/workers.py passes state.cost at both call sites and no longer defines or assigns the module attribute, exactly section 10's three bullets.\nSCORE evidence: 18\nJUSTIFICATION evidence: the reviewed run's gate-head.log records 1731 passed, 5 skipped, EXIT=0 and the negative control records 1 failed, 15 passed, EXIT=1; I reproduced the head arm at 9e37b70ab (1731 passed, EXIT=0, head-arm.log) and measured the base arm at 1325b8d5 (1729 passed, EXIT=0, base-arm.log), so both arms are readable even though the manifest's armed fields are null.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 9e37b70ab lists exactly the five paths the manifest declares and no other file changed; the evidence fragment is the only non-code path and is the declared docs/evidence artifact.\nSCORE durability: 19\nJUSTIFICATION durability: the declared mutation dropping the cost=cost hookup in judge_candidates reddens exactly test_judge_candidates_adds_reported_cost_to_the_pipeline_cost with KeyError: 'candidate_judgment' and leaves the other 15 passing (gate-negative-control.log, EXIT=1), and the cost-limit test now drives the real budget path instead of substituting the deleted seam.\nSCORE fit: 19\nJUSTIFICATION fit: the optional cost: PipelineCost | None = None mirrors the map pipeline's _acall_llm(..., cost=...) idiom, the TYPE_CHECKING import of PipelineCost keeps candidates.py free of a runtime import cycle, and the diff carries no plan, ticket or attribution string.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the shared _call_judgment/call_decisions layer and the existing PipelineCost type from imas_codex/ids/mapping.py rather than adding a second tracker or client, and it deletes the global-mutation contextmanager rather than duplicating its effect.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T210221981890-candidate-cost/manifest.md:19 follow-on: baseline_suite and after_suite are both empty rather than the armed JSON shape, so the run's own armed arms are unreadable and the added-failure derivation reads gate-head.log only; recording the two arms as JSON with their log paths closes the gap.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T210221981890-candidate-cost/gate-head.log:1 follow-on: the head arm's header names revision 1325b8d5 (the pre-commit worktree HEAD) rather than the committed head 9e37b70ab, because the gate ran before the commit; the log cannot be tied to the reviewed revision without the run's stream, and the reviewer's own head-arm.log names 9e37b70ab explicitly to supply that tie.\n",
+  "review_run_id": "r-20261006T211241701917-review-of-candidate-cost",
+  "reviewed_base_sha": "1325b8d5281ac30b20e2b29396301a5f7d816df1",
+  "reviewed_head_sha": "9e37b70aba5a826a5719db643e71ea6db353c341",
+  "reviewed_run_id": "r-20261006T210221981890-candidate-cost",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T21:24:16.947013+00:00",
+  "total": 115
+}
