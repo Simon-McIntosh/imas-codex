@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
 </head>
@@ -388,10 +388,15 @@
         removal of the bridge's <code>imas_node_embedding</code> arm and its post-hoc
         filter, and the single route count: the <code>workers.py</code> copy of
         <code>count_candidates_by_route</code> and <code>count_sources_by_mapping_status</code>
-        are deleted, and <code>discover status</code> and <code>discover clear</code>
-        (<code>imas_codex/cli/discover/__init__.py</code>) import the
-        <code>graph_ops.py</code> reader. The assign stage keeps its current call in this node;
-        only the source of each shortlist changes.
+        are deleted. The three importers of the <code>workers.py</code> copy, all in
+        <code>imas_codex/cli/discover/__init__.py</code> (<code>:84</code> and <code>:161</code>
+        for <code>discover status</code>, <code>:280</code> for <code>discover clear</code>),
+        import the <code>graph_ops.py</code> reader instead, which
+        <code>imas_codex/cli/map.py:730</code> already does. The clear path's other entry,
+        <code>clear_facility_candidates</code> (<code>imas_codex/cli/discover/map.py:21</code>,
+        called at <code>__init__.py:288</code>), already delegates to <code>graph_ops.py</code>'s
+        <code>clear_candidates</code> and stays. The assign stage keeps its current call in this
+        node; only the source of each shortlist changes.
         <ul>
           <li>The candidate edges get a reader, and a way to mark the reasoning model's pick,
             beside their writer in <code>imas_codex/ids/graph_ops.py</code>:
@@ -404,8 +409,12 @@
             read one state. It is a separate function because <code>write_candidates</code>
             deletes and rewrites every edge of a source, while a pick must flag existing edges
             without disturbing the shortlist. A path with no edge is refused with
-            <code>CandidateWriteError</code>. No candidate query is written in <code>workers.py</code> or
-            <code>mapping.py</code>.</li>
+            <code>CandidateWriteError</code>. No candidate read or write is written in
+            <code>workers.py</code> or <code>mapping.py</code>. There is one exception, and it is a
+            claim predicate, not a read: the map claim's status predicate, which
+            <code>claim_batch</code> evaluates (<code>imas_codex/discovery/base/claims.py:255</code>),
+            tests for a selected edge. It stays in <code>workers.py</code> beside the other claim
+            predicates, as §7 placed them.</li>
           <li>Write paths: <code>imas_codex/ids/graph_ops.py</code>,
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/tools.py</code>,
             <code>imas_codex/ids/workers.py</code>,
