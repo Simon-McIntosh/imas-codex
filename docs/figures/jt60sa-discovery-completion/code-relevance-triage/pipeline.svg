@@ -50,8 +50,8 @@
   <g font-size="20" fill="#111">
     <text x="490" y="318">enrich</text>
     <text x="700" y="318">scored</text>
-    <text x="910" y="312">records content relevance</text>
-    <text x="910" y="334" fill="#555" font-size="18">status unchanged — still scored</text>
+    <text x="910" y="312">marks scored</text>
+    <text x="910" y="334" fill="#555" font-size="18">with content relevance, one write</text>
     <text x="910" y="424">ingest claim</text>
     <text x="1060" y="424" fill="#555" font-size="18">relevance ≥ 0.50, highest first</text>
   </g>
