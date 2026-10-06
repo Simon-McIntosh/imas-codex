@@ -25,13 +25,18 @@ from imas_codex.llm import prompt_loader
 DISCOVERY_ROOT = Path(discovery_pkg.__file__).parent
 _RENDERERS = {"render_prompt", "render_prompt_strict"}
 
+# Prompts whose rendered body is a decisions-questions mapping consumed by
+# ``acall_decisions``, not a structured response model.  Such a prompt carries
+# no generated example, so a function that makes a ``response_model`` call must
+# not be paired with it even when it also builds the questions.
+_DECISIONS_PROMPTS = {"code/triage"}
+
 # The prompts whose call sites this walk must reach; a positive control that the
 # analysis actually follows discovery's render→builder→call dataflow rather than
 # silently returning nothing.
 EXPECTED_PROMPTS = {
     "paths/triage",
     "paths/scorer",
-    "code/triage",
     "code/scorer",
     "wiki/scorer",
     "wiki/document-scorer",
@@ -130,7 +135,7 @@ def _resolve_prompt(
     current_module: str,
 ) -> str | None:
     direct = _render_prompt_in(enclosing.body)
-    if direct:
+    if direct and direct not in _DECISIONS_PROMPTS:
         return direct
     for builder in _builder_calls(enclosing.body).values():
         if builder in imports:
@@ -138,7 +143,7 @@ def _resolve_prompt(
         else:
             source_module, original = current_module, builder
         prompt = render_map.get((source_module, original))
-        if prompt:
+        if prompt and prompt not in _DECISIONS_PROMPTS:
             return prompt
     return None
 

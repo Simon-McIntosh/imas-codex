@@ -34,6 +34,19 @@ def _code_file(path, status, **extra):
     return row
 
 
+def _relevance(row):
+    """The file's relevance: the largest of the four scope probabilities."""
+    return max(
+        float(row.get(key) or 0.0)
+        for key in (
+            "relevance_loads",
+            "relevance_processes",
+            "relevance_describes",
+            "relevance_imas",
+        )
+    )
+
+
 class StubGraphClient:
     """Evaluate seeded rows against the predicates the query itself carries."""
 
@@ -60,18 +73,18 @@ class StubGraphClient:
 
     def _match(self, cypher, kwargs):
         rows = [r for r in self.code_files if r["facility_id"] == kwargs["facility"]]
-        if "sf.triage_composite IS NULL" in cypher:
+        if "sf.relevance_stage IS NULL" in cypher:
             rows = [
                 r
                 for r in rows
-                if r["status"] == "discovered" and r.get("triage_composite") is None
+                if r["status"] == "discovered" and r.get("relevance_stage") is None
             ]
         if "coalesce(sf.is_enriched, false) = false" in cypher:
             rows = [
                 r
                 for r in rows
                 if r["status"] == "triaged"
-                and r.get("triage_composite", 0) >= kwargs["min_triage"]
+                and _relevance(r) >= kwargs["min_relevance"]
                 and not r.get("is_enriched", False)
             ]
         if "sf.is_enriched = true" in cypher:
@@ -83,7 +96,7 @@ class StubGraphClient:
                 r
                 for r in rows
                 if r["status"] == "scored"
-                and r.get("score_composite", 0) >= kwargs["min_score"]
+                and _relevance(r) >= kwargs["min_relevance"]
                 and r.get("line_count", 0) <= kwargs["max_line_count"]
             ]
         if "sf.status = 'ingested'" in cypher:
@@ -132,15 +145,15 @@ class TestClaimsHonourPrefix:
         from imas_codex.discovery.code.graph_ops import claim_files_for_enrichment
 
         rows = [
-            _code_file(INSIDE + "/a.f", "triaged", triage_composite=0.8),
-            _code_file(OUTSIDE + "/b.f", "triaged", triage_composite=0.8),
+            _code_file(INSIDE + "/a.f", "triaged", relevance_loads=0.8),
+            _code_file(OUTSIDE + "/b.f", "triaged", relevance_loads=0.8),
         ]
         files = _call(
             claim_files_for_enrichment,
             GRAPH_OPS,
             rows,
             limit=10,
-            min_triage_composite=0.5,
+            min_relevance=0.5,
             path_prefixes=[INSIDE],
         )
         assert [f["path"] for f in files] == [INSIDE + "/a.f"]
@@ -161,15 +174,15 @@ class TestClaimsHonourPrefix:
         from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
         rows = [
-            _code_file(INSIDE + "/a.f", "scored", score_composite=0.9, line_count=5),
-            _code_file(OUTSIDE + "/b.f", "scored", score_composite=0.9, line_count=5),
+            _code_file(INSIDE + "/a.f", "scored", relevance_loads=0.9, line_count=5),
+            _code_file(OUTSIDE + "/b.f", "scored", relevance_loads=0.9, line_count=5),
         ]
         files = _call(
             _claim_code_files_for_ingestion,
             GRAPH_GRAPH,
             rows,
             limit=10,
-            min_score=0.5,
+            min_relevance=0.5,
             path_prefixes=[INSIDE],
         )
         assert [f["path"] for f in files] == [INSIDE + "/a.f"]
@@ -189,19 +202,19 @@ class TestHasWorkPredicatesHonourPrefix:
     def test_enrich_predicate_ignores_outside_work(self):
         from imas_codex.discovery.code.graph_ops import has_pending_enrich_work
 
-        rows = [_code_file(OUTSIDE + "/b.f", "triaged", triage_composite=0.8)]
+        rows = [_code_file(OUTSIDE + "/b.f", "triaged", relevance_loads=0.8)]
         assert (
             _call(
                 has_pending_enrich_work,
                 GRAPH_OPS,
                 rows,
-                min_triage_composite=0.5,
+                min_relevance=0.5,
                 path_prefixes=[INSIDE],
             )
             is False
         )
         assert (
-            _call(has_pending_enrich_work, GRAPH_OPS, rows, min_triage_composite=0.5)
+            _call(has_pending_enrich_work, GRAPH_OPS, rows, min_relevance=0.5)
             is True
         )
 
@@ -218,18 +231,18 @@ class TestHasWorkPredicatesHonourPrefix:
     def test_code_predicate_ignores_outside_work(self):
         from imas_codex.discovery.code.graph_ops import has_pending_code_work
 
-        rows = [_code_file(OUTSIDE + "/b.f", "scored", score_composite=0.95)]
+        rows = [_code_file(OUTSIDE + "/b.f", "scored", relevance_loads=0.95)]
         assert (
             _call(
                 has_pending_code_work,
                 GRAPH_OPS,
                 rows,
-                min_score=0.5,
+                min_relevance=0.5,
                 path_prefixes=[INSIDE],
             )
             is False
         )
-        assert _call(has_pending_code_work, GRAPH_OPS, rows, min_score=0.5) is True
+        assert _call(has_pending_code_work, GRAPH_OPS, rows, min_relevance=0.5) is True
 
     def test_link_predicate_ignores_outside_work(self):
         from imas_codex.discovery.code.graph_ops import has_pending_link_work

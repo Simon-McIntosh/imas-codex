@@ -45,14 +45,14 @@ CLAIM_CASES = [
         CODE_OPS,
         "claim_files_for_enrichment",
         GRAPH_OPS,
-        {"limit": 10, "min_triage_composite": 0.5},
+        {"limit": 10, "min_relevance": 0.5},
     ),
     (CODE_OPS, "claim_files_for_scoring", GRAPH_OPS, {"limit": 10}),
     (
         CODE_WORKERS,
         "_claim_code_files_for_ingestion",
         GRAPH_GRAPH,
-        {"limit": 10, "min_score": 0.5},
+        {"limit": 10, "min_relevance": 0.5},
     ),
 ]
 
@@ -66,8 +66,8 @@ PREDICATE_CASES = [
     (CODE_OPS, "has_pending_scan_work", GRAPH_OPS, {"min_score": 0.5}),
     (CODE_OPS, "has_pending_score_work", GRAPH_OPS, {}),
     (CODE_OPS, "has_pending_triage_work", GRAPH_OPS, {}),
-    (CODE_OPS, "has_pending_enrich_work", GRAPH_OPS, {"min_triage_composite": 0.5}),
-    (CODE_OPS, "has_pending_code_work", GRAPH_OPS, {"min_score": 0.5}),
+    (CODE_OPS, "has_pending_enrich_work", GRAPH_OPS, {"min_relevance": 0.5}),
+    (CODE_OPS, "has_pending_code_work", GRAPH_OPS, {"min_relevance": 0.5}),
     (CODE_OPS, "has_pending_link_work", GRAPH_OPS, {}),
 ]
 
