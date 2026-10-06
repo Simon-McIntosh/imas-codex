@@ -1,0 +1,17 @@
+<section id="prefix-scoped-reset-record">
+  <h3>Let reset_to_status own path-prefix scoping</h3>
+  <p id="prefix-scoped-reset-landing">
+    <code>reset_to_status</code> now renders its own path-prefix scope through
+    <code>render_path_prefix_clause</code> (alias <code>n</code>, parameter
+    name owned inside the function), so callers pass a list only:
+    <code>discover paths</code> passes its <code>--root</code> list and
+    <code>discover code</code> passes its <code>--path-prefix</code> list, and
+    the <code>discovered</code> code spec accepts <code>skipped</code> as a
+    source status. Gate:
+    <code>tests/discovery</code> 3 failed, 1154 passed (EXIT=1); the three
+    failures are pre-existing tests under
+    <code>tests/discovery/test_paths_pipeline.py</code> — outside this node's
+    write scope — that pin the replaced inline clause; scope extension
+    requested.
+  </p>
+</section>
