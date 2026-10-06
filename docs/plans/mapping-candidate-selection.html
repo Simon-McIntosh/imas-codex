@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -321,8 +321,12 @@
       SignalSource as <code>mapping_target_path</code>, <code>mapping_target_ids</code> and
       <code>mapping_target_type</code> (<code>imas_codex/schemas/facility.yaml:1931–1935</code>,
       written at <code>imas_codex/ids/workers.py:552</code>). The selected
-      <code>MAPPING_CANDIDATE</code> edge carries the path and IDS, and the node's data type
-      gives the target type, so §8 retires those three fields.
+      <code>MAPPING_CANDIDATE</code> edge carries the path and IDS, so §8 retires
+      <code>mapping_target_path</code> and <code>mapping_target_ids</code>.
+      <code>mapping_target_type</code> stays. It is the four-valued structural
+      <code>TargetType</code> (<code>imas_codex/ids/models.py:43</code>: struct_array,
+      time_slice, scalar, profile), which the DD data type cannot reproduce, and the
+      reasoning model's choice still sets it.
       <code>write_candidates</code> replaces that <code>set_mapping_status</code> call for the
       target. The relationship cannot merge into
       <code>MAPS_TO_IMAS</code>, for two reasons:
@@ -419,8 +423,10 @@
       <li>The claim takes a batch of enriched sources that are unjudged, or stale under the
         claim timeout. It keeps the <code>@retry_on_deadlock</code> + <code>ORDER BY
         rand()</code> + claim-token pattern.</li>
-      <li>Each batch goes through <code>retrieve_candidates</code>, the judgment,
-        <code>route</code> and <code>write_candidates</code>, in that order.</li>
+      <li>Each batch goes through <code>route_ids</code>, <code>retrieve_candidates</code>
+        (scoped to the routed IDSs), <code>judge_candidates</code>, <code>route</code> and
+        <code>write_candidates</code>, in that order. IDS routing comes first because
+        §3 measured it as the recall lift.</li>
       <li><code>discover status FACILITY</code> gains the counts by candidate route.</li>
     </ul>
     <p>
@@ -493,8 +499,7 @@
         <ul>
           <li>The edge write moves into one function in <code>graph_ops.py</code>, beside
             §6's <code>write_candidates</code>. It checks the returned count and raises
-            on zero, so a binding can no longer vanish silently. One module then owns every
-            SignalSource → IMASNode edge write.</li>
+            on zero, so a binding can no longer vanish silently.</li>
           <li><code>persist_mapping_result</code> calls that function.</li>
           <li><code>create_signal_source</code>, whose only caller is
             <code>tests/ids/test_graph_ops.py</code>, is deleted together with that test,
@@ -513,11 +518,18 @@
         <code>--skip-metadata</code>, which is parsed and never read, and
         <code>--skip-errors</code>, which is the same as <code>--stage data</code>.</li>
       <li><strong>Retired fields.</strong> SignalSource loses
-        <code>mapping_target_path</code>, <code>mapping_target_ids</code> and
-        <code>mapping_target_type</code>. The map stage reads the target from the selected
-        <code>MAPPING_CANDIDATE</code> edge, and derives the target type from that node's
-        data type, where <code>claim_sources_for_mapping</code> reads the scalar today
-        (<code>workers.py:237</code>).</li>
+        <code>mapping_target_path</code> and <code>mapping_target_ids</code>. The map stage
+        reads the target from the selected <code>MAPPING_CANDIDATE</code> edge, where
+        <code>claim_sources_for_mapping</code> reads the scalars today
+        (<code>workers.py:237</code>). <code>mapping_target_type</code> stays: the escalated
+        choice call returns the <code>TargetType</code> with its pick, as the assign call
+        does now, and <code>mapping.py:1416, 1497</code> keep reading it.</li>
+      <li><strong>One owner for the edge.</strong> The <code>MAPS_TO_IMAS</code> delete in
+        <code>_clear_mapping</code> (<code>imas_codex/cli/map.py:657–666</code>), the only
+        delete site of that edge, moves into <code>graph_ops.py</code> beside the write
+        function and <code>clear_candidates</code>. <code>imas map clear</code> and
+        <code>--clear</code> call it. Every create and delete of a SignalSource → IMASNode
+        edge then lives in one module.</li>
     </ul>
     <p><strong>Node</strong> <code>map-run-consumes-candidates</code>, role implement.</p>
     <ul>
