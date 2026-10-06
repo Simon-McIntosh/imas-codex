@@ -33,7 +33,8 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Final
 
 from imas_codex.discovery.base.llm import DecisionsValidationError, call_decisions
-from imas_codex.graph.dd_search import hybrid_dd_search
+from imas_codex.graph.dd_search import hybrid_dd_search, related_dd_search
+from imas_codex.models.constants import SearchMode
 from imas_codex.search.search_strategy import SearchHit
 from imas_codex.settings import (
     RouteThresholds,
@@ -59,6 +60,16 @@ JUDGMENT_SERVICE: Final[str] = "imas-mapping"
 
 #: Number of most probable IDSs the routing choice returns.
 ROUTED_IDS: Final[int] = 3
+
+#: Number of a source's top-ranked candidates whose cross-IDS clusters seed the
+#: sibling expansion.
+CLUSTER_SEED_COUNT: Final[int] = 5
+
+#: Maximum new cross-IDS siblings added to one source's shortlist.
+CLUSTER_SIBLING_CAP: Final[int] = 10
+
+#: Identifier of the arm that returns a path as a cross-IDS cluster sibling.
+CLUSTER_ARM: Final[str] = "cluster"
 
 #: Characters of a DD node's documentation carried into a judgment.
 _CANDIDATE_DOC_CHARS: Final[int] = 400
@@ -98,15 +109,16 @@ class PairJudgment:
 class Route:
     """The routing decision for one judged source.
 
-    ``decision`` is ``"selected"`` when a select threshold is set and the best
-    candidate reaches it while leading the next by the margin, ``"no_candidate"``
-    when a floor is set and no score reaches it, and ``"escalated"`` otherwise.
-    ``shortlist`` is the top candidates in Jev order (descending
-    ``p_same_quantity``).
+    ``decision`` is ``"selected"`` when a select threshold is set and any
+    candidate reaches it, ``"no_candidate"`` when a floor is set and no score
+    reaches it, and ``"escalated"`` otherwise. ``shortlist`` is the top
+    candidates in Jev order (descending ``p_same_quantity``). ``selected`` holds
+    the path of every candidate at or above the select threshold.
     """
 
     decision: str
     shortlist: tuple[PairJudgment, ...]
+    selected: frozenset[str] = frozenset()
 
 
 @dataclass
@@ -384,6 +396,7 @@ def judge_candidates(
     model: str | None = None,
     service: str = JUDGMENT_SERVICE,
     cost: PipelineCost | None = None,
+    step: str = "candidate_judgment",
 ) -> list[PairJudgment] | None:
     """Judge every candidate's quantity against one source in a single call.
 
@@ -399,7 +412,8 @@ def judge_candidates(
         model: Decisions model id; defaults to the mapping-candidates seat.
         service: Service tag for the API key and headers.
         cost: Optional run cost tracker; the decisions call's reported cost is
-            added to it under the ``candidate_judgment`` step.
+            added to it under ``step``.
+        step: Pipeline-cost step name the call's reported cost is booked to.
     """
     if not candidates:
         return []
@@ -419,7 +433,7 @@ def judge_candidates(
         state,
         questions,
         service=service,
-        step="candidate_judgment",
+        step=step,
         cost=cost,
     )
     if answers is None:
@@ -443,12 +457,13 @@ def route(
     """Route one source from its judged candidates and the routing thresholds.
 
     Orders the judgments by descending ``p_same_quantity`` and takes the top
-    ``shortlist_size`` as the shortlist. A source is selected only when a select
-    threshold is set, its best score reaches it, and it leads the next candidate
-    by the margin; it is ``no_candidate`` only when a floor is set and no score
-    reaches it; everything else is escalated. ``None`` judgments — a failed
-    decisions call — yield ``None``: no route, and the source is not selected or
-    rejected.
+    ``shortlist_size`` as the shortlist. A source is selected when a select
+    threshold is set and any candidate reaches it — every candidate at or above
+    the threshold is returned in ``selected``, not only the best, because a
+    near-tie is expected when a quantity has several homes. It is
+    ``no_candidate`` only when a floor is set and no score reaches it;
+    everything else is escalated. ``None`` judgments — a failed decisions call —
+    yield ``None``: no route, and the source is not selected or rejected.
 
     Args:
         judgments: The source's candidate judgments, or ``None`` on failure.
@@ -462,18 +477,124 @@ def route(
     )
     shortlist = tuple(ordered[: limits.shortlist_size])
     best = ordered[0].p_same_quantity if ordered else None
-    runner_up = ordered[1].p_same_quantity if len(ordered) > 1 else None
     if (
         limits.select_threshold is not None
         and best is not None
         and best >= limits.select_threshold
-        and (runner_up is None or best - runner_up >= limits.select_margin)
     ):
         decision = "selected"
+        selected = frozenset(
+            judgment.path
+            for judgment in ordered
+            if judgment.p_same_quantity >= limits.select_threshold
+        )
     elif limits.floor_threshold is not None and (
         best is None or best < limits.floor_threshold
     ):
         decision = "no_candidate"
+        selected = frozenset()
     else:
         decision = "escalated"
-    return Route(decision=decision, shortlist=shortlist)
+        selected = frozenset()
+    return Route(decision=decision, shortlist=shortlist, selected=selected)
+
+
+def _sibling_hit(path: str, ids_name: str, documentation: str) -> SearchHit:
+    """Build the ``SearchHit`` a cross-IDS cluster sibling joins as."""
+    return SearchHit(
+        path=path,
+        ids_name=ids_name,
+        documentation=documentation,
+        score=0.0,
+        rank=1,
+        search_mode=SearchMode.AUTO,
+    )
+
+
+def expand_cluster_siblings(
+    source: Mapping[str, Any],
+    facility: Mapping[str, Any],
+    candidates: Sequence[Candidate],
+    judgments: Sequence[PairJudgment],
+    *,
+    gc: GraphClient,
+    model: str | None = None,
+    service: str = JUDGMENT_SERVICE,
+    cost: PipelineCost | None = None,
+    dd_version: int | None = None,
+) -> tuple[list[Candidate], list[PairJudgment]] | None:
+    """Expand a source's top candidates through their cross-IDS DD clusters.
+
+    The seed set is the ``CLUSTER_SEED_COUNT`` candidates with the highest
+    first-call ``p_same_quantity``. Each seed's cluster siblings in other IDSs
+    (``related_dd_search`` with ``relationship_types="cluster"``) become new
+    candidates carrying the ``CLUSTER_ARM`` arm. A sibling already in the
+    shortlist is dropped, so the union is deduplicated on path, and the new
+    siblings are capped at ``CLUSTER_SIBLING_CAP``. Each seed's
+    ``SearchHit.see_also`` is filled with the sibling paths its own cluster
+    contributed. The new siblings are judged in a second decisions call booked
+    to the ``candidate_cluster_judgment`` cost step, because the sibling set
+    depends on the first call's ranking.
+
+    Returns the new sibling candidates and their judgments — both empty when no
+    seed has a cluster sibling, or when every sibling is already in the
+    shortlist. Returns ``None`` when the second call's transport fails: the
+    siblings exist but were never scored, so the caller must fail closed and
+    leave the source unjudged for a retry rather than route it on its first-call
+    candidates alone.
+    """
+    ranked = sorted(
+        judgments, key=lambda judgment: judgment.p_same_quantity, reverse=True
+    )
+    seed_paths = [judgment.path for judgment in ranked[:CLUSTER_SEED_COUNT]]
+    if not seed_paths:
+        return [], []
+
+    by_path = {candidate.hit.path: candidate for candidate in candidates}
+    shortlist_paths = set(by_path)
+    sibling_ids: dict[str, str] = {}
+    sibling_docs: dict[str, str] = {}
+    new_order: list[str] = []
+    for seed in seed_paths:
+        result = related_dd_search(
+            gc, seed, relationship_types="cluster", dd_version=dd_version
+        )
+        seed_paths_here: list[str] = []
+        for hit in result.hits:
+            if hit.relationship_type != CLUSTER_ARM:
+                continue
+            seed_paths_here.append(hit.path)
+            if hit.path in shortlist_paths:
+                continue
+            if hit.path not in sibling_ids:
+                sibling_ids[hit.path] = hit.ids
+                sibling_docs[hit.path] = hit.doc
+                new_order.append(hit.path)
+        if seed in by_path:
+            by_path[seed].hit.see_also = list(dict.fromkeys(seed_paths_here))
+
+    new_paths = new_order[:CLUSTER_SIBLING_CAP]
+    if not new_paths:
+        return [], []
+
+    parent_docs = _fetch_parent_documentation(gc, new_paths)
+    siblings = [
+        Candidate(
+            hit=_sibling_hit(path, sibling_ids[path], sibling_docs.get(path) or ""),
+            arms=frozenset({CLUSTER_ARM}),
+            parent_documentation=parent_docs.get(path),
+        )
+        for path in new_paths
+    ]
+    sibling_judgments = judge_candidates(
+        source,
+        facility,
+        siblings,
+        model=model,
+        service=service,
+        cost=cost,
+        step="candidate_cluster_judgment",
+    )
+    if sibling_judgments is None:
+        return None
+    return siblings, sibling_judgments

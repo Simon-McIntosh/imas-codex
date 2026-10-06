@@ -1,0 +1,68 @@
+<section>
+  <h2 id="cross-ids-siblings">Cross-IDS cluster siblings widens each source's shortlist</h2>
+  <p id="cross-ids-siblings-scope">
+    A source's Jev top five candidates are now expanded through their cross-IDS
+    DD clusters. <code>expand_cluster_siblings(source, facility, candidates,
+    judgments, *, gc)</code> in <code>imas_codex/ids/candidates.py</code> takes
+    the <code>CLUSTER_SEED_COUNT</code> (5) candidates with the highest
+    first-call <code>p_same_quantity</code>, calls
+    <code>related_dd_search(gc, path, relationship_types="cluster")</code> on
+    each, and joins every new sibling as a <code>Candidate</code> whose arms are
+    <code>{cluster}</code> (<code>CLUSTER_ARM</code>), deduplicated on path,
+    dropping any path already in the shortlist and capped at
+    <code>CLUSTER_SIBLING_CAP</code> (10). Each seed's
+    <code>SearchHit.see_also</code> is filled with the sibling paths its own
+    cluster contributed. The siblings are judged in a second decisions call
+    booked to the <code>candidate_cluster_judgment</code> cost step, because
+    the sibling set depends on the first call's ranking;
+    <code>candidate_worker</code> calls the expansion between
+    <code>judge_candidates</code> and <code>route</code>. <code>route</code> now
+    returns a <code>Route.selected</code> set marking every candidate at or
+    above the select threshold, and <code>_candidate_records</code> emits each
+    record's <code>arms</code>. The edge gains an <code>arms</code> property on
+    <code>MAPPING_CANDIDATE</code>, written by <code>write_candidates</code> and
+    refused unless it is a list of strings, alongside the existing non-boolean
+    route refusal. The margin rule is retired: the <code>map-select-margin</code>
+    key, <code>RouteThresholds.select_margin</code> and its read in
+    <code>get_mapping_route_thresholds</code> are gone.
+  </p>
+  <p id="cross-ids-siblings-fail-closed">
+    Two behaviours fail closed. A failed second decisions call makes
+    <code>expand_cluster_siblings</code> return <code>None</code>: the siblings
+    exist but were never scored, so <code>candidate_worker</code> releases the
+    claim and writes no candidates, leaving the source unjudged for a retry
+    rather than recording it as fully judged on its first-call candidates alone;
+    the empty-pair return is kept only for the genuine no-sibling case.
+    <code>_candidate_arms</code> refuses an absent <code>arms</code> value
+    instead of defaulting it to empty, because the only producer always emits
+    it and an absent value means provenance was dropped.
+  </p>
+  <table id="cross-ids-siblings-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider</code></td><td>539 passed, 5 skipped, 1 deselected, exit 0</td></tr>
+      <tr><td><code>grep -rn 'select_margin\|select-margin' imas_codex/ pyproject.toml</code></td><td>prints nothing</td></tr>
+      <tr><td>negative control — skip the cluster expansion in <code>candidate_worker</code></td><td>1 failed (<code>test_candidate_worker_adds_cluster_siblings_and_books_the_second_call</code>), exit 1</td></tr>
+    </tbody>
+  </table>
+  <p id="cross-ids-siblings-tests">
+    <code>tests/ids/test_candidate_judgment.py</code> shows a seed whose
+    top candidate is <code>magnetics/ip</code> gains both cluster siblings as
+    candidates with the arm <code>cluster</code>, judged in the second call,
+    with the seed's <code>see_also</code> listing them; a sibling already in the
+    shortlist is dropped and the union is capped at ten; and the second call's
+    <code>$2.0e-4</code> lands under <code>candidate_cluster_judgment</code> in
+    the run's <code>PipelineCost</code>. <code>route</code> marks every
+    candidate at or above the select threshold in
+    <code>Route.selected</code>, and that a failed second call returns
+    <code>None</code>.
+    <code>tests/ids/test_candidate_persistence.py</code> shows
+    <code>write_candidates</code> persists each record's <code>arms</code> and
+    refuses a bare string, a list of non-strings, and an absent
+    <code>arms</code> value.
+    <code>tests/cli/test_discover_map.py</code> drives the worker to add a
+    cluster-armed sibling that reaches the select threshold, routes it, and
+    books the second call's cost, and separately drives a failing second call
+    to release the claim with no route and no records written.
+  </p>
+</section>

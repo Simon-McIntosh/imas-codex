@@ -39,8 +39,12 @@ class TestWriteCandidates:
     def test_returns_written_count_and_sets_route(self):
         gc = _gc_returning([{"written": 2}])
         judgments = [
-            {"path": "equilibrium/time_slice/profiles_1d/psi", "rank": 1},
-            {"path": "core_profiles/profiles_1d/electrons/temperature", "rank": 2},
+            {"path": "equilibrium/time_slice/profiles_1d/psi", "rank": 1, "arms": []},
+            {
+                "path": "core_profiles/profiles_1d/electrons/temperature",
+                "rank": 2,
+                "arms": [],
+            },
         ]
 
         written = write_candidates("jet:PF:r", judgments, "escalated", gc)
@@ -54,10 +58,14 @@ class TestWriteCandidates:
         first = _gc_returning([{"written": 1}])
         second = _gc_returning([{"written": 3}])
 
-        write_candidates("jet:PF:r", [{"path": "a/b"}], "escalated", first)
+        write_candidates("jet:PF:r", [{"path": "a/b", "arms": []}], "escalated", first)
         write_candidates(
             "jet:PF:r",
-            [{"path": "a/b"}, {"path": "a/c"}, {"path": "a/d"}],
+            [
+                {"path": "a/b", "arms": []},
+                {"path": "a/c", "arms": []},
+                {"path": "a/d", "arms": []},
+            ],
             "selected",
             second,
         )
@@ -74,7 +82,7 @@ class TestWriteCandidates:
     def test_missing_imnode_raises(self):
         """A candidate whose node vanished fails loudly, not silently."""
         gc = _gc_returning([{"written": 1}])
-        judgments = [{"path": "a/b"}, {"path": "a/gone"}]
+        judgments = [{"path": "a/b", "arms": []}, {"path": "a/gone", "arms": []}]
 
         with pytest.raises(CandidateWriteError):
             write_candidates("jet:PF:r", judgments, "escalated", gc)
@@ -82,7 +90,7 @@ class TestWriteCandidates:
     def test_claim_released_on_success(self):
         gc = _gc_returning([{"written": 1}])
 
-        write_candidates("jet:PF:r", [{"path": "a/b"}], "escalated", gc)
+        write_candidates("jet:PF:r", [{"path": "a/b", "arms": []}], "escalated", gc)
 
         statement = _normalised(gc)
         assert "sg.mapping_claimed_at = null" in statement
@@ -94,7 +102,9 @@ class TestWriteCandidates:
         gc = _gc_returning([{"written": 0}])
 
         with pytest.raises(CandidateWriteError):
-            write_candidates("jet:PF:r", [{"path": "a/gone"}], "escalated", gc)
+            write_candidates(
+                "jet:PF:r", [{"path": "a/gone", "arms": []}], "escalated", gc
+            )
 
         statement = _normalised(gc)
         assert "sg.mapping_claimed_at = null" in statement
@@ -106,7 +116,7 @@ class TestWriteCandidates:
         freed. Failing to gate the route on the written count would strand the
         source as 'judged' with partial edges and no way back."""
         gc = _gc_returning([{"written": 1}])
-        judgments = [{"path": "a/b"}, {"path": "a/gone"}]
+        judgments = [{"path": "a/b", "arms": []}, {"path": "a/gone", "arms": []}]
 
         with pytest.raises(CandidateWriteError):
             write_candidates("jet:PF:r", judgments, "selected", gc)
@@ -135,7 +145,9 @@ class TestWriteCandidates:
         """The producer emits route as a boolean; a bool passes through."""
         gc = _gc_returning([{"written": 1}])
 
-        write_candidates("jet:PF:r", [{"path": "a/b", "route": True}], "selected", gc)
+        write_candidates(
+            "jet:PF:r", [{"path": "a/b", "route": True, "arms": []}], "selected", gc
+        )
 
         records = gc.query.call_args.kwargs["records"]
         assert records[0]["route"] is True
@@ -147,10 +159,55 @@ class TestWriteCandidates:
 
         with pytest.raises(CandidateWriteError):
             write_candidates(
-                "jet:PF:r", [{"path": "a/b", "route": "escalated"}], "escalated", gc
+                "jet:PF:r",
+                [{"path": "a/b", "route": "escalated", "arms": []}],
+                "escalated",
+                gc,
             )
 
         assert gc.query.call_count == 0
+
+    def test_persists_arms_on_the_edge(self):
+        """Each record's arms — the retrieval routes that returned it — are
+        written so a cluster sibling can be told from a retrieval hit."""
+        gc = _gc_returning([{"written": 1}])
+
+        write_candidates(
+            "jet:PF:r",
+            [{"path": "a/b", "arms": ["cluster"], "route": True}],
+            "selected",
+            gc,
+        )
+
+        records = gc.query.call_args.kwargs["records"]
+        assert records[0]["arms"] == ["cluster"]
+        assert "r.arms = rec.arms" in _normalised(gc)
+
+    def test_arms_absent_is_refused(self):
+        """The producer always emits arms, so an absent value means a caller
+        forgot provenance: it is refused rather than defaulted to empty."""
+        gc = _gc_returning([{"written": 1}])
+
+        with pytest.raises(CandidateWriteError):
+            write_candidates("jet:PF:r", [{"path": "a/b"}], "escalated", gc)
+
+        assert gc.query.call_count == 0
+
+    def test_arms_not_a_list_of_strings_is_refused(self):
+        """A bare string or a list of non-strings must not be written as arms."""
+        gc = _gc_returning([{"written": 1}])
+        with pytest.raises(CandidateWriteError):
+            write_candidates(
+                "jet:PF:r", [{"path": "a/b", "arms": "cluster"}], "escalated", gc
+            )
+        assert gc.query.call_count == 0
+
+        gc2 = _gc_returning([{"written": 1}])
+        with pytest.raises(CandidateWriteError):
+            write_candidates(
+                "jet:PF:r", [{"path": "a/b", "arms": [1, 2]}], "escalated", gc2
+            )
+        assert gc2.query.call_count == 0
 
 
 class TestClearCandidates:
@@ -230,6 +287,7 @@ def test_write_and_clear_candidates_round_trip():
                     "model": "jev-1.13",
                     "judged_at": "2026-10-06T00:00:00Z",
                     "route": True,
+                    "arms": ["pf_active"],
                 },
                 {
                     "path": node_ids[1],
@@ -241,6 +299,7 @@ def test_write_and_clear_candidates_round_trip():
                     "model": "jev-1.13",
                     "judged_at": "2026-10-06T00:00:00Z",
                     "route": False,
+                    "arms": [],
                 },
             ]
             assert write_candidates(source_id, judgments, "selected", gc) == 2
@@ -289,8 +348,8 @@ def test_write_and_clear_candidates_round_trip():
                 write_candidates(
                     source_id,
                     [
-                        {"path": node_ids[0], "rank": 1},
-                        {"path": f"{facility}:missing:node", "rank": 2},
+                        {"path": node_ids[0], "rank": 1, "arms": []},
+                        {"path": f"{facility}:missing:node", "rank": 2, "arms": []},
                     ],
                     "selected",
                     gc,
@@ -328,7 +387,10 @@ def test_write_and_clear_candidates_round_trip():
             # Re-judge with a single candidate: the earlier edges are replaced.
             assert (
                 write_candidates(
-                    source_id, [{"path": node_ids[1], "rank": 1}], "escalated", gc
+                    source_id,
+                    [{"path": node_ids[1], "rank": 1, "arms": []}],
+                    "escalated",
+                    gc,
                 )
                 == 1
             )

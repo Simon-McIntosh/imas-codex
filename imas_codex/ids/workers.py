@@ -46,6 +46,7 @@ from imas_codex.discovery.base.supervision import (
 )
 from imas_codex.graph.client import GraphClient
 from imas_codex.ids.candidates import (
+    expand_cluster_siblings,
     judge_candidates,
     retrieve_candidates,
     route,
@@ -975,16 +976,21 @@ async def validate_worker(
 def _candidate_records(
     judgments: list,
     candidates: list,
-    selected_path: str | None,
+    selected: set[str],
 ) -> list[dict[str, Any]]:
     """Build the per-candidate records ``write_candidates`` persists.
 
     Records are ranked in Jev order (descending ``p_same_quantity``); the
-    retrieval score and IDS are read back from the matching candidate.
+    retrieval score and IDS are read back from the matching candidate, and its
+    retrieval arms are emitted so a sibling can be told from a retrieval hit.
+    A record is routed when its path is in ``selected``.
     """
     score_by_path = {
         candidate.hit.path: (candidate.hit.score, candidate.hit.ids_name)
         for candidate in candidates
+    }
+    arms_by_path = {
+        candidate.hit.path: sorted(candidate.arms) for candidate in candidates
     }
     ordered = sorted(
         judgments, key=lambda judgment: judgment.p_same_quantity, reverse=True
@@ -1001,7 +1007,8 @@ def _candidate_records(
                 "p_same_quantity": judgment.p_same_quantity,
                 "model": judgment.model,
                 "judged_at": judgment.judged_at,
-                "route": judgment.path == selected_path,
+                "route": judgment.path in selected,
+                "arms": arms_by_path.get(judgment.path, []),
             }
         )
     return records
@@ -1110,7 +1117,36 @@ async def candidate_worker(
                     model=state.model,
                     cost=state.cost,
                 )
-                decision = route(judgments, thresholds)
+                if judgments is None:
+                    wlog.warning(
+                        "No route for %s (decisions failed), releasing", source_id
+                    )
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+
+                expansion = await asyncio.to_thread(
+                    expand_cluster_siblings,
+                    source,
+                    facility_block,
+                    candidates,
+                    judgments,
+                    gc=gc,
+                    model=state.model,
+                    cost=state.cost,
+                    dd_version=state.dd_version,
+                )
+                if expansion is None:
+                    wlog.warning(
+                        "No cluster sibling judgment for %s (decisions failed), "
+                        "releasing",
+                        source_id,
+                    )
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+                siblings, sibling_judgments = expansion
+                all_candidates = list(candidates) + siblings
+                all_judgments = list(judgments) + sibling_judgments
+                decision = route(all_judgments, thresholds)
                 if decision is None:
                     wlog.warning(
                         "No route for %s (decisions failed), releasing", source_id
@@ -1118,13 +1154,8 @@ async def candidate_worker(
                     await asyncio.to_thread(release_mapping_claim, source_id)
                     continue
 
-                selected_path = (
-                    decision.shortlist[0].path
-                    if decision.decision == "selected" and decision.shortlist
-                    else None
-                )
                 records = _candidate_records(
-                    list(judgments or []), candidates, selected_path
+                    all_judgments, all_candidates, set(decision.selected)
                 )
                 written = await asyncio.to_thread(
                     write_candidates,

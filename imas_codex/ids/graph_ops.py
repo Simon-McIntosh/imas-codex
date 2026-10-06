@@ -421,7 +421,8 @@ def create_imas_mapping(
 # Optional edge properties copied verbatim from each judgment record when
 # present: rank (Jev order), retrieval_score, the routed IDS and its Choice
 # probability, p_same_quantity, the judging model and judged_at carry the
-# candidate's provenance. route is normalised to a boolean below.
+# candidate's provenance. route is normalised to a boolean and arms to a list
+# of strings below.
 _CANDIDATE_EDGE_FIELDS = (
     "rank",
     "retrieval_score",
@@ -430,6 +431,7 @@ _CANDIDATE_EDGE_FIELDS = (
     "p_same_quantity",
     "model",
     "judged_at",
+    "arms",
 )
 
 
@@ -439,8 +441,11 @@ def _candidate_record(judgment: dict[str, Any]) -> dict[str, Any]:
     ``path`` names the IMASNode the candidate targets and is required. The
     selection flag is read from ``route`` and must be a boolean: the producer
     emits a boolean, and accepting a route *string* here would let a value
-    like ``"escalated"`` mark the candidate selected. Anything but ``bool`` is
-    refused with :class:`CandidateWriteError`.
+    like ``"escalated"`` mark the candidate selected. ``arms`` is the list of
+    retrieval arms that returned the candidate and must be a list of strings,
+    so a sibling's ``cluster`` arm can be told from a retrieval hit. Anything
+    but a ``bool`` route or a list-of-strings ``arms`` is refused with
+    :class:`CandidateWriteError`.
     """
     try:
         path = judgment["path"]
@@ -458,7 +463,23 @@ def _candidate_record(judgment: dict[str, Any]) -> dict[str, Any]:
             f"candidate judgment 'route' must be a boolean, got {type(route).__name__}"
         )
     record["route"] = route
+    record["arms"] = _candidate_arms(judgment.get("arms"))
     return record
+
+
+def _candidate_arms(arms: Any) -> list[str]:
+    """Validate a judgment's ``arms`` as a list of strings.
+
+    The only producer, ``_candidate_records``, always emits ``arms``, so an
+    absent value means a caller forgot provenance: it is refused, like a
+    non-boolean route. Anything that is not a list of strings — a bare
+    ``"cluster"`` string or a list of non-strings — is refused too.
+    """
+    if not isinstance(arms, list) or not all(isinstance(arm, str) for arm in arms):
+        raise CandidateWriteError(
+            f"candidate judgment 'arms' must be a list of strings, got {type(arms).__name__}"
+        )
+    return arms
 
 
 def write_candidates(
@@ -483,9 +504,11 @@ def write_candidates(
         judgments: One record per candidate. ``path`` (the IMASNode ID) is
             required; ``rank``, ``retrieval_score``, ``ids``,
             ``choice_probability``, ``p_same_quantity``, ``model`` and
-            ``judged_at`` are copied to the edge when present. A boolean
-            ``route`` marks the edge as the selected candidate; any other
-            type is refused.
+            ``judged_at`` are copied to the edge when present, and ``arms``
+            (a required list of strings) records the retrieval arms that
+            returned the candidate. A boolean ``route`` marks the edge as the
+            selected candidate; any other type is refused, as is an absent or
+            non-list-of-strings ``arms``.
         route: Route decision stored on ``SignalSource.candidate_route``
             (e.g. 'selected', 'escalated', 'no_candidate'), or None to clear it.
             Written only when every judgment persisted.
@@ -519,7 +542,8 @@ def write_candidates(
                 r.p_same_quantity = rec.p_same_quantity,
                 r.model = rec.model,
                 r.judged_at = rec.judged_at,
-                r.route = rec.route
+                r.route = rec.route,
+                r.arms = rec.arms
             RETURN count(r) AS written
         }
         SET sg.candidate_route = CASE WHEN written = $expected THEN $route ELSE null END,

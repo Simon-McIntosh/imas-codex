@@ -1067,15 +1067,14 @@ class RouteThresholds:
     """Thresholds that route a judged source between select, escalate and reject.
 
     ``select_threshold`` unset (``None``) disables the selected route and
-    ``floor_threshold`` unset rejects no source. A source is selected only when
-    a select threshold is set, its best same_quantity reaches it, and it leads
-    the next candidate by ``select_margin``. It is rejected only when a floor
-    is set and no score reaches it. ``shortlist_size`` caps the Jev-ordered
-    shortlist the route carries.
+    ``floor_threshold`` unset rejects no source. A source is selected when a
+    select threshold is set and any candidate's same_quantity reaches it — every
+    candidate at or above the threshold is selected, not only the best. It is
+    rejected only when a floor is set and no score reaches it. ``shortlist_size``
+    caps the Jev-ordered shortlist the route carries.
     """
 
     select_threshold: float | None
-    select_margin: float
     floor_threshold: float | None
     shortlist_size: int
 
@@ -1084,12 +1083,11 @@ def get_mapping_route_thresholds() -> RouteThresholds:
     """Get the candidate-stage routing thresholds.
 
     Reads ``[tool.imas-codex.discovery]`` keys ``map-select-threshold``,
-    ``map-select-margin``, ``map-floor-threshold`` and ``map-shortlist-size``.
-    The select threshold and floor default to unset (``None``): the selected
-    route never rose above about 0.63 precision at any threshold, so it is
-    disabled until set, and no source is rejected by default. The margin
-    defaults to 0.10 and the shortlist to 5, the size at which Jev's reranked
-    top held every recoverable hit.
+    ``map-floor-threshold`` and ``map-shortlist-size``. The select threshold and
+    floor default to unset (``None``): the selected route never rose above about
+    0.63 precision at any threshold, so it is disabled until set, and no source
+    is rejected by default. The shortlist defaults to 5, the size at which Jev's
+    reranked top held every recoverable hit.
     """
     section = _get_section("discovery")
 
@@ -1099,7 +1097,6 @@ def get_mapping_route_thresholds() -> RouteThresholds:
 
     return RouteThresholds(
         select_threshold=_optional_float("map-select-threshold"),
-        select_margin=float(section.get("map-select-margin", 0.10)),
         floor_threshold=_optional_float("map-floor-threshold"),
         shortlist_size=int(section.get("map-shortlist-size", 5)),
     )

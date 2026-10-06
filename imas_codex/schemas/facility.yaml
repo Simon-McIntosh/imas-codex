@@ -1912,7 +1912,9 @@ classes:
           with probabilities, not a binding with a transform. Each
           MAPPING_CANDIDATE edge carries rank (the Jev order), retrieval_score,
           the routed IDS and its Choice probability, p_same_quantity, the judging
-          model, judged_at, and route, a flag marking the selected candidate.
+          model, judged_at, route, a flag marking the selected candidate, and
+          arms, the retrieval routes that returned it (a routed IDS, the
+          unscoped wildcard, or 'cluster' for a cross-IDS DD cluster sibling).
         range: IMASNode
         multivalued: true
         annotations:
