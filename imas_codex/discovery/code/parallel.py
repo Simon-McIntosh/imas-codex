@@ -448,6 +448,7 @@ def get_code_discovery_stats(
             f"""
             MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE cf.status = 'scored'
+              AND cf.relevance_stage = 'content'
               AND {CODE_RELEVANCE_EXPR} >= $min_ingest_relevance
               AND coalesce(cf.line_count, 0) <= 10000
             RETURN count(cf) AS pending
@@ -492,7 +493,8 @@ def get_code_discovery_stats(
             f"""
             MATCH (cc:CodeChunk)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             MATCH (cc)<-[:HAS_CHUNK]-(:CodeExample)<-[:HAS_EXAMPLE]-(cf:CodeFile)
-            WHERE {CODE_RELEVANCE_EXPR} >= $min_ingest_relevance
+            WHERE cf.relevance_stage = 'content'
+              AND {CODE_RELEVANCE_EXPR} >= $min_ingest_relevance
             RETURN count(cc) AS total,
                    count(cc.embedding) AS embedded,
                    count(CASE WHEN {pending_embed_predicate("cc")}

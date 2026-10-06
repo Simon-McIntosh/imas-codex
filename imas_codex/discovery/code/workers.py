@@ -400,12 +400,15 @@ async def score_worker(
     """Score worker: Content scoring of enriched CodeFiles.
 
     Claims CodeFiles that have been triaged AND enriched
-    (status='triaged', is_enriched=true).  The score prompt receives
-    enrichment evidence (pattern matches, preview text) and writes the
-    description and search facets.  A content-arm decisions call then records
-    the file's content relevance from its preview text; whether the file is
-    ingested is decided by that relevance, not by the scorer.  Scoring no
-    longer skips a file.
+    (``status='triaged'``, ``is_enriched=true``).  The score prompt receives
+    enrichment evidence (pattern matches, preview text) and produces the
+    description and dimension scores; a content-arm decisions call judges the
+    file's content relevance from its preview.  A file is marked ``scored``
+    only when its content decision succeeded, in one write carrying both the
+    score fields and the content-arm relevance.  A file whose content decision
+    failed is released unclaimed at its prior status, so the next pass retries
+    it.  Whether the file is ingested is decided by its content relevance, not
+    by the scorer.
     """
     from imas_codex.discovery.base.facility import get_facility
     from imas_codex.discovery.base.llm import acall_decisions, call_llm_structured
@@ -418,7 +421,6 @@ async def score_worker(
         _build_score_system_prompt,
         _build_score_user_prompt,
         _group_files_by_parent,
-        apply_content_decisions,
         apply_file_scores,
         build_triage_questions,
         build_triage_state,
@@ -515,22 +517,11 @@ async def score_worker(
             parsed = parsed_raw
             state.score_stats.cost += cost
 
-            result = await asyncio.to_thread(
-                apply_file_scores,
-                parsed.results,
-                file_id_map,
-                batch_cost=cost,
-            )
-            batch_total = result.get("scored", 0) + result.get("skipped", 0)
-            state.score_stats.processed += batch_total
-            state.score_stats.last_batch_time = _time.monotonic() - batch_start
-            state.score_stats.record_batch(batch_total)
-
-            await asyncio.to_thread(release_file_score_claims, batch_ids)
-
-            # Content arm: judge the file's content relevance from its preview.
-            # A failure here leaves the file 'scored' with no content relevance,
-            # so the ingest claim refuses it and a later pass can retry.
+            # Content arm: judge each file's content relevance from its preview
+            # before the file is marked scored. The content decision and the
+            # score write are one step: a file whose decision failed is left at
+            # its prior status and unclaimed, so the next score pass reclaims
+            # and retries it rather than stranding it.
             content_states = [
                 build_triage_state(
                     f, state.facility, facility_config, with_content=True
@@ -555,17 +546,26 @@ async def score_worker(
                     }
                 )
             content_cost = sum(d["cost"] for d in content_decisions)
-            if content_decisions:
-                state.score_stats.cost += content_cost
-                await asyncio.to_thread(
-                    apply_content_decisions,
-                    content_decisions,
-                    file_id_map,
-                    cost_total=content_cost,
-                )
+            state.score_stats.cost += content_cost
+
+            result = await asyncio.to_thread(
+                apply_file_scores,
+                parsed.results,
+                file_id_map,
+                content_decisions,
+                batch_cost=cost,
+                content_cost=content_cost,
+            )
+            batch_total = result.get("scored", 0) + result.get("deferred", 0)
+            state.score_stats.processed += batch_total
+            state.score_stats.last_batch_time = _time.monotonic() - batch_start
+            state.score_stats.record_batch(batch_total)
+
+            await asyncio.to_thread(release_file_score_claims, batch_ids)
 
             if on_progress:
                 # Stream per-file score results with composite, category, description
+                decided_paths = {d["path"] for d in content_decisions}
                 score_results = []
                 for r in parsed.results:
                     score_results.append(
@@ -574,7 +574,7 @@ async def score_worker(
                             "score_composite": round(r.score_composite, 3),
                             "category": r.file_category,
                             "description": r.description,
-                            "skipped": False,
+                            "skipped": r.path not in decided_paths,
                         }
                     )
                 on_progress(
@@ -611,8 +611,10 @@ def _claim_code_files_for_ingestion(
     Claims CodeFiles with status='scored' whose content relevance — the
     largest of the four scope probabilities stored by the content-arm
     decision — reaches the ingest threshold, and claims the highest relevance
-    first.  Skips files exceeding max_line_count to avoid tree-sitter hangs on
-    very large auto-generated files.
+    first.  Only a file whose relevance came from the content arm
+    (``relevance_stage='content'``) is eligible, so a name-arm relevance can
+    never carry a file into ingestion.  Skips files exceeding max_line_count
+    to avoid tree-sitter hangs on very large auto-generated files.
 
     Dedup is handled *after* claiming — see ``_filter_duplicates()``.
     Keeping the claim query simple avoids expensive correlated subqueries
@@ -647,6 +649,7 @@ def _claim_code_files_for_ingestion(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
+              AND sf.relevance_stage = 'content'
               AND {CODE_RELEVANCE_EXPR} >= $min_relevance
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}

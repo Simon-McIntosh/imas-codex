@@ -474,9 +474,8 @@ def claim_files_for_scoring(
     """Atomically claim enriched CodeFiles for full LLM scoring.
 
     Claims files with ``status='triaged'`` that have been enriched
-    (``is_enriched=true``).  Returns triage description (qualitative
-    only, NO triage numeric scores) plus enrichment evidence (pattern
-    categories, line count) and parent directory context.
+    (``is_enriched=true``).  Returns the file's preview text plus enrichment
+    evidence (pattern categories, line count) and parent directory context.
 
     Uses claim_token pattern with ORDER BY rand() to prevent deadlocks
     when multiple workers claim concurrently.
@@ -488,7 +487,7 @@ def claim_files_for_scoring(
             ``path`` starts with any of these prefixes.
 
     Returns:
-        List of dicts with file info + triage description + enrichment data
+        List of dicts with file info + enrichment data + parent context
     """
     import json as _json
 
@@ -527,7 +526,6 @@ def claim_files_for_scoring(
             OPTIONAL MATCH (sf)-[:IN_DIRECTORY]->(p:FacilityPath)
             RETURN sf.id AS id, sf.path AS path,
                    sf.language AS language,
-                   sf.triage_description AS triage_description,
                    sf.pattern_categories AS pattern_categories_json,
                    sf.total_pattern_matches AS total_pattern_matches,
                    sf.line_count AS line_count,
@@ -724,6 +722,10 @@ def has_pending_code_work(
 ) -> bool:
     """Check if there are scored code files needing ingestion.
 
+    Only a file whose relevance came from the content arm
+    (``relevance_stage='content'``) counts; a name-arm relevance is not an
+    ingestion decision.
+
     When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
     one of the prefixes count.
     """
@@ -738,6 +740,7 @@ def has_pending_code_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
+              AND sf.relevance_stage = 'content'
               AND {CODE_RELEVANCE_EXPR} >= $min_relevance
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}

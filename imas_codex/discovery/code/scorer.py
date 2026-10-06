@@ -460,7 +460,7 @@ def _group_files_by_parent(
                 parent_ids=parent_ids,
             )
             for row in rows:
-                pid = row["path"] and row["parent_id"]
+                pid = row["parent_id"]
                 if pid in groups:
                     groups[pid]["sibling_names"].append(row["path"])
 
@@ -572,54 +572,75 @@ def apply_triage_results(
 def apply_file_scores(
     results: list[FileScoreResult],
     file_id_map: dict[str, str],
+    content_decisions: list[dict[str, Any]],
     batch_cost: float = 0.0,
+    content_cost: float = 0.0,
 ) -> dict[str, int]:
-    """Persist full scoring results to CodeFile nodes.
+    """Persist a batch's score fields together with its content relevance.
 
-    Sets status to 'scored' and writes all dimension scores.  Scoring no longer
-    skips a file: whether a file is ingested is decided by its content-arm
-    relevance, not by the scorer's opinion.
+    A file reaches ``scored`` only when its content decision succeeded: the
+    dimension scores, the description and the content-arm relevance fields are
+    one write.  The ingest claim requires ``relevance_stage='content'``, so
+    admitting a file on a name-arm relevance or a stale status is not possible.
+    A file whose content decision failed is left at its prior status and
+    unclaimed, so a later score pass reclaims and retries it.
 
     Args:
         results: Score results from LLM.
         file_id_map: Mapping from path to CodeFile ID.
-        batch_cost: Total LLM cost for the batch, distributed per-file.
+        content_decisions: One dict per file whose content decision succeeded,
+            with ``path``, ``answers``, ``model`` and ``cost`` keys.
+        batch_cost: Total description-call cost, distributed across the files
+            actually scored.
+        content_cost: Total content-decision cost, distributed across the files
+            actually scored.
+
+    Returns:
+        Dict with ``scored`` and ``deferred`` counts.  A deferred file is one
+        whose content decision failed and was left for a later pass.
     """
+    decision_by_path = {d["path"]: d for d in content_decisions}
+
+    matched = [r for r in results if file_id_map.get(r.path)]
+    scored_count = sum(1 for r in matched if r.path in decision_by_path)
+    score_cost_per_file = batch_cost / scored_count if scored_count > 0 else 0.0
+    content_cost_per_file = content_cost / scored_count if scored_count > 0 else 0.0
+
     scored_items = []
-
-    matched_count = sum(1 for r in results if file_id_map.get(r.path))
-    cost_per_file = batch_cost / matched_count if matched_count > 0 else 0.0
-
-    for result in results:
-        sf_id = file_id_map.get(result.path)
-        if not sf_id:
+    for result in matched:
+        decision = decision_by_path.get(result.path)
+        if decision is None:
             continue
-
-        scored_items.append(
-            {
-                "id": sf_id,
-                "score_cost": cost_per_file,
-                "score_composite": round(result.score_composite, 4),
-                "score_reason": result.description,
-                "file_category": result.file_category,
-                "score_modeling_code": result.score_modeling_code,
-                "score_analysis_code": result.score_analysis_code,
-                "score_operations_code": result.score_operations_code,
-                "score_data_access": result.score_data_access,
-                "score_workflow": result.score_workflow,
-                "score_visualization": result.score_visualization,
-                "score_documentation": result.score_documentation,
-                "score_imas": result.score_imas,
-                "score_convention": result.score_convention,
-            }
+        sf_id = file_id_map[result.path]
+        item = _relevance_item(
+            sf_id,
+            decision["answers"],
+            stage="content",
+            model=decision.get("model"),
+            cost=0.0,
         )
+        item["score_cost"] = score_cost_per_file + content_cost_per_file
+        item["score_composite"] = round(result.score_composite, 4)
+        item["score_reason"] = result.description
+        item["file_category"] = result.file_category
+        item["score_modeling_code"] = result.score_modeling_code
+        item["score_analysis_code"] = result.score_analysis_code
+        item["score_operations_code"] = result.score_operations_code
+        item["score_data_access"] = result.score_data_access
+        item["score_workflow"] = result.score_workflow
+        item["score_visualization"] = result.score_visualization
+        item["score_documentation"] = result.score_documentation
+        item["score_imas"] = result.score_imas
+        item["score_convention"] = result.score_convention
+        scored_items.append(item)
 
-    with GraphClient() as gc:
-        if scored_items:
+    if scored_items:
+        set_clause = _relevance_set_clause()
+        with GraphClient() as gc:
             gc.query(
-                """
+                f"""
                 UNWIND $items AS item
-                MATCH (sf:CodeFile {id: item.id})
+                MATCH (sf:CodeFile {{id: item.id}})
                 SET sf.status = 'scored',
                     sf.score_cost = coalesce(sf.score_cost, 0) + item.score_cost,
                     sf.score_composite = item.score_composite,
@@ -627,7 +648,7 @@ def apply_file_scores(
                     sf.file_category = item.file_category,
                     sf.score_modeling_code = item.score_modeling_code,
                     sf.score_analysis_code = item.score_analysis_code,
-                    sf.score_operations_code = item.score_operations_code,
+                    sf.score_operations_code = item.score_operations_code{set_clause},
                     sf.score_data_access = item.score_data_access,
                     sf.score_workflow = item.score_workflow,
                     sf.score_visualization = item.score_visualization,
@@ -640,57 +661,7 @@ def apply_file_scores(
                 items=scored_items,
             )
 
-    return {"scored": len(scored_items), "skipped": 0}
-
-
-def apply_content_decisions(
-    decisions: list[dict[str, Any]],
-    file_id_map: dict[str, str],
-    cost_total: float = 0.0,
-) -> int:
-    """Persist content-arm decision relevance without changing file status.
-
-    The score stage has already set each file's status to 'scored'; this only
-    records the content-arm relevance that the ingest claim reads.  A decision
-    failure leaves the file untouched for a later retry.
-
-    Args:
-        decisions: One dict per judged file with ``path``, ``answers``,
-            ``model`` and ``cost`` keys.
-        file_id_map: Mapping from path to CodeFile ID.
-        cost_total: Total decision cost for the batch, distributed per file.
-
-    Returns the number of files updated.
-    """
-    matched_count = sum(1 for d in decisions if file_id_map.get(d["path"]))
-    cost_per_file = cost_total / matched_count if matched_count > 0 else 0.0
-
-    items = []
-    for decision in decisions:
-        sf_id = file_id_map.get(decision["path"])
-        if not sf_id:
-            continue
-        items.append(
-            _relevance_item(
-                sf_id,
-                decision["answers"],
-                stage="content",
-                model=decision.get("model"),
-                cost=decision.get("cost", cost_per_file),
-            )
-        )
-
-    if not items:
-        return 0
-
-    set_clause = _relevance_set_clause()
-    with GraphClient() as gc:
-        gc.query(
-            f"""
-            UNWIND $items AS item
-            MATCH (sf:CodeFile {{id: item.id}})
-            SET sf.score_cost = coalesce(sf.score_cost, 0) + item.score_cost{set_clause}
-            """,
-            items=items,
-        )
-    return len(items)
+    return {
+        "scored": len(scored_items),
+        "deferred": len(matched) - len(scored_items),
+    }
