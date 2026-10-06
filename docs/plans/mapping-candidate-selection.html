@@ -21,9 +21,9 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -141,68 +141,12 @@
   <p class="landed-summary">Measured on an adjudicated 75-source test split: Jev IDS routing lifts recall@20 from 0.556 to 0.694, Jev reranking keeps every recoverable hit in its top 5 (pair AUC 0.924), and the selected route never reaches usable precision, so Jev is a pre-screen; full JET projects to about $0.47. <a href="s3">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s4">§4 — Candidate retrieval in code</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>
-      Retrieval is deterministic and calls no LLM. A new module,
-      <code>imas_codex/ids/candidates.py</code>, exposes
-      <code>retrieve_candidates(sources, ids_by_source, *, gc, k, dd_version) -&gt;
-      dict[str, list[Candidate]]</code>. <code>ids_by_source</code> carries the IDSs that
-      §5's routing Choice named for each source. The research document
-      (<code>docs/research/mapping-candidate-probe.html</code>) measured that step at
-      recall@20 = 0.694 against 0.556 unscoped. The correct IDS was the Choice's top 1 for
-      0.861 of labelled test sources and inside its top 3 for all of them. When a source
-      carries no IDS list, retrieval runs unscoped. <code>Candidate</code> wraps the <code>SearchHit</code>
-      (<code>imas_codex/search/search_strategy.py:93</code>) that
-      <code>hybrid_dd_search</code> already returns, which carries path, IDS, documentation,
-      units, data type, physics domain and score. It adds only what a hit lacks:
-      <code>arms</code>, the set of arms that produced it, and
-      <code>parent_documentation</code>. No hit field is copied.
-    </p>
-    <p>
-      The shortlist is already built once, in <code>gather_ids_context</code>
-      (<code>imas_codex/ids/mapping.py:781–854</code>). That code collects per-source IMAS
-      hits, expands the top three through clusters, and deduplicates on path. This section
-      <em>moves</em> the hit collection and the path deduplication into
-      <code>candidates.py</code>, and re-points the vector arm at the maintained owner. It
-      drops the cluster expansion, because §3 measured that it adds no hit at K=20.
-    </p>
-    <ul>
-      <li>Hits come from <code>hybrid_dd_search</code>
-        (<code>imas_codex/graph/dd_search.py:97</code>), with <code>ids_filter</code> set
-        to the source's routed IDSs. Every source description is embedded in one batch, and
-        each embedding is passed in through the function's <code>embedding</code> argument.
-        Hits from the routed IDSs are merged by score and deduplicated on path. K is 20.</li>
-      <li>Cross-facility precedent comes from <code>fetch_cross_facility_mappings</code>.</li>
-      <li>There is no unit filter. Only 4 of 36 labelled test sources carry a
-        representative unit, so it could not be measured, and it adds nothing until
-        SignalSources carry units.</li>
-      <li><code>gather_ids_context</code> builds <code>source_candidates</code> by calling
-        <code>retrieve_candidates</code>, so the old construction and the
-        <code>ClusterSearcher</code> load in <code>gather_shared_context</code> are deleted
-        here. <code>compute_semantic_matches</code> keeps only its wiki and code bridging
-        matrix until §8.</li>
-    </ul>
-    <p><strong>Node</strong> <code>candidate-retrieval</code>, role implement.</p>
-    <ul>
-      <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
-        <code>imas_codex/ids/mapping.py</code> and
-        <code>tests/ids/test_candidates.py</code>.</li>
-      <li>It may not widen <code>hybrid_dd_search</code>'s signature or the return shape of
-        <code>gather_ids_context</code>.</li>
-    </ul>
-    <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
-      following.</p>
-    <ul>
-      <li>Every returned path is an IMASNode id read from the graph or a fake; no path is
-        built from a string.</li>
-      <li>Hits from several routed IDSs merge by score without duplicating a path, and an
-        empty IDS list runs unscoped.</li>
-      <li>One encoder call embeds a batch of sources.</li>
-      <li><code>gather_ids_context</code> returns <code>source_candidates</code> built by
-        <code>retrieve_candidates</code>, and <code>mapping.py</code> no longer imports
-        <code>ClusterSearcher</code>.</li>
-    </ul>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">candidates.py retrieves an IDS-scoped hybrid_dd_search shortlist per source, merged by score and deduplicated on path; gather_ids_context uses it and the ClusterSearcher load is gone; tests/ids 405 passed. <a href="s4">full record</a></p>
+</section>
 
     <h2 id="s5">§5 — Pair judgment through Jev</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -525,6 +469,13 @@
         wiki and code context comes from the existing <code>fetch_wiki_context</code> and
         <code>fetch_code_context</code>. <code>compute_semantic_matches</code> is deleted
         when no caller remains.</li>
+      <li><strong>No per-IDS retrieval in the map context.</strong> After §4,
+        <code>gather_ids_context</code> calls <code>retrieve_candidates</code> for every
+        source on each IDS target, re-embedding every source each time. The map stage reads
+        each source's shortlist from its <code>MAPPING_CANDIDATE</code> edges instead, so
+        that call is removed here. Cross-facility precedent, which §4 did not build because
+        the graph holds no <code>MAPS_TO_IMAS</code> edge to draw on, joins the escalated
+        prompt through <code>fetch_cross_facility_mappings</code> once bindings exist.</li>
       <li><strong>Retired options.</strong> <code>imas map run</code> loses
         <code>--skip-metadata</code>, which is parsed and never read, and
         <code>--skip-errors</code>, which is the same as <code>--stage data</code>.</li>
