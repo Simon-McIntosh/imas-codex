@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -310,8 +310,12 @@
       <li>Cluster expansion calls <code>cluster_search</code>
         (<code>dd_search.py:869</code>) in place of <code>ClusterSearcher</code>. The
         existing path-based deduplication moves with it.</li>
-      <li>The unit filter uses the dimension check behind <code>analyze_units</code>. It drops
-        a candidate only when both units are known and their dimensions differ.</li>
+      <li>The unit filter calls <code>analyze_units</code> (<code>tools.py:168</code>). That
+        function gains one returned key, <code>dimensions_match</code>: True or False when
+        both units parse, and None when either is missing or unparseable. The pint
+        comparison keeps one owner, and existing callers, which read
+        <code>compatible</code>, are unchanged. The filter drops a candidate only when
+        <code>dimensions_match</code> is False.</li>
       <li>Cross-facility precedent comes from <code>fetch_cross_facility_mappings</code>.</li>
       <li><code>gather_ids_context</code> builds <code>source_candidates</code> by calling
         <code>retrieve_candidates</code>, so the old construction and the
@@ -323,7 +327,7 @@
     <p><strong>Node</strong> <code>candidate-retrieval</code>, role implement.</p>
     <ul>
       <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
-        <code>imas_codex/ids/mapping.py</code> and
+        <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/tools.py</code> and
         <code>tests/ids/test_candidates.py</code>.</li>
       <li>It may not widen <code>hybrid_dd_search</code>'s signature or the return shape of
         <code>gather_ids_context</code>.</li>
@@ -588,9 +592,20 @@
         <code>target_id</code> must lie under the selected node, or be that node's
         <code>/data</code> or <code>/time</code> child. Anything else is rejected before
         persist, as an escalation.</li>
-      <li>Persist (<code>imas_codex/ids/models.py:574</code>) checks the count returned by
-        each <code>MAPS_TO_IMAS</code> write and raises on zero. A binding can no longer
-        vanish silently.</li>
+      <li><code>MAPS_TO_IMAS</code> has two <code>MATCH</code>-gated writers today:
+        <code>persist_mapping_result</code> (<code>imas_codex/ids/models.py:580</code>) and
+        <code>create_signal_source</code> (<code>imas_codex/ids/graph_ops.py:357</code>).
+        <ul>
+          <li>The edge write moves into one function in <code>graph_ops.py</code>, beside
+            §6's <code>write_candidates</code>. It checks the returned count and raises
+            on zero, so a binding can no longer vanish silently. One module then owns every
+            SignalSource → IMASNode edge write.</li>
+          <li><code>persist_mapping_result</code> calls that function.</li>
+          <li><code>create_signal_source</code>, whose only caller is
+            <code>tests/ids/test_graph_ops.py</code>, is deleted together with that test,
+            unless a production caller has appeared, in which case it calls the same
+            function.</li>
+        </ul></li>
       <li><code>imas map status</code> shows the candidate routes beside the mapping
         status.</li>
       <li><strong>Retired legacy retrieval.</strong> The map context stops calling
@@ -609,8 +624,8 @@
         <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
         <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
         <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
-        <code>imas_codex/ids/tools.py</code>, <code>imas_codex/cli/map.py</code> and
-        <code>tests/ids/</code>.</li>
+        <code>imas_codex/ids/tools.py</code>, <code>imas_codex/ids/graph_ops.py</code>,
+        <code>imas_codex/cli/map.py</code> and <code>tests/ids/</code>.</li>
       <li>It runs after §7, which also writes <code>workers.py</code>.</li>
     </ul>
     <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
