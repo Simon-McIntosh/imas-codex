@@ -486,7 +486,7 @@ class TestLlmStatusDeep:
     @patch("imas_codex.discovery.base.services.llm_deep_health_check")
     @patch("httpx.get")
     def test_deep_calls_deep_health_check(self, mock_get, mock_deep, runner, mock_env):
-        """--deep triggers llm_deep_health_check()."""
+        """--deep triggers llm_deep_health_check() with the discovery seat."""
         # Mock basic status check
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -500,7 +500,7 @@ class TestLlmStatusDeep:
         )
 
         runner.invoke(llm, ["status", "--deep"])
-        mock_deep.assert_called_once()
+        mock_deep.assert_called_once_with("discovery-score")
 
     @patch("httpx.get")
     def test_no_deep_does_not_call_health(self, mock_get, runner, mock_env):
