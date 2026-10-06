@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -548,6 +548,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-20261006T2230-s8-edge-ownership-audit" data-who="reckon-build" data-when="2026-10-06T22:30:00Z">
     <div class="r-comment-body"><p>Node <code>edge-ownership</code> merged as <code>397df9ee9</code>; the section stays open for <code>map-context-reads-candidates</code> and <code>map-run-routes-candidates</code>. The audit sent it back once: the binding writer read <code>written &lt; 1 and rows</code>, so an empty result passed silently, and the fragment's census lines did not resolve. Both were repaired at <code>ec3db3857</code>. A second independent review reproduced the gate there (477 passed, base 476, no added failure) and the negative control (4 tests fail with the guard removed), scoring 117 of 120. At the merged head the two census greps print only <code>graph_ops.py:585</code> (the MERGE) and <code>:640</code> (the delete). One companion path was accepted outside the declared scope: <code>tests/ids/test_mapping_e2e.py</code>, whose shared mock now reports the one edge the fail-closed writer requires.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261006T221617813366-review-of-edge-ownership" data-who="reckon-build" data-when="2026-10-06T22:24:56.665Z">
+    <div class="r-comment-body"><p>Independent re-review attached to r-20261006T214555828205-edge-ownership at reviewed_base_sha 1084aceb3b1aa23032c0e5fc1072841688acc4d7 / reviewed_head_sha ec3db385757bf2a2cc308366a572c9876f86c953 covering the two commits it gained since the prior review (a99a9d93, ec3db3857) over five files — six dimensions scored over 0..20 (goal_fidelity 20, evidence 20, scope_discipline 17, durability 20, fit 20, reuse 20; total 117), both prior follow-on findings verified repaired, added_failure_count 0, one follow-on finding (the e2e mock file sits outside the reviewed node&#x27;s declared write paths and is accepted by the continuation dispatch).</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records no baseline_suite and no after_suite arm (both null), so no reviewed arm pair was available. This review reproduced both arms itself at the reviewed base (1084aceb3, 476 passed 0 failed EXIT=0, review-base-arm.log) and the reviewed head (ec3db3857, 477 passed 0 failed EXIT=0, review-gate-reproduction.log); the head arm reports no failing id absent from the base arm, so added_failure_count is 0 with no ids.",
+  "base_log_revision": "1084aceb3b1aa23032c0e5fc1072841688acc4d7",
+  "call_site_count": 2,
+  "call_sites": [
+    "write_mapping_binding <- models.persist_mapping_result (imas_codex/ids/models.py) and mapping.run_error_derivation_only (imas_codex/ids/mapping.py); the guard the delta tightens is on the path both writers take",
+    "and both are exercised by the reproduced gate."
+  ],
+  "completed_at": "2026-10-06T22:24:56.665Z",
+  "dispatched_at": "2026-10-06T22:16:25Z",
+  "findings": [
+    {
+      "file": "tests/ids/test_mapping_e2e.py",
+      "line": "56",
+      "severity": "follow-on",
+      "text": "follow-on: this file is outside the reviewed node's declared orientation_write_paths; it was edited because the fail-closed writer required its mock_gc to report one edge for the MAPS_TO_IMAS statement. The node surfaced it (check-manifest ok:false) rather than hiding it, and the continuation dispatch names it among the covered commits, so it is accepted here and recorded for the section."
+    }
+  ],
+  "head_log_revision": "ec3db385757bf2a2cc308366a572c9876f86c953",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "two conventional commits with bodies and no AI attribution or plan identifier: a99a9d93 tightens write_mapping_binding to raise on an empty result and adapts the persist mocks to report the one written edge (test_error_derivation gains _gc_with_written_map, test_mapping_e2e's mock_gc reports the MAPS_TO_IMAS row), and ec3db3857 corrects the fragment's census lines and figure counts; 61 insertions, 23 deletions across five files.",
+    "done_when": "the reviewed node's gate `uv run --no-sync pytest tests/ids tests/test_cli.py -p no:cacheprovider` reproduced in a scratch extraction of the reviewed head ec3db3857 (477 passed, 5 skipped, 1 deselected, EXIT=0) and of the base 1084aceb3 (476 passed, 5 skipped, 1 deselected, EXIT=0); the delta's new guard is exercised by test_no_row_raises (tests/ids/test_mapping_edge_ownership.py:76), which an empty MERGE result drives to CandidateWriteError.",
+    "goal": "the followed-up delta (1084aceb3..ec3db3857, commits a99a9d93 and ec3db3857) repairs the two follow-on findings the prior review of this run recorded: write_mapping_binding now fails closed on an empty result (`if written < 1:` at imas_codex/ids/graph_ops.py:613, replacing `written < 1 and rows`), and the evidence fragment's census citations now resolve at head (docs/evidence/fragments/mapping-candidate-selection/edge-ownership.html:28-29 cite graph_ops.py:585/640, which the two census greps print at ec3db3857).",
+    "manifest": "present and self-consistent at the reviewed head (status complete; commits eb75bb0ab 1084aceb3 a99a9d93 ec3db3857; gate.log 477 passed EXIT=0; negative-control.log 4 failed EXIT=1; census note 585/640; blockers none), and its negative-control_note names exactly the four tests my independent reproduction reddens; its baseline_suite and after_suite arms are both null, and it flags the one out-of-declared-scope path.",
+    "write_paths": "the delta touches exactly five files \u2014 imas_codex/ids/graph_ops.py, tests/ids/test_error_derivation.py, tests/ids/test_mapping_e2e.py, tests/ids/test_mapping_edge_ownership.py and docs/evidence/fragments/mapping-candidate-selection/edge-ownership.html \u2014 of which the reviewed node's declared orientation_write_paths cover all but tests/ids/test_mapping_e2e.py."
+  },
+  "justifications": {
+    "durability": "reinstating the defect (disabling the guard at imas_codex/ids/graph_ops.py:613) reddens test_no_row_raises (tests/ids/test_mapping_edge_ownership.py:76) together with the three zero-row tests, so the new guard's assertion fails exactly on the regression it exists to catch.",
+    "evidence": "the gate reproduced at the reviewed head (477 passed, 5 skipped, 1 deselected, EXIT=0) and at the base (476 passed, EXIT=0), the declared negative control reproduced with the same four failing ids (tests/ids/test_mapping_edge_ownership.py:73,82,101,131), and the census re-run printed 585/640.",
+    "fit": "the added helpers are mechanism-named (_gc_with_written_map, tests/ids/test_error_derivation.py:653) and the graph_ops docstring/error message were updated to state the fail-closed contract (imas_codex/ids/graph_ops.py:554-575,613) with no plan label or attribution.",
+    "goal_fidelity": "both prior findings are repaired at head \u2014 imas_codex/ids/graph_ops.py:613 now raises on any count below one including an empty result, and the fragment/ manifest census citations resolve at 585/640 (verified by re-running both census greps at ec3db3857).",
+    "reuse": "the delta forks no capability \u2014 it tightens the single existing writer owned by imas_codex/ids/graph_ops.py:551 and reuses it; the change adds no second definition of any mechanism.",
+    "scope_discipline": "four of the five delta files are inside the reviewed node's declared orientation_write_paths; tests/ids/test_mapping_e2e.py:56 sits outside them and was edited only because the fail-closed writer forced its mock to report a written edge, which the node surfaced and the continuation dispatch now covers."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the followed-up delta (1084aceb3..ec3db3857, commits a99a9d93 and ec3db3857) repairs the two follow-on findings the prior review of this run recorded: write_mapping_binding now fails closed on an empty result (`if written < 1:` at imas_codex/ids/graph_ops.py:613, replacing `written < 1 and rows`), and the evidence fragment's census citations now resolve at head (docs/evidence/fragments/mapping-candidate-selection/edge-ownership.html:28-29 cite graph_ops.py:585/640, which the two census greps print at ec3db3857).\nVERDICT done_when: the reviewed node's gate `uv run --no-sync pytest tests/ids tests/test_cli.py -p no:cacheprovider` reproduced in a scratch extraction of the reviewed head ec3db3857 (477 passed, 5 skipped, 1 deselected, EXIT=0) and of the base 1084aceb3 (476 passed, 5 skipped, 1 deselected, EXIT=0); the delta's new guard is exercised by test_no_row_raises (tests/ids/test_mapping_edge_ownership.py:76), which an empty MERGE result drives to CandidateWriteError.\nVERDICT write_paths: the delta touches exactly five files \u2014 imas_codex/ids/graph_ops.py, tests/ids/test_error_derivation.py, tests/ids/test_mapping_e2e.py, tests/ids/test_mapping_edge_ownership.py and docs/evidence/fragments/mapping-candidate-selection/edge-ownership.html \u2014 of which the reviewed node's declared orientation_write_paths cover all but tests/ids/test_mapping_e2e.py.\nVERDICT manifest: present and self-consistent at the reviewed head (status complete; commits eb75bb0ab 1084aceb3 a99a9d93 ec3db3857; gate.log 477 passed EXIT=0; negative-control.log 4 failed EXIT=1; census note 585/640; blockers none), and its negative-control_note names exactly the four tests my independent reproduction reddens; its baseline_suite and after_suite arms are both null, and it flags the one out-of-declared-scope path.\nVERDICT diff: two conventional commits with bodies and no AI attribution or plan identifier: a99a9d93 tightens write_mapping_binding to raise on an empty result and adapts the persist mocks to report the one written edge (test_error_derivation gains _gc_with_written_map, test_mapping_e2e's mock_gc reports the MAPS_TO_IMAS row), and ec3db3857 corrects the fragment's census lines and figure counts; 61 insertions, 23 deletions across five files.\nCALL_SITES: write_mapping_binding <- models.persist_mapping_result (imas_codex/ids/models.py) and mapping.run_error_derivation_only (imas_codex/ids/mapping.py); the guard the delta tightens is on the path both writers take, and both are exercised by the reproduced gate.\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: both prior findings are repaired at head \u2014 imas_codex/ids/graph_ops.py:613 now raises on any count below one including an empty result, and the fragment/ manifest census citations resolve at 585/640 (verified by re-running both census greps at ec3db3857).\nSCORE evidence: 20\nJUSTIFICATION evidence: the gate reproduced at the reviewed head (477 passed, 5 skipped, 1 deselected, EXIT=0) and at the base (476 passed, EXIT=0), the declared negative control reproduced with the same four failing ids (tests/ids/test_mapping_edge_ownership.py:73,82,101,131), and the census re-run printed 585/640.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: four of the five delta files are inside the reviewed node's declared orientation_write_paths; tests/ids/test_mapping_e2e.py:56 sits outside them and was edited only because the fail-closed writer forced its mock to report a written edge, which the node surfaced and the continuation dispatch now covers.\nSCORE durability: 20\nJUSTIFICATION durability: reinstating the defect (disabling the guard at imas_codex/ids/graph_ops.py:613) reddens test_no_row_raises (tests/ids/test_mapping_edge_ownership.py:76) together with the three zero-row tests, so the new guard's assertion fails exactly on the regression it exists to catch.\nSCORE fit: 20\nJUSTIFICATION fit: the added helpers are mechanism-named (_gc_with_written_map, tests/ids/test_error_derivation.py:653) and the graph_ops docstring/error message were updated to state the fail-closed contract (imas_codex/ids/graph_ops.py:554-575,613) with no plan label or attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta forks no capability \u2014 it tightens the single existing writer owned by imas_codex/ids/graph_ops.py:551 and reuses it; the change adds no second definition of any mechanism.\nFINDING tests/ids/test_mapping_e2e.py:56 follow-on: this file is outside the reviewed node's declared orientation_write_paths; it was edited because the fail-closed writer required its mock_gc to report one edge for the MAPS_TO_IMAS statement. The node surfaced it (check-manifest ok:false) rather than hiding it, and the continuation dispatch names it among the covered commits, so it is accepted here and recorded for the section.",
+  "review_run_id": "r-20261006T221617813366-review-of-edge-ownership",
+  "reviewed_base": "1084aceb3b1aa23032c0e5fc1072841688acc4d7",
+  "reviewed_base_sha": "1084aceb3b1aa23032c0e5fc1072841688acc4d7",
+  "reviewed_commit": "ec3db385757bf2a2cc308366a572c9876f86c953",
+  "reviewed_head_sha": "ec3db385757bf2a2cc308366a572c9876f86c953",
+  "reviewed_run_id": "r-20261006T214555828205-edge-ownership",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T22:24:03.529043+00:00",
+  "total": 117
+}
