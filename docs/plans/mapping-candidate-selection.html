@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="59">
+<meta name="plan-version" content="60">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -189,7 +189,11 @@
         <code>target_id</code> must lie under the selected node, or be that node's
         <code>/data</code> or <code>/time</code> child. Anything else is rejected before
         persist, as an escalation.</li>
-      <li><code>MAPS_TO_IMAS</code> has three <code>MATCH</code>-gated writers today:
+      <li><strong>Landed in <code>edge-ownership</code> (<code>397df9ee9</code>).</strong> At that
+        head the two census greps below print only <code>imas_codex/ids/graph_ops.py:585</code>
+        (the write) and <code>:640</code> (the delete), and the <code>ids/graph_ops.py</code>
+        <code>create_signal_source</code> is gone. The record of what it consolidated follows.
+        Before it, <code>MAPS_TO_IMAS</code> had three <code>MATCH</code>-gated writers:
         <code>persist_mapping_result</code> (<code>imas_codex/ids/models.py:580</code>),
         <code>create_signal_source</code> (<code>imas_codex/ids/graph_ops.py:357</code>)
         and <code>run_error_derivation_only</code>
@@ -254,7 +258,8 @@
         <code>--skip-metadata</code>, which is parsed and never read, and
         <code>--skip-errors</code>, which is the same as <code>--stage data</code>.</li>
       <li><strong>Retired fields.</strong> SignalSource loses
-        <code>mapping_target_path</code> and <code>mapping_target_ids</code>. The map stage
+        <code>mapping_target_path</code>, <code>mapping_target_ids</code> and
+        <code>mapping_target_type</code>. The map stage
         reads the target from the selected <code>MAPPING_CANDIDATE</code> edge. Every site in
         <code>imas_codex/ids/workers.py</code> that reads or writes them changes (lines at
         <code>c63f3ada7</code>; the node re-greps at its head):
@@ -269,13 +274,43 @@
             stage nothing to claim;</li>
           <li>the claim projection of target IDS, path and type (:236–238);</li>
           <li>the reset filter <code>sg.mapping_target_ids IN $ids_names</code> (:380);</li>
-          <li>the reset's null-out of the three fields (:392–394), which keeps only
-            <code>mapping_target_type</code>.</li>
+          <li>the reset's null-out of the three fields (:392–394).</li>
         </ul>
-        <code>grep -rn 'mapping_target_ids\|mapping_target_path' imas_codex/</code> must
-        print nothing at the node's head. <code>mapping_target_type</code> stays: the escalated
-        choice call returns the <code>TargetType</code> with its pick, as the assign call
-        does now, and <code>mapping.py:1416, 1497</code> keep reading it.</li>
+        <code>grep -rn 'mapping_target_ids\|mapping_target_path\|mapping_target_type'
+        imas_codex/</code> must print nothing at the node's head. The only readers of
+        <code>mapping_target_type</code> are the claim projection (<code>workers.py:244</code> at
+        <code>397df9ee9</code>) and the reset (<code>:471</code>). The map stage reads the target
+        type from the in-memory <code>TargetAssignment</code> (<code>mapping.py:1340,
+        1421</code>), which the next bullet derives in code, so the stored copy has no reader
+        left.</li>
+      <li><strong>Section and target type from the DD, in code.</strong> The old assign call
+        chose a section, an IDS top-level child such as <code>pf_active/coil</code>, and
+        labelled its type. A candidate is deeper: of the 52 DD nodes the §3 labels name, 31 are
+        <code>STRUCTURE</code> nodes such as <code>magnetics/flux_loop/flux</code>. The
+        assembler fills a section at the IDS root (<code>getattr(ids, section_name)</code>,
+        <code>imas_codex/ids/assembler.py:190</code>), so the map stage builds each
+        <code>TargetAssignment</code> from the picked node:
+        <ul>
+          <li>its <code>imas_target_path</code> is the picked node's top-level ancestor,
+            <code>&lt;ids&gt;/&lt;first segment&gt;</code>. The 52 labelled nodes fall in 26
+            such sections: 25 are <code>STRUCT_ARRAY</code>, and one,
+            <code>operational_instrumentation/latency</code>, is a 0-D leaf;</li>
+          <li>its <code>target_type</code> comes from that section node. A
+            <code>STRUCT_ARRAY</code> with a <code>timebasepath</code> is
+            <code>time_slice</code>: 46 top-level arrays carry one, among them
+            <code>equilibrium/time_slice</code> and <code>core_profiles/profiles_1d</code>.
+            Any other <code>STRUCT_ARRAY</code> is <code>struct_array</code>, a node with
+            <code>ndim</code> 0 is <code>scalar</code>, and anything else is
+            <code>profile</code>. The rule is a classmethod on <code>TargetType</code> in
+            <code>imas_codex/ids/models.py</code>, fed by the section fields that
+            <code>read_candidates</code> returns;</li>
+          <li>the picked node itself is kept on the assignment, because the
+            <code>target_id</code> guard above is checked against it, not against the
+            section.</li>
+        </ul>
+        The escalated choice call therefore returns only a listed path, or <code>none</code>
+        with a disposition. It no longer returns a <code>TargetType</code>, and its response
+        model in <code>imas_codex/ids/models.py</code> changes with the prompts.</li>
       <li><strong>One owner for the edge.</strong> The <code>MAPS_TO_IMAS</code> delete in
         <code>_clear_mapping</code> (<code>imas_codex/cli/map.py:657–666</code>), the only
         delete site of that edge, moves into <code>graph_ops.py</code> beside the write
@@ -335,7 +370,9 @@
           <li>The candidate edges get a reader, and a way to mark the reasoning model's pick,
             beside their writer in <code>imas_codex/ids/graph_ops.py</code>:
             <code>read_candidates(source_ids)</code> returns each source's edges in Jev order,
-            and <code>select_candidate(source_id, path)</code> marks one edge selected. It is a
+            each with its target's section (the IDS top-level ancestor) and that section
+            node's <code>data_type</code>, <code>timebasepath</code> and <code>ndim</code>, in
+            one query; <code>select_candidate(source_id, path)</code> marks one edge selected. It is a
             separate function because <code>write_candidates</code> deletes and rewrites
             every edge of a source, while a pick must flag one existing edge without disturbing
             the shortlist. No candidate query is written in <code>workers.py</code> or
@@ -351,7 +388,9 @@
             tests/cli/test_discover_map.py tests/tools/test_dd_version_filtering.py
             tests/test_cli.py -p no:cacheprovider</code> passes, with tests showing:
             <ul>
-              <li><code>read_candidates</code> returns each source's edges in Jev order;</li>
+              <li><code>read_candidates</code> returns each source's edges in Jev order, each
+                with its section and that section's <code>data_type</code>,
+                <code>timebasepath</code> and <code>ndim</code>;</li>
               <li><code>select_candidate</code> marks exactly one edge and leaves the rest of
                 the shortlist unchanged;</li>
               <li><code>gather_ids_context</code> takes each source's shortlist from
@@ -369,11 +408,12 @@
       <li><strong><code>map-run-routes-candidates</code></strong>, role implement, 1.5 h.
         It owns the selected, escalated and no_candidate behaviour, the
         <code>target_id</code> guard, the per-source bridge narrowed to the escalated
-        sources, and the retired fields. It reads and marks candidates only through
+        sources, the section and target type derived from the DD, and the retired fields.
+        It reads and marks candidates only through
         <code>read_candidates</code> and <code>select_candidate</code>.
         <ul>
           <li>Write paths: <code>imas_codex/ids/workers.py</code>,
-            <code>imas_codex/ids/mapping.py</code>,
+            <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
             <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
             <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
             <code>imas_codex/schemas/facility.yaml</code>,
@@ -391,12 +431,16 @@
               <li>an answer naming a path outside the shortlist is refused;</li>
               <li>a <code>target_id</code> outside the selected node is escalated;</li>
               <li>a no_candidate source is skipped and its best path and probability are
-                logged.</li>
+                logged;</li>
+              <li>an assignment built from a picked node takes the node's top-level ancestor
+                as its section, and its type from that section: a time-indexed array is
+                <code>time_slice</code>, another array <code>struct_array</code>, a 0-D node
+                <code>scalar</code>.</li>
             </ul>
             After <code>uv run build-models --force</code> in the worktree, which regenerates the
             gitignored <code>models.py</code> and <code>schema_context_data.py</code> from
             <code>facility.yaml</code>, <code>grep -rn
-            'mapping_target_ids\|mapping_target_path' imas_codex/
+            'mapping_target_ids\|mapping_target_path\|mapping_target_type' imas_codex/
             tests/</code> prints nothing.</li>
         </ul></li>
     </ol>
@@ -550,7 +594,7 @@
     <div class="r-comment-body"><p>Node <code>edge-ownership</code> merged as <code>397df9ee9</code>; the section stays open for <code>map-context-reads-candidates</code> and <code>map-run-routes-candidates</code>. The audit sent it back once: the binding writer read <code>written &lt; 1 and rows</code>, so an empty result passed silently, and the fragment's census lines did not resolve. Both were repaired at <code>ec3db3857</code>. A second independent review reproduced the gate there (477 passed, base 476, no added failure) and the negative control (4 tests fail with the guard removed), scoring 117 of 120. At the merged head the two census greps print only <code>graph_ops.py:585</code> (the MERGE) and <code>:640</code> (the delete). One companion path was accepted outside the declared scope: <code>tests/ids/test_mapping_e2e.py</code>, whose shared mock now reports the one edge the fail-closed writer requires.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261006T221617813366-review-of-edge-ownership" data-who="reckon-build" data-when="2026-10-06T22:24:56.665Z">
-    <div class="r-comment-body"><p>Independent re-review attached to r-20261006T214555828205-edge-ownership at reviewed_base_sha 1084aceb3b1aa23032c0e5fc1072841688acc4d7 / reviewed_head_sha ec3db385757bf2a2cc308366a572c9876f86c953 covering the two commits it gained since the prior review (a99a9d93, ec3db3857) over five files — six dimensions scored over 0..20 (goal_fidelity 20, evidence 20, scope_discipline 17, durability 20, fit 20, reuse 20; total 117), both prior follow-on findings verified repaired, added_failure_count 0, one follow-on finding (the e2e mock file sits outside the reviewed node&#x27;s declared write paths and is accepted by the continuation dispatch).</p></div>
+    <div class="r-comment-body"><p>Independent re-review attached to r-20261006T214555828205-edge-ownership at reviewed_base_sha 1084aceb3b1aa23032c0e5fc1072841688acc4d7 / reviewed_head_sha ec3db385757bf2a2cc308366a572c9876f86c953 covering the two commits it gained since the prior review (a99a9d93, ec3db3857) over five files — six dimensions scored over 0..20 (goal_fidelity 20, evidence 20, scope_discipline 17, durability 20, fit 20, reuse 20; total 117), both prior follow-on findings verified repaired, added_failure_count 0, one follow-on finding (the e2e mock file sits outside the reviewed node's declared write paths and is accepted by the continuation dispatch).</p></div>
 </div>
 </section>
 </main>
