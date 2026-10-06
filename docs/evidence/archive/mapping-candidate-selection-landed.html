@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="mapping-candidate-selection-landed">
+  <meta name="plan-title" content="Mapping Candidate Selection — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Mapping Candidate Selection: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="mapping-candidate-selection">
+  <meta name="plan-verdict" content="qualified">
+  <title>Mapping Candidate Selection — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Mapping Candidate Selection — landed record</h1>
+  <p>Closure synthesis for Mapping Candidate Selection: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2">
+    <h2>§2 — what removed the mapping edges</h2>
+    <p>Read-only investigation <code>mapping-edge-loss</code>, revision <code>3380f837e</code>. <strong>Mechanism, verified in code:</strong> <code>imas map --clear</code> runs <code>_clear_mapping</code> (<code>imas_codex/cli/map.py:647–695</code>). It deletes <code>MAPS_TO_IMAS</code> on every source the remapped IDS uses, and <code>DETACH DELETE</code>s the IMASMapping node, which takes <code>POPULATES</code> with it. The re-persist in <code>persist_mapping_result</code> (<code>imas_codex/ids/models.py:530, 579</code>) guards every edge write behind <code>MATCH (ip:IMASNode {id})</code>, so a target id that names no node writes nothing. It still re-creates the mapping node and its <code>USES_SIGNAL_SOURCE</code> edges. That matches the measured residue: 53 mappings, 207 <code>USES_SIGNAL_SOURCE</code>, 0 <code>MAPS_TO_IMAS</code>, 0 <code>POPULATES</code>.</p><p><strong>Ruled out:</strong> a DD rebuild. DDVersion 4.1.0 was built 2026-06-18, the DD build log was last written 2026-07-22, and the DD update path never deletes IMASNode (<code>cli/imas_dd.py:409–412</code>).</p><p><strong>Rejected on audit:</strong> the report dates the removal to JET map runs on 2026-10-06 between 05:21 and 08:35. Those log lines are test runs. Their tracebacks pass through <code>unittest.mock</code> from another worktree, and the tests persist through a mock graph client, so they write to the shared <code>map_jet.log</code> and not to the graph. The report also calls <code>imas_codex.discovery.map</code> a missing module; it is a logger name (<code>cli/discover/common.py:170</code>). The date of the real removal is not established.</p><p><strong>Consequence for this plan:</strong> both protections the report asks for are already in it. Candidates use their own <code>MAPPING_CANDIDATE</code> type (§6), and every <code>MATCH</code>-gated write raises on zero rows (§6, §8).</p>
+  </section>
+
+</main>
+</body>
+</html>

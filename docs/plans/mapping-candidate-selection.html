@@ -21,9 +21,9 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -127,38 +127,12 @@
       <code>units</code>.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s2">§2 — Find what removed the mapping edges</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>
-      Every <code>MAPS_TO_IMAS</code> and <code>POPULATES</code> edge is gone, while the 53
-      IMASMapping nodes and their <code>USES_SIGNAL_SOURCE</code> edges remain. Edges that the
-      SN pipeline and DD build write into IMASNode are present. The candidate edges in §6 also
-      point at IMASNode, so whatever removed the mapping edges would remove those too. Two
-      readings fit the facts:
-    </p>
-    <ul>
-      <li>A DD rebuild deleted and re-created IMASNode, and only pipelines that re-run wrote
-        their edges back.</li>
-      <li>The JET run wrote no edges, because each <code>MATCH</code> on a free-text
-        <code>target_id</code> found no node.</li>
-    </ul>
-    <p>
-      <strong>Node</strong> <code>mapping-edge-loss</code>, role investigate, read-only. It
-      reads the DD build and graph-management code under <code>imas_codex/graph/</code>,
-      <code>imas_codex/cli/</code> and the DD build modules, with <code>git log</code> over
-      them and over <code>imas_codex/ids/models.py</code>. It reads the map CLI logs under
-      <code>~/.local/share/imas-codex/logs/</code> (<code>map_jet*.log</code>) when present.
-      It writes only its report.
-    </p>
-    <p>
-      <strong>Done when</strong> the report reaches one of two outcomes. Either it names the
-      operation that removed the edges, citing <code>file:line</code> and dated evidence from
-      git history or logs. Or it states that the operation cannot be determined from code and
-      logs, and names the record that would settle it. In both cases it states whether the
-      same operation would remove a <code>SignalSource → IMASNode</code> edge written by
-      §6. If it would, the report names the narrowest change to that operation that would
-      preserve such edges.
-    </p>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Mechanism found: imas map --clear deletes MAPS_TO_IMAS and the mapping node, and a re-persist gated on MATCH (ip:IMASNode) silently writes nothing; DD rebuild ruled out; §6 and §8 already carry both protections. <a href="s2">full record</a></p>
+</section>
 
     <h2 id="s3">§3 — Label a set and measure retrieval and Jev on it</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -446,18 +420,34 @@
       <code>MAPPING_CANDIDATE</code> relationship from SignalSource to IMASNode. Its
       properties are rank, retrieval_score, arms, p_same_quantity, p_same_object, model,
       judged_at, and route, which says whether this candidate is the selected one.
-      SignalSource gains candidate_status (<code>judged</code> once routed),
-      candidate_route, candidate_claimed_at, candidate_claim_token, candidate_judged_at and
-      candidate_model. These follow the claim pattern in
-      <code>imas_codex/discovery/AGENTS.md</code>.
     </p>
+    <ul>
+      <li>SignalSource gains one field, <code>candidate_route</code>, which stays null until
+        the source is judged. Judgment time and model live on the edges.</li>
+      <li>The candidate stage claims through the existing <code>mapping_claimed_at</code> and
+        <code>mapping_claim_token</code>. A source is in only one stage of the mapping
+        workflow at a time, and the claim predicate tells the stages apart.</li>
+    </ul>
+    <p>
+      <strong>Surface.</strong> The section adds one relationship type, one field and two
+      functions. The relationship cannot merge into <code>MAPS_TO_IMAS</code>, for two
+      reasons:
+    </p>
+    <ul>
+      <li><code>MAPS_TO_IMAS</code> is a binding with a transform, written by
+        <code>imas map run</code>. A candidate is a proposal with probabilities.</li>
+      <li>§2 found that <code>imas map --clear</code> deletes every
+        <code>MAPS_TO_IMAS</code> edge on the sources of the IDS it remaps. Only a distinct
+        type keeps candidates out of that delete.</li>
+    </ul>
     <p>
       <strong>Writes.</strong> A new <code>write_candidates(source_id, judgments, route)</code>
       in <code>imas_codex/ids/graph_ops.py</code> replaces a source's candidate edges in one
       transaction. It uses <code>UNWIND</code> and <code>MATCH</code>es both endpoints. It
       returns the written count and raises when that count is below the number of
       judgments, so a candidate whose node has vanished fails loudly instead of being dropped.
-      The same function sets the source's candidate fields and releases its claim.
+      The same function sets <code>candidate_route</code> and releases the source's mapping
+      claim.
     </p>
     <p><strong>Node</strong> <code>candidate-schema</code>, role implement.</p>
     <ul>
@@ -472,10 +462,10 @@
     <ul>
       <li>A re-judge replaces the earlier edges.</li>
       <li>A missing IMASNode raises.</li>
-      <li>Claim fields are released on success and on failure.</li>
+      <li>The mapping claim is released on success and on failure.</li>
       <li><code>clear_candidates(facility)</code>, also in <code>graph_ops.py</code>, removes
-        a facility's candidate edges and fields. Its return value states how many of each
-        it removed.</li>
+        a facility's candidate edges and resets <code>candidate_route</code>. Its return
+        value states how many of each it removed.</li>
     </ul>
     <p>One <code>-m graph</code> test, run on a compute partition against the live database,
       writes and removes the candidates of a single fixture source.</p>
@@ -518,12 +508,19 @@
         (<code>274, 287</code>) become one release routine.</li>
       <li>The three <code>has_pending_*</code> checks (<code>303, 329, 343</code>) become one
         pending check.</li>
-      <li>Each is parameterised by the status predicate, the claim property names and the
-        returned fields. The assign and map stages and the new candidate stage all call
-        them.</li>
+      <li>Each is parameterised by the label, the status predicate, the claim property
+        names and the returned fields.</li>
+      <li>The generalised routines live in the shared owner,
+        <code>imas_codex/discovery/base/claims.py</code>, not in <code>workers.py</code>.
+        <code>release_claim</code> and <code>release_claims_batch</code> gain the
+        <code>claimed_field</code> keyword that <code>reset_stale_claims</code> already has.
+        Its default, <code>claimed_at</code>, leaves every existing caller unchanged. The
+        claim and pending routines are added beside them.</li>
+      <li>The seven <code>workers.py</code> helpers become calls into
+        <code>claims.py</code>, and the assign, map and candidate stages all use them.</li>
       <li>The section adds <code>candidate_worker</code>, plus a
         <code>run_candidate_engine</code> that uses <code>run_discovery_engine</code> with an
-        <code>OrphanRecoverySpec</code> on <code>candidate_claimed_at</code>, as
+        <code>OrphanRecoverySpec</code> on <code>mapping_claimed_at</code>, as
         <code>run_mapping_engine</code> does.</li>
       <li>The claim takes a batch of enriched sources that are unjudged, or stale under the
         claim timeout. It keeps the <code>@retry_on_deadlock</code> + <code>ORDER BY
@@ -552,8 +549,12 @@
     <ul>
       <li>Write paths: <code>imas_codex/cli/discover/map.py</code>,
         <code>imas_codex/cli/discover/__init__.py</code>,
-        <code>imas_codex/ids/workers.py</code> and
+        <code>imas_codex/ids/workers.py</code>,
+        <code>imas_codex/discovery/base/claims.py</code>,
+        <code>tests/discovery/test_claims_field.py</code> and
         <code>tests/cli/test_discover_map.py</code>.</li>
+      <li><code>tests/discovery</code> must stay green, because 24 modules import
+        <code>claims.py</code>.</li>
     </ul>
     <p><strong>Done when</strong> a <code>CliRunner</code> test with fake retrieval and a fake
       transport runs <code>discover map</code> end to end over three fixture sources, and
@@ -685,7 +686,10 @@
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T164923233082-mapping-edge-loss" data-who="reckon-build" data-when="2026-10-06T17:05:48.643Z">
-    <div class="r-comment-body"><p>§2 investigated read-only; VERDICT names the map CLI&#x27;s --clear path (imas_codex/cli/map.py:79/:147 with _clear_mapping imas_codex/cli/map.py:647-695) plus the MATCH-gated silent no-op re-persist (imas_codex/ids/models.py:530/:579) as the removal mechanism, dated by map_jet.log 2026-10-06T05:21-08:35Z runs and the live-graph counts at 2026-10-06T17:14Z; the DD-rebuild reading is ruled out by DDVersion 4.1.0 build_completed_at=2026-06-18 and imas_dd_dd.log mtime 2026-07-22; EDGE_RISK=yes with two narrow protections (distinct relationship type for §6 candidates; fail closed on a zero-row IMASNode MATCH)</p></div>
+    <div class="r-comment-body"><p>§2 investigated read-only; VERDICT names the map CLI's --clear path (imas_codex/cli/map.py:79/:147 with _clear_mapping imas_codex/cli/map.py:647-695) plus the MATCH-gated silent no-op re-persist (imas_codex/ids/models.py:530/:579) as the removal mechanism, dated by map_jet.log 2026-10-06T05:21-08:35Z runs and the live-graph counts at 2026-10-06T17:14Z; the DD-rebuild reading is ruled out by DDVersion 4.1.0 build_completed_at=2026-06-18 and imas_dd_dd.log mtime 2026-07-22; EDGE_RISK=yes with two narrow protections (distinct relationship type for §6 candidates; fail closed on a zero-row IMASNode MATCH)</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261006T1712-s2-audit" data-who="reckon-build" data-when="2026-10-06T17:12:00Z">
+    <div class="r-comment-body"><p>Gate <code>grep -c '^VERDICT '</code> passed; §2 closed. Audit correction to the landing line above: the 05:21–08:35Z map_jet.log entries are mocked test runs logging to the shared CLI log, not JET re-runs, so the removal is not dated. The mechanism and the EDGE_RISK finding stand.</p></div>
 </div>
 </section>
 </main>
