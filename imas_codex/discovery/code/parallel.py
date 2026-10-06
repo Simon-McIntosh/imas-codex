@@ -99,9 +99,11 @@ async def run_parallel_code_discovery(
         min_score: Minimum FacilityPath score for scanning
         max_paths: Maximum paths to scan per batch
         focus: Natural language focus for scoring
-        path_prefixes: When given, restrict scanning to FacilityPaths whose
-            ``path`` starts with one of these prefixes; the has-work predicate
-            and the scan claim both honour it.
+        path_prefixes: When given, restrict the run to code under these
+            prefixes: the scan claim, the triage, enrichment, scoring and
+            ingestion claims, and every has-work predicate all honour it, so a
+            scoped run reports done once the named trees are done rather than
+            waiting on files outside them.
         num_scan_workers: Number of parallel scan workers
         num_triage_workers: Number of parallel triage workers
         num_enrich_workers: Number of parallel enrich workers
@@ -162,23 +164,34 @@ async def run_parallel_code_discovery(
         lambda: has_pending_scan_work(facility, min_score, path_prefixes)
     )
     state.triage_phase.set_has_work_fn(
-        lambda: has_pending_triage_work(facility) or not state.scan_phase.done
+        lambda: (
+            has_pending_triage_work(facility, path_prefixes)
+            or not state.scan_phase.done
+        )
     )
     state.enrich_phase.set_has_work_fn(
         lambda: (
-            has_pending_enrich_work(facility, min_triage_score)
+            has_pending_enrich_work(facility, min_triage_score, path_prefixes)
             or not state.triage_phase.done
         )
     )
     state.score_phase.set_has_work_fn(
-        lambda: has_pending_score_work(facility) or not state.enrich_phase.done
+        lambda: (
+            has_pending_score_work(facility, path_prefixes)
+            or not state.enrich_phase.done
+        )
     )
     state.code_phase.set_has_work_fn(
-        lambda: has_pending_code_work(facility, min_score) or not state.score_phase.done
+        lambda: (
+            has_pending_code_work(facility, min_score, path_prefixes=path_prefixes)
+            or not state.score_phase.done
+        )
     )
     # Link phase depends on code phase (propagates evidence after ingestion)
     state.link_phase.set_has_work_fn(
-        lambda: has_pending_link_work(facility) or not state.code_phase.done
+        lambda: (
+            has_pending_link_work(facility, path_prefixes) or not state.code_phase.done
+        )
     )
 
     # Pre-warm SSH ControlMaster

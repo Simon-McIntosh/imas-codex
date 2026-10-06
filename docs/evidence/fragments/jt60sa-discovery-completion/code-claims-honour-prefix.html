@@ -1,0 +1,33 @@
+<section id="code-claims-honour-prefix">
+  <h2>code-claims-honour-prefix — every code claim honours the path-prefix scope</h2>
+  <p id="code-claims-honour-prefix-summary">
+    <code>discover code --path-prefix</code> now scopes the whole code pipeline,
+    not just the file scan. One helper beside <code>render_path_prefix_clause</code>
+    returns the prefix clause and its parameters together, so a claim cannot
+    detach the predicate from the value that fills it; an empty list yields an
+    empty clause and no parameters, leaving the unscoped query unchanged.
+  </p>
+  <ul id="code-claims-honour-prefix-changes">
+    <li><code>imas_codex/graph/query_builder.py</code>: <code>build_path_prefix_filter(alias, prefixes)</code> added beside <code>render_path_prefix_clause</code>.</li>
+    <li><code>imas_codex/discovery/code/graph_ops.py</code>: the triage, enrichment and scoring claims, the five has-work predicates, and the existing scan claim and <code>has_pending_scan_work</code> all adopt the helper (alias <code>sf</code> on <code>CodeFile.path</code>, <code>p</code> on <code>FacilityPath.path</code>).</li>
+    <li><code>imas_codex/discovery/code/workers.py</code>: the ingest claim takes <code>path_prefixes</code> and all four stage workers forward <code>state.path_prefixes</code>.</li>
+    <li><code>imas_codex/discovery/code/parallel.py</code>: the five has-work predicates are wired with the run's prefix list.</li>
+  </ul>
+  <p id="code-claims-honour-prefix-measure">
+    Gate: <code>uv run pytest tests/discovery</code> — 1177 passed, EXIT=0.
+    Focused: <code>tests/discovery/test_code_claims_prefix_scope.py</code> (16 tests
+    with <code>tests/graph/test_path_prefix_filter.py</code>) seeds a claimable
+    CodeFile inside a prefix and one outside for each stage and asserts the
+    stage claims only the inside file, and each has-work predicate ignores
+    outside work.
+  </p>
+  <p id="code-claims-honour-prefix-negative-control">
+    Negative control: the ingest-claim test run against a scratch copy of the
+    package. With the <code>{prefix_clause}</code> line removed from the ingest
+    claim, the outside file is claimed and the test fails —
+    <code>EXIT=1</code>, first failure
+    <code>test_ingest_claim_ignores_files_outside_the_prefix</code>:
+    <code>Left contains one more item: '/analysis/src/other/b.f'</code>.
+    Log: <code>~/.config/reckon/crew/runs/r-20261006T093927252234-code-claims-honour-prefix/logs/negative_control_ingest_clause_removed.log</code>.
+  </p>
+</section>

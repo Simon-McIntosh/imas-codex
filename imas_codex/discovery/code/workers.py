@@ -257,7 +257,10 @@ async def triage_worker(
             _prompt_built_at = _time.monotonic()
 
         files = await asyncio.to_thread(
-            claim_files_for_triage, state.facility, limit=batch_size
+            claim_files_for_triage,
+            state.facility,
+            limit=batch_size,
+            path_prefixes=state.path_prefixes,
         )
 
         if not files:
@@ -428,7 +431,10 @@ async def score_worker(
             _prompt_built_at = _time.monotonic()
 
         files = await asyncio.to_thread(
-            claim_files_for_scoring, state.facility, limit=batch_size
+            claim_files_for_scoring,
+            state.facility,
+            limit=batch_size,
+            path_prefixes=state.path_prefixes,
         )
 
         if not files:
@@ -528,6 +534,7 @@ def _claim_code_files_for_ingestion(
     limit: int = 20,
     min_score: float | None = None,
     max_line_count: int = 10000,
+    path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Claim scored CodeFiles for ingestion.
 
@@ -538,6 +545,10 @@ def _claim_code_files_for_ingestion(
     Dedup is handled *after* claiming — see ``_filter_duplicates()``.
     Keeping the claim query simple avoids expensive correlated subqueries
     that scale as O(candidates × ingested_hashes).
+
+    When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
+    one of the prefixes are claimed, so a scoped run ingests only the named
+    trees.
 
     Uses anti-deadlock patterns: ORDER BY rand(), claim_token two-step
     verify, and @retry_on_deadlock decorator.
@@ -550,18 +561,21 @@ def _claim_code_files_for_ingestion(
 
     from imas_codex.discovery.base.claims import DEFAULT_CLAIM_TIMEOUT_SECONDS
     from imas_codex.graph import GraphClient
+    from imas_codex.graph.query_builder import build_path_prefix_filter
 
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     token = str(uuid.uuid4())
     cutoff = f"PT{DEFAULT_CLAIM_TIMEOUT_SECONDS}S"
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and token
         gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
               AND sf.score_composite IS NOT NULL
               AND sf.score_composite >= $min_score
               AND coalesce(sf.line_count, 0) <= $max_line_count
+              {prefix_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf ORDER BY rand() LIMIT $limit
@@ -573,6 +587,7 @@ def _claim_code_files_for_ingestion(
             limit=limit,
             cutoff=cutoff,
             token=token,
+            **prefix_params,
         )
         # Step 2: Read back by token to confirm claims
         result = gc.query(
@@ -764,6 +779,7 @@ async def code_worker(
                 state.facility,
                 limit=batch_size,
                 min_score=state.min_score,
+                path_prefixes=state.path_prefixes,
             )
         except Exception as e:
             logger.warning("Code claim failed: %s", e)
@@ -953,6 +969,7 @@ async def enrich_worker(
             state.facility,
             limit=batch_size,
             min_triage_composite=state.min_triage_score,
+            path_prefixes=state.path_prefixes,
         )
 
         if not files:
