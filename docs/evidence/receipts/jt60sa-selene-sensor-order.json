@@ -1,0 +1,816 @@
+{
+  "schema": "jt60sa-selene-sensor-order-receipt/1",
+  "node": "selene-sensor-order-receipt",
+  "purpose": "Join each raw EDDB magnetics channel (flux loops, tangential probes, normal probes) to its geometry-input sensor position via the shared sensor index, for the ambix machine map.",
+  "host": "jt-60sa (intr26-2), read-only",
+  "measured_utc": "2026-10-06T11:56:03Z",
+  "read_only": true,
+  "counts": {
+    "IPROB": {
+      "value": 17,
+      "source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:484 header '17 Magnetic Probe'; /analysis/src/getseldata_v4.2/eddbaccess.h:25 PBMAX=17; /analysis/src/getseldata_v4.2/outeddb.c:242 IPROB=PBMAX"
+    },
+    "ILOOP": {
+      "value": 27,
+      "source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:502 header '27 Flux Loop'; /analysis/src/getseldata_v4.2/eddbaccess.h:24 FXMAX=27; /analysis/src/getseldata_v4.2/outeddb.c:243 ILOOP=FXMAX"
+    }
+  },
+  "count_conflict": {
+    "standalone_default": {
+      "file": "/analysis/src/SAselene_v2.0_forPSRC/mgset0.f",
+      "IPROB": 17,
+      "ILOOP": 15,
+      "line_range": "135-136",
+      "note": "SELENE's standalone default. Not the geometry-input count: eqinpu96.f:221-222 overrides IPROB/ILOOP from the getseldata namelist (27/17), which outeddb.c writes from FXMAX/PBMAX. The receipt's flux list uses the geometry-input count 27."
+    }
+  },
+  "geometry_input": {
+    "geo_in": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in",
+    "identical_copies": [
+      "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in",
+      "/analysis/src/getseldata_v4.2/TEST/getseldata/geo.in",
+      "/analysis/src/getseldata_v4.2/TEST/F/geo.in",
+      "/analysis/src/getseldata_v4.2/TEST/C/geo.in",
+      "/analysis/src/getseldata_v4.2/UTL/getfame96/geo.in"
+    ],
+    "reader": "/analysis/src/getseldata_v4.2/inpgeo.c (opens ./geo.in)",
+    "probe_block": {
+      "header_line": 484,
+      "data_lines": "485-501",
+      "count": 17
+    },
+    "flux_block": {
+      "header_line": 502,
+      "data_lines": "503-529",
+      "count": 27
+    },
+    "note": "inpgeo.c reads probes (108-115) then flux (117-124) into rprb/zprb/omeg and rflx/zflx. outeddb.c writes those arrays as RPOST/ZPOST/DMPT0 and RPOSLP/ZPOSLP in the SELENE namelist."
+  },
+  "shared_index_mechanism": "A raw channel joins its position only through the shared sensor index: geteddb.c reads EDDB channel (icnt+1) into measured array slot icnt, and inpgeo.c fills the position array slot icnt from the geo.in row at the same ordinal. SELENE then binds position->grid cell via MGPOS (mgprc.f:14-28, eqvacu.f:211-227); JLOOP/JTPRB/JNPRB in inc/#MAG are grid-cell indices, not a channel map.",
+  "flux_loops": {
+    "length": 27,
+    "entries": [
+      {
+        "sensor_index": 1,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 1,
+        "geometry_position": {
+          "R": 1.8798,
+          "Z": 2.9331
+        },
+        "geo_in_line": 503,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:503 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 2,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 2,
+        "geometry_position": {
+          "R": 1.6414,
+          "Z": 2.5202
+        },
+        "geo_in_line": 504,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:504 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 3,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 3,
+        "geometry_position": {
+          "R": 1.6262,
+          "Z": 1.9769
+        },
+        "geo_in_line": 505,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:505 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 4,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 4,
+        "geometry_position": {
+          "R": 1.6246,
+          "Z": 1.427
+        },
+        "geo_in_line": 506,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:506 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 5,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 5,
+        "geometry_position": {
+          "R": 1.6241,
+          "Z": 0.9769
+        },
+        "geo_in_line": 507,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:507 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 6,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 6,
+        "geometry_position": {
+          "R": 1.6237,
+          "Z": 0.377
+        },
+        "geo_in_line": 508,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:508 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 7,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 7,
+        "geometry_position": {
+          "R": 1.6229,
+          "Z": -0.073
+        },
+        "geo_in_line": 509,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:509 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 8,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 8,
+        "geometry_position": {
+          "R": 1.6238,
+          "Z": -0.373
+        },
+        "geo_in_line": 510,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:510 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 9,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 9,
+        "geometry_position": {
+          "R": 1.6238,
+          "Z": -0.973
+        },
+        "geo_in_line": 511,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:511 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 10,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 10,
+        "geometry_position": {
+          "R": 1.6243,
+          "Z": -1.423
+        },
+        "geo_in_line": 512,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:512 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 11,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 11,
+        "geometry_position": {
+          "R": 1.6248,
+          "Z": -1.7454
+        },
+        "geo_in_line": 513,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:513 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 12,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 12,
+        "geometry_position": {
+          "R": 1.6918,
+          "Z": -2.6883
+        },
+        "geo_in_line": 514,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:514 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 13,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 13,
+        "geometry_position": {
+          "R": 2.0212,
+          "Z": -3.0384
+        },
+        "geo_in_line": 515,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:515 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 14,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 14,
+        "geometry_position": {
+          "R": 2.3023,
+          "Z": -3.1209
+        },
+        "geo_in_line": 516,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:516 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 15,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 15,
+        "geometry_position": {
+          "R": 2.3922,
+          "Z": 3.1175
+        },
+        "geo_in_line": 517,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:517 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 16,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 16,
+        "geometry_position": {
+          "R": 2.7756,
+          "Z": 3.0584
+        },
+        "geo_in_line": 518,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:518 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 17,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 17,
+        "geometry_position": {
+          "R": 3.4167,
+          "Z": 2.6996
+        },
+        "geo_in_line": 519,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:519 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 18,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 18,
+        "geometry_position": {
+          "R": 3.7581,
+          "Z": 2.3976
+        },
+        "geo_in_line": 520,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:520 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 19,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 19,
+        "geometry_position": {
+          "R": 3.966,
+          "Z": 2.1663
+        },
+        "geo_in_line": 521,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:521 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 20,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 20,
+        "geometry_position": {
+          "R": 4.2965,
+          "Z": 1.6801
+        },
+        "geo_in_line": 522,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:522 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 21,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 21,
+        "geometry_position": {
+          "R": 4.6193,
+          "Z": 0.8827
+        },
+        "geo_in_line": 523,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:523 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 22,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 22,
+        "geometry_position": {
+          "R": 4.6934,
+          "Z": 0.5322
+        },
+        "geo_in_line": 524,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:524 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 23,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 23,
+        "geometry_position": {
+          "R": 4.2974,
+          "Z": -1.676
+        },
+        "geo_in_line": 525,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:525 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 24,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 24,
+        "geometry_position": {
+          "R": 3.9693,
+          "Z": -2.1618
+        },
+        "geo_in_line": 526,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:526 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 25,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 25,
+        "geometry_position": {
+          "R": 3.7604,
+          "Z": -2.3992
+        },
+        "geo_in_line": 527,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:527 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 26,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 26,
+        "geometry_position": {
+          "R": 3.4971,
+          "Z": -2.6243
+        },
+        "geo_in_line": 528,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:528 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      },
+      {
+        "sensor_index": 27,
+        "eddb_name": "1626 S007",
+        "eddb_channel": 27,
+        "geometry_position": {
+          "R": 2.753,
+          "Z": -3.0599
+        },
+        "geo_in_line": 529,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:529 (Flux Loop data, read by /analysis/src/getseldata_v4.2/inpgeo.c:117-124 into rflx/zflx); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:309-358 dname=fluxpidB='1626 S007' (/analysis/src/getseldata_v4.2/eddbaccess.h:54) channel=icnt+1; written as RPOSLP/ZPOSLP/PSMES by /analysis/src/getseldata_v4.2/outeddb.c:279-288,259-263; read by eqinpu96.f:216-217"
+      }
+    ]
+  },
+  "tangential_probes": {
+    "length": 17,
+    "entries": [
+      {
+        "sensor_index": 1,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 1,
+        "geometry_position": {
+          "R": 4.7355,
+          "Z": -0.0283,
+          "angle_deg": 0.28
+        },
+        "geo_in_line": 485,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:485 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 2,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 2,
+        "geometry_position": {
+          "R": 4.4873,
+          "Z": 1.2805,
+          "angle_deg": 21.2
+        },
+        "geo_in_line": 486,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:486 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 3,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 3,
+        "geometry_position": {
+          "R": 4.1114,
+          "Z": 1.9694,
+          "angle_deg": 34.89
+        },
+        "geo_in_line": 487,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:487 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 4,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 4,
+        "geometry_position": {
+          "R": 3.4645,
+          "Z": 2.6539,
+          "angle_deg": 50.39
+        },
+        "geo_in_line": 488,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:488 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 5,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 5,
+        "geometry_position": {
+          "R": 2.4712,
+          "Z": 3.1004,
+          "angle_deg": 85.14
+        },
+        "geo_in_line": 489,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:489 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 6,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 6,
+        "geometry_position": {
+          "R": 1.9455,
+          "Z": 2.9651,
+          "angle_deg": 124.41
+        },
+        "geo_in_line": 490,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:490 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 7,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 7,
+        "geometry_position": {
+          "R": 1.6414,
+          "Z": 2.3449,
+          "angle_deg": 179.06
+        },
+        "geo_in_line": 491,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:491 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 8,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 8,
+        "geometry_position": {
+          "R": 1.6342,
+          "Z": 1.1231,
+          "angle_deg": 180.01
+        },
+        "geo_in_line": 492,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:492 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 9,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 9,
+        "geometry_position": {
+          "R": 1.6356,
+          "Z": -0.0002,
+          "angle_deg": 180.21
+        },
+        "geo_in_line": 493,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:493 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 10,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 10,
+        "geometry_position": {
+          "R": 1.635,
+          "Z": -1.1277,
+          "angle_deg": 180.17
+        },
+        "geo_in_line": 494,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:494 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 11,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 11,
+        "geometry_position": {
+          "R": 1.6403,
+          "Z": -2.3481,
+          "angle_deg": 180.27
+        },
+        "geo_in_line": 495,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:495 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 12,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 12,
+        "geometry_position": {
+          "R": 1.9318,
+          "Z": -2.9645,
+          "angle_deg": 234.21
+        },
+        "geo_in_line": 496,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:496 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 13,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 13,
+        "geometry_position": {
+          "R": 2.4709,
+          "Z": -3.0977,
+          "angle_deg": 274.28
+        },
+        "geo_in_line": 497,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:497 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 14,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 14,
+        "geometry_position": {
+          "R": 3.5499,
+          "Z": -2.573,
+          "angle_deg": 311.04
+        },
+        "geo_in_line": 498,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:498 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 15,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 15,
+        "geometry_position": {
+          "R": 4.1043,
+          "Z": -1.973,
+          "angle_deg": 324.55
+        },
+        "geo_in_line": 499,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:499 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 16,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 16,
+        "geometry_position": {
+          "R": 4.4856,
+          "Z": -1.2834,
+          "angle_deg": 338.37
+        },
+        "geo_in_line": 500,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:500 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      },
+      {
+        "sensor_index": 17,
+        "eddb_name": "1626 S006",
+        "eddb_channel": 17,
+        "geometry_position": {
+          "R": 4.6747,
+          "Z": -0.6201,
+          "angle_deg": 350.24
+        },
+        "geo_in_line": 501,
+        "source": "geometry: /analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:501 (Magnetic Probe data, read by /analysis/src/getseldata_v4.2/inpgeo.c:108-115 into rprb/zprb/omeg); EDDB channel: /analysis/src/getseldata_v4.2/geteddb.c:253-302 dname=btpidB='1626 S006' (/analysis/src/getseldata_v4.2/eddbaccess.h:53) channel=icnt+1; written as RPOST/ZPOST/DMPT0/BTMES by /analysis/src/getseldata_v4.2/outeddb.c:264-278,254-258; read by eqinpu96.f:213-214,218"
+      }
+    ]
+  },
+  "normal_probes": {
+    "length": 17,
+    "entries": [
+      {
+        "sensor_index": 1,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 4.4831,
+          "Z": 0.5694
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 2,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 4.308,
+          "Z": 1.0449
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 3,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 3.8888,
+          "Z": 1.4121
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 4,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 3.4033,
+          "Z": 1.6457
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 5,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 3.005,
+          "Z": 1.6284
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 6,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 2.5482,
+          "Z": 1.3007
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 7,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 2.3396,
+          "Z": 0.9685
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 8,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 2.2366,
+          "Z": 0.5091
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 9,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 2.2203,
+          "Z": 0.2154
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 10,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 2.2256,
+          "Z": -0.1937
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 11,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 2.3424,
+          "Z": -0.6953
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 12,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 2.5143,
+          "Z": -1.0446
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 13,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 3.5192,
+          "Z": -1.4408
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 14,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 3.8609,
+          "Z": -1.221
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 15,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 4.1934,
+          "Z": -0.8905
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 16,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 4.4405,
+          "Z": -0.518
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      },
+      {
+        "sensor_index": 17,
+        "eddb_name": null,
+        "eddb_channel": null,
+        "eddb_channel_unestablished": true,
+        "geometry_position": {
+          "R": 4.5782,
+          "Z": 0.02
+        },
+        "source": "position: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:127-128 (cold branch RPOSN=RPSNM(I,1), ZPOSN=ZPSNM(I,1)); RPSNM data /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:20-22 (R), /analysis/src/SAselene_v2.0_forPSRC/mgset0.f:28-30 (Z); consumed by mgprc.f:24-25 (JNPRB=MGPOS(RPOSN,ZPOSN))",
+        "note": "No EDDB channel is established for normal probes: geteddb.c reads only one probe PID (btpidB='1626 S006'); outeddb.c writes no RPOSN/ZPOSN/BTNMES field; the normal-probe position is not carried in geo.in nor in the SELENE namelist. Order is the mgset0.f sensor index only."
+      }
+    ]
+  },
+  "assertions": {
+    "expected": {
+      "IPROB": 17,
+      "ILOOP": 27
+    },
+    "observed": {
+      "flux_loops": 27,
+      "tangential_probes": 17,
+      "normal_probes": 17
+    },
+    "checks": [
+      {
+        "name": "flux_loops.length == ILOOP",
+        "pass": true
+      },
+      {
+        "name": "tangential_probes.length == IPROB",
+        "pass": true
+      },
+      {
+        "name": "normal_probes.length == IPROB",
+        "pass": true
+      },
+      {
+        "name": "every flux entry has an eddb_name",
+        "pass": true
+      },
+      {
+        "name": "every tangential entry has an eddb_name",
+        "pass": true
+      },
+      {
+        "name": "every normal entry has eddb_name None (unestablished)",
+        "pass": true
+      },
+      {
+        "name": "flux eddb channels are 1..ILOOP in order",
+        "pass": true
+      },
+      {
+        "name": "tangential eddb channels are 1..IPROB in order",
+        "pass": true
+      }
+    ],
+    "all_pass": true
+  }
+}

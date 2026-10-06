@@ -1,0 +1,121 @@
+<section id="selene-sensor-order-receipt">
+  <h2 id="selene-sensor-order-receipt-heading">SELENE sensor order — EDDB channels joined to geometry-input positions</h2>
+
+  <p id="selene-sensor-order-receipt-summary">
+    Goal: give the ambix machine map a receipt joining each raw EDDB magnetics
+    channel to its geometry-input sensor position through the shared sensor index.
+    Read-only, from <code>/analysis/src/getseldata_v4.2</code> and
+    <code>/analysis/src/SAselene_v2.0_forPSRC</code> on the <code>jt-60sa</code>
+    host, the node writes
+    <code>docs/evidence/receipts/jt60sa-selene-sensor-order.json</code> with three
+    ordered lists — <strong>27 flux loops</strong>, <strong>17 tangential probes</strong>
+    and <strong>17 normal probes</strong>. Each entry carries its sensor index, EDDB
+    channel name, geometry-input position and the source file and line range that
+    establishes it. No discover run, no graph write, and no file written on the host.
+    The receipt's parsed lengths are asserted against <code>ILOOP=27</code> and
+    <code>IPROB=17</code>; the assertion fails closed on a mismatch.
+  </p>
+
+  <figure id="selene-sensor-order-receipt-figure">
+    <img src="/jt60sa-discovery-completion/figures/selene-sensor-order-receipt/sensor-layout.svg"
+         alt="SELENE sensor positions in the R-Z plane: 27 flux loops, 17 tangential probes and 17 normal probes, each numbered by its shared sensor index" />
+    <figcaption id="selene-sensor-order-receipt-figure-caption">
+      Sensor positions from the geometry input (flux loops, tangential probes) and
+      the SELENE standalone defaults (normal probes), plotted in R-Z and numbered by
+      the shared sensor index. Flux loops hug the boundary; tangential probes
+      span the inboard/outboard contour; normal probes sit on an inner surface and
+      share their positions with the tangential set.
+    </figcaption>
+  </figure>
+
+  <h3 id="selene-sensor-order-receipt-chain">Evidence chain</h3>
+  <table id="selene-sensor-order-receipt-chain-table">
+    <thead>
+      <tr><th>Element</th><th>Source</th><th>Establishes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Geometry input</td>
+        <td><code>/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in</code> (identical
+          copies at <code>TEST/getseldata</code>, <code>TEST/F</code>, <code>TEST/C</code>,
+          <code>UTL/getfame96</code>); header line <code>484</code> “17 Magnetic Probe”,
+          data <code>485–501</code>; header <code>502</code> “27 Flux Loop”, data
+          <code>503–529</code></td>
+        <td>Sensor positions: 17 probes (R Z angle), 27 flux loops (R Z)</td>
+      </tr>
+      <tr>
+        <td>geo.in reader</td>
+        <td><code>inpgeo.c:108–115</code> (probes → <code>rprb/zprb/omeg</code>),
+          <code>117–124</code> (flux → <code>rflx/zflx</code>)</td>
+        <td>Reads probes then flux into the position arrays in file order</td>
+      </tr>
+      <tr>
+        <td>EDDB measured channels</td>
+        <td><code>geteddb.c:253–302</code> tangential probe PID <code>btpidB=“1626 S006”</code>
+          (17 channels <code>dim[0]=icnt+1</code>); <code>309–358</code> flux PID
+          <code>fluxpidB=“1626 S007”</code> (27 channels); PIDs at
+          <code>eddbaccess.h:53–54</code>, counts <code>PBMAX=17</code>/<code>FXMAX=27</code>
+          at <code>eddbaccess.h:24–25</code></td>
+        <td>The EDDB channel name and channel index per sensor</td>
+      </tr>
+      <tr>
+        <td>Namelist writer</td>
+        <td><code>outeddb.c:242 IPROB=PBMAX</code>, <code>243 ILOOP=FXMAX</code>,
+          <code>254–288</code> writes <code>BTMES/PSMES/RPOST/ZPOST/DMPT0/RPOSLP/ZPOSLP</code></td>
+        <td>Measured data and positions share one index in the SELENE namelist</td>
+      </tr>
+      <tr>
+        <td>SELENE consumer</td>
+        <td><code>eqinpu96.f:213–222</code> reads RPOST/RPOSLP/IPROB/ILOOP;
+          <code>mgprc.f:14–28</code> RPOST→JTPRB, RPOSN→JNPRB;
+          <code>eqvacu.f:211–227</code> RPOSLP→JLOOP; <code>inc/#MAG:6–15</code></td>
+        <td>Positions become grid cells; JLOOP/JTPRB/JNPRB are indices, not a channel map</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="selene-sensor-order-receipt-counts">Counts and the shared index</h3>
+  <p id="selene-sensor-order-receipt-index-note">
+    A raw channel joins its position only through the shared sensor index: the
+    EDDB channel <code>icnt+1</code> fills measured-array slot <code>icnt</code>,
+    and <code>inpgeo.c</code> fills the position-array slot <code>icnt</code> from
+    the geo.in row at the same ordinal. So flux loop <em>k</em> is EDDB
+    <code>“1626 S007”</code> channel <em>k</em> ↔ geo.in line <code>502+k</code>;
+    tangential probe <em>i</em> is EDDB <code>“1626 S006”</code> channel <em>i</em>
+    ↔ geo.in line <code>484+i</code>.
+  </p>
+  <p id="selene-sensor-order-receipt-count-conflict">
+    <strong>Count conflict, recorded not resolved by guess.</strong> SELENE's
+    standalone default <code>mgset0.f:135–136</code> sets <code>IPROB=17</code>,
+    <code>ILOOP=15</code>. The geometry input and the getseldata namelist use
+    <code>ILOOP=27</code> (<code>FXMAX</code>), and <code>eqinpu96.f:221–222</code>
+    overrides the default from the namelist. The receipt's flux list uses the
+    geometry-input count <strong>27</strong>; the <code>mgset0.f</code> 15 is
+    carried in the receipt under <code>count_conflict</code>.
+  </p>
+
+  <h3 id="selene-sensor-order-receipt-normal">Normal probes: order not established</h3>
+  <p id="selene-sensor-order-receipt-normal-note">
+    The source does not establish an EDDB channel for the normal probes, and the
+    receipt says so rather than guessing. <code>geteddb.c</code> reads only one
+    probe PID (<code>“1626 S006”</code>) and <code>outeddb.c</code> writes no
+    <code>RPOSN</code>/<code>ZPOSN</code> field, so normal-probe positions are not written by
+    the pipeline at all. The receipt records the normal-probe list with
+    <code>eddb_name: null</code>, order from the <code>mgset0.f</code> sensor index
+    only, and its position from the cold branch <code>mgset0.f:127–128</code>
+    (<code>RPOSN=RPSNM(I,1)</code>, data <code>19–22</code>/<code>28–30</code>) —
+    selected because <code>outeddb.c:224</code> writes <code>TMPW=0.0</code>. Those
+    hardcoded normal positions are numerically identical to the tangential ones in
+    <code>mgset0.f</code>, so no independent normal-probe geometry is available.
+  </p>
+
+  <h3 id="selene-sensor-order-receipt-gate">Gate and negative control</h3>
+  <p id="selene-sensor-order-receipt-gate-note">
+    Gate: the generator parses the emitted JSON and asserts
+    <code>len(flux_loops)==ILOOP</code>, <code>len(tangential_probes)==IPROB</code>,
+    <code>len(normal_probes)==IPROB</code>, ordered channels, and that every normal
+    entry is flagged unestablished — all pass. The declared mutation sets
+    <code>ILOOP=15</code>; the flux-length and channel-order checks then fail and the
+    run exits non-zero, so the guard fires rather than passing by silence.
+  </p>
+</section>
