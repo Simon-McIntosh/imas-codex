@@ -17,13 +17,13 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;, &quot;mapping-candidate-selection#s4&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s10&quot;], &quot;s10&quot;: [&quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;, &quot;mapping-candidate-selection#s4&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s10&quot;, &quot;mapping-candidate-selection#s11&quot;], &quot;s11&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s10&quot;], &quot;s10&quot;: [&quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -176,19 +176,30 @@
       so nothing is kept alongside it.
     </p>
     <ul>
-      <li>A <code>selected</code> source takes its target from its selected candidate.</li>
+      <li><strong>One source, several homes.</strong> The same data is often stored in
+        several places, in several IDSs: a measured plasma current belongs in
+        <code>magnetics/ip</code>, in the measured constraint
+        <code>equilibrium/time_slice/constraints/ip</code> and in <code>summary</code>. A
+        source's target is therefore a <em>set</em> of selected candidates, which §11 widens
+        across IDSs, and every stage below handles a set.</li>
+      <li>A <code>selected</code> source takes its targets from its selected candidates.</li>
       <li>An <code>escalated</code> source goes to the <code>reasoning</code> seat with only
         its own shortlist: the top <code>map-shortlist-size</code> candidates, 5 by default,
-        in Jev order. <code>target_assignment.md</code> and
+        in Jev order, plus the cross-IDS siblings §11 added for it.
+        <code>target_assignment.md</code> and
         <code>target_assignment_system.md</code> are rewritten in place: the model chooses
-        one listed path, or <code>none</code> with a disposition. It never writes a new
-        path.</li>
+        every listed path that should hold the source's values, or <code>none</code> with a
+        disposition. It never writes a new path.</li>
       <li>A <code>no_candidate</code> source is skipped. Its best path and probability are
         logged as evidence.</li>
       <li>The map stage still writes transforms, units and COCOS labels. Every
-        <code>target_id</code> must lie under the selected node, or be that node's
-        <code>/data</code> or <code>/time</code> child. Anything else is rejected before
-        persist, as an escalation.</li>
+        <code>target_id</code> must lie inside the section of one of the source's selected
+        candidates in that IDS, the section being the candidate's IDS top-level ancestor.
+        Anything else is rejected before persist, as an escalation. The guard is at section
+        level because the map stage chooses the fields inside a section, and a Jev-ranked node
+        is often a sibling of the field a signal fills: on the §3 test split, Jev's top five
+        hold the labelled section for 30 of the 36 labelled sources, against 25 at node
+        level.</li>
       <li><strong>Landed in <code>edge-ownership</code> (<code>397df9ee9</code>).</strong> At that
         head the two census greps below print only <code>imas_codex/ids/graph_ops.py:585</code>
         (the write) and <code>:640</code> (the delete), and the <code>ids/graph_ops.py</code>
@@ -261,17 +272,24 @@
         <code>mapping_target_path</code>, <code>mapping_target_ids</code> and
         <code>mapping_target_type</code>. The map stage
         reads the target from the selected <code>MAPPING_CANDIDATE</code> edge. Every site in
-        <code>imas_codex/ids/workers.py</code> that reads or writes them changes (lines at
-        <code>c63f3ada7</code>; the node re-greps at its head):
+        <code>imas_codex/ids/workers.py</code> that reads or writes them changes, and their
+        declarations in <code>imas_codex/schemas/facility.yaml</code> (:1943–1947) go
+        (lines at <code>c63f3ada7</code>; the node re-greps at its head):
         <ul>
           <li>the mapping claim predicate <code>sg.mapping_target_ids = $ids_name</code>
-            (:213), which becomes a match on the selected edge's IDS. A source reaches it by
-            one of two paths. A <code>selected</code> source already has a selected edge. An
-            <code>escalated</code> source is first claimed by the assign stage, on
-            <code>candidate_route = 'escalated'</code> with a candidate in the target IDS. The
-            reasoning model picks one shortlist path, and <code>select_candidate</code> marks that
-            edge selected. Without the escalated claim, the default route would leave the map
-            stage nothing to claim;</li>
+            (:213), which becomes: a selected <code>MAPPING_CANDIDATE</code> edge into
+            <code>$ids_name</code>, and no <code>MAPS_TO_IMAS</code> binding into that IDS yet.
+            A source with homes in two IDSs is then claimed once by each IDS's pass, and a
+            pass skips a source it has already bound. <code>claim_batch</code> takes this as
+            its status predicate (<code>imas_codex/discovery/base/claims.py:255</code>). A
+            source reaches a selected edge by one of two paths. A <code>selected</code> source
+            already has one. An <code>escalated</code> source is first claimed by the assign
+            stage, on <code>candidate_route = 'escalated'</code> with a candidate in the target
+            IDS; the reasoning model picks its paths, and <code>select_candidates</code> marks
+            them selected. Without the escalated claim, the default route would leave the map
+            stage nothing to claim. <code>mapping_status</code> stays a per-source summary:
+            <code>mapped</code> once every IDS of its selected edges has bindings, and
+            <code>assigned</code> before that;</li>
           <li>the claim projection of target IDS, path and type (:236–238);</li>
           <li>the reset filter <code>sg.mapping_target_ids IN $ids_names</code> (:380);</li>
           <li>the reset's null-out of the three fields (:392–394).</li>
@@ -304,13 +322,14 @@
             <code>profile</code>. The rule is a classmethod on <code>TargetType</code> in
             <code>imas_codex/ids/models.py</code>, fed by the section fields that
             <code>read_candidates</code> returns;</li>
-          <li>the picked node itself is kept on the assignment, because the
-            <code>target_id</code> guard above is checked against it, not against the
-            section.</li>
+          <li>the selected nodes inside that section travel with the assignment as the map
+            prompt's focus; the guard above checks the section, not the nodes.</li>
         </ul>
-        The escalated choice call therefore returns only a listed path, or <code>none</code>
-        with a disposition. It no longer returns a <code>TargetType</code>, and its response
-        model in <code>imas_codex/ids/models.py</code> changes with the prompts.</li>
+        A source with selected nodes in two sections of one IDS gets one assignment per
+        section. The escalated choice call therefore returns only listed paths, or
+        <code>none</code> with a disposition. It no longer returns a <code>TargetType</code>,
+        and its response model in <code>imas_codex/ids/models.py</code> changes with the
+        prompts.</li>
       <li><strong>One owner for the edge.</strong> The <code>MAPS_TO_IMAS</code> delete in
         <code>_clear_mapping</code> (<code>imas_codex/cli/map.py:657–666</code>), the only
         delete site of that edge, moves into <code>graph_ops.py</code> beside the write
@@ -329,11 +348,13 @@
         refusal, and another passes the producer's boolean and expects the edge to be
         marked.</li>
     </ul>
-    <p><strong>Nodes.</strong> The section is three nodes, run in order, because each writes
-      <code>mapping.py</code>. The second and third were one 2.5 h node; they are split so
-      that each fits one worker's 60-minute budget, and the split follows the code: the
-      second changes where the map stage reads its shortlist, the third changes what it does
-      with each route.</p>
+    <p><strong>Nodes.</strong> The section is four nodes, run in order, because each writes
+      <code>workers.py</code> or <code>mapping.py</code>. The three after
+      <code>edge-ownership</code> wait for §11, which also writes <code>workers.py</code> and
+      supplies the cross-IDS siblings the third presents. Each fits one worker's 60-minute
+      budget, and the split follows the code: the second changes where the map stage reads
+      its shortlist, the third how a set of targets is chosen, and the fourth how each chosen
+      home is mapped.</p>
     <ol>
       <li><strong><code>edge-ownership</code></strong>, role implement, 1.5 h. It owns the
         <code>MAPS_TO_IMAS</code> census bullet and its sub-bullets, the edge-delete owner,
@@ -372,10 +393,13 @@
             <code>read_candidates(source_ids)</code> returns each source's edges in Jev order,
             each with its target's section (the IDS top-level ancestor) and that section
             node's <code>data_type</code>, <code>timebasepath</code> and <code>ndim</code>, in
-            one query; <code>select_candidate(source_id, path)</code> marks one edge selected. It is a
-            separate function because <code>write_candidates</code> deletes and rewrites
-            every edge of a source, while a pick must flag one existing edge without disturbing
-            the shortlist. No candidate query is written in <code>workers.py</code> or
+            one query; <code>select_candidates(source_id, paths)</code> marks every listed
+            edge selected and sets the source's <code>candidate_route</code> to
+            <code>selected</code> in the same statement, so the status counts and the map claim
+            read one state. It is a separate function because <code>write_candidates</code>
+            deletes and rewrites every edge of a source, while a pick must flag existing edges
+            without disturbing the shortlist. A path with no edge is refused with
+            <code>CandidateWriteError</code>. No candidate query is written in <code>workers.py</code> or
             <code>mapping.py</code>.</li>
           <li>Write paths: <code>imas_codex/ids/graph_ops.py</code>,
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/tools.py</code>,
@@ -391,8 +415,9 @@
               <li><code>read_candidates</code> returns each source's edges in Jev order, each
                 with its section and that section's <code>data_type</code>,
                 <code>timebasepath</code> and <code>ndim</code>;</li>
-              <li><code>select_candidate</code> marks exactly one edge and leaves the rest of
-                the shortlist unchanged;</li>
+              <li><code>select_candidates</code> marks exactly the listed edges, possibly in two
+                IDSs, sets <code>candidate_route</code> to <code>selected</code>, leaves the rest
+                of the shortlist unchanged, and refuses a path with no edge;</li>
               <li><code>gather_ids_context</code> takes each source's shortlist from
                 <code>read_candidates</code> and never calls
                 <code>retrieve_candidates</code>;</li>
@@ -405,33 +430,56 @@
             imas_codex/</code> prints only the one definition in
             <code>graph_ops.py</code>.</li>
         </ul></li>
-      <li><strong><code>map-run-routes-candidates</code></strong>, role implement, 1.5 h.
-        It owns the selected, escalated and no_candidate behaviour, the
-        <code>target_id</code> guard, the per-source bridge narrowed to the escalated
-        sources, the section and target type derived from the DD, and the retired fields.
-        It reads and marks candidates only through
-        <code>read_candidates</code> and <code>select_candidate</code>.
+      <li><strong><code>map-run-chooses-candidates</code></strong>, role implement, 1.25 h.
+        It owns the selected, escalated and no_candidate behaviour up to the selected set:
+        the escalated set choice, the rewritten prompts and their response model, and the
+        per-source bridge narrowed to the escalated sources. It reads and marks candidates
+        only through <code>read_candidates</code> and <code>select_candidates</code>.
         <ul>
           <li>Write paths: <code>imas_codex/ids/workers.py</code>,
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
             <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
             <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
-            <code>imas_codex/schemas/facility.yaml</code>,
             <code>tests/llm/test_prompt_rendering.py</code> and
             <code>tests/ids/</code>.</li>
           <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
             tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py
             -p no:cacheprovider</code> passes, with tests showing:
             <ul>
-              <li>a selected source is mapped without an assign call;</li>
               <li>under the default thresholds, an escalated source is claimed by the assign
-                stage, and its pick becomes a selected edge that the map stage then
-                claims;</li>
-              <li>an escalated source's prompt lists only its shortlist;</li>
-              <li>an answer naming a path outside the shortlist is refused;</li>
-              <li>a <code>target_id</code> outside the selected node is escalated;</li>
+                stage, and every path it picks becomes a selected edge, with
+                <code>candidate_route</code> then <code>selected</code>;</li>
+              <li>a pick of two paths in two IDSs marks both;</li>
+              <li>an escalated source's prompt lists only its shortlist and the cross-IDS
+                siblings §11 added for it;</li>
+              <li>an answer naming a path outside that list is refused;</li>
               <li>a no_candidate source is skipped and its best path and probability are
                 logged;</li>
+              <li><code>compute_semantic_matches</code> is called only for escalated
+                sources.</li>
+            </ul></li>
+        </ul></li>
+      <li><strong><code>map-run-maps-each-home</code></strong>, role implement, 1.25 h.
+        It owns the per-IDS map claim, the section-level <code>target_id</code> guard, the
+        section and target type derived from the DD, the <code>mapping_status</code>
+        summary, and the retired fields.
+        <ul>
+          <li>Write paths: <code>imas_codex/ids/workers.py</code>,
+            <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
+            <code>imas_codex/schemas/facility.yaml</code> and <code>tests/ids/</code>.</li>
+          <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
+            tests/cli/test_discover_map.py tests/test_cli.py -p no:cacheprovider</code> passes,
+            with tests showing:
+            <ul>
+              <li>a selected source is mapped without an assign call;</li>
+              <li>a source with selected edges in <code>magnetics</code> and
+                <code>summary</code> is claimed by each IDS's pass and bound in both, and a
+                second <code>magnetics</code> pass skips it;</li>
+              <li><code>mapping_status</code> reads <code>mapped</code> only after every IDS of
+                the source's selected edges is bound;</li>
+              <li>a <code>target_id</code> outside every selected section of that IDS is
+                escalated, and one inside a selected section but outside the selected nodes is
+                kept;</li>
               <li>an assignment built from a picked node takes the node's top-level ancestor
                 as its section, and its type from that section: a time-indexed array is
                 <code>time_slice</code>, another array <code>struct_array</code>, a 0-D node
@@ -452,7 +500,9 @@
       <code>imas-codex discover map jet</code> over all enriched JET sources on the fleet
       allocation, in foreground passes of <code>--time 8</code>, under a $10 cap. It then
       audits 40 sources drawn fresh: none from the §3 set, and stratified by route. Each is
-      labelled the way §3 labels, without seeing the route.
+      labelled for every DD home it has, in any IDS, without seeing the route. Unlike §3, the
+      IDS is not fixed first: §3's labels hold one IDS per source, so they cannot score a
+      second home.
     </p>
     <p>
       It writes its evidence fragment under
@@ -461,8 +511,11 @@
     <p><strong>Done when</strong> the fragment states:</p>
     <ul>
       <li>the route counts, and the total cost against the cap;</li>
-      <li>the audited precision of <code>selected</code>, and the audited share of
-        <code>no_candidate</code> sources that truly have no DD home;</li>
+      <li>the audited section-level precision of <code>selected</code>, and the audited
+        share of <code>no_candidate</code> sources that truly have no DD home;</li>
+      <li>how many audited sources have homes in two or more IDSs, and the share of all
+        labelled homes whose section appears in the source's escalated list (the top five and
+        their §11 siblings);</li>
       <li>every one of the 22 earlier <code>no_imas_equivalent</code> sources, with its new
         route and best path.</li>
     </ul>
@@ -473,6 +526,27 @@
 <section data-reckon="section" data-id="s10" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
   <p class="landed-summary">route_ids and judge_candidates add their reported Jev cost to a passed PipelineCost; the runtime replacement of candidates.call_decisions is deleted; gate 1,731 passed. <a href="s10">full record</a></p>
 </section>
+
+    <h2 id="s11">§11 — Every home: cross-IDS siblings from DD clusters</h2>
+<section data-reckon="section" data-id="s11" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> The same data is often stored in several IDSs, and the pipeline so far finds one. §4's IDS routing is a Jev Choice, which names one answer: for the plasma-current source <code>jet:dpf("da/c2e-ipla:NNN", NNN)</code> it put probability 1.0 on <code>magnetics</code> and 0 on every other IDS, so <code>equilibrium/time_slice/constraints/ip</code> and the <code>summary</code> copy never reached its shortlist. The §3 labels cannot show this loss, because each was made with one IDS fixed first, so a valid second home scores as wrong.</p>
+<p><strong>What.</strong> After the first judgment, each source's Jev top five are expanded through their cross-IDS DD clusters with <code>related_dd_search(gc, path, relationship_types="cluster")</code> (<code>imas_codex/graph/dd_search.py:606</code>), which already returns a path's siblings in other IDSs with noise categories removed. The global <em>plasma current</em> cluster, for example, holds <code>magnetics/ip</code>, <code>equilibrium/time_slice/constraints/ip</code>, <code>equilibrium/time_slice/global_quantities/ip</code>, <code>core_profiles/global_quantities/ip</code> and <code>pulse_schedule/flux_control/ip</code>. New siblings, deduplicated on path and capped at ten per source, are judged in a second Jev call with the same <code>same_quantity</code> noul. Jev answers that noul independently for each candidate, so several homes can score high, while a reconstructed or reference copy can score low. A second call is needed because the siblings depend on the first call's ranking. The IDS-routing Choice stays as the primary-IDS router.</p>
+<ul>
+<li>Each <code>MAPPING_CANDIDATE</code> edge records its <code>arm</code>, <code>retrieval</code> or <code>cluster</code>. This is declared in <code>imas_codex/schemas/facility.yaml</code> and type-checked in <code>write_candidates</code>, so §8's escalated prompt can present the siblings and §9 can count the homes found through clusters.</li>
+<li><code>route</code> returns a set. <code>Route</code> carries every selected path, and every candidate at or above the select threshold is selected, not only the best. The margin rule is removed: with several homes a near-tie is expected, and §3 found both of the top two acceptable for a fifth of the recoverable sources. Under the recommended pre-screen role no select threshold is set, so this changes only the selector role.</li>
+<li>The owner is <code>imas_codex/ids/candidates.py</code>, beside <code>retrieve_candidates</code>; <code>candidate_worker</code> (<code>imas_codex/ids/workers.py</code>) calls the expansion between <code>judge_candidates</code> and <code>route</code>, and the second call's cost joins the run's <code>PipelineCost</code>. No setting is added: the seed count (5) and the sibling cap (10) are module constants beside <code>DEFAULT_K</code>, as K is. At §3's measured $0.0002 per judged source, the second call adds about $0.50 for all 2,288 enriched JET sources.</li>
+</ul>
+<p><strong>Node</strong> <code>cross-ids-siblings</code>, role implement, 1.5 h. It runs before §8's second node, because both write <code>workers.py</code> and <code>graph_ops.py</code>.</p>
+<ul>
+<li>Write paths: <code>imas_codex/ids/candidates.py</code>, <code>imas_codex/ids/workers.py</code>, <code>imas_codex/ids/graph_ops.py</code>, <code>imas_codex/schemas/facility.yaml</code>, <code>tests/cli/test_discover_map.py</code> and <code>tests/ids/</code>.</li>
+<li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py -p no:cacheprovider</code> passes, with tests showing:<ul>
+<li>a source whose Jev top candidate is <code>magnetics/ip</code> gains that path's cross-IDS cluster siblings as candidates with arm <code>cluster</code>, judged in a second call;</li>
+<li>a sibling already in the shortlist is not duplicated, and the cap of ten holds;</li>
+<li><code>write_candidates</code> refuses an arm other than <code>retrieval</code> or <code>cluster</code>;</li>
+<li><code>route</code> marks every candidate at or above the select threshold;</li>
+<li>the second call's cost is in the run's <code>PipelineCost</code>.</li></ul>
+The negative control skips the expansion, and the sibling test must fail.</li>
+</ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -500,6 +574,24 @@
       <button class="r-opt" data-value="floor-0.1">floor 0.1: skip about a third of sources and lose about 8% of mappings</button>
       </p>
     <p class="r-dec-rat">The default is no floor, because a mapping skipped by the floor is never seen again, while an unneeded reasoning call costs cents. Revisit once §9&#x27;s JET run gives the real cost of escalating every source.</p>
+    </div>
+<div class="r-dec" data-key="home-cardinality" data-choice="every-home" data-by="Simon McIntosh" data-when="2026-10-06T22:48:21+00:00" data-sections="s8,s9,s11">
+    <p class="r-dec-q">Does a signal source map to one DD home, or to every home it has?</p>
+    <p class="r-dec-ctx">The same data is often stored in several places, in several IDSs: a measured plasma current belongs in magnetics/ip, in the measured constraint equilibrium/time_slice/constraints/ip and in summary.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="one-home">one home per source</button>
+      <button class="r-opt chosen" data-value="every-home">every home, across IDSs</button>
+      </p>
+    <p class="r-dec-rat">Maps can, and in many places should, be one to many, because the same data is stored in multiple places; a source can map to several IDSs, plasma current for example. §11 widens the shortlist across IDSs through DD clusters, §8 selects and maps a set, and §9 audits every home.</p>
+    </div>
+<div class="r-dec" data-key="target-guard" data-choice="section" data-by="Simon McIntosh" data-when="2026-10-06T22:48:21+00:00" data-sections="s8">
+    <p class="r-dec-q">What does the map stage&#x27;s target_id guard check a mapped field against?</p>
+    <p class="r-dec-ctx">On the §3 test split Jev&#x27;s top five hold the labelled section for 30 of 36 labelled sources, against 25 at node level; a Jev-ranked node is often a sibling of the field a signal fills.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="picked-node">under the picked node</button>
+      <button class="r-opt chosen" data-value="section">inside the picked node&#x27;s section</button>
+      </p>
+    <p class="r-dec-rat">The map stage chooses the fields inside a section, so a mapped field must lie inside the section (the IDS top-level ancestor) of one of the source&#x27;s selected candidates in that IDS.</p>
     </div>
 </section>
 
