@@ -55,7 +55,8 @@ data_systems:
     db_name: jt-60sa
 
 excludes:
-  directories:
+  path_prefixes:
+    - /home
     - /tmp
     - /var/tmp
     - /work/edas
@@ -135,7 +136,6 @@ data_access_patterns:
 # Discovery root paths for path discovery pipeline
 # These are seeded as starting points for directory scanning
 discovery_roots:
-  - /home                          # User home directories
   # /analysis/src is named only through its seeded subdirectories: a seed of
   # the parent itself creates a depth-0 row that walks every unseeded child.
   - /analysis/src/SAselene_v2.0_forPSRC
