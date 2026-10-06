@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="71">
+<meta name="plan-version" content="72">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -692,7 +692,10 @@
     <div class="r-comment-body"><p>Dispatched <code>cross-ids-siblings</code> (run <code>r-20261006T231514344990-cross-ids-siblings</code>) with the unreviewed-plan waiver. The stored review at version 66 covers §11 as dispatched, and its one finding was answered as acted. The only uncovered unit was §8, whose version-67 edit is that finding's fix: the claim-predicate exception and the full route-count census. A review of the current content runs before §8's next node is dispatched.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261006T231514344990-cross-ids-siblings" data-who="reckon-build" data-when="2026-10-06T23:41:25.962Z">
-    <div class="r-comment-body"><p>§11 cross-ids-siblings — each source&#x27;s Jev top five expanded through their cross-IDS DD clusters (related_dd_search, arm &quot;cluster&quot;, dedup on path, capped at ten, seed see_also filled), siblings judged in a second call booked to candidate_cluster_judgment, route.selected marks every candidate at or above the select threshold, MAPPING_CANDIDATE gains an arms property persisted and refused unless a list of strings, and the map-select-margin key with RouteThresholds.select_margin is retired; two behaviours fail closed — a failed second decisions call makes expand_cluster_siblings return None so the worker releases the claim and writes no candidates, and _candidate_arms refuses an absent arms value; gate uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider → 539 passed, 5 skipped, 1 deselected, exit 0.</p></div>
+    <div class="r-comment-body"><p>§11 cross-ids-siblings — each source's Jev top five expanded through their cross-IDS DD clusters (related_dd_search, arm "cluster", dedup on path, capped at ten, seed see_also filled), siblings judged in a second call booked to candidate_cluster_judgment, route.selected marks every candidate at or above the select threshold, MAPPING_CANDIDATE gains an arms property persisted and refused unless a list of strings, and the map-select-margin key with RouteThresholds.select_margin is retired; two behaviours fail closed — a failed second decisions call makes expand_cluster_siblings return None so the worker releases the claim and writes no candidates, and _candidate_arms refuses an absent arms value; gate uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider → 539 passed, 5 skipped, 1 deselected, exit 0.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261006T234211542380-review-of-cross-ids-siblings" data-who="reckon-build" data-when="2026-10-06T23:53:52.291Z">
+    <div class="r-comment-body"><p>§11 cross-ids-siblings reviewed at base e01cc63dc / head fe4ff84ec: independent verdict scores all six dimensions 20 (total 120), item_aggregate 6, call_site_count 3, one follow-on finding (workers.py:1011 default arms=[] bypasses the _candidate_arms refusal on the producer path), added_failure_count 0.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records neither baseline_suite nor after_suite, so this review reproduced both arms itself in scratch trees at the reviewed base (e01cc63dc, 530 passed EXIT=0) and head (fe4ff84ec, 539 passed EXIT=0); neither arm reports a FAILED id, so the head added none.",
+  "base_log_revision": "e01cc63dc0df2d1a0c3616c1fb5f3af71d5e140f",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ids/workers.py:1128 (candidate_worker calls expand_cluster_siblings between judge_candidates and route)",
+    "imas_codex/ids/workers.py:1149 (candidate_worker calls route)",
+    "imas_codex/ids/workers.py:1161 (candidate_worker calls write_candidates)"
+  ],
+  "completed_at": "2026-10-06T23:53:52.291Z",
+  "dispatched_at": "2026-10-06T23:42:19Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/workers.py",
+      "line": "1011",
+      "severity": "follow-on",
+      "text": "follow-on: `arms_by_path.get(judgment.path, [])` defaults an absent arms to an empty list, so the fail-closed refusal in _candidate_arms (graph_ops.py:470) is bypassed on the producer path; it is unreachable today because every judgment has a matching candidate, but the guard's stated rationale overstates what it protects."
+    }
+  ],
+  "head_log_revision": "fe4ff84ec374e4891aa3b88b96c18fe3dcd80057",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base e01cc63dc; three conventional commits with bodies and no AI attribution or plan identifier, 612 insertions and 108 deletions across ten files.",
+    "done_when": "the done_when names the gate `uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider`; the manifest records 539 passed and the retirement grep printing nothing, and every listed behaviour has a test in the tests/ids and tests/cli diffs.",
+    "goal": "the node's goal is to widen each source's shortlist with cross-IDS DD-cluster siblings; expand_cluster_siblings at imas_codex/ids/candidates.py:514 does exactly that.",
+    "manifest": "read; status complete, commits 78eb341f9 02193b6e2 fe4ff84ec, gate.log 539 passed EXIT=0, negative-control.log 1 failed EXIT=1; its baseline_suite and after_suite arms are empty, so this review reproduced both arms independently.",
+    "write_paths": "the diff touches ten files, every one inside the declared write paths (imas_codex/ids/candidates.py, workers.py, graph_ops.py; imas_codex/schemas/facility.yaml; imas_codex/settings.py; pyproject.toml; tests/cli/test_discover_map.py; tests/ids/test_candidate_judgment.py; tests/ids/test_candidate_persistence.py; the cross-ids-siblings evidence fragment)."
+  },
+  "justifications": {
+    "durability": "tests/ids/test_candidate_judgment.py:367 fails if the cluster arm or see_also stops being emitted, :397 if the dedup or the cap of ten changes, :419 if the second call's cost step moves, :439 if the failed second call stops returning None, and the worker-level negative control at tests/cli/test_discover_map.py:224 is what reddens when the expansion is skipped.",
+    "evidence": "the done_when gate reproduced at the reviewed head in a scratch tree (539 passed, 5 skipped, 1 deselected, EXIT=0) and at the base e01cc63dc (530 passed, 5 skipped, 1 deselected, EXIT=0); the retirement grep prints nothing; the declared negative control reddens tests/cli/test_discover_map.py:224.",
+    "fit": "the added names are mechanism-based (expand_cluster_siblings, _sibling_hit, _candidate_arms, CLUSTER_ARM/CLUSTER_SEED_COUNT/CLUSTER_SIBLING_CAP at candidates.py:66-72), the docstrings state the fail-closed contract, and no plan label or attribution appears.",
+    "goal_fidelity": "imas_codex/ids/candidates.py:514 expands each source's top CLUSTER_SEED_COUNT candidates through related_dd_search, joins siblings with CLUSTER_ARM, fills see_also, and books the second judgment to candidate_cluster_judgment, while route.selected at candidates.py:121 and the arms refusal at graph_ops.py:470 complete the section.",
+    "reuse": "expand_cluster_siblings is the one added definition the section accepts as unoffset; it reuses related_dd_search, SearchHit, Candidate, judge_candidates and write_candidates rather than forking them, and no existing owner of cross-IDS cluster expansion exists.",
+    "scope_discipline": "every one of the ten files in `git diff --stat e01cc63dc..fe4ff84ec` lies inside the node's declared orientation_write_paths, and no path outside them was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to widen each source's shortlist with cross-IDS DD-cluster siblings; expand_cluster_siblings at imas_codex/ids/candidates.py:514 does exactly that.\nVERDICT done_when: the done_when names the gate `uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider`; the manifest records 539 passed and the retirement grep printing nothing, and every listed behaviour has a test in the tests/ids and tests/cli diffs.\nVERDICT write_paths: the diff touches ten files, every one inside the declared write paths (imas_codex/ids/candidates.py, workers.py, graph_ops.py; imas_codex/schemas/facility.yaml; imas_codex/settings.py; pyproject.toml; tests/cli/test_discover_map.py; tests/ids/test_candidate_judgment.py; tests/ids/test_candidate_persistence.py; the cross-ids-siblings evidence fragment).\nVERDICT manifest: read; status complete, commits 78eb341f9 02193b6e2 fe4ff84ec, gate.log 539 passed EXIT=0, negative-control.log 1 failed EXIT=1; its baseline_suite and after_suite arms are empty, so this review reproduced both arms independently.\nVERDICT diff: read commit by commit against base e01cc63dc; three conventional commits with bodies and no AI attribution or plan identifier, 612 insertions and 108 deletions across ten files.\nCALL_SITES: imas_codex/ids/workers.py:1128 (candidate_worker calls expand_cluster_siblings between judge_candidates and route), imas_codex/ids/workers.py:1149 (candidate_worker calls route), imas_codex/ids/workers.py:1161 (candidate_worker calls write_candidates)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/ids/candidates.py:514 expands each source's top CLUSTER_SEED_COUNT candidates through related_dd_search, joins siblings with CLUSTER_ARM, fills see_also, and books the second judgment to candidate_cluster_judgment, while route.selected at candidates.py:121 and the arms refusal at graph_ops.py:470 complete the section.\nSCORE evidence: 20\nJUSTIFICATION evidence: the done_when gate reproduced at the reviewed head in a scratch tree (539 passed, 5 skipped, 1 deselected, EXIT=0) and at the base e01cc63dc (530 passed, 5 skipped, 1 deselected, EXIT=0); the retirement grep prints nothing; the declared negative control reddens tests/cli/test_discover_map.py:224.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the ten files in `git diff --stat e01cc63dc..fe4ff84ec` lies inside the node's declared orientation_write_paths, and no path outside them was touched.\nSCORE durability: 20\nJUSTIFICATION durability: tests/ids/test_candidate_judgment.py:367 fails if the cluster arm or see_also stops being emitted, :397 if the dedup or the cap of ten changes, :419 if the second call's cost step moves, :439 if the failed second call stops returning None, and the worker-level negative control at tests/cli/test_discover_map.py:224 is what reddens when the expansion is skipped.\nSCORE fit: 20\nJUSTIFICATION fit: the added names are mechanism-based (expand_cluster_siblings, _sibling_hit, _candidate_arms, CLUSTER_ARM/CLUSTER_SEED_COUNT/CLUSTER_SIBLING_CAP at candidates.py:66-72), the docstrings state the fail-closed contract, and no plan label or attribution appears.\nSCORE reuse: 20\nJUSTIFICATION reuse: expand_cluster_siblings is the one added definition the section accepts as unoffset; it reuses related_dd_search, SearchHit, Candidate, judge_candidates and write_candidates rather than forking them, and no existing owner of cross-IDS cluster expansion exists.\nFINDING imas_codex/ids/workers.py:1011 follow-on: `arms_by_path.get(judgment.path, [])` defaults an absent arms to an empty list, so the fail-closed refusal in _candidate_arms (graph_ops.py:470) is bypassed on the producer path; it is unreachable today because every judgment has a matching candidate, but the guard's stated rationale overstates what it protects.\n",
+  "review_run_id": "r-20261006T234211542380-review-of-cross-ids-siblings",
+  "reviewed_base": "e01cc63dc0df2d1a0c3616c1fb5f3af71d5e140f",
+  "reviewed_base_sha": "e01cc63dc0df2d1a0c3616c1fb5f3af71d5e140f",
+  "reviewed_commit": "fe4ff84ec374e4891aa3b88b96c18fe3dcd80057",
+  "reviewed_head_sha": "fe4ff84ec374e4891aa3b88b96c18fe3dcd80057",
+  "reviewed_run_id": "r-20261006T231514344990-cross-ids-siblings",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T23:52:55.035086+00:00",
+  "total": 120
+}
