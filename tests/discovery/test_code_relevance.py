@@ -234,7 +234,7 @@ def _run_score(monkeypatch, files, answers_by_path):
     from imas_codex.discovery.code.workers import score_worker
 
     asyncio.run(score_worker(state, on_progress=on_progress))
-    return graph, state
+    return graph, state, released
 
 
 # ---------------------------------------------------------------------------
@@ -295,21 +295,22 @@ def test_names_arm_validation_failure_leaves_file_untouched(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def test_content_arm_records_relevance_without_changing_status(monkeypatch):
+def test_content_arm_marks_scored_with_content_relevance(monkeypatch):
     path = "/analysis/src/reader.f"
     files = [_file(path, preview_text="mdsopen('jt60sa', 12345)")]
     answers = {path: _answers(0.75, 0.4, 0.2, 0.1)}
-    graph, _ = _run_score(monkeypatch, files, answers)
+    graph, _, _ = _run_score(monkeypatch, files, answers)
 
-    content_items = graph.items_for("relevance_stage = item.relevance_stage")
-    assert [item["id"] for item in content_items] == [path]
-    assert content_items[0]["relevance_stage"] == "content"
-    assert content_items[0]["relevance_loads"] == 0.75
-    # The score call itself still set status='scored' and never skipped.
-    assert graph.items_for("sf.status = 'scored'")
+    scored_items = graph.items_for("sf.status = 'scored'")
+    assert [item["id"] for item in scored_items] == [path]
+    # The description and the content relevance land in the same write, so a
+    # file that reaches 'scored' always carries a content-arm relevance.
+    assert scored_items[0]["relevance_stage"] == "content"
+    assert scored_items[0]["relevance_loads"] == 0.75
+    assert scored_items[0]["score_reason"] == "analysis helper"
 
 
-def test_content_arm_failure_leaves_file_scored_without_relevance(monkeypatch):
+def test_content_arm_failure_leaves_file_unscored_and_claimable(monkeypatch):
     path = "/analysis/src/reader.f"
     files = [_file(path, preview_text="content")]
     bad = _answers(0.9, 0.1, 0.1, 0.1)
@@ -318,11 +319,13 @@ def test_content_arm_failure_leaves_file_scored_without_relevance(monkeypatch):
         "choice": "not_a_criterion",
         "probabilities": {"diagnostic_data_access": 1.0},
     }
-    graph, _ = _run_score(monkeypatch, files, {path: bad})
+    graph, _, released = _run_score(monkeypatch, files, {path: bad})
 
-    assert graph.items_for("sf.status = 'scored'"), "the score itself still lands"
-    content_items = graph.items_for("relevance_stage = item.relevance_stage")
-    assert content_items == [], "a refused content decision writes no relevance"
+    # A failed content decision writes nothing: the file stays at its prior
+    # status, carries no content relevance, and its claim is released so the
+    # next score pass reclaims and retries it.
+    assert graph.queries == [], "a failed content decision writes nothing"
+    assert released == [path], "the file's claim is released for a later retry"
 
 
 # ---------------------------------------------------------------------------
@@ -346,10 +349,12 @@ class _IngestStub:
     def query(self, cypher, **kwargs):
         text = " ".join(cypher.split())
         if "SET sf.claimed_at" in text:
+            require_stage = "sf.relevance_stage = 'content'" in text
             eligible = [
                 r
                 for r in self.rows
                 if r["status"] == "scored"
+                and (not require_stage or r.get("relevance_stage") == "content")
                 and _relevance(r) >= kwargs["min_relevance"]
                 and r.get("line_count", 0) <= kwargs["max_line_count"]
             ]
@@ -380,9 +385,24 @@ def test_ingest_claims_highest_relevance_first_and_refuses_below_threshold(
     from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
     rows = [
-        _file("/analysis/src/low.f", status="scored", relevance_loads=0.3),
-        _file("/analysis/src/mid.f", status="scored", relevance_loads=0.7),
-        _file("/analysis/src/high.f", status="scored", relevance_loads=0.95),
+        _file(
+            "/analysis/src/low.f",
+            status="scored",
+            relevance_stage="content",
+            relevance_loads=0.3,
+        ),
+        _file(
+            "/analysis/src/mid.f",
+            status="scored",
+            relevance_stage="content",
+            relevance_loads=0.7,
+        ),
+        _file(
+            "/analysis/src/high.f",
+            status="scored",
+            relevance_stage="content",
+            relevance_loads=0.95,
+        ),
     ]
     monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: _IngestStub(rows))
 
@@ -406,7 +426,14 @@ def test_ingest_claim_orders_by_relevance_desc(monkeypatch):
             captured.append(" ".join(cypher.split()))
             return super().query(cypher, **kwargs)
 
-    rows = [_file("/analysis/src/a.f", status="scored", relevance_imas=0.8)]
+    rows = [
+        _file(
+            "/analysis/src/a.f",
+            status="scored",
+            relevance_stage="content",
+            relevance_imas=0.8,
+        )
+    ]
     monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: _Recording(rows))
 
     _claim_code_files_for_ingestion(FACILITY, limit=10, min_relevance=0.5)
@@ -414,3 +441,22 @@ def test_ingest_claim_orders_by_relevance_desc(monkeypatch):
     claim_query = next(t for t in captured if "SET sf.claimed_at" in t)
     assert "ORDER BY relevance DESC" in claim_query
     assert ">= $min_relevance" in claim_query
+
+
+def test_ingest_claim_refuses_name_stage_relevance(monkeypatch):
+    """A name-arm relevance never carries a file into ingestion."""
+    from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+
+    rows = [
+        _file(
+            "/analysis/src/nameonly.f",
+            status="scored",
+            relevance_stage="name",
+            relevance_loads=0.9,
+        )
+    ]
+    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: _IngestStub(rows))
+
+    claimed = _claim_code_files_for_ingestion(FACILITY, limit=10, min_relevance=0.5)
+
+    assert claimed == [], "a file whose relevance came from the names arm is refused"
