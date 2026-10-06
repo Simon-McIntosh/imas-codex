@@ -21,9 +21,9 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -162,140 +162,12 @@
   <p class="landed-summary">MAPPING_CANDIDATE and candidate_route declared; write_candidates replaces a source's edges and sets the route only when every edge was written, so a shortfall leaves the source unjudged; clear_candidates reports its counts; tests/ids 410 passed plus a live round trip. <a href="s6">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s7">§7 — <code>imas-codex discover map</code></h2>
-<section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      <strong>Command.</strong> <code>imas-codex discover map FACILITY</code> is the
-      discovery stage that follows <code>discover signals</code>. It is built on the shared
-      harness (<code>DiscoveryConfig</code> and <code>run_discovery</code> in
-      <code>imas_codex/cli/discover/common.py</code>) with
-      <code>domain="map"</code>, <code>model_section="mapping-candidates"</code> and no SSH
-      check. Every option reuses a name the CLI already has:
-    </p>
-    <ul>
-      <li><code>--physics-domain/-d</code> and <code>--ids/-i</code>, both repeatable, as in
-        <code>imas map run</code>. <code>--ids</code> restricts candidates to those
-        IDSs.</li>
-      <li><code>--cost-limit/-c</code> (default $5), <code>--signal-limit/-n</code> and
-        <code>--time</code>, as in <code>discover signals</code>.</li>
-    </ul>
-    <p>
-      There is no <code>--rejudge</code> and no <code>--dry-run</code>. Re-judging is
-      <code>discover clear FACILITY --domain map</code>: a new value of the existing option,
-      calling §6's <code>clear_candidates</code>. A judgment without persistence is §3's
-      prototype, not a production mode. The command adds five options, all existing names.
-      §8 retires two from <code>imas map run</code>.
-    </p>
-    <p>
-      <strong>Worker.</strong> The candidate stage is a new phase in
-      <code>imas_codex/ids/workers.py</code>, the module that already owns SignalSource
-      claiming for the mapping workflow. That module already holds the claim pattern
-      twice. This section generalises it once, and does not add a third copy.
-    </p>
-    <p>
-      The full SignalSource census has two more claim families. Both serve the
-      <em>enrichment</em> stage on <code>claimed_at</code>:
-      <code>claim_signal_sources</code>, <code>release_source_claims</code> and
-      <code>has_pending_sources</code> in <code>imas_codex/discovery/base/grouping.py</code>,
-      and their twins in <code>imas_codex/discovery/mdsplus/graph_ops.py</code>. They are a
-      different lifecycle stage with live callers in <code>discovery/static</code>, so this
-      plan leaves them unchanged. The generic routine in <code>claims.py</code> takes the label,
-      status predicate and claim property names as parameters, so those families can adopt it
-      in their own change.
-    </p>
-    <p>
-      The same claim/token pair is re-implemented across discovery, and those sites are the
-      routine's deferred adopters, recorded here so one later change can take them in a single
-      pass:
-    </p>
-    <ul>
-      <li><code>discovery/code/graph_ops.py</code> (:170, 326, 425, 512)</li>
-      <li><code>discovery/wiki/graph_ops.py</code> (:862, 938, 1678, 1763)</li>
-      <li><code>discovery/paths/frontier.py</code> (:2834, 2995)</li>
-      <li><code>discovery/signals/parallel.py</code> (:906, 1183)</li>
-      <li><code>discovery/documents/workers.py</code> (:45)</li>
-      <li><code>discovery/mdsplus/graph_ops.py</code> (:184, 730, 912, 967, 1938)</li>
-      <li><code>discovery/base/grouping.py</code> (:128)</li>
-    </ul>
-    <p>
-      This plan moves none of them, because each is a working pipeline outside its
-      product.
-    </p>
-    <ul>
-      <li><code>claim_sources_for_assignment</code> and
-        <code>claim_sources_for_mapping</code> (<code>workers.py:136, 199</code>) become one
-        claim routine.</li>
-      <li><code>release_mapping_claim</code> and <code>release_mapping_claims_batch</code>
-        (<code>274, 287</code>) become one release routine.</li>
-      <li>The three <code>has_pending_*</code> checks (<code>303, 329, 343</code>) become one
-        pending check.</li>
-      <li>Each is parameterised by the label, the status predicate, the claim property
-        names and the returned fields.</li>
-      <li>The generalised routines live in the shared owner,
-        <code>imas_codex/discovery/base/claims.py</code>, not in <code>workers.py</code>.
-        <code>release_claim</code> and <code>release_claims_batch</code> gain the
-        <code>claimed_field</code> keyword that <code>reset_stale_claims</code> already has, and
-        a <code>token_field</code> keyword that clears the claim token as well, because the
-        mapping release clears <code>mapping_claim_token</code> beside the timestamp. The
-        defaults (<code>claimed_at</code>, no token) leave every existing caller
-        unchanged. The
-        claim and pending routines are added beside them.</li>
-      <li>The seven <code>workers.py</code> helpers become calls into
-        <code>claims.py</code>, and the assign, map and candidate stages all use them.</li>
-      <li>The section adds <code>candidate_worker</code>, plus a
-        <code>run_candidate_engine</code> that uses <code>run_discovery_engine</code> with an
-        <code>OrphanRecoverySpec</code> on <code>mapping_claimed_at</code>, as
-        <code>run_mapping_engine</code> does.</li>
-      <li>The claim takes a batch of enriched sources that are unjudged, or stale under the
-        claim timeout. It keeps the <code>@retry_on_deadlock</code> + <code>ORDER BY
-        rand()</code> + claim-token pattern.</li>
-      <li>Each batch goes through <code>route_ids</code>, <code>retrieve_candidates</code>
-        (scoped to the routed IDSs), <code>judge_candidates</code>, <code>route</code> and
-        <code>write_candidates</code>, in that order. IDS routing comes first because
-        §3 measured it as the recall lift.</li>
-      <li><code>discover status FACILITY</code> gains the counts by candidate route.</li>
-    </ul>
-    <p>
-      <strong>Surface.</strong> The section adds:
-    </p>
-    <ul>
-      <li>one subcommand, <code>discover map</code>, with five options that all reuse
-        existing names;</li>
-      <li>one <code>DISCOVERY_DOMAINS</code> value, <code>map</code>
-        (<code>cli/discover/common.py:30</code>), which <code>--domain</code> validates
-        against. A <code>map</code> branch is added beside the per-domain branches in
-        <code>discover_status</code> and <code>discover_clear</code>
-        (<code>cli/discover/__init__.py</code>), because those commands dispatch on
-        explicit branches, not on the tuple.</li>
-    </ul>
-    <p>
-      Against that, seven claim helpers in <code>workers.py</code> become three, and §8
-      retires two <code>imas map run</code> options. Within the CLI-option family, §7 retires
-      nothing itself. No existing command claims SignalSources for candidate judgment, so no
-      option could absorb the five it reuses. A separate command is needed because the
-      candidate stage runs on a different cadence from mapping: it is cheap, it re-runs
-      whenever signals are re-enriched, and it costs no reasoning-model call.
-    </p>
-    <p><strong>Node</strong> <code>discover-map-cli</code>, role implement.</p>
-    <ul>
-      <li>Write paths: <code>imas_codex/cli/discover/map.py</code>,
-        <code>imas_codex/cli/discover/__init__.py</code>,
-        <code>imas_codex/ids/workers.py</code>,
-        <code>imas_codex/discovery/base/claims.py</code>,
-        <code>tests/discovery/test_claims_field.py</code> and
-        <code>tests/cli/test_discover_map.py</code>.</li>
-      <li><code>tests/discovery</code> must stay green, because 24 modules import
-        <code>claims.py</code>.</li>
-    </ul>
-    <p><strong>Done when</strong> a <code>CliRunner</code> test with fake retrieval and a fake
-      transport runs <code>discover map</code> end to end over three fixture sources, and
-      shows:</p>
-    <ul>
-      <li>one source ends in each route;</li>
-      <li>the cost limit stops the loop;</li>
-      <li><code>discover status</code> prints the route counts;</li>
-      <li><code>discover clear --domain map</code> removes them.</li>
-    </ul>
+<section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">discover map FACILITY claims enriched sources through generalised claims.py routines, runs route_ids, retrieval, judgment, route and write per source, and adds a map domain to discover status and clear; full gate 1,824 passed. <a href="s7">full record</a></p>
+</section>
 
     <h2 id="s8">§8 — <code>imas map run</code> consumes the candidates</h2>
 <section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
