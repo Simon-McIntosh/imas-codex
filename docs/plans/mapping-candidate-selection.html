@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -574,8 +574,11 @@
       <li>one subcommand, <code>discover map</code>, with five options that all reuse
         existing names;</li>
       <li>one <code>DISCOVERY_DOMAINS</code> value, <code>map</code>
-        (<code>cli/discover/common.py:30</code>), which is how <code>discover clear</code>
-        and <code>discover status</code> reach it.</li>
+        (<code>cli/discover/common.py:30</code>), which <code>--domain</code> validates
+        against. A <code>map</code> branch is added beside the per-domain branches in
+        <code>discover_status</code> and <code>discover_clear</code>
+        (<code>cli/discover/__init__.py</code>), because those commands dispatch on
+        explicit branches, not on the tuple.</li>
     </ul>
     <p>
       Against that, seven claim helpers in <code>workers.py</code> become three, and §8
@@ -623,9 +626,13 @@
         <code>target_id</code> must lie under the selected node, or be that node's
         <code>/data</code> or <code>/time</code> child. Anything else is rejected before
         persist, as an escalation.</li>
-      <li><code>MAPS_TO_IMAS</code> has two <code>MATCH</code>-gated writers today:
-        <code>persist_mapping_result</code> (<code>imas_codex/ids/models.py:580</code>) and
-        <code>create_signal_source</code> (<code>imas_codex/ids/graph_ops.py:357</code>).
+      <li><code>MAPS_TO_IMAS</code> has three <code>MATCH</code>-gated writers today:
+        <code>persist_mapping_result</code> (<code>imas_codex/ids/models.py:580</code>),
+        <code>create_signal_source</code> (<code>imas_codex/ids/graph_ops.py:357</code>)
+        and <code>run_error_derivation_only</code>
+        (<code>imas_codex/ids/mapping.py:2085</code>). <code>grep 'MERGE
+        (sg)-\[r\?e\?l\?:MAPS_TO_IMAS\]' imas_codex/</code> finds exactly these three. The
+        error-derivation writer also calls the new function.
         <ul>
           <li>The edge write moves into one function in <code>graph_ops.py</code>, beside
             §6's <code>write_candidates</code>. It checks the returned count and raises
