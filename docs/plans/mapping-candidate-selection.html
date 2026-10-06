@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -245,21 +245,57 @@
         unit, data_type, node_category, physics_domain, the parent structure's documentation,
         and the cluster label when there is one.</li>
     </ul>
-    <p><strong>Node and output.</strong></p>
+    <p><strong>Shared constraints.</strong></p>
     <ul>
-      <li>Node <code>candidate-probe</code>, role implement. It needs the live graph and the
-        decisions endpoint.</li>
       <li>Prototype scripts live in <code>~/.cache/imas-codex-jev-map/</code>, outside the
-        package, as in the JT-60SA probe. The call is <code>POST
+        package, as in the JT-60SA probe. The Jev call is <code>POST
         https://openrouter.ai/api/alpha/decisions</code> with
         <code>{model: "typesafe/jev-1.13", state, questions}</code>, keyed by
         <code>get_api_key_for_service("imas-mapping")</code>.</li>
       <li>Heavy steps run on the fleet allocation or a <code>*_debug</code> partition.</li>
-      <li>Prototype spend cap: $3.</li>
-      <li>Write paths: <code>docs/research/mapping-candidate-probe.html</code> and
-        <code>docs/figures/mapping-candidate-probe</code>. Figures: recall@K per arm, and the
-        <code>same_quantity</code> distributions for correct and incorrect pairs.</li>
+      <li>Metered spend across all three nodes is capped at $3. Labelling runs on the free
+        local route (<code>[tool.imas-codex.model-routes.ambix-local]</code>).</li>
+      <li>Each node is bounded at 60 minutes, so the measurement is three sequential
+        nodes.</li>
     </ul>
+    <p><strong>Nodes.</strong></p>
+    <ol>
+      <li><strong><code>candidate-labels</code></strong>, role implement.
+        <ul>
+          <li>It draws the sample and labels it with a script, never by hand. The labeller
+            walks the DD top-down: it chooses an IDS from the IDS names and descriptions,
+            then a node from that IDS's quantity, geometry and identifier nodes with their
+            documentation and units. That keeps it independent of every vector arm being
+            measured.</li>
+          <li>A second pass with a different model labels the 30-source subsample.</li>
+          <li>It writes <code>sample.json</code>, <code>labels.json</code>,
+            <code>labels_second.json</code> and <code>split.json</code> under
+            <code>~/.cache/imas-codex-jev-map/labels/</code>.</li>
+          <li><strong>Done when</strong> <code>labels.json</code> has one entry per sampled
+            source, each giving IMASNode ids that exist in the graph or <code>none</code>
+            with a reason, and <code>split.json</code> gives the dev/test assignment.
+            <code>agreement.json</code> states the agreement between the two passes as a
+            number.</li>
+        </ul></li>
+      <li><strong><code>candidate-retrieval-probe</code></strong>, role implement.
+        <ul>
+          <li>It computes measure 1 for every arm. It writes the K-candidate shortlists
+            and <code>recall.json</code> under
+            <code>~/.cache/imas-codex-jev-map/retrieval/</code>.</li>
+          <li><strong>Done when</strong> <code>recall.json</code> gives recall@K and the
+            returned count, per arm and per K, on the test split.</li>
+        </ul></li>
+      <li><strong><code>candidate-jev-probe</code></strong>, role implement.
+        <ul>
+          <li>It runs measures 2 to 6 on the stored shortlists, tunes wording on dev only,
+            and writes the research document.</li>
+          <li>Write paths: <code>~/.cache/imas-codex-jev-map/jev/</code>,
+            <code>docs/research/mapping-candidate-probe.html</code> and
+            <code>docs/figures/mapping-candidate-probe</code>.</li>
+          <li>Figures: recall@K per arm, and the <code>same_quantity</code> distributions
+            for correct and incorrect pairs.</li>
+        </ul></li>
+    </ol>
     <p>
       <strong>Done when</strong> the research document reports every measure above on the
       test split, with the label agreement and the frozen question text. It must also state
