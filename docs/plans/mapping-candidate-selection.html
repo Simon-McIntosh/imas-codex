@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -476,6 +476,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261006T195620087717-review-of-candidate-schema" data-who="reckon-build" data-when="2026-10-06T20:04:11.829Z">
     <div class="r-comment-body"><p>review-of-candidate-schema: stored a parsed six-dimension review of r-20261006T192612237993-candidate-schema (goal_fidelity 19, evidence 19, scope_discipline 19, durability 18, fit 18, reuse 19; total 112) read at base 2e88380d / head 72ed0f455, with two follow-on findings (route-key bool normalisation at imas_codex/ids/graph_ops.py:540; the reviewed manifest records no baseline suite arm) and no blocking finding</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261006T195542872031-candidate-judgment" data-who="reckon-build" data-when="2026-10-06T20:18:54.140Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/mapping-candidate-selection/candidate-judgment.html — the candidate stage gains route_ids, judge_candidates, route, PairJudgment and Route in imas_codex/ids/candidates.py, the [tool.imas-codex.mapping-candidates] seat (typesafe/jev-1.13, no env-var seat, mirroring discovery-relevance) and get_mapping_route_thresholds; widened gate uv run --no-sync pytest tests/ids tests/core/test_settings.py tests/llm/test_prompt_rendering.py tests/llm/test_prompt_schema_coverage.py -&gt; 491 passed, 5 skipped, exit 0.</p></div>
 </div>
 </section>
 </main>
