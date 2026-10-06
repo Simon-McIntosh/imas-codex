@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite and no after_suite gate log (its test_logs lists gate-tests.log, a 1684-passed run over tests/discovery tests/ids tests/cli/test_discover_map.py), so no base arm exists to derive the added-failure count from.",
+  "base_log_revision": null,
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:526",
+    "imas_codex/cli/discover/map.py:154",
+    "imas_codex/ids/workers.py:1302",
+    "imas_codex/discovery/base/engine.py:92"
+  ],
+  "completed_at": "2026-10-06T20:57:26.135Z",
+  "dispatched_at": "2026-10-06T20:47:46Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T202215925701-discover-map-cli/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "the tests field reports a \"regression gate: 1684 passed\" but gate-tests.log runs only tests/discovery tests/ids tests/cli/test_discover_map.py; the node's evidence fence also names tests/test_cli.py, tests/wiki/test_graph_ops_unit.py and tests/standard_names/test_atomic_refined_name_persistence.py, test_pool_orchestrator_integration.py and test_review_axis_scoped_writes.py, none of which executed, and claims.py's release_* signature change is imported widely so those targets are not irrelevant."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T202215925701-discover-map-cli/gate-tests.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the gate log's first line is the pytest session banner, so the log names no revision, tree or command and cannot be tied to 70eb1c178 without the run's stream; the review contract requires a gate log's first line to name the revision it ran at, the tree and the command."
+    },
+    {
+      "file": "imas_codex/ids/workers.py",
+      "line": "978",
+      "severity": "follow-on",
+      "text": "_capture_decisions_cost replaces imas_codex.ids.candidates.call_decisions at runtime for the duration of the candidate worker and is untested, because test_cost_limit_stops_the_loop monkeypatches _capture_decisions_cost itself, so no test reddens if the wrapper stops routing cost; the plan section 7 audit accepts this as a design defect repaired in section 10."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base 2144115d1; the single commit 70eb1c178 changes seven files (+1286/-161), generalising the claim helpers into claims.py, adding the candidate worker and engine to workers.py, adding the discover map command, and adding tests/cli/test_discover_map.py and tests/discovery/test_claims_field.py.",
+    "done_when": "the plan's done-when names a CliRunner test with fake retrieval and a fake transport over three fixture sources, and tests/cli/test_discover_map.py carries test_candidate_worker_writes_one_route_per_source (one source per route), test_cost_limit_stops_the_loop, test_status_domain_map_prints_route_counts and test_clear_domain_map_removes_candidates; I reproduced both new files green at head (13 passed).",
+    "goal": "the node's goal is to add the `discover map` candidate stage and its CLI command on section 7's generalised claim routines, and the landed diff adds claim_batch/has_pending and the claimed_field keyword on release_* in imas_codex/discovery/base/claims.py, candidate_worker/run_candidate_engine in imas_codex/ids/workers.py, and imas_codex/cli/discover/map.py with the five option names section 7 names (imas_codex/cli/discover/map.py:30-64).",
+    "manifest": "read; it records the commit, the 1684-passed gate in gate-tests.log, the negative control and its note, and a follow-on for the discarded decisions cost, but it records no baseline_suite or after_suite and its tests field does not name the gate's target set (FINDING at manifest.md:15).",
+    "write_paths": "the manifest declares seven write paths and git show --stat 70eb1c178 lists exactly those seven files, the two granted docs/evidence and docs/figures paths being absent because the done-when names no artifact."
+  },
+  "justifications": {
+    "durability": "skipping route_ids reddens test_candidate_worker_scopes_retrieval_to_routed_ids (negative-control.log, EXIT=1) against hardcoded expected IDSs, but the runtime call_decisions patch in _capture_decisions_cost is untested because test_cost_limit_stops_the_loop substitutes that wrapper (FINDING at imas_codex/ids/workers.py:978).",
+    "evidence": "I reproduced the two new test files green at head (13 passed), but the recorded gate-tests.log covers only tests/discovery tests/ids tests/cli/test_discover_map.py while the node's evidence fence also names tests/test_cli.py, tests/wiki/test_graph_ops_unit.py and three tests/standard_names files that never ran (FINDING at manifest.md:15).",
+    "fit": "the field-constant tuples, CandidateDiscoveryState and the generic routines follow the surrounding imas_codex/ids/workers.py idiom and carry no plan or ticket identifier, though replacing a module attribute at runtime is a fit smell the plan section 7 audit accepts for section 10.",
+    "goal_fidelity": "imas_codex/ids/workers.py:1053 and :1282 add candidate_worker and run_candidate_engine, imas_codex/discovery/base/claims.py:255 adds claim_batch and :335 has_pending, and imas_codex/cli/discover/map.py:30 registers the five reused option names, exactly the section 7 surface.",
+    "reuse": "workers.py's seven claim helpers now delegate to the shared owner imas_codex/discovery/base/claims.py:255 and the candidate pipeline reuses imas_codex/ids/candidates.py route_ids/retrieve_candidates/judge_candidates/route and imas_codex/ids/graph_ops.py write_candidates rather than forking them.",
+    "scope_discipline": "git show --stat 70eb1c178 lists exactly the seven files the manifest declares, imas_codex/cli/discover/common.py among them because the dispatch granted it, and the granted docs/evidence and docs/figures paths are untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 2144115d1fadc622b16e4a5ea566ae74b19274ac\nreviewed_head_sha: 70eb1c17850f6d68cc1c81f27c2a841ceacb9de2\nVERDICT goal: the node's goal is to add the `discover map` candidate stage and its CLI command on section 7's generalised claim routines, and the landed diff adds claim_batch/has_pending and the claimed_field keyword on release_* in imas_codex/discovery/base/claims.py, candidate_worker/run_candidate_engine in imas_codex/ids/workers.py, and imas_codex/cli/discover/map.py with the five option names section 7 names (imas_codex/cli/discover/map.py:30-64).\nVERDICT done_when: the plan's done-when names a CliRunner test with fake retrieval and a fake transport over three fixture sources, and tests/cli/test_discover_map.py carries test_candidate_worker_writes_one_route_per_source (one source per route), test_cost_limit_stops_the_loop, test_status_domain_map_prints_route_counts and test_clear_domain_map_removes_candidates; I reproduced both new files green at head (13 passed).\nVERDICT write_paths: the manifest declares seven write paths and git show --stat 70eb1c178 lists exactly those seven files, the two granted docs/evidence and docs/figures paths being absent because the done-when names no artifact.\nVERDICT manifest: read; it records the commit, the 1684-passed gate in gate-tests.log, the negative control and its note, and a follow-on for the discarded decisions cost, but it records no baseline_suite or after_suite and its tests field does not name the gate's target set (FINDING at manifest.md:15).\nVERDICT diff: read commit by commit against base 2144115d1; the single commit 70eb1c178 changes seven files (+1286/-161), generalising the claim helpers into claims.py, adding the candidate worker and engine to workers.py, adding the discover map command, and adding tests/cli/test_discover_map.py and tests/discovery/test_claims_field.py.\nCALL_SITES: imas_codex/cli/discover/__init__.py:526, imas_codex/cli/discover/map.py:154, imas_codex/ids/workers.py:1302, imas_codex/discovery/base/engine.py:92\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/ids/workers.py:1053 and :1282 add candidate_worker and run_candidate_engine, imas_codex/discovery/base/claims.py:255 adds claim_batch and :335 has_pending, and imas_codex/cli/discover/map.py:30 registers the five reused option names, exactly the section 7 surface.\nSCORE evidence: 16\nJUSTIFICATION evidence: I reproduced the two new test files green at head (13 passed), but the recorded gate-tests.log covers only tests/discovery tests/ids tests/cli/test_discover_map.py while the node's evidence fence also names tests/test_cli.py, tests/wiki/test_graph_ops_unit.py and three tests/standard_names files that never ran (FINDING at manifest.md:15).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat 70eb1c178 lists exactly the seven files the manifest declares, imas_codex/cli/discover/common.py among them because the dispatch granted it, and the granted docs/evidence and docs/figures paths are untouched.\nSCORE durability: 17\nJUSTIFICATION durability: skipping route_ids reddens test_candidate_worker_scopes_retrieval_to_routed_ids (negative-control.log, EXIT=1) against hardcoded expected IDSs, but the runtime call_decisions patch in _capture_decisions_cost is untested because test_cost_limit_stops_the_loop substitutes that wrapper (FINDING at imas_codex/ids/workers.py:978).\nSCORE fit: 17\nJUSTIFICATION fit: the field-constant tuples, CandidateDiscoveryState and the generic routines follow the surrounding imas_codex/ids/workers.py idiom and carry no plan or ticket identifier, though replacing a module attribute at runtime is a fit smell the plan section 7 audit accepts for section 10.\nSCORE reuse: 19\nJUSTIFICATION reuse: workers.py's seven claim helpers now delegate to the shared owner imas_codex/discovery/base/claims.py:255 and the candidate pipeline reuses imas_codex/ids/candidates.py route_ids/retrieve_candidates/judge_candidates/route and imas_codex/ids/graph_ops.py write_candidates rather than forking them.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T202215925701-discover-map-cli/manifest.md:15 follow-on: the tests field reports a \"regression gate: 1684 passed\" but gate-tests.log runs only tests/discovery tests/ids tests/cli/test_discover_map.py; the node's evidence fence also names tests/test_cli.py, tests/wiki/test_graph_ops_unit.py and tests/standard_names/test_atomic_refined_name_persistence.py, test_pool_orchestrator_integration.py and test_review_axis_scoped_writes.py, none of which executed, and claims.py's release_* signature change is imported widely so those targets are not irrelevant.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T202215925701-discover-map-cli/gate-tests.log:1 follow-on: the gate log's first line is the pytest session banner, so the log names no revision, tree or command and cannot be tied to 70eb1c178 without the run's stream; the review contract requires a gate log's first line to name the revision it ran at, the tree and the command.\nFINDING imas_codex/ids/workers.py:978 follow-on: _capture_decisions_cost replaces imas_codex.ids.candidates.call_decisions at runtime for the duration of the candidate worker and is untested, because test_cost_limit_stops_the_loop monkeypatches _capture_decisions_cost itself, so no test reddens if the wrapper stops routing cost; the plan section 7 audit accepts this as a design defect repaired in section 10.\n",
+  "review_run_id": "r-20261006T204737523734-review-of-discover-map-cli",
+  "reviewed_base_sha": "2144115d1fadc622b16e4a5ea566ae74b19274ac",
+  "reviewed_head_sha": "70eb1c17850f6d68cc1c81f27c2a841ceacb9de2",
+  "reviewed_run_id": "r-20261006T202215925701-discover-map-cli",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T20:57:57.633419+00:00",
+  "total": 108
+}

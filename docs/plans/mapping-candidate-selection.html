@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 </head>
@@ -504,6 +504,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20261006T2050-s7-audit" data-who="reckon-build" data-when="2026-10-06T20:50:00Z">
     <div class="r-comment-body"><p>Audit of <code>discover-map-cli</code> (<code>70eb1c178</code>): the gate passed with 1,684 tests, and the negative control (skipping <code>route_ids</code>) fails as declared. One design defect is accepted for now and repaired in §10: <code>_capture_decisions_cost</code> recovers Jev spend by replacing <code>candidates.call_decisions</code> at runtime. Its root cause is the §5 text, which dropped cost from the judgment API.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261006T204737523734-review-of-discover-map-cli" data-who="reckon-build" data-when="2026-10-06T20:57:26.135Z">
+    <div class="r-comment-body"><p>landing: review of discover-map-cli (run r-20261006T202215925701) stored as a parsed record scoring all six dimensions over base 2144115d1fadc622b16e4a5ea566ae74b19274ac -&gt; head 70eb1c17850f6d68cc1c81f27c2a841ceacb9de2 (goal_fidelity 20, evidence 16, scope_discipline 19, durability 17, fit 17, reuse 19; total 108), with three follow-on findings.</p></div>
 </div>
 </section>
 </main>
