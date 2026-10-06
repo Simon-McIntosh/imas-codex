@@ -39,6 +39,9 @@ import functools
 import logging
 import random
 import time
+import uuid
+from collections.abc import Mapping
+from typing import Any
 
 from neo4j.exceptions import TransientError
 
@@ -159,21 +162,33 @@ def reset_stale_claims(
     return count
 
 
-def release_claim(label: str, node_id: str) -> None:
-    """Release claim on a single node by clearing ``claimed_at``.
+def release_claim(
+    label: str,
+    node_id: str,
+    *,
+    claimed_field: str = "claimed_at",
+    token_field: str | None = None,
+) -> None:
+    """Release claim on a single node by clearing its claim timestamp.
 
     Args:
         label: Node label (e.g., ``"CodeFile"``)
         node_id: Node ID to release
+        claimed_field: Property holding the claim timestamp
+        token_field: Claim-token property to clear as well, when set
     """
     from imas_codex.graph import GraphClient
+
+    clears = [f"n.{claimed_field} = null"]
+    if token_field:
+        clears.append(f"n.{token_field} = null")
 
     try:
         with GraphClient() as gc:
             gc.query(
                 f"""
                 MATCH (n:{label} {{id: $id}})
-                SET n.claimed_at = null
+                SET {", ".join(clears)}
                 """,
                 id=node_id,
             )
@@ -181,12 +196,20 @@ def release_claim(label: str, node_id: str) -> None:
         logger.warning("Failed to release %s claim for %s: %s", label, node_id, e)
 
 
-def release_claims_batch(label: str, node_ids: list[str]) -> int:
-    """Release claims on multiple nodes by clearing ``claimed_at``.
+def release_claims_batch(
+    label: str,
+    node_ids: list[str],
+    *,
+    claimed_field: str = "claimed_at",
+    token_field: str | None = None,
+) -> int:
+    """Release claims on multiple nodes by clearing their claim timestamps.
 
     Args:
         label: Node label (e.g., ``"CodeFile"``)
         node_ids: Node IDs to release
+        claimed_field: Property holding the claim timestamp
+        token_field: Claim-token property to clear as well, when set
 
     Returns:
         Number of claims released
@@ -196,14 +219,18 @@ def release_claims_batch(label: str, node_ids: list[str]) -> int:
     if not node_ids:
         return 0
 
+    clears = [f"n.{claimed_field} = null"]
+    if token_field:
+        clears.append(f"n.{token_field} = null")
+
     try:
         with GraphClient() as gc:
             result = gc.query(
                 f"""
                 UNWIND $ids AS nid
                 MATCH (n:{label} {{id: nid}})
-                WHERE n.claimed_at IS NOT NULL
-                SET n.claimed_at = null
+                WHERE n.{claimed_field} IS NOT NULL
+                SET {", ".join(clears)}
                 RETURN count(n) AS released
                 """,
                 ids=node_ids,
@@ -212,3 +239,125 @@ def release_claims_batch(label: str, node_ids: list[str]) -> int:
     except Exception as e:
         logger.warning("Failed to release %s claims: %s", label, e)
         return 0
+
+
+# =============================================================================
+# Generic claim / pending routines
+# =============================================================================
+# Discovery domains differ only in the node label they claim, the status
+# predicate a row must satisfy, the claim property names and the fields they
+# read back. ``claim_batch`` and ``has_pending`` take exactly those as
+# arguments, so a domain's claim and has-work helpers carry no query text of
+# their own beyond their predicate.
+
+
+@retry_on_deadlock()
+def claim_batch(
+    label: str,
+    *,
+    facility: str,
+    status_predicate: str = "TRUE",
+    status_params: Mapping[str, Any] | None = None,
+    batch_size: int = 20,
+    facility_field: str = "facility_id",
+    claimed_field: str = "claimed_at",
+    token_field: str = "claim_token",
+    return_fields: str = "n.id AS id",
+    return_clause: str = "",
+    timeout_seconds: int = DEFAULT_CLAIM_TIMEOUT_SECONDS,
+) -> list[dict[str, Any]]:
+    """Claim a random batch of unclaimed or stale rows and read them back.
+
+    Sets ``claimed_field`` and ``token_field`` on up to ``batch_size`` rows
+    matching ``status_predicate`` whose claim is absent or older than
+    ``timeout_seconds``, then returns the rows carrying this call's token. The
+    token two-step verify and ``ORDER BY rand()`` are the anti-deadlock pattern
+    shared by every domain; ``retry_on_deadlock`` retries a transient error.
+
+    Args:
+        label: Node label to claim (e.g., ``"SignalSource"``).
+        facility: Facility ID the rows belong to.
+        status_predicate: Cypher predicate a row must satisfy to be claimable,
+            written against the node variable ``n``.
+        status_params: Named parameters bound by ``status_predicate``.
+        batch_size: Maximum rows to claim.
+        facility_field: Property holding the facility ID.
+        claimed_field: Property holding the claim timestamp.
+        token_field: Property holding this claim's token.
+        return_fields: ``RETURN`` projection read back for each claimed row.
+        return_clause: Optional Cypher fragment (e.g. an ``OPTIONAL MATCH``)
+            inserted between the token match and the ``RETURN``.
+        timeout_seconds: Age at which an existing claim may be reclaimed.
+
+    Returns:
+        One mapping per claimed row, projected by ``return_fields``.
+    """
+    from imas_codex.graph import GraphClient
+
+    cutoff = f"PT{timeout_seconds}S"
+    token = str(uuid.uuid4())
+    params: dict[str, Any] = {
+        "facility": facility,
+        "batch_size": batch_size,
+        "cutoff": cutoff,
+        "token": token,
+    }
+    if status_params:
+        params.update(status_params)
+
+    with GraphClient() as gc:
+        gc.query(
+            f"""
+            MATCH (n:{label} {{{facility_field}: $facility}})
+            WHERE {status_predicate}
+              AND (n.{claimed_field} IS NULL
+                   OR n.{claimed_field} < datetime() - duration($cutoff))
+            WITH n ORDER BY rand() LIMIT $batch_size
+            SET n.{claimed_field} = datetime(),
+                n.{token_field} = $token
+            """,
+            **params,
+        )
+
+        result = gc.query(
+            f"""
+            MATCH (n:{label} {{{facility_field}: $facility,
+                                 {token_field}: $token}})
+            {return_clause}
+            RETURN {return_fields}
+            """,
+            facility=facility,
+            token=token,
+        )
+        return list(result)
+
+
+def has_pending(
+    label: str,
+    *,
+    facility: str,
+    status_predicate: str = "TRUE",
+    status_params: Mapping[str, Any] | None = None,
+    facility_field: str = "facility_id",
+) -> bool:
+    """Return whether any row matching ``status_predicate`` remains unclaimed-upon.
+
+    The predicate carries no claim clause: it names the work state itself, so
+    the answer is independent of which rows currently hold a claim.
+    """
+    from imas_codex.graph import GraphClient
+
+    params: dict[str, Any] = {"facility": facility}
+    if status_params:
+        params.update(status_params)
+
+    with GraphClient() as gc:
+        result = gc.query(
+            f"""
+            MATCH (n:{label} {{{facility_field}: $facility}})
+            WHERE {status_predicate}
+            RETURN count(n) > 0 AS has_work
+            """,
+            **params,
+        )
+        return result[0]["has_work"] if result else False

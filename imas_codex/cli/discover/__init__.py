@@ -79,6 +79,29 @@ def discover():
 # =============================================================================
 
 
+def _print_candidate_status(facility: str, use_rich: bool) -> None:
+    """Print the candidate-route counts for a facility."""
+    from imas_codex.ids.workers import count_candidates_by_route
+
+    counts = count_candidates_by_route(facility)
+    if not counts:
+        click.echo(f"No candidate data for {facility}")
+        return
+
+    if use_rich:
+        table = Table(title=f"Candidate Routes: {facility}")
+        table.add_column("Route")
+        table.add_column("Sources", justify="right")
+        for route, count in sorted(counts.items()):
+            table.add_row(route, str(count))
+        Console().print(table)
+        return
+
+    click.echo(f"Candidate Routes: {facility}")
+    for route, count in sorted(counts.items()):
+        click.echo(f"  {route}: {count}")
+
+
 @discover.command("status")
 @click.argument("facility")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
@@ -134,11 +157,19 @@ def discover_status(facility: str, as_json: bool, domain: str | None) -> None:
                 file_stats = get_code_discovery_stats(facility)
                 output["code"] = file_stats
 
+            if domain is None or domain == "map":
+                from imas_codex.ids.workers import count_candidates_by_route
+
+                output["map"] = count_candidates_by_route(facility)
+
             click.echo(json_module.dumps(output, indent=2))
         else:
             from imas_codex.discovery.paths.progress import print_discovery_status
 
-            print_discovery_status(facility, use_rich=use_rich, domain=domain)
+            if domain == "map":
+                _print_candidate_status(facility, use_rich)
+            else:
+                print_discovery_status(facility, use_rich=use_rich, domain=domain)
 
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
@@ -243,6 +274,20 @@ def discover_clear(facility: str, force: bool, domain: str | None) -> None:
                     ("documents", doc_total, clear_facility_documents)
                 )
 
+        # Map domain (candidate routes)
+        if domain is None or domain == "map":
+            from imas_codex.cli.discover.map import clear_facility_candidates
+            from imas_codex.ids.workers import count_candidates_by_route
+
+            route_counts = count_candidates_by_route(facility)
+            judged = sum(
+                count for route, count in route_counts.items() if route != "pending"
+            )
+            if judged > 0:
+                items_to_clear.append(
+                    ("candidate routes", judged, clear_facility_candidates)
+                )
+
         if not items_to_clear:
             domain_msg = f" {domain}" if domain else ""
             click.echo(f"No{domain_msg} discovery data to clear for {facility}")
@@ -286,6 +331,8 @@ def _print_clear_result(name: str, result: dict | int, facility: str) -> None:
             "users_deleted",
             "versions_deleted",
             "nodes_deleted",
+            "edges_removed",
+            "routes_reset",
         ):
             if result.get(key):
                 label = key.replace("_deleted", "").replace("_", " ")
@@ -466,6 +513,7 @@ def discover_inspect(facility: str, scanned: int, scored: int, as_json: bool) ->
 # `discover paths tcv` runs paths discovery directly (no subgroup).
 from imas_codex.cli.discover.code import code  # noqa: E402
 from imas_codex.cli.discover.documents import documents  # noqa: E402
+from imas_codex.cli.discover.map import map_candidates  # noqa: E402
 from imas_codex.cli.discover.paths import paths  # noqa: E402
 from imas_codex.cli.discover.signals import signals  # noqa: E402
 from imas_codex.cli.discover.wiki import wiki  # noqa: E402
@@ -475,3 +523,4 @@ discover.add_command(wiki)
 discover.add_command(signals)
 discover.add_command(code)
 discover.add_command(documents)
+discover.add_command(map_candidates)
