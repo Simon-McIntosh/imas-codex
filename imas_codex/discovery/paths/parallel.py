@@ -231,8 +231,8 @@ def has_pending_work(facility: str) -> bool:
                  CASE WHEN p.is_enriched = true
                       AND p.scored_at IS NULL
                       THEN 'score' ELSE null END AS rsc
-            WHERE disc IS NOT NULL OR scn IS NOT NULL OR exp IS NOT NULL
-                  OR enr IS NOT NULL OR rsc IS NOT NULL
+            WHERE (disc IS NOT NULL OR scn IS NOT NULL OR exp IS NOT NULL
+                   OR enr IS NOT NULL OR rsc IS NOT NULL)
                   {excluded_clause}
             RETURN count(p) AS pending,
                    count(disc) AS pending_discovered,

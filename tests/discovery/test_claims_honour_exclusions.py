@@ -141,6 +141,18 @@ class RecordingStub(StubGraphClient):
         return []
 
 
+class CypherRecorder(StubGraphClient):
+    """Capture the rendered query text as well as the bound parameters."""
+
+    def __init__(self, rows):
+        super().__init__(rows)
+        self.queries = []
+
+    def query(self, cypher, **kwargs):
+        self.queries.append((" ".join(cypher.split()), kwargs))
+        return super().query(cypher, **kwargs)
+
+
 def _path(path, **extra):
     row = {"id": path, "facility_id": FACILITY, "path": path, "depth": 0}
     row.update(extra)
@@ -226,3 +238,57 @@ def test_claim_excludes_exactly_the_path_prefix_family():
     rows = [_code_file(path) for path in samples]
     claimed = _call(claim_files_for_triage, rows, GRAPH_OPS, limit=10)
     assert [c["path"] for c in claimed] == expected
+
+
+EXCLUSION_MARKER = "none(excluded IN $excluded_prefixes"
+
+
+def _rendered_exclusion_query(module, name, target, extra):
+    fn = getattr(importlib.import_module(module), name)
+    recorder = CypherRecorder([_rows_for(module)(OUTSIDE_PREFIX + "/b")])
+    with (
+        patch(DOC_CFG, return_value=_exclusion_config([EXCLUDED_PREFIX])),
+        patch(target, return_value=recorder),
+    ):
+        fn(FACILITY, **extra)
+    marked = [text for text, _ in recorder.queries if EXCLUSION_MARKER in text]
+    assert marked, f"{name} rendered no exclusion clause at all"
+    return marked[0]
+
+
+def _predicate_governing_exclusion(text):
+    idx = text.index(EXCLUSION_MARKER)
+    where = text.rindex("WHERE ", 0, idx)
+    return text[where + len("WHERE ") : idx]
+
+
+def _has_top_level_or(expr):
+    depth = 0
+    upper = expr.upper()
+    for i, ch in enumerate(expr):
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        elif depth == 0 and upper.startswith(" OR ", i):
+            return True
+    return False
+
+
+@pytest.mark.parametrize("module,name,target,extra", CLAIM_CASES + PREDICATE_CASES)
+def test_exclusion_clause_is_anded_onto_the_whole_predicate(
+    module, name, target, extra
+):
+    """The exclusion must bind the whole predicate, never one disjunct.
+
+    Cypher binds AND tighter than OR, so an exclusion clause appended after an
+    unparenthesised disjunction applies only to the last disjunct. A row filter
+    cannot see this: it reads the parameters, not where the clause sits. This
+    reads the rendered text and requires no top-level OR before the clause.
+    """
+    text = _rendered_exclusion_query(module, name, target, extra)
+    expr = _predicate_governing_exclusion(text)
+    assert not _has_top_level_or(expr), (
+        f"{name} leaves a top-level OR in front of the exclusion clause, so the "
+        f"clause binds only the final disjunct: {expr!r}"
+    )
