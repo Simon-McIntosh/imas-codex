@@ -26,10 +26,21 @@
     key, <code>RouteThresholds.select_margin</code> and its read in
     <code>get_mapping_route_thresholds</code> are gone.
   </p>
+  <p id="cross-ids-siblings-fail-closed">
+    Two behaviours fail closed. A failed second decisions call makes
+    <code>expand_cluster_siblings</code> return <code>None</code>: the siblings
+    exist but were never scored, so <code>candidate_worker</code> releases the
+    claim and writes no candidates, leaving the source unjudged for a retry
+    rather than recording it as fully judged on its first-call candidates alone;
+    the empty-pair return is kept only for the genuine no-sibling case.
+    <code>_candidate_arms</code> refuses an absent <code>arms</code> value
+    instead of defaulting it to empty, because the only producer always emits
+    it and an absent value means provenance was dropped.
+  </p>
   <table id="cross-ids-siblings-gate">
     <thead><tr><th>check</th><th>result</th></tr></thead>
     <tbody>
-      <tr><td><code>uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider</code></td><td>537 passed, 5 skipped, 1 deselected, exit 0</td></tr>
+      <tr><td><code>uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider</code></td><td>539 passed, 5 skipped, 1 deselected, exit 0</td></tr>
       <tr><td><code>grep -rn 'select_margin\|select-margin' imas_codex/ pyproject.toml</code></td><td>prints nothing</td></tr>
       <tr><td>negative control — skip the cluster expansion in <code>candidate_worker</code></td><td>1 failed (<code>test_candidate_worker_adds_cluster_siblings_and_books_the_second_call</code>), exit 1</td></tr>
     </tbody>
@@ -43,12 +54,15 @@
     <code>$2.0e-4</code> lands under <code>candidate_cluster_judgment</code> in
     the run's <code>PipelineCost</code>. <code>route</code> marks every
     candidate at or above the select threshold in
-    <code>Route.selected</code>.
+    <code>Route.selected</code>, and that a failed second call returns
+    <code>None</code>.
     <code>tests/ids/test_candidate_persistence.py</code> shows
     <code>write_candidates</code> persists each record's <code>arms</code> and
-    refuses a bare string or a list of non-strings.
+    refuses a bare string, a list of non-strings, and an absent
+    <code>arms</code> value.
     <code>tests/cli/test_discover_map.py</code> drives the worker to add a
     cluster-armed sibling that reaches the select threshold, routes it, and
-    books the second call's cost.
+    books the second call's cost, and separately drives a failing second call
+    to release the claim with no route and no records written.
   </p>
 </section>
