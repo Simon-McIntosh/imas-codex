@@ -1,0 +1,45 @@
+<section id="seed-keeps-existing-rows-record">
+  <h3>Root seeding is create-only, so an existing root keeps its state</h3>
+  <p id="seed-keeps-existing-rows-landing">
+    <code>seed_facility_roots</code> built every root as a fresh
+    <code>discovered</code> depth-0 row and wrote it through
+    <code>GraphClient.create_nodes</code>, whose <code>MERGE ... SET</code>
+    upsert reset the status, scores and timestamps of a root already scored by
+    an earlier run. When a scoped <code>--root</code> run named the three
+    equilibrium tree roots, they went from <code>scored</code> (0.45, 0.60,
+    0.75) back to <code>discovered</code>, and no later run would claim them
+    again.
+  </p>
+  <p id="seed-keeps-existing-rows-change">
+    <code>create_nodes</code> gains a <code>create_only</code> option, off by
+    default, that scopes the property write to the creation event via
+    <code>ON CREATE SET</code>; relationship creation is unchanged.
+    <code>seed_facility_roots</code> writes its canonical and alias rows with
+    it, so every caller of the seed — the <code>--root</code> seed in
+    <code>imas_codex/cli/discover/paths.py</code>, the empty-graph startup seed
+    and <code>imas_codex/discovery/paths/parallel.py</code> — is additive.
+    <code>seed_missing_roots</code>, whose pre-query of existing paths only
+    worked around the overwrite, is retired with its exports in
+    <code>imas_codex/discovery/__init__.py</code> and
+    <code>imas_codex/discovery/paths/__init__.py</code>; <code>--add-roots</code>
+    now calls <code>seed_facility_roots(facility)</code>.
+    <code>create_child_paths</code>, which carried the same overwriting write
+    with no live caller, is deleted. Reprocessing an existing root is left to
+    <code>--reset-to</code>.
+  </p>
+  <p id="seed-keeps-existing-rows-measure">
+    Gate: <code>uv run pytest tests/discovery tests/graph</code> — 1728 passed,
+    4 failed, 357 deselected (EXIT=1). The four failures are pre-existing and
+    unrelated: the same ids fail identically at the base revision
+    <code>b49186d103</code> against base source in a scratch tree, so added
+    failures read 0. The change's own seven tests
+    (<code>tests/graph/test_create_nodes_create_only.py</code>,
+    <code>tests/discovery/test_seed_existing_roots.py</code>) pass: 7 passed.
+  </p>
+  <p id="seed-keeps-existing-rows-negative-control">
+    Negative control — the existing-root seed test against a copy whose seed
+    writes without the create-only option — <code>1 failed</code> (EXIT=1),
+    first failure <code>assert 'discovered' == 'scored'</code> on the root's
+    status. Log: <code>negative-control-seed-without-create-only.log</code>.
+  </p>
+</section>
