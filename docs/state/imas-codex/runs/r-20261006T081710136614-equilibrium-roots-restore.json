@@ -1,0 +1,572 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3841102,
+      "input_tokens_cumulative": 3841102,
+      "output_tokens": 17915,
+      "output_tokens_cumulative": 17915,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 151,
+    "files": 3,
+    "removed": 1
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 414,
+        "name": "test_build_device_xml_context_query_uses_section_metadata",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "test_reset_signals_discovered",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 153
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "test_reset_signals_discovered",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 153
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_parent_and_exact_derived_source_are_claim_and_identity_fenced",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "test_reset_signals_discovered",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 153
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "test_reset_signals_discovered",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 153
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_reconcile_reports_changed_rows_and_then_no_changes",
+        "path": "tests/standard_names/test_fit_artifact_reconcile.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "test_reset_signals_discovered",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 153
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_durable_and_source_backed_names_are_excluded",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "test_reset_signals_discovered",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 153
+    },
+    {
+      "existing_function": {
+        "line": 266,
+        "name": "test_scanned_reset_renders_the_stranded_row_predicate",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 160,
+        "name": "test_reset_paths_triaged",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 162
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_scanned_reset_excludes_never_scanned_discovered_rows",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 216,
+        "name": "test_reset_paths_clears_expanded_at_in_query",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 218
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_reset_without_source_filter_keeps_plain_status_match",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 216,
+        "name": "test_reset_paths_clears_expanded_at_in_query",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 218
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_reset_paths_triaged",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 266,
+        "name": "test_scanned_reset_renders_the_stranded_row_predicate",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 269
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_reset_paths_clears_expanded_at_in_query",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 283,
+        "name": "test_scanned_reset_excludes_never_scanned_discovered_rows",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 286
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_reset_without_source_filter_keeps_plain_status_match",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 283,
+        "name": "test_scanned_reset_excludes_never_scanned_discovered_rows",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 286
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_reset_paths_clears_expanded_at_in_query",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "test_reset_without_source_filter_keeps_plain_status_match",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_scanned_reset_excludes_never_scanned_discovered_rows",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "test_reset_without_source_filter_keeps_plain_status_match",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "window_line": 300
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "fb6736d0e769d6ba69c43a713d214eb11c84add5",
+    "61b5141b39cf1697c91ee55f49a11b42c8c2c88a",
+    "b951e16db0bdbfc89e2387f40de50549363ff157"
+  ],
+  "completed_at": "2026-10-06T09:16:24.583Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T08:17:16Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest tests/discovery",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T081710136614-equilibrium-roots-restore/gate-head-coordinator.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-06T09:17:10.870652+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-06T08:17:10Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 29,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 160000,
+    "observed_at": "2026-10-06T08:16:41Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 29,
+      "aggregate_tokens_per_second": 186.275,
+      "detail": "",
+      "mean_tokens_per_second": 116.422,
+      "observed_at": "2026-10-06T08:16:41Z",
+      "runs": 1.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T09:16:24.583Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T081710136614-equilibrium-roots-restore/manifest.md",
+  "member": "disposable-r-20261006T081710136614-equilibrium-roots-restore",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_reset.py::TestResetSpec::test_path_scanned_reset_admits_only_stranded_discovered_rows",
+      "tests/discovery/test_reset.py::TestResetToStatus::test_scanned_reset_excludes_never_scanned_discovered_rows",
+      "tests/discovery/test_reset.py::TestResetToStatus::test_scanned_reset_renders_the_stranded_row_predicate"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_reset.py::TestResetSpec::test_path_scanned_reset_admits_only_stranded_discovered_rows",
+      "tests/discovery/test_reset.py::TestResetToStatus::test_scanned_reset_excludes_never_scanned_discovered_rows",
+      "tests/discovery/test_reset.py::TestResetToStatus::test_scanned_reset_renders_the_stranded_row_predicate"
+    ],
+    "declaration": "a Cypher count of rows among the three roots at discovered with a non-null triage_composite reads 3 before the work and 0 after the second run",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T081710136614-equilibrium-roots-restore/negative_control_predicate_removed.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T081710136614-equilibrium-roots-restore/negative_control_predicate_removed.log",
+    "test_paths": [
+      "tests/discovery/test_reset.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "equilibrium-roots-restore",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 502,
+          "cached_input_tokens": 543190,
+          "input_tokens": 543694,
+          "output_tokens": 768,
+          "reasoning_output_tokens": 105,
+          "total_tokens": 544462,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "per §14's root-restore node: before any remote call the fenced-worker ssh wrapper from AGENTS.md is on PATH and ssh -o BatchMode=yes jt-60sa hostname answers; Cypher before the work shows /analysis/src/client_eqdbms.EQ32.Rev1, /analysis/src/SAeqfame and /analysis/src/getseldata_v4.2 at discovered with a non-null triage_composite; the three roots are reset through an existing path reset spec scoped by --root that clears their triage, and a spec's source statuses in imas_codex/discovery/base/reset.py are extended with a test in tests/discovery/test_reset.py only if no existing spec reaches such a row; uv run imas-codex discover paths jt-60sa --root /analysis/src/client_eqdbms.EQ32.Rev1 --root /analysis/src/SAeqfame --root /analysis/src/getseldata_v4.2 --time 15 runs in the foreground and all three roots end at scored through the pipeline, never by a hand-written status; a second identical run then leaves all three at scored with their scores unchanged; the count of jt-60sa rows outside the three trees whose status changed across both runs reads 0; spend is $0; the fragment records the before and after states, both run logs and their Cost lines; never --add-roots or --root /analysis/src",
+    "estimated_hours": null,
+    "goal": "Bring the three equilibrium tree roots back to scored through the scoped paths pipeline",
+    "id": "equilibrium-roots-restore",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-06T08:17:10Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 29,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 160000,
+      "observed_at": "2026-10-06T08:16:41Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 29,
+        "aggregate_tokens_per_second": 186.275,
+        "detail": "",
+        "mean_tokens_per_second": 116.422,
+        "observed_at": "2026-10-06T08:16:41Z",
+        "runs": 1.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T081710136614-equilibrium-roots-restore/manifest.md",
+    "negative_control": "a Cypher count of rows among the three roots at discovered with a non-null triage_composite reads 3 before the work and 0 after the second run",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§14",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/base/reset.py",
+      "tests/discovery/test_reset.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-roots-restore.html",
+      "docs/figures/jt60sa-discovery-completion/equilibrium-roots-restore"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1018696.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "equilibrium-roots-restore",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T08:17:12.386028+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.403,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b951e16db0bdbfc89e2387f40de50549363ff157",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+    "reviewed_head_sha": "b951e16db0bdbfc89e2387f40de50549363ff157",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 20,
+      "goal_fidelity": 18,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 111
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T081710136614-equilibrium-roots-restore",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§14",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "d85350f7-826d-42d9-bd7f-8ab8149add56",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10631718,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 590.884,
+    "generated_tokens": 74966,
+    "generation_seconds": 359.891,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.7,
+    "machine_seconds": 230.993,
+    "peak_input_tokens": 176408,
+    "tokens_per_second": 208.3,
+    "wall_tokens_per_second": 126.87
+  },
+  "time_budget": "60m",
+  "tool_steps": 57.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3548,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T09:16:28Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T09:06:27Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T081710136614-equilibrium-roots-restore",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 15485,
+    "worker_pid": 1518563
+  },
+  "worker_seconds": 3532,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
