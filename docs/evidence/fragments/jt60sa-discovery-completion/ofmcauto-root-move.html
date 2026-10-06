@@ -1,0 +1,24 @@
+<section>
+  <h2 id="ofmcauto-root-move">The stale public discovery root ofmcauto is repointed to its moved host location</h2>
+  <p id="ofmcauto-root-move-change">
+    In <code>imas_codex/config/facilities/jt-60sa.yaml</code> the public
+    <code>discovery_roots</code> entry <code>/analysis/src/ofmcauto</code> no
+    longer exists on the host; the tree moved to
+    <code>/analysis/src/OFMC/ofmcauto</code>. That one entry is replaced with
+    the moved path. No other line changes.
+  </p>
+  <p id="ofmcauto-root-move-host">
+    Confirmed on the host with one <code>ls -ld</code> through the fenced-worker
+    ssh wrapper (<code>ssh -o BatchMode=yes jt-60sa hostname</code> answers
+    <code>intr26-2</code>):
+    <code>drwxr-xr-x+ 10 h060029 g1053 4608 Oct  6 14:20 /analysis/src/OFMC/ofmcauto</code>.
+    The stale path answers <code>ls: cannot access '/analysis/src/ofmcauto': No such file or directory</code>.
+  </p>
+  <p id="ofmcauto-root-move-gate">
+    Gate <code>uv run pytest tests/config/test_facility_config_compliance.py</code>
+    exits 0: <code>29 passed, 2 warnings in 1.04s</code>. No discover run and no
+    graph write. Negative control:
+    <code>git show HEAD:imas_codex/config/facilities/jt-60sa.yaml | grep -c '/analysis/src/ofmcauto$'</code>
+    reads 1 at the base and 0 after the commit.
+  </p>
+</section>

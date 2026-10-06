@@ -142,7 +142,7 @@ discovery_roots:
   - /analysis/src/SAeqread
   - /analysis/src/edas2
   - /analysis/src/ECCD
-  - /analysis/src/ofmcauto
+  - /analysis/src/OFMC/ofmcauto
   - /analysis/src/topics_release
   - /analysis/src/easy-v5.01
   - /analysis/src/eagle-v4.05
