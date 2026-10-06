@@ -1,0 +1,19 @@
+<section>
+  <h2 id="sync-local-route">The synchronous structured call routes local models to the local client</h2>
+  <p id="sync-local-route-landing">
+    One predicate in <code>imas_codex/discovery/base/llm.py</code> reads
+    <code>_LOCAL_CLIENT_MODEL_PREFIXES</code> (declared beside
+    <code>_LOCAL_MODEL_PREFIXES</code>) and replaces the three inline
+    <code>startswith(("local/", "hosted_vllm/"))</code> tests in
+    <code>_build_kwargs</code>, <code>acall_llm_structured</code> and
+    <code>_acall_frozen_structured_transport</code>. The request translation is
+    one shared function; <code>_completion_local</code> and its cached
+    synchronous <code>OpenAI</code> client per <code>api_base</code> sit beside
+    the async pair, and <code>call_llm_structured</code> routes local models
+    through it. Gate <code>tests/discovery tests/llm
+    tests/core/test_settings.py</code> exits <strong>0</strong> (1458 passed);
+    a local id reaches the synchronous local client and an OpenRouter id
+    reaches litellm; the live check reaches the local endpoint at zero recorded
+    cost.
+  </p>
+</section>
