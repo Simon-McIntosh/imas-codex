@@ -65,9 +65,9 @@ class TriageItem:
     """Current triage activity."""
 
     path: str
-    triage_composite: float | None = None  # CodeFile.triage_composite
-    category: str = ""  # top scoring dimension (modeling, analysis, imas, etc.)
-    description: str = ""  # LLM description of what the file contains
+    relevance: float | None = None  # CodeFile name-arm relevance
+    category: str = ""  # role (diagnostic_data_access, signal_processing, ...)
+    description: str = ""  # role the decision chose for the file
     skipped: bool = False
 
 
@@ -87,7 +87,7 @@ class EnrichItem:
     """Current enrich activity."""
 
     path: str
-    triage_composite: float | None = None  # CodeFile.triage_composite
+    relevance: float | None = None  # CodeFile name-arm relevance
     patterns: int = 0  # total pattern matches
     line_count: int = 0  # lines of code
     pattern_categories: dict[str, int] = field(
@@ -430,8 +430,8 @@ class FileProgressDisplay(BaseProgressDisplay):
                 triage_terminal = "skip"
                 if triage.description:
                     triage_desc = clean_text(triage.description)
-            elif triage.triage_composite is not None:
-                triage_score_parts = [(f"{triage.triage_composite:.2f}", "bold green")]
+            elif triage.relevance is not None:
+                triage_score_parts = [(f"{triage.relevance:.2f}", "bold green")]
                 if triage.category:
                     triage_category = triage.category.replace("_", " ")
                 if triage.description:
@@ -443,8 +443,8 @@ class FileProgressDisplay(BaseProgressDisplay):
         enrich_score_parts: list[tuple[str, str]] | None = None
         if enrich:
             enrich_text = enrich.path
-            if enrich.triage_composite is not None:
-                enrich_score_parts = [(f"{enrich.triage_composite:.2f}", "bold green")]
+            if enrich.relevance is not None:
+                enrich_score_parts = [(f"{enrich.relevance:.2f}", "bold green")]
             desc_parts = []
             if enrich.line_count > 0:
                 desc_parts.append(f"{format_count(enrich.line_count)} LOC")
@@ -739,7 +739,7 @@ class FileProgressDisplay(BaseProgressDisplay):
             items = [
                 TriageItem(
                     path=r.get("path", ""),
-                    triage_composite=r.get("triage_composite"),
+                    relevance=r.get("relevance"),
                     category=r.get("category", ""),
                     description=r.get("description", ""),
                     skipped=r.get("skipped", False),
@@ -827,7 +827,7 @@ class FileProgressDisplay(BaseProgressDisplay):
             items = [
                 EnrichItem(
                     path=r.get("path", ""),
-                    triage_composite=r.get("triage_composite"),
+                    relevance=r.get("relevance"),
                     patterns=r.get("patterns", 0),
                     line_count=r.get("line_count", 0),
                     pattern_categories=r.get("pattern_categories", {}),
@@ -968,7 +968,7 @@ class FileProgressDisplay(BaseProgressDisplay):
         """Refresh totals from graph database."""
         from imas_codex.discovery.code.parallel import get_code_discovery_stats
 
-        stats = get_code_discovery_stats(facility, min_score=self.min_score)
+        stats = get_code_discovery_stats(facility)
         self.state.total = stats["total"]
         self.state.discovered = stats["discovered"]
         self.state.triaged_count = stats["triaged"]

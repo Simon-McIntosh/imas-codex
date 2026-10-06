@@ -275,6 +275,13 @@ threshold = 0.90
 # triage_threshold = threshold - triage-offset (default: 0.90 - 0.15 = 0.75).
 # Override: IMAS_CODEX_TRIAGE_THRESHOLD
 triage-offset = 0.15
+# Code-relevance gates through the decisions (Jev) model, as a maximum over
+# the four scope probabilities (loads, processes, describes, maps_to_imas).
+# code-triage-threshold is the names-arm pass gate; code-ingest-threshold is
+# the content-arm ingest gate. Overrides: IMAS_CODEX_CODE_TRIAGE_THRESHOLD,
+# IMAS_CODEX_CODE_INGEST_THRESHOLD.
+code-triage-threshold = 0.4
+code-ingest-threshold = 0.5
 
 [tool.imas-codex.logs]
 # Where CLI commands run and write logs.

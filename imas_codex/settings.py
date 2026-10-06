@@ -1028,6 +1028,35 @@ def get_triage_threshold() -> float:
     return get_discovery_threshold() - offset
 
 
+def get_code_triage_threshold() -> float:
+    """Get the minimum Jev relevance for a code file to pass triage.
+
+    Code triage asks a decisions model (Jev) for typed judgements and takes
+    the largest of the four scope probabilities as the file's relevance. A
+    file passes when its relevance reaches this threshold.
+
+    Priority: IMAS_CODEX_CODE_TRIAGE_THRESHOLD env →
+    [discovery].code-triage-threshold → 0.4.
+    """
+    if env := os.getenv("IMAS_CODEX_CODE_TRIAGE_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("code-triage-threshold", 0.4))
+
+
+def get_code_ingest_threshold() -> float:
+    """Get the minimum content-arm Jev relevance for a code file to be ingested.
+
+    The ingest claim admits a scored file whose content-arm relevance reaches
+    this threshold, and claims the highest relevance first.
+
+    Priority: IMAS_CODEX_CODE_INGEST_THRESHOLD env →
+    [discovery].code-ingest-threshold → 0.5.
+    """
+    if env := os.getenv("IMAS_CODEX_CODE_INGEST_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("code-ingest-threshold", 0.5))
+
+
 # ─── Log settings ──────────────────────────────────────────────────────────
 
 

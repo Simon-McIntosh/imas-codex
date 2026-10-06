@@ -210,51 +210,61 @@ async def triage_worker(
     state: FileDiscoveryState,
     on_progress: Callable | None = None,
     batch_size: int = 50,
+    concurrency: int = 8,
 ) -> None:
-    """Triage worker: Per-dimension LLM triage of discovered CodeFiles.
+    """Triage worker: names-arm relevance judgement of discovered CodeFiles.
 
-    Claims CodeFiles with status='discovered', groups by parent
-    FacilityPath for batch context, calls LLM for per-dimension triage
-    scores.  Files scoring above a composite threshold are set to
-    status='triaged'; below threshold → status='skipped'.
+    Claims discovered CodeFiles, builds each file's decision state (path,
+    language, directory, directory description, sibling names and the
+    facility's data-access patterns) and asks the decisions model the six
+    triage questions.  A file whose relevance -- the largest of the four scope
+    probabilities -- reaches the triage threshold becomes status='triaged' and
+    proceeds to enrichment; the rest become status='skipped' with a skip reason
+    naming their role and probabilities.
+
+    Concurrency is bounded so the decisions endpoint is never asked for more
+    than ``concurrency`` judgements at once.  A decisions failure leaves the
+    file at its status and unclaimed so a later pass retries it (fail closed).
     """
-    from imas_codex.discovery.base.llm import call_llm_structured
+    import time as _time
+
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.llm import acall_decisions
     from imas_codex.discovery.code.graph_ops import (
         claim_files_for_triage,
         release_file_triage_claims,
     )
     from imas_codex.discovery.code.scorer import (
-        FileTriageBatch,
-        _build_triage_system_prompt,
-        _build_triage_user_prompt,
         _group_files_by_parent,
         apply_triage_results,
+        build_triage_questions,
+        build_triage_state,
+        triage_relevance,
     )
-    from imas_codex.settings import get_model, get_reasoning_effort
+    from imas_codex.settings import get_code_triage_threshold, get_model
 
-    model = get_model("discovery-triage")
+    model = get_model("discovery-relevance")
+    questions = build_triage_questions()
+    threshold = get_code_triage_threshold()
+    try:
+        facility_config = get_facility(state.facility)
+    except Exception as exc:  # noqa: BLE001 - absent facility block is data, not a crash
+        logger.warning("triage_worker: facility config unavailable: %s", exc)
+        facility_config = {}
 
-    import time as _time
+    semaphore = asyncio.Semaphore(concurrency)
 
-    _prompt_built_at = _time.monotonic()
-    _PROMPT_REBUILD_INTERVAL = 60.0
-
-    triage_system_prompt = _build_triage_system_prompt(
-        facility=state.facility, focus=state.focus
-    )
+    async def judge(row: dict[str, Any]):
+        async with semaphore:
+            return await acall_decisions(
+                model, row, questions, service="facility-discovery"
+            )
 
     while not state.should_stop():
         if state.budget_exhausted:
             if on_progress:
                 on_progress("budget exhausted", state.triage_stats, None)
             break
-
-        # Rebuild system prompt periodically (picks up new calibration)
-        if (_time.monotonic() - _prompt_built_at) > _PROMPT_REBUILD_INTERVAL:
-            triage_system_prompt = _build_triage_system_prompt(
-                facility=state.facility, focus=state.focus
-            )
-            _prompt_built_at = _time.monotonic()
 
         files = await asyncio.to_thread(
             claim_files_for_triage,
@@ -275,102 +285,103 @@ async def triage_worker(
         state.triage_phase.record_activity(len(files))
 
         file_id_map = {f["path"]: f["id"] for f in files}
-        batch_ids = [f["id"] for f in files]
 
-        # Group by parent path; include sibling names for context
-        file_groups = _group_files_by_parent(files, include_siblings=True)
+        # Sibling file names give the decision neighborhood context.
+        groups = _group_files_by_parent(files, include_siblings=True)
+        siblings_by_parent = {
+            g["parent_path_id"]: g.get("sibling_names", []) for g in groups
+        }
 
         if on_progress:
             on_progress(
-                f"triaging {len(files)} files ({len(file_groups)} dirs)",
+                f"triaging {len(files)} files ({len(groups)} dirs)",
                 state.triage_stats,
                 None,
             )
 
         batch_start = _time.monotonic()
 
-        try:
-            triage_user_prompt = _build_triage_user_prompt(file_groups)
-            triage_raw, triage_cost, _ = await asyncio.to_thread(
-                call_llm_structured,
-                model=model,
-                messages=[
-                    {"role": "system", "content": triage_system_prompt},
-                    {"role": "user", "content": triage_user_prompt},
-                ],
-                response_model=FileTriageBatch,
-                temperature=0.1,
-                service="facility-discovery",
-                reasoning_effort=get_reasoning_effort("discovery-triage"),
-            )
-            assert isinstance(triage_raw, FileTriageBatch)
-            triage_parsed = triage_raw
-            state.triage_stats.cost += triage_cost
-
-            triage_applied = await asyncio.to_thread(
-                apply_triage_results,
-                triage_parsed.results,
-                file_id_map,
-                threshold=state.min_triage_score,
-                batch_cost=triage_cost,
+        states = []
+        for f in files:
+            row = dict(f)
+            row["sibling_names"] = siblings_by_parent.get(f.get("parent_path_id"), [])
+            states.append(
+                build_triage_state(
+                    row, state.facility, facility_config, with_content=False
+                )
             )
 
-            triaged = triage_applied["triaged"]
-            skipped = triage_applied["skipped"]
-            batch_total = triaged + skipped
-            state.triage_stats.processed += batch_total
-            state.triage_stats.last_batch_time = _time.monotonic() - batch_start
+        results = await asyncio.gather(
+            *(judge(s) for s in states), return_exceptions=True
+        )
+
+        decisions: list[dict[str, Any]] = []
+        failed_ids: list[str] = []
+        for f, res in zip(files, results, strict=True):
+            if isinstance(res, BaseException):
+                logger.warning("triage decision failed for %s: %s", f["path"], res)
+                failed_ids.append(f["id"])
+                continue
+            answers, cost = res
+            decisions.append(
+                {"path": f["path"], "answers": answers, "model": model, "cost": cost}
+            )
+
+        batch_cost = sum(d["cost"] for d in decisions)
+        state.triage_stats.cost += batch_cost
+
+        triaged = skipped = 0
+        if decisions:
+            try:
+                applied = await asyncio.to_thread(
+                    apply_triage_results,
+                    decisions,
+                    file_id_map,
+                    threshold=threshold,
+                    cost_total=batch_cost,
+                )
+                triaged = applied["triaged"]
+                skipped = applied["skipped"]
+            except Exception as e:
+                logger.error("Triage persistence failed: %s", e)
+                state.triage_stats.errors += len(decisions)
+                await asyncio.to_thread(
+                    release_file_triage_claims,
+                    [file_id_map[d["path"]] for d in decisions],
+                )
+                if is_infrastructure_error(e):
+                    raise
+
+        batch_total = triaged + skipped
+        state.triage_stats.processed += batch_total
+        state.triage_stats.last_batch_time = _time.monotonic() - batch_start
+        if batch_total:
             state.triage_stats.record_batch(batch_total)
 
-            if on_progress:
-                # Stream per-file triage results with scores and descriptions
-                triage_results = []
-                for r in triage_parsed.results:
-                    composite = r.triage_composite
-                    # Find top dimension
-                    dim_scores = {
-                        "modeling": r.score_modeling_code,
-                        "analysis": r.score_analysis_code,
-                        "operations": r.score_operations_code,
-                        "data_access": r.score_data_access,
-                        "workflow": r.score_workflow,
-                        "visualization": r.score_visualization,
-                        "documentation": r.score_documentation,
-                        "imas": r.score_imas,
-                        "convention": r.score_convention,
+        if failed_ids:
+            state.triage_stats.errors += len(failed_ids)
+            # Fail closed: clear the claim so a later pass retries the file.
+            await asyncio.to_thread(release_file_triage_claims, failed_ids)
+
+        if on_progress:
+            triage_results = []
+            for d in decisions:
+                relevance = triage_relevance(d["answers"])
+                role = (d["answers"].get("role") or {}).get("choice") or ""
+                triage_results.append(
+                    {
+                        "path": d["path"],
+                        "relevance": round(relevance, 3),
+                        "category": role,
+                        "description": role,
+                        "skipped": relevance < threshold,
                     }
-                    top_dim = max(dim_scores, key=lambda k: dim_scores[k])
-                    triage_results.append(
-                        {
-                            "path": r.path,
-                            "triage_composite": round(composite, 3),
-                            "description": r.description,
-                            "category": top_dim,
-                            "skipped": composite < state.min_triage_score,
-                        }
-                    )
-                on_progress(
-                    f"triaged {triaged}, skipped {skipped} (${triage_cost:.3f})",
-                    state.triage_stats,
-                    triage_results,
                 )
-
-            # Release claims (apply_triage_results already clears claimed_at
-            # for triaged/skipped files, but release any unmatched ones)
-            unmatched = set(batch_ids) - {
-                f["id"]
-                for f in files
-                if f["path"] in {r.path for r in triage_parsed.results}
-            }
-            if unmatched:
-                await asyncio.to_thread(release_file_triage_claims, list(unmatched))
-
-        except Exception as e:
-            logger.error("Triage batch failed: %s", e)
-            state.triage_stats.errors += 1
-            await asyncio.to_thread(release_file_triage_claims, batch_ids)
-            if is_infrastructure_error(e):
-                raise
+            on_progress(
+                f"triaged {triaged}, skipped {skipped} (${batch_cost:.3f})",
+                state.triage_stats,
+                triage_results,
+            )
 
         await asyncio.sleep(0.1)
 
@@ -384,15 +395,20 @@ async def score_worker(
     state: FileDiscoveryState,
     on_progress: Callable | None = None,
     batch_size: int = 50,
+    concurrency: int = 8,
 ) -> None:
-    """Score worker: Full LLM scoring of enriched CodeFiles.
+    """Score worker: Content scoring of enriched CodeFiles.
 
     Claims CodeFiles that have been triaged AND enriched
     (status='triaged', is_enriched=true).  The score prompt receives
-    enrichment evidence (pattern matches, preview text) and
-    the triage description (qualitative, NO triage numeric scores).
+    enrichment evidence (pattern matches, preview text) and writes the
+    description and search facets.  A content-arm decisions call then records
+    the file's content relevance from its preview text; whether the file is
+    ingested is decided by that relevance, not by the scorer.  Scoring no
+    longer skips a file.
     """
-    from imas_codex.discovery.base.llm import call_llm_structured
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.llm import acall_decisions, call_llm_structured
     from imas_codex.discovery.code.graph_ops import (
         claim_files_for_scoring,
         release_file_score_claims,
@@ -402,11 +418,29 @@ async def score_worker(
         _build_score_system_prompt,
         _build_score_user_prompt,
         _group_files_by_parent,
+        apply_content_decisions,
         apply_file_scores,
+        build_triage_questions,
+        build_triage_state,
     )
     from imas_codex.settings import get_model, get_reasoning_effort
 
     model = get_model("discovery-score")
+    relevance_model = get_model("discovery-relevance")
+    questions = build_triage_questions()
+    try:
+        facility_config = get_facility(state.facility)
+    except Exception as exc:  # noqa: BLE001 - absent facility block is data, not a crash
+        logger.warning("score_worker: facility config unavailable: %s", exc)
+        facility_config = {}
+
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def judge_content(row: dict[str, Any]):
+        async with semaphore:
+            return await acall_decisions(
+                relevance_model, row, questions, service="facility-discovery"
+            )
 
     import time as _time
 
@@ -494,6 +528,42 @@ async def score_worker(
 
             await asyncio.to_thread(release_file_score_claims, batch_ids)
 
+            # Content arm: judge the file's content relevance from its preview.
+            # A failure here leaves the file 'scored' with no content relevance,
+            # so the ingest claim refuses it and a later pass can retry.
+            content_states = [
+                build_triage_state(
+                    f, state.facility, facility_config, with_content=True
+                )
+                for f in files
+            ]
+            content_results = await asyncio.gather(
+                *(judge_content(s) for s in content_states), return_exceptions=True
+            )
+            content_decisions = []
+            for f, res in zip(files, content_results, strict=True):
+                if isinstance(res, BaseException):
+                    logger.warning("content decision failed for %s: %s", f["path"], res)
+                    continue
+                answers, answer_cost = res
+                content_decisions.append(
+                    {
+                        "path": f["path"],
+                        "answers": answers,
+                        "model": relevance_model,
+                        "cost": answer_cost,
+                    }
+                )
+            content_cost = sum(d["cost"] for d in content_decisions)
+            if content_decisions:
+                state.score_stats.cost += content_cost
+                await asyncio.to_thread(
+                    apply_content_decisions,
+                    content_decisions,
+                    file_id_map,
+                    cost_total=content_cost,
+                )
+
             if on_progress:
                 # Stream per-file score results with composite, category, description
                 score_results = []
@@ -504,11 +574,11 @@ async def score_worker(
                             "score_composite": round(r.score_composite, 3),
                             "category": r.file_category,
                             "description": r.description,
-                            "skipped": r.skip,
+                            "skipped": False,
                         }
                     )
                 on_progress(
-                    f"scored {result.get('scored', 0)}, skipped {result.get('skipped', 0)} (${cost:.3f})",
+                    f"scored {result.get('scored', 0)} (${cost:.3f})",
                     state.score_stats,
                     score_results,
                 )
@@ -532,15 +602,17 @@ async def score_worker(
 def _claim_code_files_for_ingestion(
     facility: str,
     limit: int = 20,
-    min_score: float | None = None,
+    min_relevance: float | None = None,
     max_line_count: int = 10000,
     path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Claim scored CodeFiles for ingestion.
 
-    Claims CodeFiles with status='scored' above the minimum interest
-    score threshold. Skips files exceeding max_line_count to avoid
-    tree-sitter hangs on very large auto-generated files.
+    Claims CodeFiles with status='scored' whose content relevance — the
+    largest of the four scope probabilities stored by the content-arm
+    decision — reaches the ingest threshold, and claims the highest relevance
+    first.  Skips files exceeding max_line_count to avoid tree-sitter hangs on
+    very large auto-generated files.
 
     Dedup is handled *after* claiming — see ``_filter_duplicates()``.
     Keeping the claim query simple avoids expensive correlated subqueries
@@ -550,17 +622,17 @@ def _claim_code_files_for_ingestion(
     one of the prefixes are claimed, so a scoped run ingests only the named
     trees.
 
-    Uses anti-deadlock patterns: ORDER BY rand(), claim_token two-step
-    verify, and @retry_on_deadlock decorator.
+    Uses a claim_token two-step verify and @retry_on_deadlock decorator.
     """
-    if min_score is None:
-        from imas_codex.settings import get_discovery_threshold
+    if min_relevance is None:
+        from imas_codex.settings import get_code_ingest_threshold
 
-        min_score = get_discovery_threshold()
+        min_relevance = get_code_ingest_threshold()
     import uuid
 
     from imas_codex.config.discovery_config import build_facility_exclusion_filter
     from imas_codex.discovery.base.claims import DEFAULT_CLAIM_TIMEOUT_SECONDS
+    from imas_codex.discovery.code.scorer import CODE_RELEVANCE_EXPR
     from imas_codex.graph import GraphClient
     from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -569,23 +641,25 @@ def _claim_code_files_for_ingestion(
     token = str(uuid.uuid4())
     cutoff = f"PT{DEFAULT_CLAIM_TIMEOUT_SECONDS}S"
     with GraphClient() as gc:
-        # Step 1: Claim with random ordering and token
+        # Step 1: Claim the highest-relevance files first, then break ties
+        # randomly so concurrent workers do not collide on one ordering.
         gc.query(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
-              AND sf.score_composite IS NOT NULL
-              AND sf.score_composite >= $min_score
+              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
-            WITH sf ORDER BY rand() LIMIT $limit
+            WITH sf, {CODE_RELEVANCE_EXPR} AS relevance
+            ORDER BY relevance DESC, rand()
+            LIMIT $limit
             SET sf.claimed_at = datetime(), sf.claim_token = $token
             """,
             facility=facility,
-            min_score=min_score,
+            min_relevance=min_relevance,
             max_line_count=max_line_count,
             limit=limit,
             cutoff=cutoff,
@@ -782,7 +856,6 @@ async def code_worker(
                 _claim_code_files_for_ingestion,
                 state.facility,
                 limit=batch_size,
-                min_score=state.min_score,
                 path_prefixes=state.path_prefixes,
             )
         except Exception as e:
@@ -972,7 +1045,7 @@ async def enrich_worker(
             claim_files_for_enrichment,
             state.facility,
             limit=batch_size,
-            min_triage_composite=state.min_triage_score,
+            min_relevance=state.min_relevance,
             path_prefixes=state.path_prefixes,
         )
 
@@ -1041,17 +1114,17 @@ async def enrich_worker(
                             ):
                                 snippet = stripped[:80]
                                 break
-                    # Look up triage_composite from the claim data
+                    # Look up relevance from the claim data
                     file_id = file_id_map.get(r["path"])
-                    triage_score = None
+                    relevance = None
                     for f in files:
                         if f["id"] == file_id:
-                            triage_score = f.get("triage_composite")
+                            relevance = f.get("relevance")
                             break
                     enrich_results.append(
                         {
                             "path": r["path"],
-                            "triage_composite": triage_score,
+                            "relevance": relevance,
                             "patterns": r.get("total_pattern_matches", 0),
                             "line_count": r.get("line_count", 0),
                             "pattern_categories": dict(top_cats),

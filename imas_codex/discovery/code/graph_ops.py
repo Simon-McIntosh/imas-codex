@@ -29,6 +29,7 @@ from imas_codex.discovery.base.claims import (
     reset_stale_claims,
     retry_on_deadlock,
 )
+from imas_codex.discovery.code.scorer import CODE_RELEVANCE_EXPR
 from imas_codex.graph import GraphClient
 from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -283,12 +284,13 @@ def claim_files_for_triage(
     limit: int = 500,
     path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Atomically claim discovered CodeFiles for LLM triage.
+    """Atomically claim discovered CodeFiles for names-arm triage.
 
-    Claims files with ``status='discovered'`` and no ``triage_composite``.
-    Returns minimal context: path, language, parent directory path and
-    description.  NO numeric scores from the parent — the triage LLM
-    should assess from filename and directory context alone.
+    Claims files with ``status='discovered'`` that have no name-arm relevance
+    yet (``relevance_stage IS NULL``).  Returns minimal context: path,
+    language, parent directory path and description.  NO numeric scores from
+    the parent — the decision should assess from filename and directory
+    context alone.
 
     Uses claim_token pattern with ORDER BY rand() to prevent deadlocks
     when multiple workers claim concurrently.
@@ -313,7 +315,7 @@ def claim_files_for_triage(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'discovered'
-              AND sf.triage_composite IS NULL
+              AND sf.relevance_stage IS NULL
               {prefix_clause}
               {excluded_clause}
               AND (sf.claimed_at IS NULL
@@ -374,14 +376,14 @@ def release_file_triage_claims(file_ids: list[str]) -> None:
 def claim_files_for_enrichment(
     facility: str,
     limit: int = 200,
-    min_triage_composite: float | None = None,
+    min_relevance: float | None = None,
     path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Atomically claim triaged CodeFiles for rg pattern enrichment.
 
-    Claims files with ``status='triaged'`` and ``triage_composite``
-    above the threshold.  Enrichment runs rg pattern matching and
-    extracts preview text for the subsequent scoring pass.
+    Claims files with ``status='triaged'`` whose relevance reaches the triage
+    threshold.  Enrichment runs rg pattern matching and extracts preview text
+    for the subsequent scoring pass.
 
     Uses claim_token pattern with ORDER BY rand() to prevent deadlocks
     when multiple workers claim concurrently.
@@ -389,18 +391,18 @@ def claim_files_for_enrichment(
     Args:
         facility: Facility ID
         limit: Maximum files to claim
-        min_triage_composite: Minimum triage composite to enrich.
-            Defaults to ``get_triage_threshold()``.
+        min_relevance: Minimum relevance to enrich.
+            Defaults to ``get_code_triage_threshold()``.
         path_prefixes: When given, restrict the claim to CodeFiles whose
             ``path`` starts with any of these prefixes.
 
     Returns:
-        List of dicts with id, path, language, triage_composite
+        List of dicts with id, path, language, relevance
     """
-    if min_triage_composite is None:
-        from imas_codex.settings import get_triage_threshold
+    if min_relevance is None:
+        from imas_codex.settings import get_code_triage_threshold
 
-        min_triage_composite = get_triage_threshold()
+        min_relevance = get_code_triage_threshold()
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
@@ -411,7 +413,7 @@ def claim_files_for_enrichment(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
-              AND sf.triage_composite >= $min_triage
+              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
               {excluded_clause}
@@ -425,7 +427,7 @@ def claim_files_for_enrichment(
             facility=facility,
             limit=limit,
             cutoff=cutoff,
-            min_triage=min_triage_composite,
+            min_relevance=min_relevance,
             token=claim_token,
             **prefix_params,
             **excluded_params,
@@ -433,11 +435,11 @@ def claim_files_for_enrichment(
 
         # Step 2: Read back only files WE successfully claimed
         result = gc.query(
-            """
-            MATCH (sf:CodeFile {claim_token: $token})-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             RETURN sf.id AS id, sf.path AS path,
                    sf.language AS language,
-                   sf.triage_composite AS triage_composite
+                   {CODE_RELEVANCE_EXPR} AS relevance
             """,
             facility=facility,
             token=claim_token,
@@ -667,7 +669,7 @@ def has_pending_triage_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'discovered'
-              AND sf.triage_composite IS NULL
+              AND sf.relevance_stage IS NULL
               {prefix_clause}
               {excluded_clause}
             RETURN count(sf) > 0 AS has_work
@@ -681,7 +683,7 @@ def has_pending_triage_work(
 
 def has_pending_enrich_work(
     facility: str,
-    min_triage_composite: float | None = None,
+    min_relevance: float | None = None,
     path_prefixes: list[str] | None = None,
 ) -> bool:
     """Check if there are triaged CodeFiles needing rg enrichment.
@@ -689,10 +691,10 @@ def has_pending_enrich_work(
     When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
     one of the prefixes count.
     """
-    if min_triage_composite is None:
-        from imas_codex.settings import get_triage_threshold
+    if min_relevance is None:
+        from imas_codex.settings import get_code_triage_threshold
 
-        min_triage_composite = get_triage_threshold()
+        min_relevance = get_code_triage_threshold()
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
@@ -700,14 +702,14 @@ def has_pending_enrich_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
-              AND sf.triage_composite >= $min_triage
+              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
               {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
-            min_triage=min_triage_composite,
+            min_relevance=min_relevance,
             **prefix_params,
             **excluded_params,
         )
@@ -716,7 +718,7 @@ def has_pending_enrich_work(
 
 def has_pending_code_work(
     facility: str,
-    min_score: float | None = None,
+    min_relevance: float | None = None,
     max_line_count: int = 10000,
     path_prefixes: list[str] | None = None,
 ) -> bool:
@@ -725,10 +727,10 @@ def has_pending_code_work(
     When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
     one of the prefixes count.
     """
-    if min_score is None:
-        from imas_codex.settings import get_discovery_threshold
+    if min_relevance is None:
+        from imas_codex.settings import get_code_ingest_threshold
 
-        min_score = get_discovery_threshold()
+        min_relevance = get_code_ingest_threshold()
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
@@ -736,14 +738,14 @@ def has_pending_code_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
-              AND sf.score_composite >= $min_score
+              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
-            min_score=min_score,
+            min_relevance=min_relevance,
             max_line_count=max_line_count,
             **prefix_params,
             **excluded_params,

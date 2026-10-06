@@ -132,9 +132,10 @@ async def run_parallel_code_discovery(
 
         min_score = get_discovery_threshold()
 
-    from imas_codex.settings import get_triage_threshold
+    from imas_codex.settings import get_code_ingest_threshold, get_code_triage_threshold
 
-    min_triage_score = get_triage_threshold()
+    min_relevance = get_code_triage_threshold()
+    min_ingest_relevance = get_code_ingest_threshold()
 
     # Release orphaned claims from previous runs
     reset_orphaned_file_claims(facility, silent=True)
@@ -149,7 +150,7 @@ async def run_parallel_code_discovery(
         service_monitor=service_monitor,
         cost_limit=cost_limit,
         min_score=min_score,
-        min_triage_score=min_triage_score,
+        min_relevance=min_relevance,
         max_paths=max_paths,
         focus=focus,
         path_prefixes=path_prefixes,
@@ -171,7 +172,7 @@ async def run_parallel_code_discovery(
     )
     state.enrich_phase.set_has_work_fn(
         lambda: (
-            has_pending_enrich_work(facility, min_triage_score, path_prefixes)
+            has_pending_enrich_work(facility, min_relevance, path_prefixes)
             or not state.triage_phase.done
         )
     )
@@ -183,7 +184,9 @@ async def run_parallel_code_discovery(
     )
     state.code_phase.set_has_work_fn(
         lambda: (
-            has_pending_code_work(facility, min_score, path_prefixes=path_prefixes)
+            has_pending_code_work(
+                facility, min_ingest_relevance, path_prefixes=path_prefixes
+            )
             or not state.score_phase.done
         )
     )
@@ -344,26 +347,25 @@ async def run_parallel_code_discovery(
 
 def get_code_discovery_stats(
     facility: str,
-    min_score: float | None = None,
-    min_triage_score: float | None = None,
+    min_relevance: float | None = None,
+    min_ingest_relevance: float | None = None,
 ) -> dict[str, int | float]:
     """Get code discovery statistics from graph for progress display.
 
     Args:
         facility: Facility ID
-        min_score: Minimum score threshold for pending counts.
-            Defaults to ``get_discovery_threshold()``.
-        min_triage_score: Minimum triage composite for enrich pending.
-            Defaults to ``get_triage_threshold()``.
+        min_relevance: Minimum relevance for triage/enrich pending counts.
+            Defaults to ``get_code_triage_threshold()``.
+        min_ingest_relevance: Minimum content relevance for ingest/embed
+            pending counts.  Defaults to ``get_code_ingest_threshold()``.
     """
-    if min_score is None:
-        from imas_codex.settings import get_discovery_threshold
+    from imas_codex.discovery.code.scorer import CODE_RELEVANCE_EXPR
+    from imas_codex.settings import get_code_ingest_threshold, get_code_triage_threshold
 
-        min_score = get_discovery_threshold()
-    if min_triage_score is None:
-        from imas_codex.settings import get_triage_threshold
-
-        min_triage_score = get_triage_threshold()
+    if min_relevance is None:
+        min_relevance = get_code_triage_threshold()
+    if min_ingest_relevance is None:
+        min_ingest_relevance = get_code_ingest_threshold()
     with GraphClient() as gc:
         result = gc.query(
             """
@@ -404,11 +406,11 @@ def get_code_discovery_stats(
             lang_key = f"{lang}_files"
             stats[lang_key] = stats.get(lang_key, 0) + count
 
-        # Pending triage: discovered without triage_composite
+        # Pending triage: discovered without name-arm relevance
         triage_result = gc.query(
             """
             MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
-            WHERE cf.status = 'discovered' AND cf.triage_composite IS NULL
+            WHERE cf.status = 'discovered' AND cf.relevance_stage IS NULL
             RETURN count(cf) AS pending
             """,
             facility=facility,
@@ -417,15 +419,15 @@ def get_code_discovery_stats(
 
         # Pending enrich: triaged but not enriched (above triage threshold)
         enrich_pending = gc.query(
-            """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE cf.status = 'triaged'
-              AND cf.triage_composite >= $min_triage
+              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
               AND coalesce(cf.is_enriched, false) = false
             RETURN count(cf) AS pending
             """,
             facility=facility,
-            min_triage=min_triage_score,
+            min_relevance=min_relevance,
         )
         stats["pending_enrich"] = enrich_pending[0]["pending"] if enrich_pending else 0
 
@@ -443,15 +445,15 @@ def get_code_discovery_stats(
 
         # Pending ingest: scored code files (consistent with claim filters)
         ingest_result = gc.query(
-            """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE cf.status = 'scored'
-              AND cf.score_composite >= $min_score
+              AND {CODE_RELEVANCE_EXPR} >= $min_ingest_relevance
               AND coalesce(cf.line_count, 0) <= 10000
             RETURN count(cf) AS pending
             """,
             facility=facility,
-            min_score=min_score,
+            min_ingest_relevance=min_ingest_relevance,
         )
         stats["pending_ingest"] = ingest_result[0]["pending"] if ingest_result else 0
 
@@ -490,7 +492,7 @@ def get_code_discovery_stats(
             f"""
             MATCH (cc:CodeChunk)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             MATCH (cc)<-[:HAS_CHUNK]-(:CodeExample)<-[:HAS_EXAMPLE]-(cf:CodeFile)
-            WHERE cf.score_composite >= $min_score
+            WHERE {CODE_RELEVANCE_EXPR} >= $min_ingest_relevance
             RETURN count(cc) AS total,
                    count(cc.embedding) AS embedded,
                    count(CASE WHEN {pending_embed_predicate("cc")}
@@ -499,7 +501,7 @@ def get_code_discovery_stats(
                          THEN 1 END) AS pending
             """,
             facility=facility,
-            min_score=min_score,
+            min_ingest_relevance=min_ingest_relevance,
             embed_retry_cutoff=embed_retry_cutoff_time(),
         )
         if embed_result:

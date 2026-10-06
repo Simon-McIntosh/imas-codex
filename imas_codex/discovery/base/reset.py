@@ -336,18 +336,15 @@ WIKI_RESET_SPECS: dict[str, ResetSpec] = {
 # Code
 # ---------------------------------------------------------------------------
 
-_CODE_TRIAGE_FIELDS = [
-    "triage_composite",
-    "triage_description",
-    "triage_modeling_code",
-    "triage_analysis_code",
-    "triage_operations_code",
-    "triage_data_access",
-    "triage_workflow",
-    "triage_visualization",
-    "triage_documentation",
-    "triage_imas",
-    "triage_convention",
+_CODE_RELEVANCE_FIELDS = [
+    "relevance_loads",
+    "relevance_processes",
+    "relevance_describes",
+    "relevance_imas",
+    "relevance_simulation",
+    "relevance_role",
+    "relevance_stage",
+    "relevance_model",
     "triaged_at",
 ]
 
@@ -384,7 +381,7 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
         target_status="discovered",
         source_statuses=["triaged", "scored", "ingested", "enriched", "skipped"],
         clear_fields=(
-            _CODE_TRIAGE_FIELDS
+            _CODE_RELEVANCE_FIELDS
             + _CODE_ENRICH_FIELDS
             + _CODE_SCORE_FIELDS
             + ["ingested_at", "skip_reason", "error", "evidence_linked"]
