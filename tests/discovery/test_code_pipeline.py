@@ -1586,6 +1586,66 @@ class TestPathPrefixScan:
             "/analysis/src/edas2",
         ]
 
+    def test_code_cli_reset_receives_path_prefixes(self):
+        """--reset-to forwards --path-prefix to reset_to_status.
+
+        The scan path returns before the reset branch, so a green suite does
+        not show the reset is scoped. This reaches the branch and pins that the
+        prefix list threads through, rather than the reset widening to every
+        code file of the facility.
+        """
+        import asyncio
+
+        from click.testing import CliRunner
+
+        from imas_codex.cli.discover.code import code
+
+        def fake_run_discovery(_config, async_main):
+            return asyncio.run(async_main(asyncio.Event(), None))
+
+        with (
+            patch(
+                "imas_codex.discovery.base.facility.get_facility",
+                return_value={"ssh_host": "jt-60sa"},
+            ),
+            patch("imas_codex.cli.discover.common.ensure_remote_environment"),
+            patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
+            patch("imas_codex.cli.discover.common.setup_logging"),
+            patch(
+                "imas_codex.cli.discover.common.make_log_print",
+                return_value=lambda *a, **k: None,
+            ),
+            patch("imas_codex.cli.discover.common.DiscoveryConfig"),
+            patch(
+                "imas_codex.cli.discover.common.run_discovery",
+                side_effect=fake_run_discovery,
+            ),
+            patch("imas_codex.settings.get_discovery_threshold", return_value=0.9),
+            patch(
+                "imas_codex.discovery.base.reset.reset_to_status",
+                return_value=3,
+            ) as reset,
+            patch(
+                "imas_codex.discovery.code.parallel.run_parallel_code_discovery",
+                new_callable=AsyncMock,
+                return_value={},
+            ),
+        ):
+            result = CliRunner().invoke(
+                code,
+                [
+                    "jt-60sa",
+                    "--path-prefix",
+                    "/analysis/src/SAeqread",
+                    "--reset-to",
+                    "discovered",
+                    "--scan-only",
+                ],
+            )
+
+        assert result.exit_code == 0, result.output
+        assert reset.call_args.kwargs.get("path_prefixes") == ["/analysis/src/SAeqread"]
+
     def test_scan_uses_facility_remote_environment(self):
         """The remote scan runs under the facility's resolved interpreter.
 
