@@ -559,11 +559,14 @@ def seed_facility_roots(
         # Ensure facility node exists (idempotent)
         gc.ensure_facility(facility)
 
-        result = gc.create_nodes("FacilityPath", items)
+        # Create-only: seeding is additive. An existing row (a root already
+        # scored or triaged by a prior run) keeps its status, depth, scores
+        # and timestamps; reprocessing is what --reset-to is for.
+        result = gc.create_nodes("FacilityPath", items, create_only=True)
 
         # Create alias nodes and ALIAS_OF relationships
         if alias_items:
-            gc.create_nodes("FacilityPath", alias_items)
+            gc.create_nodes("FacilityPath", alias_items, create_only=True)
             for alias_path, canonical_path in alias_pairs:
                 alias_id = f"{facility}:{alias_path}"
                 canonical_id = f"{facility}:{canonical_path}"
@@ -581,119 +584,6 @@ def seed_facility_roots(
             )
 
     logger.info(f"Seeded {result['processed']} root paths for {facility}")
-    return result["processed"]
-
-
-def seed_missing_roots(facility: str) -> int:
-    """Add discovery_roots from config that are not already in the graph.
-
-    This is an additive operation - existing paths are preserved.
-    Only paths from discovery_roots that don't exist in the graph are added.
-
-    Args:
-        facility: Facility ID
-
-    Returns:
-        Number of new paths created
-    """
-    from imas_codex.discovery import get_facility
-    from imas_codex.graph import GraphClient
-
-    config = get_facility(facility)
-    discovery_roots = config.get("discovery_roots", [])
-
-    if not discovery_roots:
-        logger.info(f"No discovery_roots configured for {facility}")
-        return 0
-
-    # Extract paths from config (may be dicts with 'path' key or plain strings)
-    config_paths = [
-        p.get("path") if isinstance(p, dict) else p for p in discovery_roots
-    ]
-
-    # Query which paths already exist in graph
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            MATCH (p:FacilityPath {facility_id: $facility})
-            WHERE p.path IN $paths
-            RETURN p.path AS path
-            """,
-            facility=facility,
-            paths=config_paths,
-        )
-        existing_paths = {r["path"] for r in result}
-
-    # Find missing paths
-    missing_paths = [p for p in config_paths if p not in existing_paths]
-
-    if not missing_paths:
-        logger.info(f"All {len(config_paths)} discovery_roots already in graph")
-        return 0
-
-    logger.info(
-        f"Seeding {len(missing_paths)} missing roots "
-        f"(of {len(config_paths)} configured)"
-    )
-
-    # Use existing seed function with only the missing paths
-    return seed_facility_roots(facility, root_paths=missing_paths)
-
-
-def create_child_paths(
-    facility: str,
-    parent_path: str,
-    child_paths: list[str],
-) -> int:
-    """Create child FacilityPath nodes from a parent.
-
-    Args:
-        facility: Facility ID
-        parent_path: Parent path string
-        child_paths: List of child path strings
-
-    Returns:
-        Number of paths created
-    """
-    from imas_codex.graph import GraphClient
-
-    parent_id = f"{facility}:{parent_path}"
-    parent_depth_result = None
-
-    with GraphClient() as gc:
-        # Get parent depth
-        result = gc.query(
-            "MATCH (p:FacilityPath {id: $id}) RETURN p.depth AS depth",
-            id=parent_id,
-        )
-        parent_depth_result = result[0]["depth"] if result else 0
-
-    parent_depth = parent_depth_result or 0
-    now = datetime.now(UTC).isoformat()
-    items = []
-
-    for child_path in child_paths:
-        child_id = f"{facility}:{child_path}"
-        items.append(
-            {
-                "id": child_id,
-                "facility_id": facility,
-                "path": child_path,
-                "path_type": "code_directory",
-                "status": PathStatus.discovered.value,
-                "depth": parent_depth + 1,
-                "in_directory": parent_id,
-                "discovered_at": now,
-            }
-        )
-
-    if not items:
-        return 0
-
-    with GraphClient() as gc:
-        result = gc.create_nodes("FacilityPath", items)
-        # IN_DIRECTORY relationships now created automatically by create_nodes()
-
     return result["processed"]
 
 
@@ -1820,7 +1710,7 @@ def persist_scan_results(
 ) -> dict[str, int]:
     """Persist multiple scan results in a single transaction.
 
-    Much faster than calling mark_path_scanned/create_child_paths per path.
+    Much faster than calling mark_path_scanned per path.
 
     Two modes based on is_expanding flag:
     1. First scan (is_expanding=False): Set status='scanned', no children created

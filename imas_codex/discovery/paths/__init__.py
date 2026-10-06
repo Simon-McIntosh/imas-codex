@@ -23,7 +23,6 @@ from imas_codex.discovery.paths.frontier import (
     get_purpose_distribution,
     get_scorable_paths,
     seed_facility_roots,
-    seed_missing_roots,
 )
 from imas_codex.discovery.paths.models import (
     DirectoryEvidence,
@@ -46,7 +45,6 @@ __all__ = [
     "get_scorable_paths",
     "get_high_value_paths",
     "seed_facility_roots",
-    "seed_missing_roots",
     "clear_facility_paths",
     "cleanup_orphaned_software_repos",
     # Models

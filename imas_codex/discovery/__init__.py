@@ -48,7 +48,6 @@ from imas_codex.discovery.paths import (
     get_scorable_paths,
     run_parallel_discovery,
     seed_facility_roots,
-    seed_missing_roots,
 )
 
 __all__ = [
@@ -74,7 +73,6 @@ __all__ = [
     "get_scorable_paths",
     "get_high_value_paths",
     "seed_facility_roots",
-    "seed_missing_roots",
     "clear_facility_paths",
     "cleanup_orphaned_software_repos",
     "run_parallel_discovery",
