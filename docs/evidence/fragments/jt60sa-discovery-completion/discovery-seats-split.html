@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <body>
+    <section>
+      <h2 id="discovery-seats-split">Discovery reads one model seat per function</h2>
+      <p id="discovery-seats-split-landing">
+        Six seats now exist — <code>discovery-triage</code>,
+        <code>discovery-score</code>, <code>discovery-describe</code>,
+        <code>discovery-vision</code>, <code>cluster-labels</code> and
+        <code>ids-mapping</code> — each with a default, an environment variable
+        and a pyproject section. The four text and vision seats resolve to
+        <code>local/deepseek-v4.1-flash</code> through the
+        <code>ambix-local</code> model route; <code>cluster-labels</code> and
+        <code>ids-mapping</code> stay on <code>openrouter/openai/gpt-5.4</code>.
+        Every discovery call site that previously read the shared
+        <code>language</code> or <code>vision</code> seat now reads its own and
+        forwards <code>reasoning_effort</code> from the same seat, threaded
+        through the batch scoring helpers in
+        <code>discovery/wiki/scoring.py</code> and
+        <code>discovery/base/image.py</code>. The health-check, monitor and
+        <code>DiscoveryConfig.model_section</code> parameters now require the
+        seat with no default, and each <code>discover</code> command names its
+        own.
+      </p>
+      <p id="discovery-seats-split-evidence">
+        Gate:
+        <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/core/test_settings.py tests/discovery</code>
+        exits <strong>0</strong> — 1196 passed, from
+        <code>gate-b138bca23.log</code> in the run directory.
+        <code>rg -n 'get_model(_config)?\("(language|vision)"\)'
+        imas_codex/discovery imas_codex/cli/discover</code> matches only
+        <code>imas_codex/discovery/signals/parallel.py</code>, which keeps the
+        shared vision seat. Negative control: with
+        <code>[tool.imas-codex.discovery-triage]</code>'s
+        <code>model-route</code> removed in a scratch tree, the
+        endpoint-registration test fails —
+        <code>FAILED
+        tests/core/test_settings.py::TestDiscoveryFunctionSeats::test_discovery_seats_register_local_endpoint</code>,
+        <code>EXIT=1</code>; the same command passes unmodified in the same
+        scratch tree. Live check from this compute node: one structured call
+        through <code>discovery-triage</code> and one image call through
+        <code>discovery-vision</code>, both answered at
+        <code>http://98dci4-gpu-0003:18802/v1</code> with
+        <code>endpoint_class: local-free</code> and
+        <code>cost_usd: 0.0</code>
+        (<code>live-seat-check.log</code>).
+      </p>
+      <p id="discovery-seats-split-followons">
+        The synchronous <code>DirectoryTriager.triage_batch</code> now carries a
+        local seat but the synchronous <code>call_llm_structured</code> path has
+        no local-endpoint branch, so it would hand
+        <code>local/deepseek-v4.1-flash</code> to litellm and fail; the
+        production pipeline uses the async variant, which routes to the local
+        client. The fix belongs in the shared call layer, outside this node's
+        write scope.
+      </p>
+    </section>
+  </body>
+</html>
