@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -188,12 +188,20 @@
     <p><strong>Measures</strong> (all on the test split):</p>
     <ol>
       <li><strong>Shortlist recall@K</strong>, for K ∈ {5, 10, 20, 50}: the share of
-        sources with a non-none label whose labelled node appears in the shortlist. Arms:
-        <code>compute_semantic_matches</code> as it runs today; plus a unit-dimension filter;
-        plus cluster expansion (the existing <code>ClusterSearcher</code> block in
-        <code>gather_ids_context</code>); plus all three. The current query takes
-        <code>LIMIT $k</code> inside the vector search and filters by category afterwards, so
-        it can return fewer than K. Measure the returned count as well.</li>
+        sources with a non-none label whose labelled node appears in the shortlist.
+        <ul>
+          <li>The primary arm is <code>hybrid_dd_search</code>
+            (<code>imas_codex/graph/dd_search.py:97</code>): the maintained DD search behind
+            the <code>search_dd_paths</code> MCP tool. It blends vector and full-text scores,
+            accepts a precomputed embedding, and oversamples before filtering.</li>
+          <li>The baseline is <code>compute_semantic_matches</code> as the map pipeline runs
+            it today. That query takes <code>LIMIT $k</code> inside the vector search and
+            filters by category afterwards, so it can return fewer than K. Report its
+            returned count.</li>
+          <li>Each arm is measured alone, then with the unit-dimension filter, with
+            <code>cluster_search</code> (<code>dd_search.py:869</code>) expansion, and with
+            both.</li>
+        </ul></li>
       <li><strong>Pair judgment.</strong> AUC of <code>same_quantity</code> over (source,
         candidate) pairs; top-1 accuracy after reranking, among sources whose label is in the
         shortlist; the change in both when <code>same_object</code> is combined (product,
@@ -273,23 +281,28 @@
       retrieval_score, arms (the set of arms that produced it), unit, documentation,
       node_category, data_type, physics_domain and parent_documentation.
     </p>
-    <p>It extends the existing owners and adds no parallel ones:</p>
+    <p>It builds on the maintained owners and adds no parallel ones:</p>
     <ul>
-      <li>Vector retrieval calls <code>compute_semantic_matches</code>. The fix that returns K
-        hits after the category filter goes into that function, not into a copy.</li>
-      <li>Cluster expansion moves out of <code>gather_ids_context</code> into this module.
-        <code>gather_ids_context</code> then calls it.</li>
+      <li>Retrieval calls <code>hybrid_dd_search</code>
+        (<code>imas_codex/graph/dd_search.py:97</code>) once per source. Every source
+        description is embedded in one batch, and each embedding is passed in through the
+        function's <code>embedding</code> argument. The function's oversampling already
+        returns K hits after its filters, so no search code is copied or patched.</li>
+      <li>Cluster expansion calls <code>cluster_search</code>
+        (<code>dd_search.py:869</code>), not <code>ClusterSearcher</code>.</li>
       <li>The unit filter uses the dimension check behind <code>analyze_units</code>. It drops
         a candidate only when both units are known and their dimensions differ.</li>
       <li>Cross-facility precedent comes from <code>fetch_cross_facility_mappings</code>.</li>
+      <li>The map pipeline's legacy retrieval, <code>compute_semantic_matches</code> and the
+        <code>ClusterSearcher</code> block in <code>gather_ids_context</code>, is retired by
+        §8, not by this section.</li>
     </ul>
     <p>K and the arm set are the ones §3 names.</p>
     <p><strong>Node</strong> <code>candidate-retrieval</code>, role implement.</p>
     <ul>
-      <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
-        <code>imas_codex/ids/tools.py</code>, <code>imas_codex/ids/mapping.py</code> and
+      <li>Write paths: <code>imas_codex/ids/candidates.py</code> and
         <code>tests/ids/test_candidates.py</code>.</li>
-      <li>It may not widen <code>gather_shared_context</code>'s return shape.</li>
+      <li>It may not widen <code>hybrid_dd_search</code>'s signature.</li>
     </ul>
     <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
       following.</p>
@@ -299,7 +312,7 @@
       <li>The unit filter drops a dimension mismatch and keeps a candidate when either unit
         is unknown.</li>
       <li>Cluster expansion adds members without duplicating a path.</li>
-      <li>The vector arm returns K hits when K matching nodes exist.</li>
+      <li>One encoder call embeds a batch of sources.</li>
     </ul>
 
     <h2 id="s5">§5 — Pair judgment through Jev</h2>
@@ -321,9 +334,11 @@
       <li><strong>Thresholds.</strong> <code>map-select-threshold</code>,
         <code>map-select-margin</code> and <code>map-floor-threshold</code> in
         <code>[tool.imas-codex.discovery]</code>, with defaults from §3. Their accessors sit
-        beside <code>get_triage_threshold</code> in <code>imas_codex/settings.py</code>. The
-        decisions-call node also edits that file, so this node is dispatched only after that
-        one has merged.</li>
+        beside <code>get_triage_threshold</code> in <code>imas_codex/settings.py</code>. Two §25
+        nodes also edit <code>settings.py</code> and <code>pyproject.toml</code>:
+        <code>decisions-call</code> and <code>code-relevance-triage</code>. This node is
+        dispatched only after both have merged, and its worker reads the merged
+        <code>settings.py</code> before editing.</li>
       <li><strong>Questions.</strong> <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>
         carries the frozen §3 wording. It is declared and rendered through the same mechanism
         that §25 establishes for <code>code/triage.md</code>.</li>
@@ -391,6 +406,9 @@
       <li>A re-judge replaces the earlier edges.</li>
       <li>A missing IMASNode raises.</li>
       <li>Claim fields are released on success and on failure.</li>
+      <li><code>clear_candidates(facility)</code>, also in <code>graph_ops.py</code>, removes
+        a facility's candidate edges and fields. Its return value states how many of each
+        it removed.</li>
     </ul>
     <p>One <code>-m graph</code> test, run on a compute partition against the live database,
       writes and removes the candidates of a single fixture source.</p>
@@ -403,31 +421,45 @@
       harness (<code>DiscoveryConfig</code> and <code>run_discovery</code> in
       <code>imas_codex/cli/discover/common.py</code>) with
       <code>domain="map"</code>, <code>model_section="mapping-candidates"</code> and no SSH
-      check. Options:
+      check. Every option reuses a name the CLI already has:
     </p>
     <ul>
-      <li><code>--physics-domain/-d</code> (repeatable)</li>
-      <li><code>--ids/-i</code> (repeatable; restricts candidates to those IDSs)</li>
-      <li><code>--cost-limit/-c</code> (default $5)</li>
-      <li><code>--time</code></li>
-      <li><code>--limit</code></li>
-      <li><code>--rejudge</code> (re-routes judged sources)</li>
-      <li><code>--dry-run</code></li>
+      <li><code>--physics-domain/-d</code> and <code>--ids/-i</code>, both repeatable, as in
+        <code>imas map run</code>. <code>--ids</code> restricts candidates to those
+        IDSs.</li>
+      <li><code>--cost-limit/-c</code> (default $5), <code>--signal-limit/-n</code> and
+        <code>--time</code>, as in <code>discover signals</code>.</li>
     </ul>
     <p>
-      <strong>Worker.</strong> The claim loop in <code>imas_codex/ids/candidate_workers.py</code>
-      claims a batch of enriched sources that are unjudged, or stale under a claim timeout.
-      For each batch it calls <code>retrieve_candidates</code>, then the judgment, then
-      <code>route</code>, then <code>write_candidates</code>. It follows the
-      <code>@retry_on_deadlock</code> + <code>ORDER BY rand()</code> + claim-token pattern and
-      the orphan recovery in <code>imas_codex/ids/workers.py</code>. <code>discover status
-      FACILITY</code> gains the counts by candidate route.
+      There is no <code>--rejudge</code> and no <code>--dry-run</code>. Re-judging is
+      <code>discover clear FACILITY --domain map</code>: a new value of the existing option,
+      calling §6's <code>clear_candidates</code>. A judgment without persistence is §3's
+      prototype, not a production mode. The command adds five options, all existing names.
+      §8 retires two from <code>imas map run</code>.
     </p>
+    <p>
+      <strong>Worker.</strong> The candidate stage is a new phase in
+      <code>imas_codex/ids/workers.py</code>, the module that already owns SignalSource
+      claiming. It adds <code>claim_sources_for_candidates</code>,
+      <code>release_candidate_claim</code>, <code>has_pending_candidate_work</code> and
+      <code>candidate_worker</code> beside their mapping counterparts. It also adds a
+      <code>run_candidate_engine</code> that uses <code>run_discovery_engine</code> with an
+      <code>OrphanRecoverySpec</code> on <code>candidate_claimed_at</code>, as
+      <code>run_mapping_engine</code> does.
+    </p>
+    <ul>
+      <li>The claim takes a batch of enriched sources that are unjudged, or stale under the
+        claim timeout. It uses the same <code>@retry_on_deadlock</code> + <code>ORDER BY
+        rand()</code> + claim-token pattern.</li>
+      <li>Each batch goes through <code>retrieve_candidates</code>, the judgment,
+        <code>route</code> and <code>write_candidates</code>, in that order.</li>
+      <li><code>discover status FACILITY</code> gains the counts by candidate route.</li>
+    </ul>
     <p><strong>Node</strong> <code>discover-map-cli</code>, role implement.</p>
     <ul>
       <li>Write paths: <code>imas_codex/cli/discover/map.py</code>,
         <code>imas_codex/cli/discover/__init__.py</code>,
-        <code>imas_codex/ids/candidate_workers.py</code> and
+        <code>imas_codex/ids/workers.py</code> and
         <code>tests/cli/test_discover_map.py</code>.</li>
     </ul>
     <p><strong>Done when</strong> a <code>CliRunner</code> test with fake retrieval and a fake
@@ -436,7 +468,8 @@
     <ul>
       <li>one source ends in each route;</li>
       <li>the cost limit stops the loop;</li>
-      <li><code>discover status</code> prints the route counts.</li>
+      <li><code>discover status</code> prints the route counts;</li>
+      <li><code>discover clear --domain map</code> removes them.</li>
     </ul>
 
     <h2 id="s8">§8 — <code>imas map run</code> consumes the candidates</h2>
@@ -463,6 +496,14 @@
         vanish silently.</li>
       <li><code>imas map status</code> shows the candidate routes beside the mapping
         status.</li>
+      <li><strong>Retired legacy retrieval.</strong> The map context stops calling
+        <code>compute_semantic_matches</code> and <code>ClusterSearcher</code> in
+        <code>gather_shared_context</code> and <code>gather_ids_context</code>; an escalated
+        source's context comes from its candidates. <code>compute_semantic_matches</code>
+        is deleted when no caller remains.</li>
+      <li><strong>Retired options.</strong> <code>imas map run</code> loses
+        <code>--skip-metadata</code>, which is parsed and never read, and
+        <code>--skip-errors</code>, which is the same as <code>--stage data</code>.</li>
     </ul>
     <p><strong>Node</strong> <code>map-run-consumes-candidates</code>, role implement.</p>
     <ul>
@@ -470,8 +511,9 @@
         <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
         <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
         <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
-        <code>imas_codex/cli/map.py</code> and <code>tests/ids/</code>.</li>
-      <li>It runs after §4, which also writes <code>mapping.py</code>.</li>
+        <code>imas_codex/ids/tools.py</code>, <code>imas_codex/cli/map.py</code> and
+        <code>tests/ids/</code>.</li>
+      <li>It runs after §7, which also writes <code>workers.py</code>.</li>
     </ul>
     <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
       following.</p>
@@ -481,6 +523,8 @@
       <li>An answer naming a path outside the shortlist is refused.</li>
       <li>A <code>target_id</code> outside the selected node is escalated.</li>
       <li>A zero-row <code>MAPS_TO_IMAS</code> write raises.</li>
+      <li><code>imas map run --help</code> no longer lists <code>--skip-metadata</code> or
+        <code>--skip-errors</code>.</li>
     </ul>
 
     <h2 id="s9">§9 — First JET run, audited</h2>
