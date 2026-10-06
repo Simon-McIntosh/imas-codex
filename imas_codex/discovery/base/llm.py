@@ -81,6 +81,7 @@ logger = logging.getLogger(__name__)
 # isolated connection pool so local generation can never be starved by paid
 # OpenRouter traffic. Keyed by api_base so each local endpoint is pooled once.
 _LOCAL_CLIENTS: dict[str, Any] = {}
+_LOCAL_SYNC_CLIENTS: dict[str, Any] = {}
 _LOCAL_CLIENT_MAX_CONNECTIONS = 256
 
 
@@ -110,24 +111,49 @@ def _get_local_client(api_base: str, api_key: str | None) -> Any:
     return client
 
 
+def _get_local_sync_client(api_base: str, api_key: str | None) -> Any:
+    """Return a pooled synchronous OpenAI client for a local endpoint.
+
+    The synchronous sibling of :func:`_get_local_client`: one cached client per
+    ``api_base`` with the same isolated connection pool, so a local model sent
+    through :func:`call_llm_structured` off the event loop is never starved by
+    litellm's shared OpenRouter pool.
+    """
+    client = _LOCAL_SYNC_CLIENTS.get(api_base)
+    if client is None:
+        import httpx
+        from openai import OpenAI
+
+        limits = httpx.Limits(
+            max_connections=_LOCAL_CLIENT_MAX_CONNECTIONS,
+            max_keepalive_connections=_LOCAL_CLIENT_MAX_CONNECTIONS,
+        )
+        client = OpenAI(
+            base_url=api_base,
+            api_key=api_key or "EMPTY",
+            http_client=httpx.Client(limits=limits),
+            max_retries=0,  # retry/backoff handled by the caller loop
+        )
+        _LOCAL_SYNC_CLIENTS[api_base] = client
+    return client
+
+
 def _is_local_api_base(api_base: str | None) -> bool:
     """True if ``api_base`` points at a local/self-hosted OpenAI-compatible server."""
     return bool(api_base)
 
 
-async def _acompletion_local(kwargs: dict[str, Any]) -> Any:
-    """Async chat-completion against a local endpoint via the dedicated client.
+def _local_call_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
+    """Translate caller kwargs into the local OpenAI-compatible request.
 
-    Accepts the same ``kwargs`` litellm would receive (model, messages,
-    api_base, api_key, max_tokens, timeout, extra_body, …) and returns the
-    OpenAI SDK response object, which is shape-compatible with the
-    ``response.choices[0].message.content`` / ``response.usage`` access the
-    caller already uses for litellm responses. Strips the endpoint-location
-    prefix because the local endpoint serves the bare model name.
+    Shared by the async and synchronous local clients. Accepts the same
+    ``kwargs`` litellm would receive (model, messages, api_base, api_key,
+    max_tokens, timeout, extra_body, …) and returns the OpenAI SDK call
+    arguments, stripping the endpoint-location prefix because the local
+    endpoint serves the bare model name.
     """
-    client = _get_local_client(kwargs["api_base"], kwargs.get("api_key"))
     model = kwargs["model"]
-    for prefix in _LOCAL_MODEL_PREFIXES:
+    for prefix in _LOCAL_CLIENT_MODEL_PREFIXES:
         if model.startswith(prefix):
             model = model[len(prefix) :]
             break
@@ -147,7 +173,29 @@ async def _acompletion_local(kwargs: dict[str, Any]) -> Any:
         call_kwargs["response_format"] = kwargs["response_format"]
     if kwargs.get("extra_body"):
         call_kwargs["extra_body"] = kwargs["extra_body"]
-    return await client.chat.completions.create(**call_kwargs)
+    return call_kwargs
+
+
+async def _acompletion_local(kwargs: dict[str, Any]) -> Any:
+    """Async chat-completion against a local endpoint via the dedicated client.
+
+    Returns the OpenAI SDK response object, which is shape-compatible with the
+    ``response.choices[0].message.content`` / ``response.usage`` access the
+    caller already uses for litellm responses.
+    """
+    client = _get_local_client(kwargs["api_base"], kwargs.get("api_key"))
+    return await client.chat.completions.create(**_local_call_kwargs(kwargs))
+
+
+def _completion_local(kwargs: dict[str, Any]) -> Any:
+    """Synchronous sibling of :func:`_acompletion_local`.
+
+    A local model routed through :func:`call_llm_structured` uses the cached
+    synchronous client, so it never reaches litellm's provider dispatch (which
+    rejects the ``local/`` provider).
+    """
+    client = _get_local_sync_client(kwargs["api_base"], kwargs.get("api_key"))
+    return client.chat.completions.create(**_local_call_kwargs(kwargs))
 
 
 T = TypeVar("T")
@@ -884,6 +932,21 @@ _LOCAL_MODEL_PREFIXES = (
     "hosted_vllm/",
     "openai/localhost",
 )
+
+# Model prefixes served by the dedicated OpenAI-compatible local client and
+# its chat template. A strict subset of _LOCAL_MODEL_PREFIXES: ``ollama/`` and
+# ``openai/localhost`` route through litellm, so keeping this narrower set
+# distinct avoids silently rerouting them when the two meanings are read as
+# one. Declared beside the parent set so the relationship stays visible.
+_LOCAL_CLIENT_MODEL_PREFIXES = (
+    "local/",
+    "hosted_vllm/",
+)
+
+
+def _is_local_client_model(model: str) -> bool:
+    """True if ``model`` is served by the dedicated local OpenAI-compatible client."""
+    return any(model.startswith(p) for p in _LOCAL_CLIENT_MODEL_PREFIXES)
 
 
 def ensure_model_prefix(model: str) -> str:
@@ -2099,7 +2162,7 @@ def _build_kwargs(
     #   request ``"max"`` uniformly and get each provider's maximum effort.
     if reasoning_effort is not None:
         extra_body = kwargs.setdefault("extra_body", {})
-        if model.startswith(("local/", "hosted_vllm/")):
+        if _is_local_client_model(model):
             extra_body["chat_template_kwargs"] = {
                 "thinking": True,
                 "reasoning_effort": reasoning_effort,
@@ -2189,9 +2252,21 @@ def call_llm_structured(
     total_cache_creation = 0
     response_count = 0
 
+    # Local endpoints bypass litellm's provider dispatch (which rejects the
+    # local/ provider) and use the dedicated synchronous client, so a local
+    # model reaches the same isolated connection pool the async path uses.
+    # Detected by the api_base _build_kwargs already resolved for local models.
+    _use_local = _is_local_client_model(model) and _is_local_api_base(
+        kwargs.get("api_base")
+    )
+
     for attempt in range(max_retries):
         try:
-            response = litellm.completion(**kwargs)
+            response = (
+                _completion_local(kwargs)
+                if _use_local
+                else litellm.completion(**kwargs)
+            )
             total_cost += extract_cost(response, model=model)
             input_tokens = response.usage.prompt_tokens or 0
             output_tokens = response.usage.completion_tokens or 0
@@ -2373,7 +2448,7 @@ async def acall_llm_structured(
     # they use a dedicated, isolated client so free GPU generation is never
     # starved by concurrent slow OpenRouter traffic. Detected by the api_base
     # the routing logic already resolved into kwargs for local models.
-    _use_local = model.startswith(("local/", "hosted_vllm/")) and _is_local_api_base(
+    _use_local = _is_local_client_model(model) and _is_local_api_base(
         kwargs.get("api_base")
     )
 
@@ -2829,7 +2904,7 @@ async def _acall_frozen_structured_transport(
     response_count = 0
     attempt_count = 0
     last_error: Exception | None = None
-    use_local = model.startswith(("local/", "hosted_vllm/")) and _is_local_api_base(
+    use_local = _is_local_client_model(model) and _is_local_api_base(
         routing_kwargs.get("api_base")
     )
     governor = None if use_local else get_rate_governor()
