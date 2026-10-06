@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mapping-candidate-selection">
+  <meta name="plan-title" content="Mapping Candidate Selection">
+  <meta name="plan-summary" content="Choose each signal source&#x27;s IMAS target from retrieved DD nodes with Jev pair judgments; only ambiguous sources reach the reasoning model">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="21.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
+  <title>Mapping Candidate Selection | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-06">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Signals · IMAS mapping</p>
+      <h1>Mapping Candidate Selection</h1>
+      <p class="lead">
+        <code>imas-codex imas map</code> asks a reasoning model to write IMAS target paths as
+        free text for every signal source of an IDS in a single call. On JET, that left 146
+        sources marked validated and no mapping edge in the graph. This plan rebuilds the
+        target-selection step in three parts. Code retrieves a shortlist of real
+        Data Dictionary (DD) nodes for each source. Jev answers narrow yes/no questions about
+        each pair of source and candidate. Code routes each source to selected, escalated or
+        no candidate. The reasoning model then only sees the sources that stay ambiguous,
+        and only the paths on their shortlist. The selection stage runs as
+        <code>imas-codex discover map FACILITY</code>, so it fits the discovery workflow;
+        <code>imas map run</code> keeps the field-level transforms, validation and
+        activation.
+      </p>
+      <figure>
+      <img src="/imas-codex/figures/mapping-candidate-selection/pipeline.svg" alt="Pipeline: an enriched SignalSource goes to code retrieval of K leaf candidates, then Jev judges each pair, then code routes the source to selected, escalated or no candidate">
+      <figcaption>The selection stage this plan builds. Code retrieves real DD nodes and Jev
+        returns probabilities for each pair. Thresholds measured in §3 route each source.
+        Selected and escalated sources feed <code>imas map run</code>, which writes the
+        transforms; a no-candidate source keeps its best path and probability as
+        evidence.</figcaption>
+    </figure>
+    </header>
+
+    <h2 id="s1">§1 — What the map pipeline does today, measured</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      <strong>Pipeline.</strong> <code>imas_codex/cli/map.py</code> drives
+      <code>run_mapping_engine</code> in <code>imas_codex/ids/workers.py</code>. It runs four
+      workers over <code>SignalSource.mapping_status</code>: context, assign, map and
+      validate.
+    </p>
+    <ul>
+      <li><strong>Context</strong> (<code>gather_shared_context</code>,
+        <code>imas_codex/ids/mapping.py:565</code>) embeds every enriched source description
+        once. It then runs <code>compute_semantic_matches</code>
+        (<code>imas_codex/ids/tools.py:769</code>) at 20 hits per source over the
+        <code>imas_node_embedding</code> index, plus wiki and code chunks. So a per-source
+        shortlist of DD nodes already exists, as <code>source_candidates</code>. Today it is
+        only pasted into prompts as text.</li>
+      <li><strong>Assign</strong> (<code>aassign_targets</code>, <code>mapping.py:954</code>)
+        sends every domain-matched source of one IDS to the <code>reasoning</code> seat in
+        <em>one</em> call, together with the IDS subtree. The model writes
+        <code>imas_target_path</code> as a string, with a self-reported 0–1 confidence and a
+        free-text disposition for sources it leaves unassigned.</li>
+      <li><strong>Map</strong> (<code>map_worker</code>, <code>workers.py:594</code>) calls the
+        <code>ids-mapping</code> seat once per source. The call writes
+        <code>SignalMappingEntry.target_id</code>, also as a string.</li>
+      <li><strong>Persist</strong> (<code>imas_codex/ids/models.py:574–603</code>) writes
+        <code>MAPS_TO_IMAS</code> through <code>MATCH (ip:IMASNode {id: $target_id})</code>.
+        A target id that names no node writes nothing and reports nothing.</li>
+    </ul>
+    <p><strong>Graph, read 2026-10-06</strong> (DD 4.1.1 current):</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>JET SignalSources, enriched / discovered</td><td>2,288 / 47</td></tr>
+        <tr><td>JT-60SA SignalSources, enriched / discovered</td><td>13 / 267</td></tr>
+        <tr><td>JET sources at <code>mapping_status = validated</code></td><td>146</td></tr>
+        <tr><td>…of which disposition null / no_imas_equivalent / metadata_only / insufficient_context / facility_specific</td><td>90 / 22 / 21 / 12 / 1</td></tr>
+        <tr><td>Active <code>IMASMapping</code> nodes (JET), and the sources they use</td><td>53, through 207 <code>USES_SIGNAL_SOURCE</code> edges</td></tr>
+        <tr><td><code>MAPS_TO_IMAS</code> edges, any facility</td><td><strong>0</strong></td></tr>
+        <tr><td><code>POPULATES</code> edges, any facility</td><td><strong>0</strong></td></tr>
+        <tr><td>IMASNode total / embedded</td><td>61,366 / 9,503 (all quantity, geometry and identifier nodes; no coordinate node)</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The assembler loads bindings through <code>USES_SIGNAL_SOURCE → MAPS_TO_IMAS</code>
+      (<code>imas_codex/ids/graph_ops.py:130–144</code>). It would therefore find nothing for
+      any of the 53 active JET mappings. Other edges into IMASNode are intact:
+      94,928 <code>IMASNodeChange FOR_IMAS_PATH</code> and 9,076
+      <code>StandardNameSource FROM_DD_PATH</code>. §2 establishes what removed the mapping
+      edges.
+    </p>
+    <p>
+      <strong>Wrong dispositions that a pair judgment should catch.</strong>
+      <code>jet:device_xml:magprobes/NNN/r</code> is described as "static radial position of
+      magnetic probe 10" and is recorded <code>no_imas_equivalent</code>, yet
+      <code>magnetics/b_field_pol_probe/position/r</code> (unit m) exists and is embedded.
+      <code>jet:device_xml:pfpassive/NNN/r</code> is recorded <code>no_imas_equivalent</code>
+      and its <code>z</code> sibling <code>facility_specific</code>, yet
+      <code>pf_passive/loop/element/geometry/rectangle/r</code>, <code>/z</code> and
+      <code>/width</code> exist and are embedded. A single call that judges two hundred
+      sources against a whole IDS subtree loses exactly these. Each one is a clear yes when
+      the source and the path are put side by side.
+    </p>
+    <p>
+      <strong>What a candidate is.</strong> A signal's DD home is a <code>quantity</code>
+      node: <code>magnetics/b_field_pol_probe/field</code> (T),
+      <code>pf_active/coil/current</code> (A) or <code>nbi/unit/power_launched</code> (W).
+      Its <code>/data</code> and <code>/time</code> children are <code>structural</code> and
+      are not embedded. Static geometry lands on <code>geometry</code> leaves. Candidates
+      are therefore the embedded quantity, geometry and identifier nodes. The
+      <code>data</code>/<code>time</code> child is resolved by code in the field-mapping step,
+      never by a model. IMASNode's unit property is <code>unit</code>, not
+      <code>units</code>.
+    </p>
+
+    <h2 id="s2">§2 — Find what removed the mapping edges</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Every <code>MAPS_TO_IMAS</code> and <code>POPULATES</code> edge is gone, while the 53
+      IMASMapping nodes and their <code>USES_SIGNAL_SOURCE</code> edges remain. Edges that the
+      SN pipeline and DD build write into IMASNode are present. The candidate edges in §6 also
+      point at IMASNode, so whatever removed the mapping edges would remove those too. Two
+      readings fit the facts:
+    </p>
+    <ul>
+      <li>A DD rebuild deleted and re-created IMASNode, and only pipelines that re-run wrote
+        their edges back.</li>
+      <li>The JET run wrote no edges, because each <code>MATCH</code> on a free-text
+        <code>target_id</code> found no node.</li>
+    </ul>
+    <p>
+      <strong>Node</strong> <code>mapping-edge-loss</code>, role investigate, read-only. It
+      reads the DD build and graph-management code under <code>imas_codex/graph/</code>,
+      <code>imas_codex/cli/</code> and the DD build modules, with <code>git log</code> over
+      them and over <code>imas_codex/ids/models.py</code>. It reads the map CLI logs under
+      <code>~/.local/share/imas-codex/logs/</code> (<code>map_jet*.log</code>) when present.
+      It writes only its report.
+    </p>
+    <p>
+      <strong>Done when</strong> the report reaches one of two outcomes. Either it names the
+      operation that removed the edges, citing <code>file:line</code> and dated evidence from
+      git history or logs. Or it states that the operation cannot be determined from code and
+      logs, and names the record that would settle it. In both cases it states whether the
+      same operation would remove a <code>SignalSource → IMASNode</code> edge written by
+      §6. If it would, the report names the narrowest change to that operation that would
+      preserve such edges.
+    </p>
+
+    <h2 id="s3">§3 — Label a set and measure retrieval and Jev on it</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      This section gates everything after it. It follows the method that took JT-60SA code
+      triage from AUC 0.63 to 0.96 (<code>jt60sa-discovery-completion</code> §25): a frozen
+      labelled set, a prototype outside the package, and operating points read off held-out
+      data before any code is built.
+    </p>
+    <p><strong>Labelled set.</strong></p>
+    <ul>
+      <li>150 JET enriched SignalSources, stratified over the 20 physics domains they occupy:
+        proportional, with at least 3 per domain. The set includes 20 of the 56 previously
+        validated sources with a negative disposition, including the probe and passive
+        examples in §1. It also includes all 13 enriched JT-60SA sources.</li>
+      <li>A label is the DD 4.1.1 quantity, geometry or identifier node (or nodes) that should
+        hold the source's values, or <code>none</code> with a one-line reason.</li>
+      <li>Labels come from a reasoning pass that queries the DD through the graph
+        (<code>search_dd_paths</code>, <code>fetch_dd_paths</code>, IDS subtrees). That pass
+        <em>never sees the shortlist being measured</em>, because seeing it would inflate
+        recall. A second, independent pass labels a 30-source subsample, and the agreement is
+        reported.</li>
+      <li>Labels are frozen before any question wording is tuned. Sources are split 50/50
+        into dev and test, stratified by domain. Tuning reads only dev; every reported
+        number is from test.</li>
+    </ul>
+    <p><strong>Measures</strong> (all on the test split):</p>
+    <ol>
+      <li><strong>Shortlist recall@K</strong>, for K ∈ {5, 10, 20, 50}: the share of
+        sources with a non-none label whose labelled node appears in the shortlist. Arms:
+        <code>compute_semantic_matches</code> as it runs today; plus a unit-dimension filter;
+        plus cluster expansion (the existing <code>ClusterSearcher</code> block in
+        <code>gather_ids_context</code>); plus all three. The current query takes
+        <code>LIMIT $k</code> inside the vector search and filters by category afterwards, so
+        it can return fewer than K. Measure the returned count as well.</li>
+      <li><strong>Pair judgment.</strong> AUC of <code>same_quantity</code> over (source,
+        candidate) pairs; top-1 accuracy after reranking, among sources whose label is in the
+        shortlist; the change in both when <code>same_object</code> is combined (product,
+        and minimum).</li>
+      <li><strong>None detection.</strong> Precision and recall of "best
+        <code>same_quantity</code> below a floor" against <code>none</code> labels, across
+        floors.</li>
+      <li><strong>Batching.</strong> One call per pair, against one call per source that
+        carries all K candidates in state and asks 2K questions, each referencing
+        <code>candidates[i]</code>. Report the mean absolute difference in probabilities, the
+        cost and the latency.</li>
+      <li><strong>Final pick (optional).</strong> One Choice over the top 5 plus
+        <code>none_of_these</code>, against plain argmax.</li>
+      <li><strong>Cost</strong> per source, and projected cost for all 2,288 JET
+        sources.</li>
+    </ol>
+    <p><strong>Starting questions.</strong> The wording carries the JT-60SA lessons: explicit
+      true and false criteria, exclusion clauses, and the facility block. Tuning on dev may
+      change the wording; the frozen text is part of the deliverable.</p>
+    <ul>
+      <li><code>same_quantity</code> (noul): "Would the IMAS field at
+        <code>candidate.path</code> correctly hold the values that
+        <code>signal_source</code> provides?" True: storing them there needs at most a unit
+        conversion, a sign or COCOS flip, or the selection of one array element. False: the
+        field holds a different quantity, a different component or coordinate, a different
+        object, or only a related or derived quantity.</li>
+      <li><code>same_object</code> (noul): "Does the structure containing
+        <code>candidate.path</code> describe the same kind of object as the source?" Objects
+        are, for example, the same diagnostic, coil, passive element, heating unit or plasma
+        region. True: the same kind of object. False: a different kind of object, even if the
+        quantity matches. A PF coil current against a passive-loop current is an example.</li>
+    </ul>
+    <p><strong>State.</strong></p>
+    <ul>
+      <li><code>facility</code>: the same <code>data_access_patterns</code> block that
+        <code>run_jev_v3.py</code> builds.</li>
+      <li><code>signal_source</code>: id, group_key, description, rep_description,
+        physics_domain, rep_unit, rep_sign_convention, rep_cocos, sample_accessors,
+        member_count and keywords.</li>
+      <li><code>candidate</code>: path, IDS and its one-line description, documentation,
+        unit, data_type, node_category, physics_domain, the parent structure's documentation,
+        and the cluster label when there is one.</li>
+    </ul>
+    <p><strong>Node and output.</strong></p>
+    <ul>
+      <li>Node <code>candidate-probe</code>, role implement. It needs the live graph and the
+        decisions endpoint.</li>
+      <li>Prototype scripts live in <code>~/.cache/imas-codex-jev-map/</code>, outside the
+        package, as in the JT-60SA probe. The call is <code>POST
+        https://openrouter.ai/api/alpha/decisions</code> with
+        <code>{model: "typesafe/jev-1.13", state, questions}</code>, keyed by
+        <code>get_api_key_for_service("imas-mapping")</code>.</li>
+      <li>Heavy steps run on the fleet allocation or a <code>*_debug</code> partition.</li>
+      <li>Prototype spend cap: $3.</li>
+      <li>Write paths: <code>docs/research/mapping-candidate-probe.html</code> and
+        <code>docs/figures/mapping-candidate-probe</code>. Figures: recall@K per arm, and the
+        <code>same_quantity</code> distributions for correct and incorrect pairs.</li>
+    </ul>
+    <p>
+      <strong>Done when</strong> the research document reports every measure above on the
+      test split, with the label agreement and the frozen question text. It must also state
+      three operating points as numbers: <code>select_threshold</code>,
+      <code>select_margin</code> and <code>floor_threshold</code>. For each, it gives the
+      precision and recall of the <code>selected</code> route and the share of sources each
+      route receives. The document says which role the numbers support: Jev as the selector
+      with escalation, or Jev as a pre-screen only. It names the K and the retrieval arms
+      that §4 builds.
+    </p>
+
+    <h2 id="s4">§4 — Candidate retrieval in code</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Retrieval is deterministic and calls no LLM. A new module,
+      <code>imas_codex/ids/candidates.py</code>, exposes
+      <code>retrieve_candidates(sources, *, gc, k, dd_version) -&gt; dict[str,
+      list[Candidate]]</code>. <code>Candidate</code> is a dataclass with fields path, ids,
+      retrieval_score, arms (the set of arms that produced it), unit, documentation,
+      node_category, data_type, physics_domain and parent_documentation.
+    </p>
+    <p>It extends the existing owners and adds no parallel ones:</p>
+    <ul>
+      <li>Vector retrieval calls <code>compute_semantic_matches</code>. The fix that returns K
+        hits after the category filter goes into that function, not into a copy.</li>
+      <li>Cluster expansion moves out of <code>gather_ids_context</code> into this module.
+        <code>gather_ids_context</code> then calls it.</li>
+      <li>The unit filter uses the dimension check behind <code>analyze_units</code>. It drops
+        a candidate only when both units are known and their dimensions differ.</li>
+      <li>Cross-facility precedent comes from <code>fetch_cross_facility_mappings</code>.</li>
+    </ul>
+    <p>K and the arm set are the ones §3 names.</p>
+    <p><strong>Node</strong> <code>candidate-retrieval</code>, role implement.</p>
+    <ul>
+      <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
+        <code>imas_codex/ids/tools.py</code>, <code>imas_codex/ids/mapping.py</code> and
+        <code>tests/ids/test_candidates.py</code>.</li>
+      <li>It may not widen <code>gather_shared_context</code>'s return shape.</li>
+    </ul>
+    <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
+      following.</p>
+    <ul>
+      <li>Every returned path is an IMASNode id read from the graph or a fake; no path is
+        built from a string.</li>
+      <li>The unit filter drops a dimension mismatch and keeps a candidate when either unit
+        is unknown.</li>
+      <li>Cluster expansion adds members without duplicating a path.</li>
+      <li>The vector arm returns K hits when K matching nodes exist.</li>
+    </ul>
+
+    <h2 id="s5">§5 — Pair judgment through Jev</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      This section waits on the decisions-call node in
+      <code>jt60sa-discovery-completion</code> §25. That node adds
+      <code>call_decisions</code> and <code>acall_decisions</code> to
+      <code>imas_codex/discovery/base/llm.py</code>, with the model as a parameter, strict
+      answer validation, retries through <code>_is_retryable</code>, cost from
+      <code>usage.cost</code>, and a test guard that fails any live decisions request. This
+      section calls that layer and builds no second client.
+    </p>
+    <ul>
+      <li><strong>Seat.</strong> <code>[tool.imas-codex.mapping-candidates] model =
+        "typesafe/jev-1.13"</code> in <code>pyproject.toml</code>, registered in
+        <code>MODEL_SECTIONS</code>. It is a separate seat from
+        <code>discovery-relevance</code>.</li>
+      <li><strong>Thresholds.</strong> <code>map-select-threshold</code>,
+        <code>map-select-margin</code> and <code>map-floor-threshold</code> in
+        <code>[tool.imas-codex.discovery]</code>, with defaults from §3. Their accessors sit
+        beside <code>get_triage_threshold</code> in <code>imas_codex/settings.py</code>. The
+        decisions-call node also edits that file, so this node is dispatched only after that
+        one has merged.</li>
+      <li><strong>Questions.</strong> <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>
+        carries the frozen §3 wording. It is declared and rendered through the same mechanism
+        that §25 establishes for <code>code/triage.md</code>.</li>
+      <li><strong>Judgment.</strong> <code>imas_codex/ids/judgment.py</code> builds the state,
+        asks the questions in the batching form §3 chose, and returns one typed
+        <code>PairJudgment</code> per candidate: path, <code>p_same_quantity</code>,
+        <code>p_same_object</code>, model, judged_at and cost. It also exposes
+        <code>route(judgments, thresholds) -&gt; Route</code>, where <code>Route</code> is
+        <code>selected</code>, <code>escalated</code> or <code>no_candidate</code>. A source is
+        selected when its best combined score is at or above the select threshold and leads
+        the next candidate by at least the margin. It is <code>no_candidate</code> when no
+        score reaches the floor. Everything else is escalated.</li>
+      <li><strong>Fail closed.</strong> A decisions failure returns no route. The source stays
+        unjudged for a later retry and is never selected or rejected.</li>
+    </ul>
+    <p><strong>Node</strong> <code>candidate-judgment</code>, role implement.</p>
+    <ul>
+      <li>Write paths: <code>imas_codex/ids/judgment.py</code>,
+        <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>,
+        <code>imas_codex/settings.py</code>, <code>pyproject.toml</code> and
+        <code>tests/ids/test_judgment.py</code>.</li>
+    </ul>
+    <p><strong>Done when</strong> <code>tests/ids/test_judgment.py</code> passes under the
+      fake transport and shows the following.</p>
+    <ul>
+      <li>The state carries the facility, source and candidate blocks.</li>
+      <li>A malformed answer is rejected.</li>
+      <li>A transport error yields no route.</li>
+      <li><code>route</code> returns each of the three routes at the configured thresholds,
+        including the margin case, where two candidates both clear the select threshold
+        within the margin and the source is escalated.</li>
+    </ul>
+
+    <h2 id="s6">§6 — Candidate edges in the graph</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <strong>Schema.</strong> <code>imas_codex/schemas/facility.yaml</code> declares a
+      <code>MAPPING_CANDIDATE</code> relationship from SignalSource to IMASNode. Its
+      properties are rank, retrieval_score, arms, p_same_quantity, p_same_object, model,
+      judged_at, and route, which says whether this candidate is the selected one.
+      SignalSource gains candidate_status (<code>judged</code> once routed),
+      candidate_route, candidate_claimed_at, candidate_claim_token, candidate_judged_at and
+      candidate_model. These follow the claim pattern in
+      <code>imas_codex/discovery/AGENTS.md</code>.
+    </p>
+    <p>
+      <strong>Writes.</strong> A new <code>write_candidates(source_id, judgments, route)</code>
+      in <code>imas_codex/ids/graph_ops.py</code> replaces a source's candidate edges in one
+      transaction. It uses <code>UNWIND</code> and <code>MATCH</code>es both endpoints. It
+      returns the written count and raises when that count is below the number of
+      judgments, so a candidate whose node has vanished fails loudly instead of being dropped.
+      The same function sets the source's candidate fields and releases its claim.
+    </p>
+    <p><strong>Node</strong> <code>candidate-schema</code>, role implement.</p>
+    <ul>
+      <li>Write paths: <code>imas_codex/schemas/facility.yaml</code>,
+        <code>imas_codex/ids/graph_ops.py</code> and
+        <code>tests/ids/test_candidate_persistence.py</code>.</li>
+      <li>It runs <code>build-models</code> in its own worktree and never stages the generated
+        models.</li>
+    </ul>
+    <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
+      following.</p>
+    <ul>
+      <li>A re-judge replaces the earlier edges.</li>
+      <li>A missing IMASNode raises.</li>
+      <li>Claim fields are released on success and on failure.</li>
+    </ul>
+    <p>One <code>-m graph</code> test, run on a compute partition against the live database,
+      writes and removes the candidates of a single fixture source.</p>
+
+    <h2 id="s7">§7 — <code>imas-codex discover map</code></h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <strong>Command.</strong> <code>imas-codex discover map FACILITY</code> is the
+      discovery stage that follows <code>discover signals</code>. It is built on the shared
+      harness (<code>DiscoveryConfig</code> and <code>run_discovery</code> in
+      <code>imas_codex/cli/discover/common.py</code>) with
+      <code>domain="map"</code>, <code>model_section="mapping-candidates"</code> and no SSH
+      check. Options:
+    </p>
+    <ul>
+      <li><code>--physics-domain/-d</code> (repeatable)</li>
+      <li><code>--ids/-i</code> (repeatable; restricts candidates to those IDSs)</li>
+      <li><code>--cost-limit/-c</code> (default $5)</li>
+      <li><code>--time</code></li>
+      <li><code>--limit</code></li>
+      <li><code>--rejudge</code> (re-routes judged sources)</li>
+      <li><code>--dry-run</code></li>
+    </ul>
+    <p>
+      <strong>Worker.</strong> The claim loop in <code>imas_codex/ids/candidate_workers.py</code>
+      claims a batch of enriched sources that are unjudged, or stale under a claim timeout.
+      For each batch it calls <code>retrieve_candidates</code>, then the judgment, then
+      <code>route</code>, then <code>write_candidates</code>. It follows the
+      <code>@retry_on_deadlock</code> + <code>ORDER BY rand()</code> + claim-token pattern and
+      the orphan recovery in <code>imas_codex/ids/workers.py</code>. <code>discover status
+      FACILITY</code> gains the counts by candidate route.
+    </p>
+    <p><strong>Node</strong> <code>discover-map-cli</code>, role implement.</p>
+    <ul>
+      <li>Write paths: <code>imas_codex/cli/discover/map.py</code>,
+        <code>imas_codex/cli/discover/__init__.py</code>,
+        <code>imas_codex/ids/candidate_workers.py</code> and
+        <code>tests/cli/test_discover_map.py</code>.</li>
+    </ul>
+    <p><strong>Done when</strong> a <code>CliRunner</code> test with fake retrieval and a fake
+      transport runs <code>discover map</code> end to end over three fixture sources, and
+      shows:</p>
+    <ul>
+      <li>one source ends in each route;</li>
+      <li>the cost limit stops the loop;</li>
+      <li><code>discover status</code> prints the route counts.</li>
+    </ul>
+
+    <h2 id="s8">§8 — <code>imas map run</code> consumes the candidates</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      The assign stage's single all-sources call is replaced; this is a greenfield project,
+      so nothing is kept alongside it.
+    </p>
+    <ul>
+      <li>A <code>selected</code> source takes its target from its selected candidate.</li>
+      <li>An <code>escalated</code> source goes to the <code>reasoning</code> seat with only
+        its own shortlist. <code>target_assignment.md</code> and
+        <code>target_assignment_system.md</code> are rewritten in place: the model chooses
+        one listed path, or <code>none</code> with a disposition. It never writes a new
+        path.</li>
+      <li>A <code>no_candidate</code> source is skipped. Its best path and probability are
+        logged as evidence.</li>
+      <li>The map stage still writes transforms, units and COCOS labels. Every
+        <code>target_id</code> must lie under the selected node, or be that node's
+        <code>/data</code> or <code>/time</code> child. Anything else is rejected before
+        persist, as an escalation.</li>
+      <li>Persist (<code>imas_codex/ids/models.py:574</code>) checks the count returned by
+        each <code>MAPS_TO_IMAS</code> write and raises on zero. A binding can no longer
+        vanish silently.</li>
+      <li><code>imas map status</code> shows the candidate routes beside the mapping
+        status.</li>
+    </ul>
+    <p><strong>Node</strong> <code>map-run-consumes-candidates</code>, role implement.</p>
+    <ul>
+      <li>Write paths: <code>imas_codex/ids/workers.py</code>,
+        <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
+        <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
+        <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
+        <code>imas_codex/cli/map.py</code> and <code>tests/ids/</code>.</li>
+      <li>It runs after §4, which also writes <code>mapping.py</code>.</li>
+    </ul>
+    <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
+      following.</p>
+    <ul>
+      <li>A selected source is mapped without an assign call.</li>
+      <li>An escalated source's prompt lists only its shortlist.</li>
+      <li>An answer naming a path outside the shortlist is refused.</li>
+      <li>A <code>target_id</code> outside the selected node is escalated.</li>
+      <li>A zero-row <code>MAPS_TO_IMAS</code> write raises.</li>
+    </ul>
+
+    <h2 id="s9">§9 — First JET run, audited</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <strong>Node</strong> <code>jet-candidate-run</code>, role implement. It runs
+      <code>imas-codex discover map jet</code> over all enriched JET sources on the fleet
+      allocation, in foreground passes of <code>--time 8</code>, under a $10 cap. It then
+      audits 40 sources drawn fresh: none from the §3 set, and stratified by route. Each is
+      labelled the way §3 labels, without seeing the route.
+    </p>
+    <p>
+      It writes its evidence fragment under
+      <code>docs/evidence/fragments/mapping-candidate-selection/</code>.
+    </p>
+    <p><strong>Done when</strong> the fragment states:</p>
+    <ul>
+      <li>the route counts, and the total cost against the cap;</li>
+      <li>the audited precision of <code>selected</code>, and the audited share of
+        <code>no_candidate</code> sources that truly have no DD home;</li>
+      <li>every one of the 22 earlier <code>no_imas_equivalent</code> sources, with its new
+        route and best path.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="jev-role" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">After §3, does Jev select targets with escalation, or only shortlist for the reasoning model?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="selector-with-escalation">selector with escalation</button>
+      <button class="r-opt" data-value="prescreen-only">pre-screen only</button>
+      </p>
+    <p class="r-dec-rat">The routing in §5 covers both. Pre-screen only is the same design with the select threshold set above 1, so every non-floor source escalates. The choice sets the default threshold, and §3&#x27;s precision of the selected route should decide it. The recommendation is selector with escalation, provided that precision on the test split is at least 0.9.</p>
+    </div>
+<div class="r-dec" data-key="cli-home" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Where does the candidate stage live on the command line?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="discover-map">imas-codex discover map FACILITY</button>
+      <button class="r-opt" data-value="imas-map-candidates">imas-codex imas map candidates FACILITY</button>
+      </p>
+    <p class="r-dec-rat">The recommendation is discover map . The stage is a claim loop over a facility&#x27;s discovered signals, with cost and time caps, so it shares the discover harness, status and logs. imas map keeps the work that needs a reasoning model and the mapping lifecycle (validate, activate, clear).</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mcs-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-06" data-recommends-skill="/reckon-build mapping-candidate-selection §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Label a set and measure retrieval and Jev</h4>
+    <div class="r-fu-body"><p>The measurement every later section is sized from. It needs neither the decisions-call layer nor a schema change.</p></div>
+    <pre class="r-fu-prompt">/reckon-build mapping-candidate-selection §3</pre>
+    </article>
+<article class="r-fu" data-id="f-mcs-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-06" data-recommends-skill="/reckon-build mapping-candidate-selection §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Find what removed the mapping edges</h4>
+    <div class="r-fu-body"><p>Read-only, and independent of §3. Its answer decides whether §6's edges need protection from the same operation.</p></div>
+    <pre class="r-fu-prompt">/reckon-build mapping-candidate-selection §2</pre>
+    </article>
+</section>
+  <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-mcs-1" data-section="s5" data-gated-sections="s5" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">call_decisions and acall_decisions are in imas_codex/discovery/base/llm.py with the model as a parameter, strict answer validation and a test guard against live decisions requests</h4>
+    <p class="r-gate-required-evidence">jt60sa-discovery-completion#s25</p>
+    </div>
+</section>
+</main>
+</body>
+</html>
