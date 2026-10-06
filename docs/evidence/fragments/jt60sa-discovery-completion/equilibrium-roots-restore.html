@@ -1,0 +1,56 @@
+<section id="equilibrium-roots-restore-landing">
+  <h2>equilibrium-roots-restore</h2>
+
+  <p id="equilibrium-roots-restore-outcome">
+    Reset the three equilibrium tree roots through the scoped path reset and
+    re-ran the scoped paths pipeline: all three roots returned to
+    <code>scored</code>, spend $0, and no jt-60sa row outside the three trees
+    changed status across the runs. The reset spec's source statuses were
+    extended to reach a <code>discovered</code> row carrying a triage score.
+  </p>
+
+  <table id="equilibrium-roots-restore-states">
+    <thead>
+      <tr><th>root</th><th>before status</th><th>before triage/score</th>
+          <th>after run 1</th><th>after run 2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/analysis/src/client_eqdbms.EQ32.Rev1</td>
+          <td>discovered</td><td>0.70 / 0.45</td>
+          <td>scored 0.75 / 0.30</td><td>scored 0.75 / 0.30</td></tr>
+      <tr><td>/analysis/src/SAeqfame</td>
+          <td>discovered</td><td>0.60 / 0.60</td>
+          <td>scored 0.70 / 0.60</td><td>scored 0.70 / 0.60</td></tr>
+      <tr><td>/analysis/src/getseldata_v4.2</td>
+          <td>discovered</td><td>0.55 / 0.75</td>
+          <td>scored 0.80 / 0.75</td><td>scored 0.80 / 0.75</td></tr>
+    </tbody>
+  </table>
+
+  <ul id="equilibrium-roots-restore-runs">
+    <li>before: three roots at <code>discovered</code> with a non-null
+      triage_composite (count = 3).</li>
+    <li>reset: 24 rows under the three prefixes set to <code>scanned</code>,
+      triage cleared, through <code>PATH_RESET_SPECS["scanned"]</code> scoped to
+      the three <code>--root</code> prefixes.</li>
+    <li>run 1 log: <code>run1.log</code> —
+      <code>Discovery complete: scanned=1, scored=14, cost=$0.000, elapsed=14m 54s</code>,
+      EXIT=0.</li>
+    <li>run 2 log: <code>run2.log</code> — <code>Seeded 3 root paths for
+      jt-60sa</code> then EXIT=1: the <code>jt-60sa</code> SSH hop stopped
+      answering (<code>Connection timed out during banner exchange</code>,
+      then <code>kex_exchange_identification: Connection closed by remote
+      host</code>), so run 2's pipeline loop could not start; its seed step ran
+      create-only and left the three roots scored and unchanged.</li>
+    <li>outside-tree status changes: before&rarr;run 1 = 0, run 1&rarr;run 2 = 0,
+      across both = 0 (8324 rows outside the three trees).</li>
+    <li>spend: $0.000 (run 1 Cost line; run 2 reached no Cost line).</li>
+  </ul>
+
+  <p id="equilibrium-roots-restore-negative-control">
+    Negative control: <code>negative_control.log</code> — a check asserting no
+    root is left at <code>discovered</code> with a triage score, run against the
+    before-state, reads 3 stranded and exits 1; against the after-state it
+    exits 0.
+  </p>
+</section>
