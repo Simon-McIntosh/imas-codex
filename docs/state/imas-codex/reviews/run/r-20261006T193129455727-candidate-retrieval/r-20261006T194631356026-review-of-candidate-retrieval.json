@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/ids/test_candidates.py::test_every_returned_path_is_a_graph_node_id",
+    "tests/ids/test_candidates.py::test_hits_from_several_ids_merge_by_score_without_duplicating_a_path"
+  ],
+  "added_failures_note": "total capped at 5: the reviewed run added 2 failing test(s) not retired by name (tests/ids/test_candidates.py::test_every_returned_path_is_a_graph_node_id, tests/ids/test_candidates.py::test_hits_from_several_ids_merge_by_score_without_duplicating_a_path)",
+  "base_log_revision": null,
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/ids/mapping.py:767",
+    "imas_codex/ids/mapping.py:843",
+    "imas_codex/ids/mapping.py:1043",
+    "imas_codex/ids/mapping.py:1232",
+    "imas_codex/ids/workers.py:457"
+  ],
+  "completed_at": "2026-10-06T19:56:31.275Z",
+  "dispatched_at": "2026-10-06T19:46:38Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T193129455727-candidate-retrieval/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest records its negative-control log (negative-control-dedup.log, 2 intentional failures) as the after_suite arm, with the same command as baseline_suite, so a reader's added-failure derivation counts those 2 mutation failures as failures the change added and caps the review total; the head-arm suite (tests/ids, 405 passed EXIT=0) is recorded only under tests, and the negative-control failures are not retired by full ::-id, so repairing after_suite to name the head-arm suite (or naming both ids) removes the spurious cap."
+    },
+    {
+      "file": "tests/ids/test_candidates.py",
+      "line": "115",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion {cand.hit.path for cand in candidates} <= node_ids compares the returned paths against the same string literals the test passes both as the fake hits and as node_ids, so it cannot fail if production code synthesised a path; the independent guard is the parent_documentation read-back at tests/ids/test_candidates.py:117."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against base ce47cc8b; the single commit e7d200ca adds candidates.py (188 lines), removes the cluster expansion and the ClusterSearcher load in gather_shared_context and re-points gather_ids_context at retrieve_candidates in mapping.py, and adds test_candidates.py (236 lines) and the fragment; mapping.py no longer imports ClusterSearcher, hybrid_dd_search's signature is unchanged, and gather_ids_context keeps its return keys.",
+    "done_when": "the done-when names tests/ids and the four bullets; tests/ids/test_candidates.py carries one test per bullet \u2014 node id read from a fake graph (:87-117), score merge without a duplicate path and unscoped-empty-list (:120-174), one encoder batch (:177-193), gather_ids_context via retrieve_candidates plus no ClusterSearcher import (:196-236); the manifest records the tests/ids gate as 405 passed, 5 skipped EXIT=0 and I reproduced tests/ids/test_candidates.py at head (6 passed, EXIT=0).",
+    "goal": "the node's goal is a deterministic, LLM-free DD shortlist builder in imas_codex/ids/candidates.py exposing retrieve_candidates(sources, ids_by_source, *, gc, k, dd_version) -> dict[str, list[Candidate]]; read at imas_codex/ids/candidates.py:66-129, it embeds each source once, searches one arm per routed IDS through hybrid_dd_search, merges by score and deduplicates on path, and Candidate (imas_codex/ids/candidates.py:43-55) composes the returned SearchHit with arms and parent_documentation, so the goal is met.",
+    "manifest": "read; it records the tests/ids gate command and its 405 passed result, test_logs, negative_control_log naming negative-control-dedup.log (last line EXIT=1) and a baseline_suite/after_suite pair whose after_suite log_path is that same negative-control log rather than a head-arm suite (FINDING at manifest.md:16).",
+    "write_paths": "the manifest declares imas_codex/ids/candidates.py, imas_codex/ids/mapping.py, tests/ids/test_candidates.py and the evidence fragment; git show --stat e7d200ca lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the declared negative control (drop the path deduplication in the arm merge) reddens the merge test exactly (2 failed, 4 passed, EXIT=1, negative-control-dedup.log), so tests/ids/test_candidates.py:149-154 guards the dedup, but the node-id test's subset assertion at tests/ids/test_candidates.py:115 has both sides supplied by the test and no test covers a source absent from ids_by_source.",
+    "evidence": "tests/ids carries a test for each done-when bullet and the manifest records 405 passed, 5 skipped EXIT=0, which I reproduced for the node's own module at head e7d200ca (6 passed, EXIT=0, review-gate.log); the manifest's after_suite arm is the negative-control log, so the recorded head-arm suite is the node's tests line rather than a separate after_suite measurement.",
+    "fit": "the added names describe mechanism (retrieve_candidates, Candidate, DEFAULT_K, UNSCOPED_ARM, _merge_arms, _fetch_parent_documentation) with no version, plan, sprint or ticket identifier and no attribution, and the frozen slots dataclass matches the surrounding style at imas_codex/ids/candidates.py:43-63.",
+    "goal_fidelity": "imas_codex/ids/candidates.py:66-129 implements retrieve_candidates exactly as \u00a74 names it, and imas_codex/ids/mapping.py:767 builds source_candidates through it while mapping.py no longer references ClusterSearcher.",
+    "reuse": "the change extends the existing search owner rather than forking it (hybrid_dd_search reused with ids_filter, imas_codex/ids/candidates.py:146-153, and Candidate composes SearchHit rather than copying its fields), but the parent-documentation lookup at imas_codex/ids/candidates.py:165-180 is a fresh query beside the repository's existing parent-documentation reads (imas_codex/graph/dd_enrichment.py:666, imas_codex/graph/dd_workers.py:863), which use coalesce(description, documentation) where it reads documentation alone.",
+    "scope_discipline": "git show --stat e7d200ca touches only the four paths the manifest declares and every mapping.py hunk is a consequence of moving the shortlist into candidates.py, though \u00a74's node write paths name three of those files and not the evidence fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a deterministic, LLM-free DD shortlist builder in imas_codex/ids/candidates.py exposing retrieve_candidates(sources, ids_by_source, *, gc, k, dd_version) -> dict[str, list[Candidate]]; read at imas_codex/ids/candidates.py:66-129, it embeds each source once, searches one arm per routed IDS through hybrid_dd_search, merges by score and deduplicates on path, and Candidate (imas_codex/ids/candidates.py:43-55) composes the returned SearchHit with arms and parent_documentation, so the goal is met.\nVERDICT done_when: the done-when names tests/ids and the four bullets; tests/ids/test_candidates.py carries one test per bullet \u2014 node id read from a fake graph (:87-117), score merge without a duplicate path and unscoped-empty-list (:120-174), one encoder batch (:177-193), gather_ids_context via retrieve_candidates plus no ClusterSearcher import (:196-236); the manifest records the tests/ids gate as 405 passed, 5 skipped EXIT=0 and I reproduced tests/ids/test_candidates.py at head (6 passed, EXIT=0).\nVERDICT write_paths: the manifest declares imas_codex/ids/candidates.py, imas_codex/ids/mapping.py, tests/ids/test_candidates.py and the evidence fragment; git show --stat e7d200ca lists exactly those four paths and nothing else.\nVERDICT manifest: read; it records the tests/ids gate command and its 405 passed result, test_logs, negative_control_log naming negative-control-dedup.log (last line EXIT=1) and a baseline_suite/after_suite pair whose after_suite log_path is that same negative-control log rather than a head-arm suite (FINDING at manifest.md:16).\nVERDICT diff: read commit by commit against base ce47cc8b; the single commit e7d200ca adds candidates.py (188 lines), removes the cluster expansion and the ClusterSearcher load in gather_shared_context and re-points gather_ids_context at retrieve_candidates in mapping.py, and adds test_candidates.py (236 lines) and the fragment; mapping.py no longer imports ClusterSearcher, hybrid_dd_search's signature is unchanged, and gather_ids_context keeps its return keys.\nCALL_SITES: imas_codex/ids/mapping.py:767, imas_codex/ids/mapping.py:843, imas_codex/ids/mapping.py:1043, imas_codex/ids/mapping.py:1232, imas_codex/ids/workers.py:457\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/ids/candidates.py:66-129 implements retrieve_candidates exactly as \u00a74 names it, and imas_codex/ids/mapping.py:767 builds source_candidates through it while mapping.py no longer references ClusterSearcher.\nSCORE evidence: 19\nJUSTIFICATION evidence: tests/ids carries a test for each done-when bullet and the manifest records 405 passed, 5 skipped EXIT=0, which I reproduced for the node's own module at head e7d200ca (6 passed, EXIT=0, review-gate.log); the manifest's after_suite arm is the negative-control log, so the recorded head-arm suite is the node's tests line rather than a separate after_suite measurement.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat e7d200ca touches only the four paths the manifest declares and every mapping.py hunk is a consequence of moving the shortlist into candidates.py, though \u00a74's node write paths name three of those files and not the evidence fragment.\nSCORE durability: 18\nJUSTIFICATION durability: the declared negative control (drop the path deduplication in the arm merge) reddens the merge test exactly (2 failed, 4 passed, EXIT=1, negative-control-dedup.log), so tests/ids/test_candidates.py:149-154 guards the dedup, but the node-id test's subset assertion at tests/ids/test_candidates.py:115 has both sides supplied by the test and no test covers a source absent from ids_by_source.\nSCORE fit: 20\nJUSTIFICATION fit: the added names describe mechanism (retrieve_candidates, Candidate, DEFAULT_K, UNSCOPED_ARM, _merge_arms, _fetch_parent_documentation) with no version, plan, sprint or ticket identifier and no attribution, and the frozen slots dataclass matches the surrounding style at imas_codex/ids/candidates.py:43-63.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the existing search owner rather than forking it (hybrid_dd_search reused with ids_filter, imas_codex/ids/candidates.py:146-153, and Candidate composes SearchHit rather than copying its fields), but the parent-documentation lookup at imas_codex/ids/candidates.py:165-180 is a fresh query beside the repository's existing parent-documentation reads (imas_codex/graph/dd_enrichment.py:666, imas_codex/graph/dd_workers.py:863), which use coalesce(description, documentation) where it reads documentation alone.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T193129455727-candidate-retrieval/manifest.md:16 follow-on: the reviewed manifest records its negative-control log (negative-control-dedup.log, 2 intentional failures) as the after_suite arm, with the same command as baseline_suite, so a reader's added-failure derivation counts those 2 mutation failures as failures the change added and caps the review total; the head-arm suite (tests/ids, 405 passed EXIT=0) is recorded only under tests, and the negative-control failures are not retired by full ::-id, so repairing after_suite to name the head-arm suite (or naming both ids) removes the spurious cap.\nFINDING tests/ids/test_candidates.py:115 follow-on: the assertion {cand.hit.path for cand in candidates} <= node_ids compares the returned paths against the same string literals the test passes both as the fake hits and as node_ids, so it cannot fail if production code synthesised a path; the independent guard is the parent_documentation read-back at tests/ids/test_candidates.py:117.\n",
+  "review_run_id": "r-20261006T194631356026-review-of-candidate-retrieval",
+  "reviewed_base_sha": "ce47cc8b7e3a1171c7c12d67585cc2c3b9fc087b",
+  "reviewed_head_sha": "e7d200ca8030d3496905d49c6a801503e5d00b52",
+  "reviewed_run_id": "r-20261006T193129455727-candidate-retrieval",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T19:53:33.640326+00:00",
+  "total": 5
+}

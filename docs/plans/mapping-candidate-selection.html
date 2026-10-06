@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -611,6 +611,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261006T193129455727-candidate-retrieval" data-who="reckon-build" data-when="2026-10-06T19:45:59.592Z">
     <div class="r-comment-body"><p>candidate-retrieval: DD shortlist now built by imas_codex/ids/candidates.py — retrieve_candidates embeds each source once, searches one arm per routed IDS through hybrid_dd_search, merges by score and deduplicates on path (Candidate composes the SearchHit with arms and parent documentation); gather_ids_context builds source_candidates through retrieve_candidates and mapping.py no longer loads ClusterSearcher; gate uv run --no-sync pytest tests/ids → 405 passed, 5 skipped, exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261006T194631356026-review-of-candidate-retrieval" data-who="reckon-build" data-when="2026-10-06T19:56:31.275Z">
+    <div class="r-comment-body"><p>reviewed run r-20261006T193129455727-candidate-retrieval at base ce47cc8b head e7d200ca (single commit e7d200ca &quot;feat(ids): add deterministic DD candidate retrieval&quot;) and stored a parsed six-dimension record at both granted review-store paths scoring goal_fidelity 20, evidence 19, scope_discipline 19, durability 18, fit 20, reuse 19 (scored sum 115) with two follow-on findings; the annotation caps the stored total to 5 because the reviewed manifest&#x27;s after_suite arm records the negative-control log (2 intentional mutation failures) rather than a head-arm suite — the run is unarmed (suite_command null) so the cap is informational, and the fix is to re-record after_suite as the tests/ids head suite or name both ids in prose</p></div>
 </div>
 </section>
 </main>
