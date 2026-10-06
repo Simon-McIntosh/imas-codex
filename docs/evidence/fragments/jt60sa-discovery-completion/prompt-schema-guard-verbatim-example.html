@@ -1,0 +1,17 @@
+<section id="prompt-schema-guard-verbatim-example-landing">
+  <h2 id="prompt-schema-guard-verbatim-example-heading">Prompt schema guard reads the generated block</h2>
+  <p id="prompt-schema-guard-verbatim-example-what">
+    <code>tests/llm/test_prompt_schema_coverage.py</code> now asserts, for every
+    prompt&rarr;response-model pair its call-site AST walk derives, that
+    <code>get_pydantic_schema_json(response_model)</code> appears verbatim in
+    <code>render_prompt(name)</code>, replacing a field-name-membership check
+    that prose could satisfy without the generated example being present.
+  </p>
+  <p id="prompt-schema-guard-verbatim-example-measure">
+    Gate <code>uv run pytest tests/llm tests/discovery</code> at
+    <code>253de5f69</code> &rarr; 1426 passed, 9 skipped, 5 deselected, exit 0.
+    Negative control (scratch prompt copy, <code>score_imas</code> dropped from
+    the rendered example) &rarr; exit 1, first failure names
+    <code>paths/triage</code>; pristine scratch arm passes.
+  </p>
+</section>

@@ -1,11 +1,13 @@
-"""Every discovery prompt must carry its response model's schema in its text.
+"""Every discovery prompt must carry its response model's generated example.
 
 A local endpoint is served a request that no longer carries ``response_format``
 (see ``base/llm.py``), so the schema a structured call needs must reach the
 engine inside the prompt itself. This test derives the prompt↔response-model
 pairs by walking the AST of ``imas_codex.discovery`` — no table of pairs is
-maintained here — and asserts each response model's field set is present in the
-rendered prompt.
+maintained here — and asserts the exact example ``get_pydantic_schema_json``
+generates for each response model appears verbatim in the rendered prompt, so
+naming a field in prose cannot mask a missing, truncated or swapped generated
+block.
 """
 
 from __future__ import annotations
@@ -189,26 +191,6 @@ def _model_objects() -> dict[str, type]:
     return out
 
 
-def _schema_field_names(model: type) -> set[str]:
-    """Every property name anywhere in the model's JSON schema, nested included."""
-    names: set[str] = set()
-    schema = model.model_json_schema()
-
-    def walk(node: object) -> None:
-        if isinstance(node, dict):
-            props = node.get("properties")
-            if isinstance(props, dict):
-                names.update(props)
-            for value in node.values():
-                walk(value)
-        elif isinstance(node, list):
-            for item in node:
-                walk(item)
-
-    walk(schema)
-    return names
-
-
 def test_walk_reaches_expected_prompts():
     """Positive control: the AST walk must reach the named discovery prompts."""
     pairs = _collect_pairs()
@@ -217,13 +199,13 @@ def test_walk_reaches_expected_prompts():
     assert pairs["signals/source_unwind"] == "SignalSourceCodeUnwindBatch"
 
 
-@pytest.mark.parametrize("prompt_name", sorted(EXPECTED_PROMPTS))
-def test_prompt_text_carries_response_model_fields(prompt_name):
-    pairs = _collect_pairs()
-    model_name = pairs[prompt_name]
+@pytest.mark.parametrize("prompt_name", sorted(_collect_pairs()))
+def test_prompt_carries_generated_example_verbatim(prompt_name):
+    model_name = _collect_pairs()[prompt_name]
     model = _model_objects()[model_name]
+    generated = prompt_loader.get_pydantic_schema_json(model)
     rendered = prompt_loader.render_prompt(prompt_name, {})
-    missing = {f for f in _schema_field_names(model) if f not in rendered}
-    assert not missing, (
-        f"prompt {prompt_name!r} is missing fields of {model_name}: {sorted(missing)}"
+    assert generated in rendered, (
+        f"prompt {prompt_name!r} does not contain the generated example for "
+        f"{model_name} verbatim"
     )
