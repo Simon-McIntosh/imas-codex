@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -561,6 +561,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261006T192612237993-candidate-schema" data-who="reckon-build" data-when="2026-10-06T19:55:44.778Z">
     <div class="r-comment-body"><p>candidate-schema: declared MAPPING_CANDIDATE (SignalSource-&gt;IMASNode, many) and candidate_route in facility.yaml; added write_candidates (one-statement replace, route set only when the written count equals the judgment count so a shortfall leaves it null, claim released either way, count shortfall raises) and clear_candidates (edge and route counts) to graph_ops.py; tests/ids 410 passed/5 skipped/1 deselected, live -m graph round trip passed including shortfall and empty-no_candidate cases</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261006T195620087717-review-of-candidate-schema" data-who="reckon-build" data-when="2026-10-06T20:04:11.829Z">
+    <div class="r-comment-body"><p>review-of-candidate-schema: stored a parsed six-dimension review of r-20261006T192612237993-candidate-schema (goal_fidelity 19, evidence 19, scope_discipline 19, durability 18, fit 18, reuse 19; total 112) read at base 2e88380d / head 72ed0f455, with two follow-on findings (route-key bool normalisation at imas_codex/ids/graph_ops.py:540; the reviewed manifest records no baseline suite arm) and no blocking finding</p></div>
 </div>
 </section>
 </main>

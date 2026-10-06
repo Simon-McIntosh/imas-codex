@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T20:04:11.829Z",
+  "dispatched_at": "2026-10-06T19:56:28Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/graph_ops.py",
+      "line": "540",
+      "severity": "follow-on",
+      "text": "follow-on: a judgment's route is normalised with bool(), so a caller who passes a route string (such as the string decision the function's own route argument takes) marks every candidate selected; test_selection_flag_normalised_to_boolean at tests/ids/test_candidate_persistence.py:134 covers only a boolean."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T192612237993-candidate-schema/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest records tests and test_logs but no baseline_suite or after_suite arm, so the store's added-failure derivation on read returns an unmeasured count (None) and a reader cannot see the change's failures against its base."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 2e88380d; f4315f3b declares the schema and adds write_candidates and clear_candidates, and 72ed0f455 makes the route fail closed on a shortfall with a CALL-subquery count and a CASE guard; facility.yaml:1908-1956, graph_ops.py:502-660, the 352-line test file and the fragment, all inside the declared paths.",
+    "done_when": "the done-when names tests/ids and four bullets plus one live -m graph test; tests/ids/test_candidate_persistence.py carries one test per bullet (re-judge replacement at :52, missing-node raise at :74, claim release on success and failure at :82 and :91, clear counts at :146) and the live round trip at :173; the manifest records tests/ids 410 passed, 5 skipped, 1 deselected exit 0 and the -m graph run 1 passed exit 0.",
+    "goal": "the node goal is the MAPPING_CANDIDATE relationship, the candidate_route field and the two functions that own candidate persistence; imas_codex/schemas/facility.yaml:1908-1956 declares mapping_candidates (range IMASNode, multivalued, relationship_type MAPPING_CANDIDATE) and candidate_route, and imas_codex/ids/graph_ops.py:544-660 adds write_candidates and clear_candidates, so the goal is met.",
+    "manifest": "read; it records status complete, both gate commands with results, test_logs (gate-tests-ids.log, gate-graph.log) and negative_control_log (EXIT=1), and it names no baseline_suite or after_suite arm (see FINDING on the manifest).",
+    "write_paths": "the manifest declares imas_codex/schemas/facility.yaml, imas_codex/ids/graph_ops.py, tests/ids/test_candidate_persistence.py and docs/evidence/fragments/mapping-candidate-selection/candidate-schema.html; git show --stat 2e88380d..72ed0f455 lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the negative control (negative-control.log, EXIT=1) shows dropping the CASE guard at imas_codex/ids/graph_ops.py:605 reddens the shortfall unit test and the live round trip, but several unit assertions check only the statement text and the route key's truthy normalisation at graph_ops.py:540 is untested.",
+    "evidence": "each done-when bullet has a test in tests/ids/test_candidate_persistence.py and the manifest records tests/ids 410 passed exit 0 and the -m graph run 1 passed exit 0, but the reviewed manifest records no baseline arm so the added-failure count is unmeasured.",
+    "fit": "the gc parameter and dataclass style follow imas_codex/ids/graph_ops.py:63 and :544 with no plan or version identifier, but route names both the boolean edge flag at graph_ops.py:540 and the string source decision.",
+    "goal_fidelity": "write_candidates and clear_candidates at imas_codex/ids/graph_ops.py:544 and :632 match section 6's surface, but the route is set conditionally at graph_ops.py:605 where section 6 states the function sets candidate_route unconditionally.",
+    "reuse": "no prior owner writes MAPPING_CANDIDATE edges (grep over imas_codex shows only facility.yaml and graph_ops.py) and the claim release mirrors imas_codex/ids/workers.py:254 but is inlined to keep the replacement one statement.",
+    "scope_discipline": "git show --stat 2e88380d..72ed0f455 touches only the four declared paths, though the evidence fragment it edits is not one of section 6's three node write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is the MAPPING_CANDIDATE relationship, the candidate_route field and the two functions that own candidate persistence; imas_codex/schemas/facility.yaml:1908-1956 declares mapping_candidates (range IMASNode, multivalued, relationship_type MAPPING_CANDIDATE) and candidate_route, and imas_codex/ids/graph_ops.py:544-660 adds write_candidates and clear_candidates, so the goal is met.\nVERDICT done_when: the done-when names tests/ids and four bullets plus one live -m graph test; tests/ids/test_candidate_persistence.py carries one test per bullet (re-judge replacement at :52, missing-node raise at :74, claim release on success and failure at :82 and :91, clear counts at :146) and the live round trip at :173; the manifest records tests/ids 410 passed, 5 skipped, 1 deselected exit 0 and the -m graph run 1 passed exit 0.\nVERDICT write_paths: the manifest declares imas_codex/schemas/facility.yaml, imas_codex/ids/graph_ops.py, tests/ids/test_candidate_persistence.py and docs/evidence/fragments/mapping-candidate-selection/candidate-schema.html; git show --stat 2e88380d..72ed0f455 lists exactly those four paths and nothing else.\nVERDICT manifest: read; it records status complete, both gate commands with results, test_logs (gate-tests-ids.log, gate-graph.log) and negative_control_log (EXIT=1), and it names no baseline_suite or after_suite arm (see FINDING on the manifest).\nVERDICT diff: read commit by commit against base 2e88380d; f4315f3b declares the schema and adds write_candidates and clear_candidates, and 72ed0f455 makes the route fail closed on a shortfall with a CALL-subquery count and a CASE guard; facility.yaml:1908-1956, graph_ops.py:502-660, the 352-line test file and the fragment, all inside the declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: write_candidates and clear_candidates at imas_codex/ids/graph_ops.py:544 and :632 match section 6's surface, but the route is set conditionally at graph_ops.py:605 where section 6 states the function sets candidate_route unconditionally.\nSCORE evidence: 19\nJUSTIFICATION evidence: each done-when bullet has a test in tests/ids/test_candidate_persistence.py and the manifest records tests/ids 410 passed exit 0 and the -m graph run 1 passed exit 0, but the reviewed manifest records no baseline arm so the added-failure count is unmeasured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat 2e88380d..72ed0f455 touches only the four declared paths, though the evidence fragment it edits is not one of section 6's three node write paths.\nSCORE durability: 18\nJUSTIFICATION durability: the negative control (negative-control.log, EXIT=1) shows dropping the CASE guard at imas_codex/ids/graph_ops.py:605 reddens the shortfall unit test and the live round trip, but several unit assertions check only the statement text and the route key's truthy normalisation at graph_ops.py:540 is untested.\nSCORE fit: 18\nJUSTIFICATION fit: the gc parameter and dataclass style follow imas_codex/ids/graph_ops.py:63 and :544 with no plan or version identifier, but route names both the boolean edge flag at graph_ops.py:540 and the string source decision.\nSCORE reuse: 19\nJUSTIFICATION reuse: no prior owner writes MAPPING_CANDIDATE edges (grep over imas_codex shows only facility.yaml and graph_ops.py) and the claim release mirrors imas_codex/ids/workers.py:254 but is inlined to keep the replacement one statement.\nFINDING imas_codex/ids/graph_ops.py:540 follow-on: a judgment's route is normalised with bool(), so a caller who passes a route string (such as the string decision the function's own route argument takes) marks every candidate selected; test_selection_flag_normalised_to_boolean at tests/ids/test_candidate_persistence.py:134 covers only a boolean.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T192612237993-candidate-schema/manifest.md:11 follow-on: the reviewed manifest records tests and test_logs but no baseline_suite or after_suite arm, so the store's added-failure derivation on read returns an unmeasured count (None) and a reader cannot see the change's failures against its base.\n",
+  "review_run_id": "r-20261006T195620087717-review-of-candidate-schema",
+  "reviewed_base_sha": "2e88380d04901949942498d280a3d493ccbcb0a4",
+  "reviewed_head_sha": "72ed0f4553ac8a8191a49e9061affb182ab97397",
+  "reviewed_run_id": "r-20261006T192612237993-candidate-schema",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T20:03:06.928573+00:00",
+  "total": 112
+}
