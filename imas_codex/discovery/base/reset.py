@@ -42,6 +42,13 @@ class ResetSpec:
     clear_fields: list[str]
     """Node properties to SET to ``null`` when resetting."""
 
+    source_filter: str | None = None
+    """Optional Cypher predicate (alias ``n``) that admits rows whose status is
+    *not* in ``source_statuses``.  It is combined as
+    ``n.status IN $source_statuses OR (<source_filter>)``, so it can widen the
+    reset to a specific subset of one extra status without matching every row
+    of that status."""
+
     facility_key: str = "facility_id"
     """Property on the node that holds the facility identifier.  Most domains
     use ``facility_id``; paths use a relationship ``-[:AT_FACILITY]->``."""
@@ -91,7 +98,10 @@ def reset_to_status(
 
     # Build WHERE clause — the prefix scope is rendered here so callers never
     # spell the predicate or name its parameter themselves.
-    where_parts = ["WHERE n.status IN $source_statuses"]
+    status_predicate = "n.status IN $source_statuses"
+    if spec.source_filter:
+        status_predicate = f"({status_predicate} OR ({spec.source_filter}))"
+    where_parts = [f"WHERE {status_predicate}"]
     if extra_filter:
         where_parts.append(extra_filter)
     if path_prefixes:
@@ -262,12 +272,15 @@ PATH_RESET_SPECS: dict[str, ResetSpec] = {
     "scanned": ResetSpec(
         label="FacilityPath",
         target_status="scanned",
-        # A seeded root can sit at ``discovered`` carrying a triage score: a
-        # ``--root`` naming an existing root may overwrite its status while its
-        # scores survive, leaving it unclaimable (the scan takes only discovered
-        # rows whose triage is null).  Including ``discovered`` lets the scoped
-        # reset clear that stale triage so the pipeline re-claims the row.
-        source_statuses=["discovered", "triaged", "scored"],
+        source_statuses=["triaged", "scored"],
+        # A seeded root can sit at ``discovered`` while carrying a triage score
+        # (a ``--root`` re-seed may overwrite its status as its scores survive),
+        # leaving it unclaimable: the scan takes only discovered rows whose
+        # triage is null and the triage claim only scanned rows.  The bound
+        # admits that stranded subset only — a never-scanned discovered row has
+        # no triage score and stays untouched, so an unscoped reset cannot push
+        # it past enumeration.
+        source_filter="n.status = 'discovered' AND n.triage_composite IS NOT NULL",
         clear_fields=(
             _PATH_TRIAGE_FIELDS
             + _PATH_ENRICH_FIELDS

@@ -2,17 +2,17 @@
   <h2>equilibrium-roots-restore</h2>
 
   <p id="equilibrium-roots-restore-outcome">
-    Reset the three equilibrium tree roots through the scoped path reset and
-    re-ran the scoped paths pipeline: all three roots returned to
-    <code>scored</code>, spend $0, and no jt-60sa row outside the three trees
-    changed status across the runs. The reset spec's source statuses were
-    extended to reach a <code>discovered</code> row carrying a triage score.
+    Reset the three equilibrium tree roots through the scoped path reset — now
+    bounded so the scanned reset reaches a <code>discovered</code> row only when
+    it carries a triage score — and re-ran the scoped paths pipeline: all three
+    roots returned to <code>scored</code>, spend $0, and no jt-60sa row outside
+    the three trees changed status across the runs.
   </p>
 
   <table id="equilibrium-roots-restore-states">
     <thead>
       <tr><th>root</th><th>before status</th><th>before triage/score</th>
-          <th>after run 1</th><th>after run 2</th></tr>
+          <th>after run 1</th><th>after run 2 seed (live check)</th></tr>
     </thead>
     <tbody>
       <tr><td>/analysis/src/client_eqdbms.EQ32.Rev1</td>
@@ -32,25 +32,36 @@
       triage_composite (count = 3).</li>
     <li>reset: 24 rows under the three prefixes set to <code>scanned</code>,
       triage cleared, through <code>PATH_RESET_SPECS["scanned"]</code> scoped to
-      the three <code>--root</code> prefixes.</li>
+      the three <code>--root</code> prefixes. The spec's source statuses stay
+      <code>["triaged", "scored"]</code>; a spec-level
+      <code>source_filter</code> renders <code>n.status = 'discovered' AND
+      n.triage_composite IS NOT NULL</code> into the WHERE clause, so a
+      never-scanned discovered row (null triage) is never moved, scoped or not.</li>
     <li>run 1 log: <code>run1.log</code> —
       <code>Discovery complete: scanned=1, scored=14, cost=$0.000, elapsed=14m 54s</code>,
       EXIT=0.</li>
-    <li>run 2 log: <code>run2.log</code> — <code>Seeded 3 root paths for
-      jt-60sa</code> then EXIT=1: the <code>jt-60sa</code> SSH hop stopped
-      answering (<code>Connection timed out during banner exchange</code>,
-      then <code>kex_exchange_identification: Connection closed by remote
-      host</code>), so run 2's pipeline loop could not start; its seed step ran
-      create-only and left the three roots scored and unchanged.</li>
-    <li>outside-tree status changes: before&rarr;run 1 = 0, run 1&rarr;run 2 = 0,
+    <li>live check (the second scoped run's create-only seed, standing in for a
+      full second run): the second scoped command's seed ran at 10:39:06 local,
+      before the SSH preflight failed — <code>run2.log</code> records
+      <code>Seeded 3 root paths for jt-60sa</code> at that timestamp. Cypher
+      after it (<code>livecheck.log</code>) shows all three roots still
+      <code>scored</code> with unchanged scores: client_eqdbms 0.30, SAeqfame
+      0.60, getseldata_v4.2 0.75. The <code>--root</code> seed is create-only,
+      so naming the existing roots left their status and scores intact.</li>
+    <li>outside-tree status changes: before&rarr;run 1 = 0, run 1&rarr;seed = 0,
       across both = 0 (8324 rows outside the three trees).</li>
-    <li>spend: $0.000 (run 1 Cost line; run 2 reached no Cost line).</li>
+    <li>spend: $0.000 (run 1 Cost line).</li>
+    <li>gate: <code>uv run --no-sync pytest tests/discovery</code> —
+      <code>1171 passed</code>, EXIT=0 (tests_discovery.log).</li>
   </ul>
 
   <p id="equilibrium-roots-restore-negative-control">
-    Negative control: <code>negative_control.log</code> — a check asserting no
-    root is left at <code>discovered</code> with a triage score, run against the
-    before-state, reads 3 stranded and exits 1; against the after-state it
-    exits 0.
+    Negative control: <code>negative_control_predicate_removed.log</code> — with
+    the spec's <code>source_filter</code> removed, three tests fail
+    (admit-only-stranded-discovered, render-the-stranded-row-predicate,
+    excludes-never-scanned-discovered), EXIT=1; with the predicate in place the
+    same file is 27 passed. <code>negative_control.log</code> records the state
+    check: the before-state reads 3 stranded roots and exits 1,
+    <code>negative_control_after.log</code> reads 0 and exits 0.
   </p>
 </section>
