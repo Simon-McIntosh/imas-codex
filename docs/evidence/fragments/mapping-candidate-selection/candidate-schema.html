@@ -1,0 +1,60 @@
+<section>
+  <h2 id="candidate-schema">MAPPING_CANDIDATE edges: schema, write and clear</h2>
+  <p id="candidate-schema-scope">
+    Declares the candidate relationship and the two functions that own it.
+    Write paths: <code>imas_codex/schemas/facility.yaml</code>,
+    <code>imas_codex/ids/graph_ops.py</code>,
+    <code>tests/ids/test_candidate_persistence.py</code>.
+  </p>
+
+  <h3 id="candidate-schema-declaration">Declaration</h3>
+  <ul id="candidate-schema-declared-surface">
+    <li><code>SignalSource</code> gains slot <code>mapping_candidates</code>,
+      <code>range: IMASNode</code>, <code>multivalued</code>, annotated
+      <code>relationship_type: MAPPING_CANDIDATE</code>. The generated schema
+      context reads <code>('SignalSource', 'MAPPING_CANDIDATE', 'IMASNode',
+      'many')</code>.</li>
+    <li><code>SignalSource</code> gains field <code>candidate_route</code>
+      (string), null until judged.</li>
+    <li>Edge properties written by <code>write_candidates</code>: rank,
+      retrieval_score, ids, choice_probability, p_same_quantity, model,
+      judged_at, route.</li>
+  </ul>
+
+  <h3 id="candidate-schema-functions">Functions in <code>graph_ops.py</code></h3>
+  <p id="candidate-schema-write-behaviour">
+    <code>write_candidates(source_id, judgments, route, gc)</code> replaces a
+    source's MAPPING_CANDIDATE edges in one statement: it sets
+    <code>candidate_route</code>, releases the mapping claim
+    (<code>mapping_claimed_at</code> and <code>mapping_claim_token</code> to
+    null), deletes the prior edges, then UNWINDs the judgments, MATCHing both
+    the SignalSource and each IMASNode. It returns the written count and raises
+    <code>CandidateWriteError</code> when that count is below the number of
+    judgments, so a candidate whose node has vanished fails loudly. The release
+    rides in the same statement that can raise, so a failed write still frees
+    the claim.
+  </p>
+  <p id="candidate-schema-clear-behaviour">
+    <code>clear_candidates(facility, gc)</code> removes a facility's candidate
+    edges and resets <code>candidate_route</code>, returning
+    <code>{"edges_removed": n, "routes_reset": m}</code>.
+  </p>
+
+  <h3 id="candidate-schema-evidence">Evidence</h3>
+  <ul id="candidate-schema-gate">
+    <li><code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code>:
+      409 passed, 5 skipped, 1 deselected (the graph test), exit 0.
+      <code>tests/ids/test_candidate_persistence.py</code> contributes 10
+      passing tests showing a re-judge replaces earlier edges, a missing
+      IMASNode raises, the claim is released on success and on failure, and
+      <code>clear_candidates</code> reports its counts.</li>
+    <li><code>-m graph</code> against the live database (compute node
+      <code>98dci4-clu-2018</code>): creates a uniquely named fixture source,
+      writes two candidates, re-judges to one (earlier edges replaced), reads
+      the released claim, clears, and deletes the fixture — exit 0, zero
+      residue.</li>
+    <li>Negative control: removing the written-count check makes
+      <code>test_missing_imnode_raises</code> fail (exit 1), so the guard is
+      load-bearing.</li>
+  </ul>
+</section>

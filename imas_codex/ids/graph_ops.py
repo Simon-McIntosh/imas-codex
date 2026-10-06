@@ -13,12 +13,22 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
 
 logger = logging.getLogger(__name__)
+
+
+class CandidateWriteError(RuntimeError):
+    """Raised when a candidate write persists fewer edges than judgments.
+
+    A candidate whose IMASNode has vanished cannot be written, because the
+    write MATCHes both endpoints. Surfacing that as an error keeps the loss
+    loud instead of silently dropping the candidate.
+    """
 
 
 @dataclass
@@ -488,3 +498,158 @@ def create_imas_mapping(
         len(sections),
     )
     return mapping_id
+
+
+# =============================================================================
+# Mapping candidate persistence
+# =============================================================================
+
+# Optional edge properties copied verbatim from each judgment record when
+# present: rank (Jev order), retrieval_score, the routed IDS and its Choice
+# probability, p_same_quantity, the judging model and judged_at carry the
+# candidate's provenance. route is normalised to a boolean below.
+_CANDIDATE_EDGE_FIELDS = (
+    "rank",
+    "retrieval_score",
+    "ids",
+    "choice_probability",
+    "p_same_quantity",
+    "model",
+    "judged_at",
+)
+
+
+def _candidate_record(judgment: dict[str, Any]) -> dict[str, Any]:
+    """Normalise one judgment into the record the write query binds.
+
+    ``path`` names the IMASNode the candidate targets and is required. The
+    selection flag is read from ``route`` or, failing that, ``selected``; an
+    explicit flag lets the caller mark the chosen candidate independently of
+    the source-level route decision.
+    """
+    try:
+        path = judgment["path"]
+    except KeyError as exc:
+        raise CandidateWriteError(
+            "candidate judgment has no 'path' naming its IMASNode"
+        ) from exc
+
+    record: dict[str, Any] = {"path": path, "route": False}
+    for name in _CANDIDATE_EDGE_FIELDS:
+        record[name] = judgment.get(name)
+    record["route"] = bool(judgment.get("route", judgment.get("selected", False)))
+    return record
+
+
+def write_candidates(
+    source_id: str,
+    judgments: Iterable[dict[str, Any]],
+    route: str | None,
+    gc: GraphClient,
+) -> int:
+    """Replace a source's MAPPING_CANDIDATE edges in one transaction.
+
+    Deletes every existing MAPPING_CANDIDATE edge on the source, then writes
+    one edge per judgment, MATCHing both the SignalSource and each candidate's
+    IMASNode. The same statement sets ``candidate_route`` and releases the
+    source's mapping claim, so a re-judge replaces the earlier edges and a
+    failed re-judge still frees the claim for the next pass.
+
+    Args:
+        source_id: SignalSource ID.
+        judgments: One record per candidate. ``path`` (the IMASNode ID) is
+            required; ``rank``, ``retrieval_score``, ``ids``,
+            ``choice_probability``, ``p_same_quantity``, ``model`` and
+            ``judged_at`` are copied to the edge when present. A truthy
+            ``route`` (or ``selected``) marks the edge as the selected
+            candidate.
+        route: Route decision stored on ``SignalSource.candidate_route``
+            (e.g. 'selected', 'escalated', 'no_candidate'), or None to clear it.
+        gc: Graph client instance.
+
+    Returns:
+        The number of edges written.
+
+    Raises:
+        CandidateWriteError: If fewer edges were written than judgments, which
+            happens when a candidate's IMASNode does not exist.
+    """
+    records = [_candidate_record(j) for j in judgments]
+    expected = len(records)
+
+    rows = gc.query(
+        """
+        MATCH (sg:SignalSource {id: $source_id})
+        SET sg.candidate_route = $route,
+            sg.mapping_claimed_at = null,
+            sg.mapping_claim_token = null
+        WITH sg
+        OPTIONAL MATCH (sg)-[old:MAPPING_CANDIDATE]->(:IMASNode)
+        DELETE old
+        WITH DISTINCT sg
+        UNWIND $records AS rec
+        MATCH (ip:IMASNode {id: rec.path})
+        MERGE (sg)-[r:MAPPING_CANDIDATE]->(ip)
+        SET r.rank = rec.rank,
+            r.retrieval_score = rec.retrieval_score,
+            r.ids = rec.ids,
+            r.choice_probability = rec.choice_probability,
+            r.p_same_quantity = rec.p_same_quantity,
+            r.model = rec.model,
+            r.judged_at = rec.judged_at,
+            r.route = rec.route
+        RETURN count(r) AS written
+        """,
+        source_id=source_id,
+        route=route,
+        records=records,
+    )
+
+    written = rows[0]["written"] if rows else 0
+    if written < expected:
+        raise CandidateWriteError(
+            f"wrote {written} of {expected} MAPPING_CANDIDATE edges for "
+            f"{source_id}; a candidate's IMASNode may not exist"
+        )
+
+    logger.info(
+        "Wrote %d MAPPING_CANDIDATE edges for %s (route=%s)",
+        written,
+        source_id,
+        route,
+    )
+    return written
+
+
+def clear_candidates(facility: str, gc: GraphClient) -> dict[str, int]:
+    """Remove a facility's candidate edges and reset every source's route.
+
+    Args:
+        facility: Facility ID whose sources are cleared.
+        gc: Graph client instance.
+
+    Returns:
+        ``{"edges_removed": ..., "routes_reset": ...}`` — the number of
+        MAPPING_CANDIDATE edges deleted and the number of sources whose
+        ``candidate_route`` was reset to null.
+    """
+    rows = gc.query(
+        """
+        MATCH (sg:SignalSource {facility_id: $facility})
+        OPTIONAL MATCH (sg)-[r:MAPPING_CANDIDATE]->(:IMASNode)
+        WITH sg, collect(r) AS rels,
+             CASE WHEN sg.candidate_route IS NULL THEN 0 ELSE 1 END AS had_route
+        WITH sg, rels, size(rels) AS edge_count, had_route
+        FOREACH (rel IN rels | DELETE rel)
+        SET sg.candidate_route = null
+        RETURN sum(edge_count) AS edges_removed,
+               sum(had_route) AS routes_reset
+        """,
+        facility=facility,
+    )
+
+    row = rows[0] if rows else {}
+    return {
+        "edges_removed": row.get("edges_removed") or 0,
+        "routes_reset": row.get("routes_reset") or 0,
+    }
