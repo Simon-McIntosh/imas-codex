@@ -642,7 +642,10 @@ class GraphClient:
             {"processed": 2, "relationships": {"AT_FACILITY": 2}}
         """
         if not items:
-            return {"processed": 0, "relationships": {}}
+            empty_counts = {"processed": 0, "relationships": {}}
+            if create_only:
+                empty_counts["created"] = 0
+            return empty_counts
 
         # Auto-embed items with description but no embedding
         if label in self.schema.description_embeddable_labels:

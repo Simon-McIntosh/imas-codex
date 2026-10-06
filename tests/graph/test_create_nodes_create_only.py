@@ -219,3 +219,12 @@ def test_default_reports_processed_and_no_created_count():
 
     assert result["processed"] == 2
     assert "created" not in result
+
+
+def test_create_only_empty_items_reports_zero_created():
+    client = _client({})
+
+    result = client.create_nodes("FacilityPath", [], create_only=True)
+
+    assert result["created"] == 0
+    assert result["processed"] == 0
