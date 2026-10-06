@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;, &quot;mapping-candidate-selection#s4&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -281,28 +281,39 @@
       retrieval_score, arms (the set of arms that produced it), unit, documentation,
       node_category, data_type, physics_domain and parent_documentation.
     </p>
-    <p>It builds on the maintained owners and adds no parallel ones:</p>
+    <p>
+      The shortlist is already built once, in <code>gather_ids_context</code>
+      (<code>imas_codex/ids/mapping.py:781–854</code>). That code collects per-source IMAS
+      hits, expands the top three through clusters, and deduplicates on path. This section
+      <em>moves</em> that construction into <code>candidates.py</code> and re-points its two
+      arms at the maintained owners. It is not written a second time.
+    </p>
     <ul>
-      <li>Retrieval calls <code>hybrid_dd_search</code>
-        (<code>imas_codex/graph/dd_search.py:97</code>) once per source. Every source
+      <li>Vector hits come from <code>hybrid_dd_search</code>
+        (<code>imas_codex/graph/dd_search.py:97</code>), once per source. Every source
         description is embedded in one batch, and each embedding is passed in through the
-        function's <code>embedding</code> argument. The function's oversampling already
-        returns K hits after its filters, so no search code is copied or patched.</li>
+        function's <code>embedding</code> argument. Its oversampling already returns K hits
+        after its filters, so no search code is copied or patched.</li>
       <li>Cluster expansion calls <code>cluster_search</code>
-        (<code>dd_search.py:869</code>), not <code>ClusterSearcher</code>.</li>
+        (<code>dd_search.py:869</code>) in place of <code>ClusterSearcher</code>. The
+        existing path-based deduplication moves with it.</li>
       <li>The unit filter uses the dimension check behind <code>analyze_units</code>. It drops
         a candidate only when both units are known and their dimensions differ.</li>
       <li>Cross-facility precedent comes from <code>fetch_cross_facility_mappings</code>.</li>
-      <li>The map pipeline's legacy retrieval, <code>compute_semantic_matches</code> and the
-        <code>ClusterSearcher</code> block in <code>gather_ids_context</code>, is retired by
-        §8, not by this section.</li>
+      <li><code>gather_ids_context</code> builds <code>source_candidates</code> by calling
+        <code>retrieve_candidates</code>, so the old construction and the
+        <code>ClusterSearcher</code> load in <code>gather_shared_context</code> are deleted
+        here. <code>compute_semantic_matches</code> keeps only its wiki and code bridging
+        matrix until §8.</li>
     </ul>
     <p>K and the arm set are the ones §3 names.</p>
     <p><strong>Node</strong> <code>candidate-retrieval</code>, role implement.</p>
     <ul>
-      <li>Write paths: <code>imas_codex/ids/candidates.py</code> and
+      <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
+        <code>imas_codex/ids/mapping.py</code> and
         <code>tests/ids/test_candidates.py</code>.</li>
-      <li>It may not widen <code>hybrid_dd_search</code>'s signature.</li>
+      <li>It may not widen <code>hybrid_dd_search</code>'s signature or the return shape of
+        <code>gather_ids_context</code>.</li>
     </ul>
     <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
       following.</p>
@@ -313,6 +324,9 @@
         is unknown.</li>
       <li>Cluster expansion adds members without duplicating a path.</li>
       <li>One encoder call embeds a batch of sources.</li>
+      <li><code>gather_ids_context</code> returns <code>source_candidates</code> built by
+        <code>retrieve_candidates</code>, and <code>mapping.py</code> no longer imports
+        <code>ClusterSearcher</code>.</li>
     </ul>
 
     <h2 id="s5">§5 — Pair judgment through Jev</h2>
@@ -333,8 +347,10 @@
         <code>discovery-relevance</code>.</li>
       <li><strong>Thresholds.</strong> <code>map-select-threshold</code>,
         <code>map-select-margin</code> and <code>map-floor-threshold</code> in
-        <code>[tool.imas-codex.discovery]</code>, with defaults from §3. Their accessors sit
-        beside <code>get_triage_threshold</code> in <code>imas_codex/settings.py</code>. Two §25
+        <code>[tool.imas-codex.discovery]</code>, with defaults from §3. One accessor,
+        <code>get_mapping_route_thresholds()</code>, returns them as a frozen
+        <code>RouteThresholds</code>, beside <code>get_triage_threshold</code> in
+        <code>imas_codex/settings.py</code>. Two §25
         nodes also edit <code>settings.py</code> and <code>pyproject.toml</code>:
         <code>decisions-call</code> and <code>code-relevance-triage</code>. This node is
         dispatched only after both have merged, and its worker reads the merged
@@ -342,9 +358,11 @@
       <li><strong>Questions.</strong> <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>
         carries the frozen §3 wording. It is declared and rendered through the same mechanism
         that §25 establishes for <code>code/triage.md</code>.</li>
-      <li><strong>Judgment.</strong> <code>imas_codex/ids/judgment.py</code> builds the state,
-        asks the questions in the batching form §3 chose, and returns one typed
-        <code>PairJudgment</code> per candidate: path, <code>p_same_quantity</code>,
+      <li><strong>Judgment.</strong> Judgment and routing live in
+        <code>imas_codex/ids/candidates.py</code> beside retrieval, so one module owns the
+        candidate stage. <code>judge_candidates</code> builds the state, asks the questions
+        in the batching form §3 chose, and returns one typed <code>PairJudgment</code> per
+        candidate: path, <code>p_same_quantity</code>,
         <code>p_same_object</code>, model, judged_at and cost. It also exposes
         <code>route(judgments, thresholds) -&gt; Route</code>, where <code>Route</code> is
         <code>selected</code>, <code>escalated</code> or <code>no_candidate</code>. A source is
@@ -353,15 +371,28 @@
         score reaches the floor. Everything else is escalated.</li>
       <li><strong>Fail closed.</strong> A decisions failure returns no route. The source stays
         unjudged for a later retry and is never selected or rejected.</li>
+      <li><strong>Surface.</strong> The section adds:
+        <ul>
+          <li>one model seat;</li>
+          <li>one settings accessor with its dataclass;</li>
+          <li>in <code>candidates.py</code>, <code>judge_candidates</code>,
+            <code>route</code>, <code>PairJudgment</code> and <code>Route</code>.</li>
+        </ul>
+        It retires nothing in these families, for two reasons. Every LLM stage in
+        <code>MODEL_SECTIONS</code> has its own seat so its model can change alone, and
+        no existing code judges a (signal, DD node) pair. The surface it displaces is
+        §8's: the free-text <code>imas_target_path</code> that the assign call writes for
+        every source.</li>
     </ul>
-    <p><strong>Node</strong> <code>candidate-judgment</code>, role implement.</p>
+    <p><strong>Node</strong> <code>candidate-judgment</code>, role implement. It runs after
+      §4, which also writes <code>candidates.py</code>.</p>
     <ul>
-      <li>Write paths: <code>imas_codex/ids/judgment.py</code>,
+      <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
         <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>,
         <code>imas_codex/settings.py</code>, <code>pyproject.toml</code> and
-        <code>tests/ids/test_judgment.py</code>.</li>
+        <code>tests/ids/test_candidate_judgment.py</code>.</li>
     </ul>
-    <p><strong>Done when</strong> <code>tests/ids/test_judgment.py</code> passes under the
+    <p><strong>Done when</strong> <code>tests/ids/test_candidate_judgment.py</code> passes under the
       fake transport and shows the following.</p>
     <ul>
       <li>The state carries the facility, source and candidate blocks.</li>
@@ -440,21 +471,47 @@
     <p>
       <strong>Worker.</strong> The candidate stage is a new phase in
       <code>imas_codex/ids/workers.py</code>, the module that already owns SignalSource
-      claiming. It adds <code>claim_sources_for_candidates</code>,
-      <code>release_candidate_claim</code>, <code>has_pending_candidate_work</code> and
-      <code>candidate_worker</code> beside their mapping counterparts. It also adds a
-      <code>run_candidate_engine</code> that uses <code>run_discovery_engine</code> with an
-      <code>OrphanRecoverySpec</code> on <code>candidate_claimed_at</code>, as
-      <code>run_mapping_engine</code> does.
+      claiming. That module already holds the claim pattern twice. This section generalises
+      it once, and does not add a third copy.
     </p>
     <ul>
+      <li><code>claim_sources_for_assignment</code> and
+        <code>claim_sources_for_mapping</code> (<code>workers.py:136, 199</code>) become one
+        claim routine.</li>
+      <li><code>release_mapping_claim</code> and <code>release_mapping_claims_batch</code>
+        (<code>274, 287</code>) become one release routine.</li>
+      <li>The three <code>has_pending_*</code> checks (<code>303, 329, 343</code>) become one
+        pending check.</li>
+      <li>Each is parameterised by the status predicate, the claim property names and the
+        returned fields. The assign and map stages and the new candidate stage all call
+        them.</li>
+      <li>The section adds <code>candidate_worker</code>, plus a
+        <code>run_candidate_engine</code> that uses <code>run_discovery_engine</code> with an
+        <code>OrphanRecoverySpec</code> on <code>candidate_claimed_at</code>, as
+        <code>run_mapping_engine</code> does.</li>
       <li>The claim takes a batch of enriched sources that are unjudged, or stale under the
-        claim timeout. It uses the same <code>@retry_on_deadlock</code> + <code>ORDER BY
+        claim timeout. It keeps the <code>@retry_on_deadlock</code> + <code>ORDER BY
         rand()</code> + claim-token pattern.</li>
       <li>Each batch goes through <code>retrieve_candidates</code>, the judgment,
         <code>route</code> and <code>write_candidates</code>, in that order.</li>
       <li><code>discover status FACILITY</code> gains the counts by candidate route.</li>
     </ul>
+    <p>
+      <strong>Surface.</strong> The section adds:
+    </p>
+    <ul>
+      <li>one subcommand, <code>discover map</code>, with five options that all reuse
+        existing names;</li>
+      <li>one <code>DISCOVERY_DOMAINS</code> value, <code>map</code>
+        (<code>cli/discover/common.py:30</code>), which is how <code>discover clear</code>
+        and <code>discover status</code> reach it.</li>
+    </ul>
+    <p>
+      Against that, seven claim helpers in <code>workers.py</code> become three, and §8
+      retires two <code>imas map run</code> options. A separate command is needed because the
+      candidate stage runs on a different cadence from mapping: it is cheap, it re-runs
+      whenever signals are re-enriched, and it costs no reasoning-model call.
+    </p>
     <p><strong>Node</strong> <code>discover-map-cli</code>, role implement.</p>
     <ul>
       <li>Write paths: <code>imas_codex/cli/discover/map.py</code>,
@@ -497,10 +554,11 @@
       <li><code>imas map status</code> shows the candidate routes beside the mapping
         status.</li>
       <li><strong>Retired legacy retrieval.</strong> The map context stops calling
-        <code>compute_semantic_matches</code> and <code>ClusterSearcher</code> in
-        <code>gather_shared_context</code> and <code>gather_ids_context</code>; an escalated
-        source's context comes from its candidates. <code>compute_semantic_matches</code>
-        is deleted when no caller remains.</li>
+        <code>compute_semantic_matches</code>, which after §4 supplies only the wiki and
+        code bridging matrix. An escalated source's context comes from its candidates, and
+        wiki and code context comes from the existing <code>fetch_wiki_context</code> and
+        <code>fetch_code_context</code>. <code>compute_semantic_matches</code> is deleted
+        when no caller remains.</li>
       <li><strong>Retired options.</strong> <code>imas map run</code> loses
         <code>--skip-metadata</code>, which is parsed and never read, and
         <code>--skip-errors</code>, which is the same as <code>--stage data</code>.</li>
