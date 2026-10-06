@@ -1,0 +1,23 @@
+<section>
+  <h2 id="superseded-individualization-prompt">The signals/individualization prompt is deleted, superseded by signals/source_unwind</h2>
+  <p id="superseded-individualization-prompt-result">
+    <code>imas_codex/llm/prompts/signals/individualization.md</code> is removed
+    with <code>git rm</code>. Its frontmatter declared
+    <code>used_by: imas_codex.discovery.signals.parallel.individualize_source_descriptions</code>
+    with <code>task: individualization</code>, and no <code>render_prompt</code>
+    call site names <code>signals/individualization</code>; that live function
+    now renders <code>signals/source_unwind</code>, which declares the same
+    <code>used_by</code> and task with a generated schema.
+    <code>imas_codex/llm/prompts/discovery/enricher.md</code> is unchanged (blob
+    <code>f0be483a</code> identical in both revisions).
+  </p>
+  <p id="superseded-individualization-prompt-evidence">
+    Prompt counts, measured before and after deletion: <code>load_prompts</code>
+    returns <strong>66 &rarr; 65</strong> and the MCP server's registered prompt
+    list returns <strong>66 &rarr; 65</strong>; <code>signals/source_unwind</code>
+    is present in both after deletion, <code>signals/individualization</code> in
+    neither. Gate <code>uv run --no-sync pytest tests/llm tests/discovery</code>
+    exits <strong>0</strong> (1426 passed, 9 skipped, 5 deselected) on the fleet
+    compute node (<code>98dci4-clu-2018</code>).
+  </p>
+</section>
