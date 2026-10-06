@@ -89,6 +89,15 @@ class TestResetSpec:
             assert spec.facility_via_rel is True, f"paths/{name} should use rel"
             assert spec.label == "FacilityPath"
 
+    def test_path_scanned_reset_clears_expanded_at(self, reset_mod):
+        """Re-listing a root requires clearing its expansion stamp."""
+        spec = reset_mod.PATH_RESET_SPECS["scanned"]
+        assert "expanded_at" in spec.clear_fields
+
+    def test_path_triaged_reset_clears_expanded_at(self, reset_mod):
+        spec = reset_mod.PATH_RESET_SPECS["triaged"]
+        assert "expanded_at" in spec.clear_fields
+
 
 # ─── reset_to_status tests ──────────────────────────────────────────────
 
@@ -177,3 +186,15 @@ class TestResetToStatus:
         query = mock_gc.query.call_args[0][0]
         assert "CHECKED_WITH" in query
         assert "DELETE r" in query
+
+    def test_reset_paths_clears_expanded_at_in_query(self, reset_mod):
+        """The scanned reset nulls expanded_at so the root can expand again."""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 12}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.PATH_RESET_SPECS["scanned"]
+            reset_mod.reset_to_status(spec, "jt-60sa")
+
+        query = mock_gc.query.call_args[0][0]
+        assert "n.expanded_at = null" in query
