@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -210,10 +210,14 @@
             function.</li>
         </ul></li>
       <li><code>imas map status</code> shows the candidate routes beside the mapping status
-        by calling <code>count_candidates_by_route</code>, the reader §7 added to
-        <code>imas_codex/ids/workers.py</code> for <code>discover status</code>, so both
-        surfaces share one count. <code>count_sources_by_mapping_status</code>, which has no
-        caller, is deleted.</li>
+        by calling <code>count_candidates_by_route</code>, so both surfaces share one count.
+        §7 put that reader in <code>imas_codex/ids/workers.py</code>. It moves into
+        <code>graph_ops.py</code> beside <code>write_candidates</code> and
+        <code>clear_candidates</code>, so every candidate-state query has one owner.
+        <code>edge-ownership</code> adds it to <code>graph_ops.py</code>, and
+        <code>map-run-consumes-candidates</code> deletes the <code>workers.py</code> copy and
+        repoints <code>discover status</code> and <code>discover clear</code>.
+        <code>count_sources_by_mapping_status</code>, which has no caller, is deleted.</li>
       <li><strong>Retired legacy retrieval.</strong> The map context stops calling
         <code>compute_semantic_matches</code>, which after §4 supplies only the wiki and
         code bridging matrix. An escalated source's context comes from its candidates, and
@@ -317,7 +321,9 @@
             <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
             <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
             <code>imas_codex/schemas/facility.yaml</code>,
-            <code>tests/tools/test_dd_version_filtering.py</code> and
+            <code>imas_codex/cli/discover/__init__.py</code>,
+            <code>tests/tools/test_dd_version_filtering.py</code>,
+            <code>tests/cli/test_discover_map.py</code> and
             <code>tests/ids/</code>.</li>
           <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
             tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py
