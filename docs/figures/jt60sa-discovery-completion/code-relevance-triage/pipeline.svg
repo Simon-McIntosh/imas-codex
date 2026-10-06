@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="470" viewBox="0 0 1400 470" font-family="sans-serif">
+  <rect x="0" y="0" width="1400" height="470" fill="white"/>
+
+  <!-- Row 1: the names arm decides relevance from file identity -->
+  <g font-size="22" fill="#111">
+    <text x="40" y="46">names arm — file identity</text>
+  </g>
+
+  <g fill="none" stroke="#333" stroke-width="2">
+    <rect x="40" y="80" width="150" height="64"/>
+    <rect x="250" y="80" width="300" height="64"/>
+    <rect x="640" y="80" width="150" height="64"/>
+    <rect x="870" y="80" width="470" height="64"/>
+  </g>
+  <g font-size="20" fill="#111">
+    <text x="60" y="118">discovered</text>
+    <text x="270" y="110">six decisions questions</text>
+    <text x="270" y="132" fill="#555" font-size="18">loads · processes · describes · IMAS · sim · role</text>
+    <text x="662" y="118">triaged</text>
+    <text x="890" y="110" fill="#b00">skipped</text>
+    <text x="890" y="132" fill="#b00" font-size="18">reason names role and probabilities</text>
+  </g>
+
+  <g fill="none" stroke="#333" stroke-width="2" marker-end="url(#a)">
+    <path d="M190 112 L250 112"/>
+    <path d="M550 104 L640 104"/>
+  </g>
+  <g fill="none" stroke="#b00" stroke-width="2" marker-end="url(#r)">
+    <path d="M550 132 L870 132"/>
+  </g>
+  <text x="566" y="96" font-size="19" fill="#0a5">relevance ≥ 0.40</text>
+  <text x="566" y="156" font-size="19" fill="#b00">relevance &lt; 0.40</text>
+  <text x="250" y="176" font-size="18" fill="#333">relevance = max of the four scope nouls</text>
+
+  <!-- Row 2: enrichment, scoring, content arm, ingest claim -->
+  <g font-size="22" fill="#111">
+    <text x="40" y="246">content arm — file preview</text>
+  </g>
+
+  <g fill="none" stroke="#333" stroke-width="2">
+    <rect x="470" y="280" width="150" height="64"/>
+    <rect x="680" y="280" width="150" height="64"/>
+    <rect x="890" y="280" width="330" height="64"/>
+    <rect x="890" y="392" width="470" height="64"/>
+  </g>
+  <g fill="none" stroke="#333" stroke-width="2" marker-end="url(#a)">
+    <path d="M620 312 L680 312"/>
+    <path d="M830 312 L890 312"/>
+  </g>
+  <g font-size="20" fill="#111">
+    <text x="490" y="318">enrich</text>
+    <text x="700" y="318">scored</text>
+    <text x="910" y="312">records content relevance</text>
+    <text x="910" y="334" fill="#555" font-size="18">status unchanged — still scored</text>
+    <text x="910" y="424">ingest claim</text>
+    <text x="1060" y="424" fill="#555" font-size="18">relevance ≥ 0.50, highest first</text>
+  </g>
+
+  <!-- triaged drops into the enrichment row -->
+  <path d="M715 144 L715 200 L545 200 L545 280" fill="none" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+  <text x="560" y="228" font-size="19" fill="#0a5">passes triage</text>
+
+  <!-- content arm feeds the ingest claim -->
+  <path d="M1055 344 L1055 392" fill="none" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+  <g fill="none" stroke="#b00" stroke-width="2" marker-end="url(#r)">
+    <path d="M1250 344 L1360 344 L1360 466"/>
+  </g>
+  <text x="1200" y="300" font-size="19" fill="#b00">skipped: relevance &lt; 0.50</text>
+
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#333"/>
+    </marker>
+    <marker id="r" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#b00"/>
+    </marker>
+  </defs>
+</svg>
