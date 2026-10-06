@@ -169,8 +169,6 @@ def _local_call_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
         call_kwargs["seed"] = kwargs["seed"]
     if kwargs.get("timeout") is not None:
         call_kwargs["timeout"] = kwargs["timeout"]
-    if kwargs.get("response_format") is not None:
-        call_kwargs["response_format"] = kwargs["response_format"]
     if kwargs.get("extra_body"):
         call_kwargs["extra_body"] = kwargs["extra_body"]
     return call_kwargs
@@ -478,9 +476,16 @@ class EmptyResponseError(ValueError):
     Retryable. Carries ``finish_reason`` so the retry loop can tell budget
     exhaustion (``finish_reason='length'`` — a reasoning model spent its whole
     completion budget on thinking) from other transient empties, and grow the
-    token budget before the next attempt in the former case. Subclasses
-    ``ValueError`` for backward compatibility with callers that catch the old
-    ``ValueError('LLM returned empty response content')``.
+    token budget before the next attempt in the former case.
+
+    An engine-aborted reply (``finish_reason='abort'``) counts as empty even
+    when it carries a partial content: the engine stopped generation mid-stream,
+    so the prefix is a truncated fragment rather than an answer and must be
+    retried instead of handed to the JSON parser. An abort does not grow the
+    token budget — only ``finish_reason='length'`` does.
+
+    Subclasses ``ValueError`` for backward compatibility with callers that
+    catch the old ``ValueError('LLM returned empty response content')``.
 
     The message always contains ``"empty response content"`` so it matches the
     retryable-pattern set.
@@ -1532,6 +1537,22 @@ def _finish_reason(response: Any) -> str | None:
         return None
 
 
+def _reject_unusable_reply(response: Any, content: str | None) -> None:
+    """Raise :class:`EmptyResponseError` when a reply carries no usable content.
+
+    A reply is unusable when it has no content at all, or when the engine
+    aborted generation (``finish_reason='abort'``) — an aborted reply's content
+    is a truncated prefix, not an answer, so the structured loops must retry
+    rather than hand the prefix to the JSON parser. Every structured loop calls
+    this in place of an ``if not content`` guard so the abort cause reaches the
+    same retry path. An abort does not grow the token budget: that stays keyed
+    on ``finish_reason == 'length'`` at the callers.
+    """
+    finish_reason = _finish_reason(response)
+    if not content or finish_reason == "abort":
+        raise EmptyResponseError(finish_reason)
+
+
 # Multiplier applied to the request's max_tokens when an empty-content response
 # was caused by completion-budget exhaustion (finish_reason='length'). The next
 # retry gets more headroom so reasoning + the JSON answer both fit.
@@ -2280,8 +2301,7 @@ def call_llm_structured(
 
             # Parse response content through Pydantic
             content = response.choices[0].message.content
-            if not content:
-                raise EmptyResponseError(_finish_reason(response))
+            _reject_unusable_reply(response, content)
 
             content = _sanitize_content(content)
             parsed = _parse_structured_content(content, response_model, model)
@@ -2508,8 +2528,7 @@ async def acall_llm_structured(
 
                 # Parse response content through Pydantic
                 content = response.choices[0].message.content
-                if not content:
-                    raise EmptyResponseError(_finish_reason(response))
+                _reject_unusable_reply(response, content)
 
                 content = _sanitize_content(content)
                 parsed = _parse_structured_content(content, response_model, model)
@@ -2832,8 +2851,7 @@ def _call_frozen_structured_transport(
             total_cache_read += cache_read
             total_cache_creation += cache_creation
             content = response.choices[0].message.content
-            if not content:
-                raise EmptyResponseError(_finish_reason(response))
+            _reject_unusable_reply(response, content)
             parsed = _parse_structured_content(
                 _sanitize_content(content), response_model, model
             )
@@ -2956,8 +2974,7 @@ async def _acall_frozen_structured_transport(
                 total_cache_read += cache_read
                 total_cache_creation += cache_creation
                 content = response.choices[0].message.content
-                if not content:
-                    raise EmptyResponseError(_finish_reason(response))
+                _reject_unusable_reply(response, content)
                 parsed = _parse_structured_content(
                     _sanitize_content(content), response_model, model
                 )
