@@ -1,0 +1,43 @@
+<section>
+  <h2 id="equilibrium-tree-paths">The three equilibrium source trees get FacilityPath rows through seeded roots</h2>
+  <p id="equilibrium-tree-paths-roots">
+    The public <code>discovery_roots</code> in
+    <code>imas_codex/config/facilities/jt-60sa.yaml</code> no longer name
+    <code>/analysis/src</code>; that one entry is replaced by its eleven seeded
+    subdirectories (SAselene_v2.0_forPSRC, SAeqread, edas2, ECCD, ofmcauto,
+    topics_release, easy-v5.01, eagle-v4.05, client_eqdbms.EQ32.Rev1, SAeqfame,
+    getseldata_v4.2), so a seed reproduces the graph without the parent walk.
+  </p>
+  <p id="equilibrium-tree-paths-run">
+    The scoped run
+    <code>uv run imas-codex discover paths jt-60sa --root /analysis/src/client_eqdbms.EQ32.Rev1
+    --root /analysis/src/SAeqfame --root /analysis/src/getseldata_v4.2 --time 20</code>
+    seeded 3 roots, then completed in 6m 10s with
+    <code>scanned=11, scored=3, cost=$0.000</code>.
+  </p>
+  <table id="equilibrium-tree-paths-counts">
+    <caption>FacilityPath rows under each tree, before and after the run</caption>
+    <thead>
+      <tr><th>tree</th><th>before total</th><th>before scored</th><th>after total</th><th>after scored</th><th>after status breakdown</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/analysis/src/client_eqdbms.EQ32.Rev1</td><td>0</td><td>0</td><td>8</td><td>1</td><td>scored 1, skipped 4, scanned 3</td></tr>
+      <tr><td>/analysis/src/SAeqfame</td><td>0</td><td>0</td><td>4</td><td>1</td><td>scored 1, scanned 2, triaged 1</td></tr>
+      <tr><td>/analysis/src/getseldata_v4.2</td><td>0</td><td>0</td><td>3</td><td>1</td><td>scored 1, scanned 2</td></tr>
+    </tbody>
+  </table>
+  <p id="equilibrium-tree-paths-outside">
+    jt-60sa FacilityPath rows outside the three trees whose status changed
+    during the run: <strong>0</strong> (8324 rows before, 8339 after; the 15
+    new rows are exactly the three trees; 0 removed). Negative control: the
+    count of jt-60sa rows whose path is exactly <code>/analysis/src</code>
+    reads <strong>0</strong>; rows under <code>/analysis/src/</code> total 641.
+  </p>
+  <p id="equilibrium-tree-paths-log">
+    Run log: <code>~/.local/share/imas-codex/logs/paths_jt-60sa.log</code>.
+    Cost lines: <code>Cost limit: $10.00</code>;
+    <code>TRIAGE batch: 3 paths, total: 3, cost: $0.000</code>;
+    <code>Discovery complete: scanned=11, scored=3, cost=$0.000, elapsed=6m 10s</code>.
+    Spend is $0.000 (local discovery seats), under the $5 ceiling.
+  </p>
+</section>
