@@ -1,0 +1,19 @@
+<section>
+  <h2 id="candidate-label-adjudication">Adjudicated test-split labels from the two labelling passes</h2>
+  <p id="candidate-label-adjudication-result">
+    The 75 test-split sources are labelled with a second-pass model
+    (openrouter <code>gpt-5.4</code>) using the same top-down DD walk as pass 1.
+    45 sources stand (both passes gave the same node set); the 30 disagreements
+    are adjudicated on the source, both answers and the candidate nodes of the
+    IDSs either pass chose. 36 sources carry a node label over 42 distinct
+    IMASNode ids and 39 are <code>none</code> with a reason; 23 labels changed
+    from pass 1.
+  </p>
+  <p id="candidate-label-adjudication-gate">
+    Gate prints <code>75 45 30 23</code>: every labelled id exists as a current
+    IMASNode (0 of 42 absent, 0 <code>removed</code>), every <code>none</code>
+    carries a reason and none carries the failure marker. Writes
+    <code>labels_test.json</code> and <code>adjudication.json</code> under the
+    probe's labels directory.
+  </p>
+</section>
