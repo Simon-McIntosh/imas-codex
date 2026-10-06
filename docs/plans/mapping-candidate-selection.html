@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 </head>
@@ -260,28 +260,57 @@
         <code>CandidateWriteError</code>. A test passes a route string and expects the
         refusal.</li>
     </ul>
-    <p><strong>Node</strong> <code>map-run-consumes-candidates</code>, role implement.</p>
-    <ul>
-      <li>Write paths: <code>imas_codex/ids/workers.py</code>,
-        <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
-        <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
-        <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
-        <code>imas_codex/ids/tools.py</code>, <code>imas_codex/ids/graph_ops.py</code>,
-        <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/cli/map.py</code> and
-        <code>tests/ids/</code>.</li>
-      <li>It runs after §7, which also writes <code>workers.py</code>.</li>
-    </ul>
-    <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
-      following.</p>
-    <ul>
-      <li>A selected source is mapped without an assign call.</li>
-      <li>An escalated source's prompt lists only its shortlist.</li>
-      <li>An answer naming a path outside the shortlist is refused.</li>
-      <li>A <code>target_id</code> outside the selected node is escalated.</li>
-      <li>A zero-row <code>MAPS_TO_IMAS</code> write raises.</li>
-      <li><code>imas map run --help</code> no longer lists <code>--skip-metadata</code> or
-        <code>--skip-errors</code>.</li>
-    </ul>
+    <p><strong>Nodes.</strong> The section is two nodes, run in order, because both write
+      <code>mapping.py</code>.</p>
+    <ol>
+      <li><strong><code>edge-ownership</code></strong>, role implement, 1.5 h. It owns the
+        <code>MAPS_TO_IMAS</code> census bullet and its sub-bullets, the edge-delete owner,
+        the strict selection flag, the retired options, and <code>imas map status</code>
+        calling <code>count_candidates_by_route</code>.
+        <ul>
+          <li>Write paths: <code>imas_codex/ids/graph_ops.py</code>,
+            <code>imas_codex/ids/models.py</code>, <code>imas_codex/ids/mapping.py</code>,
+            <code>imas_codex/cli/map.py</code>, <code>tests/ids/test_graph_ops.py</code>,
+            <code>tests/ids/test_error_derivation.py</code>,
+            <code>tests/ids/test_candidate_persistence.py</code> and
+            <code>tests/ids/test_mapping_edge_ownership.py</code>.</li>
+          <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/test_cli.py
+            -p no:cacheprovider</code> passes, with tests showing:
+            <ul>
+              <li>a zero-row <code>MAPS_TO_IMAS</code> write raises from every writer;</li>
+              <li><code>imas map clear</code> deletes through <code>graph_ops</code>;</li>
+              <li>a route string in a judgment is refused;</li>
+              <li><code>imas map status</code> prints route counts;</li>
+              <li><code>imas map run --help</code> lists neither retired option.</li>
+            </ul>
+            The two census commands print only sites in <code>graph_ops.py</code>.</li>
+        </ul></li>
+      <li><strong><code>map-run-consumes-candidates</code></strong>, role implement, 2.5 h.
+        It owns the selected, escalated and no_candidate behaviour, the
+        <code>target_id</code> guard, the retired legacy retrieval, the removed per-IDS
+        retrieval, the retired fields, and the deletion of
+        <code>count_sources_by_mapping_status</code>.
+        <ul>
+          <li>Write paths: <code>imas_codex/ids/workers.py</code>,
+            <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/tools.py</code>,
+            <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
+            <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
+            <code>imas_codex/schemas/facility.yaml</code> and <code>tests/ids/</code>.</li>
+          <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
+            tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py
+            -p no:cacheprovider</code> passes, with tests showing:
+            <ul>
+              <li>a selected source is mapped without an assign call;</li>
+              <li>an escalated source's prompt lists only its shortlist;</li>
+              <li>an answer naming a path outside the shortlist is refused;</li>
+              <li>a <code>target_id</code> outside the selected node is escalated;</li>
+              <li><code>gather_ids_context</code> no longer calls
+                <code>retrieve_candidates</code>.</li>
+            </ul>
+            <code>grep -rn 'mapping_target_ids\|mapping_target_path\|compute_semantic_matches'
+            imas_codex/</code> prints nothing.</li>
+        </ul></li>
+    </ol>
 
     <h2 id="s9">§9 — First JET run, audited</h2>
 <section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -405,7 +434,7 @@
     <div class="r-comment-body"><p>landing: review of discover-map-cli (run r-20261006T202215925701) stored as a parsed record scoring all six dimensions over base 2144115d1fadc622b16e4a5ea566ae74b19274ac -&gt; head 70eb1c17850f6d68cc1c81f27c2a841ceacb9de2 (goal_fidelity 20, evidence 16, scope_discipline 19, durability 17, fit 17, reuse 19; total 108), with three follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261006T202215925701-discover-map-cli" data-who="reckon-build" data-when="2026-10-06T21:00:30.842Z">
-    <div class="r-comment-body"><p>landing: `imas-codex discover map` candidate stage built on generalised claim routines — claims.py gains claim_batch/has_pending and claimed_field on release_*, workers.py&#x27;s seven helpers delegate to them and add candidate_worker/run_candidate_engine, and the map command registers with status/clear branches and tests.</p></div>
+    <div class="r-comment-body"><p>landing: `imas-codex discover map` candidate stage built on generalised claim routines — claims.py gains claim_batch/has_pending and claimed_field on release_*, workers.py's seven helpers delegate to them and add candidate_worker/run_candidate_engine, and the map command registers with status/clear branches and tests.</p></div>
 </div>
 </section>
 </main>
