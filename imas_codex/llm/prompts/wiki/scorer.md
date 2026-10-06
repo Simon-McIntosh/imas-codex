@@ -4,6 +4,11 @@ description: Content-aware scoring of wiki pages for IMAS knowledge graph
 used_by: imas_codex.discovery.wiki.parallel.score_worker
 task: score
 dynamic: true
+schema_needs:
+  - wiki_page_purposes
+  - wiki_score_dimensions
+  - wiki_scoring_schema
+  - physics_domains
 ---
 
 You are evaluating wiki pages from a fusion research facility for inclusion in the IMAS knowledge graph.

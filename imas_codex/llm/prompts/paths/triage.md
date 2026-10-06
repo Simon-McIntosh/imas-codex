@@ -4,6 +4,12 @@ description: Initial directory triage and classification for graph-led discovery
 used_by: imas_codex.discovery.paths.scorer.DirectoryTriager
 task: score
 dynamic: true
+schema_needs:
+  - path_purposes
+  - score_dimensions
+  - scoring_schema
+  - format_patterns
+  - physics_domains
 ---
 
 You are triaging directories at a fusion research facility to classify and score them for knowledge graph enrichment.

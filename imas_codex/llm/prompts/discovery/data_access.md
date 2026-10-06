@@ -2,6 +2,8 @@
 name: data_access
 description: Discover all data access methods at a facility
 dynamic: true
+schema_needs:
+  - data_access_fields
 ---
 
 # Data Access Discovery for {{ facility | default("the target facility") }}

@@ -152,6 +152,54 @@ def test_openrouter_model_reaches_litellm(monkeypatch):
     assert called["model"] == "openrouter/anthropic/claude-sonnet-4.6"
 
 
+def test_local_client_request_carries_no_response_format(monkeypatch):
+    """The local client is not asked to constrain the grammar; the schema is in the prompt."""
+    _register_local_endpoint(monkeypatch)
+
+    received: dict[str, Any] = {}
+
+    class Completions:
+        def create(self, **kwargs):
+            received.update(kwargs)
+            return _fake_response('{"value": "ok"}')
+
+    class Client:
+        class Chat:
+            completions = Completions()
+
+        chat = Chat()
+
+    monkeypatch.setattr(
+        llm, "_get_local_sync_client", lambda api_base, api_key: Client()
+    )
+
+    result = llm.call_llm_structured(
+        model=LOCAL_MODEL,
+        messages=[{"role": "user", "content": "hi"}],
+        response_model=Answer,
+        max_tokens=16,
+    )
+
+    assert result.parsed == Answer(value="ok")
+    assert "response_format" not in received
+
+
+def test_local_call_kwargs_drops_response_format():
+    """The local request builder never forwards response_format."""
+    out = llm._local_call_kwargs(
+        {
+            "model": LOCAL_MODEL,
+            "messages": [{"role": "user", "content": "hi"}],
+            "response_format": Answer,
+            "max_tokens": 8,
+        }
+    )
+
+    assert "response_format" not in out
+    assert out["model"] == "deepseek-v4.1-flash"
+    assert out["max_tokens"] == 8
+
+
 def test_async_path_routes_local_model_to_async_client(monkeypatch):
     """The async path still sends a local model to the dedicated async client."""
     _register_local_endpoint(monkeypatch)

@@ -4,7 +4,8 @@ description: Generate individualized name/description templates for signal sourc
 used_by: imas_codex.discovery.signals.parallel.individualize_source_descriptions
 task: individualization
 dynamic: true
-schema_needs: []
+schema_needs:
+  - signal_source_unwind_schema
 ---
 
 You are an expert at individualizing descriptions for groups of tokamak facility signals.
@@ -44,11 +45,5 @@ Source 1:
 ```
 
 ### Output
-```json
-{
-  "source_index": 1,
-  "name_template": "Magnetic Probe {member_id} Radial Position",
-  "description_template": "Radial position (R coordinate) of magnetic probe {member_id} in the poloidal magnetic field measurement array. {node_description}",
-  "variation_field": "probe number"
-}
-```
+
+{% include "schema/source-unwind-output.md" %}

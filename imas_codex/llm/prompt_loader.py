@@ -799,6 +799,28 @@ def _provide_signal_enrichment_schema() -> dict[str, Any]:
 
 
 @lru_cache(maxsize=1)
+def _provide_signal_source_unwind_schema() -> dict[str, Any]:
+    """Provide SignalSourceCodeUnwindBatch Pydantic schema for LLM prompts.
+
+    Used by the signals/source_unwind prompt, which generates name/description
+    templates for signal source group members.
+    """
+    from imas_codex.discovery.signals.models import (
+        SignalSourceCodeUnwind,
+        SignalSourceCodeUnwindBatch,
+    )
+
+    return {
+        "signal_source_unwind_schema_example": get_pydantic_schema_json(
+            SignalSourceCodeUnwindBatch
+        ),
+        "signal_source_unwind_schema_fields": get_pydantic_schema_description(
+            SignalSourceCodeUnwind
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
 def _provide_cluster_vocabularies() -> dict[str, Any]:
     """Provide controlled vocabularies for cluster labeling prompts.
 
@@ -911,6 +933,7 @@ _SCHEMA_PROVIDERS: dict[str, Any] = {
     "image_caption_schema": _provide_image_caption_schema,
     # Signal enrichment
     "signal_enrichment_schema": _provide_signal_enrichment_schema,
+    "signal_source_unwind_schema": _provide_signal_source_unwind_schema,
     "diagnostic_categories": _provide_diagnostic_categories,
     # Static tree enrichment
     "static_enrichment_schema": _provide_static_enrichment_schema,
@@ -968,92 +991,25 @@ _SCHEMA_PROVIDERS["file_score_dimensions"] = _provide_file_score_dimensions
 _SCHEMA_PROVIDERS["file_scoring_schema"] = _provide_file_scoring_schema
 _SCHEMA_PROVIDERS["file_triage_schema"] = _provide_file_triage_schema
 
-# Default schema needs per prompt (when not specified in frontmatter)
-# Only load what's actually used by each prompt
-_DEFAULT_SCHEMA_NEEDS: dict[str, list[str]] = {
-    "paths/triage": [
-        "path_purposes",
-        "score_dimensions",
-        "scoring_schema",
-        "format_patterns",
-        "physics_domains",
-    ],
-    "paths/scorer": [
-        "score_schema",
-        "format_patterns",
-        "path_purposes",
-        "score_dimensions",
-        "physics_domains",
-    ],
-    "discovery/roots": ["discovery_categories"],
-    "discovery/data_access": ["data_access_fields"],
-    "signals/enrichment": [
-        "physics_domains",
-        "signal_enrichment_schema",
-        "diagnostic_categories",
-    ],
-    # IMAS DD enrichment
-    "imas/enrichment": [
-        "physics_domains",
-        "imas_enrichment_schema",
-    ],
-    # IMAS DD refinement (Pass 2)
-    "imas/refinement": [
-        "physics_domains",
-        "imas_enrichment_schema",
-    ],
-    # Static tree enrichment
-    "discovery/static-enricher": [
-        "static_enrichment_schema",
-    ],
-    # Wiki prompts
-    "wiki/scorer": [
-        "wiki_page_purposes",
-        "wiki_score_dimensions",
-        "wiki_scoring_schema",
-        "physics_domains",
-    ],
-    "wiki/document-scorer": [
-        "wiki_page_purposes",
-        "wiki_score_dimensions",
-        "document_scoring_schema",
-        "physics_domains",
-    ],
-    "wiki/image-captioner": [
-        "image_caption_schema",
-        "physics_domains",
-    ],
-    # File scoring
-    "code/scorer": [
-        "file_score_dimensions",
-        "file_scoring_schema",
-        "format_patterns",
-    ],
-    # File triage (pass 1) — dimension scoring from minimal context
-    "code/triage": [
-        "file_score_dimensions",
-        "file_triage_schema",
-    ],
-}
-
 
 def get_schema_for_prompt(
     prompt_name: str, schema_needs: list[str] | None = None
 ) -> dict[str, Any]:
     """Get only the schema context needed for a specific prompt.
 
-    Uses prompt frontmatter schema_needs if available, otherwise uses
-    defaults based on prompt name. Only invokes the required providers.
+    A prompt owns its schema context through its own ``schema_needs``
+    frontmatter; the caller passes that list here. When it is ``None`` there is
+    no schema context to load.
 
     Args:
         prompt_name: Prompt identifier (e.g., "paths/scorer")
-        schema_needs: Explicit list of needs (overrides frontmatter/defaults)
+        schema_needs: The prompt's declared needs (from its frontmatter)
 
     Returns:
         Dict with only the requested schema context
     """
     if schema_needs is None:
-        schema_needs = _DEFAULT_SCHEMA_NEEDS.get(prompt_name, [])
+        schema_needs = []
 
     context: dict[str, Any] = {}
     for need in schema_needs:
@@ -1360,7 +1316,7 @@ def _load_strict_prompt_from_path(
     )
     schema_needs = metadata.get("schema_needs")
     if schema_needs is None:
-        schema_needs = _DEFAULT_SCHEMA_NEEDS.get(registered_name, [])
+        schema_needs = []
     if not isinstance(schema_needs, list) or any(
         not isinstance(need, str) for need in schema_needs
     ):
@@ -1398,7 +1354,7 @@ def render_prompt_strict(
         )
     schema_needs = prompt.metadata.get("schema_needs")
     if schema_needs is not None and (
-        not isinstance(schema_needs, list)
+        not isinstance(schema_needs, (list, tuple))
         or any(not isinstance(need, str) for need in schema_needs)
     ):
         raise StrictPromptError(f"Prompt {name!r} has invalid schema_needs")
@@ -1407,7 +1363,7 @@ def render_prompt_strict(
         raise StrictPromptError(
             f"Prompt {name!r} names unknown schema providers: {sorted(unknown_needs)}"
         )
-    full_context = get_schema_for_prompt(name, schema_needs)
+    full_context = get_schema_for_prompt(name, list(schema_needs or ()))
     collisions = set(supplied) & set(full_context)
     if collisions:
         raise PromptContextError(

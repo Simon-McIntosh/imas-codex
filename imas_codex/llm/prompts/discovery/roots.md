@@ -2,6 +2,8 @@
 name: roots
 description: Identify high-value root directories for seeding the discovery pipeline
 dynamic: true
+schema_needs:
+  - discovery_categories
 ---
 
 # Discover Root Paths for {{ facility | default("the target facility") }}

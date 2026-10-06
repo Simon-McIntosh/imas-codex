@@ -491,15 +491,22 @@ batch = DirectoryScoringBatch.model_validate_json(response.content)
 
 1. Create prompt in `imas_codex/llm/prompts/` (use appropriate subdir: `paths/`, `code/`, `signals/`)
 2. Define Pydantic model in `imas_codex/discovery/paths/models.py`
-3. Add to `_DEFAULT_SCHEMA_NEEDS` in `prompt_loader.py`:
-   ```python
-   _DEFAULT_SCHEMA_NEEDS = {
-       "paths/scorer": ["score_schema", "score_dimensions", ...],
-       "paths/triage": ["scoring_schema", "score_dimensions", ...],
-       "your_domain/your_new_prompt": ["your_schema_needs"],
-   }
+3. Declare the prompt's schema context in its own frontmatter `schema_needs`
+   (frontmatter is the only owner of that mapping; there is no central table):
+   ```yaml
+   ---
+   name: paths/triage
+   schema_needs:
+     - scoring_schema
+     - score_dimensions
+   ---
    ```
-4. Use `response_format=YourModel` in LiteLLM call
+   Register a provider for any response model that does not yet have one in
+   `_SCHEMA_PROVIDERS`, and render the example and field list through the shared
+   partials under `imas_codex/llm/prompts/shared/schema`.
+4. Use `response_format=YourModel` in the LiteLLM call. A request served by the
+   dedicated local client never sends `response_format`, so the schema declared
+   in the prompt is what the local engine receives.
 
 **Never hardcode JSON examples** - use `get_pydantic_schema_json(Model)` to generate
 examples from the Pydantic model. This ensures prompts stay in sync with schema changes.

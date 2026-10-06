@@ -4,6 +4,9 @@ description: Per-dimension triage scoring for discovered CodeFiles from minimal 
 used_by: imas_codex.discovery.code.scorer
 task: score
 dynamic: true
+schema_needs:
+  - file_score_dimensions
+  - file_triage_schema
 ---
 
 You are triaging source files at a fusion research facility by scoring each file across multiple dimensions from minimal context — directory description, filename, and sibling file names.
