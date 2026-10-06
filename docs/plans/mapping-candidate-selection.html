@@ -21,9 +21,9 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -148,100 +148,12 @@
   <p class="landed-summary">candidates.py retrieves an IDS-scoped hybrid_dd_search shortlist per source, merged by score and deduplicated on path; gather_ids_context uses it and the ClusterSearcher load is gone; tests/ids 405 passed. <a href="s4">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s5">§5 — Pair judgment through Jev</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      This section waits on the decisions-call node in
-      <code>jt60sa-discovery-completion</code> §25. That node adds
-      <code>call_decisions</code> and <code>acall_decisions</code> to
-      <code>imas_codex/discovery/base/llm.py</code>, with the model as a parameter, strict
-      answer validation, retries through <code>_is_retryable</code>, cost from
-      <code>usage.cost</code>, and a test guard that fails any live decisions request. This
-      section calls that layer and builds no second client.
-    </p>
-    <ul>
-      <li><strong>Seat.</strong> <code>[tool.imas-codex.mapping-candidates] model =
-        "typesafe/jev-1.13"</code> in <code>pyproject.toml</code>, registered in
-        <code>MODEL_SECTIONS</code>. It is a separate seat from
-        <code>discovery-relevance</code>.</li>
-      <li><strong>Thresholds.</strong> <code>map-select-threshold</code>,
-        <code>map-select-margin</code>, <code>map-floor-threshold</code> and
-        <code>map-shortlist-size</code> in <code>[tool.imas-codex.discovery]</code>. One
-        accessor, <code>get_mapping_route_thresholds()</code>, returns them as a frozen
-        <code>RouteThresholds</code>, beside <code>get_triage_threshold</code> in
-        <code>imas_codex/settings.py</code>. The defaults follow §3's measurement:
-        <ul>
-          <li>the select threshold is unset, which disables the <code>selected</code>
-            route, because the selected route never exceeded about 0.63 precision at any
-            threshold;</li>
-          <li>the floor is unset, so no source is skipped;</li>
-          <li>the shortlist size is 5, because Jev's reranked top 5 kept every hit the
-            shortlist held.</li>
-        </ul>
-        The jev-role and none-floor decisions below set the first two. Two §25
-        nodes also edit <code>settings.py</code> and <code>pyproject.toml</code>:
-        <code>decisions-call</code> and <code>code-relevance-triage</code>. This node is
-        dispatched only after both have merged, and its worker reads the merged
-        <code>settings.py</code> before editing.</li>
-      <li><strong>Questions.</strong> <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>
-        carries the frozen §3 wording. It is declared and rendered through the same mechanism
-        that §25 establishes for <code>code/triage.md</code>.</li>
-      <li><strong>Judgment.</strong> Judgment and routing live in
-        <code>imas_codex/ids/candidates.py</code> beside retrieval, so one module owns the
-        candidate stage. Each source costs two Jev requests:
-        <ul>
-          <li><code>route_ids</code> asks one Choice over every IDS, with its name and
-            one-line description as criteria, and returns the three most probable IDSs for
-            §4.</li>
-          <li><code>judge_candidates</code> asks one <code>same_quantity</code> noul per
-            candidate in a single batched request. §3 measured batching at a mean
-            difference of 0.03 from per-pair calls, at a quarter of the cost. It returns one
-            typed <code>PairJudgment</code> per candidate: path,
-            <code>p_same_quantity</code>, model and judged_at. <code>same_object</code> is
-            not asked, because it added nothing measurable.</li>
-          <li><code>route(judgments, thresholds) -&gt; Route</code> orders the candidates by
-            <code>p_same_quantity</code> and returns <code>selected</code>,
-            <code>escalated</code> or <code>no_candidate</code>, with the top N as the
-            shortlist. A source is selected only when a select threshold is set, its best
-            score reaches it, and it leads the next candidate by the margin. It is
-            <code>no_candidate</code> only when a floor is set and no score reaches it.
-            Everything else is escalated.</li>
-        </ul></li>
-      <li><strong>Fail closed.</strong> A decisions failure returns no route. The source stays
-        unjudged for a later retry and is never selected or rejected.</li>
-      <li><strong>Surface.</strong> The section adds:
-        <ul>
-          <li>one model seat;</li>
-          <li>one settings accessor with its dataclass;</li>
-          <li>in <code>candidates.py</code>, <code>route_ids</code>,
-            <code>judge_candidates</code>, <code>route</code>, <code>PairJudgment</code> and
-            <code>Route</code>.</li>
-        </ul>
-        It retires nothing in these families, for two reasons. Every LLM stage in
-        <code>MODEL_SECTIONS</code> has its own seat so its model can change alone, and
-        no existing code judges a (signal, DD node) pair. The surface it displaces is
-        §8's: the free-text <code>imas_target_path</code> that the assign call writes for
-        every source.</li>
-    </ul>
-    <p><strong>Node</strong> <code>candidate-judgment</code>, role implement. It runs after
-      §4, which also writes <code>candidates.py</code>.</p>
-    <ul>
-      <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
-        <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>,
-        <code>imas_codex/settings.py</code>, <code>pyproject.toml</code> and
-        <code>tests/ids/test_candidate_judgment.py</code>.</li>
-    </ul>
-    <p><strong>Done when</strong> <code>tests/ids/test_candidate_judgment.py</code> passes under the
-      fake transport and shows the following.</p>
-    <ul>
-      <li>The state carries the facility, source and candidate blocks.</li>
-      <li>A malformed answer is rejected.</li>
-      <li>A transport error yields no route.</li>
-      <li><code>route</code> escalates every source under the default thresholds and returns
-        the top 5 in Jev order. With a select threshold set, it returns each of the three
-        routes, including the margin case.</li>
-      <li><code>route_ids</code> returns three IDSs taken from the criteria it offered.</li>
-    </ul>
+<section data-reckon="section" data-id="s5" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">route_ids, judge_candidates and route in candidates.py through call_decisions; mapping-candidates seat; RouteThresholds default to escalating every source with its Jev top 5; widened gate 491 passed. <a href="s5">full record</a></p>
+</section>
 
     <section class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
