@@ -21,9 +21,9 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -134,217 +134,25 @@
   <p class="landed-summary">Mechanism found: imas map --clear deletes MAPS_TO_IMAS and the mapping node, and a re-persist gated on MATCH (ip:IMASNode) silently writes nothing; DD rebuild ruled out; §6 and §8 already carry both protections. <a href="s2">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s3">§3 — Label a set and measure retrieval and Jev on it</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      This section gates everything after it. It follows the method that took JT-60SA code
-      triage from AUC 0.63 to 0.96 (<code>jt60sa-discovery-completion</code> §25): a frozen
-      labelled set, a prototype outside the package, and operating points read off held-out
-      data before any code is built.
-    </p>
-    <p><strong>Labelled set.</strong></p>
-    <ul>
-      <li>150 JET enriched SignalSources, stratified over the 20 physics domains they occupy:
-        proportional, with at least 3 per domain. The set includes 20 of the 56 previously
-        validated sources with a negative disposition, including the probe and passive
-        examples in §1. It also includes all 13 enriched JT-60SA sources.</li>
-      <li>A label is the <em>set</em> of current DD 4.1.1 quantity, geometry or identifier
-        nodes that could correctly hold the source's values, or <code>none</code> with a
-        one-line reason. A source can have more than one correct home: q on axis fits both
-        <code>equilibrium/time_slice/global_quantities/q_axis</code> and
-        <code>summary/local/magnetic_axis/q</code>. A judgment is correct when its node is
-        in the set.</li>
-      <li>Labels come from a reasoning pass that queries the DD through the graph
-        (<code>search_dd_paths</code>, <code>fetch_dd_paths</code>, IDS subtrees). That pass
-        <em>never sees the shortlist being measured</em>, because seeing it would inflate
-        recall. A second, independent pass labels a 30-source subsample, and the agreement is
-        reported.</li>
-      <li>Labels are frozen before any question wording is tuned. Sources are split 50/50
-        into dev and test, stratified by domain. Tuning reads only dev; every reported
-        number is from test.</li>
-    </ul>
-    <p><strong>Measures</strong> (all on the test split):</p>
-    <ol>
-      <li><strong>Shortlist recall@K</strong>, for K ∈ {5, 10, 20, 50}: the share of
-        sources with a non-none label whose labelled node appears in the shortlist.
-        <ul>
-          <li>The primary arm is <code>hybrid_dd_search</code>
-            (<code>imas_codex/graph/dd_search.py:97</code>): the maintained DD search behind
-            the <code>search_dd_paths</code> MCP tool. It blends vector and full-text scores,
-            accepts a precomputed embedding, and oversamples before filtering.</li>
-          <li>The baseline is <code>compute_semantic_matches</code> as the map pipeline runs
-            it today. That query takes <code>LIMIT $k</code> inside the vector search and
-            filters by category afterwards, so it can return fewer than K. Report its
-            returned count.</li>
-          <li>Each arm is measured alone, then with the unit-dimension filter, with
-            <code>cluster_search</code> (<code>dd_search.py:869</code>) expansion, and with
-            both.</li>
-        </ul></li>
-      <li><strong>Pair judgment.</strong> AUC of <code>same_quantity</code> over (source,
-        candidate) pairs; top-1 accuracy after reranking, among sources whose label is in the
-        shortlist; the change in both when <code>same_object</code> is combined (product,
-        and minimum). Also report how often the top two candidates are <em>both</em> in a
-        source's set. The margin rule in §5 must not escalate a source only because two
-        correct homes score alike.</li>
-      <li><strong>None detection.</strong> Precision and recall of "best
-        <code>same_quantity</code> below a floor" against <code>none</code> labels, across
-        floors.</li>
-      <li><strong>Batching.</strong> One call per pair, against one call per source that
-        carries all K candidates in state and asks 2K questions, each referencing
-        <code>candidates[i]</code>. Report the mean absolute difference in probabilities, the
-        cost and the latency.</li>
-      <li><strong>Final pick (optional).</strong> One Choice over the top 5 plus
-        <code>none_of_these</code>, against plain argmax.</li>
-      <li><strong>Cost</strong> per source, and projected cost for all 2,288 JET
-        sources.</li>
-    </ol>
-    <p><strong>Starting questions.</strong> The wording carries the JT-60SA lessons: explicit
-      true and false criteria, exclusion clauses, and the facility block. Tuning on dev may
-      change the wording; the frozen text is part of the deliverable.</p>
-    <ul>
-      <li><code>same_quantity</code> (noul): "Would the IMAS field at
-        <code>candidate.path</code> correctly hold the values that
-        <code>signal_source</code> provides?" True: storing them there needs at most a unit
-        conversion, a sign or COCOS flip, or the selection of one array element. False: the
-        field holds a different quantity, a different component or coordinate, a different
-        object, or only a related or derived quantity.</li>
-      <li><code>same_object</code> (noul): "Does the structure containing
-        <code>candidate.path</code> describe the same kind of object as the source?" Objects
-        are, for example, the same diagnostic, coil, passive element, heating unit or plasma
-        region. True: the same kind of object. False: a different kind of object, even if the
-        quantity matches. A PF coil current against a passive-loop current is an example.</li>
-    </ul>
-    <p><strong>State.</strong></p>
-    <ul>
-      <li><code>facility</code>: the same <code>data_access_patterns</code> block that
-        <code>run_jev_v3.py</code> builds.</li>
-      <li><code>signal_source</code>: id, group_key, description, rep_description,
-        physics_domain, rep_unit, rep_sign_convention, rep_cocos, sample_accessors,
-        member_count and keywords.</li>
-      <li><code>candidate</code>: path, IDS and its one-line description, documentation,
-        unit, data_type, node_category, physics_domain, the parent structure's documentation,
-        and the cluster label when there is one.</li>
-    </ul>
-    <p><strong>Shared constraints.</strong></p>
-    <ul>
-      <li>Prototype scripts and data live in
-        <code>~/.config/reckon/crew/reports/imas-codex/mapping-candidate-selection/</code>,
-        written <code>$PROBE</code> below. That is outside the package, as in the JT-60SA
-        probe, and inside reckon's delivery directory, where workers may write and later
-        nodes can read. The Jev call is <code>POST
-        https://openrouter.ai/api/alpha/decisions</code> with
-        <code>{model: "typesafe/jev-1.13", state, questions}</code>, keyed by
-        <code>get_api_key_for_service("imas-mapping")</code>.</li>
-      <li>Heavy steps run on the fleet allocation or a <code>*_debug</code> partition.</li>
-      <li>Metered spend across all three nodes is capped at $3. Labelling runs on the free
-        local route (<code>[tool.imas-codex.model-routes.ambix-local]</code>).</li>
-      <li>Each node is bounded at 60 minutes, so the measurement is three sequential
-        nodes.</li>
-    </ul>
-    <p><strong>Nodes.</strong></p>
-    <ol>
-      <li><strong><code>candidate-labels</code></strong>, role implement.
-        <ul>
-          <li>It draws the sample and labels it with a script, never by hand. The labeller
-            walks the DD top-down: it chooses an IDS from the IDS names and descriptions,
-            then a node from that IDS's quantity, geometry and identifier nodes with their
-            documentation and units. That keeps it independent of every vector arm being
-            measured.</li>
-          <li>A second pass with a different model labels the 30-source subsample.</li>
-          <li>It writes <code>sample.json</code>, <code>labels.json</code>,
-            <code>labels_second.json</code> and <code>split.json</code> under
-            <code>$PROBE/labels/</code>.</li>
-          <li><strong>Done when</strong> <code>labels.json</code> has one entry per sampled
-            source, each giving IMASNode ids that exist in the graph or <code>none</code>
-            with a reason, and <code>split.json</code> gives the dev/test assignment.
-            <code>agreement.json</code> states the agreement between the two passes as a
-            number.</li>
-          <li><em>Landed.</em> 163 sources: 82 labelled over 52 current nodes, 81
-            <code>none</code> with reasons, 0 failures. Exact agreement on the 30-source
-            subsample is 0.633. The local pass made errors that the second pass did not, for
-            example labelling a pressure profile as <code>barometry/gauge/pressure</code>.</li>
-        </ul></li>
-      <li><strong><code>candidate-label-adjudication</code></strong>, role implement.
-        <ul>
-          <li>The local pass is too noisy to measure a 0.9 precision against, so the test
-            split is adjudicated.</li>
-          <li>The second-pass model labels every test source, with the same top-down walk
-            and the same restriction to current nodes.</li>
-          <li>Where the two passes agree, the label stands. Where they disagree, an
-            adjudicator receives the source, both answers and the candidate nodes of the IDSs
-            either pass chose. It returns the acceptable set, or <code>none</code> with a
-            reason.</li>
-          <li>Dev labels stay as they are, because tuning tolerates noise and measurement
-            does not.</li>
-          <li>It writes <code>labels_test.json</code> and <code>adjudication.json</code>
-            under <code>$PROBE/labels/</code>. The spend counts against the shared
-            $3 cap.</li>
-          <li><strong>Done when</strong> <code>labels_test.json</code> has one entry per test
-            source, each a non-empty set of current IMASNode ids that exist in the graph or
-            <code>none</code> with a reason. <code>adjudication.json</code> states how many
-            test labels stood, how many were adjudicated, and how many changed.</li>
-        </ul></li>
-      <li><strong><code>candidate-retrieval-probe</code></strong>, role implement.
-        Test-split measures use <code>labels_test.json</code>.
-        <ul>
-          <li>It computes measure 1 for every arm. It writes the K-candidate shortlists
-            and <code>recall.json</code> under
-            <code>$PROBE/retrieval/</code>.</li>
-          <li><strong>Done when</strong> <code>recall.json</code> gives recall@K and the
-            returned count, per arm and per K, on the test split.</li>
-        </ul></li>
-      <li><strong><code>candidate-jev-probe</code></strong>, role implement.
-        <ul>
-          <li><em>Why it gains two arms.</em> The retrieval probe measured
-            <code>hybrid_dd_search</code> at recall@20 = 0.556 and recall@50 = 0.611 on the
-            36 labelled test sources, against 0.444 and 0.528 for
-            <code>compute_semantic_matches</code>. The unit and cluster modifiers did not
-            move it. In 11 of the 16 misses at K=20, no node of the labelled IDS appears in
-            the top 20 at all: raw pickup-coil signals retrieve <code>plasma_transport</code>
-            and <code>edge_transport</code> nodes, for example. The loss is IDS choice, not
-            ranking, so retrieval is measured with an IDS-routing step first.</li>
-          <li><strong>Arm: domain filter.</strong> <code>hybrid_dd_search</code> with the
-            source's <code>physics_domain</code> as its <code>physics_domain</code>
-            argument. This is deterministic and costs no model call.</li>
-          <li><strong>Arm: Jev IDS routing.</strong> This is the hierarchical-classification
-            pattern. One Jev Choice per source picks among every IDS, using its name and
-            description as criteria. The three most probable IDSs feed
-            <code>hybrid_dd_search</code> with <code>ids_filter</code> set to them, and the
-            hits are merged by score. Report the Choice's top-1 and top-3 accuracy against
-            the labelled IDSs, and recall@K for the merged shortlist, beside the stored
-            arms.</li>
-          <li>It then runs measures 2 to 6 on the shortlist of the arm with the best
-            recall@20, tunes wording on dev only, and writes the research document. The
-            document names that arm for §4. If the winning arm needs a Jev call,
-            §4's retrieval takes the IDS-routing Choice from §5's module.</li>
-          <li>Only 4 of the 36 labelled test sources carry a representative unit, so the
-            unit filter is reported as untestable on this sample rather than as
-            useless.</li>
-          <li>Write paths: <code>$PROBE/jev/</code>,
-            <code>docs/research/mapping-candidate-probe.html</code> and
-            <code>docs/figures/mapping-candidate-probe</code>.</li>
-          <li>Figures: recall@K per arm, and the <code>same_quantity</code> distributions
-            for correct and incorrect pairs.</li>
-        </ul></li>
-    </ol>
-    <p>
-      <strong>Done when</strong> the research document reports every measure above on the
-      test split, with the label agreement and the frozen question text. It must also state
-      three operating points as numbers: <code>select_threshold</code>,
-      <code>select_margin</code> and <code>floor_threshold</code>. For each, it gives the
-      precision and recall of the <code>selected</code> route and the share of sources each
-      route receives. The document says which role the numbers support: Jev as the selector
-      with escalation, or Jev as a pre-screen only. It names the K and the retrieval arms
-      that §4 builds.
-    </p>
+<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Measured on an adjudicated 75-source test split: Jev IDS routing lifts recall@20 from 0.556 to 0.694, Jev reranking keeps every recoverable hit in its top 5 (pair AUC 0.924), and the selected route never reaches usable precision, so Jev is a pre-screen; full JET projects to about $0.47. <a href="s3">full record</a></p>
+</section>
 
     <h2 id="s4">§4 — Candidate retrieval in code</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       Retrieval is deterministic and calls no LLM. A new module,
       <code>imas_codex/ids/candidates.py</code>, exposes
-      <code>retrieve_candidates(sources, *, gc, k, dd_version) -&gt; dict[str,
-      list[Candidate]]</code>. <code>Candidate</code> wraps the <code>SearchHit</code>
+      <code>retrieve_candidates(sources, ids_by_source, *, gc, k, dd_version) -&gt;
+      dict[str, list[Candidate]]</code>. <code>ids_by_source</code> carries the IDSs that
+      §5's routing Choice named for each source. The research document
+      (<code>docs/research/mapping-candidate-probe.html</code>) measured that step at
+      recall@20 = 0.694 against 0.556 unscoped. The correct IDS was the Choice's top 1 for
+      0.861 of labelled test sources and inside its top 3 for all of them. When a source
+      carries no IDS list, retrieval runs unscoped. <code>Candidate</code> wraps the <code>SearchHit</code>
       (<code>imas_codex/search/search_strategy.py:93</code>) that
       <code>hybrid_dd_search</code> already returns, which carries path, IDS, documentation,
       units, data type, physics domain and score. It adds only what a hit lacks:
@@ -355,36 +163,30 @@
       The shortlist is already built once, in <code>gather_ids_context</code>
       (<code>imas_codex/ids/mapping.py:781–854</code>). That code collects per-source IMAS
       hits, expands the top three through clusters, and deduplicates on path. This section
-      <em>moves</em> that construction into <code>candidates.py</code> and re-points its two
-      arms at the maintained owners. It is not written a second time.
+      <em>moves</em> the hit collection and the path deduplication into
+      <code>candidates.py</code>, and re-points the vector arm at the maintained owner. It
+      drops the cluster expansion, because §3 measured that it adds no hit at K=20.
     </p>
     <ul>
-      <li>Vector hits come from <code>hybrid_dd_search</code>
-        (<code>imas_codex/graph/dd_search.py:97</code>), once per source. Every source
-        description is embedded in one batch, and each embedding is passed in through the
-        function's <code>embedding</code> argument. Its oversampling already returns K hits
-        after its filters, so no search code is copied or patched.</li>
-      <li>Cluster expansion calls <code>cluster_search</code>
-        (<code>dd_search.py:869</code>) in place of <code>ClusterSearcher</code>. The
-        existing path-based deduplication moves with it.</li>
-      <li>The unit filter calls <code>analyze_units</code> (<code>tools.py:168</code>). That
-        function gains one returned key, <code>dimensions_match</code>: True or False when
-        both units parse, and None when either is missing or unparseable. The pint
-        comparison keeps one owner, and existing callers, which read
-        <code>compatible</code>, are unchanged. The filter drops a candidate only when
-        <code>dimensions_match</code> is False.</li>
+      <li>Hits come from <code>hybrid_dd_search</code>
+        (<code>imas_codex/graph/dd_search.py:97</code>), with <code>ids_filter</code> set
+        to the source's routed IDSs. Every source description is embedded in one batch, and
+        each embedding is passed in through the function's <code>embedding</code> argument.
+        Hits from the routed IDSs are merged by score and deduplicated on path. K is 20.</li>
       <li>Cross-facility precedent comes from <code>fetch_cross_facility_mappings</code>.</li>
+      <li>There is no unit filter. Only 4 of 36 labelled test sources carry a
+        representative unit, so it could not be measured, and it adds nothing until
+        SignalSources carry units.</li>
       <li><code>gather_ids_context</code> builds <code>source_candidates</code> by calling
         <code>retrieve_candidates</code>, so the old construction and the
         <code>ClusterSearcher</code> load in <code>gather_shared_context</code> are deleted
         here. <code>compute_semantic_matches</code> keeps only its wiki and code bridging
         matrix until §8.</li>
     </ul>
-    <p>K and the arm set are the ones §3 names.</p>
     <p><strong>Node</strong> <code>candidate-retrieval</code>, role implement.</p>
     <ul>
       <li>Write paths: <code>imas_codex/ids/candidates.py</code>,
-        <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/tools.py</code> and
+        <code>imas_codex/ids/mapping.py</code> and
         <code>tests/ids/test_candidates.py</code>.</li>
       <li>It may not widen <code>hybrid_dd_search</code>'s signature or the return shape of
         <code>gather_ids_context</code>.</li>
@@ -394,9 +196,8 @@
     <ul>
       <li>Every returned path is an IMASNode id read from the graph or a fake; no path is
         built from a string.</li>
-      <li>The unit filter drops a dimension mismatch and keeps a candidate when either unit
-        is unknown.</li>
-      <li>Cluster expansion adds members without duplicating a path.</li>
+      <li>Hits from several routed IDSs merge by score without duplicating a path, and an
+        empty IDS list runs unscoped.</li>
       <li>One encoder call embeds a batch of sources.</li>
       <li><code>gather_ids_context</code> returns <code>source_candidates</code> built by
         <code>retrieve_candidates</code>, and <code>mapping.py</code> no longer imports
@@ -420,11 +221,20 @@
         <code>MODEL_SECTIONS</code>. It is a separate seat from
         <code>discovery-relevance</code>.</li>
       <li><strong>Thresholds.</strong> <code>map-select-threshold</code>,
-        <code>map-select-margin</code> and <code>map-floor-threshold</code> in
-        <code>[tool.imas-codex.discovery]</code>, with defaults from §3. One accessor,
-        <code>get_mapping_route_thresholds()</code>, returns them as a frozen
+        <code>map-select-margin</code>, <code>map-floor-threshold</code> and
+        <code>map-shortlist-size</code> in <code>[tool.imas-codex.discovery]</code>. One
+        accessor, <code>get_mapping_route_thresholds()</code>, returns them as a frozen
         <code>RouteThresholds</code>, beside <code>get_triage_threshold</code> in
-        <code>imas_codex/settings.py</code>. Two §25
+        <code>imas_codex/settings.py</code>. The defaults follow §3's measurement:
+        <ul>
+          <li>the select threshold is unset, which disables the <code>selected</code>
+            route, because the selected route never exceeded about 0.63 precision at any
+            threshold;</li>
+          <li>the floor is unset, so no source is skipped;</li>
+          <li>the shortlist size is 5, because Jev's reranked top 5 kept every hit the
+            shortlist held.</li>
+        </ul>
+        The jev-role and none-floor decisions below set the first two. Two §25
         nodes also edit <code>settings.py</code> and <code>pyproject.toml</code>:
         <code>decisions-call</code> and <code>code-relevance-triage</code>. This node is
         dispatched only after both have merged, and its worker reads the merged
@@ -434,23 +244,34 @@
         that §25 establishes for <code>code/triage.md</code>.</li>
       <li><strong>Judgment.</strong> Judgment and routing live in
         <code>imas_codex/ids/candidates.py</code> beside retrieval, so one module owns the
-        candidate stage. <code>judge_candidates</code> builds the state, asks the questions
-        in the batching form §3 chose, and returns one typed <code>PairJudgment</code> per
-        candidate: path, <code>p_same_quantity</code>,
-        <code>p_same_object</code>, model, judged_at and cost. It also exposes
-        <code>route(judgments, thresholds) -&gt; Route</code>, where <code>Route</code> is
-        <code>selected</code>, <code>escalated</code> or <code>no_candidate</code>. A source is
-        selected when its best combined score is at or above the select threshold and leads
-        the next candidate by at least the margin. It is <code>no_candidate</code> when no
-        score reaches the floor. Everything else is escalated.</li>
+        candidate stage. Each source costs two Jev requests:
+        <ul>
+          <li><code>route_ids</code> asks one Choice over every IDS, with its name and
+            one-line description as criteria, and returns the three most probable IDSs for
+            §4.</li>
+          <li><code>judge_candidates</code> asks one <code>same_quantity</code> noul per
+            candidate in a single batched request. §3 measured batching at a mean
+            difference of 0.03 from per-pair calls, at a quarter of the cost. It returns one
+            typed <code>PairJudgment</code> per candidate: path,
+            <code>p_same_quantity</code>, model and judged_at. <code>same_object</code> is
+            not asked, because it added nothing measurable.</li>
+          <li><code>route(judgments, thresholds) -&gt; Route</code> orders the candidates by
+            <code>p_same_quantity</code> and returns <code>selected</code>,
+            <code>escalated</code> or <code>no_candidate</code>, with the top N as the
+            shortlist. A source is selected only when a select threshold is set, its best
+            score reaches it, and it leads the next candidate by the margin. It is
+            <code>no_candidate</code> only when a floor is set and no score reaches it.
+            Everything else is escalated.</li>
+        </ul></li>
       <li><strong>Fail closed.</strong> A decisions failure returns no route. The source stays
         unjudged for a later retry and is never selected or rejected.</li>
       <li><strong>Surface.</strong> The section adds:
         <ul>
           <li>one model seat;</li>
           <li>one settings accessor with its dataclass;</li>
-          <li>in <code>candidates.py</code>, <code>judge_candidates</code>,
-            <code>route</code>, <code>PairJudgment</code> and <code>Route</code>.</li>
+          <li>in <code>candidates.py</code>, <code>route_ids</code>,
+            <code>judge_candidates</code>, <code>route</code>, <code>PairJudgment</code> and
+            <code>Route</code>.</li>
         </ul>
         It retires nothing in these families, for two reasons. Every LLM stage in
         <code>MODEL_SECTIONS</code> has its own seat so its model can change alone, and
@@ -472,9 +293,10 @@
       <li>The state carries the facility, source and candidate blocks.</li>
       <li>A malformed answer is rejected.</li>
       <li>A transport error yields no route.</li>
-      <li><code>route</code> returns each of the three routes at the configured thresholds,
-        including the margin case, where two candidates both clear the select threshold
-        within the margin and the source is escalated.</li>
+      <li><code>route</code> escalates every source under the default thresholds and returns
+        the top 5 in Jev order. With a select threshold set, it returns each of the three
+        routes, including the margin case.</li>
+      <li><code>route_ids</code> returns three IDSs taken from the criteria it offered.</li>
     </ul>
 
     <h2 id="s6">§6 — Candidate edges in the graph</h2>
@@ -482,8 +304,9 @@
     <p>
       <strong>Schema.</strong> <code>imas_codex/schemas/facility.yaml</code> declares a
       <code>MAPPING_CANDIDATE</code> relationship from SignalSource to IMASNode. Its
-      properties are rank, retrieval_score, arms, p_same_quantity, p_same_object, model,
-      judged_at, and route, which says whether this candidate is the selected one.
+      properties are rank (the Jev order), retrieval_score, the routed IDS and its Choice
+      probability, p_same_quantity, model, judged_at, and route, which says whether this
+      candidate is the selected one.
     </p>
     <ul>
       <li>SignalSource gains one field, <code>candidate_route</code>, which stays null until
@@ -649,7 +472,8 @@
     <ul>
       <li>A <code>selected</code> source takes its target from its selected candidate.</li>
       <li>An <code>escalated</code> source goes to the <code>reasoning</code> seat with only
-        its own shortlist. <code>target_assignment.md</code> and
+        its own shortlist: the top <code>map-shortlist-size</code> candidates, 5 by default,
+        in Jev order. <code>target_assignment.md</code> and
         <code>target_assignment_system.md</code> are rewritten in place: the model chooses
         one listed path, or <code>none</code> with a disposition. It never writes a new
         path.</li>
@@ -742,13 +566,13 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="jev-role" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="jev-role" data-choice="" data-by="" data-when="" data-recommended="prescreen-only" data-recommended-by="reckon-build">
     <p class="r-dec-q">After §3, does Jev select targets with escalation, or only shortlist for the reasoning model?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="selector-with-escalation">selector with escalation</button>
       <button class="r-opt" data-value="prescreen-only">pre-screen only</button>
       </p>
-    <p class="r-dec-rat">The routing in §5 covers both. Pre-screen only is the same design with the select threshold set above 1, so every non-floor source escalates. The choice sets the default threshold, and §3&#x27;s precision of the selected route should decide it. The recommendation is selector with escalation, provided that precision on the test split is at least 0.9.</p>
+    <p class="r-dec-rat">The routing in §5 covers both; the choice only sets whether a select threshold is configured. Measured in §3 (docs/research/mapping-candidate-probe.html): the selected route never exceeded about 0.63 precision on the test split at any threshold, and was 0.4 at the dev-tuned point. Jev is a strong ranker (pair AUC 0.924), but its absolute same_quantity is low for many correct pairs. Its reranked top 5 kept every correct node the shortlist held. Recommendation: pre-screen only. Jev routes the IDS and orders a five-candidate shortlist, and the reasoning model makes every final choice. This is §5&#x27;s default.</p>
     </div>
 <div class="r-dec" data-key="cli-home" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Where does the candidate stage live on the command line?</p>
@@ -757,6 +581,15 @@
       <button class="r-opt" data-value="imas-map-candidates">imas-codex imas map candidates FACILITY</button>
       </p>
     <p class="r-dec-rat">The recommendation is discover map . The stage is a claim loop over a facility&#x27;s discovered signals, with cost and time caps, so it shares the discover harness, status and logs. imas map keeps the work that needs a reasoning model and the mapping lifecycle (validate, activate, clear).</p>
+    </div>
+<div class="r-dec" data-key="none-floor" data-choice="" data-by="" data-when="" data-sections="s5,s8" data-recommended="no-floor" data-recommended-by="reckon-build">
+    <p class="r-dec-q">Skip sources whose best Jev score is below a floor?</p>
+    <p class="r-dec-ctx">A floor skips the reasoning-model call for a source whose best same_quantity is below it. On the 75-source test split, a floor of 0.1 would route 26 sources to no_candidate. 23 of those are labelled none (precision 0.88), and the floor catches 23 of the 39 none sources (recall 0.59). The other 3 have a real DD home, and skipping them loses 3 of the 36 labelled mappings. A floor of 0.2 catches 34 of the 39 nones at 0.76 precision, but loses 11 real mappings.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="no-floor">no floor: every source reaches the reasoning model</button>
+      <button class="r-opt" data-value="floor-0.1">floor 0.1: skip about a third of sources and lose about 8% of mappings</button>
+      </p>
+    <p class="r-dec-rat">The default is no floor, because a mapping skipped by the floor is never seen again, while an unneeded reasoning call costs cents. Revisit once §9&#x27;s JET run gives the real cost of escalating every source.</p>
     </div>
 </section>
 
