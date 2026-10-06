@@ -561,12 +561,16 @@ def seed_facility_roots(
 
         # Create-only: seeding is additive. An existing row (a root already
         # scored or triaged by a prior run) keeps its status, depth, scores
-        # and timestamps; reprocessing is what --reset-to is for.
-        result = gc.create_nodes("FacilityPath", items, create_only=True)
+        # and timestamps; reprocessing is what --reset-to is for. The write
+        # reports how many rows it actually created, so a seed that names an
+        # existing root reports 0 for it.
+        created = gc.create_nodes("FacilityPath", items, create_only=True)["created"]
 
         # Create alias nodes and ALIAS_OF relationships
         if alias_items:
-            gc.create_nodes("FacilityPath", alias_items, create_only=True)
+            created += gc.create_nodes("FacilityPath", alias_items, create_only=True)[
+                "created"
+            ]
             for alias_path, canonical_path in alias_pairs:
                 alias_id = f"{facility}:{alias_path}"
                 canonical_id = f"{facility}:{canonical_path}"
@@ -583,8 +587,8 @@ def seed_facility_roots(
                 f"Created {len(alias_pairs)} ALIAS_OF links for duplicate mount points"
             )
 
-    logger.info(f"Seeded {result['processed']} root paths for {facility}")
-    return result["processed"]
+    logger.info(f"Seeded {created} new root paths for {facility}")
+    return created
 
 
 def _is_repo_publicly_accessible(url: str, timeout: float = 5.0) -> bool:

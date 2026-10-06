@@ -629,6 +629,10 @@ class GraphClient:
 
         Returns:
             Dict with counts: {"processed": N, "relationships": {rel_type: count}}
+            and, when create_only is True, "created": N — the number of nodes
+            this call actually created (the previously-absent rows). Under the
+            default upsert every row is processed but the created count is not
+            tracked, so the key is absent.
 
         Example:
             >>> client.create_nodes("FacilityPath", [
@@ -638,7 +642,10 @@ class GraphClient:
             {"processed": 2, "relationships": {"AT_FACILITY": 2}}
         """
         if not items:
-            return {"processed": 0, "relationships": {}}
+            empty_counts = {"processed": 0, "relationships": {}}
+            if create_only:
+                empty_counts["created"] = 0
+            return empty_counts
 
         # Auto-embed items with description but no embedding
         if label in self.schema.description_embeddable_labels:
@@ -664,17 +671,30 @@ class GraphClient:
                     logger.warning("Auto-embedding unavailable for %s, skipping", label)
 
         processed = 0
+        created = 0
         rel_counts: dict[str, int] = {}
 
         # Node creation query (always runs first). With create_only, the
         # property write is scoped to the creation event so an existing node
-        # keeps its stored properties.
-        properties_clause = "ON CREATE SET n += item" if create_only else "SET n += item"
-        node_query = f"""
-            UNWIND $batch AS item
-            MERGE (n:{label} {{id: item.id}})
-            {properties_clause}
-        """
+        # keeps its stored properties. MERGE exposes no creation flag, so a
+        # create-only write marks the rows it creates, aggregates that mark
+        # into the returned rows, and clears it in the same statement; the
+        # mark therefore never survives the write.
+        if create_only:
+            node_query = f"""
+                UNWIND $batch AS item
+                MERGE (n:{label} {{id: item.id}})
+                ON CREATE SET n += item, n._created_by_merge = true
+                WITH n, n._created_by_merge AS created
+                REMOVE n._created_by_merge
+                RETURN sum(CASE WHEN created = true THEN 1 ELSE 0 END) AS created
+            """
+        else:
+            node_query = f"""
+                UNWIND $batch AS item
+                MERGE (n:{label} {{id: item.id}})
+                SET n += item
+            """
 
         # Get schema-defined relationships for this class
         relationships = (
@@ -686,7 +706,10 @@ class GraphClient:
                 batch = items[i : i + batch_size]
 
                 # Create nodes
-                sess.run(node_query, batch=batch)
+                result = sess.run(node_query, batch=batch)
+                if create_only:
+                    row = result.single()
+                    created += int(row["created"] or 0) if row else 0
                 processed += len(batch)
 
                 # Create relationships based on schema
@@ -710,7 +733,10 @@ class GraphClient:
                         rel.cypher_type, 0
                     ) + len(rel_batch)
 
-        return {"processed": processed, "relationships": rel_counts}
+        result_counts = {"processed": processed, "relationships": rel_counts}
+        if create_only:
+            result_counts["created"] = created
+        return result_counts
 
     def create_relationship(
         self,
