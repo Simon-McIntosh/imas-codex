@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 </head>
@@ -203,6 +203,24 @@
       status predicate and claim property names as parameters, so those families can adopt it
       in their own change.
     </p>
+    <p>
+      The same claim/token pair is re-implemented across discovery, and those sites are the
+      routine's deferred adopters, recorded here so one later change can take them in a single
+      pass:
+    </p>
+    <ul>
+      <li><code>discovery/code/graph_ops.py</code> (:170, 326, 425, 512)</li>
+      <li><code>discovery/wiki/graph_ops.py</code> (:862, 938, 1678, 1763)</li>
+      <li><code>discovery/paths/frontier.py</code> (:2834, 2995)</li>
+      <li><code>discovery/signals/parallel.py</code> (:906, 1183)</li>
+      <li><code>discovery/documents/workers.py</code> (:45)</li>
+      <li><code>discovery/mdsplus/graph_ops.py</code> (:184, 730, 912, 967, 1938)</li>
+      <li><code>discovery/base/grouping.py</code> (:128)</li>
+    </ul>
+    <p>
+      This plan moves none of them, because each is a working pipeline outside its
+      product.
+    </p>
     <ul>
       <li><code>claim_sources_for_assignment</code> and
         <code>claim_sources_for_mapping</code> (<code>workers.py:136, 199</code>) become one
@@ -216,8 +234,11 @@
       <li>The generalised routines live in the shared owner,
         <code>imas_codex/discovery/base/claims.py</code>, not in <code>workers.py</code>.
         <code>release_claim</code> and <code>release_claims_batch</code> gain the
-        <code>claimed_field</code> keyword that <code>reset_stale_claims</code> already has.
-        Its default, <code>claimed_at</code>, leaves every existing caller unchanged. The
+        <code>claimed_field</code> keyword that <code>reset_stale_claims</code> already has, and
+        a <code>token_field</code> keyword that clears the claim token as well, because the
+        mapping release clears <code>mapping_claim_token</code> beside the timestamp. The
+        defaults (<code>claimed_at</code>, no token) leave every existing caller
+        unchanged. The
         claim and pending routines are added beside them.</li>
       <li>The seven <code>workers.py</code> helpers become calls into
         <code>claims.py</code>, and the assign, map and candidate stages all use them.</li>
@@ -316,8 +337,11 @@
             unless a production caller has appeared, in which case it calls the same
             function.</li>
         </ul></li>
-      <li><code>imas map status</code> shows the candidate routes beside the mapping
-        status.</li>
+      <li><code>imas map status</code> shows the candidate routes beside the mapping status
+        by calling <code>count_candidates_by_route</code>, the reader §7 added to
+        <code>imas_codex/ids/workers.py</code> for <code>discover status</code>, so both
+        surfaces share one count. <code>count_sources_by_mapping_status</code>, which has no
+        caller, is deleted.</li>
       <li><strong>Retired legacy retrieval.</strong> The map context stops calling
         <code>compute_semantic_matches</code>, which after §4 supplies only the wiki and
         code bridging matrix. An escalated source's context comes from its candidates, and
