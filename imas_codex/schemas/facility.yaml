@@ -1905,6 +1905,18 @@ classes:
         range: IMASNode
         annotations:
           relationship_type: MAPS_TO_IMAS
+      mapping_candidates:
+        description: >-
+          Ranked IMAS field candidates proposed for this source by the mapping
+          candidate stage. Distinct from MAPS_TO_IMAS: a candidate is a proposal
+          with probabilities, not a binding with a transform. Each
+          MAPPING_CANDIDATE edge carries rank (the Jev order), retrieval_score,
+          the routed IDS and its Choice probability, p_same_quantity, the judging
+          model, judged_at, and route, a flag marking the selected candidate.
+        range: IMASNode
+        multivalued: true
+        annotations:
+          relationship_type: MAPPING_CANDIDATE
       mapping_disposition:
         description: >-
           Disposition of mapping evaluation. Set to the MappingDisposition
@@ -1934,6 +1946,12 @@ classes:
         description: Full IMAS path being mapped to (e.g., "magnetics/flux_loop/flux/data")
       mapping_target_type:
         description: IMAS node data type being mapped to
+      candidate_route:
+        description: >-
+          Route the candidate stage reached for this source: selected,
+          escalated or no_candidate. Null until the source is judged, and reset
+          to null by clear_candidates.
+        range: string
       mapping_claimed_at:
         description: >-
           Timestamp when a worker claimed this source for mapping.

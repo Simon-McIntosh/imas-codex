@@ -1,0 +1,70 @@
+<section>
+  <h2 id="candidate-schema">MAPPING_CANDIDATE edges: schema, write and clear</h2>
+  <p id="candidate-schema-scope">
+    Declares the candidate relationship and the two functions that own it.
+    Write paths: <code>imas_codex/schemas/facility.yaml</code>,
+    <code>imas_codex/ids/graph_ops.py</code>,
+    <code>tests/ids/test_candidate_persistence.py</code>.
+  </p>
+
+  <h3 id="candidate-schema-declaration">Declaration</h3>
+  <ul id="candidate-schema-declared-surface">
+    <li><code>SignalSource</code> gains slot <code>mapping_candidates</code>,
+      <code>range: IMASNode</code>, <code>multivalued</code>, annotated
+      <code>relationship_type: MAPPING_CANDIDATE</code>. The generated schema
+      context reads <code>('SignalSource', 'MAPPING_CANDIDATE', 'IMASNode',
+      'many')</code>.</li>
+    <li><code>SignalSource</code> gains field <code>candidate_route</code>
+      (string), null until judged.</li>
+    <li>Edge properties written by <code>write_candidates</code>: rank,
+      retrieval_score, ids, choice_probability, p_same_quantity, model,
+      judged_at, route.</li>
+  </ul>
+
+  <h3 id="candidate-schema-functions">Functions in <code>graph_ops.py</code></h3>
+  <p id="candidate-schema-write-behaviour">
+    <code>write_candidates(source_id, judgments, route, gc)</code> replaces a
+    source's MAPPING_CANDIDATE edges in one statement: it deletes the prior
+    edges, UNWINDs the judgments inside a <code>CALL</code> subquery that
+    MATCHes both the SignalSource and each IMASNode, counts the edges written,
+    then releases the mapping claim (<code>mapping_claimed_at</code> and
+    <code>mapping_claim_token</code> to null) and sets
+    <code>candidate_route</code>. The route is set with
+    <code>CASE WHEN written = $expected THEN $route ELSE null END</code>: it
+    lands only when every judgment persisted, so a shortfall leaves the route
+    null and the next pass re-judges the source rather than treating it as
+    done. The statement still raises <code>CandidateWriteError</code> when the
+    release has run, so a candidate whose node has vanished fails loudly
+    without stranding the source. The subquery keeps the count row when the
+    judgment list is empty, so a <code>no_candidate</code> decision with no
+    edges still records its route.
+  </p>
+  <p id="candidate-schema-clear-behaviour">
+    <code>clear_candidates(facility, gc)</code> removes a facility's candidate
+    edges and resets <code>candidate_route</code>, returning
+    <code>{"edges_removed": n, "routes_reset": m}</code>.
+  </p>
+
+  <h3 id="candidate-schema-evidence">Evidence</h3>
+  <ul id="candidate-schema-gate">
+    <li><code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code>:
+      410 passed, 5 skipped, 1 deselected (the graph test), exit 0.
+      <code>tests/ids/test_candidate_persistence.py</code> contributes 11
+      passing tests showing a re-judge replaces earlier edges, a missing
+      IMASNode raises, a shortfall keeps <code>candidate_route</code> null
+      while still releasing the claim, an empty <code>no_candidate</code> write
+      sets the route, the claim is released on success and on failure, and
+      <code>clear_candidates</code> reports its counts.</li>
+    <li><code>-m graph</code> against the live database (compute node
+      <code>98dci4-clu-2018</code>): creates a uniquely named fixture source,
+      writes two candidates, re-judges to one (earlier edges replaced), then
+      proves a shortfall leaves the route null with one partial edge and a
+      released claim, and an empty <code>no_candidate</code> write sets the
+      route with zero edges; reads the released claim, clears, and deletes the
+      fixture — exit 0, zero residue.</li>
+    <li>Negative control: dropping the route's <code>CASE</code> guard so it is
+      set unconditionally makes both the shortfall unit test and the live graph
+      round-trip fail (route reads <code>selected</code> after a shortfall,
+      exit 1), so the fail-closed guard is load-bearing.</li>
+  </ul>
+</section>
