@@ -15,7 +15,7 @@ Use `call_llm_structured()` / `acall_llm_structured()` from `imas_codex.discover
 from imas_codex.discovery.base.llm import call_llm_structured
 
 result, cost, tokens = call_llm_structured(
-    model=get_model("language"),
+    model=get_model("discovery-score"),
     messages=[
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},

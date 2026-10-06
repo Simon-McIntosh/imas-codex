@@ -284,17 +284,6 @@ triage-offset = 0.15
 # Override: IMAS_CODEX_LOG_LOCATION
 location = "iter"
 
-[tool.imas-codex.language]
-# openrouter/ prefix required so direct-path bypass preserves cache_control
-# and response_cost. Without it, calls silently route through the proxy,
-# stripping cache discounts (often 80%+) and zeroing cost telemetry.
-# SHARED by 15+ non-SN consumers: discovery (paths, wiki, signals, code),
-# DD enrichment (dd_enrichment.py), IMAS mapping (ids/mapping.py), cluster
-# labeling, static discovery. SN docs use their dedicated seat so their model
-# selection remains independent of facility discovery.
-model = "openrouter/openai/gpt-5.4"
-batch-size = 50
-
 [tool.imas-codex.sn-docs]
 # Documentation generation needs physics-faithful prose and strict banned-prose
 # compliance. Selection evidence belongs in the benchmark result artifacts.
@@ -348,7 +337,8 @@ reasoning-effort = "medium"
 [tool.imas-codex.sn-classifier]
 # Physics-domain classifier (dd_domain_classifier.classify_domains): assigns a
 # physics_domain to DD paths, which SN names inherit — so it is an
-# SN-attributable seat, not the generic [language] model.
+# SN-attributable seat, its model choice owned by the SN pipeline that
+# consumes its output rather than shared with any other pipeline.
 # Domain classification shapes downstream domain-scoping (which examples a
 # name sees at compose/review), so it uses a strong model.
 model = "openrouter/openai/gpt-5.5"
@@ -373,16 +363,6 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 # and response_cost. Without it, calls silently route through the proxy,
 # stripping cache discounts (often 80%+) and zeroing cost telemetry.
 model = "openrouter/anthropic/claude-sonnet-4.6"
-
-[tool.imas-codex.vision]
-# openrouter/ prefix — see [language] note above.
-# flash-lite is INTENTIONAL here: this section drives image OCR only
-# (wiki/document page image captioning via discovery/wiki and related
-# doc-ingestion paths). It is NOT used in the SN compose/review/refine
-# pipeline. Flash-lite is adequate for OCR-quality transcription and
-# keeps image-processing costs minimal. Any SN-pipeline model must go
-# through [sn-compose], [sn-refine], or [sn-review.*] — never vision.
-model = "openrouter/google/gemini-3.1-flash-lite-preview"
 
 # ─── Discovery function seats ──────────────────────────────────────────────
 # One seat per discovery function so a model can be chosen per function, the
@@ -421,8 +401,10 @@ endpoint-class = "local-free"
 
 [tool.imas-codex.cluster-labels]
 # Cluster labelling. Keeps the OpenRouter model so nothing outside discovery
-# changes model.
+# changes model. batch-size is the clusters-per-LLM-call setting that
+# get_labeling_batch_size reads.
 model = "openrouter/openai/gpt-5.4"
+batch-size = 50
 
 [tool.imas-codex.ids-mapping]
 # IDS mapping and metadata enrichment.

@@ -517,7 +517,7 @@ def _call_llm(
     """Call LLM with structured output parsing."""
     from imas_codex.discovery.base.llm import call_llm_structured
 
-    llm_model = model or get_model("language")
+    llm_model = model or get_model("ids-mapping")
     logger.info("Step %s: calling %s", step_name, llm_model)
 
     result, usd, tokens = call_llm_structured(
@@ -545,7 +545,7 @@ async def _acall_llm(
     """Async LLM call with structured output parsing."""
     from imas_codex.discovery.base.llm import acall_llm_structured
 
-    llm_model = model or get_model("language")
+    llm_model = model or get_model("ids-mapping")
     logger.info("Step %s: calling %s (async)", step_name, llm_model)
 
     result, usd, tokens = await acall_llm_structured(

@@ -3328,10 +3328,11 @@ async def enrich_worker(
         SignalEnrichmentBatch,
     )
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
     # Get model configured for enrichment task
-    model = get_model("language")
+    model = get_model("discovery-describe")
+    reasoning_effort = get_reasoning_effort("discovery-describe")
 
     # Render system prompt once (contains physics domains from schema)
     system_prompt = render_prompt("signals/enrichment")
@@ -3980,6 +3981,7 @@ async def enrich_worker(
                 ],
                 response_model=SignalEnrichmentBatch,
                 temperature=0.3,
+                reasoning_effort=reasoning_effort,
                 service="facility-discovery",
             )
         except ProviderBudgetExhausted as e:
@@ -4270,9 +4272,10 @@ async def individualize_source_descriptions(
         SignalSourceCodeUnwindBatch,
     )
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
-    model = get_model("language")
+    model = get_model("discovery-describe")
+    reasoning_effort = get_reasoning_effort("discovery-describe")
     system_prompt = render_prompt("signals/source_unwind")
 
     # Find enriched sources that haven't been individualized yet
@@ -4387,6 +4390,7 @@ async def individualize_source_descriptions(
                 ],
                 response_model=SignalSourceCodeUnwindBatch,
                 temperature=0.3,
+                reasoning_effort=reasoning_effort,
                 service="facility-discovery",
             )
         except ProviderBudgetExhausted:
