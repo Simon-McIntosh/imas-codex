@@ -10,7 +10,7 @@ Covers:
 - Failed release clears claim_token, leaves docs_stage at 'pending'
 - Worker renders chain history in prompt context
 - Worker renders reviewer feedback in prompt context
-- Worker uses get_model("language") not reasoning model
+- Worker uses get_model("sn-docs") not a reasoning model
 - Worker streams per-item progress
 """
 
@@ -435,12 +435,12 @@ def test_worker_renders_reviewer_feedback():
 
 
 # =============================================================================
-# 10. test_worker_uses_language_model
+# 10. test_worker_uses_docs_model
 # =============================================================================
 
 
 @pytest.mark.asyncio
-async def test_worker_uses_language_model():
+async def test_worker_uses_docs_model():
     """process_generate_docs_batch uses get_model('sn-docs'), not a reasoning model."""
     from imas_codex.standard_names.models import GeneratedDocs
     from imas_codex.standard_names.workers import process_generate_docs_batch
