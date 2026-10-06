@@ -1,0 +1,44 @@
+<section>
+  <h2 id="candidate-judgment">Jev pair judgment and routing in <code>ids/candidates.py</code></h2>
+  <p id="candidate-judgment-scope">
+    The candidate module now owns judgment and routing beside retrieval.
+    <code>route_ids(description, *, gc)</code> asks one Choice over every IDS
+    (its name and one-line description offered as criteria) and returns the
+    three most probable IDSs; <code>judge_candidates(source, facility,
+    candidates)</code> asks one batched <code>same_quantity</code> noul per
+    candidate in a single decisions request and returns one
+    <code>PairJudgment</code> (path, <code>p_same_quantity</code>, model,
+    judged_at) per candidate; <code>route(judgments, thresholds)</code> orders
+    them by <code>p_same_quantity</code> and returns a <code>Route</code>
+    (decision, top-N shortlist). Both calls travel the shared
+    <code>call_decisions</code> layer. Thresholds come from
+    <code>get_mapping_route_thresholds()</code> (<code>RouteThresholds</code>):
+    the select threshold and floor default unset, the margin to 0.10 and the
+    shortlist to 5. A decisions transport failure returns no route, leaving the
+    source unjudged; a malformed answer is raised, not swallowed. Model seat
+    <code>[tool.imas-codex.mapping-candidates]</code> =
+    <code>typesafe/jev-1.13</code>; the questions are the frozen wording in
+    <code>imas_codex/llm/prompts/mapping/candidate_judgment.md</code>.
+  </p>
+  <table id="candidate-judgment-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code></td><td>411 passed, 5 skipped, exit 0</td></tr>
+      <tr><td><code>uv run --no-sync pytest tests/ids/test_candidate_judgment.py</code></td><td>6 passed, exit 0</td></tr>
+      <tr><td>negative control — <code>route</code> selects the best candidate when no select threshold is configured</td><td>1 failed, 5 passed, exit 1</td></tr>
+    </tbody>
+  </table>
+  <p id="candidate-judgment-tests">
+    Under the fake decisions transport, <code>test_candidate_judgment.py</code>
+    shows the state carries the facility, signal_source and candidate blocks; a
+    malformed answer is rejected with a <code>DecisionsValidationError</code>; a
+    transport error yields <code>None</code> judgments and no route from both
+    <code>judge_candidates</code> and <code>route_ids</code>; the default
+    thresholds escalate with the top five in descending
+    <code>p_same_quantity</code>; a select threshold returns selected,
+    escalated (margin case) and no_candidate; and <code>route_ids</code>
+    returns three IDSs drawn from the criteria it offered. Under the declared
+    mutation the default-thresholds escalation test fails, so the select
+    guard is load-bearing.
+  </p>
+</section>

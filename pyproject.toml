@@ -282,6 +282,16 @@ triage-offset = 0.15
 # IMAS_CODEX_CODE_INGEST_THRESHOLD.
 code-triage-threshold = 0.4
 code-ingest-threshold = 0.5
+# Candidate-stage routing thresholds (get_mapping_route_thresholds). A source
+# is selected only when map-select-threshold is set and its best same_quantity
+# reaches it while leading the next by map-select-margin; it is rejected only
+# when map-floor-threshold is set and no score reaches it. Both gate keys are
+# intentionally absent: the selected route never reached usable precision, so
+# it stays disabled until the select threshold is written, and no source is
+# rejected. map-select-margin is the Jev operating-point margin and
+# map-shortlist-size the reranked top size that held every recoverable hit.
+map-select-margin = 0.10
+map-shortlist-size = 5
 
 [tool.imas-codex.logs]
 # Where CLI commands run and write logs.
@@ -411,6 +421,13 @@ endpoint-class = "local-free"
 # The endpoint takes its own request/response shape and is called directly by
 # the decisions call layer, so this seat carries no chat route and its cost is
 # read from the response usage rather than priced in configuration.
+model = "typesafe/jev-1.13"
+
+[tool.imas-codex.mapping-candidates]
+# Pair judgment and IDS routing over a retrieved DD shortlist, through the same
+# OpenRouter alpha decisions endpoint. A seat separate from discovery-relevance
+# so the candidate stage's model changes alone. Called directly by the
+# decisions call layer; cost is read from the response usage.
 model = "typesafe/jev-1.13"
 
 [tool.imas-codex.cluster-labels]
