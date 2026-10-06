@@ -1,0 +1,25 @@
+<section>
+  <h2 id="candidate-labels">A frozen 163-source labelled set for the retrieval and Jev measurement</h2>
+  <p id="candidate-labels-result">
+    150 JET enriched SignalSources stratified over the 20 physics domains they
+    occupy (proportional, at least three per domain), including 20 of the 56
+    validated sources carrying a negative disposition and the two probe/passive
+    examples from §1, plus all 13 enriched JT-60SA sources, are labelled by a
+    scripted top-down DD walk — choose an IDS from the IDS names and
+    descriptions, then the node(s) from that IDS's quantity, geometry and
+    identifier nodes. The set is split 50/50 dev/test stratified by domain (87
+    dev / 76 test). 75 sources carry a node label over 56 distinct IMASNode ids,
+    all present in the sampling graph; 88 are <code>none</code>, each with a
+    one-line reason. A second pass with a different model (openrouter
+    <code>gpt-5.4</code>, against the local <code>deepseek-v4.1-flash</code>) on
+    a 30-source stratified subsample agrees exactly on 0.600 of sources.
+  </p>
+  <p id="candidate-labels-gate">
+    Gate <code>python3 -c "…print(len(labels), len(split), agreement)"</code>
+    prints <code>163 163 0.6</code>; every labelled id exists as an IMASNode
+    (0 of 56 absent). Writes <code>sample.json</code>, <code>labels.json</code>,
+    <code>labels_second.json</code>, <code>split.json</code>,
+    <code>agreement.json</code> under the probe's labels directory, with the
+    labeller scripts alongside.
+  </p>
+</section>
