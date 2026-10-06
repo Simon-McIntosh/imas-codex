@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T20:23:04.555Z",
+  "dispatched_at": "2026-10-06T20:12:03Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T195542872031-candidate-judgment/manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite is a prose string (\"405 passed, 5 skipped (tests/ids at base 67c2de2da; the widened targets are new and have no recorded base)\") rather than the armed JSON shape (revision, command, exit_status, log_path, completed, failure_count, failure_ids) the contract names, so the added-failure derivation reads no base gate-log path and records the count unmeasured; recording the two arms as JSON with their log paths closes the gap."
+    },
+    {
+      "file": "imas_codex/ids/candidates.py",
+      "line": "288",
+      "severity": "follow-on",
+      "text": "follow-on: _ids_criteria runs an inline \"MATCH (i:IDS) RETURN i.id AS id, i.description AS description\" listing beside sibling inline listings at imas_codex/graph/dd_workers.py:904 and imas_codex/graph/dd_enrichment.py:980; no extracted owner exists, so this is not a duplicated capability, but the fourth inline IDS listing is the point to consider one."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 67c2de2da; 358dc44a1 adds the judgment surface and be469845a deletes one env-var registration, together 661 changed lines across candidates.py, settings.py, pyproject.toml, the prompt file and the test file, and nothing else.",
+    "done_when": "the done-when names tests/ids/test_candidate_judgment.py; the file carries one test per bullet and the manifest records the tests/ids gate at 411 passed, 5 skipped and the widened gate at 491 passed, 5 skipped.",
+    "goal": "the node's goal is to add Jev IDS routing, batched same_quantity judgment and threshold routing to imas_codex/ids/candidates.py, and the landed diff adds route_ids, judge_candidates, route, PairJudgment and Route there (imas_codex/ids/candidates.py:283-334).",
+    "manifest": "read; it records both gate commands, their results, test_logs, the negative control and the widened-gate fix, but its baseline_suite field is prose rather than the armed JSON shape (FINDING at the manifest).",
+    "write_paths": "the manifest declares six paths and git show --stat 358dc44a1 plus be469845a list exactly those paths, the figure directory absent because the done-when names no artifact."
+  },
+  "justifications": {
+    "durability": "the declared mutation dropping the select_threshold guard reddens test_default_thresholds_escalate_and_shortlist_top_five_in_jev_order (EXIT=1), tests/ids/test_candidate_judgment.py:248-282 fails if the margin, floor or ordering branches regress, and be469845a removes an env-var registration that test_openrouter_prefix_present rejects.",
+    "evidence": "the manifest records tests/ids at 411 passed, 5 skipped and the widened gate (tests/ids, tests/core/test_settings.py, tests/llm/test_prompt_rendering.py, tests/llm/test_prompt_schema_coverage.py) at 491 passed, 5 skipped with gate-widened.log, and I reproduced tests/ids/test_candidate_judgment.py at head (6 passed).",
+    "fit": "the frozen slots dataclasses and the JUDGMENT_SERVICE constant match the surrounding style, be469845a aligns the seat with discovery-relevance's no-env-var registration, and no plan or ticket identifier or attribution appears.",
+    "goal_fidelity": "imas_codex/ids/candidates.py:283-334 defines route_ids, judge_candidates, route, PairJudgment (imas_codex/ids/candidates.py:86) and Route (imas_codex/ids/candidates.py:101), exactly the five symbols section 5 names.",
+    "reuse": "judge_candidates and route_ids extend the shared call_decisions layer rather than building a second client (imas_codex/ids/candidates.py:145-166) and Candidate composes SearchHit; the search over imas_codex found no extracted owner of an IDS-with-description listing.",
+    "scope_discipline": "git show --stat 358dc44a1 and be469845a list only the six declared write paths, and docs/figures/mapping-candidate-selection/candidate-judgment is absent because the done-when names no figure."
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 67c2de2dae12fbb5b1d750cbbad73514f43b326c\nreviewed_head_sha: be469845a0e051345a584093c5311919b8864115\nVERDICT goal: the node's goal is to add Jev IDS routing, batched same_quantity judgment and threshold routing to imas_codex/ids/candidates.py, and the landed diff adds route_ids, judge_candidates, route, PairJudgment and Route there (imas_codex/ids/candidates.py:283-334).\nVERDICT done_when: the done-when names tests/ids/test_candidate_judgment.py; the file carries one test per bullet and the manifest records the tests/ids gate at 411 passed, 5 skipped and the widened gate at 491 passed, 5 skipped.\nVERDICT write_paths: the manifest declares six paths and git show --stat 358dc44a1 plus be469845a list exactly those paths, the figure directory absent because the done-when names no artifact.\nVERDICT manifest: read; it records both gate commands, their results, test_logs, the negative control and the widened-gate fix, but its baseline_suite field is prose rather than the armed JSON shape (FINDING at the manifest).\nVERDICT diff: read commit by commit against base 67c2de2da; 358dc44a1 adds the judgment surface and be469845a deletes one env-var registration, together 661 changed lines across candidates.py, settings.py, pyproject.toml, the prompt file and the test file, and nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/ids/candidates.py:283-334 defines route_ids, judge_candidates, route, PairJudgment (imas_codex/ids/candidates.py:86) and Route (imas_codex/ids/candidates.py:101), exactly the five symbols section 5 names.\nSCORE evidence: 19\nJUSTIFICATION evidence: the manifest records tests/ids at 411 passed, 5 skipped and the widened gate (tests/ids, tests/core/test_settings.py, tests/llm/test_prompt_rendering.py, tests/llm/test_prompt_schema_coverage.py) at 491 passed, 5 skipped with gate-widened.log, and I reproduced tests/ids/test_candidate_judgment.py at head (6 passed).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat 358dc44a1 and be469845a list only the six declared write paths, and docs/figures/mapping-candidate-selection/candidate-judgment is absent because the done-when names no figure.\nSCORE durability: 19\nJUSTIFICATION durability: the declared mutation dropping the select_threshold guard reddens test_default_thresholds_escalate_and_shortlist_top_five_in_jev_order (EXIT=1), tests/ids/test_candidate_judgment.py:248-282 fails if the margin, floor or ordering branches regress, and be469845a removes an env-var registration that test_openrouter_prefix_present rejects.\nSCORE fit: 19\nJUSTIFICATION fit: the frozen slots dataclasses and the JUDGMENT_SERVICE constant match the surrounding style, be469845a aligns the seat with discovery-relevance's no-env-var registration, and no plan or ticket identifier or attribution appears.\nSCORE reuse: 18\nJUSTIFICATION reuse: judge_candidates and route_ids extend the shared call_decisions layer rather than building a second client (imas_codex/ids/candidates.py:145-166) and Candidate composes SearchHit; the search over imas_codex found no extracted owner of an IDS-with-description listing.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T195542872031-candidate-judgment/manifest.md:19 follow-on: baseline_suite is a prose string (\"405 passed, 5 skipped (tests/ids at base 67c2de2da; the widened targets are new and have no recorded base)\") rather than the armed JSON shape (revision, command, exit_status, log_path, completed, failure_count, failure_ids) the contract names, so the added-failure derivation reads no base gate-log path and records the count unmeasured; recording the two arms as JSON with their log paths closes the gap.\nFINDING imas_codex/ids/candidates.py:288 follow-on: _ids_criteria runs an inline \"MATCH (i:IDS) RETURN i.id AS id, i.description AS description\" listing beside sibling inline listings at imas_codex/graph/dd_workers.py:904 and imas_codex/graph/dd_enrichment.py:980; no extracted owner exists, so this is not a duplicated capability, but the fourth inline IDS listing is the point to consider one.",
+  "review_run_id": "r-20261006T201152869415-review-of-candidate-judgment",
+  "reviewed_base_sha": "67c2de2dae12fbb5b1d750cbbad73514f43b326c",
+  "reviewed_head_sha": "be469845a0e051345a584093c5311919b8864115",
+  "reviewed_run_id": "r-20261006T195542872031-candidate-judgment",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T20:23:26.841408+00:00",
+  "total": 114
+}

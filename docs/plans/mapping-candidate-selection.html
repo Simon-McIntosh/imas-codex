@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -479,6 +479,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261006T195542872031-candidate-judgment" data-who="reckon-build" data-when="2026-10-06T20:18:54.140Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/mapping-candidate-selection/candidate-judgment.html — the candidate stage gains route_ids, judge_candidates, route, PairJudgment and Route in imas_codex/ids/candidates.py, the [tool.imas-codex.mapping-candidates] seat (typesafe/jev-1.13, no env-var seat, mirroring discovery-relevance) and get_mapping_route_thresholds; widened gate uv run --no-sync pytest tests/ids tests/core/test_settings.py tests/llm/test_prompt_rendering.py tests/llm/test_prompt_schema_coverage.py -&gt; 491 passed, 5 skipped, exit 0.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261006T201152869415-review-of-candidate-judgment" data-who="reckon-build" data-when="2026-10-06T20:23:04.555Z">
+    <div class="r-comment-body"><p>the review for r-20261006T195542872031-candidate-judgment is stored: six dimensions scored (goal_fidelity 20, evidence 19, scope_discipline 19, durability 19, fit 19, reuse 18; total 114), reviewed_base_sha 67c2de2dae12fbb5b1d750cbbad73514f43b326c and reviewed_head_sha be469845a0e051345a584093c5311919b8864115, item_aggregate 6, call_sites none, added_failure_count null (unmeasured), two follow-on findings.</p></div>
 </div>
 </section>
 </main>
