@@ -26,7 +26,10 @@
         Gate:
         <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/core/test_settings.py tests/discovery</code>
         exits <strong>0</strong> — 1196 passed, from
-        <code>gate-b138bca23.log</code> in the run directory.
+        <code>gate-b138bca23.log</code> in the run directory, and the same
+        command with <code>tests/cli/test_llm_cli.py</code> added exits
+        <strong>0</strong> — 1248 passed, from
+        <code>gate-b138bca23-plus-cli.log</code>.
         <code>rg -n 'get_model(_config)?\("(language|vision)"\)'
         imas_codex/discovery imas_codex/cli/discover</code> matches only
         <code>imas_codex/discovery/signals/parallel.py</code>, which keeps the
@@ -43,7 +46,15 @@
         <code>http://98dci4-gpu-0003:18802/v1</code> with
         <code>endpoint_class: local-free</code> and
         <code>cost_usd: 0.0</code>
-        (<code>live-seat-check.log</code>).
+        (<code>live-seat-check.log</code>). The image call was repeated with a
+        rendered PNG carrying two lines of text, so the answer shows the image
+        content survives <code>score_images_batch</code> and the local call
+        path rather than only that the endpoint answered: the returned
+        <code>ocr_text</code> is <code>"EQDB record: psi(129x129), boundary\nShot
+        E101173  Ip = 5.5 MA"</code> — both lines verbatim — at
+        <code>cost_usd: 0.0</code>, and the recorded request the local client
+        sent carries an <code>image_url</code> part
+        (<code>live-vision-text-check.log</code>).
       </p>
       <p id="discovery-seats-split-followons">
         The synchronous <code>DirectoryTriager.triage_batch</code> now carries a
@@ -51,8 +62,8 @@
         no local-endpoint branch, so it would hand
         <code>local/deepseek-v4.1-flash</code> to litellm and fail; the
         production pipeline uses the async variant, which routes to the local
-        client. The fix belongs in the shared call layer, outside this node's
-        write scope.
+        client. The fix belongs in the shared call layer. The status
+        <code>--deep</code> path names the <code>discovery-score</code> seat.
       </p>
     </section>
   </body>
