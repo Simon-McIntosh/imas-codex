@@ -146,6 +146,7 @@ MODEL_SECTIONS = frozenset(
         "discovery-describe",
         "discovery-vision",
         "discovery-relevance",
+        "mapping-candidates",
         "cluster-labels",
         "ids-mapping",
         "agent",
@@ -178,6 +179,10 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # which takes its own request/response shape and is called directly by
     # the decisions call layer rather than through the chat-routing path.
     "discovery-relevance": "typesafe/jev-1.13",
+    # Pair judgment and IDS routing over a retrieved DD shortlist, through the
+    # same decisions endpoint. Its own seat so the candidate stage's model
+    # changes independently of the code-relevance seat.
+    "mapping-candidates": "typesafe/jev-1.13",
     "cluster-labels": "openrouter/openai/gpt-5.4",
     "ids-mapping": "openrouter/openai/gpt-5.4",
     "agent": "openrouter/anthropic/claude-sonnet-4.6",
@@ -1055,6 +1060,49 @@ def get_code_ingest_threshold() -> float:
     if env := os.getenv("IMAS_CODEX_CODE_INGEST_THRESHOLD"):
         return float(env)
     return float(_get_section("discovery").get("code-ingest-threshold", 0.5))
+
+
+@dataclass(frozen=True, slots=True)
+class RouteThresholds:
+    """Thresholds that route a judged source between select, escalate and reject.
+
+    ``select_threshold`` unset (``None``) disables the selected route and
+    ``floor_threshold`` unset rejects no source. A source is selected only when
+    a select threshold is set, its best same_quantity reaches it, and it leads
+    the next candidate by ``select_margin``. It is rejected only when a floor
+    is set and no score reaches it. ``shortlist_size`` caps the Jev-ordered
+    shortlist the route carries.
+    """
+
+    select_threshold: float | None
+    select_margin: float
+    floor_threshold: float | None
+    shortlist_size: int
+
+
+def get_mapping_route_thresholds() -> RouteThresholds:
+    """Get the candidate-stage routing thresholds.
+
+    Reads ``[tool.imas-codex.discovery]`` keys ``map-select-threshold``,
+    ``map-select-margin``, ``map-floor-threshold`` and ``map-shortlist-size``.
+    The select threshold and floor default to unset (``None``): the selected
+    route never rose above about 0.63 precision at any threshold, so it is
+    disabled until set, and no source is rejected by default. The margin
+    defaults to 0.10 and the shortlist to 5, the size at which Jev's reranked
+    top held every recoverable hit.
+    """
+    section = _get_section("discovery")
+
+    def _optional_float(key: str) -> float | None:
+        value = section.get(key)
+        return None if value is None else float(value)
+
+    return RouteThresholds(
+        select_threshold=_optional_float("map-select-threshold"),
+        select_margin=float(section.get("map-select-margin", 0.10)),
+        floor_threshold=_optional_float("map-floor-threshold"),
+        shortlist_size=int(section.get("map-shortlist-size", 5)),
+    )
 
 
 # ─── Log settings ──────────────────────────────────────────────────────────
