@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="56">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -220,7 +220,7 @@
         predicate and <code>has_pending_candidate_work</code> stay in <code>workers.py</code>
         as claim-loop helpers that delegate to <code>claims.py</code>.
         <code>edge-ownership</code> adds it to <code>graph_ops.py</code>, and
-        <code>map-run-consumes-candidates</code> deletes the <code>workers.py</code> copy and
+        <code>map-context-reads-candidates</code> deletes the <code>workers.py</code> copy and
         repoints <code>discover status</code> and <code>discover clear</code>.
         <code>count_sources_by_mapping_status</code>, which has no caller, is deleted.</li>
       <li><strong>Per-source bridge kept, narrowed.</strong> After §4,
@@ -294,8 +294,11 @@
         refusal, and another passes the producer's boolean and expects the edge to be
         marked.</li>
     </ul>
-    <p><strong>Nodes.</strong> The section is two nodes, run in order, because both write
-      <code>mapping.py</code>.</p>
+    <p><strong>Nodes.</strong> The section is three nodes, run in order, because each writes
+      <code>mapping.py</code>. The second and third were one 2.5 h node; they are split so
+      that each fits one worker's 60-minute budget, and the split follows the code: the
+      second changes where the map stage reads its shortlist, the third changes what it does
+      with each route.</p>
     <ol>
       <li><strong><code>edge-ownership</code></strong>, role implement, 1.5 h. It owns the
         <code>MAPS_TO_IMAS</code> census bullet and its sub-bullets, the edge-delete owner,
@@ -319,11 +322,15 @@
             </ul>
             The two census commands print only sites in <code>graph_ops.py</code>.</li>
         </ul></li>
-      <li><strong><code>map-run-consumes-candidates</code></strong>, role implement, 2.5 h.
-        It owns the selected, escalated and no_candidate behaviour, the
-        <code>target_id</code> guard, the retired legacy retrieval, the removed per-IDS
-        retrieval, the retired fields, and the deletion of
-        <code>count_sources_by_mapping_status</code>.
+      <li><strong><code>map-context-reads-candidates</code></strong>, role implement, 1 h.
+        It owns the candidate reader and pick marker, the removed per-IDS retrieval, the
+        removal of the bridge's <code>imas_node_embedding</code> arm and its post-hoc
+        filter, and the single route count: the <code>workers.py</code> copy of
+        <code>count_candidates_by_route</code> and <code>count_sources_by_mapping_status</code>
+        are deleted, and <code>discover status</code> and <code>discover clear</code>
+        (<code>imas_codex/cli/discover/__init__.py</code>) import the
+        <code>graph_ops.py</code> reader. The assign stage keeps its current call in this node;
+        only the source of each shortlist changes.
         <ul>
           <li>The candidate edges get a reader, and a way to mark the reasoning model's pick,
             beside their writer in <code>imas_codex/ids/graph_ops.py</code>:
@@ -333,20 +340,48 @@
             every edge of a source, while a pick must flag one existing edge without disturbing
             the shortlist. No candidate query is written in <code>workers.py</code> or
             <code>mapping.py</code>.</li>
-          <li>Write paths: <code>imas_codex/ids/workers.py</code>,
+          <li>Write paths: <code>imas_codex/ids/graph_ops.py</code>,
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/tools.py</code>,
-            <code>imas_codex/ids/graph_ops.py</code>,
-            <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
-            <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
-            <code>imas_codex/schemas/facility.yaml</code>,
+            <code>imas_codex/ids/workers.py</code>,
             <code>imas_codex/cli/discover/__init__.py</code>,
             <code>tests/cli/test_discover_map.py</code>,
             <code>tests/tools/test_dd_version_filtering.py</code> and
             <code>tests/ids/</code>.</li>
+          <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids
+            tests/cli/test_discover_map.py tests/tools/test_dd_version_filtering.py
+            tests/test_cli.py -p no:cacheprovider</code> passes, with tests showing:
+            <ul>
+              <li><code>read_candidates</code> returns each source's edges in Jev order;</li>
+              <li><code>select_candidate</code> marks exactly one edge and leaves the rest of
+                the shortlist unchanged;</li>
+              <li><code>gather_ids_context</code> takes each source's shortlist from
+                <code>read_candidates</code> and never calls
+                <code>retrieve_candidates</code>;</li>
+              <li><code>discover status</code> prints the route counts from the
+                <code>graph_ops.py</code> reader.</li>
+            </ul>
+            <code>grep -n 'retrieve_candidates' imas_codex/ids/mapping.py</code> and
+            <code>grep -n 'imas_node_embedding' imas_codex/ids/tools.py</code> print nothing,
+            and <code>grep -rn 'def count_candidates_by_route\|count_sources_by_mapping_status'
+            imas_codex/</code> prints only the one definition in
+            <code>graph_ops.py</code>.</li>
+        </ul></li>
+      <li><strong><code>map-run-routes-candidates</code></strong>, role implement, 1.5 h.
+        It owns the selected, escalated and no_candidate behaviour, the
+        <code>target_id</code> guard, the per-source bridge narrowed to the escalated
+        sources, and the retired fields. It reads and marks candidates only through
+        <code>read_candidates</code> and <code>select_candidate</code>.
+        <ul>
+          <li>Write paths: <code>imas_codex/ids/workers.py</code>,
+            <code>imas_codex/ids/mapping.py</code>,
+            <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
+            <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
+            <code>imas_codex/schemas/facility.yaml</code>,
+            <code>tests/llm/test_prompt_rendering.py</code> and
+            <code>tests/ids/</code>.</li>
           <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
             tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py
-            tests/tools/test_dd_version_filtering.py -p no:cacheprovider</code> passes, with
-            tests showing:
+            -p no:cacheprovider</code> passes, with tests showing:
             <ul>
               <li>a selected source is mapped without an assign call;</li>
               <li>under the default thresholds, an escalated source is claimed by the assign
@@ -355,8 +390,8 @@
               <li>an escalated source's prompt lists only its shortlist;</li>
               <li>an answer naming a path outside the shortlist is refused;</li>
               <li>a <code>target_id</code> outside the selected node is escalated;</li>
-              <li><code>gather_ids_context</code> no longer calls
-                <code>retrieve_candidates</code>.</li>
+              <li>a no_candidate source is skipped and its best path and probability are
+                logged.</li>
             </ul>
             After <code>uv run build-models --force</code> in the worktree, which regenerates the
             gitignored <code>models.py</code> and <code>schema_context_data.py</code> from
@@ -426,10 +461,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mcs-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-06" data-recommends-skill="/reckon-build mapping-candidate-selection §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-06" data-recommends-skill="/reckon-build mapping-candidate-selection §3" data-resolved-at="2026-10-06T22:19:41+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Label a set and measure retrieval and Jev</h4>
     <div class="r-fu-body"><p>The measurement every later section is sized from. It needs neither the decisions-call layer nor a schema change.</p></div>
     <pre class="r-fu-prompt">/reckon-build mapping-candidate-selection §3</pre>
+    <p class="r-fu-outcome">§3 landed: 54-source labelled set, recall@20 0.556 hybrid alone and 0.694 with Jev IDS routing, AUC 0.924; the section is collapsed.</p>
     </article>
 <article class="r-fu" data-id="f-mcs-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-06" data-recommends-skill="/reckon-build mapping-candidate-selection §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Find what removed the mapping edges</h4>
@@ -439,10 +475,11 @@
 </section>
   <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
-<div class="r-gate" data-id="g-mcs-1" data-section="s5" data-gated-sections="s5" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-mcs-1" data-section="s5" data-gated-sections="s5" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">call_decisions and acall_decisions are in imas_codex/discovery/base/llm.py with the model as a parameter, strict answer validation and a test guard against live decisions requests</h4>
     <p class="r-gate-required-evidence">jt60sa-discovery-completion#s25</p>
-    </div>
+    <a class="r-gate-evidence" href="call_decisions (imas_codex/discovery/base/llm.py:3429) and acall_decisions (:3493) take the model as their first parameter and raise DecisionsValidationError on any answer that fails its question type; tests/conftest.py:403 no_live_decisions_requests refuses any request to the alpha/decisions endpoint; landed by 3e91ac114 and consumed by §5.">Evidence</a>
+</div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T164923233082-mapping-edge-loss" data-who="reckon-build" data-when="2026-10-06T17:05:48.643Z">
@@ -465,6 +502,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261006T185011187573-candidate-jev-probe" data-who="reckon-build" data-when="2026-10-06T19:14:26.526Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/mapping-candidate-selection/candidate-jev-probe.html</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261006T2225-fu-correction" data-who="reckon-build" data-when="2026-10-06T22:25:00Z">
+    <div class="r-comment-body">Correction to the f-mcs-001 outcome: the labelled test set is 36 sources (docs/research/mapping-candidate-probe.html), not 54. Recall@20 0.556 hybrid alone and 0.694 with Jev IDS routing, and AUC 0.924, are measured on those 36.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261006T193129455727-candidate-retrieval" data-who="reckon-build" data-when="2026-10-06T19:45:59.592Z">
     <div class="r-comment-body"><p>candidate-retrieval: DD shortlist now built by imas_codex/ids/candidates.py — retrieve_candidates embeds each source once, searches one arm per routed IDS through hybrid_dd_search, merges by score and deduplicates on path (Candidate composes the SearchHit with arms and parent documentation); gather_ids_context builds source_candidates through retrieve_candidates and mapping.py no longer loads ClusterSearcher; gate uv run --no-sync pytest tests/ids → 405 passed, 5 skipped, exit 0</p></div>
