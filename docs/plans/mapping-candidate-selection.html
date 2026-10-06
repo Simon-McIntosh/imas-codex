@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -227,7 +227,15 @@
         produces that per-source bridge. <code>fetch_wiki_context</code> and
         <code>fetch_code_context</code> are domain-filtered facility blocks, not a
         replacement. So it stays, and is called only for the sources the escalated choice
-        prompt carries, not for every enriched source as today.</li>
+        prompt carries, not for every enriched source as today. Its own
+        <code>imas_node_embedding</code> arm is removed from
+        <code>imas_codex/ids/tools.py</code>, along with the post-hoc filter at
+        <code>mapping.py:681–694</code> that discarded it. Today that arm runs and its hits
+        are thrown away, and because the arms share <code>k_per_source</code>, the discarded
+        hits can crowd out the wiki and code matches the bridge exists for. DD retrieval has
+        one owner, <code>retrieve_candidates</code>. The test of that arm's DD-version filter
+        in <code>tests/tools/test_dd_version_filtering.py</code> is removed with it, because
+        <code>hybrid_dd_search</code> owns the DD-version filter now.</li>
       <li><strong>No per-IDS retrieval in the map context.</strong> After §4,
         <code>gather_ids_context</code> calls <code>retrieve_candidates</code> for every
         source on each IDS target, re-embedding every source each time. The map stage reads
@@ -325,7 +333,8 @@
             <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
             <code>imas_codex/schemas/facility.yaml</code>,
             <code>imas_codex/cli/discover/__init__.py</code>,
-            <code>tests/cli/test_discover_map.py</code> and
+            <code>tests/cli/test_discover_map.py</code>,
+            <code>tests/tools/test_dd_version_filtering.py</code> and
             <code>tests/ids/</code>.</li>
           <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
             tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py
