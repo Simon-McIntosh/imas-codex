@@ -103,6 +103,26 @@ class TestResetSpec:
         spec = reset_mod.PATH_RESET_SPECS["triaged"]
         assert "expanded_at" in spec.clear_fields
 
+    def test_path_scanned_reset_keeps_discovered_out_of_source_statuses(
+        self, reset_mod
+    ):
+        """The shared spec must not list ``discovered``: an unscoped reset would
+        otherwise push every never-scanned discovered row past enumeration."""
+        spec = reset_mod.PATH_RESET_SPECS["scanned"]
+        assert "discovered" not in spec.source_statuses
+        assert "triaged" in spec.source_statuses
+        assert "scored" in spec.source_statuses
+        # Clearing the triage composite is what makes the row claimable again.
+        assert "triage_composite" in spec.clear_fields
+
+    def test_path_scanned_reset_admits_only_stranded_discovered_rows(self, reset_mod):
+        """A ``discovered`` row is admitted only when it carries a triage score,
+        which distinguishes a re-seeded root from a never-scanned row."""
+        spec = reset_mod.PATH_RESET_SPECS["scanned"]
+        assert spec.source_filter is not None
+        assert "n.status = 'discovered'" in spec.source_filter
+        assert "n.triage_composite IS NOT NULL" in spec.source_filter
+
 
 # ─── reset_to_status tests ──────────────────────────────────────────────
 
@@ -242,3 +262,48 @@ class TestResetToStatus:
         assert "STARTS WITH" not in query
         assert "path_prefixes" not in query
         assert "path_prefixes" not in mock_gc.query.call_args[1]
+
+    def test_scanned_reset_renders_the_stranded_row_predicate(self, reset_mod):
+        """reset_to_status ORs the spec's source_filter into the status match, so
+        a discovered row with a triage score *is* reset."""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 3}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.PATH_RESET_SPECS["scanned"]
+            count = reset_mod.reset_to_status(spec, "jt-60sa")
+
+        assert count == 3
+        query = mock_gc.query.call_args[0][0]
+        assert (
+            "n.status IN $source_statuses "
+            "OR (n.status = 'discovered' AND n.triage_composite IS NOT NULL)"
+        ) in query
+
+    def test_scanned_reset_excludes_never_scanned_discovered_rows(self, reset_mod):
+        """The predicate requires a non-null triage_composite, so a discovered
+        row with no triage score *is not* reset."""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 0}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.PATH_RESET_SPECS["scanned"]
+            reset_mod.reset_to_status(spec, "jt-60sa")
+
+        query = mock_gc.query.call_args[0][0]
+        assert "n.triage_composite IS NOT NULL" in query
+        assert "n.triage_composite IS NULL" not in query
+
+    def test_reset_without_source_filter_keeps_plain_status_match(self, reset_mod):
+        """A spec with no source_filter renders the bare status predicate with
+        no OR branch.  (The ``triaged`` spec carries none.)"""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 1}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.PATH_RESET_SPECS["triaged"]
+            reset_mod.reset_to_status(spec, "jt-60sa")
+
+        query = mock_gc.query.call_args[0][0]
+        assert "WHERE n.status IN $source_statuses" in query
+        assert "$source_statuses OR" not in query
