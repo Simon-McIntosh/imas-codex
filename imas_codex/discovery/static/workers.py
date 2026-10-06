@@ -340,7 +340,7 @@ async def enrich_worker(
         _build_system_prompt,
         _build_user_prompt,
     )
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
     from .graph_ops import (
         claim_orphan_nodes_for_enrichment,
@@ -400,7 +400,7 @@ async def enrich_worker(
             [{"groups_created": groups_created}],
         )
 
-    model = get_model("language")
+    model = get_model("discovery-describe")
     system_prompt = _build_system_prompt(state.facility, state.data_source_name)
 
     # Build version descriptions from config
@@ -470,6 +470,7 @@ async def enrich_worker(
                 messages=messages,
                 response_model=StaticNodeBatch,
                 service="facility-discovery",
+                reasoning_effort=get_reasoning_effort("discovery-describe"),
             )
             state.enrich_stats.cost += cost
 
@@ -607,6 +608,7 @@ async def enrich_worker(
                 messages=messages,
                 response_model=StaticNodeBatch,
                 service="facility-discovery",
+                reasoning_effort=get_reasoning_effort("discovery-describe"),
             )
             state.enrich_stats.cost += cost
 
@@ -724,6 +726,7 @@ async def enrich_worker(
                 messages=messages,
                 response_model=StaticNodeBatch,
                 service="facility-discovery",
+                reasoning_effort=get_reasoning_effort("discovery-describe"),
             )
             state.enrich_stats.cost += cost
 

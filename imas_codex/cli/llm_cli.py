@@ -349,7 +349,7 @@ def llm_status(url: str | None, deep: bool) -> None:
                 )
                 from imas_codex.discovery.base.services import llm_deep_health_check
 
-                healthy, detail, data = llm_deep_health_check()
+                healthy, detail, data = llm_deep_health_check("discovery-score")
                 if healthy:
                     click.echo(f"  ✓ All models healthy ({detail})")
                 else:

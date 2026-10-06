@@ -117,13 +117,15 @@ class DiscoveryConfig:
     facility_config: dict
     """Full facility config dict from get_facility()."""
 
+    model_section: str
+    """Model seat whose first LLM stage this command runs (e.g. discovery-triage)."""
+
     # Service monitor configuration
     check_graph: bool = True
     check_embed: bool = True
     check_ssh: bool = True
     check_auth: bool = False
     check_model: bool = False
-    model_section: str = "language"
 
     # Display configuration
     display: BaseProgressDisplay | None = None
@@ -475,9 +477,7 @@ def ensure_remote_environment(facility_config: dict) -> None:
         if not module.get("importable")
     ]
     if unimportable:
-        problems.append(
-            "required module(s) not importable: " + ", ".join(unimportable)
-        )
+        problems.append("required module(s) not importable: " + ", ".join(unimportable))
     if environment.get("error"):
         problems.append(environment["error"])
 
@@ -507,7 +507,7 @@ def create_discovery_monitor(
     check_ssh: bool = True,
     check_auth: bool = True,
     check_model: bool = False,
-    model_section: str = "language",
+    model_section: str,
     poll_interval: float = 15.0,
 ) -> ServiceMonitor:
     """Create a service monitor from a facility config dict.

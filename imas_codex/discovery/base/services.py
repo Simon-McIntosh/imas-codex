@@ -292,7 +292,7 @@ def embed_health_check() -> tuple[bool, str]:
         return False, str(e)[:100]
 
 
-def llm_health_check(section: str = "language") -> tuple[bool, str]:
+def llm_health_check(section: str) -> tuple[bool, str]:
     """Check LLM proxy health via ``/health/readiness`` (no LLM API calls).
 
     When a LiteLLM proxy is configured (``[llm].location`` is set),
@@ -303,7 +303,7 @@ def llm_health_check(section: str = "language") -> tuple[bool, str]:
     proxy is configured (``location=local``).
 
     Args:
-        section: Model section to check (language, vision, etc.)
+        section: Model section to check (a function seat, e.g. discovery-score).
 
     Returns:
         (healthy, detail) tuple where detail is the proxy location
@@ -322,11 +322,15 @@ def llm_health_check(section: str = "language") -> tuple[bool, str]:
     return _probe_litellm_local(section)
 
 
-def llm_deep_health_check(section: str = "language") -> tuple[bool, str, dict]:
+def llm_deep_health_check(section: str) -> tuple[bool, str, dict]:
     """Full model-level health check via /health — makes real LLM API calls.
 
     WARNING: Sends completion requests to ALL configured models including cc:*
     (billed to Claude Code key). Only for manual diagnostics via CLI.
+
+    Args:
+        section: Model section for the local-mode probe (a function seat, e.g.
+            discovery-score).
 
     Returns:
         (healthy, detail, data) — data includes the raw /health JSON response.
@@ -977,7 +981,8 @@ def create_service_monitor(
     check_ssh: bool = True,
     check_auth: bool = True,
     check_model: bool = False,
-    model_section: str = "language",
+    *,
+    model_section: str,
     poll_interval: float = 15.0,
 ) -> ServiceMonitor:
     """Create a ServiceMonitor with standard checks for discovery CLIs.
@@ -1001,7 +1006,8 @@ def create_service_monitor(
         check_ssh: Include SSH connectivity check
         check_auth: Include wiki auth/reachability check
         check_model: Include LLM provider health check
-        model_section: Model section to monitor (default: "language")
+        model_section: Model section to monitor (required; a function seat such as
+            discovery-score)
         poll_interval: Default polling interval in seconds
 
     Returns:

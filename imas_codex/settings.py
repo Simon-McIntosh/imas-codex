@@ -139,6 +139,12 @@ MODEL_SECTIONS = frozenset(
         "embedding",
         "language",
         "vision",
+        "discovery-triage",
+        "discovery-score",
+        "discovery-describe",
+        "discovery-vision",
+        "cluster-labels",
+        "ids-mapping",
         "agent",
         "compaction",
         "reasoning",
@@ -159,6 +165,16 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "embedding": "Qwen/Qwen3-Embedding-0.6B",
     "language": "google/gemini-3.1-flash-lite-preview",
     "vision": "google/gemini-3.1-flash-lite-preview",
+    # Discovery function seats. Each discovery call site names the seat for the
+    # work it does, so a model can be chosen per function. The four text/vision
+    # seats default to the local lane; cluster labelling and IDS mapping keep
+    # the OpenRouter model. Active models live in pyproject.toml.
+    "discovery-triage": "local/deepseek-v4.1-flash",
+    "discovery-score": "local/deepseek-v4.1-flash",
+    "discovery-describe": "local/deepseek-v4.1-flash",
+    "discovery-vision": "local/deepseek-v4.1-flash",
+    "cluster-labels": "openrouter/openai/gpt-5.4",
+    "ids-mapping": "openrouter/openai/gpt-5.4",
     "agent": "openrouter/anthropic/claude-sonnet-4.6",
     "compaction": "openrouter/anthropic/claude-haiku-4.5",
     "reasoning": "openrouter/anthropic/claude-sonnet-4.6",
@@ -197,6 +213,12 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "embedding": "IMAS_CODEX_EMBEDDING_MODEL",
     "language": "IMAS_CODEX_LANGUAGE_MODEL",
     "vision": "IMAS_CODEX_VISION_MODEL",
+    "discovery-triage": "IMAS_CODEX_DISCOVERY_TRIAGE_MODEL",
+    "discovery-score": "IMAS_CODEX_DISCOVERY_SCORE_MODEL",
+    "discovery-describe": "IMAS_CODEX_DISCOVERY_DESCRIBE_MODEL",
+    "discovery-vision": "IMAS_CODEX_DISCOVERY_VISION_MODEL",
+    "cluster-labels": "IMAS_CODEX_CLUSTER_LABELS_MODEL",
+    "ids-mapping": "IMAS_CODEX_IDS_MAPPING_MODEL",
     "agent": "IMAS_CODEX_AGENT_MODEL",
     "compaction": "IMAS_CODEX_COMPACTION_MODEL",
     "reasoning": "IMAS_CODEX_REASONING_MODEL",
@@ -215,8 +237,9 @@ _MODEL_ENV_VARS: dict[str, str] = {
 def get_model(section: str) -> str:
     """Get the configured model for a pyproject.toml section.
 
-    Accepted sections match [tool.imas-codex.*]:
-        language, vision, agent, compaction, embedding
+    Accepted sections match [tool.imas-codex.*], e.g. the discovery function
+    seats (discovery-triage, discovery-score, discovery-describe,
+    discovery-vision), cluster-labels, ids-mapping, agent, compaction, embedding.
 
     Priority: env var → [tool.imas-codex.{section}].model → default.
 
@@ -1021,9 +1044,10 @@ def get_log_location() -> str:
 
 
 # ─── Model accessors ───────────────────────────────────────────────────────
-# All callers should use get_model("language"), get_model("vision"), etc.
-# The embedding model is accessed via get_embedding_model() for consistency
-# with the other embedding accessors (dimension, backend, etc.).
+# All callers should use get_model(<section>), naming the function seat that
+# matches the work (e.g. get_model("discovery-triage")). The embedding model is
+# accessed via get_embedding_model() for consistency with the other embedding
+# accessors (dimension, backend, etc.).
 
 
 # ─── Graph settings (Neo4j) ────────────────────────────────────────────────

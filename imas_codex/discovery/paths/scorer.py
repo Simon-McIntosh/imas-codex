@@ -31,7 +31,7 @@ from imas_codex.discovery.paths.models import (
     TriagedDirectory,
     parse_path_purpose,
 )
-from imas_codex.settings import get_model
+from imas_codex.settings import get_model, get_reasoning_effort
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class DirectoryTriager:
     def __post_init__(self):
         """Initialize model from config if not provided."""
         if self.model is None:
-            self.model = get_model("language")
+            self.model = get_model("discovery-triage")
 
     def triage_batch(
         self,
@@ -142,6 +142,7 @@ class DirectoryTriager:
             ],
             response_model=TriageBatch,
             service="facility-discovery",
+            reasoning_effort=get_reasoning_effort("discovery-triage"),
         )
 
         # Calculate cost per path for tracking
@@ -209,6 +210,7 @@ class DirectoryTriager:
             ],
             response_model=TriageBatch,
             service="facility-discovery",
+            reasoning_effort=get_reasoning_effort("discovery-triage"),
         )
         t_llm_end = time_mod.monotonic()
         logger.info(

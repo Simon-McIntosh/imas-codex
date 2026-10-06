@@ -417,6 +417,7 @@ async def _score_documents_batch(
     focus: str | None = None,
     data_access_patterns: dict[str, Any] | None = None,
     facility: str | None = None,
+    reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
     """Score a batch of documents using LLM with structured output.
 
@@ -508,6 +509,7 @@ async def _score_documents_batch(
         max_retries=5,
         retry_base_delay=4.0,
         service="facility-discovery",
+        reasoning_effort=reasoning_effort,
     )
 
     llm_results = batch.results
@@ -567,6 +569,7 @@ async def _score_images_batch(
     focus: str | None = None,
     data_access_patterns: dict[str, Any] | None = None,
     facility_id: str | None = None,
+    reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
     """Score a batch of images using VLM with structured output.
 
@@ -575,7 +578,12 @@ async def _score_images_batch(
     from imas_codex.discovery.base.image import score_images_batch
 
     return await score_images_batch(
-        images, model, focus, data_access_patterns, facility_id=facility_id
+        images,
+        model,
+        focus,
+        data_access_patterns,
+        facility_id=facility_id,
+        reasoning_effort=reasoning_effort,
     )
 
 
@@ -812,6 +820,7 @@ async def _score_pages_batch(
     focus: str | None = None,
     data_access_patterns: dict[str, Any] | None = None,
     facility: str | None = None,
+    reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
     """Score a batch of pages using LLM with structured output.
 
@@ -907,6 +916,7 @@ async def _score_pages_batch(
         response_model=WikiScoreBatch,
         temperature=0.3,
         service="facility-discovery",
+        reasoning_effort=reasoning_effort,
     )
 
     llm_results = batch.results

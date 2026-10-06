@@ -829,6 +829,7 @@ def wiki(
             domain="wiki",
             facility=facility,
             facility_config=config,
+            model_section="discovery-score",
             display=display,
             check_graph=True,
             check_embed=not (scan_only or score_only),

@@ -296,7 +296,7 @@ async def image_score_worker(
         release_claimed_images,
         score_images_batch,
     )
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
     worker_id = id(asyncio.current_task())
     logger.info("image_score_worker started (task=%s)", worker_id)
@@ -394,13 +394,14 @@ async def image_score_worker(
             )
 
         try:
-            model = get_model("vision")
+            model = get_model("discovery-vision")
             results, cost = await score_images_batch(
                 images_ready,
                 model,
                 state.focus,
                 facility_access_patterns,
                 facility_id=state.facility,
+                reasoning_effort=get_reasoning_effort("discovery-vision"),
             )
 
             await asyncio.to_thread(
