@@ -399,6 +399,13 @@ model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 
+[tool.imas-codex.discovery-relevance]
+# Code-relevance judgements through the OpenRouter alpha decisions endpoint.
+# The endpoint takes its own request/response shape and is called directly by
+# the decisions call layer, so this seat carries no chat route and its cost is
+# read from the response usage rather than priced in configuration.
+model = "typesafe/jev-1.13"
+
 [tool.imas-codex.cluster-labels]
 # Cluster labelling. Keeps the OpenRouter model so nothing outside discovery
 # changes model. batch-size is the clusters-per-LLM-call setting that
