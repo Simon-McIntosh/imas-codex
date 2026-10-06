@@ -21,9 +21,9 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -243,74 +243,12 @@
       <li><code>route_ids</code> returns three IDSs taken from the criteria it offered.</li>
     </ul>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s6">§6 — Candidate edges in the graph</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      <strong>Schema.</strong> <code>imas_codex/schemas/facility.yaml</code> declares a
-      <code>MAPPING_CANDIDATE</code> relationship from SignalSource to IMASNode. Its
-      properties are rank (the Jev order), retrieval_score, the routed IDS and its Choice
-      probability, p_same_quantity, model, judged_at, and route, which says whether this
-      candidate is the selected one.
-    </p>
-    <ul>
-      <li>SignalSource gains one field, <code>candidate_route</code>, which stays null until
-        the source is judged. Judgment time and model live on the edges.</li>
-      <li>The candidate stage claims through the existing <code>mapping_claimed_at</code> and
-        <code>mapping_claim_token</code>. A source is in only one stage of the mapping
-        workflow at a time, and the claim predicate tells the stages apart.</li>
-    </ul>
-    <p>
-      <strong>Surface.</strong> The section adds one relationship type, one field and two
-      functions. What they displace: the assign stage today stores its free-text choice on
-      SignalSource as <code>mapping_target_path</code>, <code>mapping_target_ids</code> and
-      <code>mapping_target_type</code> (<code>imas_codex/schemas/facility.yaml:1931–1935</code>,
-      written at <code>imas_codex/ids/workers.py:552</code>). The selected
-      <code>MAPPING_CANDIDATE</code> edge carries the path and IDS, so §8 retires
-      <code>mapping_target_path</code> and <code>mapping_target_ids</code>.
-      <code>mapping_target_type</code> stays. It is the four-valued structural
-      <code>TargetType</code> (<code>imas_codex/ids/models.py:43</code>: struct_array,
-      time_slice, scalar, profile), which the DD data type cannot reproduce, and the
-      reasoning model's choice still sets it.
-      <code>write_candidates</code> replaces that <code>set_mapping_status</code> call for the
-      target. The relationship cannot merge into
-      <code>MAPS_TO_IMAS</code>, for two reasons:
-    </p>
-    <ul>
-      <li><code>MAPS_TO_IMAS</code> is a binding with a transform, written by
-        <code>imas map run</code>. A candidate is a proposal with probabilities.</li>
-      <li>§2 found that <code>imas map --clear</code> deletes every
-        <code>MAPS_TO_IMAS</code> edge on the sources of the IDS it remaps. Only a distinct
-        type keeps candidates out of that delete.</li>
-    </ul>
-    <p>
-      <strong>Writes.</strong> A new <code>write_candidates(source_id, judgments, route)</code>
-      in <code>imas_codex/ids/graph_ops.py</code> replaces a source's candidate edges in one
-      transaction. It uses <code>UNWIND</code> and <code>MATCH</code>es both endpoints. It
-      returns the written count and raises when that count is below the number of
-      judgments, so a candidate whose node has vanished fails loudly instead of being dropped.
-      The same function sets <code>candidate_route</code> and releases the source's mapping
-      claim.
-    </p>
-    <p><strong>Node</strong> <code>candidate-schema</code>, role implement.</p>
-    <ul>
-      <li>Write paths: <code>imas_codex/schemas/facility.yaml</code>,
-        <code>imas_codex/ids/graph_ops.py</code> and
-        <code>tests/ids/test_candidate_persistence.py</code>.</li>
-      <li>It runs <code>build-models</code> in its own worktree and never stages the generated
-        models.</li>
-    </ul>
-    <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
-      following.</p>
-    <ul>
-      <li>A re-judge replaces the earlier edges.</li>
-      <li>A missing IMASNode raises.</li>
-      <li>The mapping claim is released on success and on failure.</li>
-      <li><code>clear_candidates(facility)</code>, also in <code>graph_ops.py</code>, removes
-        a facility's candidate edges and resets <code>candidate_route</code>. Its return
-        value states how many of each it removed.</li>
-    </ul>
-    <p>One <code>-m graph</code> test, run on a compute partition against the live database,
-      writes and removes the candidates of a single fixture source.</p>
+<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">MAPPING_CANDIDATE and candidate_route declared; write_candidates replaces a source's edges and sets the route only when every edge was written, so a shortfall leaves the source unjudged; clear_candidates reports its counts; tests/ids 410 passed plus a live round trip. <a href="s6">full record</a></p>
+</section>
 
     <h2 id="s7">§7 — <code>imas-codex discover map</code></h2>
 <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -492,6 +430,12 @@
         function and <code>clear_candidates</code>. <code>imas map clear</code> and
         <code>--clear</code> call it. Every create and delete of a SignalSource → IMASNode
         edge then lives in one module.</li>
+      <li><strong>Strict selection flag.</strong> §6's <code>_candidate_record</code>
+        normalises a judgment's <code>route</code> with <code>bool()</code>, so a route
+        <em>string</em> such as <code>"escalated"</code> would mark the candidate selected.
+        It reads only a boolean <code>selected</code>, and rejects any other type with
+        <code>CandidateWriteError</code>. A test passes a route string and expects the
+        refusal.</li>
     </ul>
     <p><strong>Node</strong> <code>map-run-consumes-candidates</code>, role implement.</p>
     <ul>
@@ -613,7 +557,7 @@
     <div class="r-comment-body"><p>candidate-retrieval: DD shortlist now built by imas_codex/ids/candidates.py — retrieve_candidates embeds each source once, searches one arm per routed IDS through hybrid_dd_search, merges by score and deduplicates on path (Candidate composes the SearchHit with arms and parent documentation); gather_ids_context builds source_candidates through retrieve_candidates and mapping.py no longer loads ClusterSearcher; gate uv run --no-sync pytest tests/ids → 405 passed, 5 skipped, exit 0</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261006T194631356026-review-of-candidate-retrieval" data-who="reckon-build" data-when="2026-10-06T19:56:31.275Z">
-    <div class="r-comment-body"><p>reviewed run r-20261006T193129455727-candidate-retrieval at base ce47cc8b head e7d200ca (single commit e7d200ca &quot;feat(ids): add deterministic DD candidate retrieval&quot;) and stored a parsed six-dimension record at both granted review-store paths scoring goal_fidelity 20, evidence 19, scope_discipline 19, durability 18, fit 20, reuse 19 (scored sum 115) with two follow-on findings; the annotation caps the stored total to 5 because the reviewed manifest&#x27;s after_suite arm records the negative-control log (2 intentional mutation failures) rather than a head-arm suite — the run is unarmed (suite_command null) so the cap is informational, and the fix is to re-record after_suite as the tests/ids head suite or name both ids in prose</p></div>
+    <div class="r-comment-body"><p>reviewed run r-20261006T193129455727-candidate-retrieval at base ce47cc8b head e7d200ca (single commit e7d200ca "feat(ids): add deterministic DD candidate retrieval") and stored a parsed six-dimension record at both granted review-store paths scoring goal_fidelity 20, evidence 19, scope_discipline 19, durability 18, fit 20, reuse 19 (scored sum 115) with two follow-on findings; the annotation caps the stored total to 5 because the reviewed manifest's after_suite arm records the negative-control log (2 intentional mutation failures) rather than a head-arm suite — the run is unarmed (suite_command null) so the cap is informational, and the fix is to re-record after_suite as the tests/ids head suite or name both ids in prose</p></div>
 </div>
 </section>
 </main>
