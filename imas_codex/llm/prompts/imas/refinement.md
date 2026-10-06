@@ -4,6 +4,7 @@ description: Refine Pass 1 descriptions using sibling and cross-IDS peer context
 task: enrichment
 dynamic: true
 schema_needs:
+  - physics_domains
   - imas_enrichment_schema
 ---
 

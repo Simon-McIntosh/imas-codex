@@ -4,6 +4,12 @@ description: Independent scoring of directories using enrichment evidence
 used_by: imas_codex.discovery.paths.parallel.score_worker
 task: score
 dynamic: true
+schema_needs:
+  - score_schema
+  - format_patterns
+  - path_purposes
+  - score_dimensions
+  - physics_domains
 ---
 
 You are scoring directories at a fusion research facility using **concrete filesystem evidence** from deep analysis. You receive enrichment data — regex pattern matches, lines of code by language, disk usage, and format conversion detection — that proves what code exists.

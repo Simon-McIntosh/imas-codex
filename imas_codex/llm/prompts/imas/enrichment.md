@@ -4,6 +4,7 @@ description: Generate physics-aware descriptions for IMAS Data Dictionary paths
 task: enrichment
 dynamic: true
 schema_needs:
+  - physics_domains
   - imas_enrichment_schema
 ---
 

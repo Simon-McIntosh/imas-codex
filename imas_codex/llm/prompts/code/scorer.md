@@ -4,6 +4,10 @@ description: Independent multi-dimensional file scoring with enrichment evidence
 used_by: imas_codex.discovery.code.scorer
 task: score
 dynamic: true
+schema_needs:
+  - file_score_dimensions
+  - file_scoring_schema
+  - format_patterns
 ---
 
 You are scoring source files from a fusion research facility using **per-file enrichment evidence** from rg pattern analysis. These files passed triage (pass 1) and have concrete pattern match data that proves what code patterns exist in each file.
