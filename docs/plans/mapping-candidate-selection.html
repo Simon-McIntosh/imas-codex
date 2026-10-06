@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -262,9 +262,14 @@
       <li><strong>Strict selection flag.</strong> §6's <code>_candidate_record</code>
         normalises a judgment's <code>route</code> with <code>bool()</code>, so a route
         <em>string</em> such as <code>"escalated"</code> would mark the candidate selected.
-        It reads only a boolean <code>selected</code>, and rejects any other type with
-        <code>CandidateWriteError</code>. A test passes a route string and expects the
-        refusal.</li>
+        It keeps the <code>route</code> key, which the producer
+        <code>_candidate_records</code> in <code>imas_codex/ids/workers.py</code> already emits
+        as a boolean, and type-checks the value. A <code>bool</code> passes, and anything
+        else is refused with <code>CandidateWriteError</code>. The <code>selected</code>
+        fallback is dropped. No producer changes, so this stays inside
+        <code>edge-ownership</code>'s scope. A test passes a route string and expects the
+        refusal, and another passes the producer's boolean and expects the edge to be
+        marked.</li>
     </ul>
     <p><strong>Nodes.</strong> The section is two nodes, run in order, because both write
       <code>mapping.py</code>.</p>
