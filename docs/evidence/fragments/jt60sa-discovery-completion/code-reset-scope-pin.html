@@ -1,0 +1,16 @@
+<section id="code-reset-scope-pin-record">
+  <h3>Discover code passes its path prefixes to the scoped reset</h3>
+  <p id="code-reset-scope-pin-landing">
+    The code command's CLI test now reaches the <code>--reset-to</code> branch
+    (the existing CLI test runs with <code>--scan-only</code> and returns
+    before it) and pins that <code>reset_to_status</code> receives the
+    <code>--path-prefix</code> list. A later edit dropping
+    <code>path_prefixes</code> from the reset call now fails the suite instead
+    of silently widening <code>--reset-to</code> to every JT-60SA code file.
+    Gate: <code>uv run pytest tests/discovery/test_code_pipeline.py</code> 91
+    passed (EXIT=0). Negative control — the same test against a copy of
+    <code>imas_codex/cli/discover/code.py</code> whose reset call omits
+    <code>path_prefixes</code> — 1 failed (EXIT=1), first failure the assertion
+    on the prefix list.
+  </p>
+</section>
