@@ -11,5 +11,5 @@
   </g>
   <path d="M640 120 L800 120 L800 200 L640 200" fill="none" stroke="#555" stroke-width="2"/>
   <text x="660" y="165" font-size="18" fill="#111">kept</text>
-  <text x="500" y="270" font-size="16" fill="#666">no excluded prefix resolves the exclusion itself: one helper renders it</text>
+  <text x="40" y="270" font-size="16" fill="#666">a disjunctive eligibility test is parenthesised: AND binds tighter than OR, the exclusion governs the whole predicate</text>
 </svg>

@@ -44,12 +44,28 @@
     and another seeds a sample of paths and asserts the claim's exclusion
     matches exactly the paths <code>ExclusionConfig.should_exclude</code> marks
     with a <code>path_prefix:</code> reason.
-    Negative control (log recorded): with the negated clause removed from
+    Because Cypher binds <code>AND</code> tighter than <code>OR</code>, an
+    exclusion clause appended after a disjunction governs only the last branch:
+    <code>has_pending_work</code> rendered its five state tests as
+    <code>disc OR scn OR exp OR enr OR (rsc AND none(...))</code>, so rows under
+    an excluded prefix that were discovered, scanned, expand-eligible or
+    enrich-eligible still counted as pending — and a has-work predicate true
+    while every claim returns nothing drives the phase reset loop. The state
+    disjunction is now parenthesised so the exclusion binds the whole
+    predicate, and the other sites were audited: each appends the clause to an
+    <code>AND</code>-chain, or to a disjunction already parenthesised, so none
+    needed the same change. A remaining test renders each claim's and each
+    has-work predicate's Cypher and asserts no top-level <code>OR</code>
+    precedes the exclusion clause, which the row-filtering stub cannot see.
+    Negative controls (logs recorded): with the negated clause removed from
     <code>claim_paths_for_scanning</code> in a scratch copy the path-claim test
     run exits <strong>1</strong> with
     <code>['/work/scratch/jt60sa/a', '/analysis/src/SAeqread/b']</code> claimed
     against the expected outside row alone — the excluded row is the first
-    failure.
+    failure. With the parentheses removed from <code>has_pending_work</code> in
+    a scratch copy the placement test exits <strong>1</strong> on
+    <code>has_pending_work</code> alone while the row-filtering tests stay
+    green, which is why placement needs its own assertion.
   </p>
   <figure>
     <img src="/jt60sa-discovery-completion/figures/claims-honour-exclusion-prefixes/claim_predicate.svg"
