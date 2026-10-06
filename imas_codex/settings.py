@@ -225,7 +225,6 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "discovery-score": "IMAS_CODEX_DISCOVERY_SCORE_MODEL",
     "discovery-describe": "IMAS_CODEX_DISCOVERY_DESCRIBE_MODEL",
     "discovery-vision": "IMAS_CODEX_DISCOVERY_VISION_MODEL",
-    "mapping-candidates": "IMAS_CODEX_MAPPING_CANDIDATES_MODEL",
     "cluster-labels": "IMAS_CODEX_CLUSTER_LABELS_MODEL",
     "ids-mapping": "IMAS_CODEX_IDS_MAPPING_MODEL",
     "agent": "IMAS_CODEX_AGENT_MODEL",
