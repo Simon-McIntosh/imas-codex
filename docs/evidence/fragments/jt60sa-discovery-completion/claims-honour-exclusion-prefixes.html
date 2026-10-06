@@ -1,0 +1,61 @@
+<section>
+  <h2 id="claims-honour-exclusion-prefixes">Claims and has-work predicates skip excluded path prefixes</h2>
+  <p id="claims-honour-exclusion-prefixes-result">
+    A facility's path-prefix exclusions were a seeding rule only: rows already in
+    the graph under an excluded prefix were still claimed and still counted as
+    pending work, so a discovery run churned the very subtrees the exclusion
+    config names. Every path claim and code claim, and every has-work predicate
+    behind them, now binds a negated prefix predicate built from one helper.
+    <code>build_path_prefix_filter</code> in
+    <code>imas_codex/graph/query_builder.py</code> gains a <code>negated</code>
+    flag and a <code>param</code> argument defaulting to <code>prefixes</code>,
+    so a claim that both scopes and excludes renders
+    <code>none(excluded IN $excluded_prefixes WHERE p.path STARTS WITH excluded)</code>
+    beside the scope clause and binds two distinct lists rather than overwriting
+    one name. The new <code>build_facility_exclusion_filter</code> in
+    <code>imas_codex/config/discovery_config.py</code>, placed beside
+    <code>get_exclusion_config_for_facility</code>, resolves
+    <code>get_exclusion_config_for_facility(facility).path_prefixes</code> and
+    returns the clause with its parameters built through
+    <code>build_path_prefix_filter</code>. The five path claims in
+    <code>imas_codex/discovery/paths/parallel.py</code> move from
+    <code>render_path_prefix_clause</code> to
+    <code>build_path_prefix_filter</code> for their <code>--root</code> scope;
+    <code>has_pending_work</code> and its five <code>_has_pending_*_work</code>
+    helpers, the four code claims and six code predicates in
+    <code>imas_codex/discovery/code/graph_ops.py</code>, and the one ingestion
+    claim in <code>imas_codex/discovery/code/workers.py</code> all call that one
+    helper at the 22 sites the node names — none resolves the exclusions itself.
+    The name-based families (basename directories, patterns, archive extensions,
+    dotfiles, scratch names) stay seed-time and scan-time rules, because they
+    judge an entry as the scanner meets it.
+  </p>
+  <p id="claims-honour-exclusion-prefixes-evidence">
+    Gate <code>uv run --no-sync pytest tests/discovery
+    tests/graph/test_path_prefix_filter.py</code> exits <strong>0</strong>
+    (1218 passed) on the fleet node, against a baseline of 1188 passed. The new
+    <code>tests/discovery/test_claims_honour_exclusions.py</code> seeds one
+    claimable row under an excluded prefix and one outside for each of the 22
+    claims and predicates and asserts only the outside row is claimed or
+    counted; a stub GraphClient evaluates the seeded rows against the prefix
+    predicates the query itself carries, read from the named parameters the
+    caller bound. A separate assertion binds a scoped claim and confirms it
+    carries both <code>scope_prefixes</code> and <code>excluded_prefixes</code>,
+    and another seeds a sample of paths and asserts the claim's exclusion
+    matches exactly the paths <code>ExclusionConfig.should_exclude</code> marks
+    with a <code>path_prefix:</code> reason.
+    Negative control (log recorded): with the negated clause removed from
+    <code>claim_paths_for_scanning</code> in a scratch copy the path-claim test
+    run exits <strong>1</strong> with
+    <code>['/work/scratch/jt60sa/a', '/analysis/src/SAeqread/b']</code> claimed
+    against the expected outside row alone — the excluded row is the first
+    failure.
+  </p>
+  <figure>
+    <img src="/jt60sa-discovery-completion/figures/claims-honour-exclusion-prefixes/claim_predicate.svg"
+         alt="A claim's WHERE clause is the eligibility predicate AND the scope predicate AND the negation of the exclusion predicate"/>
+    <figcaption>A claim keeps a row when it is eligible, inside the scope
+      prefixes, and under none of the exclusion prefixes. The exclusion is
+      rendered by one helper, so no claim resolves it itself.</figcaption>
+  </figure>
+</section>

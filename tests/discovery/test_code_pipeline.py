@@ -1496,8 +1496,8 @@ class TestPathPrefixScan:
             claim_paths_for_file_scan("jt-60sa")
 
         query_text, kwargs = mock_gc.query.call_args_list[0]
-        assert "STARTS WITH" not in query_text[0]
-        assert "prefixes" not in kwargs
+        assert "STARTS WITH prefix" not in query_text[0]
+        assert not ({"prefixes", "scope_prefixes"} & set(kwargs))
 
     def test_has_pending_scan_work_carries_prefix_predicate(self):
         from imas_codex.discovery.code.graph_ops import has_pending_scan_work

@@ -559,11 +559,13 @@ def _claim_code_files_for_ingestion(
         min_score = get_discovery_threshold()
     import uuid
 
+    from imas_codex.config.discovery_config import build_facility_exclusion_filter
     from imas_codex.discovery.base.claims import DEFAULT_CLAIM_TIMEOUT_SECONDS
     from imas_codex.graph import GraphClient
     from imas_codex.graph.query_builder import build_path_prefix_filter
 
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     token = str(uuid.uuid4())
     cutoff = f"PT{DEFAULT_CLAIM_TIMEOUT_SECONDS}S"
     with GraphClient() as gc:
@@ -576,6 +578,7 @@ def _claim_code_files_for_ingestion(
               AND sf.score_composite >= $min_score
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
+              {excluded_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf ORDER BY rand() LIMIT $limit
@@ -588,6 +591,7 @@ def _claim_code_files_for_ingestion(
             cutoff=cutoff,
             token=token,
             **prefix_params,
+            **excluded_params,
         )
         # Step 2: Read back by token to confirm claims
         result = gc.query(

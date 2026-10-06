@@ -280,7 +280,11 @@ def render_path_prefix_clause(alias: str, param: str) -> str:
 
 
 def build_path_prefix_filter(
-    alias: str, prefixes: list[str] | None
+    alias: str,
+    prefixes: list[str] | None,
+    *,
+    negated: bool = False,
+    param: str = "prefixes",
 ) -> tuple[str, dict[str, Any]]:
     """Render the path-prefix clause together with the parameters that fill it.
 
@@ -290,9 +294,21 @@ def build_path_prefix_filter(
     bind the parameter it names; pass ``params`` into the same query that
     interpolates ``clause``.
 
+    With ``negated`` the clause matches paths under *none* of the prefixes, for
+    a claim that excludes a subtree rather than restricting to one. The
+    ``param`` names the query parameter the clause reads, so a claim that both
+    scopes and excludes binds two distinct lists — ``scope_prefixes`` and
+    ``excluded_prefixes`` — rather than overwriting one shared name.
+
     An empty or absent prefix list yields an empty clause and no parameters, so
     the query reads exactly as it did before a scope was offered.
     """
     if not prefixes:
         return "", {}
-    return render_path_prefix_clause(alias, "prefixes"), {"prefixes": list(prefixes)}
+    if negated:
+        clause = (
+            f"AND none(excluded IN ${param} WHERE {alias}.path STARTS WITH excluded)"
+        )
+    else:
+        clause = render_path_prefix_clause(alias, param)
+    return clause, {param: list(prefixes)}
