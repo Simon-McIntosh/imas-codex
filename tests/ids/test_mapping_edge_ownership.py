@@ -73,6 +73,15 @@ class TestWriteMappingBinding:
         with pytest.raises(CandidateWriteError):
             write_mapping_binding(_binding(), gc)
 
+    def test_no_row_raises(self):
+        """A write that returns no row fails closed rather than silently
+        returning zero."""
+        gc = MagicMock()
+        gc.query.return_value = []
+
+        with pytest.raises(CandidateWriteError):
+            write_mapping_binding(_binding(), gc)
+
 
 # ---------------------------------------------------------------------------
 # Every writer raises on a zero-row write

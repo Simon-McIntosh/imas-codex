@@ -554,13 +554,13 @@ def write_mapping_binding(binding: Any, gc: GraphClient) -> int:
 
     The single owner of a MAPS_TO_IMAS edge create. MATCHes both endpoints,
     MERGEs the edge and sets the transform, unit, confidence and derived-error
-    properties. The statement counts the edge it wrote; a reported count of
-    zero raises, so a binding whose source or target IMASNode has vanished
-    fails loudly instead of being dropped silently.
+    properties. The statement counts the edge it wrote; a count below one
+    raises, so a binding whose source or target IMASNode has vanished fails
+    loudly instead of being dropped silently.
 
-    The count is read from the row the write returns. Neo4j always returns that
-    row for an aggregating ``RETURN count(r)`` — zero matches yield one row
-    carrying ``written = 0`` — so a vanished endpoint is reported and raised.
+    The write fails closed: a result carrying no row is treated the same as a
+    reported count of zero, so a write that matched neither endpoint — or
+    returned nothing at all — cannot pass as a success.
 
     Args:
         binding: A ``ValidatedSignalMapping``, or any object exposing the same
@@ -571,12 +571,12 @@ def write_mapping_binding(binding: Any, gc: GraphClient) -> int:
         gc: Graph client instance.
 
     Returns:
-        The number of edges written (1 on success, 0 when the write count was
-        not reported).
+        The number of edges written (1 on success).
 
     Raises:
-        CandidateWriteError: If the write reports zero edges, which happens
-            when the source or its target IMASNode does not exist.
+        CandidateWriteError: If the write reports fewer than one edge, or
+            returns no row at all, which happens when the source or its target
+            IMASNode does not exist.
     """
     rows = gc.query(
         """
@@ -610,9 +610,9 @@ def write_mapping_binding(binding: Any, gc: GraphClient) -> int:
     )
 
     written = rows[0]["written"] if rows else 0
-    if written < 1 and rows:
+    if written < 1:
         raise CandidateWriteError(
-            f"wrote 0 MAPS_TO_IMAS edges for {binding.source_id} → "
+            f"wrote {written} MAPS_TO_IMAS edges for {binding.source_id} → "
             f"{binding.target_id}; the source or its IMASNode may not exist"
         )
     return written
