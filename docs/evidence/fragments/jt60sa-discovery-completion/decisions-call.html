@@ -1,0 +1,69 @@
+<section>
+  <h2 id="decisions-call">The decisions endpoint gets a call layer that validates every answer before returning it</h2>
+  <p id="decisions-call-result">
+    <code>imas_codex/discovery/base/llm.py</code> gains
+    <code>call_decisions(model, state, questions, *, service)</code> and
+    <code>acall_decisions</code> with the same signature. Both take the model as a
+    parameter, as <code>call_llm_structured</code> does, and post
+    <code>{model, state, questions}</code> to
+    <code>https://openrouter.ai/api/alpha/decisions</code> — an endpoint whose
+    request and response shapes differ from chat completions, so it cannot route
+    through <code>call_llm_structured</code>. The API key comes from
+    <code>get_api_key_for_service(service)</code> and the dashboard headers from a
+    new <code>_service_headers(service)</code> helper extracted out of
+    <code>_build_kwargs</code>, which now calls the same helper, so the chat and
+    decisions paths share one definition. A retryable response — 429 or any 5xx,
+    reaching the retry test through <code>_is_retryable</code> and
+    <code>DEFAULT_RETRY_BASE_DELAY</code> — is retried with the existing backoff.
+    Every answer is validated against its question type before it is returned: a
+    <code>noul</code> must lie in [0, 1]; a <code>choice</code> must name one of
+    the offered criteria, carry a probability for each offered criterion and no
+    other, sum those probabilities to 1 within 0.01, and hold any confidence in
+    [0, 1]. A violation raises <code>DecisionsValidationError</code> without a
+    retry, so a malformed judgement fails fast rather than repeating; a response
+    that carries no usable <code>usage.cost</code> is refused the same way rather
+    than read as zero. The call returns the answers together with that cost.
+  </p>
+  <p id="decisions-call-model-seat">
+    A new <code>[tool.imas-codex.discovery-relevance]</code> seat is registered in
+    <code>pyproject.toml</code> with <code>model = "typesafe/jev-1.13"</code>, and
+    <code>"discovery-relevance"</code> joins <code>MODEL_SECTIONS</code> and
+    <code>_MODEL_DEFAULTS</code> in <code>imas_codex/settings.py</code> so
+    <code>get_model('discovery-relevance')</code> resolves it. The seat is
+    deliberately not added to <code>_MODEL_ENV_VARS</code>: the decisions model is
+    called directly, not through the litellm proxy that prefixes
+    <code>openrouter/</code>, and the <code>test_openrouter_prefix_present</code>
+    guard parametrizes over exactly that mapping.
+  </p>
+  <p id="decisions-call-evidence">
+    Gate <code>uv run --no-sync pytest tests/discovery/test_llm_decisions.py
+    tests/discovery/test_llm_routing.py
+    tests/discovery/test_llm_service_propagation.py
+    tests/discovery/test_llm_local_routing.py tests/discovery/test_llm_kwargs.py
+    tests/core/test_settings.py tests/core/test_model_seat_names.py</code> exits
+    <strong>0</strong> (147 passed) on the fleet compute node
+    (<code>98dci4-clu-2018</code>); <code>imas_codex.discovery.base.llm</code>
+    resolves to the worktree copy. <code>tests/discovery/test_llm_decisions.py</code>
+    drives the call layer through a fake transport at the
+    <code>_post_decisions</code>/<code>_apost_decisions</code> seam: success
+    returns the answers and the cost unchanged, 429 and 5xx retry to success, and
+    each of the six contract violations is refused. An autouse
+    <code>no_live_decisions_requests</code> fixture added to
+    <code>tests/conftest.py</code> wraps <code>httpx.Client.send</code> and
+    <code>httpx.AsyncClient.send</code> so any test that opens the live decisions
+    endpoint fails, and a test drives the un-replaced seam to prove the guard
+    fires. Negative control (log recorded): in a scratch copy of the package with
+    the <code>if choice not in criteria:</code> check deleted,
+    <code>test_choice_outside_criteria_is_refused</code> fails with
+    <code>DID NOT RAISE DecisionsValidationError</code> (exit 1) — an
+    out-of-call answer was accepted — while the same test passes on the gate
+    revision.
+  </p>
+  <p id="decisions-call-caveat">
+    The seat carries no chat route and its cost is read from the response's
+    <code>usage</code> rather than priced in configuration, so a caller that wants
+    spend accounting must consume the returned cost. No live call to the endpoint
+    was made by this node: its gate is entirely against the fake transport, by
+    design.
+  </p>
+</section>
