@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="300" viewBox="0 0 900 300" font-family="sans-serif">
+  <rect x="0" y="0" width="900" height="300" fill="white"/>
+  <g font-size="18" fill="#111">
+    <text x="40" y="60">FacilityPath &amp; CodeFile row</text>
+    <text x="505" y="60">claimed &amp; counted?</text>
+  </g>
+  <g font-size="18">
+    <text x="40" y="130" fill="#333">eligibility predicate</text>
+    <text x="40" y="170" fill="#333">AND scope: path under $scope_prefixes</text>
+    <text x="40" y="210" fill="#b00">AND none under $excluded_prefixes</text>
+  </g>
+  <path d="M640 120 L800 120 L800 200 L640 200" fill="none" stroke="#555" stroke-width="2"/>
+  <text x="660" y="165" font-size="18" fill="#111">kept</text>
+  <text x="40" y="270" font-size="16" fill="#666">a disjunctive eligibility test is parenthesised: AND binds tighter than OR, the exclusion governs the whole predicate</text>
+</svg>

@@ -21,6 +21,7 @@ import logging
 import uuid
 from typing import Any
 
+from imas_codex.config.discovery_config import build_facility_exclusion_filter
 from imas_codex.discovery.base.claims import (
     DEFAULT_CLAIM_TIMEOUT_SECONDS,
     release_claim,
@@ -130,6 +131,7 @@ def claim_paths_for_file_scan(
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("p", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     params: dict[str, Any] = {
         "facility": facility,
         "min_score": min_score,
@@ -137,6 +139,7 @@ def claim_paths_for_file_scan(
         "cutoff": cutoff,
         "token": claim_token,
         **prefix_params,
+        **excluded_params,
     }
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
@@ -147,6 +150,7 @@ def claim_paths_for_file_scan(
               AND coalesce(p.score_composite, 0) >= $min_score
               AND p.path IS NOT NULL
               {prefix_clause}
+              {excluded_clause}
               AND (p.files_claimed_at IS NULL
                    OR p.files_claimed_at < datetime() - duration($cutoff))
               AND coalesce(p.vcs_remote_accessible, false) = false
@@ -302,6 +306,7 @@ def claim_files_for_triage(
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
@@ -310,6 +315,7 @@ def claim_files_for_triage(
             WHERE sf.status = 'discovered'
               AND sf.triage_composite IS NULL
               {prefix_clause}
+              {excluded_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf
@@ -322,6 +328,7 @@ def claim_files_for_triage(
             cutoff=cutoff,
             token=claim_token,
             **prefix_params,
+            **excluded_params,
         )
 
         # Step 2: Read back only files WE successfully claimed
@@ -397,6 +404,7 @@ def claim_files_for_enrichment(
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
@@ -406,6 +414,7 @@ def claim_files_for_enrichment(
               AND sf.triage_composite >= $min_triage
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
+              {excluded_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf
@@ -419,6 +428,7 @@ def claim_files_for_enrichment(
             min_triage=min_triage_composite,
             token=claim_token,
             **prefix_params,
+            **excluded_params,
         )
 
         # Step 2: Read back only files WE successfully claimed
@@ -483,6 +493,7 @@ def claim_files_for_scoring(
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
@@ -491,6 +502,7 @@ def claim_files_for_scoring(
             WHERE sf.status = 'triaged'
               AND sf.is_enriched = true
               {prefix_clause}
+              {excluded_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf
@@ -503,6 +515,7 @@ def claim_files_for_scoring(
             cutoff=cutoff,
             token=claim_token,
             **prefix_params,
+            **excluded_params,
         )
 
         # Step 2: Read back only files WE successfully claimed
@@ -578,10 +591,12 @@ def has_pending_scan_work(
 
         min_score = get_discovery_threshold()
     prefix_clause, prefix_params = build_path_prefix_filter("p", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     params: dict[str, Any] = {
         "facility": facility,
         "min_score": min_score,
         **prefix_params,
+        **excluded_params,
     }
     with GraphClient() as gc:
         result = gc.query(
@@ -591,6 +606,7 @@ def has_pending_scan_work(
               AND coalesce(p.score_composite, 0) >= $min_score
               AND p.path IS NOT NULL
               {prefix_clause}
+              {excluded_clause}
               AND coalesce(p.vcs_remote_accessible, false) = false
               AND NOT EXISTS {{
                 MATCH (p)-[:INSTANCE_OF]->(r:SoftwareRepo)
@@ -618,6 +634,7 @@ def has_pending_score_work(
     trees are done.
     """
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         result = gc.query(
             f"""
@@ -625,10 +642,12 @@ def has_pending_score_work(
             WHERE sf.status = 'triaged'
               AND sf.is_enriched = true
               {prefix_clause}
+              {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
             **prefix_params,
+            **excluded_params,
         )
         return result[0]["has_work"] if result else False
 
@@ -642,6 +661,7 @@ def has_pending_triage_work(
     one of the prefixes count.
     """
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         result = gc.query(
             f"""
@@ -649,10 +669,12 @@ def has_pending_triage_work(
             WHERE sf.status = 'discovered'
               AND sf.triage_composite IS NULL
               {prefix_clause}
+              {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
             **prefix_params,
+            **excluded_params,
         )
         return result[0]["has_work"] if result else False
 
@@ -672,6 +694,7 @@ def has_pending_enrich_work(
 
         min_triage_composite = get_triage_threshold()
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         result = gc.query(
             f"""
@@ -680,11 +703,13 @@ def has_pending_enrich_work(
               AND sf.triage_composite >= $min_triage
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
+              {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
             min_triage=min_triage_composite,
             **prefix_params,
+            **excluded_params,
         )
         return result[0]["has_work"] if result else False
 
@@ -705,6 +730,7 @@ def has_pending_code_work(
 
         min_score = get_discovery_threshold()
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         result = gc.query(
             f"""
@@ -713,12 +739,14 @@ def has_pending_code_work(
               AND sf.score_composite >= $min_score
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
+              {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
             min_score=min_score,
             max_line_count=max_line_count,
             **prefix_params,
+            **excluded_params,
         )
         return result[0]["has_work"] if result else False
 
@@ -732,6 +760,7 @@ def has_pending_link_work(
     one of the prefixes count.
     """
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         result = gc.query(
             f"""
@@ -739,10 +768,12 @@ def has_pending_link_work(
             WHERE sf.status = 'ingested'
               AND coalesce(sf.evidence_linked, false) = false
               {prefix_clause}
+              {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
             **prefix_params,
+            **excluded_params,
         )
         return result[0]["has_work"] if result else False
 

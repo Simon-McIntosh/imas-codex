@@ -24,6 +24,7 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -535,6 +536,35 @@ def get_exclusion_config_for_facility(facility: str) -> ExclusionConfig:
         logger.debug(f"Could not load facility excludes for {facility}: {e}")
 
     return base_config
+
+
+def build_facility_exclusion_filter(
+    facility: str, alias: str
+) -> tuple[str, dict[str, Any]]:
+    """Render the clause excluding paths under a facility's exclusion prefixes.
+
+    Resolves ``get_exclusion_config_for_facility(facility).path_prefixes`` — the
+    one exclusion family that names a subtree — and returns the negated
+    path-prefix clause for a node bound as *alias*, together with the parameter
+    dict that fills it.
+
+    The parameter is named ``excluded_prefixes`` so a claim that also restricts
+    to a scope binds two distinct lists rather than overwriting one shared name.
+    Claims and has-work predicates call this rather than resolving the
+    exclusions themselves, so the exclusion policy has a single owner. The
+    name-based exclusion families (basename directories, patterns, archive
+    extensions, dotfiles, scratch names) stay seed-time and scan-time rules,
+    because they judge an entry as the scanner meets it.
+
+    An empty prefix list yields an empty clause and no parameters, so a
+    facility with no subtree exclusions leaves the query untouched.
+    """
+    from imas_codex.graph.query_builder import build_path_prefix_filter
+
+    prefixes = get_exclusion_config_for_facility(facility).path_prefixes
+    return build_path_prefix_filter(
+        alias, prefixes, negated=True, param="excluded_prefixes"
+    )
 
 
 def clear_config_cache() -> None:

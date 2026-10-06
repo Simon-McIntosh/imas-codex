@@ -39,3 +39,67 @@ class TestBuildPathPrefixFilter:
         _, params = build_path_prefix_filter("sf", prefixes)
         prefixes.append("/b")
         assert params["prefixes"] == ["/a"]
+
+    def test_negated_renders_a_none_predicate(self):
+        clause, params = build_path_prefix_filter("p", ["/a"], negated=True)
+        assert clause == (
+            "AND none(excluded IN $prefixes WHERE p.path STARTS WITH excluded)"
+        )
+        assert params == {"prefixes": ["/a"]}
+
+    def test_param_names_the_bound_parameter(self):
+        clause, params = build_path_prefix_filter(
+            "p", ["/a"], param="excluded_prefixes"
+        )
+        assert "$excluded_prefixes" in clause
+        assert params == {"excluded_prefixes": ["/a"]}
+
+    def test_negated_with_a_named_parameter(self):
+        clause, params = build_path_prefix_filter(
+            "p", ["/a"], negated=True, param="excluded_prefixes"
+        )
+        assert clause == (
+            "AND none(excluded IN $excluded_prefixes WHERE p.path STARTS WITH excluded)"
+        )
+        assert params == {"excluded_prefixes": ["/a"]}
+
+    def test_negated_empty_list_yields_empty_clause_and_no_parameters(self):
+        assert build_path_prefix_filter(
+            "p", [], negated=True, param="excluded_prefixes"
+        ) == ("", {})
+
+
+class TestFacilityExclusionFilter:
+    def test_renders_a_negated_clause_with_its_own_parameter(self):
+        from unittest.mock import patch
+
+        from imas_codex.config.discovery_config import (
+            ExclusionConfig,
+            build_facility_exclusion_filter,
+        )
+
+        cfg = ExclusionConfig()
+        cfg.path_prefixes = ["/scratch"]
+        with patch(
+            "imas_codex.config.discovery_config.get_exclusion_config_for_facility",
+            return_value=cfg,
+        ):
+            clause, params = build_facility_exclusion_filter("iter", "p")
+        assert clause == (
+            "AND none(excluded IN $excluded_prefixes WHERE p.path STARTS WITH excluded)"
+        )
+        assert params == {"excluded_prefixes": ["/scratch"]}
+
+    def test_no_prefixes_yields_an_empty_clause(self):
+        from unittest.mock import patch
+
+        from imas_codex.config.discovery_config import (
+            ExclusionConfig,
+            build_facility_exclusion_filter,
+        )
+
+        with patch(
+            "imas_codex.config.discovery_config.get_exclusion_config_for_facility",
+            return_value=ExclusionConfig(),
+        ):
+            assert build_facility_exclusion_filter("iter", "p") == ("", {})

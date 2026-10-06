@@ -25,6 +25,7 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.config.discovery_config import build_facility_exclusion_filter
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
 from imas_codex.discovery.base.llm import ProviderBudgetExhausted
@@ -37,7 +38,7 @@ from imas_codex.discovery.base.supervision import (
 )
 from imas_codex.discovery.paths.models import ScoreBatch
 from imas_codex.graph.models import PathStatus, TerminalReason
-from imas_codex.graph.query_builder import render_path_prefix_clause
+from imas_codex.graph.query_builder import build_path_prefix_filter
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -210,10 +211,11 @@ def has_pending_work(facility: str) -> bool:
     """
     from imas_codex.graph import GraphClient
 
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WITH p,
                  CASE WHEN p.status = $discovered AND p.triage_composite IS NULL
                       THEN 'discovered' ELSE null END AS disc,
@@ -229,8 +231,9 @@ def has_pending_work(facility: str) -> bool:
                  CASE WHEN p.is_enriched = true
                       AND p.scored_at IS NULL
                       THEN 'score' ELSE null END AS rsc
-            WHERE disc IS NOT NULL OR scn IS NOT NULL OR exp IS NOT NULL
-                  OR enr IS NOT NULL OR rsc IS NOT NULL
+            WHERE (disc IS NOT NULL OR scn IS NOT NULL OR exp IS NOT NULL
+                   OR enr IS NOT NULL OR rsc IS NOT NULL)
+                  {excluded_clause}
             RETURN count(p) AS pending,
                    count(disc) AS pending_discovered,
                    count(scn) AS pending_scanned,
@@ -242,6 +245,7 @@ def has_pending_work(facility: str) -> bool:
             discovered=PathStatus.discovered.value,
             scanned=PathStatus.scanned.value,
             triaged=PathStatus.triaged.value,
+            **excluded_params,
         )
         if result:
             pending = result[0]["pending"]
@@ -266,15 +270,18 @@ def _has_pending_scan_work(facility: str) -> bool:
     """Check if there are discovered paths awaiting scanning."""
     from imas_codex.graph import GraphClient
 
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $discovered AND p.triage_composite IS NULL
+              {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
             discovered=PathStatus.discovered.value,
+            **excluded_params,
         )
         return bool(result and result[0]["has_work"])
 
@@ -283,17 +290,20 @@ def _has_pending_expand_work(facility: str) -> bool:
     """Check if there are triaged paths awaiting expansion."""
     from imas_codex.graph import GraphClient
 
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
               AND p.should_expand = true
               AND p.expanded_at IS NULL
+              {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
+            **excluded_params,
         )
         return bool(result and result[0]["has_work"])
 
@@ -302,15 +312,18 @@ def _has_pending_triage_work(facility: str) -> bool:
     """Check if there are scanned paths awaiting triage."""
     from imas_codex.graph import GraphClient
 
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $scanned AND p.triage_composite IS NULL
+              {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
             scanned=PathStatus.scanned.value,
+            **excluded_params,
         )
         return bool(result and result[0]["has_work"])
 
@@ -319,18 +332,21 @@ def _has_pending_enrich_work(facility: str) -> bool:
     """Check if there are triaged paths awaiting enrichment."""
     from imas_codex.graph import GraphClient
 
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
               AND p.should_enrich = true
               AND p.triage_composite >= 0.15
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
+              {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
+            **excluded_params,
         )
         return bool(result and result[0]["has_work"])
 
@@ -343,15 +359,18 @@ def _has_pending_score_work(facility: str) -> bool:
     """
     from imas_codex.graph import GraphClient
 
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.is_enriched = true
               AND p.scored_at IS NULL
+              {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
+            **excluded_params,
         )
         return bool(result and result[0]["has_work"])
 
@@ -479,9 +498,10 @@ def claim_paths_for_scanning(
 
     from imas_codex.graph import GraphClient
 
-    root_clause = ""
-    if root_filter:
-        root_clause = render_path_prefix_clause("p", "root_filter")
+    scope_clause, scope_params = build_path_prefix_filter(
+        "p", root_filter, param="scope_prefixes"
+    )
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -491,7 +511,8 @@ def claim_paths_for_scanning(
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $discovered AND p.triage_composite IS NULL
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             WITH p ORDER BY rand() LIMIT $limit
             SET p.claimed_at = datetime(), p.claim_token = $token
             """,
@@ -499,20 +520,23 @@ def claim_paths_for_scanning(
             limit=limit,
             discovered=PathStatus.discovered.value,
             cutoff=cutoff,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         result = gc.query(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $discovered
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth, false AS is_expanding
             """,
             facility=facility,
             discovered=PathStatus.discovered.value,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         return list(result)
 
@@ -535,9 +559,10 @@ def claim_paths_for_expanding(
 
     from imas_codex.graph import GraphClient
 
-    root_clause = ""
-    if root_filter:
-        root_clause = render_path_prefix_clause("p", "root_filter")
+    scope_clause, scope_params = build_path_prefix_filter(
+        "p", root_filter, param="scope_prefixes"
+    )
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -549,7 +574,8 @@ def claim_paths_for_expanding(
               AND p.should_expand = true
               AND p.expanded_at IS NULL
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             WITH p ORDER BY rand() LIMIT $limit
             SET p.claimed_at = datetime(), p.claim_token = $token
             """,
@@ -557,20 +583,23 @@ def claim_paths_for_expanding(
             limit=limit,
             triaged=PathStatus.triaged.value,
             cutoff=cutoff,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         result = gc.query(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged AND p.should_expand = true
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth, true AS is_expanding
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         return list(result)
 
@@ -592,9 +621,10 @@ def claim_paths_for_triaging(
 
     from imas_codex.graph import GraphClient
 
-    root_clause = ""
-    if root_filter:
-        root_clause = render_path_prefix_clause("p", "root_filter")
+    scope_clause, scope_params = build_path_prefix_filter(
+        "p", root_filter, param="scope_prefixes"
+    )
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -604,7 +634,8 @@ def claim_paths_for_triaging(
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $scanned AND p.triage_composite IS NULL
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             WITH p ORDER BY rand() LIMIT $limit
             SET p.claimed_at = datetime(), p.claim_token = $token
             """,
@@ -612,14 +643,16 @@ def claim_paths_for_triaging(
             limit=limit,
             scanned=PathStatus.scanned.value,
             cutoff=cutoff,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         result = gc.query(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $scanned
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth,
                    p.total_files AS total_files, p.total_dirs AS total_dirs,
                    p.file_type_counts AS file_type_counts,
@@ -634,8 +667,9 @@ def claim_paths_for_triaging(
             """,
             facility=facility,
             scanned=PathStatus.scanned.value,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         return list(result)
 
@@ -710,9 +744,10 @@ def claim_paths_for_enriching(
 
     from imas_codex.graph import GraphClient
 
-    root_clause = ""
-    if root_filter:
-        root_clause = render_path_prefix_clause("p", "root_filter")
+    scope_clause, scope_params = build_path_prefix_filter(
+        "p", root_filter, param="scope_prefixes"
+    )
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
 
     min_enrich_score = 0.15
     if auto_enrich_threshold is not None:
@@ -734,7 +769,8 @@ def claim_paths_for_enriching(
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               AND (p.total_dirs IS NULL OR p.total_dirs <= 500)
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             WITH p ORDER BY rand() LIMIT $limit
             SET p.claimed_at = datetime(), p.claim_token = $token
             """,
@@ -742,23 +778,26 @@ def claim_paths_for_enriching(
             limit=limit,
             triaged=PathStatus.triaged.value,
             cutoff=cutoff,
-            root_filter=root_filter or [],
             auto_enrich_threshold=auto_enrich_threshold,
             min_enrich_score=min_enrich_score,
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         result = gc.query(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth, p.triage_composite AS triage_composite,
                    p.path_purpose AS path_purpose
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         return list(result)
 
@@ -790,9 +829,10 @@ def claim_paths_for_scoring(
 
     threshold = min_score if min_score is not None else 0.0
 
-    root_clause = ""
-    if root_filter:
-        root_clause = render_path_prefix_clause("p", "root_filter")
+    scope_clause, scope_params = build_path_prefix_filter(
+        "p", root_filter, param="scope_prefixes"
+    )
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -804,22 +844,25 @@ def claim_paths_for_scoring(
               AND p.triage_composite >= $min_score
               AND p.scored_at IS NULL
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             WITH p ORDER BY rand() LIMIT $limit
             SET p.claimed_at = datetime(), p.claim_token = $token
             """,
             facility=facility,
             limit=limit,
             cutoff=cutoff,
-            root_filter=root_filter or [],
             min_score=threshold,
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         result = gc.query(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.is_enriched = true
-            {root_clause}
+              {scope_clause}
+              {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth,
                    p.triage_composite AS triage_composite,
                    p.triage_modeling_code AS triage_modeling_code,
@@ -854,8 +897,9 @@ def claim_paths_for_scoring(
                    p.enrich_warnings AS enrich_warnings
             """,
             facility=facility,
-            root_filter=root_filter or [],
             token=claim_token,
+            **scope_params,
+            **excluded_params,
         )
         return list(result)
 
