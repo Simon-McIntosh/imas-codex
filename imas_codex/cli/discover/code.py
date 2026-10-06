@@ -197,7 +197,9 @@ def code(
         from imas_codex.discovery.base.reset import CODE_RESET_SPECS, reset_to_status
 
         spec = CODE_RESET_SPECS[reset_to]
-        reset_count = reset_to_status(spec, facility)
+        reset_count = reset_to_status(
+            spec, facility, path_prefixes=list(path_prefixes) or None
+        )
         if reset_count > 0:
             log_print(
                 f"[yellow]Reset {reset_count} file(s) to '{reset_to}' for reprocessing[/yellow]"

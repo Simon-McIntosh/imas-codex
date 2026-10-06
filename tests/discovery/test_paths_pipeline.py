@@ -25,9 +25,17 @@ def _capture_reset(root_filter):
     """Run the pipeline up to its reset call and capture the reset arguments."""
     captured: dict = {}
 
-    def fake_reset(spec, facility, *, extra_filter="", extra_params=None):
+    def fake_reset(
+        spec,
+        facility,
+        *,
+        path_prefixes=None,
+        extra_filter="",
+        extra_params=None,
+    ):
         captured["spec"] = spec
         captured["facility"] = facility
+        captured["path_prefixes"] = path_prefixes
         captured["extra_filter"] = extra_filter
         captured["extra_params"] = extra_params
         raise _StopAtReset
@@ -70,20 +78,23 @@ def _capture_reset(root_filter):
 def test_reset_is_root_scoped_when_root_given():
     captured = _capture_reset(["/analysis/src"])
     assert captured["spec"] is not None
-    assert "$root_prefixes" in captured["extra_filter"]
-    assert captured["extra_params"] == {"root_prefixes": ["/analysis/src"]}
+    assert captured["path_prefixes"] == ["/analysis/src"]
+    assert not captured["extra_filter"]
+    assert not captured["extra_params"]
 
 
 def test_reset_matches_root_and_descendants():
-    """The scope matches paths under the root; the renderer owns the text."""
+    """The scope matches paths under the root; the reset owns the clause text."""
     from imas_codex.graph.query_builder import render_path_prefix_clause
 
     captured = _capture_reset(["/analysis/src"])
-    assert captured["extra_filter"] == render_path_prefix_clause("n", "root_prefixes")
-    assert "n.path STARTS WITH prefix" in captured["extra_filter"]
+    assert captured["path_prefixes"] == ["/analysis/src"]
+    clause = render_path_prefix_clause("n", "path_prefixes")
+    assert "n.path STARTS WITH prefix" in clause
 
 
 def test_reset_is_unscoped_without_root():
     captured = _capture_reset(None)
+    assert captured["path_prefixes"] is None
     assert captured["extra_filter"] == ""
     assert not captured["extra_params"]
