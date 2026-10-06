@@ -22,6 +22,16 @@ _MERGE_RE = re.compile(
 )
 
 
+class _Result:
+    """Stand-in for a Neo4j result, exposing the aggregate row to ``single``."""
+
+    def __init__(self, row: dict | None) -> None:
+        self._row = row
+
+    def single(self) -> dict | None:
+        return self._row
+
+
 class FakeSession:
     """Minimal in-memory model of ``MERGE (n) SET`` and ``ON CREATE SET``."""
 
@@ -35,21 +45,26 @@ class FakeSession:
     def __exit__(self, *_: object) -> bool:
         return False
 
-    def run(self, query: str, **params: object) -> None:
+    def run(self, query: str, **params: object) -> _Result:
         self.queries.append(query)
         match = _MERGE_RE.search(query)
-        if not match:
-            return
-        label, verb = match.group(1), match.group(2)
-        create_only = verb == "ON CREATE SET"
-        for item in params["batch"]:  # type: ignore[union-attr]
-            key = (label, item["id"])
-            existed = key in self._store
-            if not existed:
-                self._store[key] = {}
-            if create_only and existed:
-                continue
-            self._store[key].update(item)
+        created = 0
+        if match:
+            label, verb = match.group(1), match.group(2)
+            create_only = verb == "ON CREATE SET"
+            for item in params["batch"]:  # type: ignore[union-attr]
+                key = (label, item["id"])
+                existed = key in self._store
+                if not existed:
+                    self._store[key] = {}
+                    created += 1
+                if create_only and existed:
+                    continue
+                self._store[key].update(item)
+        # The create-only form aggregates the rows it created into a RETURN.
+        if "RETURN" in query:
+            return _Result({"created": created})
+        return _Result(None)
 
 
 def _client(store: dict) -> GraphClient:
@@ -165,3 +180,42 @@ def test_query_form_differs_by_option():
     assert "SET n += item" in default_query
     assert "ON CREATE SET" not in default_query
     assert "ON CREATE SET n += item" in create_only_query
+
+
+def test_create_only_reports_created_count():
+    store = {
+        ("FacilityPath", "jt-60sa:/a"): {"id": "jt-60sa:/a", "status": "scored"},
+        ("FacilityPath", "jt-60sa:/b"): {"id": "jt-60sa:/b", "status": "scored"},
+    }
+    client = _client(store)
+
+    result = client.create_nodes(
+        "FacilityPath",
+        [
+            {"id": "jt-60sa:/a", "status": "discovered"},
+            {"id": "jt-60sa:/b", "status": "discovered"},
+            {"id": "jt-60sa:/c", "status": "discovered"},
+        ],
+        create_only=True,
+    )
+
+    assert result["created"] == 1
+    assert result["processed"] == 3
+
+
+def test_default_reports_processed_and_no_created_count():
+    store = {
+        ("FacilityPath", "jt-60sa:/a"): {"id": "jt-60sa:/a", "status": "scored"},
+    }
+    client = _client(store)
+
+    result = client.create_nodes(
+        "FacilityPath",
+        [
+            {"id": "jt-60sa:/a", "status": "discovered"},
+            {"id": "jt-60sa:/b", "status": "discovered"},
+        ],
+    )
+
+    assert result["processed"] == 2
+    assert "created" not in result

@@ -24,6 +24,16 @@ _MERGE_RE = re.compile(
 )
 
 
+class _Result:
+    """Stand-in for a Neo4j result, exposing the aggregate row to ``single``."""
+
+    def __init__(self, row: dict | None) -> None:
+        self._row = row
+
+    def single(self) -> dict | None:
+        return self._row
+
+
 class FakeSession:
     """Minimal in-memory model of ``MERGE (n) SET`` and ``ON CREATE SET``."""
 
@@ -37,21 +47,26 @@ class FakeSession:
     def __exit__(self, *_: object) -> bool:
         return False
 
-    def run(self, query: str, **params: object) -> None:
+    def run(self, query: str, **params: object) -> _Result:
         self.queries.append(query)
         match = _MERGE_RE.search(query)
-        if not match:
-            return
-        label, verb = match.group(1), match.group(2)
-        create_only = verb == "ON CREATE SET"
-        for item in params["batch"]:  # type: ignore[union-attr]
-            key = (label, item["id"])
-            existed = key in self._store
-            if not existed:
-                self._store[key] = {}
-            if create_only and existed:
-                continue
-            self._store[key].update(item)
+        created = 0
+        if match:
+            label, verb = match.group(1), match.group(2)
+            create_only = verb == "ON CREATE SET"
+            for item in params["batch"]:  # type: ignore[union-attr]
+                key = (label, item["id"])
+                existed = key in self._store
+                if not existed:
+                    self._store[key] = {}
+                    created += 1
+                if create_only and existed:
+                    continue
+                self._store[key].update(item)
+        # The create-only form aggregates the rows it created into a RETURN.
+        if "RETURN" in query:
+            return _Result({"created": created})
+        return _Result(None)
 
 
 class _NoExclusion:
@@ -128,3 +143,23 @@ def test_seed_writes_create_only(graph):
 
     queries = [q for sess in graph["_sessions"] for q in sess.queries]
     assert any("ON CREATE SET n += item" in q for q in queries)
+
+
+def test_seed_reports_only_created_roots(graph):
+    """Two existing roots plus one new root: the seed reports exactly 1."""
+    facility = "jt-60sa"
+    existing = ["/analysis/src/SAeqfame", "/analysis/src/getseldata_v4.2"]
+    new_root = "/analysis/src/client_eqdbms.EQ32.Rev1"
+
+    for path in existing:
+        graph[("FacilityPath", f"{facility}:{path}")] = {
+            "id": f"{facility}:{path}",
+            "facility_id": facility,
+            "path": path,
+            "status": "scored",
+            "depth": 0,
+        }
+
+    created = seed_facility_roots(facility, root_paths=[*existing, new_root])
+
+    assert created == 1
