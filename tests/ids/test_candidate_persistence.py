@@ -131,15 +131,26 @@ class TestWriteCandidates:
             _normalised(gc)
         )
 
-    def test_selection_flag_normalised_to_boolean(self):
+    def test_boolean_route_marks_the_edge(self):
+        """The producer emits route as a boolean; a bool passes through."""
         gc = _gc_returning([{"written": 1}])
 
-        write_candidates(
-            "jet:PF:r", [{"path": "a/b", "selected": True}], "selected", gc
-        )
+        write_candidates("jet:PF:r", [{"path": "a/b", "route": True}], "selected", gc)
 
         records = gc.query.call_args.kwargs["records"]
         assert records[0]["route"] is True
+
+    def test_route_string_is_refused(self):
+        """A route *string* such as 'escalated' must not mark the candidate
+        selected: only the producer's boolean is accepted."""
+        gc = _gc_returning([{"written": 1}])
+
+        with pytest.raises(CandidateWriteError):
+            write_candidates(
+                "jet:PF:r", [{"path": "a/b", "route": "escalated"}], "escalated", gc
+            )
+
+        assert gc.query.call_count == 0
 
 
 class TestClearCandidates:

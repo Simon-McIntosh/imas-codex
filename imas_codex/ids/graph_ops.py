@@ -299,92 +299,6 @@ def _index_from_path(path: str) -> int:
     return int(path.rsplit(":", 1)[-1])
 
 
-# Each spec: (source_property, target_id, transform_expression, source_units, target_units)
-MappingSpec = tuple[str, str, str, str | None, str | None]
-
-
-def create_signal_source(
-    facility: str,
-    ids_name: str,
-    section: str,
-    system: str,
-    mapping_specs: list[MappingSpec],
-    gc: GraphClient,
-) -> str:
-    """Create a SignalSource and MAPS_TO_IMAS relationships for field mappings.
-
-    Args:
-        facility: Facility ID (e.g., 'jet').
-        ids_name: IDS name (e.g., 'pf_active').
-        section: Section name (e.g., 'coil', 'b_field_pol_probe').
-        system: System code (e.g., 'PF', 'MP').
-        mapping_specs: List of (source_property, target_id, transform_expression,
-            source_units, target_units) tuples.
-        gc: Graph client instance.
-
-    Returns:
-        SignalSource ID.
-    """
-    group_id = f"{facility}:ids:{ids_name}:{system}"
-    group_key = f"{ids_name}/{section}"
-
-    # Create SignalSource node
-    gc.query(
-        """
-        MERGE (sg:SignalSource {id: $group_id})
-        SET sg.facility_id = $facility,
-            sg.group_key = $group_key,
-            sg.status = 'discovered'
-        WITH sg
-        MATCH (f:Facility {id: $facility})
-        MERGE (sg)-[:AT_FACILITY]->(f)
-        """,
-        group_id=group_id,
-        facility=facility,
-        group_key=group_key,
-    )
-
-    # Create MAPS_TO_IMAS relationships
-    maps = [
-        {
-            "source_property": source_prop,
-            "target_path": target_path,
-            "transform_expression": transform,
-            "source_units": source_units,
-            "target_units": target_units,
-            "driver": "device_xml",
-            "status": "validated",
-            "confidence": 1.0,
-        }
-        for source_prop, target_path, transform, source_units, target_units in mapping_specs
-    ]
-
-    gc.query(
-        """
-        UNWIND $maps AS m
-        MATCH (sg:SignalSource {id: $group_id})
-        MATCH (ip:IMASNode {id: m.target_path})
-        MERGE (sg)-[rel:MAPS_TO_IMAS]->(ip)
-        SET rel.source_property = m.source_property,
-            rel.transform_expression = m.transform_expression,
-            rel.source_units = m.source_units,
-            rel.target_units = m.target_units,
-            rel.driver = m.driver,
-            rel.status = m.status,
-            rel.confidence = m.confidence
-        """,
-        group_id=group_id,
-        maps=maps,
-    )
-
-    logger.info(
-        "Created SignalSource %s with %d MAPS_TO_IMAS relationships",
-        group_id,
-        len(maps),
-    )
-    return group_id
-
-
 def create_imas_mapping(
     facility: str,
     ids_name: str,
@@ -523,9 +437,10 @@ def _candidate_record(judgment: dict[str, Any]) -> dict[str, Any]:
     """Normalise one judgment into the record the write query binds.
 
     ``path`` names the IMASNode the candidate targets and is required. The
-    selection flag is read from ``route`` or, failing that, ``selected``; an
-    explicit flag lets the caller mark the chosen candidate independently of
-    the source-level route decision.
+    selection flag is read from ``route`` and must be a boolean: the producer
+    emits a boolean, and accepting a route *string* here would let a value
+    like ``"escalated"`` mark the candidate selected. Anything but ``bool`` is
+    refused with :class:`CandidateWriteError`.
     """
     try:
         path = judgment["path"]
@@ -534,10 +449,15 @@ def _candidate_record(judgment: dict[str, Any]) -> dict[str, Any]:
             "candidate judgment has no 'path' naming its IMASNode"
         ) from exc
 
-    record: dict[str, Any] = {"path": path, "route": False}
+    record: dict[str, Any] = {"path": path}
     for name in _CANDIDATE_EDGE_FIELDS:
         record[name] = judgment.get(name)
-    record["route"] = bool(judgment.get("route", judgment.get("selected", False)))
+    route = judgment.get("route", False)
+    if not isinstance(route, bool):
+        raise CandidateWriteError(
+            f"candidate judgment 'route' must be a boolean, got {type(route).__name__}"
+        )
+    record["route"] = route
     return record
 
 
@@ -563,9 +483,9 @@ def write_candidates(
         judgments: One record per candidate. ``path`` (the IMASNode ID) is
             required; ``rank``, ``retrieval_score``, ``ids``,
             ``choice_probability``, ``p_same_quantity``, ``model`` and
-            ``judged_at`` are copied to the edge when present. A truthy
-            ``route`` (or ``selected``) marks the edge as the selected
-            candidate.
+            ``judged_at`` are copied to the edge when present. A boolean
+            ``route`` marks the edge as the selected candidate; any other
+            type is refused.
         route: Route decision stored on ``SignalSource.candidate_route``
             (e.g. 'selected', 'escalated', 'no_candidate'), or None to clear it.
             Written only when every judgment persisted.
@@ -627,6 +547,134 @@ def write_candidates(
         route,
     )
     return written
+
+
+def write_mapping_binding(binding: Any, gc: GraphClient) -> int:
+    """Write one ``SignalSource -[:MAPS_TO_IMAS]-> IMASNode`` binding.
+
+    The single owner of a MAPS_TO_IMAS edge create. MATCHes both endpoints,
+    MERGEs the edge and sets the transform, unit, confidence and derived-error
+    properties. The statement counts the edge it wrote; a reported count of
+    zero raises, so a binding whose source or target IMASNode has vanished
+    fails loudly instead of being dropped silently.
+
+    The count is read from the row the write returns. Neo4j always returns that
+    row for an aggregating ``RETURN count(r)`` — zero matches yield one row
+    carrying ``written = 0`` — so a vanished endpoint is reported and raised.
+
+    Args:
+        binding: A ``ValidatedSignalMapping``, or any object exposing the same
+            attributes: ``source_id``, ``target_id``, ``source_property``,
+            ``transform_expression``, ``source_units``, ``target_units``,
+            ``cocos_label``, ``confidence``, ``evidence``, ``mapping_type``,
+            ``error_type`` and ``derived_from``.
+        gc: Graph client instance.
+
+    Returns:
+        The number of edges written (1 on success, 0 when the write count was
+        not reported).
+
+    Raises:
+        CandidateWriteError: If the write reports zero edges, which happens
+            when the source or its target IMASNode does not exist.
+    """
+    rows = gc.query(
+        """
+        MATCH (sg:SignalSource {id: $sg_id})
+        MATCH (ip:IMASNode {id: $target_id})
+        MERGE (sg)-[r:MAPS_TO_IMAS]->(ip)
+        SET r.source_property = $source_property,
+            r.transform_expression = $transform_expression,
+            r.source_units = $source_units,
+            r.target_units = $target_units,
+            r.cocos_label = $cocos_label,
+            r.confidence = $confidence,
+            r.evidence = $evidence,
+            r.mapping_type = $mapping_type,
+            r.error_type = $error_type,
+            r.derived_from = $derived_from
+        RETURN count(r) AS written
+        """,
+        sg_id=binding.source_id,
+        target_id=binding.target_id,
+        source_property=binding.source_property,
+        transform_expression=binding.transform_expression,
+        source_units=binding.source_units,
+        target_units=binding.target_units,
+        cocos_label=binding.cocos_label,
+        confidence=binding.confidence,
+        evidence=binding.evidence,
+        mapping_type=binding.mapping_type,
+        error_type=binding.error_type,
+        derived_from=binding.derived_from,
+    )
+
+    written = rows[0]["written"] if rows else 0
+    if written < 1 and rows:
+        raise CandidateWriteError(
+            f"wrote 0 MAPS_TO_IMAS edges for {binding.source_id} → "
+            f"{binding.target_id}; the source or its IMASNode may not exist"
+        )
+    return written
+
+
+def clear_mapping_bindings(facility: str, ids_name: str, gc: GraphClient) -> int:
+    """Delete the MAPS_TO_IMAS edges a mapping's signal sources carry.
+
+    The single owner of a MAPS_TO_IMAS edge delete. Scoped to the
+    ``USES_SIGNAL_SOURCE`` sources of the ``facility``/``ids_name``
+    IMASMapping, so a mapping's bindings can be removed as a unit.
+
+    Args:
+        facility: Facility ID.
+        ids_name: IDS name whose mapping sources are cleared.
+        gc: Graph client instance.
+
+    Returns:
+        The number of MAPS_TO_IMAS relationships deleted.
+    """
+    rows = gc.query(
+        """
+        MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
+              -[:USES_SIGNAL_SOURCE]->(sg:SignalSource)
+        MATCH (sg)-[r:MAPS_TO_IMAS]->(:IMASNode)
+        DELETE r
+        RETURN count(r) AS deleted
+        """,
+        facility=facility,
+        ids=ids_name,
+    )
+
+    deleted = rows[0]["deleted"] if rows else 0
+    logger.info("Removed %d MAPS_TO_IMAS edges for %s:%s", deleted, facility, ids_name)
+    return deleted
+
+
+def count_candidates_by_route(
+    facility: str, gc: GraphClient | None = None
+) -> dict[str, int]:
+    """Count a facility's enriched signal sources grouped by candidate_route.
+
+    Args:
+        facility: Facility ID.
+        gc: Graph client instance. A client is opened and closed when omitted.
+
+    Returns:
+        ``{route: count}`` with unjudged sources keyed ``'pending'``.
+    """
+    if gc is None:
+        with GraphClient() as owned:
+            return count_candidates_by_route(facility, owned)
+    rows = gc.query(
+        """
+        MATCH (sg:SignalSource {facility_id: $facility})
+        WHERE sg.status = 'enriched'
+        RETURN coalesce(sg.candidate_route, 'pending') AS route,
+               count(sg) AS cnt
+        """,
+        facility=facility,
+    )
+    return {r["route"]: r["cnt"] for r in rows}
 
 
 def clear_candidates(facility: str, gc: GraphClient) -> dict[str, int]:

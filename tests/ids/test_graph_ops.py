@@ -11,7 +11,6 @@ from imas_codex.ids.graph_ops import (
     SignalMapping,
     _index_from_path,
     create_imas_mapping,
-    create_signal_source,
     load_mapping,
     load_sections,
     load_signal_mappings,
@@ -194,20 +193,6 @@ class TestLoadSignalMappings:
             result = load_signal_mappings("jet:pf_active", gc)
         assert len(result) == 1
         assert "COCOS-sensitive" not in caplog.text
-
-
-class TestCreateSignalSource:
-    def test_creates_group_with_maps_to_imas(self):
-        gc = MagicMock()
-        gc.query.return_value = []
-        specs: list[tuple[str, str, str, str | None, str | None]] = [
-            ("r", "test/section/r", "value", "m", "m"),
-            ("z", "test/section/z", "value", "m", "m"),
-        ]
-        result = create_signal_source("jet", "test", "section", "PF", specs, gc)
-        assert result == "jet:ids:test:PF"
-        # Called twice: create SignalSource node + create MAPS_TO_IMAS rels
-        assert gc.query.call_count == 2
 
 
 class TestCreateIMASMapping:

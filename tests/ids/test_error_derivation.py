@@ -7,7 +7,7 @@ Covers:
 - classify_error_signals: uncertainty vs physics-error-field exclusion
 - match_error_signals_to_imas: cross-reference with existing data mappings
 - persist_mapping_result: error fields are persisted in MAPS_TO_IMAS relationships
-- CLI: --stage, --skip-errors, --skip-metadata flags appear in help text
+- CLI: --stage appears in help text; --skip-errors and --skip-metadata do not
 """
 
 from __future__ import annotations
@@ -780,8 +780,9 @@ def test_map_run_help_includes_stage():
     assert "--stage" in result.output
 
 
-def test_map_run_help_includes_skip_errors():
-    """CLI help text includes --skip-errors flag."""
+def test_map_run_help_omits_retired_skip_flags():
+    """--skip-errors and --skip-metadata are retired: --stage data replaces the
+    first and the second was parsed but never read."""
     from click.testing import CliRunner
 
     from imas_codex.cli.map import map_cmd
@@ -789,19 +790,8 @@ def test_map_run_help_includes_skip_errors():
     runner = CliRunner()
     result = runner.invoke(map_cmd, ["run", "--help"])
     assert result.exit_code == 0
-    assert "--skip-errors" in result.output
-
-
-def test_map_run_help_includes_skip_metadata():
-    """CLI help text includes --skip-metadata flag."""
-    from click.testing import CliRunner
-
-    from imas_codex.cli.map import map_cmd
-
-    runner = CliRunner()
-    result = runner.invoke(map_cmd, ["run", "--help"])
-    assert result.exit_code == 0
-    assert "--skip-metadata" in result.output
+    assert "--skip-errors" not in result.output
+    assert "--skip-metadata" not in result.output
 
 
 def test_map_run_help_stage_choices():
