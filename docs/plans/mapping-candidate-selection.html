@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 </head>
@@ -237,7 +237,13 @@
         <code>c63f3ada7</code>; the node re-greps at its head):
         <ul>
           <li>the mapping claim predicate <code>sg.mapping_target_ids = $ids_name</code>
-            (:213), which becomes a match on the selected edge's IDS;</li>
+            (:213), which becomes a match on the selected edge's IDS. A source reaches it by
+            one of two paths. A <code>selected</code> source already has a selected edge. An
+            <code>escalated</code> source is first claimed by the assign stage, on
+            <code>candidate_route = 'escalated'</code> with a candidate in the target IDS. The
+            reasoning model picks one shortlist path, and <code>select_candidate</code> marks that
+            edge selected. Without the escalated claim, the default route would leave the map
+            stage nothing to claim;</li>
           <li>the claim projection of target IDS, path and type (:236–238);</li>
           <li>the reset filter <code>sg.mapping_target_ids IN $ids_names</code> (:380);</li>
           <li>the reset's null-out of the three fields (:392–394), which keeps only
@@ -291,24 +297,43 @@
         retrieval, the retired fields, and the deletion of
         <code>count_sources_by_mapping_status</code>.
         <ul>
+          <li>The candidate edges get a reader, and a way to mark the reasoning model's pick,
+            beside their writer in <code>imas_codex/ids/graph_ops.py</code>:
+            <code>read_candidates(source_ids)</code> returns each source's edges in Jev order,
+            and <code>select_candidate(source_id, path)</code> marks one edge selected. No
+            candidate query is written in <code>workers.py</code> or
+            <code>mapping.py</code>.</li>
+          <li><code>compute_semantic_matches</code> has one importer outside
+            <code>imas_codex/</code>: <code>tests/tools/test_dd_version_filtering.py</code>
+            (:443, :457). Its test of that function is removed with the function.</li>
           <li>Write paths: <code>imas_codex/ids/workers.py</code>,
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/tools.py</code>,
+            <code>imas_codex/ids/graph_ops.py</code>,
             <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
             <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
-            <code>imas_codex/schemas/facility.yaml</code> and <code>tests/ids/</code>.</li>
+            <code>imas_codex/schemas/facility.yaml</code>,
+            <code>tests/tools/test_dd_version_filtering.py</code> and
+            <code>tests/ids/</code>.</li>
           <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
             tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py
-            -p no:cacheprovider</code> passes, with tests showing:
+            tests/tools/test_dd_version_filtering.py -p no:cacheprovider</code> passes, with
+            tests showing:
             <ul>
               <li>a selected source is mapped without an assign call;</li>
+              <li>under the default thresholds, an escalated source is claimed by the assign
+                stage, and its pick becomes a selected edge that the map stage then
+                claims;</li>
               <li>an escalated source's prompt lists only its shortlist;</li>
               <li>an answer naming a path outside the shortlist is refused;</li>
               <li>a <code>target_id</code> outside the selected node is escalated;</li>
               <li><code>gather_ids_context</code> no longer calls
                 <code>retrieve_candidates</code>.</li>
             </ul>
-            <code>grep -rn 'mapping_target_ids\|mapping_target_path\|compute_semantic_matches'
-            imas_codex/</code> prints nothing.</li>
+            After <code>uv run build-models --force</code> in the worktree, which regenerates the
+            gitignored <code>models.py</code> and <code>schema_context_data.py</code> from
+            <code>facility.yaml</code>, <code>grep -rn
+            'mapping_target_ids\|mapping_target_path\|compute_semantic_matches' imas_codex/
+            tests/</code> prints nothing.</li>
         </ul></li>
     </ol>
 
