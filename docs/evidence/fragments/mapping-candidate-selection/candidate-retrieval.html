@@ -1,0 +1,37 @@
+<section>
+  <h2 id="candidate-retrieval">DD candidate retrieval moved into <code>ids/candidates.py</code></h2>
+  <p id="candidate-retrieval-scope">
+    <code>retrieve_candidates(sources, ids_by_source, *, gc, k, dd_version)
+    -&gt; dict[str, list[Candidate]]</code> is the new deterministic shortlist
+    builder. Each source description is embedded once, then searched once per
+    routed IDS through <code>hybrid_dd_search</code>; the arms are merged by
+    score and deduplicated on path, and <code>Candidate</code> composes the
+    returned <code>SearchHit</code> (no field copied) with the arms that
+    produced it and the parent node's documentation. <code>K = 20</code>.
+    <code>gather_ids_context</code> now builds <code>source_candidates</code>
+    through <code>retrieve_candidates</code>; the cluster expansion and the
+    <code>ClusterSearcher</code> load in <code>gather_shared_context</code> are
+    deleted, and <code>compute_semantic_matches</code> now supplies only the
+    wiki and code bridges.
+  </p>
+  <table id="candidate-retrieval-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code></td><td>405 passed, 5 skipped, exit 0</td></tr>
+      <tr><td><code>uv run --no-sync pytest tests/ids/test_candidates.py</code></td><td>6 passed, exit 0</td></tr>
+      <tr><td>negative control — drop the path deduplication in the IDS merge</td><td>2 failed, 4 passed, exit 1</td></tr>
+    </tbody>
+  </table>
+  <p id="candidate-retrieval-tests">
+    <code>tests/ids/test_candidates.py</code> shows: every returned path is an
+    IMASNode id read back from the fake graph or supplied as a fake hit, with no
+    path assembled from a string; hits from two routed IDSs merge by score with
+    the shared path held once at its higher score and both arms recorded; an
+    empty IDS list issues a single unscoped search; one <code>embed_texts</code>
+    call carries the whole batch; and <code>gather_ids_context</code> returns
+    the retrieval result and <code>mapping.py</code> no longer names
+    <code>ClusterSearcher</code>. Under the declared mutation
+    (<code>negative-control-dedup.log</code>) the duplicate-path test fails,
+    so the deduplication is load-bearing.
+  </p>
+</section>
