@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -395,8 +395,19 @@
     <p>
       <strong>Worker.</strong> The candidate stage is a new phase in
       <code>imas_codex/ids/workers.py</code>, the module that already owns SignalSource
-      claiming. That module already holds the claim pattern twice. This section generalises
-      it once, and does not add a third copy.
+      claiming for the mapping workflow. That module already holds the claim pattern
+      twice. This section generalises it once, and does not add a third copy.
+    </p>
+    <p>
+      The full SignalSource census has two more claim families. Both serve the
+      <em>enrichment</em> stage on <code>claimed_at</code>:
+      <code>claim_signal_sources</code>, <code>release_source_claims</code> and
+      <code>has_pending_sources</code> in <code>imas_codex/discovery/base/grouping.py</code>,
+      and their twins in <code>imas_codex/discovery/mdsplus/graph_ops.py</code>. They are a
+      different lifecycle stage with live callers in <code>discovery/static</code>, so this
+      plan leaves them unchanged. The generic routine in <code>claims.py</code> takes the label,
+      status predicate and claim property names as parameters, so those families can adopt it
+      in their own change.
     </p>
     <ul>
       <li><code>claim_sources_for_assignment</code> and
