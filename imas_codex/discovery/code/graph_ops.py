@@ -29,7 +29,7 @@ from imas_codex.discovery.base.claims import (
     retry_on_deadlock,
 )
 from imas_codex.graph import GraphClient
-from imas_codex.graph.query_builder import render_path_prefix_clause
+from imas_codex.graph.query_builder import build_path_prefix_filter
 
 logger = logging.getLogger(__name__)
 
@@ -129,17 +129,15 @@ def claim_paths_for_file_scan(
         min_score = get_discovery_threshold()
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
-    prefix_clause = ""
+    prefix_clause, prefix_params = build_path_prefix_filter("p", path_prefixes)
     params: dict[str, Any] = {
         "facility": facility,
         "min_score": min_score,
         "limit": limit,
         "cutoff": cutoff,
         "token": claim_token,
+        **prefix_params,
     }
-    if path_prefixes:
-        prefix_clause = render_path_prefix_clause("p", "prefixes")
-        params["prefixes"] = list(path_prefixes)
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
@@ -279,6 +277,7 @@ def set_files_scan_after(facility: str) -> None:
 def claim_files_for_triage(
     facility: str,
     limit: int = 500,
+    path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Atomically claim discovered CodeFiles for LLM triage.
 
@@ -293,19 +292,24 @@ def claim_files_for_triage(
     Args:
         facility: Facility ID
         limit: Maximum files to claim
+        path_prefixes: When given, restrict the claim to CodeFiles whose
+            ``path`` starts with any of these prefixes, so a scoped run
+            triages only the named trees.
 
     Returns:
         List of dicts with file info + parent path/description
     """
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'discovered'
               AND sf.triage_composite IS NULL
+              {prefix_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf
@@ -317,6 +321,7 @@ def claim_files_for_triage(
             limit=limit,
             cutoff=cutoff,
             token=claim_token,
+            **prefix_params,
         )
 
         # Step 2: Read back only files WE successfully claimed
@@ -363,6 +368,7 @@ def claim_files_for_enrichment(
     facility: str,
     limit: int = 200,
     min_triage_composite: float | None = None,
+    path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Atomically claim triaged CodeFiles for rg pattern enrichment.
 
@@ -378,6 +384,8 @@ def claim_files_for_enrichment(
         limit: Maximum files to claim
         min_triage_composite: Minimum triage composite to enrich.
             Defaults to ``get_triage_threshold()``.
+        path_prefixes: When given, restrict the claim to CodeFiles whose
+            ``path`` starts with any of these prefixes.
 
     Returns:
         List of dicts with id, path, language, triage_composite
@@ -388,14 +396,16 @@ def claim_files_for_enrichment(
         min_triage_composite = get_triage_threshold()
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
               AND sf.triage_composite >= $min_triage
               AND coalesce(sf.is_enriched, false) = false
+              {prefix_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf
@@ -408,6 +418,7 @@ def claim_files_for_enrichment(
             cutoff=cutoff,
             min_triage=min_triage_composite,
             token=claim_token,
+            **prefix_params,
         )
 
         # Step 2: Read back only files WE successfully claimed
@@ -446,6 +457,7 @@ def release_file_enrich_claims(file_ids: list[str]) -> None:
 def claim_files_for_scoring(
     facility: str,
     limit: int = 100,
+    path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Atomically claim enriched CodeFiles for full LLM scoring.
 
@@ -460,6 +472,8 @@ def claim_files_for_scoring(
     Args:
         facility: Facility ID
         limit: Maximum files to claim
+        path_prefixes: When given, restrict the claim to CodeFiles whose
+            ``path`` starts with any of these prefixes.
 
     Returns:
         List of dicts with file info + triage description + enrichment data
@@ -468,13 +482,15 @@ def claim_files_for_scoring(
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
               AND sf.is_enriched = true
+              {prefix_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
             WITH sf
@@ -486,6 +502,7 @@ def claim_files_for_scoring(
             limit=limit,
             cutoff=cutoff,
             token=claim_token,
+            **prefix_params,
         )
 
         # Step 2: Read back only files WE successfully claimed
@@ -560,11 +577,12 @@ def has_pending_scan_work(
         from imas_codex.settings import get_discovery_threshold
 
         min_score = get_discovery_threshold()
-    prefix_clause = ""
-    params: dict[str, Any] = {"facility": facility, "min_score": min_score}
-    if path_prefixes:
-        prefix_clause = render_path_prefix_clause("p", "prefixes")
-        params["prefixes"] = list(path_prefixes)
+    prefix_clause, prefix_params = build_path_prefix_filter("p", path_prefixes)
+    params: dict[str, Any] = {
+        "facility": facility,
+        "min_score": min_score,
+        **prefix_params,
+    }
     with GraphClient() as gc:
         result = gc.query(
             f"""
@@ -590,94 +608,141 @@ def has_pending_scan_work(
         return result[0]["has_work"] if result else False
 
 
-def has_pending_score_work(facility: str) -> bool:
-    """Check if there are triaged+enriched CodeFiles needing scoring."""
+def has_pending_score_work(
+    facility: str, path_prefixes: list[str] | None = None
+) -> bool:
+    """Check if there are triaged+enriched CodeFiles needing scoring.
+
+    When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
+    one of the prefixes count, so a scoped run reports done once the named
+    trees are done.
+    """
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
               AND sf.is_enriched = true
+              {prefix_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
+            **prefix_params,
         )
         return result[0]["has_work"] if result else False
 
 
-def has_pending_triage_work(facility: str) -> bool:
-    """Check if there are discovered CodeFiles needing triage."""
+def has_pending_triage_work(
+    facility: str, path_prefixes: list[str] | None = None
+) -> bool:
+    """Check if there are discovered CodeFiles needing triage.
+
+    When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
+    one of the prefixes count.
+    """
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'discovered'
               AND sf.triage_composite IS NULL
+              {prefix_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
+            **prefix_params,
         )
         return result[0]["has_work"] if result else False
 
 
 def has_pending_enrich_work(
-    facility: str, min_triage_composite: float | None = None
+    facility: str,
+    min_triage_composite: float | None = None,
+    path_prefixes: list[str] | None = None,
 ) -> bool:
-    """Check if there are triaged CodeFiles needing rg enrichment."""
+    """Check if there are triaged CodeFiles needing rg enrichment.
+
+    When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
+    one of the prefixes count.
+    """
     if min_triage_composite is None:
         from imas_codex.settings import get_triage_threshold
 
         min_triage_composite = get_triage_threshold()
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
               AND sf.triage_composite >= $min_triage
               AND coalesce(sf.is_enriched, false) = false
+              {prefix_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
             min_triage=min_triage_composite,
+            **prefix_params,
         )
         return result[0]["has_work"] if result else False
 
 
 def has_pending_code_work(
-    facility: str, min_score: float | None = None, max_line_count: int = 10000
+    facility: str,
+    min_score: float | None = None,
+    max_line_count: int = 10000,
+    path_prefixes: list[str] | None = None,
 ) -> bool:
-    """Check if there are scored code files needing ingestion."""
+    """Check if there are scored code files needing ingestion.
+
+    When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
+    one of the prefixes count.
+    """
     if min_score is None:
         from imas_codex.settings import get_discovery_threshold
 
         min_score = get_discovery_threshold()
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
               AND sf.score_composite >= $min_score
               AND coalesce(sf.line_count, 0) <= $max_line_count
+              {prefix_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
             min_score=min_score,
             max_line_count=max_line_count,
+            **prefix_params,
         )
         return result[0]["has_work"] if result else False
 
 
-def has_pending_link_work(facility: str) -> bool:
-    """Check if there are ingested CodeFiles with unlinked code evidence."""
+def has_pending_link_work(
+    facility: str, path_prefixes: list[str] | None = None
+) -> bool:
+    """Check if there are ingested CodeFiles with unlinked code evidence.
+
+    When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
+    one of the prefixes count.
+    """
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'ingested'
               AND coalesce(sf.evidence_linked, false) = false
+              {prefix_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
+            **prefix_params,
         )
         return result[0]["has_work"] if result else False
 

@@ -277,3 +277,22 @@ def render_path_prefix_clause(alias: str, param: str) -> str:
     claims and the scoped status reset; do not spell the clause inline.
     """
     return f"AND any(prefix IN ${param} WHERE {alias}.path STARTS WITH prefix)"
+
+
+def build_path_prefix_filter(
+    alias: str, prefixes: list[str] | None
+) -> tuple[str, dict[str, Any]]:
+    """Render the path-prefix clause together with the parameters that fill it.
+
+    Returns ``(clause, params)`` for a node bound as *alias* whose ``path``
+    must start with one of *prefixes*. The value and the predicate it fills are
+    returned as one pair so a caller cannot render the clause and then forget to
+    bind the parameter it names; pass ``params`` into the same query that
+    interpolates ``clause``.
+
+    An empty or absent prefix list yields an empty clause and no parameters, so
+    the query reads exactly as it did before a scope was offered.
+    """
+    if not prefixes:
+        return "", {}
+    return render_path_prefix_clause(alias, "prefixes"), {"prefixes": list(prefixes)}
