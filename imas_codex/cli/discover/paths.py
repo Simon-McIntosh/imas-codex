@@ -208,7 +208,6 @@ def _run_iterative_discovery(
     from imas_codex.discovery import (
         get_discovery_stats,
         seed_facility_roots,
-        seed_missing_roots,
     )
     from imas_codex.discovery.base.facility import get_facility
     from imas_codex.settings import get_model
@@ -233,7 +232,7 @@ def _run_iterative_discovery(
     # Handle --add-roots flag
     if add_roots:
         log_print("[cyan]Checking for missing discovery_roots...[/cyan]")
-        seeded = seed_missing_roots(facility)
+        seeded = seed_facility_roots(facility)
         if seeded > 0:
             log_print(f"[green]Added {seeded} new root path(s) from config[/green]")
         else:

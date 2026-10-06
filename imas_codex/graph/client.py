@@ -608,6 +608,7 @@ class GraphClient:
         items: list[dict[str, Any]],
         batch_size: int = 50,
         create_relationships: bool = True,
+        create_only: bool = False,
     ) -> dict[str, int]:
         """Create or update multiple nodes using UNWIND for efficiency.
 
@@ -621,6 +622,10 @@ class GraphClient:
             batch_size: Number of nodes per UNWIND batch (default: 50)
             create_relationships: If True, create edges for all schema-defined
                 relationship fields found in items. Default True.
+            create_only: If True, apply properties only when the node is
+                created (ON CREATE SET), leaving an existing node's properties
+                untouched. Relationship creation is unaffected. Default False
+                (upsert: existing nodes are updated).
 
         Returns:
             Dict with counts: {"processed": N, "relationships": {rel_type: count}}
@@ -661,11 +666,14 @@ class GraphClient:
         processed = 0
         rel_counts: dict[str, int] = {}
 
-        # Node creation query (always runs first)
+        # Node creation query (always runs first). With create_only, the
+        # property write is scoped to the creation event so an existing node
+        # keeps its stored properties.
+        properties_clause = "ON CREATE SET n += item" if create_only else "SET n += item"
         node_query = f"""
             UNWIND $batch AS item
             MERGE (n:{label} {{id: item.id}})
-            SET n += item
+            {properties_clause}
         """
 
         # Get schema-defined relationships for this class
