@@ -1992,6 +1992,19 @@ def _ensure_json_in_messages(
     return [{"role": "system", "content": _JSON_INSTRUCTION}, *messages]
 
 
+def _service_headers(service: str) -> dict[str, str]:
+    """OpenRouter dashboard headers identifying the calling service.
+
+    The ``X-Title`` names the service on the OpenRouter dashboard and the
+    ``HTTP-Referer`` attributes the traffic. Defined once here so the chat
+    (``_build_kwargs``) and decisions callers share a single definition.
+    """
+    return {
+        "X-Title": "imas-codex:" + service,
+        "HTTP-Referer": "https://github.com/iterorganization/imas-codex",
+    }
+
+
 def _build_kwargs(
     model: str,
     api_key: str,
@@ -2152,11 +2165,7 @@ def _build_kwargs(
     # Per-service X-Title for OpenRouter dashboard visibility.
     # Client extra_headers shallow-replaces proxy config extra_headers,
     # so per-service titles override the proxy fallback "imas-codex".
-    title = f"imas-codex:{service}"
-    kwargs["extra_headers"] = {
-        "X-Title": title,
-        "HTTP-Referer": "https://github.com/iterorganization/imas-codex",
-    }
+    kwargs["extra_headers"] = _service_headers(service)
 
     kwargs["metadata"] = {
         "service": service,
@@ -3223,3 +3232,305 @@ async def acall_llm(
                 raise
 
     raise last_error  # type: ignore[misc]
+
+
+# ---------------------------------------------------------------------------
+# Decisions endpoint (typed judgements, distinct from chat completions)
+# ---------------------------------------------------------------------------
+# The OpenRouter alpha decisions endpoint takes a request of
+# ``{model, state, questions}`` and answers each question with a typed
+# judgement: a ``noul`` answer carries a probability in [0, 1]; a ``choice``
+# answer names one of the offered criteria, carries its probability
+# distribution over them, and a confidence. Both the request and the response
+# shape differ from chat completions, so a decisions call cannot route through
+# :func:`call_llm_structured`; these functions are the one canonical route to a
+# decisions model.
+
+DECISIONS_ENDPOINT = "https://openrouter.ai/api/alpha/decisions"
+DECISIONS_TIMEOUT = 60.0
+
+
+class DecisionsError(RuntimeError):
+    """A decisions call failed at the transport layer.
+
+    Carries the HTTP ``status`` when one was returned so the retry loop can
+    treat 429 and 5xx as retryable alongside the shared ``_is_retryable``
+    patterns.
+    """
+
+    def __init__(self, message: str, *, status: int | None = None) -> None:
+        super().__init__(message)
+        self.status = status
+
+
+class DecisionsValidationError(ValueError):
+    """A decisions answer violated the contract its question declared.
+
+    A deterministic contract violation — a noul outside [0, 1], a choice
+    outside the offered criteria, probabilities that do not sum to 1, or a
+    confidence outside [0, 1]. Raised without retry so a malformed judgement
+    is never mistaken for a usable one.
+    """
+
+
+def _decisions_retryable(error: BaseException) -> bool:
+    """Return True when a decisions attempt should be retried.
+
+    429 and 5xx are retryable by HTTP status; everything else is judged by the
+    shared ``_is_retryable`` patterns rather than a second copy of that policy.
+    """
+    status = getattr(error, "status", None)
+    if isinstance(status, int) and not isinstance(status, bool):
+        if status == 429 or status >= 500:
+            return True
+    return _is_retryable(str(error))
+
+
+def _validate_decisions_answers(
+    questions: Mapping[str, Any], answers: Mapping[str, Any]
+) -> None:
+    """Validate every answer against the contract its question declared.
+
+    ``noul`` probabilities must lie in [0, 1]; a ``choice`` selection must be
+    one of the offered criteria, its probability distribution must cover only
+    those criteria and sum to 1 within 0.01, and any confidence must lie in
+    [0, 1]. Any violation raises :class:`DecisionsValidationError`.
+    """
+    for name, question in questions.items():
+        answer = answers.get(name)
+        if not isinstance(answer, Mapping):
+            raise DecisionsValidationError(f"decision {name!r} carried no answer")
+        question_type = question.get("type")
+        if question_type == "noul":
+            value = answer.get("noul")
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, int | float)
+                or not 0.0 <= float(value) <= 1.0
+            ):
+                raise DecisionsValidationError(
+                    f"decision {name!r} noul {value!r} lies outside [0, 1]"
+                )
+        elif question_type == "choice":
+            criteria = question.get("criteria") or {}
+            choice = answer.get("choice")
+            if choice not in criteria:
+                raise DecisionsValidationError(
+                    f"decision {name!r} choice {choice!r} is not one of the "
+                    f"offered criteria {sorted(criteria)}"
+                )
+            probabilities = answer.get("probabilities")
+            if not isinstance(probabilities, Mapping):
+                raise DecisionsValidationError(
+                    f"decision {name!r} choice carried no probabilities"
+                )
+            total = 0.0
+            for criterion, probability in probabilities.items():
+                if criterion not in criteria:
+                    raise DecisionsValidationError(
+                        f"decision {name!r} carried a probability for unknown "
+                        f"criterion {criterion!r}"
+                    )
+                if (
+                    isinstance(probability, bool)
+                    or not isinstance(probability, int | float)
+                    or not 0.0 <= float(probability) <= 1.0
+                ):
+                    raise DecisionsValidationError(
+                        f"decision {name!r} probability {probability!r} lies "
+                        "outside [0, 1]"
+                    )
+                total += float(probability)
+            if abs(total - 1.0) > 0.01:
+                raise DecisionsValidationError(
+                    f"decision {name!r} probabilities sum to {total:.4f}, not 1"
+                )
+            if "confidence" in answer:
+                confidence = answer["confidence"]
+                if (
+                    isinstance(confidence, bool)
+                    or not isinstance(confidence, int | float)
+                    or not 0.0 <= float(confidence) <= 1.0
+                ):
+                    raise DecisionsValidationError(
+                        f"decision {name!r} confidence {confidence!r} lies "
+                        "outside [0, 1]"
+                    )
+        else:
+            raise DecisionsValidationError(
+                f"decision {name!r} declares unknown type {question_type!r}"
+            )
+
+
+def _parse_decisions_response(
+    response: Any, questions: Mapping[str, Any]
+) -> tuple[dict[str, Any], float]:
+    """Validate one decisions HTTP response; return ``(answers, cost)``.
+
+    A non-2xx status or an unreadable body raises :class:`DecisionsError` for
+    the caller's retry loop. A contract violation raises
+    :class:`DecisionsValidationError` directly. A missing or non-numeric
+    ``usage.cost`` is refused rather than reported as a silent zero.
+    """
+    status = getattr(response, "status_code", None)
+    if isinstance(status, int) and status >= 400:
+        raise DecisionsError(
+            f"decisions endpoint returned HTTP {status}: "
+            f"{str(getattr(response, 'text', ''))[:200]}",
+            status=status,
+        )
+    try:
+        payload = response.json()
+    except ValueError as exc:
+        raise DecisionsError(f"decisions response was not JSON: {exc}") from exc
+    if not isinstance(payload, Mapping):
+        raise DecisionsError("decisions response was not a JSON object")
+    answers = payload.get("answers")
+    if not isinstance(answers, Mapping):
+        raise DecisionsError("decisions response carried no answers object")
+    _validate_decisions_answers(questions, answers)
+    usage = payload.get("usage")
+    raw_cost = usage.get("cost") if isinstance(usage, Mapping) else None
+    if (
+        isinstance(raw_cost, bool)
+        or not isinstance(raw_cost, int | float)
+        or not math.isfinite(float(raw_cost))
+        or raw_cost < 0
+    ):
+        raise DecisionsValidationError(
+            f"decisions usage cost {raw_cost!r} is not a finite non-negative number"
+        )
+    return dict(answers), float(raw_cost)
+
+
+def _post_decisions(
+    headers: Mapping[str, str], body: Mapping[str, Any], timeout: float
+) -> Any:
+    """POST one decisions request synchronously (the HTTP seam tests replace)."""
+    import httpx
+
+    return httpx.post(
+        DECISIONS_ENDPOINT, headers=dict(headers), json=dict(body), timeout=timeout
+    )
+
+
+async def _apost_decisions(
+    headers: Mapping[str, str], body: Mapping[str, Any], timeout: float
+) -> Any:
+    """POST one decisions request asynchronously (the HTTP seam tests replace)."""
+    import httpx
+
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        return await client.post(
+            DECISIONS_ENDPOINT, headers=dict(headers), json=dict(body)
+        )
+
+
+def call_decisions(
+    model: str,
+    state: Mapping[str, Any],
+    questions: Mapping[str, Any],
+    *,
+    service: str,
+    max_retries: int = DEFAULT_MAX_RETRIES,
+    retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+) -> tuple[dict[str, Any], float]:
+    """Ask a decisions model for typed judgements; return ``(answers, cost)``.
+
+    Posts ``{model, state, questions}`` to the OpenRouter decisions endpoint
+    with the key from :func:`get_api_key_for_service` and the service headers
+    from :func:`_service_headers`. 429 and 5xx responses retry with backoff
+    through :func:`_is_retryable` and :data:`DEFAULT_RETRY_BASE_DELAY`; every
+    answer is validated against its question type, and any violation raises
+    :class:`DecisionsValidationError` without retry. The returned cost is the
+    value reported in ``usage.cost``.
+
+    Args:
+        model: Decisions model id (e.g. ``typesafe/jev-1.13``).
+        state: The judgement context (facility, file, optional content).
+        questions: Question definitions keyed by question name.
+        service: Service tag for the API key and the ``X-Title`` header.
+
+    Returns:
+        ``(answers, cost)`` — the validated answers keyed by question name,
+        and the USD cost reported in ``usage.cost``.
+
+    Raises:
+        DecisionsValidationError: An answer violated its question contract.
+        DecisionsError: The endpoint failed after all retries.
+    """
+    api_key = get_api_key_for_service(service)
+    request_headers = {
+        "Authorization": "Bearer " + api_key,
+        **_service_headers(service),
+    }
+    body = {"model": model, "state": dict(state), "questions": dict(questions)}
+    last_error: Exception | None = None
+    for attempt in range(max_retries):
+        try:
+            response = _post_decisions(request_headers, body, DECISIONS_TIMEOUT)
+            return _parse_decisions_response(response, questions)
+        except DecisionsValidationError:
+            raise
+        except Exception as exc:  # noqa: BLE001 - the retry policy decides
+            last_error = exc
+            if attempt < max_retries - 1 and _decisions_retryable(exc):
+                delay = retry_base_delay * (2**attempt)
+                logger.debug(
+                    "decisions error (attempt %d/%d): %s. Retrying in %.1fs...",
+                    attempt + 1,
+                    max_retries,
+                    str(exc)[:100],
+                    delay,
+                )
+                time.sleep(delay)
+                continue
+            raise
+    assert last_error is not None  # unreachable: max_retries >= 1
+    raise last_error
+
+
+async def acall_decisions(
+    model: str,
+    state: Mapping[str, Any],
+    questions: Mapping[str, Any],
+    *,
+    service: str,
+    max_retries: int = DEFAULT_MAX_RETRIES,
+    retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+) -> tuple[dict[str, Any], float]:
+    """Async counterpart of :func:`call_decisions`.
+
+    Identical request, validation and retry semantics, using the async
+    transport seam and non-blocking backoff.
+    """
+    api_key = get_api_key_for_service(service)
+    request_headers = {
+        "Authorization": "Bearer " + api_key,
+        **_service_headers(service),
+    }
+    body = {"model": model, "state": dict(state), "questions": dict(questions)}
+    last_error: Exception | None = None
+    for attempt in range(max_retries):
+        try:
+            response = await _apost_decisions(request_headers, body, DECISIONS_TIMEOUT)
+            return _parse_decisions_response(response, questions)
+        except DecisionsValidationError:
+            raise
+        except Exception as exc:  # noqa: BLE001 - the retry policy decides
+            last_error = exc
+            if attempt < max_retries - 1 and _decisions_retryable(exc):
+                delay = retry_base_delay * (2**attempt)
+                logger.debug(
+                    "decisions error (attempt %d/%d): %s. Retrying in %.1fs...",
+                    attempt + 1,
+                    max_retries,
+                    str(exc)[:100],
+                    delay,
+                )
+                await asyncio.sleep(delay)
+                continue
+            raise
+    assert last_error is not None  # unreachable: max_retries >= 1
+    raise last_error
+

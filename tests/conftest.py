@@ -399,6 +399,44 @@ def disable_caching():
             yield
 
 
+@pytest.fixture(autouse=True)
+def no_live_decisions_requests(monkeypatch):
+    """Fail any test that opens the live decisions endpoint.
+
+    The OpenRouter ``alpha/decisions`` endpoint is paid and live, so a test
+    that reaches it spends money and depends on the network. Intercept both
+    the sync and async httpx send paths and refuse only a request aimed at
+    that endpoint, leaving every other HTTP-using test unaffected. The
+    decisions call layer is driven through a replaced HTTP seam in its own
+    tests; a dedicated test drives the real seam to prove this guard fires.
+    """
+    try:
+        import httpx
+    except ImportError:  # pragma: no cover - httpx is a runtime dependency
+        yield
+        return
+
+    def _refuse(request):
+        url = request.url
+        if url.host == "openrouter.ai" and url.path == "/api/alpha/decisions":
+            raise RuntimeError(f"refusing live request to the decisions endpoint {url}")
+
+    real_sync_send = httpx.Client.send
+    real_async_send = httpx.AsyncClient.send
+
+    def guarded_sync_send(self, request, *args, **kwargs):
+        _refuse(request)
+        return real_sync_send(self, request, *args, **kwargs)
+
+    async def guarded_async_send(self, request, *args, **kwargs):
+        _refuse(request)
+        return await real_async_send(self, request, *args, **kwargs)
+
+    monkeypatch.setattr(httpx.Client, "send", guarded_sync_send)
+    monkeypatch.setattr(httpx.AsyncClient, "send", guarded_async_send)
+    yield
+
+
 @pytest.fixture(scope="session", autouse=True)
 def mock_heavy_operations():
     """Mock heavy operations that slow down tests.

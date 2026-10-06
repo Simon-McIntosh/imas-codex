@@ -145,6 +145,7 @@ MODEL_SECTIONS = frozenset(
         "discovery-score",
         "discovery-describe",
         "discovery-vision",
+        "discovery-relevance",
         "cluster-labels",
         "ids-mapping",
         "agent",
@@ -173,6 +174,10 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "discovery-score": "local/deepseek-v4.1-flash",
     "discovery-describe": "local/deepseek-v4.1-flash",
     "discovery-vision": "local/deepseek-v4.1-flash",
+    # Code-relevance judgements through the OpenRouter decisions endpoint,
+    # which takes its own request/response shape and is called directly by
+    # the decisions call layer rather than through the chat-routing path.
+    "discovery-relevance": "typesafe/jev-1.13",
     "cluster-labels": "openrouter/openai/gpt-5.4",
     "ids-mapping": "openrouter/openai/gpt-5.4",
     "agent": "openrouter/anthropic/claude-sonnet-4.6",
