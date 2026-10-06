@@ -297,7 +297,7 @@ def _run_iterative_discovery(
     effective_triage_workers = 0 if scan_only else num_triage_workers
 
     # Get model name for display
-    model_name = get_model("language")
+    model_name = get_model("discovery-triage")
     if model_name.startswith("anthropic/"):
         model_name = model_name[len("anthropic/") :]
 
@@ -370,6 +370,7 @@ def _run_iterative_discovery(
             domain="paths",
             facility=facility,
             facility_config=facility_config,
+            model_section="discovery-triage",
             display=display,
             check_graph=True,
             check_embed=not scan_only,

@@ -255,6 +255,7 @@ def imas_build(
             domain="imas_dd",
             facility="imas",
             facility_config={},
+            model_section="dd-enrichment",
             display=display,
             check_graph=True,
             check_embed=True,

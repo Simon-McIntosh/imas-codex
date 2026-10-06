@@ -237,7 +237,7 @@ class TestLlmDeepHealthCheck:
         mock_resp.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value = mock_resp
 
-        result = llm_deep_health_check()
+        result = llm_deep_health_check("discovery-score")
         assert len(result) == 3
         healthy, detail, data = result
         assert healthy is True
@@ -254,6 +254,6 @@ class TestLlmHealthCheckUsesReadiness:
         from imas_codex.discovery.base.services import llm_health_check
 
         mock_readiness.return_value = (True, "iter")
-        llm_health_check()
+        llm_health_check("discovery-score")
         mock_readiness.assert_called_once_with("iter")
         mock_proxy.assert_not_called()

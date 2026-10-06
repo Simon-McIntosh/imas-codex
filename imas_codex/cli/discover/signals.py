@@ -311,6 +311,7 @@ def signals(
             domain="signals",
             facility=facility,
             facility_config=config,
+            model_section="discovery-describe",
             display=display,
             check_graph=True,
             check_embed=not scan_only,

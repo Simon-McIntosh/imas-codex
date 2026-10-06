@@ -98,9 +98,19 @@ class TestSettingsFunctions:
 
     # Sections that intentionally use a LOCAL model (free, served on a
     # dedicated client) and are therefore EXEMPT from the openrouter/ prefix
-    # guard: the locally routed compose and parent-enrichment seats, plus the
-    # local embedding model.
-    _LOCAL_MODEL_SECTIONS = frozenset({"sn-compose", "sn-parent-enrich", "embedding"})
+    # guard: the locally routed compose and parent-enrichment seats, the four
+    # discovery function seats, plus the local embedding model.
+    _LOCAL_MODEL_SECTIONS = frozenset(
+        {
+            "sn-compose",
+            "sn-parent-enrich",
+            "embedding",
+            "discovery-triage",
+            "discovery-score",
+            "discovery-describe",
+            "discovery-vision",
+        }
+    )
 
     @pytest.mark.parametrize(
         "section",
@@ -225,7 +235,7 @@ class TestModuleLevelConstants:
 
 
 def test_free_local_endpoint_requires_explicit_trusted_classification():
-    assert settings.is_explicit_free_local_endpoint("local/deepseek-v4-flash")
+    assert settings.is_explicit_free_local_endpoint("local/deepseek-v4.1-flash")
     assert not settings.is_explicit_free_local_endpoint(
         "openrouter/openai/gpt-5.6-luna"
     )
@@ -252,7 +262,7 @@ def test_model_sources_separate_route_seats_from_candidate_selection():
     assert fixed.endpoint_class == "local-free"
 
     review_models = settings.get_model_source_models("sn-review:names")
-    assert "local/deepseek-v4-flash" in review_models
+    assert "local/deepseek-v4.1-flash" in review_models
     assert any(model.startswith("openrouter/") for model in review_models)
     with pytest.raises(ValueError, match="requires an explicit"):
         settings.resolve_model_source("sn-review:names")
@@ -264,7 +274,7 @@ def test_model_sources_separate_route_seats_from_candidate_selection():
 
 def test_local_reviewer_source_binds_its_own_endpoint_contract():
     resolved = settings.resolve_model_source(
-        "sn-review:names", candidate_model="local/deepseek-v4-flash"
+        "sn-review:names", candidate_model="local/deepseek-v4.1-flash"
     )
 
     assert resolved.api_key_env == "AMBIX_API_KEY"
@@ -354,3 +364,67 @@ class TestGraphSettings:
         profile = settings.get_graph_profile()
         assert profile.name in {"codex", "uninitialized"}
         assert profile.bolt_port == 7687
+
+
+class TestDiscoveryFunctionSeats:
+    """Discovery reads one model seat per function.
+
+    The four text/vision seats run on the local lane through the ambix router;
+    cluster labelling and IDS mapping keep the OpenRouter model.
+    """
+
+    DISCOVERY_SEATS = (
+        "discovery-triage",
+        "discovery-score",
+        "discovery-describe",
+        "discovery-vision",
+    )
+
+    def test_seats_resolve_configured_models(self, monkeypatch):
+        """Each seat resolves the model configured in pyproject.toml."""
+        settings._load_pyproject_settings.cache_clear()
+
+        for seat in self.DISCOVERY_SEATS:
+            monkeypatch.delenv(settings._MODEL_ENV_VARS[seat], raising=False)
+            assert settings.get_model(seat) == "local/deepseek-v4.1-flash"
+
+        for seat in ("cluster-labels", "ids-mapping"):
+            monkeypatch.delenv(settings._MODEL_ENV_VARS[seat], raising=False)
+            assert settings.get_model(seat) == "openrouter/openai/gpt-5.4"
+
+    def test_seats_honour_environment_override(self, monkeypatch):
+        """A seat's model is overridable through its environment variable."""
+        settings._load_pyproject_settings.cache_clear()
+
+        monkeypatch.setenv("IMAS_CODEX_DISCOVERY_SCORE_MODEL", "test-score-model")
+        assert settings.get_model("discovery-score") == "test-score-model"
+
+    def test_discovery_seats_register_local_endpoint(self):
+        """The four discovery seats bind their model to the ambix-local route."""
+        settings._load_pyproject_settings.cache_clear()
+        settings.register_model_endpoints()
+
+        route_api_base = settings._get_section("model-routes")["ambix-local"][
+            "api-base"
+        ]
+        for seat in self.DISCOVERY_SEATS:
+            config = settings.get_model_config(seat)
+            assert config["api_base"] == route_api_base, (
+                f"{seat} is not routed to ambix-local"
+            )
+            assert config["api_key_env"] == "AMBIX_API_KEY"
+
+            model = settings.get_model(seat)
+            endpoint = settings.get_model_endpoint(model)
+            assert endpoint is not None, f"{seat} registered no endpoint"
+            assert endpoint["api_base"] == route_api_base
+            assert endpoint["endpoint_class"] == "local-free"
+            assert settings.is_explicit_free_local_endpoint(model)
+
+    def test_labels_and_mapping_seats_have_no_local_endpoint(self):
+        """Cluster labelling and IDS mapping keep default proxy routing."""
+        settings._load_pyproject_settings.cache_clear()
+        settings.register_model_endpoints()
+
+        for seat in ("cluster-labels", "ids-mapping"):
+            assert settings.get_model_endpoint(settings.get_model(seat)) is None

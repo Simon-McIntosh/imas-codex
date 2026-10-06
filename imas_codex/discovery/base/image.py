@@ -626,6 +626,7 @@ async def score_images_batch(
     focus: str | None = None,
     data_access_patterns: dict[str, Any] | None = None,
     facility_id: str | None = None,
+    reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
     """Score a batch of images using VLM with structured output.
 
@@ -641,6 +642,7 @@ async def score_images_batch(
             When provided, injected into the prompt template so the VLM can
             recognize facility-specific path formats and tool references.
         facility_id: Facility identifier for entity extraction (e.g., 'tcv')
+        reasoning_effort: Optional reasoning budget for the VLM seat.
 
     Returns:
         (results, cost) tuple
@@ -718,6 +720,7 @@ async def score_images_batch(
         max_retries=5,
         retry_base_delay=4.0,
         service="facility-discovery",
+        reasoning_effort=reasoning_effort,
     )
 
     llm_results = batch.results

@@ -384,6 +384,50 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 # through [sn-compose], [sn-refine], or [sn-review.*] — never vision.
 model = "openrouter/google/gemini-3.1-flash-lite-preview"
 
+# ─── Discovery function seats ──────────────────────────────────────────────
+# One seat per discovery function so a model can be chosen per function, the
+# way the standard-names pipeline already does. The four text/vision seats run
+# on the local lane through the ambix router; cluster labelling and IDS mapping
+# stay on OpenRouter. reasoning-effort is left unset, which keeps the local
+# model's non-thinking behaviour; setting it is a one-line change per seat.
+
+[tool.imas-codex.discovery-triage]
+# Path triage and code-file triage.
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
+
+[tool.imas-codex.discovery-score]
+# Path scoring, code-file scoring, wiki page and wiki document scoring.
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
+
+[tool.imas-codex.discovery-describe]
+# Signal enrichment and static tree enrichment.
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
+
+[tool.imas-codex.discovery-vision]
+# Wiki and document image scoring.
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
+
+[tool.imas-codex.cluster-labels]
+# Cluster labelling. Keeps the OpenRouter model so nothing outside discovery
+# changes model.
+model = "openrouter/openai/gpt-5.4"
+
+[tool.imas-codex.ids-mapping]
+# IDS mapping and metadata enrichment.
+model = "openrouter/openai/gpt-5.4"
+
 [tool.imas-codex.reasoning]
 # openrouter/ prefix — see [dd-enrichment] note above.
 model = "openrouter/anthropic/claude-sonnet-4.6"

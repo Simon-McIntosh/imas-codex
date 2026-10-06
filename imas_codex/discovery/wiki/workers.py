@@ -72,7 +72,7 @@ async def score_worker(
     Uses centralized LLM access via get_model().
     Cost is tracked from actual OpenRouter response.
     """
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
     worker_id = id(asyncio.current_task())
     logger.info(f"score_worker started (task={worker_id})")
@@ -337,7 +337,7 @@ async def score_worker(
 
         try:
             # Step 2: Score batch with LLM (only pages that have content)
-            model = get_model("language")
+            model = get_model("discovery-score")
             logger.debug(f"score_worker {worker_id}: starting LLM scoring...")
             results, cost = await _score_pages_batch(
                 pages_with_content,
@@ -345,6 +345,7 @@ async def score_worker(
                 state.focus,
                 facility_access_patterns,
                 facility=state.facility,
+                reasoning_effort=get_reasoning_effort("discovery-score"),
             )
             logger.debug(
                 f"score_worker {worker_id}: LLM scored {len(results)} pages, cost=${cost:.4f}"
@@ -870,7 +871,7 @@ async def docs_score_worker(
 
     Uses the same scoring dimensions as wiki page scoring for consistency.
     """
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
     worker_id = id(asyncio.current_task())
     logger.info(f"docs_score_worker started (task={worker_id})")
@@ -1021,13 +1022,14 @@ async def docs_score_worker(
 
         try:
             # Step 2: Score batch with LLM (only documents that have content)
-            model = get_model("language")
+            model = get_model("discovery-score")
             results, cost = await _score_documents_batch(
                 documents_to_score,
                 model,
                 state.focus,
                 facility_access_patterns,
                 facility=state.facility,
+                reasoning_effort=get_reasoning_effort("discovery-score"),
             )
 
             # Add preview_text to results for persistence
@@ -1115,7 +1117,7 @@ async def image_score_worker(
     Fetches image bytes on-demand from url, sends to VLM, receives
     caption + scoring in one pass. Image data is NOT stored in the graph.
     """
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
     worker_id = id(asyncio.current_task())
     logger.info(f"image_score_worker started (task={worker_id})")
@@ -1228,13 +1230,14 @@ async def image_score_worker(
             on_progress(f"scoring {len(images_ready)} images", state.image_stats)
 
         try:
-            model = get_model("vision")
+            model = get_model("discovery-vision")
             results, cost = await _score_images_batch(
                 images_ready,
                 model,
                 state.focus,
                 facility_access_patterns,
                 facility_id=state.facility,
+                reasoning_effort=get_reasoning_effort("discovery-vision"),
             )
 
             # Enrich results with source metadata for display

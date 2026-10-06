@@ -230,9 +230,9 @@ async def triage_worker(
         _group_files_by_parent,
         apply_triage_results,
     )
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
-    model = get_model("language")
+    model = get_model("discovery-triage")
 
     import time as _time
 
@@ -298,6 +298,7 @@ async def triage_worker(
                 response_model=FileTriageBatch,
                 temperature=0.1,
                 service="facility-discovery",
+                reasoning_effort=get_reasoning_effort("discovery-triage"),
             )
             assert isinstance(triage_raw, FileTriageBatch)
             triage_parsed = triage_raw
@@ -400,9 +401,9 @@ async def score_worker(
         _group_files_by_parent,
         apply_file_scores,
     )
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
-    model = get_model("language")
+    model = get_model("discovery-score")
 
     import time as _time
 
@@ -468,6 +469,7 @@ async def score_worker(
                 response_model=FileScoreBatch,
                 temperature=0.1,
                 service="facility-discovery",
+                reasoning_effort=get_reasoning_effort("discovery-score"),
             )
             assert isinstance(parsed_raw, FileScoreBatch)
             parsed = parsed_raw

@@ -226,6 +226,7 @@ def documents(
             domain="documents",
             facility=facility,
             facility_config=config,
+            model_section="discovery-vision",
             display=display,
             check_graph=False,
             check_embed=False,

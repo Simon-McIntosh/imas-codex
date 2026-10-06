@@ -2436,7 +2436,7 @@ async def _async_score_with_llm(
     )
     from imas_codex.discovery.paths.models import ScoreBatch
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
 
     # Build prompt context with enriched examples
     context: dict = {}
@@ -2556,7 +2556,7 @@ async def _async_score_with_llm(
     user_prompt = "\n".join(lines_prompt)
 
     # Get model
-    model = get_model("language")
+    model = get_model("discovery-score")
 
     # Call LLM with shared retry+parse loop — retries on both API errors
     # and JSON/validation errors (same resilience as wiki pipeline).
@@ -2571,6 +2571,7 @@ async def _async_score_with_llm(
             ],
             response_model=ScoreBatch,
             service="facility-discovery",
+            reasoning_effort=get_reasoning_effort("discovery-score"),
         )
     except ValueError:
         # All retries exhausted — mark all as failed so they're skipped

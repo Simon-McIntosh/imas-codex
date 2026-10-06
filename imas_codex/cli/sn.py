@@ -1035,6 +1035,7 @@ def _run_sn_cmd(
         domain="standard-names",
         facility="sn",
         facility_config={},  # SN has no facility YAML
+        model_section="sn-compose",
         display=display,
         check_graph=not dry_run,
         check_embed=not dry_run and not drain_scope_id,

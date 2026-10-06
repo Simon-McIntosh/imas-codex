@@ -231,6 +231,7 @@ def code(
             domain="code",
             facility=facility,
             facility_config=facility_config,
+            model_section="discovery-triage",
             display=display,
             check_graph=True,
             check_embed=not scan_only and not score_only,
