@@ -4,9 +4,10 @@ The worker tests run ``candidate_worker`` against a candidate
 :class:`CandidateDiscoveryState` with the claim, routing, retrieval, judgment
 and persistence calls replaced, so the batch pipeline, the one-route-per-source
 outcome and the retrieval scoping are measured without a live graph or a live
-decisions endpoint. The cost-limit test wraps the decisions-cost seam to prove
-the loop halts once the run's spend reaches the limit — the negative control
-for the scoped-retrieval assertion lives here as
+decisions endpoint. The cost-limit test adds each replaced helper's reported
+spend to the run's ``PipelineCost`` through the same ``cost=`` argument the
+worker passes, proving the loop halts once the run's spend reaches the limit —
+the negative control for the scoped-retrieval assertion lives here as
 ``test_candidate_worker_scopes_retrieval_to_routed_ids``.
 
 The command tests invoke ``discover map`` with the engine replaced, asserting
@@ -17,7 +18,6 @@ counts and the ``clear --domain map`` removal counts.
 from __future__ import annotations
 
 import asyncio
-from contextlib import contextmanager
 
 import pytest
 from click.testing import CliRunner
@@ -87,7 +87,12 @@ class _Candidate:
 
 
 def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0):
-    """Replace every graph and decisions call the candidate worker makes."""
+    """Replace every graph and decisions call the candidate worker makes.
+
+    ``add_cost`` makes each replaced helper add its call's reported spend to the
+    ``PipelineCost`` the worker passes, so the cost-limit test exercises the real
+    budget path rather than a patched seam.
+    """
     remaining = list(SOURCES)
 
     def fake_claim(facility, domains=None, batch_size=10):
@@ -97,7 +102,9 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0):
         batch, remaining[:] = remaining[:size], remaining[size:]
         return batch
 
-    def fake_route_ids(description, *, gc, model=None):
+    def fake_route_ids(description, *, gc, model=None, cost=None):
+        if cost is not None and add_cost:
+            cost.add("candidate_route", add_cost, 0)
         return list(_IDS_BY_DESCRIPTION[description])
 
     def fake_retrieve(sources, ids_by_source, *, gc, k=20, dd_version=None):
@@ -107,7 +114,9 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0):
             for sid, ids in ids_by_source.items()
         }
 
-    def fake_judge(source, facility, candidates, *, model=None):
+    def fake_judge(source, facility, candidates, *, model=None, cost=None):
+        if cost is not None and add_cost:
+            cost.add("candidate_judgment", add_cost, 0)
         return [
             _judgment(f"{source['id']}/p{i}", p)
             for i, p in enumerate(_SCORES[source["id"]])
@@ -129,17 +138,6 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0):
         "imas_codex.ids.workers.get_mapping_route_thresholds", lambda: _THRESHOLDS
     )
     monkeypatch.setattr("imas_codex.ids.workers.GraphClient", lambda: _FakeGraph())
-
-    if add_cost:
-
-        @contextmanager
-        def fake_capture(cost, step):
-            yield
-            cost.add(step, add_cost, 0)
-
-        monkeypatch.setattr(
-            "imas_codex.ids.workers._capture_decisions_cost", fake_capture
-        )
 
 
 def _new_state(**kwargs) -> CandidateDiscoveryState:
@@ -208,12 +206,16 @@ def test_candidate_worker_ids_filter_narrows_routed_ids(monkeypatch):
 def test_cost_limit_stops_the_loop(monkeypatch):
     captured: dict = {}
     _patch_worker(monkeypatch, captured, add_cost=0.002)
-    state = _new_state(batch_size=1, cost_limit=0.001)
+    state = _new_state(batch_size=1, cost_limit=0.003)
 
     asyncio.run(candidate_worker(state))
 
+    # One source is routed and judged (0.002 + 0.002), then the live spend
+    # exceeds the limit and the loop halts before claiming the next source.
     assert state.sources_judged == 1
-    assert state.cost.total_usd >= 0.001
+    assert state.cost.steps["candidate_route"] == pytest.approx(0.002)
+    assert state.cost.steps["candidate_judgment"] == pytest.approx(0.002)
+    assert state.cost.total_usd == pytest.approx(0.004)
 
 
 def test_source_limit_bounds_the_loop(monkeypatch):

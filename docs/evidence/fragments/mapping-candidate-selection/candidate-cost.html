@@ -1,0 +1,46 @@
+<section>
+  <h2 id="candidate-cost">Candidate-stage Jev spend routes through <code>PipelineCost</code></h2>
+  <p id="candidate-cost-scope">
+    <code>route_ids(description, *, gc, model, service, cost)</code> and
+    <code>judge_candidates(source, facility, candidates, *, model, service,
+    cost)</code> now take an optional <code>cost: PipelineCost</code> — the run's
+    cost tracker from <code>CandidateDiscoveryState.cost</code>. Each decisions
+    request's transport-reported <code>usage.cost</code> is added to it under a
+    step name as the request is made (<code>candidate_route</code> for the IDS
+    Choice, <code>candidate_judgment</code> for the batched
+    <code>same_quantity</code> call), the way the map pipeline's
+    <code>_acall_llm(..., cost=...)</code> does. The shared
+    <code>_call_judgment</code> helper carries the add, so a helper that is not
+    passed a tracker still runs unchanged. <code>candidate_worker</code> passes
+    <code>cost=state.cost</code> on both calls. The
+    <code>_capture_decisions_cost</code> context manager is deleted: nothing in
+    production replaces <code>imas_codex.ids.candidates.call_decisions</code> or
+    assigns any module attribute of <code>candidates</code>, removing the global
+    mutable state that double-counted under concurrency and collided with tests
+    patching the same symbol.
+  </p>
+  <table id="candidate-cost-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/ids tests/discovery tests/cli/test_discover_map.py tests/test_cli.py -p no:cacheprovider</code></td><td>1731 passed, 5 skipped, 1 deselected, exit 0</td></tr>
+      <tr><td><code>grep -rn "_capture_decisions_cost\|candidates.call_decisions =" imas_codex/</code></td><td>no matches (exit 1)</td></tr>
+      <tr><td>negative control — drop the <code>cost=cost</code> hookup in <code>judge_candidates</code></td><td>1 failed, 15 passed, exit 1</td></tr>
+    </tbody>
+  </table>
+  <p id="candidate-cost-tests">
+    Under the fake decisions transport, <code>test_candidate_judgment.py</code>
+    shows one <code>judge_candidates</code> call adds its reported
+    <code>usage.cost</code> to the passed <code>PipelineCost</code> under
+    <code>candidate_judgment</code> and one <code>route_ids</code> call adds its
+    reported cost under <code>candidate_route</code>, each
+    <code>total_usd</code> equal to the transport's figure.
+    <code>test_discover_map.py</code> drives <code>candidate_worker</code> with
+    the replaced helpers adding their own reported spend through the same
+    <code>cost=</code> argument the worker passes: with a per-source route and
+    judgment spend of $0.002 each against a $0.003 limit, one source is judged
+    (route + judgment = $0.004) and the loop halts before claiming the next, so
+    <code>discover map</code>'s cost limit stops the loop without patching any
+    decisions seam. Under the declared mutation the judge-cost test alone fails,
+    so the add is load-bearing.
+  </p>
+</section>
