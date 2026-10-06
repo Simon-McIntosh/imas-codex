@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -295,8 +295,31 @@
         </ul></li>
       <li><strong><code>candidate-jev-probe</code></strong>, role implement.
         <ul>
-          <li>It runs measures 2 to 6 on the stored shortlists, tunes wording on dev only,
-            and writes the research document.</li>
+          <li><em>Why it gains two arms.</em> The retrieval probe measured
+            <code>hybrid_dd_search</code> at recall@20 = 0.556 and recall@50 = 0.611 on the
+            36 labelled test sources, against 0.444 and 0.528 for
+            <code>compute_semantic_matches</code>. The unit and cluster modifiers did not
+            move it. In 11 of the 16 misses at K=20, no node of the labelled IDS appears in
+            the top 20 at all: raw pickup-coil signals retrieve <code>plasma_transport</code>
+            and <code>edge_transport</code> nodes, for example. The loss is IDS choice, not
+            ranking, so retrieval is measured with an IDS-routing step first.</li>
+          <li><strong>Arm: domain filter.</strong> <code>hybrid_dd_search</code> with the
+            source's <code>physics_domain</code> as its <code>physics_domain</code>
+            argument. This is deterministic and costs no model call.</li>
+          <li><strong>Arm: Jev IDS routing.</strong> This is the hierarchical-classification
+            pattern. One Jev Choice per source picks among every IDS, using its name and
+            description as criteria. The three most probable IDSs feed
+            <code>hybrid_dd_search</code> with <code>ids_filter</code> set to them, and the
+            hits are merged by score. Report the Choice's top-1 and top-3 accuracy against
+            the labelled IDSs, and recall@K for the merged shortlist, beside the stored
+            arms.</li>
+          <li>It then runs measures 2 to 6 on the shortlist of the arm with the best
+            recall@20, tunes wording on dev only, and writes the research document. The
+            document names that arm for §4. If the winning arm needs a Jev call,
+            §4's retrieval takes the IDS-routing Choice from §5's module.</li>
+          <li>Only 4 of the 36 labelled test sources carry a representative unit, so the
+            unit filter is reported as untestable on this sample rather than as
+            useless.</li>
           <li>Write paths: <code>$PROBE/jev/</code>,
             <code>docs/research/mapping-candidate-probe.html</code> and
             <code>docs/figures/mapping-candidate-probe</code>.</li>
