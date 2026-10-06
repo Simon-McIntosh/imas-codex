@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -541,6 +541,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261006T215813704724-review-of-edge-ownership" data-who="reckon-build" data-when="2026-10-06T22:07:53.980Z">
     <div class="r-comment-body"><p>Independent review attached to r-20261006T214555828205-edge-ownership at reviewed_base_sha b0e8fca830e15c3f1be89e88cddeadb80995d109 / reviewed_head_sha 1084aceb3b1aa23032c0e5fc1072841688acc4d7 — six dimensions scored over 0..20 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 19; total 112), overall SOUND with two follow-on findings and added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261006T214555828205-edge-ownership" data-who="reckon-build" data-when="2026-10-06T22:14:55.530Z">
+    <div class="r-comment-body"><p>Consolidated every MAPS_TO_IMAS edge create and delete into imas_codex/ids/graph_ops.py: write_mapping_binding fails closed on a missing count row or a reported zero, clear_mapping_bindings owns the delete that imas map clear calls, _candidate_record type-checks a judgment&#x27;s route, imas map status prints routes through count_candidates_by_route, and imas map run drops --skip-errors and --skip-metadata; gate 477 passed, 5 skipped, 1 deselected, EXIT=0.</p></div>
 </div>
 </section>
 </main>
