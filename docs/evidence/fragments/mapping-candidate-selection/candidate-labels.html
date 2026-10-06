@@ -8,16 +8,32 @@
     scripted top-down DD walk — choose an IDS from the IDS names and
     descriptions, then the node(s) from that IDS's quantity, geometry and
     identifier nodes. The set is split 50/50 dev/test stratified by domain (87
-    dev / 76 test). 75 sources carry a node label over 56 distinct IMASNode ids,
-    all present in the sampling graph; 88 are <code>none</code>, each with a
-    one-line reason. A second pass with a different model (openrouter
-    <code>gpt-5.4</code>, against the local <code>deepseek-v4.1-flash</code>) on
-    a 30-source stratified subsample agrees exactly on 0.600 of sources.
+    dev / 75 test). 82 sources carry a node label over 52 distinct IMASNode ids,
+    every one a current DD 4.1.1 node (none with lifecycle_status
+    <code>removed</code>) and every one present in the sampling graph; 81 are
+    <code>none</code>, each with a one-line reason drawn from the DD, and none is
+    recorded as a bare failure. A second pass with a different model
+    (openrouter <code>gpt-5.4</code>, against the local
+    <code>deepseek-v4.1-flash</code>) on a 30-source stratified subsample agrees
+    exactly on 0.633 of sources (any-overlap 0.167).
   </p>
+  <figure>
+    <img src="/imas-codex/figures/mapping-candidate-selection/candidate-labels/labels-by-domain.svg"
+         alt="Labelled vs none counts for the 163 sampled sources, one bar per physics domain">
+    <figcaption>
+      The 163 sampled sources by physics domain, labelled (blue) against
+      <code>none</code> (grey); the number at each bar is the domain's sample
+      size. <code>none</code> concentrates in the operations- and
+      diagnostic-services domains (machine_operations 14/20, auxiliary_heating
+      10/11) and is near-absent where a DD target clearly exists (equilibrium
+      0/5, magnetic_field_diagnostics 2/24).
+    </figcaption>
+  </figure>
   <p id="candidate-labels-gate">
     Gate <code>python3 -c "…print(len(labels), len(split), agreement)"</code>
-    prints <code>163 163 0.6</code>; every labelled id exists as an IMASNode
-    (0 of 56 absent). Writes <code>sample.json</code>, <code>labels.json</code>,
+    prints <code>163 163 0.6333333333333333</code>; every labelled id exists as a
+    current IMASNode (0 of 52 absent, 0 removed). Writes
+    <code>sample.json</code>, <code>labels.json</code>,
     <code>labels_second.json</code>, <code>split.json</code>,
     <code>agreement.json</code> under the probe's labels directory, with the
     labeller scripts alongside.
