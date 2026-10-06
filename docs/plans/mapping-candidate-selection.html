@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -755,6 +755,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261006T181544414098-candidate-label-adjudication" data-who="reckon-build" data-when="2026-10-06T18:23:53.606Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/mapping-candidate-selection/candidate-label-adjudication.html — the 75 test-split sources labelled by a second-pass model (gpt-5.4) with the same top-down walk; 45 stood, 30 adjudicated, 23 changed from pass 1; 36 labelled over 42 current IMASNode ids, 39 none with a reason; gate prints 75 45 30 23.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261006T182548796197-candidate-retrieval-probe" data-who="reckon-build" data-when="2026-10-06T18:38:57.767Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/mapping-candidate-selection/candidate-retrieval-probe.html — measure 1 on the 75-source test split (36 labelled): hybrid_dd_search recall@{5,10,20,50} = 0.3056/0.4167/0.5556/0.6111 vs compute_semantic_matches 0.3611/0.3611/0.4444/0.5278; the unit-dim and cluster modifiers are inert at K&lt;=20 (both base arms fill every K; only 4/36 sources expose a unit dimension).</p></div>
 </div>
 </section>
 </main>
