@@ -1,0 +1,19 @@
+<section id="jt60sa-exclusion-prefixes-record">
+  <h3>JT-60SA discovery excludes user home and absolute work paths as prefixes</h3>
+  <p id="jt60sa-exclusion-prefixes-landing">
+    In <code>imas_codex/config/facilities/jt-60sa.yaml</code> the absolute
+    <code>excludes.directories</code> entries (<code>/tmp</code>,
+    <code>/var/tmp</code>, <code>/work/edas</code>) move to
+    <code>excludes.path_prefixes</code>, <code>/home</code> is added there, and
+    <code>/home</code> leaves <code>discovery_roots</code>.
+    <code>tests/config/test_jt60sa_exclusions.py</code> asserts
+    <code>should_exclude</code> is true for <code>/home/u/x</code> and
+    <code>/work/edas/x</code> and false for <code>/analysis/src/x</code>, and
+    that <code>/home</code> is not a discovery root. Measure:
+    <code>uv run pytest tests/config</code> — 33 passed (EXIT=0). Negative
+    control: the same test against a scratch copy whose
+    <code>path_prefixes</code> omit <code>/home</code> — 1 failed (EXIT=1),
+    first failure <code>test_home_subtree_excluded</code>,
+    <code>assert False is True</code>.
+  </p>
+</section>
