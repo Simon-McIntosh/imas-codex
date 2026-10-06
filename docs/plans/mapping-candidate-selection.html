@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -221,8 +221,11 @@
     </ul>
     <p><strong>Shared constraints.</strong></p>
     <ul>
-      <li>Prototype scripts live in <code>~/.cache/imas-codex-jev-map/</code>, outside the
-        package, as in the JT-60SA probe. The Jev call is <code>POST
+      <li>Prototype scripts and data live in
+        <code>~/.config/reckon/crew/reports/imas-codex/mapping-candidate-selection/</code>,
+        written <code>$PROBE</code> below. That is outside the package, as in the JT-60SA
+        probe, and inside reckon's delivery directory, where workers may write and later
+        nodes can read. The Jev call is <code>POST
         https://openrouter.ai/api/alpha/decisions</code> with
         <code>{model: "typesafe/jev-1.13", state, questions}</code>, keyed by
         <code>get_api_key_for_service("imas-mapping")</code>.</li>
@@ -244,7 +247,7 @@
           <li>A second pass with a different model labels the 30-source subsample.</li>
           <li>It writes <code>sample.json</code>, <code>labels.json</code>,
             <code>labels_second.json</code> and <code>split.json</code> under
-            <code>~/.cache/imas-codex-jev-map/labels/</code>.</li>
+            <code>$PROBE/labels/</code>.</li>
           <li><strong>Done when</strong> <code>labels.json</code> has one entry per sampled
             source, each giving IMASNode ids that exist in the graph or <code>none</code>
             with a reason, and <code>split.json</code> gives the dev/test assignment.
@@ -255,7 +258,7 @@
         <ul>
           <li>It computes measure 1 for every arm. It writes the K-candidate shortlists
             and <code>recall.json</code> under
-            <code>~/.cache/imas-codex-jev-map/retrieval/</code>.</li>
+            <code>$PROBE/retrieval/</code>.</li>
           <li><strong>Done when</strong> <code>recall.json</code> gives recall@K and the
             returned count, per arm and per K, on the test split.</li>
         </ul></li>
@@ -263,7 +266,7 @@
         <ul>
           <li>It runs measures 2 to 6 on the stored shortlists, tunes wording on dev only,
             and writes the research document.</li>
-          <li>Write paths: <code>~/.cache/imas-codex-jev-map/jev/</code>,
+          <li>Write paths: <code>$PROBE/jev/</code>,
             <code>docs/research/mapping-candidate-probe.html</code> and
             <code>docs/figures/mapping-candidate-probe</code>.</li>
           <li>Figures: recall@K per arm, and the <code>same_quantity</code> distributions
