@@ -29,6 +29,7 @@ from imas_codex.discovery.base.claims import (
     retry_on_deadlock,
 )
 from imas_codex.graph import GraphClient
+from imas_codex.graph.query_builder import render_path_prefix_clause
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +138,7 @@ def claim_paths_for_file_scan(
         "token": claim_token,
     }
     if path_prefixes:
-        prefix_clause = "AND ANY(pre IN $prefixes WHERE p.path STARTS WITH pre)"
+        prefix_clause = render_path_prefix_clause("p", "prefixes")
         params["prefixes"] = list(path_prefixes)
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
@@ -562,7 +563,7 @@ def has_pending_scan_work(
     prefix_clause = ""
     params: dict[str, Any] = {"facility": facility, "min_score": min_score}
     if path_prefixes:
-        prefix_clause = "AND ANY(pre IN $prefixes WHERE p.path STARTS WITH pre)"
+        prefix_clause = render_path_prefix_clause("p", "prefixes")
         params["prefixes"] = list(path_prefixes)
     with GraphClient() as gc:
         result = gc.query(

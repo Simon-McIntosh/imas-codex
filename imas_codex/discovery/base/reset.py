@@ -242,14 +242,19 @@ PATH_RESET_SPECS: dict[str, ResetSpec] = {
         label="FacilityPath",
         target_status="triaged",
         source_statuses=["scored"],
-        clear_fields=_PATH_SCORE_FIELDS,
+        clear_fields=_PATH_SCORE_FIELDS + ["expanded_at"],
         facility_via_rel=True,
     ),
     "scanned": ResetSpec(
         label="FacilityPath",
         target_status="scanned",
         source_statuses=["triaged", "scored"],
-        clear_fields=_PATH_TRIAGE_FIELDS + _PATH_ENRICH_FIELDS + _PATH_SCORE_FIELDS,
+        clear_fields=(
+            _PATH_TRIAGE_FIELDS
+            + _PATH_ENRICH_FIELDS
+            + _PATH_SCORE_FIELDS
+            + ["expanded_at"]
+        ),
         facility_via_rel=True,
     ),
 }

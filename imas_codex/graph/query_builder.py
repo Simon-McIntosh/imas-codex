@@ -263,3 +263,17 @@ def _default_return_props(label: str) -> list[str]:
         if candidate in props:
             defaults.append(candidate)
     return defaults
+
+
+def render_path_prefix_clause(alias: str, param: str) -> str:
+    """Render a Cypher filter matching paths under any of a list of prefixes.
+
+    Emits ``AND any(prefix IN $<param> WHERE <alias>.path STARTS WITH prefix)``
+    for a node bound as *alias* whose ``path`` property must start with one of
+    the prefixes passed as the query parameter *param*. The caller supplies the
+    concrete list under that parameter name.
+
+    This is the single renderer for the prefix predicate shared by the path
+    claims and the scoped status reset; do not spell the clause inline.
+    """
+    return f"AND any(prefix IN ${param} WHERE {alias}.path STARTS WITH prefix)"

@@ -1,0 +1,168 @@
+<section id="equilibrium-source-paths">
+  <h2 id="equilibrium-source-paths-heading">Equilibrium source paths — root-scoped reset for FacilityPath and CodeChunk coverage</h2>
+
+  <p id="equilibrium-source-paths-summary">
+    Goal: give the three equilibrium source trees on the JT-60SA host scored
+    <code>FacilityPath</code> rows and <code>CodeChunk</code> rows so the EQDBMS
+    record layout becomes searchable (plan §2/§14). On the lead's instruction the
+    operational pipeline was <strong>withheld</strong> — the discover
+    <code>paths</code> and <code>code</code> runs were not launched, and no remote
+    call was made (the earlier positive control, <code>hostname</code> →
+    <code>intr26-2</code>, is the only one on this node). This node delivered
+    instead the owner code changes that make the scoped reset work — the prefix
+    predicate consolidated into one renderer and the reset's stamp clear — each
+    with tests, plus the live before-state and the exclusion record that identify
+    why the trees were never listed. The exact command the released run will use
+    is recorded below.
+  </p>
+
+  <h3 id="equilibrium-source-paths-before">Before-state (Cypher, live jt-60sa graph)</h3>
+  <table id="equilibrium-source-paths-before-table">
+    <thead>
+      <tr><th>Tree</th><th>FacilityPath rows</th><th>of which scored</th><th>CodeChunk rows</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/analysis/src/SAeqread</code></td><td>10</td><td>7</td><td>0</td></tr>
+      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1</code></td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td><code>/analysis/src/SAeqfame</code></td><td>0</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="equilibrium-source-paths-before-total">
+    Context: <code>FacilityPath</code> rows for jt-60sa total 8,324, of which 626
+    lie under <code>/analysis/src</code>. <code>CodeChunk</code> rows for jt-60sa
+    total 201, none under any of the three trees — the EQDBMS record layout is
+    not searchable, consistent with §2 and §14. Of the three trees only
+    <code>SAeqread</code> exists in the graph at all; <code>client_eqdbms.EQ32.Rev1</code>
+    and <code>SAeqfame</code> have no node, matching the §2 finding.
+  </p>
+
+  <h3 id="equilibrium-source-paths-exclusion">Exclusion record — none for the three trees</h3>
+  <p id="equilibrium-source-paths-exclusion-note">
+    The three trees were not dropped by a facility <code>excludes:</code> pattern.
+    Every excluded/skipped directory under <code>/analysis/src</code> carries a
+    <code>FacilityPath</code> node with <code>status='skipped'</code> and a
+    <code>terminal_reason</code>; the only such reasons present are
+    <code>excluded</code> (on <code>directory:__pycache__</code> and
+    <code>directory:.svn</code>), <code>access_denied</code> (the <code>edas2</code>
+    v2.1.14 subdirectories) and <code>scan_error</code> (the <code>eqdbms</code>
+    directories under <code>edas2</code>). None of the three target trees carries
+    any skipped/excluded row.
+  </p>
+  <p id="equilibrium-source-paths-exclusion-yaml">
+    The jt-60sa facility excludes (lines 57–65 of
+    <code>imas_codex/config/facilities/jt-60sa.yaml</code>) are directories
+    <code>/tmp</code>, <code>/var/tmp</code>, <code>/work/edas</code> and patterns
+    <code>*.avi</code>, <code>*.dat.old</code>, <code>*.backup</code>. No pattern
+    matches a tree name, so no exclusion narrowing was needed and the facility
+    YAML was left unchanged.
+  </p>
+  <p id="equilibrium-source-paths-exclusion-cause">
+    The real cause is the expansion stamp. The root
+    <code>/analysis/src</code> carries <code>status='discovered'</code>,
+    <code>expanded_at=null</code> — it was never re-expanded. Children are created
+    only in the expansion branch of <code>persist_scan_results</code>, and
+    <code>claim_paths_for_expanding</code> claims only <code>expanded_at IS NULL</code>,
+    a property no writer cleared. <code>SAeqread</code> exists from an earlier
+    expansion (<code>expanded_at=2026-03-10</code>) but the two newer trees, added
+    to the filesystem after that, were never listed. Clearing
+    <code>expanded_at</code> on reset is exactly the missing step.
+  </p>
+
+  <h3 id="equilibrium-source-paths-changes">Owner changes (committed before the run)</h3>
+  <table id="equilibrium-source-paths-changes-table">
+    <thead>
+      <tr><th>File</th><th>Change</th><th>Test</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>imas_codex/graph/query_builder.py</code></td>
+        <td>one renderer,
+          <code>render_path_prefix_clause(alias, param)</code>, emits
+          <code>AND any(prefix IN $&lt;param&gt; WHERE &lt;alias&gt;.path STARTS WITH prefix)</code>.
+          This is the single home of the path-prefix predicate.</td>
+        <td><code>tests/graph/test_query_builder.py</code> —
+          <code>TestRenderPathPrefixClause</code> pins the rendered text for two
+          aliases (<code>p</code>, <code>n</code>) and two parameter names
+          (<code>root_filter</code>, <code>root_prefixes</code>, <code>prefixes</code>)</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/discovery/paths/parallel.py</code></td>
+        <td>the five path-claim sites now call the renderer with alias
+          <code>p</code>, parameter <code>root_filter</code>; the inline clause is
+          gone and behaviour is unchanged.</td>
+        <td><code>tests/discovery/test_parallel.py</code> (unchanged, stays green)</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/discovery/code/graph_ops.py</code></td>
+        <td>the two code-scan claim sites now call the renderer with alias
+          <code>p</code>, parameter <code>prefixes</code>; behaviour unchanged.</td>
+        <td><code>tests/discovery/test_code_pipeline.py</code> (unchanged, stays green)</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/discovery/base/reset.py</code></td>
+        <td><code>expanded_at</code> added to <code>clear_fields</code> of the
+          <code>scanned</code> and <code>triaged</code> <code>PATH_RESET_SPECS</code>
+          entries, so a reset lets the root expand again.</td>
+        <td><code>tests/discovery/test_reset.py</code> —
+          <code>test_path_scanned_reset_clears_expanded_at</code>,
+          <code>test_path_triaged_reset_clears_expanded_at</code>,
+          <code>test_reset_paths_clears_expanded_at_in_query</code></td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/cli/discover/paths.py</code></td>
+        <td>the <code>--reset-to</code> branch passes the <code>--root</code>
+          prefixes to <code>reset_to_status</code> as the renderer's result for
+          alias <code>n</code>, parameter <code>root_prefixes</code>, so a scoped
+          reset touches only the named root and its descendants and the reset and
+          the claims share one predicate spelling.</td>
+        <td><code>tests/discovery/test_paths_pipeline.py</code> —
+          <code>test_reset_is_root_scoped_when_root_given</code>,
+          <code>test_reset_matches_root_and_descendants</code>,
+          <code>test_reset_is_unscoped_without_root</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="equilibrium-source-paths-changes-scope">
+    <code>seed_facility_roots</code> was not touched: three callers pass
+    <code>root_paths</code> and a stamp clear keyed on it would change two of them.
+    After the change, <code>rg -n 'STARTS WITH (root|pre|p)\b' imas_codex/discovery
+    imas_codex/cli</code> matches nothing — the predicate lives only in the
+    renderer.
+  </p>
+
+  <h3 id="equilibrium-source-paths-command">Command the released run will use</h3>
+  <pre id="equilibrium-source-paths-command-reset"><code># 1. root-scoped reset, then re-list/expand/triage/score the root's children
+uv run imas-codex discover paths jt-60sa --reset-to scanned --root /analysis/src --time 20
+
+# 2. scoped code scan over the three trees
+uv run imas-codex discover code jt-60sa \
+  --path-prefix /analysis/src/SAeqread \
+  --path-prefix /analysis/src/client_eqdbms.EQ32.Rev1 \
+  --path-prefix /analysis/src/SAeqfame --time 20</code></pre>
+  <p id="equilibrium-source-paths-command-note">
+    The reset count is expected in the tens (the root plus its existing children);
+    a count in the thousands means the root filter did not apply and the run must
+    be stopped. The preceding SSH-container wrapper
+    (<code>mkdir -p /tmp/sshwrap &amp;&amp; printf '#!/bin/sh\nexec /usr/bin/ssh -F "$HOME/.ssh/config" "$@"\n' &gt; /tmp/sshwrap/ssh &amp;&amp; chmod +x /tmp/sshwrap/ssh &amp;&amp; export PATH=/tmp/sshwrap:$PATH</code>)
+    must be in the same shell as the invocation. Verify afterwards with Cypher
+    (scored <code>FacilityPath</code> rows per tree) and
+    <code>_search_code('EQDBMS record layout', 'jt-60sa')</code>.
+  </p>
+
+  <h3 id="equilibrium-source-paths-remote">Remote call (one only)</h3>
+  <p id="equilibrium-source-paths-remote-note">
+    Serial positive control after the wrapper on PATH:
+    <code>ssh -o BatchMode=yes jt-60sa hostname</code> → <code>intr26-2</code>
+    (exit 0). No other traffic was sent over the hop; the hop that had gone down
+    during the first attempt had recovered before this call.
+  </p>
+
+  <h3 id="equilibrium-source-paths-logs">Logs and spend</h3>
+  <ul id="equilibrium-source-paths-logs-list">
+    <li id="equilibrium-source-paths-log-gate">Gate (reset + pipeline tests):
+      <code>~/.config/reckon/crew/runs/r-20261005T103700585487-equilibrium-source-paths/gate-tests.log</code></li>
+    <li id="equilibrium-source-paths-log-counts">Step 1 / step 3 Cypher output:
+      <code>~/.config/reckon/crew/runs/r-20261005T103700585487-equilibrium-source-paths/step1-3.txt</code></li>
+    <li id="equilibrium-source-paths-spend">LLM spend this node: <strong>USD 0.00</strong> — the pipeline was withheld, so no scoring or embedding call was made, well under the USD 5 cap.</li>
+  </ul>
+</section>
