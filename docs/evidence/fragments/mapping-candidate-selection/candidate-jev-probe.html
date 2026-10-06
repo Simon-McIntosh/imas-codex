@@ -1,0 +1,94 @@
+<section>
+  <h2 id="candidate-jev-probe">IDS-routed retrieval and Jev pair judgment on the test split</h2>
+  <p id="candidate-jev-probe-scope">
+    75 test sources (36 labelled over 42 DD 4.1.1 nodes, 39 none); recall denominator 36.
+    Dev split 87 sources used only to tune the routing thresholds. Jev model
+    <code>typesafe/jev-1.13</code>, service <code>imas-mapping</code>. Data under
+    <code>~/.config/reckon/crew/reports/imas-codex/mapping-candidate-selection/jev/</code>
+    (<code>measures.json</code>, <code>arms_recall.json</code>, <code>judgments_test.json</code>).
+  </p>
+
+  <table id="candidate-jev-probe-recall">
+    <thead><tr><th>arm</th><th>R@5</th><th>R@10</th><th>R@20</th><th>R@50</th></tr></thead>
+    <tbody>
+      <tr><td>Jev IDS routing (top-3)</td><td>0.4167</td><td>0.5833</td><td>0.6944</td><td>0.7222</td></tr>
+      <tr><td>physics-domain filter</td><td>0.2500</td><td>0.3611</td><td>0.3889</td><td>0.3889</td></tr>
+      <tr><td>hybrid_dd_search (stored)</td><td>0.3056</td><td>0.4167</td><td>0.5556</td><td>0.6111</td></tr>
+      <tr><td>compute_semantic_matches (stored)</td><td>0.3611</td><td>0.3611</td><td>0.4444</td><td>0.5278</td></tr>
+    </tbody>
+  </table>
+  <p id="candidate-jev-probe-routing-accuracy">
+    IDS top-1 accuracy 0.861, top-3 1.000 on test (n=36); dev 0.900 / 0.975 (n=40). Every
+    labelled source's home IDS is inside the routing arm's top-3, so recall loss is IDS
+    choice, not ranking.
+  </p>
+
+  <table id="candidate-jev-probe-pair-judgment">
+    <thead><tr><th>score</th><th>AUC</th><th>top-1 acc</th><th>top-2 both acceptable</th></tr></thead>
+    <tbody>
+      <tr><td>same_quantity</td><td>0.9242</td><td>0.80 (20/25)</td><td>0.1667 (4/24)</td></tr>
+      <tr><td>product sq&middot;so</td><td>0.9184</td><td>0.76 (19/25)</td><td>0.1667 (4/24)</td></tr>
+      <tr><td>min(sq,so)</td><td>0.9254</td><td>0.80 (20/25)</td><td>0.1667 (4/24)</td></tr>
+    </tbody>
+  </table>
+
+  <table id="candidate-jev-probe-none-detection">
+    <thead><tr><th>floor</th><th>precision</th><th>recall</th><th>tp/fp/fn</th></tr></thead>
+    <tbody>
+      <tr><td>0.1</td><td>0.885</td><td>0.590</td><td>23/3/16</td></tr>
+      <tr><td>0.2</td><td>0.756</td><td>0.872</td><td>34/11/5</td></tr>
+      <tr><td>0.3</td><td>0.679</td><td>0.923</td><td>36/17/3</td></tr>
+      <tr><td>0.4</td><td>0.627</td><td>0.949</td><td>37/22/2</td></tr>
+      <tr><td>0.5</td><td>0.576</td><td>0.974</td><td>38/28/1</td></tr>
+    </tbody>
+  </table>
+
+  <p id="candidate-jev-probe-operating-point">
+    Dev-tuned operating point (combination <code>same_quantity</code>): select_threshold
+    <strong>0.54</strong>, select_margin <strong>0.10</strong>, floor_threshold
+    <strong>0.35</strong>.
+  </p>
+  <table id="candidate-jev-probe-operating-point-routes">
+    <thead><tr><th>split</th><th>selected</th><th>escalated</th><th>no_candidate</th><th>sel. precision</th><th>sel. recall</th></tr></thead>
+    <tbody>
+      <tr><td>dev (87)</td><td>2.3%</td><td>87.4%</td><td>10.3%</td><td>1.000</td><td>0.047</td></tr>
+      <tr><td>test (75)</td><td>6.7%</td><td>17.3%</td><td>76.0%</td><td>0.400</td><td>0.056</td></tr>
+    </tbody>
+  </table>
+  <table id="candidate-jev-probe-test-sweep">
+    <thead><tr><th>select_threshold</th><th>selected share</th><th>precision</th><th>recall</th></tr></thead>
+    <tbody>
+      <tr><td>0.30</td><td>0.293</td><td>0.591</td><td>0.361</td></tr>
+      <tr><td>0.40</td><td>0.213</td><td>0.625</td><td>0.278</td></tr>
+      <tr><td>0.50</td><td>0.120</td><td>0.556</td><td>0.139</td></tr>
+      <tr><td>0.60</td><td>0.053</td><td>0.500</td><td>0.056</td></tr>
+      <tr><td>0.70</td><td>0.013</td><td>1.000</td><td>0.028</td></tr>
+    </tbody>
+  </table>
+
+  <p id="candidate-jev-probe-batching">
+    Batching (one call per source carrying K candidates and 2K questions) vs one call per
+    pair, 10-source test subsample: mean absolute same_quantity difference 0.032; $0.000215
+    vs $0.000862 per source; 0.53 s vs 6.52 s mean latency.
+  </p>
+  <p id="candidate-jev-probe-final-pick">
+    Final-pick Choice over top 5 plus none_of_these: 71/75 answered, 0 errors; 7 concrete
+    picks of which 2 correct (accuracy 0.286), 64 none_of_these; 0.714 agreed with the
+    same_quantity argmax. Not adopted.
+  </p>
+  <p id="candidate-jev-probe-cost">
+    Cost: pair judgment $0.000205/source ($0.0145 test), IDS routing $0.0195 test; projected
+    to 2288 enriched JET sources $0.47 pair judgment, ~$0.60 routing; under the $3 cap.
+  </p>
+  <p id="candidate-jev-probe-role">
+    <strong>Role: Jev as a pre-screen only.</strong> same_quantity AUC 0.924 with top-1 0.80
+    ranks well, but the noul scale is compressed (max best score 0.71, mean 0.22), so no
+    threshold holding &ge;0.9 selected precision selects a useful share (best meaningful
+    precision 0.625 at 0.40; reaches 0.9 only at 1 selected source). The candidate stage flags
+    and escalates; the reasoning model keeps the final choice.
+  </p>
+  <p id="candidate-jev-probe-label-agreement">
+    The two labelling passes agreed exactly on 0.633 of the 30-source subsample
+    (<code>candidate-label-adjudication</code>).
+  </p>
+</section>
