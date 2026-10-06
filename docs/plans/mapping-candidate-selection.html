@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -708,6 +708,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20261006T1712-s2-audit" data-who="reckon-build" data-when="2026-10-06T17:12:00Z">
     <div class="r-comment-body"><p>Gate <code>grep -c '^VERDICT '</code> passed; §2 closed. Audit correction to the landing line above: the 05:21–08:35Z map_jet.log entries are mocked test runs logging to the shared CLI log, not JET re-runs, so the removal is not dated. The mechanism and the EDGE_RISK finding stand.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261006T171919450098-candidate-labels" data-who="reckon-build" data-when="2026-10-06T18:05:15.625Z">
+    <div class="r-comment-body"><p>candidate-labels drew and labelled a frozen 163-source set (150 JET over 20 domains plus the 13 enriched JT-60SA sources) by a scripted top-down DD walk and split it dev/test by domain; the gate prints 163 163 0.6333333333333333 (sample size, split size, two-model exact agreement on the 30-source subsample), 82 sources carry 52 distinct current DD 4.1.1 IMASNode ids (0 absent, 0 lifecycle_status &#x27;removed&#x27;), 81 are none each with a DD reason, 0 failed, spend $0.389 against the $3 cap.</p></div>
 </div>
 </section>
 </main>
