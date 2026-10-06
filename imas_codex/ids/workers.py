@@ -1124,7 +1124,7 @@ async def candidate_worker(
                     await asyncio.to_thread(release_mapping_claim, source_id)
                     continue
 
-                siblings, sibling_judgments = await asyncio.to_thread(
+                expansion = await asyncio.to_thread(
                     expand_cluster_siblings,
                     source,
                     facility_block,
@@ -1135,6 +1135,15 @@ async def candidate_worker(
                     cost=state.cost,
                     dd_version=state.dd_version,
                 )
+                if expansion is None:
+                    wlog.warning(
+                        "No cluster sibling judgment for %s (decisions failed), "
+                        "releasing",
+                        source_id,
+                    )
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+                siblings, sibling_judgments = expansion
                 all_candidates = list(candidates) + siblings
                 all_judgments = list(judgments) + sibling_judgments
                 decision = route(all_judgments, thresholds)

@@ -522,7 +522,7 @@ def expand_cluster_siblings(
     service: str = JUDGMENT_SERVICE,
     cost: PipelineCost | None = None,
     dd_version: int | None = None,
-) -> tuple[list[Candidate], list[PairJudgment]]:
+) -> tuple[list[Candidate], list[PairJudgment]] | None:
     """Expand a source's top candidates through their cross-IDS DD clusters.
 
     The seed set is the ``CLUSTER_SEED_COUNT`` candidates with the highest
@@ -537,8 +537,11 @@ def expand_cluster_siblings(
     depends on the first call's ranking.
 
     Returns the new sibling candidates and their judgments — both empty when no
-    seed has a sibling, and empty when the second call's transport fails, so the
-    source still routes on its first-call candidates.
+    seed has a cluster sibling, or when every sibling is already in the
+    shortlist. Returns ``None`` when the second call's transport fails: the
+    siblings exist but were never scored, so the caller must fail closed and
+    leave the source unjudged for a retry rather than route it on its first-call
+    candidates alone.
     """
     ranked = sorted(
         judgments, key=lambda judgment: judgment.p_same_quantity, reverse=True
@@ -593,5 +596,5 @@ def expand_cluster_siblings(
         step="candidate_cluster_judgment",
     )
     if sibling_judgments is None:
-        return [], []
+        return None
     return siblings, sibling_judgments

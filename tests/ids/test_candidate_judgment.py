@@ -434,3 +434,28 @@ def test_expansion_books_second_call_cost_to_the_cluster_step(monkeypatch):
 
     assert cost.steps["candidate_cluster_judgment"] == pytest.approx(COST)
     assert cost.total_usd == pytest.approx(COST)
+
+
+def test_expansion_fails_closed_when_the_second_call_fails(monkeypatch):
+    """A failed second call must not fall back to the first-call candidates:
+    the siblings exist but were never scored, so the whole expansion is None and
+    the caller leaves the source unjudged."""
+    from imas_codex.ids import candidates as cand
+
+    _patch_related(monkeypatch, {"magnetics/ip": ["equilibrium/time_slice/ip"]})
+    monkeypatch.setattr(llm, "_decisions_retryable", lambda error: False)
+
+    def boom(headers, body, timeout):
+        raise RuntimeError("connection refused")
+
+    monkeypatch.setattr(llm, "_post_decisions", boom)
+
+    result = cand.expand_cluster_siblings(
+        {"id": "src-1", "description": "plasma current"},
+        {"facility_id": "jet"},
+        [_candidate("magnetics/ip", 0.9)],
+        [_judgment("magnetics/ip", 0.9)],
+        gc=_DocGraph(),
+    )
+
+    assert result is None

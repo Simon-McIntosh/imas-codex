@@ -468,14 +468,13 @@ def _candidate_record(judgment: dict[str, Any]) -> dict[str, Any]:
 
 
 def _candidate_arms(arms: Any) -> list[str]:
-    """Normalise a judgment's ``arms`` to a list of strings.
+    """Validate a judgment's ``arms`` as a list of strings.
 
-    An absent value normalises to an empty list; anything present that is not a
-    list of strings is refused, so a bare ``"cluster"`` string or a list of
-    non-strings cannot be written as arms.
+    The only producer, ``_candidate_records``, always emits ``arms``, so an
+    absent value means a caller forgot provenance: it is refused, like a
+    non-boolean route. Anything that is not a list of strings — a bare
+    ``"cluster"`` string or a list of non-strings — is refused too.
     """
-    if arms is None:
-        return []
     if not isinstance(arms, list) or not all(isinstance(arm, str) for arm in arms):
         raise CandidateWriteError(
             f"candidate judgment 'arms' must be a list of strings, got {type(arms).__name__}"
@@ -506,9 +505,9 @@ def write_candidates(
             required; ``rank``, ``retrieval_score``, ``ids``,
             ``choice_probability``, ``p_same_quantity``, ``model`` and
             ``judged_at`` are copied to the edge when present, and ``arms``
-            (a list of strings, defaulting to empty) records the retrieval arms
-            that returned the candidate. A boolean ``route`` marks the edge as
-            the selected candidate; any other type is refused, as is a
+            (a required list of strings) records the retrieval arms that
+            returned the candidate. A boolean ``route`` marks the edge as the
+            selected candidate; any other type is refused, as is an absent or
             non-list-of-strings ``arms``.
         route: Route decision stored on ``SignalSource.candidate_route``
             (e.g. 'selected', 'escalated', 'no_candidate'), or None to clear it.

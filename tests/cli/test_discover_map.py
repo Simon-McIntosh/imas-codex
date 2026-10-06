@@ -248,6 +248,32 @@ def test_candidate_worker_adds_cluster_siblings_and_books_the_second_call(monkey
     assert state.cost.steps["candidate_cluster_judgment"] == pytest.approx(0.001)
 
 
+def test_candidate_worker_releases_when_the_cluster_judgment_fails(monkeypatch):
+    """A failed second decisions call must fail closed: the source is released
+    with no candidates written and no route, so it is retried rather than
+    recorded as fully judged with its siblings lost."""
+    captured: dict = {}
+    released: list[str] = []
+
+    def expand(source, candidates, judgments, *, cost=None):
+        if source["id"] == "src-sel":
+            return None
+        return [], []
+
+    _patch_worker(monkeypatch, captured, expand=expand)
+    monkeypatch.setattr(
+        "imas_codex.ids.workers.release_mapping_claim",
+        lambda source_id: released.append(source_id),
+    )
+    state = _new_state(batch_size=10)
+
+    asyncio.run(candidate_worker(state))
+
+    assert "src-sel" in released
+    assert "src-sel" not in captured.get("routes", {})
+    assert state.sources_judged == 2
+
+
 def test_cost_limit_stops_the_loop(monkeypatch):
     captured: dict = {}
     _patch_worker(monkeypatch, captured, add_cost=0.002)
