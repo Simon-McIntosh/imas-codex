@@ -27,12 +27,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import uuid as _uuid
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.cli.logging import WorkerLogAdapter
-from imas_codex.discovery.base.claims import retry_on_deadlock
+from imas_codex.discovery.base.claims import (
+    claim_batch,
+    has_pending,
+    release_claim,
+    release_claims_batch,
+)
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
 from imas_codex.discovery.base.progress import WorkerStats
 from imas_codex.discovery.base.state import DiscoveryStateBase
@@ -41,7 +46,15 @@ from imas_codex.discovery.base.supervision import (
     PipelinePhase,
 )
 from imas_codex.graph.client import GraphClient
+from imas_codex.ids.candidates import (
+    judge_candidates,
+    retrieve_candidates,
+    route,
+    route_ids,
+)
+from imas_codex.ids.graph_ops import write_candidates
 from imas_codex.ids.mapping import PipelineCost
+from imas_codex.settings import get_mapping_route_thresholds
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -128,123 +141,199 @@ class MappingDiscoveryState(DiscoveryStateBase):
 
 
 # =============================================================================
+# Candidate Discovery State
+# =============================================================================
+
+
+@dataclass
+class CandidateDiscoveryState(DiscoveryStateBase):
+    """Shared state for the candidate judgment pipeline.
+
+    One candidate worker claims enriched sources whose ``candidate_route`` is
+    unset, routes each to its most probable IDSs, retrieves DD candidates
+    within those IDSs, judges them, and writes the route and the candidate
+    edges. The run ends when no unjudged source remains, the deadline passes,
+    or the spend reaches the cost limit.
+    """
+
+    # Restrict to these physics domains (None = all).
+    domains: list[str] = field(default_factory=list)
+    # Restrict the routed IDSs to this set (None = any).
+    ids_filter: list[str] = field(default_factory=list)
+    # Maximum sources to judge this run (None = unbounded).
+    source_limit: int | None = None
+    # Sources claimed and judged per batch.
+    batch_size: int = 10
+
+    dd_version: int | None = None
+    model: str | None = None
+
+    # Cumulative candidate-stage cost; the decisions layer's per-call cost is
+    # routed in by ``_capture_decisions_cost`` because the candidate helpers
+    # return the answers and discard the cost.
+    cost: PipelineCost = field(default_factory=PipelineCost)
+
+    sources_judged: int = 0
+    candidates_written: int = 0
+
+    candidate_stats: WorkerStats = field(default_factory=WorkerStats)
+    candidate_phase: PipelinePhase = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.candidate_phase = PipelinePhase("candidate")
+
+    @property
+    def total_cost(self) -> float:
+        return self.cost.total_usd
+
+    def should_stop(self) -> bool:
+        if super().should_stop():
+            return True
+        if self.budget_exhausted:
+            return True
+        if self.source_limit is not None and self.sources_judged >= self.source_limit:
+            return True
+        return False
+
+
+# =============================================================================
 # Graph Claim Operations
 # =============================================================================
 
 
-@retry_on_deadlock()
+def _domain_filter(domains: list[str] | None) -> tuple[str, dict[str, Any]]:
+    """Return the domain predicate fragment and its bound parameters."""
+    if not domains:
+        return "", {}
+    return "AND n.physics_domain IN $domains", {"domains": domains}
+
+
+_ASSIGNMENT_STATUS = """
+n.status = 'enriched'
+AND n.mapping_status IS NULL
+AND NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode) }
+"""
+
+_ASSIGNMENT_RETURN = """
+OPTIONAL MATCH (m:FacilitySignal)-[:MEMBER_OF]->(n)
+WITH n, count(m) AS member_count,
+     collect(DISTINCT m.accessor)[..10] AS sample_accessors
+OPTIONAL MATCH (rep:FacilitySignal {id: n.representative_id})
+"""
+
+_ASSIGNMENT_FIELDS = """
+n.id AS id, n.group_key AS group_key,
+n.description AS description,
+n.keywords AS keywords,
+n.physics_domain AS physics_domain,
+member_count,
+sample_accessors,
+rep.description AS rep_description,
+rep.unit AS rep_unit,
+rep.sign_convention AS rep_sign_convention,
+rep.cocos AS rep_cocos
+"""
+
+_REPRESENTATIVE = "OPTIONAL MATCH (rep:FacilitySignal {id: n.representative_id})"
+
+_MAPPING_FIELDS = """
+n.id AS id, n.group_key AS group_key,
+n.description AS description,
+n.keywords AS keywords,
+n.physics_domain AS physics_domain,
+n.mapping_target_ids AS target_ids,
+n.mapping_target_path AS target_path,
+n.mapping_target_type AS target_type,
+rep.description AS rep_description,
+rep.unit AS rep_unit,
+rep.sign_convention AS rep_sign_convention,
+rep.cocos AS rep_cocos
+"""
+
+_CANDIDATE_FIELDS = """
+n.id AS id, n.group_key AS group_key,
+n.description AS description,
+n.keywords AS keywords,
+n.physics_domain AS physics_domain,
+rep.description AS rep_description,
+rep.unit AS rep_unit,
+rep.sign_convention AS rep_sign_convention,
+rep.cocos AS rep_cocos
+"""
+
+_MAPPING_CLAIM_FIELDS = {
+    "claimed_field": "mapping_claimed_at",
+    "token_field": "mapping_claim_token",
+}
+
+
 def claim_sources_for_assignment(
     facility: str,
     domains: list[str] | None = None,
     batch_size: int = 20,
 ) -> list[dict[str, Any]]:
     """Claim enriched sources that have no mapping_status yet."""
-    cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
-    token = str(_uuid.uuid4())
-    params: dict[str, Any] = {
-        "facility": facility,
-        "batch_size": batch_size,
-        "cutoff": cutoff,
-        "token": token,
-    }
-
-    domain_filter = ""
-    if domains:
-        domain_filter = "AND sg.physics_domain IN $domains"
-        params["domains"] = domains
-
-    with GraphClient() as gc:
-        gc.query(
-            f"""
-            MATCH (sg:SignalSource {{facility_id: $facility}})
-            WHERE sg.status = 'enriched'
-              AND sg.mapping_status IS NULL
-              AND NOT EXISTS {{ (sg)-[:MAPS_TO_IMAS]->(:IMASNode) }}
-              {domain_filter}
-              AND (sg.mapping_claimed_at IS NULL
-                   OR sg.mapping_claimed_at < datetime() - duration($cutoff))
-            WITH sg ORDER BY rand() LIMIT $batch_size
-            SET sg.mapping_claimed_at = datetime(),
-                sg.mapping_claim_token = $token
-            """,
-            **params,
-        )
-
-        result = gc.query(
-            """
-            MATCH (sg:SignalSource {facility_id: $facility,
-                                     mapping_claim_token: $token})
-            OPTIONAL MATCH (m:FacilitySignal)-[:MEMBER_OF]->(sg)
-            WITH sg, count(m) AS member_count,
-                 collect(DISTINCT m.accessor)[..10] AS sample_accessors
-            OPTIONAL MATCH (rep:FacilitySignal {id: sg.representative_id})
-            RETURN sg.id AS id, sg.group_key AS group_key,
-                   sg.description AS description,
-                   sg.keywords AS keywords,
-                   sg.physics_domain AS physics_domain,
-                   member_count,
-                   sample_accessors,
-                   rep.description AS rep_description,
-                   rep.unit AS rep_unit,
-                   rep.sign_convention AS rep_sign_convention,
-                   rep.cocos AS rep_cocos
-            """,
-            facility=facility,
-            token=token,
-        )
-        return list(result)
+    domain_filter, domain_params = _domain_filter(domains)
+    return claim_batch(
+        "SignalSource",
+        facility=facility,
+        status_predicate=_ASSIGNMENT_STATUS + domain_filter,
+        status_params=domain_params,
+        batch_size=batch_size,
+        return_fields=_ASSIGNMENT_FIELDS,
+        return_clause=_ASSIGNMENT_RETURN,
+        timeout_seconds=CLAIM_TIMEOUT_SECONDS,
+        **_MAPPING_CLAIM_FIELDS,
+    )
 
 
-@retry_on_deadlock()
 def claim_sources_for_mapping(
     facility: str,
     ids_name: str,
     batch_size: int = 3,
 ) -> list[dict[str, Any]]:
     """Claim sources where mapping_status = 'assigned' for a given IDS."""
-    cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
-    token = str(_uuid.uuid4())
+    return claim_batch(
+        "SignalSource",
+        facility=facility,
+        status_predicate=(
+            "n.mapping_status = 'assigned' AND n.mapping_target_ids = $ids_name"
+        ),
+        status_params={"ids_name": ids_name},
+        batch_size=batch_size,
+        return_fields=_MAPPING_FIELDS,
+        return_clause=_REPRESENTATIVE,
+        timeout_seconds=CLAIM_TIMEOUT_SECONDS,
+        **_MAPPING_CLAIM_FIELDS,
+    )
 
-    with GraphClient() as gc:
-        gc.query(
-            """
-            MATCH (sg:SignalSource {facility_id: $facility})
-            WHERE sg.mapping_status = 'assigned'
-              AND sg.mapping_target_ids = $ids_name
-              AND (sg.mapping_claimed_at IS NULL
-                   OR sg.mapping_claimed_at < datetime() - duration($cutoff))
-            WITH sg ORDER BY rand() LIMIT $batch_size
-            SET sg.mapping_claimed_at = datetime(),
-                sg.mapping_claim_token = $token
-            """,
-            facility=facility,
-            ids_name=ids_name,
-            batch_size=batch_size,
-            cutoff=cutoff,
-            token=token,
-        )
 
-        result = gc.query(
-            """
-            MATCH (sg:SignalSource {facility_id: $facility,
-                                     mapping_claim_token: $token})
-            OPTIONAL MATCH (rep:FacilitySignal {id: sg.representative_id})
-            RETURN sg.id AS id, sg.group_key AS group_key,
-                   sg.description AS description,
-                   sg.keywords AS keywords,
-                   sg.physics_domain AS physics_domain,
-                   sg.mapping_target_ids AS target_ids,
-                   sg.mapping_target_path AS target_path,
-                   sg.mapping_target_type AS target_type,
-                   rep.description AS rep_description,
-                   rep.unit AS rep_unit,
-                   rep.sign_convention AS rep_sign_convention,
-                   rep.cocos AS rep_cocos
-            """,
-            facility=facility,
-            token=token,
-        )
-        return list(result)
+def claim_sources_for_candidates(
+    facility: str,
+    domains: list[str] | None = None,
+    batch_size: int = 10,
+) -> list[dict[str, Any]]:
+    """Claim enriched sources whose candidates have not been judged yet.
+
+    A source is claimable while its ``candidate_route`` is null; a route lands
+    once its candidates are judged and written, so a judged source drops out of
+    this set. The claim window bounds a source whose judgment failed: once the
+    claim is stale it is reclaimed and retried.
+    """
+    domain_filter, domain_params = _domain_filter(domains)
+    return claim_batch(
+        "SignalSource",
+        facility=facility,
+        status_predicate=(
+            "n.status = 'enriched' AND n.candidate_route IS NULL " + domain_filter
+        ),
+        status_params=domain_params,
+        batch_size=batch_size,
+        return_fields=_CANDIDATE_FIELDS,
+        return_clause=_REPRESENTATIVE,
+        timeout_seconds=CLAIM_TIMEOUT_SECONDS,
+        **_MAPPING_CLAIM_FIELDS,
+    )
 
 
 def set_mapping_status(source_id: str, status: str, **props: Any) -> None:
@@ -273,31 +362,12 @@ def set_mapping_status(source_id: str, status: str, **props: Any) -> None:
 
 def release_mapping_claim(source_id: str) -> None:
     """Release a mapping claim without changing status."""
-    with GraphClient() as gc:
-        gc.query(
-            """
-            MATCH (sg:SignalSource {id: $id})
-            SET sg.mapping_claimed_at = null,
-                sg.mapping_claim_token = null
-            """,
-            id=source_id,
-        )
+    release_claim("SignalSource", source_id, **_MAPPING_CLAIM_FIELDS)
 
 
 def release_mapping_claims_batch(source_ids: list[str]) -> None:
     """Release mapping claims on multiple sources."""
-    if not source_ids:
-        return
-    with GraphClient() as gc:
-        gc.query(
-            """
-            UNWIND $ids AS sid
-            MATCH (sg:SignalSource {id: sid})
-            SET sg.mapping_claimed_at = null,
-                sg.mapping_claim_token = null
-            """,
-            ids=source_ids,
-        )
+    release_claims_batch("SignalSource", source_ids, **_MAPPING_CLAIM_FIELDS)
 
 
 def has_pending_assignment_work(
@@ -305,53 +375,62 @@ def has_pending_assignment_work(
     domains: list[str] | None = None,
 ) -> bool:
     """Check if enriched sources without mapping_status exist."""
-    params: dict[str, Any] = {"facility": facility}
-    domain_filter = ""
-    if domains:
-        domain_filter = "AND sg.physics_domain IN $domains"
-        params["domains"] = domains
-
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            MATCH (sg:SignalSource {{facility_id: $facility}})
-            WHERE sg.status = 'enriched'
-              AND sg.mapping_status IS NULL
-              AND NOT EXISTS {{ (sg)-[:MAPS_TO_IMAS]->(:IMASNode) }}
-              {domain_filter}
-            RETURN count(sg) > 0 AS has_work
-            """,
-            **params,
-        )
-        return result[0]["has_work"] if result else False
+    domain_filter, domain_params = _domain_filter(domains)
+    return has_pending(
+        "SignalSource",
+        facility=facility,
+        status_predicate=_ASSIGNMENT_STATUS + domain_filter,
+        status_params=domain_params,
+    )
 
 
 def has_pending_mapping_work(facility: str) -> bool:
     """Check if assigned-but-unmapped sources exist."""
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            MATCH (sg:SignalSource {facility_id: $facility})
-            WHERE sg.mapping_status = 'assigned'
-            RETURN count(sg) > 0 AS has_work
-            """,
-            facility=facility,
-        )
-        return result[0]["has_work"] if result else False
+    return has_pending(
+        "SignalSource",
+        facility=facility,
+        status_predicate="n.mapping_status = 'assigned'",
+    )
 
 
 def has_pending_validation_work(facility: str) -> bool:
     """Check if mapped-but-unvalidated sources exist."""
+    return has_pending(
+        "SignalSource",
+        facility=facility,
+        status_predicate="n.mapping_status = 'mapped'",
+    )
+
+
+def has_pending_candidate_work(
+    facility: str,
+    domains: list[str] | None = None,
+) -> bool:
+    """Check if enriched sources remain whose candidates are unjudged."""
+    domain_filter, domain_params = _domain_filter(domains)
+    return has_pending(
+        "SignalSource",
+        facility=facility,
+        status_predicate=(
+            "n.status = 'enriched' AND n.candidate_route IS NULL " + domain_filter
+        ),
+        status_params=domain_params,
+    )
+
+
+def count_candidates_by_route(facility: str) -> dict[str, int]:
+    """Count signal sources grouped by candidate_route."""
     with GraphClient() as gc:
         result = gc.query(
             """
             MATCH (sg:SignalSource {facility_id: $facility})
-            WHERE sg.mapping_status = 'mapped'
-            RETURN count(sg) > 0 AS has_work
+            WHERE sg.status = 'enriched'
+            RETURN coalesce(sg.candidate_route, 'pending') AS route,
+                   count(sg) AS cnt
             """,
             facility=facility,
         )
-        return result[0]["has_work"] if result else False
+        return {r["route"]: r["cnt"] for r in result}
 
 
 def count_sources_by_mapping_status(facility: str) -> dict[str, int]:
@@ -895,6 +974,220 @@ async def validate_worker(
     state.validate_phase.mark_done()
 
 
+@contextmanager
+def _capture_decisions_cost(cost: PipelineCost, step: str):
+    """Route the candidate stage's decisions spend into ``cost``.
+
+    ``route_ids`` and ``judge_candidates`` consume the shared decisions layer's
+    ``(answers, cost)`` pair and return only the answers, so a candidate run's
+    spend would otherwise never reach the run budget and ``--cost-limit`` could
+    not stop it. The candidate engine runs a single worker, so wrapping the
+    module-level decisions entry point those helpers call is safe here: no
+    second worker reaches it concurrently. The original is restored on exit.
+    """
+    from imas_codex.ids import candidates as _candidates
+
+    original = _candidates.call_decisions
+
+    def recording(model, state, questions, *, service, **kwargs):
+        answers, spent = original(model, state, questions, service=service, **kwargs)
+        cost.add(step, spent, 0)
+        return answers, spent
+
+    _candidates.call_decisions = recording
+    try:
+        yield
+    finally:
+        _candidates.call_decisions = original
+
+
+def _candidate_records(
+    judgments: list,
+    candidates: list,
+    selected_path: str | None,
+) -> list[dict[str, Any]]:
+    """Build the per-candidate records ``write_candidates`` persists.
+
+    Records are ranked in Jev order (descending ``p_same_quantity``); the
+    retrieval score and IDS are read back from the matching candidate.
+    """
+    score_by_path = {
+        candidate.hit.path: (candidate.hit.score, candidate.hit.ids_name)
+        for candidate in candidates
+    }
+    ordered = sorted(
+        judgments, key=lambda judgment: judgment.p_same_quantity, reverse=True
+    )
+    records: list[dict[str, Any]] = []
+    for rank, judgment in enumerate(ordered, start=1):
+        score, ids_name = score_by_path.get(judgment.path, (None, None))
+        records.append(
+            {
+                "path": judgment.path,
+                "rank": rank,
+                "retrieval_score": score,
+                "ids": ids_name,
+                "p_same_quantity": judgment.p_same_quantity,
+                "model": judgment.model,
+                "judged_at": judgment.judged_at,
+                "route": judgment.path == selected_path,
+            }
+        )
+    return records
+
+
+def _facility_block(facility: str) -> dict[str, Any]:
+    """A compact facility block to ground a candidate judgment."""
+    from imas_codex.discovery.base.facility import get_facility
+
+    try:
+        config = get_facility(facility)
+    except Exception:
+        return {"facility_id": facility}
+    return {
+        "facility_id": facility,
+        "description": config.get("description", ""),
+    }
+
+
+async def candidate_worker(
+    state: CandidateDiscoveryState,
+    on_progress: Callable | None = None,
+    **_kwargs,
+) -> None:
+    """Claim unjudged sources and route their DD candidates.
+
+    Claim loop: claims batches of enriched sources whose ``candidate_route`` is
+    unset, routes each source to its most probable IDSs, retrieves candidates
+    within those IDSs, judges them and writes the route and edges. A decisions
+    transport failure releases the source's claim so a later pass retries it.
+    """
+    wlog = WorkerLogAdapter(logger, worker_name="candidate_worker")
+
+    facility_block = _facility_block(state.facility)
+    thresholds = get_mapping_route_thresholds()
+
+    while not state.should_stop():
+        batch_size = state.batch_size
+        if state.source_limit is not None:
+            remaining = state.source_limit - state.sources_judged
+            if remaining <= 0:
+                break
+            batch_size = min(batch_size, remaining)
+
+        sources = await asyncio.to_thread(
+            claim_sources_for_candidates,
+            state.facility,
+            domains=state.domains or None,
+            batch_size=batch_size,
+        )
+        if not sources:
+            state.candidate_phase.record_idle()
+            if state.candidate_phase.done:
+                break
+            await asyncio.sleep(2.0)
+            continue
+
+        state.candidate_phase.record_activity(len(sources))
+
+        with GraphClient() as gc, _capture_decisions_cost(state.cost, "candidate"):
+            descriptions: dict[str, str] = {}
+            routed: dict[str, list[str]] = {}
+            for source in sources:
+                if state.should_stop():
+                    break
+                ids = await asyncio.to_thread(
+                    route_ids,
+                    source.get("description") or "",
+                    gc=gc,
+                    model=state.model,
+                )
+                if ids is None:
+                    await asyncio.to_thread(release_mapping_claim, source["id"])
+                    continue
+                if state.ids_filter:
+                    ids = [name for name in ids if name in state.ids_filter]
+                descriptions[source["id"]] = source.get("description") or ""
+                routed[source["id"]] = ids
+
+            if not routed:
+                continue
+
+            retrieved = await asyncio.to_thread(
+                retrieve_candidates,
+                descriptions,
+                routed,
+                gc=gc,
+                dd_version=state.dd_version,
+            )
+
+            for source in sources:
+                source_id = source["id"]
+                if source_id not in routed:
+                    continue
+                if state.should_stop():
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+
+                candidates = retrieved.get(source_id, [])
+                judgments = await asyncio.to_thread(
+                    judge_candidates,
+                    source,
+                    facility_block,
+                    candidates,
+                    model=state.model,
+                )
+                decision = route(judgments, thresholds)
+                if decision is None:
+                    wlog.warning(
+                        "No route for %s (decisions failed), releasing", source_id
+                    )
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+
+                selected_path = (
+                    decision.shortlist[0].path
+                    if decision.decision == "selected" and decision.shortlist
+                    else None
+                )
+                records = _candidate_records(
+                    list(judgments or []), candidates, selected_path
+                )
+                written = await asyncio.to_thread(
+                    write_candidates,
+                    source_id,
+                    records,
+                    decision.decision,
+                    gc,
+                )
+                state.sources_judged += 1
+                state.candidates_written += written
+                state.candidate_stats.processed += 1
+
+                wlog.info(
+                    "Judged %s: %s (%d candidates, cost $%.4f)",
+                    source_id,
+                    decision.decision,
+                    written,
+                    state.cost.total_usd,
+                )
+
+                if on_progress:
+                    on_progress(
+                        f"{source_id} -> {decision.decision}",
+                        state.candidate_stats,
+                        [
+                            {
+                                "source_id": source_id,
+                                "route": decision.decision,
+                                "candidates": written,
+                            }
+                        ],
+                    )
+
+    state.candidate_phase.mark_done()
+
+
 # =============================================================================
 # Engine Entry Point
 # =============================================================================
@@ -966,6 +1259,48 @@ async def run_mapping_engine(
             validate_worker,
             on_progress=on_progress,
             depends_on=["map_phase"],
+        ),
+    ]
+
+    orphan_specs = [
+        OrphanRecoverySpec(
+            label="SignalSource",
+            facility_field="facility_id",
+            timeout_seconds=CLAIM_TIMEOUT_SECONDS,
+            claimed_field="mapping_claimed_at",
+        ),
+    ]
+
+    await run_discovery_engine(
+        state,
+        workers,
+        stop_event=stop_event,
+        orphan_specs=orphan_specs,
+    )
+
+
+async def run_candidate_engine(
+    state: CandidateDiscoveryState,
+    *,
+    stop_event: asyncio.Event | None = None,
+    on_progress: Callable | None = None,
+) -> None:
+    """Run the candidate judgment pipeline as a discovery engine.
+
+    A single candidate worker claims unjudged sources until none remain; the
+    phase's completion check reads the graph for unjudged sources, and orphan
+    recovery releases candidate claims left stale on ``mapping_claimed_at``.
+    """
+    state.candidate_phase.set_has_work_fn(
+        lambda: has_pending_candidate_work(state.facility, state.domains or None)
+    )
+
+    workers = [
+        WorkerSpec(
+            "candidate",
+            "candidate_phase",
+            candidate_worker,
+            on_progress=on_progress,
         ),
     ]
 

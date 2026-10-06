@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # Valid discovery domains
-DISCOVERY_DOMAINS = ("paths", "wiki", "signals", "code", "documents")
+DISCOVERY_DOMAINS = ("paths", "wiki", "signals", "code", "documents", "map")
 
 
 # =============================================================================
