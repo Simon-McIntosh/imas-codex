@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 </head>
@@ -249,7 +249,9 @@
     </ul>
     <p>
       Against that, seven claim helpers in <code>workers.py</code> become three, and §8
-      retires two <code>imas map run</code> options. A separate command is needed because the
+      retires two <code>imas map run</code> options. Within the CLI-option family, §7 retires
+      nothing itself. No existing command claims SignalSources for candidate judgment, so no
+      option could absorb the five it reuses. A separate command is needed because the
       candidate stage runs on a different cadence from mapping: it is cheap, it re-runs
       whenever signals are re-enriched, and it costs no reasoning-model call.
     </p>
@@ -298,8 +300,11 @@
         <code>persist_mapping_result</code> (<code>imas_codex/ids/models.py:580</code>),
         <code>create_signal_source</code> (<code>imas_codex/ids/graph_ops.py:357</code>)
         and <code>run_error_derivation_only</code>
-        (<code>imas_codex/ids/mapping.py:2085</code>). <code>grep 'MERGE
-        (sg)-\[r\?e\?l\?:MAPS_TO_IMAS\]' imas_codex/</code> finds exactly these three. The
+        (<code>imas_codex/ids/mapping.py:2008</code> at <code>c63f3ada7</code>). The census
+        <code>grep -rnE 'MERGE \(sg\)-\[(r|rel):MAPS_TO_IMAS\]' imas_codex/</code> finds
+        exactly these three, and <code>grep -rnE '\[r:MAPS_TO_IMAS\]-&gt;\(:IMASNode\)'
+        imas_codex/</code> finds the one delete, in <code>imas_codex/cli/map.py:661</code>. The
+        node re-runs both commands at its head and consolidates every site they print. The
         error-derivation writer also calls the new function.
         <ul>
           <li>The edge write moves into one function in <code>graph_ops.py</code>, beside
@@ -331,9 +336,19 @@
         <code>--skip-errors</code>, which is the same as <code>--stage data</code>.</li>
       <li><strong>Retired fields.</strong> SignalSource loses
         <code>mapping_target_path</code> and <code>mapping_target_ids</code>. The map stage
-        reads the target from the selected <code>MAPPING_CANDIDATE</code> edge, where
-        <code>claim_sources_for_mapping</code> reads the scalars today
-        (<code>workers.py:237</code>). <code>mapping_target_type</code> stays: the escalated
+        reads the target from the selected <code>MAPPING_CANDIDATE</code> edge. Every site in
+        <code>imas_codex/ids/workers.py</code> that reads or writes them changes (lines at
+        <code>c63f3ada7</code>; the node re-greps at its head):
+        <ul>
+          <li>the mapping claim predicate <code>sg.mapping_target_ids = $ids_name</code>
+            (:213), which becomes a match on the selected edge's IDS;</li>
+          <li>the claim projection of target IDS, path and type (:236–238);</li>
+          <li>the reset filter <code>sg.mapping_target_ids IN $ids_names</code> (:380);</li>
+          <li>the reset's null-out of the three fields (:392–394), which keeps only
+            <code>mapping_target_type</code>.</li>
+        </ul>
+        <code>grep -rn 'mapping_target_ids\|mapping_target_path' imas_codex/</code> must
+        print nothing at the node's head. <code>mapping_target_type</code> stays: the escalated
         choice call returns the <code>TargetType</code> with its pick, as the assign call
         does now, and <code>mapping.py:1416, 1497</code> keep reading it.</li>
       <li><strong>One owner for the edge.</strong> The <code>MAPS_TO_IMAS</code> delete in
