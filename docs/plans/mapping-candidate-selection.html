@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -467,10 +467,11 @@
     <pre class="r-fu-prompt">/reckon-build mapping-candidate-selection §3</pre>
     <p class="r-fu-outcome">§3 landed: 54-source labelled set, recall@20 0.556 hybrid alone and 0.694 with Jev IDS routing, AUC 0.924; the section is collapsed.</p>
     </article>
-<article class="r-fu" data-id="f-mcs-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-06" data-recommends-skill="/reckon-build mapping-candidate-selection §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcs-002" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-06" data-recommends-skill="/reckon-build mapping-candidate-selection §2" data-resolved-at="2026-10-06T22:25:41+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Find what removed the mapping edges</h4>
     <div class="r-fu-body"><p>Read-only, and independent of §3. Its answer decides whether §6's edges need protection from the same operation.</p></div>
     <pre class="r-fu-prompt">/reckon-build mapping-candidate-selection §2</pre>
+    <p class="r-fu-outcome">§2 landed: the edges were removed by the imas map clear path together with a MATCH-gated re-persist that dropped edges silently; §6 gave candidates their own relationship and edge-ownership made every MAPS_TO_IMAS write fail closed.</p>
     </article>
 </section>
   <section data-reckon="gates" id="gates" class="r-gates">
@@ -543,7 +544,10 @@
     <div class="r-comment-body"><p>Independent review attached to r-20261006T214555828205-edge-ownership at reviewed_base_sha b0e8fca830e15c3f1be89e88cddeadb80995d109 / reviewed_head_sha 1084aceb3b1aa23032c0e5fc1072841688acc4d7 — six dimensions scored over 0..20 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 19; total 112), overall SOUND with two follow-on findings and added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261006T214555828205-edge-ownership" data-who="reckon-build" data-when="2026-10-06T22:14:55.530Z">
-    <div class="r-comment-body"><p>Consolidated every MAPS_TO_IMAS edge create and delete into imas_codex/ids/graph_ops.py: write_mapping_binding fails closed on a missing count row or a reported zero, clear_mapping_bindings owns the delete that imas map clear calls, _candidate_record type-checks a judgment&#x27;s route, imas map status prints routes through count_candidates_by_route, and imas map run drops --skip-errors and --skip-metadata; gate 477 passed, 5 skipped, 1 deselected, EXIT=0.</p></div>
+    <div class="r-comment-body"><p>Consolidated every MAPS_TO_IMAS edge create and delete into imas_codex/ids/graph_ops.py: write_mapping_binding fails closed on a missing count row or a reported zero, clear_mapping_bindings owns the delete that imas map clear calls, _candidate_record type-checks a judgment's route, imas map status prints routes through count_candidates_by_route, and imas map run drops --skip-errors and --skip-metadata; gate 477 passed, 5 skipped, 1 deselected, EXIT=0.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20261006T2230-s8-edge-ownership-audit" data-who="reckon-build" data-when="2026-10-06T22:30:00Z">
+    <div class="r-comment-body"><p>Node <code>edge-ownership</code> merged as <code>397df9ee9</code>; the section stays open for <code>map-context-reads-candidates</code> and <code>map-run-routes-candidates</code>. The audit sent it back once: the binding writer read <code>written &lt; 1 and rows</code>, so an empty result passed silently, and the fragment's census lines did not resolve. Both were repaired at <code>ec3db3857</code>. A second independent review reproduced the gate there (477 passed, base 476, no added failure) and the negative control (4 tests fail with the guard removed), scoring 117 of 120. At the merged head the two census greps print only <code>graph_ops.py:585</code> (the MERGE) and <code>:640</code> (the delete). One companion path was accepted outside the declared scope: <code>tests/ids/test_mapping_e2e.py</code>, whose shared mock now reports the one edge the fail-closed writer requires.</p></div>
 </div>
 </section>
 </main>
