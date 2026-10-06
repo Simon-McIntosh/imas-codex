@@ -106,6 +106,28 @@
       acceptable — the margin rule of §5 must not escalate those on the strength of a near-tie
       alone.
     </p>
+    <p>
+      Reordering the IDS-routed shortlist by <code>same_quantity</code> is the measure the
+      pre-screen role rests on. It is reported beside the same shortlist left in its retrieval
+      order:
+    </p>
+    <table>
+      <thead><tr><th>N</th><th>reranked, all labelled</th><th>reranked, recoverable</th><th>unranked, all labelled</th><th>unranked, recoverable</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>0.5556</td><td>0.8000</td><td>0.2778</td><td>0.4000</td></tr>
+        <tr><td>3</td><td>0.6389</td><td>0.9200</td><td>0.3611</td><td>0.5200</td></tr>
+        <tr><td>5</td><td>0.6944</td><td>1.0000</td><td>0.4167</td><td>0.6000</td></tr>
+        <tr><td>10</td><td>0.6944</td><td>1.0000</td><td>0.5833</td><td>0.8400</td></tr>
+      </tbody>
+    </table>
+    <p>
+      "All labelled" is over the 36 labelled test sources; "recoverable" is over the 25 whose
+      label is present in the shortlist. Reordering roughly doubles recall at small N — at
+      N=1 from 0.278 to 0.556 over all labelled, and 0.40 to 0.80 over the recoverable ones —
+      and saturates by N=5, where every recoverable label is inside the top five. That is the
+      behaviour a pre-screen needs: it puts the acceptable path near the top of a short list
+      that the reasoning model then reads.
+    </p>
 
     <h2 id="none">§3 — None detection and the operating points</h2>
     <p>
@@ -131,7 +153,7 @@
     <table>
       <thead><tr><th>split</th><th>selected</th><th>escalated</th><th>no_candidate</th><th>selected precision</th><th>selected recall</th></tr></thead>
       <tbody>
-        <tr><td>dev (87)</td><td>2.3 %</td><td>87.4 %</td><td>10.3 %</td><td>1.000</td><td>0.047</td></tr>
+        <tr><td>dev (87)</td><td>2.3 %</td><td>19.5 %</td><td>78.2 %</td><td>1.000</td><td>0.047</td></tr>
         <tr><td><strong>test (75)</strong></td><td><strong>6.7 %</strong></td><td>17.3 %</td><td>76.0 %</td><td><strong>0.400</strong></td><td><strong>0.056</strong></td></tr>
       </tbody>
     </table>
@@ -177,19 +199,23 @@
 
     <h2 id="decision">§5 — What the numbers support, and what §4 builds</h2>
     <p>
-      <strong>Role: Jev as a pre-screen only.</strong> Jev ranks candidate paths well on this
-      split — <code>same_quantity</code> AUC 0.924 and top-1 accuracy 0.80 among recoverable
-      sources — and, combined with IDS routing, lifts shortlist recall@20 from 0.556 to
-      <strong>0.694</strong>. But its <code>same_quantity</code> probabilities are compressed:
-      the highest score any test source reaches is 0.71 and the mean best score is 0.22, so no
-      select threshold both clears the 0.9 precision bar and selects a useful share. The
-      best precision with meaningful coverage is 0.625 at threshold 0.40, and precision
-      reaches 0.9 only at a single selected source (1.3 %). The dev-tuned point confirms it:
-      dev precision 1.0 over two sources falls to 0.40 over five on test. That is the
-      signature of a good ranker with an uncalibrated absolute scale, so the candidate stage
-      should flag and escalate, and the reasoning model should keep the final choice. The
-      §5 decision resolves to <em>pre-screen only</em>: every non-floor source escalates with
-      its shortlist.
+      <strong>Recommendation to the lead's Jev-role decision: pre-screen only, not selector
+      with escalation.</strong> Jev ranks candidate paths well on this split —
+      <code>same_quantity</code> AUC 0.924 and top-1 accuracy 0.80 among recoverable sources;
+      reranking the IDS-routed shortlist by it puts an acceptable path at rank 1 for 0.80 of
+      recoverable sources and inside the top five for all of them — and, combined with IDS
+      routing, it lifts shortlist recall@20 from 0.556 to <strong>0.694</strong>. What it does
+      not do is decide: its <code>same_quantity</code> probabilities are compressed (the
+      highest score any test source reaches is 0.71, the mean best score 0.22), so no select
+      threshold both clears the 0.9 precision bar and selects a useful share. The best
+      precision with meaningful coverage is 0.625 at threshold 0.40, and precision reaches 0.9
+      only at a single selected source (1.3 %). The dev-tuned point shows the same: precision
+      1.0 over two dev sources falls to 0.40 over five on test. That is the signature of a
+      good ranker with an uncalibrated absolute scale. The evidence therefore favours the
+      pre-screen role — flag and escalate, keep the reasoning model on the final choice, and
+      let every non-floor source reach it with its shortlist — but the call is the lead's, and
+      a selector would need the probability scale calibrated or a differently-posed question
+      before it can be reconsidered.
     </p>
     <p>
       <strong>What §4 builds.</strong> Retrieval keeps the maintained

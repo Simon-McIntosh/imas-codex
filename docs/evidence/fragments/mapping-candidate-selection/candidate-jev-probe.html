@@ -32,6 +32,20 @@
     </tbody>
   </table>
 
+  <table id="candidate-jev-probe-reranked-recall">
+    <thead><tr><th>N</th><th>reranked all</th><th>reranked recoverable</th><th>unranked all</th><th>unranked recoverable</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>0.5556</td><td>0.8000</td><td>0.2778</td><td>0.4000</td></tr>
+      <tr><td>3</td><td>0.6389</td><td>0.9200</td><td>0.3611</td><td>0.5200</td></tr>
+      <tr><td>5</td><td>0.6944</td><td>1.0000</td><td>0.4167</td><td>0.6000</td></tr>
+      <tr><td>10</td><td>0.6944</td><td>1.0000</td><td>0.5833</td><td>0.8400</td></tr>
+    </tbody>
+  </table>
+  <p id="candidate-jev-probe-reranked-scope">
+    IDS-routed shortlist reordered by same_quantity, test split. "all" denominator 36 labelled,
+    "recoverable" denominator 25 with the label in the shortlist. Saturates at N=5.
+  </p>
+
   <table id="candidate-jev-probe-none-detection">
     <thead><tr><th>floor</th><th>precision</th><th>recall</th><th>tp/fp/fn</th></tr></thead>
     <tbody>
@@ -51,7 +65,7 @@
   <table id="candidate-jev-probe-operating-point-routes">
     <thead><tr><th>split</th><th>selected</th><th>escalated</th><th>no_candidate</th><th>sel. precision</th><th>sel. recall</th></tr></thead>
     <tbody>
-      <tr><td>dev (87)</td><td>2.3%</td><td>87.4%</td><td>10.3%</td><td>1.000</td><td>0.047</td></tr>
+      <tr><td>dev (87)</td><td>2.3%</td><td>19.5%</td><td>78.2%</td><td>1.000</td><td>0.047</td></tr>
       <tr><td>test (75)</td><td>6.7%</td><td>17.3%</td><td>76.0%</td><td>0.400</td><td>0.056</td></tr>
     </tbody>
   </table>
@@ -81,7 +95,7 @@
     to 2288 enriched JET sources $0.47 pair judgment, ~$0.60 routing; under the $3 cap.
   </p>
   <p id="candidate-jev-probe-role">
-    <strong>Role: Jev as a pre-screen only.</strong> same_quantity AUC 0.924 with top-1 0.80
+    <strong>Recommendation (for the lead's Jev-role decision): pre-screen only.</strong> same_quantity AUC 0.924 with top-1 0.80
     ranks well, but the noul scale is compressed (max best score 0.71, mean 0.22), so no
     threshold holding &ge;0.9 selected precision selects a useful share (best meaningful
     precision 0.625 at 0.40; reaches 0.9 only at 1 selected source). The candidate stage flags
