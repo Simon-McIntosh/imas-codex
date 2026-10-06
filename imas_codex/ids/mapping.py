@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.ids.candidates import DEFAULT_K, retrieve_candidates
 from imas_codex.ids.metadata import (
     IDSMetadataResult,
     persist_metadata,
@@ -627,15 +628,6 @@ def gather_shared_context(
         t_embed = _time.monotonic()
         _emit(f"embedded {len(source_descs)} sources ({t_embed - t_sources:.1f}s)")
 
-    # Cluster searcher (loaded once, used per-IDS)
-    cluster_searcher = None
-    try:
-        from imas_codex.clusters.search import ClusterSearcher
-
-        cluster_searcher = ClusterSearcher.load()
-    except Exception:
-        logger.debug("Cluster searcher unavailable")
-
     # Wiki + code context (domain-scoped, shared across IDS)
     _emit("wiki + code context")
     wiki_context: list[dict[str, Any]] = []
@@ -680,13 +672,13 @@ def gather_shared_context(
     except Exception:
         pass
 
-    # Per-source vector queries — run ONCE with NO IDS filter.
-    # Results are post-filtered by IDS prefix in gather_ids_context.
-    _emit(f"vector search ({len(source_descs)} sources)")
+    # Per-source bridging queries, run ONCE with no IDS filter. DD candidate
+    # retrieval owns the IMAS arm, so only the wiki and code bridges are kept.
+    _emit(f"wiki + code matches ({len(source_descs)} sources)")
     semantic_match_matrix: dict[str, list[dict[str, Any]]] = {}
     if source_descs and embeddings is not None:
         try:
-            semantic_match_matrix = compute_semantic_matches(
+            matrix = compute_semantic_matches(
                 source_descs,
                 "",  # No IDS filter — get matches across ALL IDS
                 gc=gc,
@@ -697,6 +689,10 @@ def gather_shared_context(
                 on_progress=on_progress,
                 precomputed_embeddings=embeddings,
             )
+            semantic_match_matrix = {
+                source_id: [m for m in matches if m.get("content_type") != "imas"]
+                for source_id, matches in matrix.items()
+            }
         except Exception:
             logger.debug("Semantic match matrix failed", exc_info=True)
 
@@ -712,7 +708,6 @@ def gather_shared_context(
         "source_descs": source_descs,
         "embeddings": embeddings,
         "ids_domains": ids_domains,
-        "cluster_searcher": cluster_searcher,
         "wiki_context": wiki_context,
         "code_context": code_context,
         "dd_version": dd_version,
@@ -731,9 +726,9 @@ def gather_ids_context(
 ) -> dict[str, Any]:
     """Gather IDS-specific context using pre-computed shared data.
 
-    Uses the pre-computed ``semantic_match_matrix`` from
-    ``gather_shared_context`` — no vector queries here.  Only cheap
-    graph lookups (subtree, existing mappings, clusters, COCOS).
+    Reuses the sources, embeddings and wiki/code bridges computed once by
+    ``gather_shared_context``, retrieves each source's DD shortlist and adds
+    the IDS's own graph lookups (subtree, existing mappings, COCOS).
     """
     import time as _time
 
@@ -743,7 +738,6 @@ def gather_ids_context(
 
     dd_version = shared["dd_version"]
     groups = shared["groups"]
-    cluster_searcher = shared["cluster_searcher"]
 
     t0 = _time.monotonic()
 
@@ -764,59 +758,19 @@ def gather_ids_context(
     except Exception:
         logger.warning("Semantic search unavailable")
 
-    # Post-filter pre-computed match matrix by IDS prefix
-    _emit("filtering matches")
-    ids_prefix = f"{ids_name}/"
-    full_matrix = shared.get("semantic_match_matrix", {})
-    semantic_match_matrix: dict[str, list[dict[str, Any]]] = {}
-    for source_id, matches in full_matrix.items():
-        filtered = [
-            m
-            for m in matches
-            if m["content_type"] != "imas" or m["target_id"].startswith(ids_prefix)
-        ]
-        if filtered:
-            semantic_match_matrix[source_id] = filtered
+    # Bridging matches (wiki + code) are shared across IDS targets
+    semantic_match_matrix = shared.get("semantic_match_matrix", {})
 
-    # Build source_candidates from IMAS hits in the filtered matrix
-    source_candidates: dict[str, list[dict[str, Any]]] = {}
-    for source_id, matches in semantic_match_matrix.items():
-        imas_hits = [
-            {
-                "id": m["target_id"],
-                "score": m["score"],
-                "documentation": m["excerpt"],
-            }
-            for m in matches
-            if m["content_type"] == "imas"
-        ]
-        if imas_hits:
-            source_candidates[source_id] = imas_hits
-
-    # Cluster enrichment (using pre-loaded searcher)
-    if cluster_searcher:
-        for _source_id, candidates in source_candidates.items():
-            cluster_additions: list[dict[str, Any]] = []
-            existing_ids = {c["id"] for c in candidates}
-            for cand in candidates[:3]:
-                try:
-                    cluster_hits = cluster_searcher.search_by_path(cand["id"])
-                    for hit in cluster_hits:
-                        for member_path in hit.paths:
-                            if member_path not in existing_ids:
-                                cluster_additions.append(
-                                    {
-                                        "id": member_path,
-                                        "score": hit.similarity_score
-                                        * cand.get("score", 0.5),
-                                        "via_cluster": hit.label,
-                                        "documentation": f"Cluster member: {hit.description}",
-                                    }
-                                )
-                                existing_ids.add(member_path)
-                except Exception:
-                    pass
-            candidates.extend(cluster_additions)
+    # Per-source DD shortlist, each source routed to this IDS
+    _emit("retrieving candidates")
+    source_descs = shared["source_descs"]
+    source_candidates = retrieve_candidates(
+        dict(source_descs),
+        {source_id: [ids_name] for source_id, _ in source_descs},
+        gc=gc,
+        k=DEFAULT_K,
+        dd_version=dd_version,
+    )
 
     # IDS-specific: existing mappings, COCOS, cross-facility, section clusters
     existing = search_existing_mappings(facility, ids_name, gc=gc)
@@ -842,9 +796,8 @@ def gather_ids_context(
     target_domains = shared["ids_domains"].get(ids_name, [])
     t_total = _time.monotonic()
     _emit(
-        f"{len(source_candidates)} candidates, "
-        f"{sum(len(v) for v in semantic_match_matrix.values())} matches "
-        f"({t_total - t0:.1f}s)"
+        f"{sum(len(v) for v in source_candidates.values())} candidates over "
+        f"{len(source_candidates)} sources ({t_total - t0:.1f}s)"
     )
 
     return {
@@ -1091,27 +1044,11 @@ def map_signals(
         semantic_context = ""
         cluster_context = ""
         if source_semantic:
-            semantic_lines = []
-            cluster_lines = []
-            for sc in source_semantic:
-                path = sc.get("id", "")
-                score = sc.get("score", 0)
-                doc = sc.get("documentation", "")
-                via = sc.get("via_cluster")
-                if via:
-                    cluster_lines.append(
-                        f"  - {path} (score={score:.2f}, cluster={via}): {doc}"
-                    )
-                else:
-                    semantic_lines.append(f"  - {path} (score={score:.2f}): {doc}")
-            if semantic_lines:
-                semantic_context = "Semantic search candidates:\n" + "\n".join(
-                    semantic_lines
-                )
-            if cluster_lines:
-                cluster_context = "Cluster-derived candidates:\n" + "\n".join(
-                    cluster_lines
-                )
+            semantic_context = "Semantic search candidates:\n" + "\n".join(
+                f"  - {cand.hit.path} (score={cand.hit.score:.2f}): "
+                f"{cand.hit.documentation}"
+                for cand in source_semantic
+            )
 
         # Wiki and code context from gather_context
         wiki_ctx = _format_wiki_context(context.get("wiki_context", []))
@@ -1296,25 +1233,11 @@ def _prepare_section_context(
     semantic_context = ""
     cluster_context = ""
     if source_semantic:
-        semantic_lines = []
-        cluster_lines = []
-        for sc in source_semantic:
-            path = sc.get("id", "")
-            score = sc.get("score", 0)
-            doc = sc.get("documentation", "")
-            via = sc.get("via_cluster")
-            if via:
-                cluster_lines.append(
-                    f"  - {path} (score={score:.2f}, cluster={via}): {doc}"
-                )
-            else:
-                semantic_lines.append(f"  - {path} (score={score:.2f}): {doc}")
-        if semantic_lines:
-            semantic_context = "Semantic search candidates:\n" + "\n".join(
-                semantic_lines
-            )
-        if cluster_lines:
-            cluster_context = "Cluster-derived candidates:\n" + "\n".join(cluster_lines)
+        semantic_context = "Semantic search candidates:\n" + "\n".join(
+            f"  - {cand.hit.path} (score={cand.hit.score:.2f}): "
+            f"{cand.hit.documentation}"
+            for cand in source_semantic
+        )
 
     wiki_ctx = _format_wiki_context(context.get("wiki_context", []))
     code_ctx = _format_code_context(context.get("code_context", []))
