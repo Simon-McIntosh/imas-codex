@@ -37,6 +37,7 @@ from imas_codex.discovery.base.supervision import (
 )
 from imas_codex.discovery.paths.models import ScoreBatch
 from imas_codex.graph.models import PathStatus, TerminalReason
+from imas_codex.graph.query_builder import render_path_prefix_clause
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -480,7 +481,7 @@ def claim_paths_for_scanning(
 
     root_clause = ""
     if root_filter:
-        root_clause = "AND any(root IN $root_filter WHERE p.path STARTS WITH root)"
+        root_clause = render_path_prefix_clause("p", "root_filter")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -536,7 +537,7 @@ def claim_paths_for_expanding(
 
     root_clause = ""
     if root_filter:
-        root_clause = "AND any(root IN $root_filter WHERE p.path STARTS WITH root)"
+        root_clause = render_path_prefix_clause("p", "root_filter")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -593,7 +594,7 @@ def claim_paths_for_triaging(
 
     root_clause = ""
     if root_filter:
-        root_clause = "AND any(root IN $root_filter WHERE p.path STARTS WITH root)"
+        root_clause = render_path_prefix_clause("p", "root_filter")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -711,7 +712,7 @@ def claim_paths_for_enriching(
 
     root_clause = ""
     if root_filter:
-        root_clause = "AND any(root IN $root_filter WHERE p.path STARTS WITH root)"
+        root_clause = render_path_prefix_clause("p", "root_filter")
 
     min_enrich_score = 0.15
     if auto_enrich_threshold is not None:
@@ -791,7 +792,7 @@ def claim_paths_for_scoring(
 
     root_clause = ""
     if root_filter:
-        root_clause = "AND any(root IN $root_filter WHERE p.path STARTS WITH root)"
+        root_clause = render_path_prefix_clause("p", "root_filter")
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())

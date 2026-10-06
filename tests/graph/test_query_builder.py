@@ -4,7 +4,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.graph.query_builder import graph_search
+from imas_codex.graph.query_builder import (
+    graph_search,
+    render_path_prefix_clause,
+)
 
 
 @pytest.fixture
@@ -257,3 +260,26 @@ class TestGraphSearchFilterOps:
         cypher = mock_gc.query.call_args[0][0]
         assert ">=" in cypher
         assert "<>" in cypher
+
+
+class TestRenderPathPrefixClause:
+    """The prefix clause renderer shared by path claims and scoped resets."""
+
+    def test_alias_p_root_filter(self):
+        assert render_path_prefix_clause("p", "root_filter") == (
+            "AND any(prefix IN $root_filter WHERE p.path STARTS WITH prefix)"
+        )
+
+    def test_alias_n_root_prefixes(self):
+        assert render_path_prefix_clause("n", "root_prefixes") == (
+            "AND any(prefix IN $root_prefixes WHERE n.path STARTS WITH prefix)"
+        )
+
+    def test_prefixes_parameter(self):
+        assert render_path_prefix_clause("p", "prefixes") == (
+            "AND any(prefix IN $prefixes WHERE p.path STARTS WITH prefix)"
+        )
+
+    def test_uses_starts_with(self):
+        clause = render_path_prefix_clause("n", "root_prefixes")
+        assert "STARTS WITH" in clause

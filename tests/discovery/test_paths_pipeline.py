@@ -75,11 +75,12 @@ def test_reset_is_root_scoped_when_root_given():
 
 
 def test_reset_matches_root_and_descendants():
-    """The scope matches the root itself and any path beneath it."""
+    """The scope matches paths under the root; the renderer owns the text."""
+    from imas_codex.graph.query_builder import render_path_prefix_clause
+
     captured = _capture_reset(["/analysis/src"])
-    extra_filter = captured["extra_filter"]
-    assert "n.path = p" in extra_filter
-    assert "n.path STARTS WITH p + '/'" in extra_filter
+    assert captured["extra_filter"] == render_path_prefix_clause("n", "root_prefixes")
+    assert "n.path STARTS WITH prefix" in captured["extra_filter"]
 
 
 def test_reset_is_unscoped_without_root():

@@ -6,12 +6,14 @@
     <code>FacilityPath</code> rows and <code>CodeChunk</code> rows so the EQDBMS
     record layout becomes searchable (plan §2/§14). On the lead's instruction the
     operational pipeline was <strong>withheld</strong> — the discover
-    <code>paths</code> and <code>code</code> runs were not launched, and exactly
-    one remote call (the serial <code>hostname</code> positive control) was made.
-    This node delivered instead the two owner code changes that make the scoped
-    reset work, verified by tests, plus the live before-state and the exclusion
-    record that identify why the trees were never listed. The exact command the
-    released run will use is recorded below.
+    <code>paths</code> and <code>code</code> runs were not launched, and no remote
+    call was made (the earlier positive control, <code>hostname</code> →
+    <code>intr26-2</code>, is the only one on this node). This node delivered
+    instead the owner code changes that make the scoped reset work — the prefix
+    predicate consolidated into one renderer and the reset's stamp clear — each
+    with tests, plus the live before-state and the exclusion record that identify
+    why the trees were never listed. The exact command the released run will use
+    is recorded below.
   </p>
 
   <h3 id="equilibrium-source-paths-before">Before-state (Cypher, live jt-60sa graph)</h3>
@@ -73,6 +75,30 @@
     </thead>
     <tbody>
       <tr>
+        <td><code>imas_codex/graph/query_builder.py</code></td>
+        <td>one renderer,
+          <code>render_path_prefix_clause(alias, param)</code>, emits
+          <code>AND any(prefix IN $&lt;param&gt; WHERE &lt;alias&gt;.path STARTS WITH prefix)</code>.
+          This is the single home of the path-prefix predicate.</td>
+        <td><code>tests/graph/test_query_builder.py</code> —
+          <code>TestRenderPathPrefixClause</code> pins the rendered text for two
+          aliases (<code>p</code>, <code>n</code>) and two parameter names
+          (<code>root_filter</code>, <code>root_prefixes</code>, <code>prefixes</code>)</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/discovery/paths/parallel.py</code></td>
+        <td>the five path-claim sites now call the renderer with alias
+          <code>p</code>, parameter <code>root_filter</code>; the inline clause is
+          gone and behaviour is unchanged.</td>
+        <td><code>tests/discovery/test_parallel.py</code> (unchanged, stays green)</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/discovery/code/graph_ops.py</code></td>
+        <td>the two code-scan claim sites now call the renderer with alias
+          <code>p</code>, parameter <code>prefixes</code>; behaviour unchanged.</td>
+        <td><code>tests/discovery/test_code_pipeline.py</code> (unchanged, stays green)</td>
+      </tr>
+      <tr>
         <td><code>imas_codex/discovery/base/reset.py</code></td>
         <td><code>expanded_at</code> added to <code>clear_fields</code> of the
           <code>scanned</code> and <code>triaged</code> <code>PATH_RESET_SPECS</code>
@@ -85,10 +111,10 @@
       <tr>
         <td><code>imas_codex/cli/discover/paths.py</code></td>
         <td>the <code>--reset-to</code> branch passes the <code>--root</code>
-          prefixes to <code>reset_to_status</code> as
-          <code>AND any(p IN $root_prefixes WHERE n.path = p OR n.path STARTS WITH p + '/')</code>
-          (the shape <code>imas_codex/cli/discover/signals.py</code> uses), so a
-          scoped reset touches only the named root and its descendants.</td>
+          prefixes to <code>reset_to_status</code> as the renderer's result for
+          alias <code>n</code>, parameter <code>root_prefixes</code>, so a scoped
+          reset touches only the named root and its descendants and the reset and
+          the claims share one predicate spelling.</td>
         <td><code>tests/discovery/test_paths_pipeline.py</code> —
           <code>test_reset_is_root_scoped_when_root_given</code>,
           <code>test_reset_matches_root_and_descendants</code>,
@@ -99,8 +125,9 @@
   <p id="equilibrium-source-paths-changes-scope">
     <code>seed_facility_roots</code> was not touched: three callers pass
     <code>root_paths</code> and a stamp clear keyed on it would change two of them.
-    Net diff: 2 source files, 42 insertions / 5 deletions, plus the new pipeline
-    test module.
+    After the change, <code>rg -n 'STARTS WITH (root|pre|p)\b' imas_codex/discovery
+    imas_codex/cli</code> matches nothing — the predicate lives only in the
+    renderer.
   </p>
 
   <h3 id="equilibrium-source-paths-command">Command the released run will use</h3>

@@ -243,15 +243,13 @@ def _run_iterative_discovery(
     # Handle --reset-to flag
     if reset_to:
         from imas_codex.discovery.base.reset import PATH_RESET_SPECS, reset_to_status
+        from imas_codex.graph.query_builder import render_path_prefix_clause
 
         spec = PATH_RESET_SPECS[reset_to]
         extra_filter = ""
         extra_params: dict = {}
         if root_filter:
-            extra_filter = (
-                "AND any(p IN $root_prefixes "
-                "WHERE n.path = p OR n.path STARTS WITH p + '/')"
-            )
+            extra_filter = render_path_prefix_clause("n", "root_prefixes")
             extra_params["root_prefixes"] = root_filter
         reset_count = reset_to_status(
             spec, facility, extra_filter=extra_filter, extra_params=extra_params
