@@ -33,7 +33,7 @@ inside `imas_codex/graph/schema.py`.
 
 **NodeCategory enum** (`imas_dd.yaml`): DD node classification — 9 values: `quantity`, `geometry`, `coordinate`, `metadata`, `error`, `structural`, `identifier`, `fit_artifact`, `representation`. Classifier lives in `imas_codex/core/node_classifier.py` (two-pass: Pass 1 attribute-only, Pass 2 graph-relational). Category sets for pipeline participation in `imas_codex/core/node_categories.py`.
 
-**IMASNodeStatus lifecycle** (`imas_dd.yaml`): DD build pipeline `built → enriched → refined → embedded → classified` across seven workers EXTRACT → BUILD → ENRICH → REFINE → EMBED → CLASSIFY → CLUSTER. CLASSIFY (after EMBED) uses `get_model("language")` for three-tier domain assignment — LLM for physics paths; inheritance (`HAS_ERROR`/`HAS_PARENT`) for error/metadata; none for infra metadata (`ids_properties/*`, `code/*`). `"general"` paths retry with expanded cluster context; `--reset-to embedded` re-classifies only (~$2.60, cheapest domain fix).
+**IMASNodeStatus lifecycle** (`imas_dd.yaml`): DD build pipeline `built → enriched → refined → embedded → classified` across seven workers EXTRACT → BUILD → ENRICH → REFINE → EMBED → CLASSIFY → CLUSTER. CLASSIFY (after EMBED) uses `get_model("sn-classifier")` for three-tier domain assignment — LLM for physics paths; inheritance (`HAS_ERROR`/`HAS_PARENT`) for error/metadata; none for infra metadata (`ids_properties/*`, `code/*`). `"general"` paths retry with expanded cluster context; `--reset-to embedded` re-classifies only (~$2.60, cheapest domain fix).
 
 Always import enums and classes from generated models. Never hardcode status values:
 

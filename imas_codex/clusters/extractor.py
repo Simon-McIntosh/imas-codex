@@ -563,7 +563,7 @@ class RelationshipExtractor:
         """Get the labeling model name."""
         from imas_codex.settings import get_model
 
-        return get_model("language")
+        return get_model("cluster-labels")
 
     def _get_labels_with_cache(
         self, clusters: list, label_cache: LabelCache

@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+  <body>
+    <section>
+      <h2 id="retire-language-seat">Signals, clusters and IDS read their function seats; the language and vision seats are gone</h2>
+      <p id="retire-language-seat-landing">
+        Signal enrichment and source-description individualisation in
+        <code>discovery/signals/parallel.py</code> now read
+        <code>discovery-describe</code> and forward
+        <code>reasoning_effort=get_reasoning_effort("discovery-describe")</code>
+        to the LLM layer at both call sites. Cluster labelling
+        (<code>clusters/extractor.py</code>, <code>clusters/label_cache.py</code>)
+        reads <code>cluster-labels</code>; IDS mapping and metadata
+        (<code>ids/mapping.py</code>, <code>ids/metadata.py</code>) read
+        <code>ids-mapping</code>; and <code>get_labeling_batch_size</code>
+        reads <code>batch-size</code> from <code>[cluster-labels]</code> (moved
+        from <code>[language]</code>). The <code>language</code> and
+        <code>vision</code> seats are removed from <code>MODEL_SECTIONS</code>,
+        <code>_MODEL_DEFAULTS</code>, <code>_MODEL_ENV_VARS</code> and
+        <code>pyproject.toml</code>, with no alias. The four settings tests that
+        bound the retired seats are retired, and
+        <code>tests/standard_names/test_refine_model_dispatch.py</code> compares
+        <code>sn-refine</code> against the live <code>sn-compose</code> seat
+        instead of <code>language</code>. A new AST guard,
+        <code>tests/core/test_model_seat_names.py</code>, walks every module
+        under <code>imas_codex</code> and asserts every string literal bound to a
+        model-seat position is in <code>MODEL_SECTIONS</code>.
+      </p>
+      <p id="retire-language-seat-evidence">
+        Gate:
+        <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/core tests/discovery tests/clusters tests/ids tests/standard_names/test_refine_model_dispatch.py tests/standard_names/test_generate_docs.py</code>
+        exits <strong>0</strong> (result in
+        <code>gate-retire-language-seat.log</code> in the run directory).
+        Negative control: with <code>model_section: str = "language"</code>
+        planted in a scratch copy of <code>imas_codex/cli/discover/common.py</code>
+        and the scan root pointed at it, the AST guard fails —
+        <code>FAILED tests/core/test_model_seat_names.py::test_every_seat_name_reference_is_a_known_section</code>,
+        <code>EXIT=1</code> (<code>negative-control-seat-names.log</code>).
+        <code>rg 'get_model(_config)?\("(language|vision)"\)|\[tool\.imas-codex\.(language|vision)\]' imas_codex pyproject.toml</code>
+        returns one out-of-scope residual, reported as a follow-on below.
+      </p>
+      <p id="retire-language-seat-followons">
+        One stale seat reference remains outside this node's write scope:
+        <code>imas_codex/cli/imas_dd.py</code> line 102, a <code>--model</code>
+        help string reading "Default: uses [tool.imas-codex.language] model from
+        pyproject.toml." It should name the live
+        <code>dd-enrichment</code> seat, which is what the DD build path resolves
+        (<code>imas_dd.py:258</code> passes <code>model_section="dd-enrichment"</code>).
+        The <code>get_reasoning_effort</code> domain admits the live
+        <code>sn-review</code> and <code>sn-fanout</code> sections, which carry a
+        reasoning effort without a single <code>model</code> key and so are not
+        model seats.
+      </p>
+    </section>
+  </body>
+</html>

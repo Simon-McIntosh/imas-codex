@@ -219,7 +219,7 @@ class LabelCache:
             The path hash used as key
         """
         path_hash = compute_cluster_hash(paths)
-        model = model or get_model("language")
+        model = model or get_model("cluster-labels")
         created_at = datetime.now().isoformat()
         paths_json = json.dumps(sorted(paths))
 
@@ -286,7 +286,7 @@ class LabelCache:
         Returns:
             Number of labels stored
         """
-        model = model or get_model("language")
+        model = model or get_model("cluster-labels")
         created_at = datetime.now().isoformat()
         count = 0
         new_entries: list[tuple[str, str, str]] = []

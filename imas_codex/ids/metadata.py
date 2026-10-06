@@ -350,7 +350,7 @@ def populate_metadata(
             earlier pipeline stages.  Each dict may contain ``source_id``,
             ``target_id``, and ``confidence`` keys.
         model: LLM model identifier to use.  Falls back to
-            ``settings.get_model("language")`` when ``None``.
+            ``settings.get_model("ids-mapping")`` when ``None``.
         pipeline_config: Arbitrary pipeline configuration dict stored in
             ``code/parameters``.
 
@@ -399,7 +399,7 @@ def populate_metadata(
         from imas_codex.llm.prompt_loader import render_prompt
         from imas_codex.settings import get_model
 
-        llm_model = model or get_model("language")
+        llm_model = model or get_model("ids-mapping")
 
         system_prompt = render_prompt("mapping/metadata_population_system")
         user_prompt = render_prompt(

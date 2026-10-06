@@ -5,9 +5,13 @@ Configuration is organized into subsections:
   [tool.imas-codex.graph]          — Neo4j graph URI, username, password
   [tool.imas-codex.data-dictionary] — DD version, include-ggd, include-error-fields
   [tool.imas-codex.embedding]      — embedding model, dimension, location
-  [tool.imas-codex.language]       — language models, batch-size for structured output
+  [tool.imas-codex.discovery-triage] — model for path and code-file triage
+  [tool.imas-codex.discovery-score]  — model for path, code, wiki and document scoring
+  [tool.imas-codex.discovery-describe] — model for signal and static enrichment
+  [tool.imas-codex.discovery-vision] — model for wiki and document image scoring
+  [tool.imas-codex.cluster-labels] — model and batch-size for cluster labelling
+  [tool.imas-codex.ids-mapping]    — model for IDS mapping and metadata enrichment
   [tool.imas-codex.dd-enrichment]  — model for DD path enrichment/refinement
-  [tool.imas-codex.vision]         — vision models for image/document tasks
   [tool.imas-codex.agent]          — agent models for planning/exploration tasks
   [tool.imas-codex.compaction]     — compaction models for summarization tasks
   [tool.imas-codex.model-routes]   — named model endpoint addresses
@@ -137,8 +141,6 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
 MODEL_SECTIONS = frozenset(
     {
         "embedding",
-        "language",
-        "vision",
         "discovery-triage",
         "discovery-score",
         "discovery-describe",
@@ -163,8 +165,6 @@ MODEL_SECTIONS = frozenset(
 # Default model per section (fallback when not configured)
 _MODEL_DEFAULTS: dict[str, str] = {
     "embedding": "Qwen/Qwen3-Embedding-0.6B",
-    "language": "google/gemini-3.1-flash-lite-preview",
-    "vision": "google/gemini-3.1-flash-lite-preview",
     # Discovery function seats. Each discovery call site names the seat for the
     # work it does, so a model can be chosen per function. The four text/vision
     # seats default to the local lane; cluster labelling and IDS mapping keep
@@ -211,8 +211,6 @@ _MODEL_DEFAULTS: dict[str, str] = {
 # Environment variable names per section
 _MODEL_ENV_VARS: dict[str, str] = {
     "embedding": "IMAS_CODEX_EMBEDDING_MODEL",
-    "language": "IMAS_CODEX_LANGUAGE_MODEL",
-    "vision": "IMAS_CODEX_VISION_MODEL",
     "discovery-triage": "IMAS_CODEX_DISCOVERY_TRIAGE_MODEL",
     "discovery-score": "IMAS_CODEX_DISCOVERY_SCORE_MODEL",
     "discovery-describe": "IMAS_CODEX_DISCOVERY_DESCRIBE_MODEL",
@@ -1159,11 +1157,11 @@ def get_include_error_fields() -> bool:
 def get_labeling_batch_size() -> int:
     """Get batch size for cluster labeling.
 
-    Priority: IMAS_CODEX_LABELING_BATCH_SIZE env → [language].batch-size → 50.
+    Priority: IMAS_CODEX_LABELING_BATCH_SIZE env → [cluster-labels].batch-size → 50.
     """
     if env := os.getenv("IMAS_CODEX_LABELING_BATCH_SIZE"):
         return int(env)
-    if (val := _get_section("language").get("batch-size")) is not None:
+    if (val := _get_section("cluster-labels").get("batch-size")) is not None:
         return int(val)
     return 50
 

@@ -22,24 +22,6 @@ class TestSettingsFunctions:
 
         assert result == "test-model"
 
-    def test_get_model_language_env_override(self, monkeypatch):
-        """Environment variable overrides language model setting."""
-        settings._load_pyproject_settings.cache_clear()
-
-        monkeypatch.setenv("IMAS_CODEX_LANGUAGE_MODEL", "test-llm")
-        result = settings.get_model("language")
-
-        assert result == "test-llm"
-
-    def test_get_model_vision_env_override(self, monkeypatch):
-        """Environment variable overrides vision model setting."""
-        settings._load_pyproject_settings.cache_clear()
-
-        monkeypatch.setenv("IMAS_CODEX_VISION_MODEL", "test-vlm")
-        result = settings.get_model("vision")
-
-        assert result == "test-vlm"
-
     def test_get_labeling_batch_size_env_override(self, monkeypatch):
         """Environment variable overrides labeling batch size."""
         settings._load_pyproject_settings.cache_clear()
@@ -82,16 +64,6 @@ class TestSettingsFunctions:
 
         monkeypatch.delenv("IMAS_CODEX_EMBEDDING_MODEL", raising=False)
         result = settings.get_embedding_model()
-
-        assert isinstance(result, str)
-        assert len(result) > 0
-
-    def test_get_model_language_default(self, monkeypatch):
-        """get_model('language') returns default when env not set."""
-        settings._load_pyproject_settings.cache_clear()
-
-        monkeypatch.delenv("IMAS_CODEX_LANGUAGE_MODEL", raising=False)
-        result = settings.get_model("language")
 
         assert isinstance(result, str)
         assert len(result) > 0
@@ -168,18 +140,6 @@ class TestSettingsFunctions:
 
 class TestGetModel:
     """Tests for unified get_model(section) function."""
-
-    def test_language_section_returns_model(self):
-        """Language section returns a model string."""
-        model = settings.get_model("language")
-        assert isinstance(model, str)
-        assert "/" in model
-
-    def test_vision_section_returns_model(self):
-        """Vision section returns a model string."""
-        model = settings.get_model("vision")
-        assert isinstance(model, str)
-        assert "/" in model
 
     def test_embedding_section_returns_model(self):
         """Embedding section returns a model string."""

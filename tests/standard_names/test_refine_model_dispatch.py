@@ -2,16 +2,15 @@
 
 Pin the contract that ``process_refine_name_batch`` and
 ``process_refine_docs_batch`` resolve their model via
-``get_model("sn-refine")`` — *not* ``get_model("language")`` (the
-generate_docs / bulk-content tier).
+``get_model("sn-refine")`` — *not* ``get_model("sn-compose")`` (the
+bulk-content tier).
 
 This guards against the failure mode that triggered E3's collapse in
 acceptance rate (cl=0 ~42% → cl=1+ ~5%): flash-lite refines could not
 lift reviewer-critiqued names.  Peeling refine onto its own pyproject
 section (default Sonnet 4.6) gives the refine pass a model with
 sufficient capability to recover from feedback, and keeps the section
-free to diverge from both compose (``sn-compose``) and bulk content
-(``language``) without coupling.
+free to diverge from compose (``sn-compose``) without coupling.
 """
 
 from __future__ import annotations
@@ -45,30 +44,30 @@ def test_refine_default_is_sonnet_class(monkeypatch: pytest.MonkeyPatch) -> None
     )
 
 
-def test_refine_env_override_independent_of_language(
+def test_refine_env_override_independent_of_compose(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """``IMAS_CODEX_SN_REFINE_MODEL`` is honoured without leaking to language."""
+    """``IMAS_CODEX_SN_REFINE_MODEL`` is honoured without leaking to compose."""
     monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "test/refine-only")
-    monkeypatch.setenv("IMAS_CODEX_LANGUAGE_MODEL", "test/language-only")
+    monkeypatch.setenv("IMAS_CODEX_SN_COMPOSE_MODEL", "test/compose-only")
     assert settings.get_model("sn-refine") == "test/refine-only"
-    assert settings.get_model("language") == "test/language-only"
+    assert settings.get_model("sn-compose") == "test/compose-only"
 
 
-def test_refine_does_not_alias_language(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Dispatch contract: refine and language resolve via *different* keys.
+def test_refine_does_not_alias_compose(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Dispatch contract: refine and compose resolve via *different* keys.
 
     Future regressions where refine is silently routed back through
-    ``get_model("language")`` would re-introduce the E3 failure mode.
-    Override only the refine env var and assert language is unaffected
+    ``get_model("sn-compose")`` would re-introduce the E3 failure mode.
+    Override only the refine env var and assert compose is unaffected
     (this is the property we care about — distinct dispatch keys).
     """
     monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "test/refine-canary")
-    monkeypatch.delenv("IMAS_CODEX_LANGUAGE_MODEL", raising=False)
+    monkeypatch.delenv("IMAS_CODEX_SN_COMPOSE_MODEL", raising=False)
     refine = settings.get_model("sn-refine")
-    language = settings.get_model("language")
+    compose = settings.get_model("sn-compose")
     assert refine == "test/refine-canary"
-    assert language != "test/refine-canary"
+    assert compose != "test/refine-canary"
 
 
 # ─── Worker-level dispatch ───────────────────────────────────────────
@@ -93,9 +92,9 @@ def test_refine_name_worker_imports_refine_section() -> None:
         "process_refine_name_batch must dispatch via get_model('refine'); "
         "see commit history for E3 acceptance-rate audit."
     )
-    # And it must NOT silently route through language tier.
-    assert 'get_model("language")' not in src, (
-        "process_refine_name_batch must not use get_model('language') — "
+    # And it must NOT silently route through the compose (bulk) tier.
+    assert 'get_model("sn-compose")' not in src, (
+        "process_refine_name_batch must not use get_model('sn-compose') — "
         "flash-lite refines accept critiqued names at ~5% (E3 audit)."
     )
 
@@ -109,4 +108,4 @@ def test_refine_docs_worker_imports_refine_section() -> None:
 
     src = inspect.getsource(workers.process_refine_docs_batch)
     assert 'get_model("sn-refine")' in src
-    assert 'get_model("language")' not in src
+    assert 'get_model("sn-compose")' not in src
