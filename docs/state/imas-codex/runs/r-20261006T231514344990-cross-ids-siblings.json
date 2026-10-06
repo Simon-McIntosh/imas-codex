@@ -1,0 +1,5888 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "e01cc63dc0df2d1a0c3616c1fb5f3af71d5e140f",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6697719,
+      "input_tokens_cumulative": 6697719,
+      "output_tokens": 22217,
+      "output_tokens_cumulative": 22217,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 612,
+    "files": 10,
+    "removed": 108
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_focus_run_preflights_before_graph_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 341
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 1132,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_see_also_in_report",
+        "path": "tests/search/test_cluster_output.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 341
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 335,
+        "name": "test_cli_reaches_atomic_operator",
+        "path": "tests/standard_names/test_accepted_cohort_restage.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 341
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 583,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 948,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 713,
+        "name": "test_approval_creates_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 342
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_existing_rc_tag_does_not_block_approval",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 342
+    },
+    {
+      "existing_function": {
+        "line": 813,
+        "name": "test_undo_removes_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 342
+    },
+    {
+      "existing_function": {
+        "line": 855,
+        "name": "test_undo_restores_the_exact_rc_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 342
+    },
+    {
+      "existing_function": {
+        "line": 1018,
+        "name": "test_approval_locates_the_labelled_artifact_and_tags_the_version",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 342
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "run_function": {
+        "line": 92,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "run_function": {
+        "line": 197,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_graph_start_does_not_read_embedding_compute_config",
+        "path": "tests/cli/test_graph_start_config.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_multiletter_si_units_round_trip",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "categorizer",
+        "path": "tests/core/test_physics_categorization.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 767,
+        "name": "test_python_tcvpy_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 786,
+        "name": "test_matlab_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_fortran_mds_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_idl_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 838,
+        "name": "test_python_mdsplus_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 856,
+        "name": "test_tdi_function_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_scan_unknown_data_class_leaves_slot_unset",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_paths",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 522,
+        "name": "test_returns_list_of_dicts",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 627,
+        "name": "test_classifies_single_path",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_invalid_domain_falls_back_to_general",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_on_cost_callback_called",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_gathers_sections_and_identifiers",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_enriches_ids_with_llm",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_returns_page_context",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "_rebuild",
+        "path": "tests/graph/test_rebuild_honours_resolution.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_make_script",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 489,
+        "name": "test_decimation_code_structure",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 334,
+        "name": "test_classify_error_signals_identifies_uncertainty",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "test_classify_error_signals_excludes_physics_error_fields",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 374,
+        "name": "test_classify_error_signals_excludes_plain_signals",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_classify_error_signals_mixed",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 428,
+        "name": "test_classify_error_signals_lower_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_classify_error_signals_upper_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 466,
+        "name": "test_classify_error_signals_sigma_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 485,
+        "name": "test_classify_error_signals_returns_required_keys",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 525,
+        "name": "test_match_error_signals_to_imas_basic",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 588,
+        "name": "test_match_error_signals_to_imas_no_existing_mappings",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 608,
+        "name": "test_match_error_signals_confidence_reduced",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 844,
+        "name": "test_run_error_derivation_only_derives_from_graph",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 44,
+        "name": "test_basic_search",
+        "path": "tests/ingestion/test_search.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 459,
+        "name": "test_legacy_flat_format_backward_compat",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 491,
+        "name": "test_data_nodes_section",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 542,
+        "name": "test_multiple_access_methods",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 617,
+        "name": "test_wiki_chunks_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 663,
+        "name": "test_page_grouping",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1022,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1063,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1091,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1111,
+        "name": "test_code_fence_defaults_to_python",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1467,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1504,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1527,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1577,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1598,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1617,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1653,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1688,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "_persist",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 1093,
+        "name": "_terminal_recovery_client",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 2845,
+        "name": "test_terminal_recovery_relationship_lock_plan_is_participant_anchored",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "query",
+        "path": "tests/standard_names/test_attachment_write_guards.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 353,
+        "name": "test_compose_persist_guards_a_binding_onto_an_established_name",
+        "path": "tests/standard_names/test_attachment_write_guards.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 2708,
+        "name": "test_power_at_separatrix_passes_complete_candidate_validation",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 272
+    },
+    {
+      "existing_function": {
+        "line": 588,
+        "name": "test_run_benchmark_mocked",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1499,
+        "name": "test_score_with_reviewer_docs_target",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_docs_sample_shape",
+        "path": "tests/standard_names/test_benchmark_roles.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "test_counts_accepted_and_reintroduction_and_drift",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 445,
+        "name": "_two_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 497,
+        "name": "test_adjudicator_not_called_when_nothing_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 739,
+        "name": "test_halts_on_low_acceptance_and_sets_resume",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "test_description_from_dict",
+        "path": "tests/standard_names/test_candidate_description.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_catalog_import_divergence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_no_sources_block_binds_nothing",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_matches_by_id_and_never_creates_a_node",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_missing_name_is_reported_not_recreated",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_export_reader_withholds_valid_but_exhausted_names",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 617,
+        "name": "test_compose_commit_once",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_query",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_both_hybrid_and_related_render",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "query",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_unit_injection_reports_only_physical_scalar_edge_conflicts",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_write_boundary_still_raises_when_response_model_repairs",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 272
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 698,
+        "name": "test_from_dd_row_basic",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 721,
+        "name": "test_from_signal_row",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "test_run_audits_wires_the_check",
+        "path": "tests/standard_names/test_description_latex.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 272
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 288,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 416,
+        "name": "test_locus_ancestry_does_not_create_automatic_docs_cohort",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_safe_projection_family_remains_available_to_docs",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 223,
+        "name": "_add_peer_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "_accepted_docs_node",
+        "path": "tests/standard_names/test_edit_parity.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_refine_name_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "_review_names_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_review_docs_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 309,
+        "name": "test_steering_block_contains_hint_and_reason_text",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "_persist_gc",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 739,
+        "name": "test_manifest_sources_reconcile_emitted_excluded_and_non_nameable",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 801,
+        "name": "test_manifest_source_projection_follows_superseded_identity",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "_staging_dir",
+        "path": "tests/standard_names/test_export_layout_stamp.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_hint_fields_reach_the_caller",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1249,
+        "name": "test_reclaimed_same_candidate_can_reserve_after_owned_orphan_cleanup",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 858,
+        "name": "test_write_dd_skipped_source",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_gyrokinetics_constant_paths_qualify_as_eligible",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 95,
+        "name": "test_embedding_field_not_in_write_batch",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_phase_to_stats_mapping",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_generation_and_refinement_prompts_enforce_normative_boundary",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_claims_returned_as_dicts",
+        "path": "tests/standard_names/test_polling_claims.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_scoped_terminal_residue_reports_transient_claims",
+        "path": "tests/standard_names/test_pool_idle_exhaustion.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_sn_side_pools_use_sn_ids",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 729,
+        "name": "test_rebuild_reports_exact_consistency_rows_and_refuses_completion",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_publish_transport_only.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_campaign_manifest_reports_a_reasonless_quarantine",
+        "path": "tests/standard_names/test_quarantine_reason.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_claim_eligibility",
+        "path": "tests/standard_names/test_refine_docs_chain.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_claim_enriches_chain_history",
+        "path": "tests/standard_names/test_refine_docs_chain.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_returns_mapping",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_prefers_accepted_over_drafted",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_frozen_artifact_with_source_accounting_loads_for_approval",
+        "path": "tests/standard_names/test_review_artifact_schema.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_write_reviews_coalesces_none_cost_to_zero",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_write_reviews_preserves_zero_cost",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 211,
+        "name": "test_escalation_review_carries_cost",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_review_cluster_reconstruction",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_review_neighborhood_enrichment",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_repeated_source_binding",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 272
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_semantic_cluster_neighbors_never_expand_source_authority",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 9,
+        "name": "query",
+        "path": "tests/standard_names/test_roster_reason_transcription.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 545,
+        "name": "test_compose_two_step",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_dd_projection_reconcile_uses_full_attachment_guard",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "test_fetch_single",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_list_all",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_list_with_physics_domain_filter",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_list_filter_info_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_list_physics_domain_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_list_table_format",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_pooled_compose_delivers_source_and_name_steering_to_prompt",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 217,
+        "name": "test_signals_source_without_dd_path_not_filtered",
+        "path": "tests/standard_names/test_source_invariants.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_accepts_signals_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "test_validate_via_isn_description_quality",
+        "path": "tests/standard_names/test_validate_isn.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 123,
+        "name": "_resolution_batch",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 272
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_invalid_editorial_rows_are_rejected",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_duplicate_gap_identity_is_rejected",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 271
+    },
+    {
+      "existing_function": {
+        "line": 639,
+        "name": "test_observation_write_preserves_editorial_and_dedup_state",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 699,
+        "name": "test_batch_observations_cannot_downgrade_mechanical_reuse",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 754,
+        "name": "test_editorial_guidance_routes_fold_reject_and_add_honestly",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_text_only_match_uses_text_score",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 706,
+        "name": "test_dual_match_boosted",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 746,
+        "name": "test_enrichment_includes_lifecycle",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_shared_fetch_dd_error_fields_returns_structured_results",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_version_context_includes_diagnostics",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_dd3_path_found_with_dd_version_4",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_dd_version_param_is_integer",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_no_dd_version_skips_filter",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "run_function": {
+        "line": 280,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 286
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "run_function": {
+        "line": 355,
+        "name": "fake_post",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "window_line": 357
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "78eb341f986c041be32c0099f4717c7e785ee575",
+    "02193b6e2e46ff3ca12ca8cbb6f77535dffdaf46",
+    "fe4ff84ec374e4891aa3b88b96c18fe3dcd80057"
+  ],
+  "completed_at": "2026-10-06T23:41:25.962Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T23:15:22Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/ids",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T231514344990-cross-ids-siblings/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.6862745098039216,
+    "plan": "mapping-candidate-selection",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T00:15:14.743735+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-06T23:15:14Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 8,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 200000,
+    "observed_at": "2026-10-06T23:15:06Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 8,
+      "aggregate_tokens_per_second": 84.409,
+      "detail": "",
+      "mean_tokens_per_second": 105.512,
+      "observed_at": "2026-10-06T23:15:06Z",
+      "runs": 0.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T23:41:25.962Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T231514344990-cross-ids-siblings/manifest.md",
+  "member": "disposable-r-20261006T231514344990-cross-ids-siblings",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/cli/test_discover_map.py::test_candidate_worker_adds_cluster_siblings_and_books_the_second_call"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/cli/test_discover_map.py::test_candidate_worker_adds_cluster_siblings_and_books_the_second_call"
+    ],
+    "declaration": "skip the cluster expansion in candidate_worker; the sibling test must fail",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T231514344990-cross-ids-siblings/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T231514344990-cross-ids-siblings/negative-control.log",
+    "test_paths": [
+      "tests/cli/test_discover_map.py",
+      "tests/core/test_settings.py",
+      "tests/ids/"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cross-ids-siblings",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 724,
+          "cached_input_tokens": 407068,
+          "input_tokens": 407794,
+          "output_tokens": 1292,
+          "reasoning_output_tokens": 46,
+          "total_tokens": 409086,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/test_cli.py tests/core/test_settings.py -p no:cacheprovider exits 0 with tests showing a source whose Jev top candidate is magnetics/ip gains its cross-IDS cluster siblings as candidates with the arm cluster judged in a second call while the seed's see_also lists them, a sibling already in the shortlist is not duplicated and the cap of ten holds, write_candidates persists each record's arms and refuses one that is not a list of strings, route marks every candidate at or above the select threshold, and the second call's cost is in the run's PipelineCost; grep -rn 'select_margin\\|select-margin' imas_codex/ pyproject.toml prints nothing",
+    "estimated_hours": null,
+    "goal": "Widen each source's candidate shortlist with the cross-IDS DD cluster siblings of its Jev top five",
+    "id": "cross-ids-siblings",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-06T23:15:14Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 8,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 200000,
+      "observed_at": "2026-10-06T23:15:06Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 8,
+        "aggregate_tokens_per_second": 84.409,
+        "detail": "",
+        "mean_tokens_per_second": 105.512,
+        "observed_at": "2026-10-06T23:15:06Z",
+        "runs": 0.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T231514344990-cross-ids-siblings/manifest.md",
+    "negative_control": "skip the cluster expansion in candidate_worker; the sibling test must fail",
+    "plan": "mapping-candidate-selection",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§11",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/ids/candidates.py",
+      "imas_codex/ids/workers.py",
+      "imas_codex/ids/graph_ops.py",
+      "imas_codex/schemas/facility.yaml",
+      "imas_codex/settings.py",
+      "pyproject.toml",
+      "tests/core/test_settings.py",
+      "tests/cli/test_discover_map.py",
+      "tests/ids/",
+      "docs/evidence/fragments/mapping-candidate-selection/cross-ids-siblings.html",
+      "docs/figures/mapping-candidate-selection/cross-ids-siblings"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1600477.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cross-ids-siblings",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T23:15:17.836542+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.92,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 517.871,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 872.403,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 40,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 41
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.93,
+      "codex": 0.01,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "hold": 0.05
+    },
+    "rendered_token_estimate": 1055,
+    "usage": {
+      "cost": 0.000127428,
+      "input_tokens": 3034,
+      "output_tokens": 89
+    }
+  },
+  "plan": "mapping-candidate-selection",
+  "plan_impl_at_dispatch": 0.6862745098039216,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "fe4ff84ec374e4891aa3b88b96c18fe3dcd80057",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e01cc63dc0df2d1a0c3616c1fb5f3af71d5e140f",
+    "reviewed_head_sha": "fe4ff84ec374e4891aa3b88b96c18fe3dcd80057",
+    "scores": {
+      "durability": 20,
+      "evidence": 20,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 120
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T231514344990-cross-ids-siblings",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§11",
+  "session": "mapping-20261006",
+  "session_harness": "claude",
+  "session_id": "ef6fa753-f17a-44bd-ab25-32c926fabbf0",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 9,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 14829376,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 676.636,
+    "generated_tokens": 72539,
+    "generation_seconds": 322.449,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.8,
+    "machine_seconds": 354.187,
+    "peak_input_tokens": 176760,
+    "tokens_per_second": 224.96,
+    "wall_tokens_per_second": 107.21
+  },
+  "time_budget": "60m",
+  "tool_steps": 75.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1563,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T23:41:30Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T23:30:05Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T231514344990-cross-ids-siblings",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8624,
+    "worker_pid": 1042346
+  },
+  "worker_seconds": 1544,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
