@@ -1,0 +1,29 @@
+<section>
+  <h2 id="candidate-retrieval-probe">Shortlist recall@K per retrieval arm on the adjudicated test split</h2>
+  <p id="candidate-retrieval-probe-scope">
+    75 test sources (36 labelled, 39 none); recall denominator 36.
+    K in {5,10,20,50}. <code>$PROBE/retrieval/recall.json</code>,
+    <code>$PROBE/retrieval/shortlists.json</code>.
+  </p>
+  <table id="candidate-retrieval-probe-recall">
+    <thead><tr><th>arm</th><th>R@5</th><th>R@10</th><th>R@20</th><th>R@50</th></tr></thead>
+    <tbody>
+      <tr><td>hybrid_dd_search</td><td>0.3056</td><td>0.4167</td><td>0.5556</td><td>0.6111</td></tr>
+      <tr><td>hybrid_dd_search+unit_dim</td><td>0.3056</td><td>0.4167</td><td>0.5556</td><td>0.6111</td></tr>
+      <tr><td>hybrid_dd_search+cluster</td><td>0.3056</td><td>0.4167</td><td>0.5556</td><td>0.6111</td></tr>
+      <tr><td>hybrid_dd_search+unit_dim+cluster</td><td>0.3056</td><td>0.4167</td><td>0.5556</td><td>0.6389</td></tr>
+      <tr><td>compute_semantic_matches</td><td>0.3611</td><td>0.3611</td><td>0.4444</td><td>0.5278</td></tr>
+      <tr><td>compute_semantic_matches+unit_dim</td><td>0.3611</td><td>0.3611</td><td>0.4444</td><td>0.5278</td></tr>
+      <tr><td>compute_semantic_matches+cluster</td><td>0.3611</td><td>0.3611</td><td>0.4444</td><td>0.5278</td></tr>
+      <tr><td>compute_semantic_matches+unit_dim+cluster</td><td>0.3611</td><td>0.3611</td><td>0.4444</td><td>0.5556</td></tr>
+    </tbody>
+  </table>
+  <p id="candidate-retrieval-probe-modifiers">
+    Modifiers are inert at K&le;20: both base arms fill every K
+    (baseline returned-count below K = 0 at all four K), so appended cluster
+    members never reach the shortlist, and only 4 of 36 labelled sources carry a
+    representative-unit dimensionality for the unit-dim filter to act on
+    (it drops candidates but no labelled hit). Cluster expansion adds one hit at
+    K=50 only once unit-dim frees a slot.
+  </p>
+</section>
