@@ -1,0 +1,878 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "ba4dda34f621700118a6a8c1ade77e4ad10d9721",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4071277,
+      "input_tokens_cumulative": 4071277,
+      "output_tokens": 19987,
+      "output_tokens_cumulative": 19987,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 40,
+    "files": 5,
+    "removed": 21
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 3299,
+        "name": "enrich_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 3889
+    },
+    {
+      "existing_function": {
+        "line": 605,
+        "name": "test_static_signal_gets_all_version_check_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4622,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4668
+    },
+    {
+      "existing_function": {
+        "line": 651,
+        "name": "test_subtree_signal_gets_connection_tree_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4622,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4668
+    },
+    {
+      "existing_function": {
+        "line": 687,
+        "name": "test_tdi_function_gets_reference_shot_only",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4622,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4668
+    },
+    {
+      "existing_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_refine_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_similarity_gate_persists_only_the_measured_dimension",
+        "path": "tests/standard_names/test_gate_verdict_provenance.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 500,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 474
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_review_names_processes_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 494,
+        "name": "test_review_docs_independent_from_names",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 837,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 833,
+        "name": "test_worker_uses_canonical_model",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_valid_status_still_calls_llm",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 443,
+        "name": "test_worker_uses_docs_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "window_line": 477
+    }
+  ],
+  "commit_list_shortfall": {
+    "declared": 3,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261006T030930757649-retire-language-seat' has a passing gate presenting 1 commit(s) of the 3 its manifest declares; missing: 22507934d0a6b65ffcb7dbc70e7ae1770e330ba6, 5554fa5e93ce171a3461e52fc5c56b33156f7199. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "22507934d0a6b65ffcb7dbc70e7ae1770e330ba6",
+      "5554fa5e93ce171a3461e52fc5c56b33156f7199"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "4d30baabd593292c3616279ea717cb7c79220c9f"
+  ],
+  "completed_at": "2026-10-06T03:45:03.938Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T03:09:39Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/core tests/discovery tests/clusters tests/ids tests/standard_names/test_refine_model_dispatch.py tests/standard_names/test_generate_docs.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T030930757649-retire-language-seat/gate-retire-language-seat-2.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-06T04:09:32.086257+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-06T03:09:32Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 14,
+    "mean_context": 120000,
+    "observed_at": "2026-10-06T03:09:08Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 24,
+      "aggregate_tokens_per_second": 191.9,
+      "detail": "",
+      "mean_tokens_per_second": 106.611,
+      "observed_at": "2026-10-06T03:09:08Z",
+      "runs": 1.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T03:45:03.938Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T030930757649-retire-language-seat/manifest.md",
+  "member": "disposable-r-20261006T030930757649-retire-language-seat",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/core/test_model_seat_names.py::test_every_seat_name_reference_is_a_known_section"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/core/test_model_seat_names.py::test_every_seat_name_reference_is_a_known_section"
+    ],
+    "declaration": "with a model_section default of language planted in a scratch copy of imas_codex/cli/discover/common.py, the AST seat-name test fails; the manifest records the failing test id",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T030930757649-retire-language-seat/negative-control-seat-names.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T030930757649-retire-language-seat/negative-control-seat-names.log",
+    "test_paths": [
+      "tests/core/test_model_seat_names.py",
+      "tests/core/test_settings.py",
+      "tests/standard_names/test_generate_docs.py",
+      "tests/standard_names/test_refine_model_dispatch.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "retire-language-seat",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1483,
+          "cached_input_tokens": 599748,
+          "input_tokens": 601233,
+          "output_tokens": 1419,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 602652,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "per §21's second node: signal enrichment and source-description individualisation in imas_codex/discovery/signals/parallel.py read discovery-describe and pass its reasoning effort; clusters/extractor.py and clusters/label_cache.py read cluster-labels; ids/mapping.py and ids/metadata.py read ids-mapping; get_labeling_batch_size reads cluster-labels; language and vision are gone from MODEL_SECTIONS, _MODEL_DEFAULTS, _MODEL_ENV_VARS and pyproject.toml; the four settings tests that bind them are retired and tests/standard_names/test_refine_model_dispatch.py compares sn-refine against a live seat instead of language; settings.py comments and imas_codex/config/AGENTS.md, imas_codex/llm/AGENTS.md and imas_codex/graph/AGENTS.md name the new seats; an AST test over imas_codex asserts every string passed to get_model, get_model_config, get_reasoning_effort, llm_health_check, llm_deep_health_check or as a section or model_section argument or default is in MODEL_SECTIONS, and a planted language default makes it fail; rg 'get_model(_config)?\\(\"(language|vision)\"\\)|\\[tool\\.imas-codex\\.(language|vision)\\]' imas_codex pyproject.toml matches nothing; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/core tests/discovery tests/clusters tests/ids tests/standard_names/test_refine_model_dispatch.py tests/standard_names/test_generate_docs.py exits 0 with the log path in the manifest; no discover command runs against a facility host",
+    "estimated_hours": null,
+    "goal": "Move signals, clusters and IDS onto their function seats and retire the language and vision seats",
+    "id": "retire-language-seat",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-06T03:09:32Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 14,
+      "mean_context": 120000,
+      "observed_at": "2026-10-06T03:09:08Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 24,
+        "aggregate_tokens_per_second": 191.9,
+        "detail": "",
+        "mean_tokens_per_second": 106.611,
+        "observed_at": "2026-10-06T03:09:08Z",
+        "runs": 1.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T030930757649-retire-language-seat/manifest.md",
+    "negative_control": "with a model_section default of language planted in a scratch copy of imas_codex/cli/discover/common.py, the AST seat-name test fails; the manifest records the failing test id",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§21",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/settings.py",
+      "pyproject.toml",
+      "imas_codex/discovery/signals/parallel.py",
+      "imas_codex/clusters/extractor.py",
+      "imas_codex/clusters/label_cache.py",
+      "imas_codex/ids/mapping.py",
+      "imas_codex/ids/metadata.py",
+      "imas_codex/config/AGENTS.md",
+      "imas_codex/llm/AGENTS.md",
+      "imas_codex/graph/AGENTS.md",
+      "tests/core/test_settings.py",
+      "tests/core/test_model_seat_names.py",
+      "tests/standard_names/test_refine_model_dispatch.py",
+      "tests/standard_names/test_generate_docs.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/retire-language-seat.html",
+      "docs/figures/jt60sa-discovery-completion/retire-language-seat",
+      "imas_codex/cli/imas_dd.py",
+      "imas_codex/graph/dd_domain_classifier.py",
+      "imas_codex/standard_names/workers.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3192880.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "retire-language-seat",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T03:09:34.489210+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.92,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 352.201,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 501.252,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 11,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 38
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0.03,
+      "clive": 0.9400000000000001,
+      "codex": 0,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "hold": 0.03
+    },
+    "rendered_token_estimate": 1257,
+    "usage": {
+      "cost": 0.000136752,
+      "input_tokens": 3256,
+      "output_tokens": 89
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.9,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "4d30baabd593292c3616279ea717cb7c79220c9f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "ba4dda34f621700118a6a8c1ade77e4ad10d9721",
+    "reviewed_head_sha": "4d30baabd593292c3616279ea717cb7c79220c9f",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 118
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T030930757649-retire-language-seat",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§21",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "ecc51a1b-d879-48b1-af9c-845d539588d2",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 5,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 19493455,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 598.568,
+    "generated_tokens": 89138,
+    "generation_seconds": 299.865,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 58.6,
+    "machine_seconds": 298.703,
+    "peak_input_tokens": 134918,
+    "tokens_per_second": 297.26,
+    "wall_tokens_per_second": 148.92
+  },
+  "time_budget": "60m",
+  "tool_steps": 158.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2124,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T03:45:09Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T03:34:59Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T030930757649-retire-language-seat",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14689,
+    "worker_pid": 4154961
+  },
+  "worker_seconds": 2093,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
