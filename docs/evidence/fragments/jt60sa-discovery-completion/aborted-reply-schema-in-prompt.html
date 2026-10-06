@@ -1,0 +1,54 @@
+<section>
+  <h2 id="aborted-reply-schema-in-prompt">Discovery carries each response schema in its prompt, not in response_format</h2>
+  <p id="aborted-reply-schema-in-prompt-result">
+    The dedicated local OpenAI-compatible client no longer forwards
+    <code>response_format</code>: <code>_local_call_kwargs</code> in
+    <code>imas_codex/discovery/base/llm.py</code> translates only model,
+    messages, <code>max_tokens</code>, <code>temperature</code>,
+    <code>seed</code>, <code>timeout</code> and <code>extra_body</code>. The
+    shared <code>_build_kwargs</code> is unchanged, so an OpenRouter model and a
+    <code>local/</code> model without a local API base still send it. Because the
+    schema no longer travels in the request, each prompt owns it: the central
+    <code>_DEFAULT_SCHEMA_NEEDS</code> table in
+    <code>imas_codex/llm/prompt_loader.py</code> and its two fallback reads are
+    deleted, and every discovery call-site prompt declares its schema providers
+    in its own <code>schema_needs</code> frontmatter. Each renders its example
+    and field list through the shared partials under
+    <code>imas_codex/llm/prompts/shared/schema</code>; the signal source-unwind
+    prompt gains a <code>SignalSourceCodeUnwindBatch</code> provider and a
+    <code>source-unwind-output</code> partial in place of its hand-written JSON
+    example. An engine-aborted reply (<code>finish_reason='abort'</code>) is now
+    rejected through <code>_reject_unusable_reply</code> in all four structured
+    loops — the truncated prefix raises the existing retryable
+    <code>EmptyResponseError</code> instead of reaching the JSON parser, and only
+    <code>finish_reason='length'</code> grows the token budget. The strict
+    renderer accepts the frozen tuple it reads back from prompt metadata, so a
+    frontmatter-declared need no longer trips a list-only type check.
+  </p>
+  <p id="aborted-reply-schema-in-prompt-evidence">
+    Gate <code>uv run --no-sync pytest tests/discovery tests/llm</code> exits
+    <strong>0</strong> (1425 passed, 9 skipped) on the fleet compute node
+    (<code>98dci4-clu-2018</code>). The prompt-schema test derives
+    prompt&harr;response-model pairs by walking the AST of
+    <code>imas_codex/discovery</code> — no table of pairs is held — reaches the
+    ten real call-site prompts, and asserts every field of each response model's
+    JSON schema (nested item models included) appears in the rendered prompt; the
+    aborted-reply test asserts an abort raises
+    <code>EmptyResponseError(finish_reason='abort')</code> and is retried without
+    growing <code>max_tokens</code>; the routing tests assert the local client
+    carries no <code>response_format</code> while a <code>local/</code> model
+    without a local API base and an OpenRouter model still do.
+    Live check: one prompt of <strong>99,054 tokens</strong> rendered from the
+    <code>paths/triage</code> prompt served from <code>98dci4-clu-2018</code>
+    through the <code>discovery-triage</code> seat
+    (<code>local/deepseek-v4.1-flash</code>) returned
+    <code>finish_reason='stop'</code> and validated as a
+    <code>TriageBatch</code> with 40 results. Negative control (logs recorded):
+    with the abort branch removed from <code>_reject_unusable_reply</code> the
+    aborted-reply test fails (<code>1 failed</code>, exit 1); with the schema
+    render removed from <code>shared/schema/scoring-output.md</code> the
+    <code>paths/triage</code> schema-coverage test fails (<code>1 failed</code>,
+    exit 1). Logs under
+    <code>runs/r-20261006T053829458419-aborted-reply-schema-in-prompt/</code>.
+  </p>
+</section>
