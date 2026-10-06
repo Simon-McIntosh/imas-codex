@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records no baseline_suite and no after_suite arm (both null). Its single gate.log names head revision 9422314a0 and shows 147 passed, 0 failed, EXIT=0, which this review reproduced; a head arm with no failing id cannot have added a failure, so added_failure_count reads 0 with no ids. No base arm was measured, so no base/head subtraction was possible.",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T17:10:26.148Z",
+  "dispatched_at": "2026-10-06T17:01:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/decisions-call.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment says a choice must carry a probability for each offered criterion and no other, but _validate_decisions_answers in imas_codex/discovery/base/llm.py enforces only that every probability key is an offered criterion and that the probabilities sum to 1 within 0.01; a criterion left absent is accepted as 0, so the prose overstates the check it describes."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/decisions-call.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest records neither baseline_suite nor after_suite, so the run holds no measured added-failure pair for the promotion audit to read; added_failure_count is derived as 0 from the zero-failure head arm alone."
+    },
+    {
+      "file": "imas_codex/discovery/base/llm.py",
+      "line": "3401",
+      "severity": "follow-on",
+      "text": "follow-on: a missing or non-numeric usage.cost raises DecisionsValidationError, the class documented as a non-retryable deterministic answer-contract violation; a response whose only deficiency is an absent usage block, more plausibly transient than a malformed noul, therefore fails without retry."
+    }
+  ],
+  "head_log_revision": "9422314a097eea380728fa48017dea7f58fb95b3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "three commits over base 7f2a6414b - 3e91ac114 (llm.py +321/-5, settings.py +5, pyproject.toml +7), 37acb4cce (tests/conftest.py +38, tests/discovery/test_llm_decisions.py +254) and 9422314a0 (the evidence fragment +69) - 689 insertions and 5 deletions across six files.",
+    "done_when": "the node's declared measure is its gate; the reviewed manifest records 147 passed EXIT=0 at head 9422314a0, and I reproduced exactly that (147 passed, 2 warnings in 12.04s, EXIT=0) plus the declared mutation (choice-membership check deleted -> test_choice_outside_criteria_is_refused DID NOT RAISE, EXIT=1).",
+    "goal": "the decisions-call node's goal is the canonical call layer for the OpenRouter decisions endpoint plus the discovery-relevance seat and their tests; imas_codex/discovery/base/llm.py lands call_decisions and acall_decisions posting {model,state,questions} to https://openrouter.ai/api/alpha/decisions, and get_model('discovery-relevance') resolves to typesafe/jev-1.13.",
+    "manifest": "present and self-consistent (status complete; commits 3e91ac114, 37acb4cce, 9422314a0; gate.log and negative-control.log named; a negative-control note; blockers none), but it records no baseline_suite and no after_suite arm.",
+    "write_paths": "the reviewed manifest declares seven write paths; the three-commit diff touches six files (imas_codex/discovery/base/llm.py, imas_codex/settings.py, pyproject.toml, tests/conftest.py, tests/discovery/test_llm_decisions.py and the evidence fragment), every one inside the declared set, and nothing outside it."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_llm_decisions.py:159 fails if the choice-membership check is removed (reproduced, EXIT=1) and each of the six refusals pins an independent guard; one deduction because a missing usage.cost raises the non-retryable validation type.",
+    "evidence": "the gate the manifest names is recorded in gate.log and I reproduced it at head (147 passed, EXIT=0) and its negative control (EXIT=1); one deduction because the reviewed record carries no baseline/after arm, so its measured added-failure pair is absent.",
+    "fit": "the added symbols are mechanism-named (call_decisions, _service_headers, _decisions_retryable) and the commits are conventional with bodies; the docstring and fragment prose carry no plan identifier.",
+    "goal_fidelity": "imas_codex/discovery/base/llm.py:3239 and :3497 land the call layer beside call_llm_structured, imas_codex/settings.py registers the seat, and a probe returned get_model('discovery-relevance') = typesafe/jev-1.13 with request and answer shapes matching the prototype's real responses.",
+    "reuse": "imas_codex/discovery/base/llm.py:1995 extracts _service_headers and _build_kwargs calls it, _decisions_retryable delegates to _is_retryable, and the repository search found no prior owner of a decisions-endpoint call layer.",
+    "scope_discipline": "every path in the three-commit diff lies inside the manifest's declared write paths and no file outside them was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the decisions-call node's goal is the canonical call layer for the OpenRouter decisions endpoint plus the discovery-relevance seat and their tests; imas_codex/discovery/base/llm.py lands call_decisions and acall_decisions posting {model,state,questions} to https://openrouter.ai/api/alpha/decisions, and get_model('discovery-relevance') resolves to typesafe/jev-1.13.\nVERDICT done_when: the node's declared measure is its gate; the reviewed manifest records 147 passed EXIT=0 at head 9422314a0, and I reproduced exactly that (147 passed, 2 warnings in 12.04s, EXIT=0) plus the declared mutation (choice-membership check deleted -> test_choice_outside_criteria_is_refused DID NOT RAISE, EXIT=1).\nVERDICT write_paths: the reviewed manifest declares seven write paths; the three-commit diff touches six files (imas_codex/discovery/base/llm.py, imas_codex/settings.py, pyproject.toml, tests/conftest.py, tests/discovery/test_llm_decisions.py and the evidence fragment), every one inside the declared set, and nothing outside it.\nVERDICT manifest: present and self-consistent (status complete; commits 3e91ac114, 37acb4cce, 9422314a0; gate.log and negative-control.log named; a negative-control note; blockers none), but it records no baseline_suite and no after_suite arm.\nVERDICT diff: three commits over base 7f2a6414b - 3e91ac114 (llm.py +321/-5, settings.py +5, pyproject.toml +7), 37acb4cce (tests/conftest.py +38, tests/discovery/test_llm_decisions.py +254) and 9422314a0 (the evidence fragment +69) - 689 insertions and 5 deletions across six files.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/base/llm.py:3239 and :3497 land the call layer beside call_llm_structured, imas_codex/settings.py registers the seat, and a probe returned get_model('discovery-relevance') = typesafe/jev-1.13 with request and answer shapes matching the prototype's real responses.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate the manifest names is recorded in gate.log and I reproduced it at head (147 passed, EXIT=0) and its negative control (EXIT=1); one deduction because the reviewed record carries no baseline/after arm, so its measured added-failure pair is absent.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the three-commit diff lies inside the manifest's declared write paths and no file outside them was touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_llm_decisions.py:159 fails if the choice-membership check is removed (reproduced, EXIT=1) and each of the six refusals pins an independent guard; one deduction because a missing usage.cost raises the non-retryable validation type.\nSCORE fit: 19\nJUSTIFICATION fit: the added symbols are mechanism-named (call_decisions, _service_headers, _decisions_retryable) and the commits are conventional with bodies; the docstring and fragment prose carry no plan identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_codex/discovery/base/llm.py:1995 extracts _service_headers and _build_kwargs calls it, _decisions_retryable delegates to _is_retryable, and the repository search found no prior owner of a decisions-endpoint call layer.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/decisions-call.html:20 follow-on: the fragment says a choice must carry a probability for each offered criterion and no other, but _validate_decisions_answers in imas_codex/discovery/base/llm.py enforces only that every probability key is an offered criterion and that the probabilities sum to 1 within 0.01; a criterion left absent is accepted as 0, so the prose overstates the check it describes.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/decisions-call.html:0 follow-on: the reviewed manifest records neither baseline_suite nor after_suite, so the run holds no measured added-failure pair for the promotion audit to read; added_failure_count is derived as 0 from the zero-failure head arm alone.\nFINDING imas_codex/discovery/base/llm.py:3401 follow-on: a missing or non-numeric usage.cost raises DecisionsValidationError, the class documented as a non-retryable deterministic answer-contract violation; a response whose only deficiency is an absent usage block, more plausibly transient than a malformed noul, therefore fails without retry.\n",
+  "review_run_id": "r-20261006T170151022586-review-of-decisions-call",
+  "reviewed_base": "7f2a6414bca92f4dd2a69f43130609e99b781e4a",
+  "reviewed_base_sha": "7f2a6414bca92f4dd2a69f43130609e99b781e4a",
+  "reviewed_commit": "9422314a097eea380728fa48017dea7f58fb95b3",
+  "reviewed_head_sha": "9422314a097eea380728fa48017dea7f58fb95b3",
+  "reviewed_run_id": "r-20261006T163616108180-decisions-call",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T17:08:57.926691+00:00",
+  "total": 114
+}
