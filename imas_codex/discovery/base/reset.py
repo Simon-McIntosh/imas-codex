@@ -262,7 +262,12 @@ PATH_RESET_SPECS: dict[str, ResetSpec] = {
     "scanned": ResetSpec(
         label="FacilityPath",
         target_status="scanned",
-        source_statuses=["triaged", "scored"],
+        # A seeded root can sit at ``discovered`` carrying a triage score: a
+        # ``--root`` naming an existing root may overwrite its status while its
+        # scores survive, leaving it unclaimable (the scan takes only discovered
+        # rows whose triage is null).  Including ``discovered`` lets the scoped
+        # reset clear that stale triage so the pipeline re-claims the row.
+        source_statuses=["discovered", "triaged", "scored"],
         clear_fields=(
             _PATH_TRIAGE_FIELDS
             + _PATH_ENRICH_FIELDS

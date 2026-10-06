@@ -103,6 +103,16 @@ class TestResetSpec:
         spec = reset_mod.PATH_RESET_SPECS["triaged"]
         assert "expanded_at" in spec.clear_fields
 
+    def test_path_scanned_reset_reaches_discovered_with_triage(self, reset_mod):
+        """A seeded root can sit at ``discovered`` with a triage score kept;
+        the scanned reset must reach it, or the pipeline can never re-claim it."""
+        spec = reset_mod.PATH_RESET_SPECS["scanned"]
+        assert "discovered" in spec.source_statuses
+        assert "triaged" in spec.source_statuses
+        assert "scored" in spec.source_statuses
+        # Clearing the triage composite is what makes the row claimable again.
+        assert "triage_composite" in spec.clear_fields
+
 
 # ─── reset_to_status tests ──────────────────────────────────────────────
 
