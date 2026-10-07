@@ -55,11 +55,11 @@
     <tbody>
       <tr id="search-rerank-row-30">
         <td>30</td><td>0.3093</td><td>0.3576</td><td>0.3202</td><td>0.4761</td>
-        <td>0.2987</td><td>0.3337</td><td>0.3587</td><td>0.3585</td>
+        <td>0.2987</td><td>0.3337</td><td>0.3539</td><td>0.3585</td>
       </tr>
       <tr id="search-rerank-row-60">
         <td><strong>60</strong></td><td>0.2873</td><td>0.2994</td><td>0.2981</td><td><strong>0.4821</strong></td>
-        <td>0.2987</td><td><strong>0.3772</strong></td><td>0.3587</td><td>0.3159</td>
+        <td>0.2987</td><td><strong>0.3772</strong></td><td>0.3550</td><td>0.3159</td>
       </tr>
       <tr id="search-rerank-row-100">
         <td>100</td><td>0.2634</td><td>0.2815</td><td>0.2717</td><td>0.5766</td>
@@ -137,10 +137,10 @@
     <img src="/imas-codex/figures/discovery-judgments-through-jev/search-rerank/pool_sweep.svg"
          alt="Left: reranked nDCG@10 and labelled-only nDCG@10 rise with pool size above the embedding order's flat labelled-only line. Right: per-query wall p95 against pool size for 16, 32 and 48 judgements in flight, with the 5 s budget marked; only the 60-candidate pool clears the budget at 32 in flight.">
     <figcaption>
-      Left: the embedding order's labelled-only nDCG@10 and the rerank's, against pool size, with the
-      rerank's whole-set nDCG@10 for reference. Right: per-query wall p95 against pool size at three
-      concurrency levels, with the 5 s budget. Pool 60 at 32 in flight is the only deep pool inside
-      the budget.
+      Left: the embedding order's labelled-only nDCG@10 and the rerank's at 32 in flight, against
+      pool size, with the rerank's whole-set nDCG@10 for reference. Right: per-query wall p95 against
+      pool size at three concurrency levels, with the 5 s budget. Pool 60 at 32 in flight is the only
+      deep pool inside the budget.
     </figcaption>
   </figure>
 
