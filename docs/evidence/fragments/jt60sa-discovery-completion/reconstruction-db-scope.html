@@ -151,4 +151,16 @@
       <tr><td><code>xckai_read.f</code></td><td>0.24</td><td><strong>0.43</strong></td><td>0.47</td><td>diagnostic_data_access</td></tr>
     </tbody>
   </table>
+  <p id="reconstruction-db-scope-caveat">
+    Scope note. <code>tests/discovery/test_code_ingested_rejudge.py</code> lies
+    outside this node's declared write paths, but the node's declared gate runs
+    it and it builds its own answer set for the shared question set, so adding a
+    required noul left every re-judge decision unanswered and the re-judge
+    dropped each file. The file's local answer helper therefore sets the fifth
+    scope noul by keyword, defaulting to zero — the same mechanical change the
+    sibling code-relevance test carries. It is recorded here rather than added
+    silently to the change list: the gate the spec names cannot pass without it,
+    so the two grants are in tension and the widening is the coordinator's to
+    accept.
+  </p>
 </section>
