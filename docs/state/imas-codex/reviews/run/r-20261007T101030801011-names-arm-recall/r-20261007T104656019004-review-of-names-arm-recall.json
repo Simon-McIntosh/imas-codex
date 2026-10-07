@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run r-20261007T101030801011-names-arm-recall declares no baseline_suite and no after_suite arm (its manifest records tests/test_logs only), so both arms are absent; ledger.added_failure_ids(None, None) is empty and the added-failure arithmetic is not applied to a record written without access to a manifest, per review.store_review. The reviewed node is docs-only (one evidence fragment, no test path in its write scope), so no suite arm exists.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T10:56:43.797Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "exempted",
+      "reason": "answered in place by the automatic repair round on this same run, which corrects the fragment's admitted counts to the primary measurement",
+      "recorded_at": "2026-10-07T10:56:22.066075+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-07T10:47:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html",
+      "line": "5",
+      "severity": "blocking",
+      "text": "blocking: the headline and the per-bin table report 3 of 75 sampled admissions, taken from stability.json repeat 0, while the primary measurement the manifest cites (measurement.log content_full, spend $0.0259) admitted 6 of 75 with the 0.30-0.35 and 0.35-0.40 bins at 0.133 and 0.200 rather than the reported 0.067 and 0.067; the primary run's total is never reported, and the section's gate-move decision reads exactly this per-bin fraction."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html",
+      "line": "122",
+      "severity": "follow-on",
+      "text": "follow-on: the production note attributes '3-4 of 75' to an identity-only repeat, but the identity arm was run once (3/75, judged.json content_identity); the 3,3,4 range belongs to the full arm's three stability.py repeats, so the arm the number is attributed to is wrong."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html",
+      "line": "102",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the strongest facet any file reached was 0.83 (lmdif1.f), while the only output recording facets, judged.json, records 0.81 for that file, so the quoted maximum is unsupported by the recorded logs."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read base 6b47ac50a to head a6766f4ee; a single 138-line docs fragment, no code, no graph write, no discover run, consistent with the node's read-only brief.",
+    "done_when": "the done-when asks for the per-bin table (paths, name relevance, composite, strongest facet), the cohort table, the fragment carrying them, the fetch count and the spend at or under USD 1; every one is present in the fragment, but the bin counts are taken from a stability repeat rather than the primary run.",
+    "goal": "the node's one-sentence goal is to measure, read-only, how many name-skipped JT-60SA files the content arm would admit, with per-bin and cohort tables plus the decision spend, and docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html does carry both tables, the admitted-path table and the spend.",
+    "manifest": "read; status complete, gate is run_measurement.py through the reports directory, but its 'sample 3/75, cohort 2/31' quotes the identity arm of a log whose content_full arm reports 6/75.",
+    "write_paths": "read the manifest's declared write paths (reports/imas-codex/names-arm-recall, docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, docs/figures/jt60sa-discovery-completion/names-arm-recall) and the commit a6766f4ee; the diff is the one fragment file, inside the scope, with no figure and no code change."
+  },
+  "justifications": {
+    "durability": "the scripts (run_measurement.py, stability.py) and their logs are recorded under reports/imas-codex/names-arm-recall and the getevq.f negative control reproduces, but stability.json records no facets so the 0.83 claim cannot be re-checked.",
+    "evidence": "the fragment's headline 3/75 (names-arm-recall.html:5) disagrees with its own cited gate log /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/names-arm-recall/measurement.log, whose content_full arm admits 6/75.",
+    "fit": "the fragment follows the sibling evidence-fragment idiom (section, captioned tables) at docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:50 and carries no plan identifier.",
+    "goal_fidelity": "docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:4 states and reports the content-arm admission the section asks for, per bin and for the cohort.",
+    "reuse": "the measurement imports the real content arm from imas_codex/discovery/code/scorer.py and fetch_remote_files from imas_codex/ingestion/readers/remote.py rather than re-implementing either.",
+    "scope_discipline": "git diff 6b47ac50a..a6766f4ee changes only docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, inside the declared write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's one-sentence goal is to measure, read-only, how many name-skipped JT-60SA files the content arm would admit, with per-bin and cohort tables plus the decision spend, and docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html does carry both tables, the admitted-path table and the spend.\nVERDICT done_when: the done-when asks for the per-bin table (paths, name relevance, composite, strongest facet), the cohort table, the fragment carrying them, the fetch count and the spend at or under USD 1; every one is present in the fragment, but the bin counts are taken from a stability repeat rather than the primary run.\nVERDICT write_paths: read the manifest's declared write paths (reports/imas-codex/names-arm-recall, docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, docs/figures/jt60sa-discovery-completion/names-arm-recall) and the commit a6766f4ee; the diff is the one fragment file, inside the scope, with no figure and no code change.\nVERDICT manifest: read; status complete, gate is run_measurement.py through the reports directory, but its 'sample 3/75, cohort 2/31' quotes the identity arm of a log whose content_full arm reports 6/75.\nVERDICT diff: read base 6b47ac50a to head a6766f4ee; a single 138-line docs fragment, no code, no graph write, no discover run, consistent with the node's read-only brief.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:4 states and reports the content-arm admission the section asks for, per bin and for the cohort.\nSCORE evidence: 9\nJUSTIFICATION evidence: the fragment's headline 3/75 (names-arm-recall.html:5) disagrees with its own cited gate log /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/names-arm-recall/measurement.log, whose content_full arm admits 6/75.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 6b47ac50a..a6766f4ee changes only docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, inside the declared write scope.\nSCORE durability: 14\nJUSTIFICATION durability: the scripts (run_measurement.py, stability.py) and their logs are recorded under reports/imas-codex/names-arm-recall and the getevq.f negative control reproduces, but stability.json records no facets so the 0.83 claim cannot be re-checked.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment idiom (section, captioned tables) at docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:50 and carries no plan identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the measurement imports the real content arm from imas_codex/discovery/code/scorer.py and fetch_remote_files from imas_codex/ingestion/readers/remote.py rather than re-implementing either.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:5 blocking: the headline and the per-bin table report 3 of 75 sampled admissions, taken from stability.json repeat 0, while the primary measurement the manifest cites (measurement.log content_full, spend $0.0259) admitted 6 of 75 with the 0.30-0.35 and 0.35-0.40 bins at 0.133 and 0.200 rather than the reported 0.067 and 0.067; the primary run's total is never reported, and the section's gate-move decision reads exactly this per-bin fraction.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:122 follow-on: the production note attributes '3-4 of 75' to an identity-only repeat, but the identity arm was run once (3/75, judged.json content_identity); the 3,3,4 range belongs to the full arm's three stability.py repeats, so the arm the number is attributed to is wrong.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:102 follow-on: the fragment states the strongest facet any file reached was 0.83 (lmdif1.f), while the only output recording facets, judged.json, records 0.81 for that file, so the quoted maximum is unsupported by the recorded logs.\n",
+  "review_run_id": "r-20261007T104656019004-review-of-names-arm-recall",
+  "reviewed_base": "6b47ac50a935523cd8be8597f3ac84f2c5a62322",
+  "reviewed_base_sha": "6b47ac50a935523cd8be8597f3ac84f2c5a62322",
+  "reviewed_commit": "a6766f4ee230f963d38377cef1fa3d0957bd3055",
+  "reviewed_head_sha": "a6766f4ee230f963d38377cef1fa3d0957bd3055",
+  "reviewed_run_id": "r-20261007T101030801011-names-arm-recall",
+  "scores": {
+    "durability": 14,
+    "evidence": 9,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T10:56:00+00:00",
+  "total": 97
+}
