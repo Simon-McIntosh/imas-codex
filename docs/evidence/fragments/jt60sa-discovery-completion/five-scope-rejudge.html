@@ -1,124 +1,174 @@
 <section>
-  <h2 id="five-scope-rejudge-overview">Five-scope re-judge of JT-60SA code blocked on the facility hop</h2>
+  <h2 id="five-scope-rejudge-overview">Five-scope re-judge of JT-60SA code: name stage drained, hop dropped before content reset</h2>
   <p id="five-scope-rejudge-overview-result">
-    The §35 re-judge could not run: its required positive control,
-    <code>ssh -o BatchMode=yes jt-60sa hostname</code>, fails. The workstation
-    reaches the <code>laptop</code> jump host, which serves its reverse tunnel
-    to the login node, but the laptop's IFERC SSL-VPN is down, so neither
-    <code>nakasvr26.iferc.org</code> (the current primary) nor
-    <code>nakasvr23.iferc.org</code> accepts a TCP connection on port 22. The
-    <code>discover code</code> SCAN stage enumerates files over that hop, so no
-    name-, content- or ingested-stage re-judge could be driven and no "after"
-    census exists. The before-census below was captured from the knowledge
-    graph, which needs no facility hop, and is the state a resumed run starts
-    from. Decision spend is <strong>USD 0</strong>: no discovery invocation
-    reached a decision seat.
+    §35 step (1) ran to completion: the name-stage skipped files were reset
+    through the §34 name target and re-judged, and the drain found the scan and
+    triage phases empty. The EQDB set under
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1</code> moved from 48 files
+    skipped at the name stage to 30 ingested and 3 scored, the reconstruction-db
+    noul admitted <strong>45</strong> files, and CodeChunks under that subtree
+    went 0&rarr;67. The run then died on the facility hop: the
+    <code>--reset-to content</code> pass (step 2) failed after ~40&nbsp;s with
+    <code>kex_exchange_identification: Connection closed by remote host</code>,
+    and a fresh positive control confirmed the hop was down. Per the resume
+    instruction the run stopped rather than retrying, so steps (2) drain,
+    (3) <code>--rejudge-ingested</code> and (4) the <code>inc/F</code> prefix
+    pass were not reached. Decision spend: <strong>USD 0.29</strong>.
   </p>
-  <p id="five-scope-rejudge-blocker">
-    <strong>Blocker (exact unmet condition).</strong> With the fence wrapper in
-    place (<code>/tmp/sshwrap/ssh</code> execs
-    <code>/usr/bin/ssh -F "$HOME/.ssh/config"</code>, <code>chmod +x</code>,
-    <code>PATH=/tmp/sshwrap:$PATH</code>), four boundedly reproduced attempts at
-    16:34:36, 16:34:51, 16:35:11 and 16:39:47Z each returned
-    <code>Connection timed out during banner exchange</code>. The
-    <code>laptop</code> hop itself is healthy — <code>ssh laptop hostname</code>
-    returns <code>FR-IWL-MCINTOS1</code> — but from inside it
-    <code>getent hosts</code> resolves both IFERC names to
-    <code>157.111.x.x</code> and a bounded <code>/dev/tcp</code> connect to port
-    22 times out on both. No <code>openvpn</code> or other VPN process is
-    running on the laptop; only <code>autossh</code> (the reverse tunnel) is
-    present. No alternative route is configured: the private facility notes
-    record that SOCKS5 proxying was removed from JT-60SA on 2026-01-29 and that
-    the VPN is "often unreachable from external networks".
+  <p id="five-scope-rejudge-overview-hop">
+    The hop was restored at 22:13Z (<code>ssh jt-60sa hostname</code> &rarr;
+    <code>intr26-2</code>, exit 0; no concurrent <code>discover code jt-60sa</code>
+    process). It dropped at 22:31Z during the content reset. This is the same
+    IFERC-SSL-VPN dependency recorded in the first attempt; the graph has not
+    changed for JT-60SA code outside this run's own writes.
   </p>
 </section>
 <section>
-  <h2 id="five-scope-rejudge-before">Before-census, 2026-10-07 ~16:45 UTC</h2>
-  <p id="five-scope-rejudge-before-codefiles">
+  <h2 id="five-scope-rejudge-census">Before and after counts</h2>
+  <p id="five-scope-rejudge-census-codefiles">
     CodeFiles at facility <code>jt-60sa</code>, by <code>status</code> and
-    <code>relevance_stage</code> (graph query over
-    <code>CodeFile</code> where <code>facility_id='jt-60sa'</code>):
+    <code>relevance_stage</code>. Before = 2026-10-07 ~16:45Z; after = 22:36Z,
+    after step (1) and before the hop drop:
   </p>
-  <table id="five-scope-rejudge-before-table">
+  <table id="five-scope-rejudge-census-table">
     <thead>
-      <tr><th>status</th><th>stage</th><th>CodeFiles</th></tr>
+      <tr><th>status</th><th>stage</th><th>before</th><th>after</th></tr>
     </thead>
     <tbody>
-      <tr><td>ingested</td><td>content</td><td>581</td></tr>
-      <tr><td>scored</td><td>content</td><td>717</td></tr>
-      <tr><td>skipped</td><td>content</td><td>50</td></tr>
-      <tr><td>skipped</td><td>name</td><td>1860</td></tr>
-      <tr><td><strong>total</strong></td><td></td><td><strong>3208</strong></td></tr>
+      <tr><td>ingested</td><td>content</td><td>581</td><td>633</td></tr>
+      <tr><td>scored</td><td>content</td><td>717</td><td>784</td></tr>
+      <tr><td>skipped</td><td>content</td><td>50</td><td>61</td></tr>
+      <tr><td>skipped</td><td>name</td><td>1860</td><td>1730</td></tr>
+      <tr><td><strong>total</strong></td><td></td><td><strong>3208</strong></td><td><strong>3208</strong></td></tr>
     </tbody>
   </table>
-  <p id="five-scope-rejudge-before-chunks">
-    CodeChunk nodes for <code>jt-60sa</code>: <strong>3050</strong>. The value is
-    confirmed by two independent paths — <code>CodeChunk.facility_id='jt-60sa'</code>
-    and <code>CodeFile-[:HAS_EXAMPLE]-&gt;CodeExample-[:HAS_CHUNK]-&gt;CodeChunk</code>
-    — and the instrument is shown to see chunks present: the graph holds
-    <strong>269010</strong> CodeChunk nodes in total, all hung off
-    <code>CodeExample</code>. A first query that joined
-    <code>CodeFile-[:HAS_CHUNK]-&gt;CodeChunk</code> directly returned 0; that
-    relationship does not exist for code files and the zero was a property of
-    the query, not of the graph.
+  <p id="five-scope-rejudge-census-chunks">
+    CodeChunks for <code>jt-60sa</code>: <strong>3050 &rarr; 3211</strong>,
+    counted through
+    <code>CodeFile-[:HAS_EXAMPLE]-&gt;CodeExample-[:HAS_CHUNK]-&gt;CodeChunk</code>
+    (a direct <code>CodeFile-[:HAS_CHUNK]</code> join does not exist and returns
+    a false zero). Under <code>/analysis/src/client_eqdbms.EQ32.Rev1</code>:
+    <strong>0 &rarr; 67</strong> chunks.
   </p>
-  <p id="five-scope-rejudge-before-eqdb">
-    The EQDB set under <code>/analysis/src/client_eqdbms.EQ32.Rev1</code>:
-    <strong>48 CodeFiles, every one at status <code>skipped</code>, then every
-    one at stage <code>name</code></strong>, and <strong>0 CodeChunks</strong>.
-    Scores are uniformly low — composite 0.08–0.30, and
-    <code>relevance_reconstruction_db</code> null on all 48 — so the new
-    reconstruction-db noul has admitted nothing here in the before state. The
-    set is two trees: <code>eqdbms/EQDB/</code> (the EQDB read/write Fortran) and
-    <code>eqtrace/</code> (a spline/ODE trace library whose files score high on
-    <code>relevance_simulation</code> — 0.81–0.87 — but low on composite). No
-    file at facility <code>jt-60sa</code> carries
-    <code>relevance_reconstruction_db &gt;= 0.5</code> before the run.
+  <p id="five-scope-rejudge-census-eqdb">
+    The EQDB set (<code>client_eqdbms.EQ32.Rev1</code>, 48 files), before all
+    <code>skipped/name</code>, after:
   </p>
-  <p id="five-scope-rejudge-before-incf">
-    The <code>.bf</code> field-list includes under
-    <code>/analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code> are
-    <strong>not listed as CodeFiles at all</strong>: facility <code>jt-60sa</code>
-    holds <strong>0</strong> CodeFiles whose path ends <code>.bf</code>. The
-    directory is known to the path table but its files were never enumerated —
-    <code>FacilityPath /analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code> is at
-    status <code>scored</code>, and the sibling
-    <code>inc/F_1025</code> and <code>inc/F_129</code> are at
-    <code>triaged</code>. This is exactly the §35 item-4 gap: the includes are
-    missing from the before census and must be re-opened by prefix and judged.
+  <table id="five-scope-rejudge-census-eqdb-table">
+    <thead>
+      <tr><th>status</th><th>stage</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ingested</td><td>content</td><td>0</td><td>30</td></tr>
+      <tr><td>scored</td><td>content</td><td>0</td><td>3</td></tr>
+      <tr><td>skipped</td><td>content</td><td>0</td><td>1</td></tr>
+      <tr><td>skipped</td><td>name</td><td>48</td><td>14</td></tr>
+    </tbody>
+  </table>
+</section>
+<section>
+  <h2 id="five-scope-rejudge-admitted">Files newly admitted by the reconstruction-db noul</h2>
+  <p id="five-scope-rejudge-admitted-list">
+    <strong>45</strong> files at facility <code>jt-60sa</code> now carry
+    <code>relevance_reconstruction_db &gt;= 0.5</code> (before: 0), listed with
+    that score, the composite, and <code>relevance_simulation</code>:
   </p>
-  <p id="five-scope-rejudge-before-search">
-    The §14 search criterion could not be run: <code>_search_code</code> reads
-    the graph and would report only the before state, and the criterion's
-    subject — a chunk from a file carrying the EQDBMS field list — has no chunk
-    to find because the <code>.bf</code> includes are unlisted and the EQDB
-    Fortran carries no chunk. This is deferred to the resumed run.
+  <ul id="five-scope-rejudge-admitted-eqdb">
+    <li><strong>The EQDB set</strong> (<code>client_eqdbms.EQ32.Rev1</code>): 26
+    Fortran readers/writers under <code>eqdbms/EQDB/</code> &mdash;
+    <code>eqrd2/4/10/11/13/15/20/21/22/31/32.f</code> (rec_db 0.96&ndash;0.97),
+    <code>eqwt2/4/10/11/13/15/20/21/31/32.f</code> (0.93&ndash;0.96),
+    <code>eqdb_get.f</code> (0.94), <code>eqdb_get_rev.f</code> (0.94),
+    <code>eqdb_io.f</code> (0.95), <code>eqdbio.f</code> (0.93),
+    <code>eqdbio_rev.f</code> (0.94), <code>eqdb_set.f</code> (0.90),
+    <code>eqdbconv.f</code> (0.51), <code>eqdblist.f</code> (0.68); plus
+    <code>eqtrace/eqgettrace.f90</code> (0.82) and
+    <code>eqtrace/gettracedata.f</code> (0.61). Composite tracks rec_db
+    closely (0.51&ndash;0.97).</li>
+    <li><strong>The EQDB library</strong> <code>/analysis/lib/eqdbms/</code>:
+    <code>eqdbput2m.f</code> (0.91), <code>eqdbput.f</code> (0.90).</li>
+    <li><strong>EDAS equilibrium readers</strong>
+    <code>edas2/v2.1.15/edas_share/eqread_pac/</code>: <code>fledd.pac/testCast.f</code>
+    (0.91), <code>test2.f</code> (0.88), <code>test1.f</code> (0.87),
+    <code>testSL.f</code> (0.87), <code>locallist.f</code> (0.64),
+    <code>set_limitr_info.f</code> (0.59), <code>eqfame/eqset.py</code> (0.51);
+    <code>v2.1.14/.../eqdblist.f</code> (0.55),
+    <code>fledd.pac.20160412/eqdbms/eqdbms/C/f_ewrite.c</code> (0.59).</li>
+    <li><strong>Others</strong>: <code>SAeqread/u_file/ufldat.f</code> (0.68),
+    <code>SAeqread/u_file/u_out.f</code> (0.51),
+    <code>getseldata_v4.2/UTL/getfame96/main.c</code> (0.51).</li>
+  </ul>
+  <p id="five-scope-rejudge-admitted-includes">
+    <strong>The <code>.bf</code> field-list includes are still not admitted or
+    listed.</strong> Step (4) was not reached; facility <code>jt-60sa</code>
+    holds <strong>0</strong> CodeFiles ending <code>.bf</code> and
+    <strong>0</strong> CodeFiles under
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code>. The include set is
+    named here only by the reader that references it (below); the includes
+    themselves remain unenumerated.
+  </p>
+  <p id="five-scope-rejudge-admitted-simulation">
+    <strong>Simulation-looking files admitted by the reconstruction-db noul</strong>
+    (<code>relevance_simulation &gt;= 0.5</code> while admitted on
+    <code>relevance_reconstruction_db</code>) &mdash; 3 files:
+    <code>eqdbms/EQDB/eqwt13.f</code> (rec_db 0.96, sim 0.53),
+    <code>eqtrace/gettracedata.f</code> (rec_db 0.61, sim 0.60), and
+    <code>edas_share/eqread_pac/eqfame/eqset.py</code> (rec_db 0.51, sim 0.72).
+    The wider <code>eqtrace/eqtrace/</code> spline/ODE library scores
+    <code>relevance_simulation</code> 0.81&ndash;0.87 but was not admitted on
+    <code>reconstruction_db</code>, so it is not in this list.
+  </p>
+  <p id="five-scope-rejudge-below-gates">
+    <strong>Ingested files now below both admission gates</strong> (listed, not
+    removed): <strong>470</strong> files are <code>ingested</code> with
+    <code>relevance_reconstruction_db &lt; 0.5</code> and
+    <code>relevance_simulation &lt; 0.5</code>; <strong>0</strong> of them are
+    under <code>client_eqdbms</code>. The full 470-path list is in
+    <code>reports/imas-codex/five-scope-rejudge/census_after.json</code>.
   </p>
 </section>
 <section>
-  <h2 id="five-scope-rejudge-resume">Resume plan</h2>
-  <p id="five-scope-rejudge-resume-steps">
-    The hop is the sole gate. Once <code>ssh -o BatchMode=yes jt-60sa hostname</code>
-    succeeds, run from this worktree with
+  <h2 id="five-scope-rejudge-search">§14 search criterion</h2>
+  <p id="five-scope-rejudge-search-result">
+    <code>_search_code('EQDBMS record layout', facility='jt-60sa')</code> (run
+    once from <code>imas_codex/llm/search_tools.py</code>) returned
+    <strong>10 matches</strong>. The top hit,
+    <code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/fledd.pac.20160412/eqitem_get.f</code>
+    (score 6.17), carries a chunk that names the EQDBMS field lists directly in
+    its comments &mdash; <code>#EQV.bf</code>, <code>#OUT.bf</code>,
+    <code>#EQU.bf</code>. So the criterion is <strong>partially met</strong>: a
+    chunk referencing the field lists comes back, but from an EDAS equilibrium
+    reader that <em>names</em> them, not from a file that <em>carries</em> the
+    field list (the <code>inc/F</code> includes and the
+    <code>lib/eqdbms/eqdbget*.f</code> headers were never listed or ingested).
+    The result is a property of an incomplete state, not of the search.
+  </p>
+</section>
+<section>
+  <h2 id="five-scope-rejudge-remaining">Where it stopped, and the resume plan</h2>
+  <p id="five-scope-rejudge-remaining-stopped">
+    Completed: step (1) <code>--reset-to name</code> and its drain (scan and
+    triage phases reported empty). Not reached: step (2)
+    <code>--reset-to content</code> (failed on the hop drop), its drain,
+    step (3) <code>--rejudge-ingested</code>, and step (4) the
+    <code>inc/F</code> prefix pass. Decision spend USD 0.29 (<code>--cost-limit
+    3</code> per invocation; ceiling USD 10 not approached).
+  </p>
+  <p id="five-scope-rejudge-remaining-plan">
+    On hop recovery, resume with
     <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv</code>
-    and <code>PYTHONPATH=$PWD</code>, single-writer, <code>--cost-limit 3</code>
-    on every invocation, stopping if summed decision spend reaches USD 10:
-    (1) <code>discover code jt-60sa --reset-to name --time 8</code>, then repeat
-    <code>discover code jt-60sa --time 8</code> until no file waits at
-    <code>triaged</code> and no admitted content-stage file waits for ingest;
-    (2) <code>discover code jt-60sa --reset-to content --time 8</code> once,
-    then drain; (3) <code>discover code jt-60sa --reset-to ingested
+    and <code>PYTHONPATH=$PWD</code>, single-writer, <code>--cost-limit 3</code>:
+    (2) <code>discover code jt-60sa --reset-to content --time 8</code> once, then
+    <code>discover code jt-60sa --time 8</code> until no admitted content-stage
+    file waits for ingest; (3) <code>discover code jt-60sa --reset-to ingested
     --rejudge-ingested --time 8</code> once, then
     <code>discover code jt-60sa --rejudge-ingested --time 8</code> until no
-    ingested content-stage file lacks a recorded answer; (4) if the scan skips
-    <code>inc/F</code> because its FacilityPath is marked scanned, re-open it
-    with <code>--path-prefix /analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code>
-    and run one more pass. Then re-run the census, list newly admitted files at
-    <code>relevance_reconstruction_db &gt;= 0.5</code> with composite, naming the
-    EQDB set and includes, list any newly admitted file at
-    <code>relevance_simulation &gt;= 0.5</code> whose admitting noul is
-    reconstruction-db, list ingested files now below both gates, run
-    <code>_search_code('EQDBMS record layout', facility='jt-60sa')</code> once,
-    and report summed decision spend.
+    ingested content-stage file lacks a recorded answer; (4) re-open
+    <code>--path-prefix /analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code> and
+    run one more pass so the <code>.bf</code> includes are listed and judged.
+    Then re-run
+    <code>reports/imas-codex/five-scope-rejudge/census.py</code> for the final
+    after-census and re-run the §14 search, whose field-list chunk is expected
+    only once the includes are ingested.
   </p>
 </section>
