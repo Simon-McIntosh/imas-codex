@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="discovery-judgments-through-jev">
+  <meta name="plan-title" content="Discovery Judgments Through Jev">
+  <meta name="plan-summary" content="Move every judgment the discovery LLM rubric makes onto Jev typed judgments, prototype-first, and re-judge stored rows from the graph">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="20.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="discovery,signals,wiki">
+  <meta name="plan-after" content="jt60sa-discovery-completion#s25">
+  <title>Discovery Judgments Through Jev | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-07">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;}">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why every discovery judgment moves</h2>
+    <p>Each discovery pipeline makes the same kind of decision. A language model scores an item on several purpose dimensions from 0 to 1 against a written rubric, and code compares those numbers with fixed thresholds to decide what to keep, expand or ingest. The code pipeline showed that this is the wrong instrument.</p>
+    <ul>
+      <li>The rubric places core facility code at 0.65–0.85, while the gates sat at 0.75 and 0.90.</li>
+      <li>The scale drifts by facility: ingested TCV files have a median of 0.85, while the JT-60SA Grad-Shafranov solver tops out at 0.75.</li>
+      <li>Against 128 hand-labelled files from JT-60SA, TCV and JET, the old composite separates the code a mapper needs at AUC 0.56.</li>
+      <li>Jev's typed judgments separate the same files at AUC 0.962.</li>
+    </ul>
+    <p>§25 of <a href="/imas-codex/jt60sa-discovery-completion">JT-60SA Discovery Completion</a> deployed that change for code. This plan carries it to every other pipeline.</p>
+    <p>Jev, TypeSafe's decisions model reached through OpenRouter's <code>/api/alpha/decisions</code> endpoint, answers three typed primitives:</p>
+    <ul>
+      <li><strong>Noul:</strong> the probability that a condition holds.</li>
+      <li><strong>Choice:</strong> one option from a set, with its distribution.</li>
+      <li><strong>Score:</strong> a probability-weighted position on ordered, concretely described levels.</li>
+    </ul>
+    <p>Three rules select among them. Two are measured; the third follows from what each primitive returns.</p>
+    <ul>
+      <li><strong>Gate on Nouls.</strong> For an in-or-out decision, the maximum of the scope Nouls separated in-scope code at AUC 0.962. A five-level relevance Score reached 0.894, and the maximum of four facet Scores reached 0.913.</li>
+      <li><strong>Use one Noul per label wherever several labels can hold.</strong> A Choice is single-answer. Measured by the mapping-candidate-selection plan: a JET plasma-current source received 1.0 on <code>magnetics</code> and 0 on <code>equilibrium</code> and <code>summary</code>, although it belongs in all three.</li>
+      <li><strong>Use Choice for an exclusive classification, and Score for a graded facet that is stored and tracked.</strong> Facets are read only for items that pass the gate: outside it, MINPACK's least-squares routines scored 2.5 of 3 on signal processing.</li>
+    </ul>
+    <p>Text generation stays with the language model: descriptions, keywords, signal names, cluster labels, and the DD, IDS and identifier enrichment text.</p>
+
+    <h2 id="s2">§2 — The judgments the language model makes today</h2>
+    <p>Census of the structured model calls in the discovery code, 2026-10-07. Each row names the response model, the judgments it carries, and the Jev form that replaces them.</p>
+    <table>
+      <thead><tr><th>Pipeline</th><th>Call (response model)</th><th>Judgments today</th><th>Jev form</th></tr></thead>
+      <tbody>
+        <tr><td>paths, triage</td><td><code>TriageBatch</code> in <code>discovery/paths/scorer.py</code></td><td>11 purpose scores, <code>path_purpose</code>, <code>physics_domain</code>, <code>should_expand</code>, <code>should_enrich</code></td><td>scope Nouls as the gate, facet Scores, a Noul each for expand and enrich, purpose as a Choice, domain as Nouls per label</td></tr>
+        <tr><td>paths, score</td><td><code>ScoreBatch</code> in <code>discovery/paths/parallel.py</code></td><td>the same, plus <code>new_score</code></td><td>the same forms, from the enriched evidence</td></tr>
+        <tr><td>wiki pages</td><td><code>WikiScoreBatch</code> in <code>discovery/wiki/scoring.py</code></td><td>6 content scores, <code>page_purpose</code>, <code>physics_domain</code>, <code>should_ingest</code></td><td>an ingest Noul as the gate, facet Scores, purpose as a Choice</td></tr>
+        <tr><td>documents</td><td><code>DocumentScoreBatch</code> in <code>discovery/wiki/scoring.py</code></td><td>as for wiki pages</td><td>as for wiki pages</td></tr>
+        <tr><td>images</td><td><code>ImageScoreBatch</code> in <code>discovery/base/image.py</code></td><td>the same scores and decisions, plus OCR text and diagrams</td><td>the vision model keeps the caption, OCR and diagram; Jev decides from that text</td></tr>
+        <tr><td>signal enrichment</td><td><code>SignalEnrichmentBatch</code> in <code>discovery/signals/parallel.py</code></td><td><code>physics_domain</code>, <code>diagnostic</code>, <code>context_quality</code>, beside the generated name and description</td><td>domain as Nouls per label, diagnostic and context quality as Choices, and a Noul that the description is supported by its source context</td></tr>
+        <tr><td>DD domain classifier</td><td><code>DomainBatchResult</code> in <code>graph/dd_domain_classifier.py</code></td><td><code>physics_domain</code> per DD path</td><td>Nouls per label, with the single label kept where the schema requires one</td></tr>
+      </tbody>
+    </table>
+    <p>Out of scope here: the code pipeline, owned by §25 of JT-60SA Discovery Completion, and IMAS mapping, owned by the mapping-candidate-selection plan. That plan rewrites <code>imas_codex/ids/mapping.py</code> and <code>imas_codex/ids/workers.py</code>, and no node of this plan writes those files.</p>
+
+    <h2 id="s3">§3 — A graph-only re-judge mode</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>Most stored rows carry the text Jev needs, so re-judging them needs no facility traffic. Counted on 2026-10-07:</p>
+    <table>
+      <thead><tr><th>Node</th><th>Rows</th><th>Judged by the language model</th><th>Text stored for re-judging</th></tr></thead>
+      <tbody>
+        <tr><td>FacilityPath</td><td>275,351</td><td>46,307</td><td>115,139 descriptions</td></tr>
+        <tr><td>WikiPage</td><td>28,239</td><td>23,054</td><td>23,054 previews</td></tr>
+        <tr><td>Document</td><td>41,175</td><td>6,112</td><td>20,961 previews</td></tr>
+        <tr><td>CodeFile</td><td>264,618</td><td>163,193</td><td>98,379 previews</td></tr>
+        <tr><td>FacilitySignal</td><td>53,170</td><td>49,760</td><td>49,760 descriptions</td></tr>
+      </tbody>
+    </table>
+    <p>At the measured $0.0001 and 0.4 s per call, re-judging every row with stored text costs about $55–60 and about 8 hours at a concurrency of 8.</p>
+    <p>The node adds one re-judge driver beside each pipeline's claim functions. It builds the Jev state from stored fields only, writes the judgment fields, and records the model and stage, through the <code>call_decisions</code> layer that §25 landed. A file whose stored text is missing is left for the pipeline's own fetch. A failed decision leaves the row untouched.</p>
+    <p>Done when:</p>
+    <ul>
+      <li>The driver re-judges a scoped prefix of one facility with no SSH call. A test asserts that the remote executor is never invoked.</li>
+      <li>It writes the same fields the pipeline's own judgment writes.</li>
+      <li>Its spend is recorded.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Paths through Jev</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>Path judgments gate everything downstream: code discovery scans only paths above the discovery threshold of 0.9. On 2026-10-06 that admitted 94 of the 692 JT-60SA paths outside <code>/home</code>, and excluded the getseldata, SAeqfame, eqdbms and client_eqdbms equilibrium trees.</p>
+    <p>Prototype first, as for code:</p>
+    <ul>
+      <li>a labelled sample of at least 120 paths across JT-60SA, TCV and JET;</li>
+      <li>the questions from §2, with the facility's <code>data_access_patterns</code> injected;</li>
+      <li>AUC and operating points measured against the current composite.</li>
+    </ul>
+    <p>Then deploy:</p>
+    <ul>
+      <li>Path triage and scoring write Jev judgments.</li>
+      <li>The scan, expand and enrich gates read Nouls.</li>
+      <li>The 0.9 threshold retires from path gating.</li>
+      <li>The language model keeps only the description.</li>
+    </ul>
+    <p>Done when the deployed path judgments reproduce the prototype's AUC within 0.02 on its labelled set.</p>
+
+    <h2 id="s5">§5 — Wiki pages and documents through Jev</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>The same pattern applies, with one open question carried in. At JT-60SA, 3,754 of the 4,476 wiki pages are <code>SystemDailyReport</code> pages. Their previews show only the blank form template, because TWiki stores filled-in form values in <code>%META:FIELD</code> lines that the preview may drop.</p>
+    <p>The node first checks one raw page. If the values are there, the preview builder includes them, before any judgment is re-run.</p>
+    <p>Done when:</p>
+    <ul>
+      <li>Wiki and document ingest are gated on a Jev Noul.</li>
+      <li>The prototype's AUC on a labelled page sample is recorded.</li>
+      <li>The daily-report question is answered from a raw page.</li>
+    </ul>
+
+    <h2 id="s6">§6 — Signal enrichment and DD domain classifications through Jev</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>Signal enrichment keeps the language model for the generated name and description, and moves its classifications to Jev:</p>
+    <ul>
+      <li>physics domain as Nouls per label;</li>
+      <li>diagnostic and context quality as Choices;</li>
+      <li>a Noul asking whether the generated description is supported by the source context the enrichment read. A low value sends the signal back for enrichment rather than accepting the description.</li>
+    </ul>
+    <p>The DD domain classifier becomes the same physics-domain judgment over DD paths.</p>
+    <p>Done when both deploy behind a prototype that measures agreement with a labelled sample, with the change against the current assignments reported.</p>
+
+    <h2 id="s7">§7 — Re-judge the stored rows</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>After §3–§6 land, the re-judge driver runs once per facility and pipeline over the stored rows:</p>
+    <ul>
+      <li>JT-60SA first, then TCV, JET and ITER;</li>
+      <li>each run scoped and bounded, in foreground passes;</li>
+      <li>spend recorded against the estimate in §3.</li>
+    </ul>
+    <p>A row whose decision changes from skip to admit enters its pipeline's normal fetch. A row whose decision changes from admit to skip keeps what it already ingested, and is only reported.</p>
+
+    <h2 id="s8">§8 — Further uses to evaluate</h2>
+    <p>These are candidates, not commitments. Each needs its own prototype before it earns a node.</p>
+    <ul>
+      <li><strong>Search reranking:</strong> a Score per retrieved chunk in the MCP search tools, against the query.</li>
+      <li><strong>Fork detection:</strong> a Noul over two files' names and previews, asking whether they are copies of one code, to collapse the personal copies that make up 99.7% of TCV's scored backlog.</li>
+      <li><strong>Selection instead of generation:</strong> Choices over candidate units, sign conventions or COCOS values drawn from the graph, wherever a pipeline asks a language model to write one of a known set.</li>
+      <li><strong>Standard-name review:</strong> rubric dimensions as Scores, compared against the current reviewers. This is evaluated only, because review needs written reasons that Jev does not produce.</li>
+    </ul>
+
+    
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-djj-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the graph-only re-judge mode</h4>
+    <div class="r-fu-body"><p>§3 is the shared foundation. The pipeline sections reuse its driver for their own re-judging.</p></div>
+    <pre class="r-fu-prompt">/reckon-build discovery-judgments-through-jev §3</pre>
+    </article>
+</section>
+  <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-djj-1" data-section="s4" data-gated-sections="s4,s6" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">call_decisions validates score-type answers (score within the level range, probabilities over the offered levels summing to 1 within the rounding tolerance), which the path and signal judgments rely on for their facet Scores</h4>
+    <p class="r-gate-required-evidence">jt60sa-discovery-completion#s25</p>
+    </div>
+</section>
+</main>
+</body>
+</html>
