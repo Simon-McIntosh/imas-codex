@@ -1,0 +1,99 @@
+<section>
+  <h2 id="facet-rejudge">JT-60SA content-stage files re-judged, and the facet rule admits two</h2>
+  <p id="facet-rejudge-result">
+    With the content question set now asked, a single <code>--reset-to
+    content</code> pass re-judged the 780 JT-60SA content-stage files that were
+    at <code>scored</code> or <code>skipped</code> and left the 539
+    <code>ingested</code> and 29 <code>failed</code> untouched. Every facet
+    confidence, zero on all 1,348 content-stage files before the pass, now
+    carries a real answer on the re-judged files. The pipeline drained in one
+    pass: a confirming <code>--time 8</code> pass reported no work
+    (<code>0 scanned, 0 scored, 0 code ingested, Cost $0.00</code>).
+  </p>
+  <table id="facet-rejudge-before-after">
+    <caption>Content-stage files by status, and facet confidences above zero, before and after the re-judge</caption>
+    <thead>
+      <tr><th>measure</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>content-stage files</td><td>1348</td><td>1348</td></tr>
+      <tr><td>scored</td><td>710</td><td>723</td></tr>
+      <tr><td>ingested</td><td>539</td><td>552</td></tr>
+      <tr><td>skipped (content stage)</td><td>70</td><td>44</td></tr>
+      <tr><td>failed</td><td>29</td><td>29</td></tr>
+      <tr><td>score_data_access_confidence &gt; 0</td><td>0</td><td>726</td></tr>
+      <tr><td>score_signal_processing_confidence &gt; 0</td><td>0</td><td>661</td></tr>
+      <tr><td>score_machine_description_confidence &gt; 0</td><td>0</td><td>738</td></tr>
+      <tr><td>score_imas_mapping_confidence &gt; 0</td><td>0</td><td>755</td></tr>
+      <tr><td>relevance_grade_confidence &gt; 0</td><td>0</td><td>624</td></tr>
+    </tbody>
+  </table>
+  <p id="facet-rejudge-admitted">
+    The facet rule (strongest facet at or above the 0.85
+    <code>code-facet-admission-threshold</code>, composite below the 0.5
+    <code>code-ingest-threshold</code>) admits <strong>two</strong> files, both
+    already <code>ingested</code>. No other file is admitted only by a facet:
+  </p>
+  <table id="facet-rejudge-facet-only">
+    <caption>Files admitted only by the facet rule, with their facets and composite</caption>
+    <thead>
+      <tr><th>path</th><th>status</th><th>composite</th><th>data_access</th><th>signal_processing</th><th>machine_description</th><th>imas_mapping</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</td><td>ingested</td><td>0.30</td><td>0.01</td><td>0.29</td><td><strong>0.8733</strong></td><td>0.0</td></tr>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC/plt/prbplt.f</td><td>ingested</td><td>0.32</td><td>0.01</td><td>0.0133</td><td><strong>0.8567</strong></td><td>0.0</td></tr>
+    </tbody>
+  </table>
+  <p id="facet-rejudge-named">
+    <code>mgset0.f</code> now carries machine_description 0.8733 (composite 0.30,
+    data_access 0.01, signal_processing 0.29, imas_mapping 0.0, relevance_grade
+    1.84, machine-description confidence 0.63). <code>eqgrd.f</code>
+    (<code>/analysis/src/SAselene_v2.0_forPSRC/eqgrd.f</code>) re-judged to
+    machine_description 0.4833 — below the 0.85 facet gate — with composite 0.22,
+    data_access 0.005, signal_processing 0.2333, imas_mapping 0.0 and
+    relevance_grade 1.87, so it stays at <code>scored</code> and the facet rule
+    does not admit it. A second <code>eqgrd.f</code>
+    (<code>/analysis/src/topics_release/topics/topics/eqmain/eqgrd.f</code>) is
+    admitted on its composite 0.54 and is <code>ingested</code>.
+  </p>
+  <p id="facet-rejudge-ingested">
+    Thirteen files were newly ingested, two by the facet rule
+    (<code>mgset0.f</code>, <code>prbplt.f</code>) and eleven on composite at or
+    above 0.5:
+    <code>edas_eslice2/eslice_data_area/eslice_custom_classes_matplotlib.py</code>
+    (0.53, v2.1.15), <code>edas_esurf2/esurf_data_area/esurf_view_equilibrium_parameters_area.py</code>
+    (0.53), <code>edas_share/eqread_pac/fledd.pac/eqdb.f</code> (0.50),
+    <code>edas_share/eslice_esurf/default/Easy.py</code> (0.52),
+    <code>tool/adam2imas/dum.f</code> (0.51), <code>tool/adam2imas/set_adam_ni.f</code>
+    (0.56), <code>topics/eqmain/cal_delp.f</code> (0.53),
+    <code>topics/eqmain/slctuion.f</code> (0.52), <code>topics/fp_rat_v1l1/tae_diagnostic.f90</code>
+    (0.50), <code>topics/rfmain/rfcal1.f</code> (0.54) and
+    <code>topics/trmain/rst_ionden.f</code> (0.50).
+  </p>
+  <p id="facet-rejudge-evidence">
+    Measure: <code>uv run --no-sync imas-codex discover code jt-60sa --reset-to
+    content --time 8</code> once, then a confirming <code>uv run --no-sync
+    imas-codex discover code jt-60sa --time 8</code>, run on the fleet node
+    <code>98dci4-clu-2018</code> (job 1277272) with
+    <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv</code>
+    and <code>PYTHONPATH=$PWD</code>, the JT-60SA hop reached through
+    <code>/tmp/sshwrap/ssh</code> (<code>ssh -o BatchMode=yes jt-60sa hostname</code>
+    returned <code>intr26-2</code>). No other <code>discover code jt-60sa</code>
+    process ran for this user. Decision spend: <strong>$0.09</strong> for the
+    reset pass (198.6 s), <strong>$0.00</strong> for the confirming pass
+    (479.6 s). Residual work: <strong>0</strong> files wait at
+    <code>triaged</code> for scoring and <strong>0</strong> admitted file waits
+    for ingest under the claim's own <code>line_count &lt;= 10000</code> bound.
+    The two chunk-less <code>eslice_set_fitting_func_area.py</code> files are
+    admitted on composite (0.80 and 0.75) but sit above that bound (10,374 and
+    10,467 lines), so the ingest claim structurally never takes them — they are
+    the pair §31 owns. Negative control: of the 723 files now at
+    <code>scored</code>, 721 carry composite and every facet below their
+    thresholds and are correctly not admitted and stay not ingested (for example
+    <code>edas_share/eqread_pac_org_20170621/__init__.py</code>, composite 0.49,
+    facets 0.1475/0.02/0.02/0.0367). Scripts and their outputs in
+    <code>reports/imas-codex/facet-rejudge/</code>: <code>census.py</code>,
+    <code>admission.py</code>, <code>final_state.py</code>, with
+    <code>before_census.json</code> and <code>after_final.json</code>.
+  </p>
+</section>
