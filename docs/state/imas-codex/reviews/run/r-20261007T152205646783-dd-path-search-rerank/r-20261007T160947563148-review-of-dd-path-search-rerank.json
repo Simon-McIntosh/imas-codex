@@ -1,0 +1,114 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by this review from the reviewed node's own gate, run as two arms in scratch extractions under $TMPDIR: baseline_suite at the reviewed base 46572d2b8 (tests/tools/ in the base tree, 224 passed / 6 skipped / 13 deselected, EXIT=0, logs/review_base.log) and after_suite at the reviewed head 786814e41 (tests/tools/ in the head tree, 238 passed / 6 skipped / 13 deselected, EXIT=0, logs/review_head.log). Both arms ran to their summary line; the head adds exactly the 14 tests of tests/tools/test_dd_path_search_rerank.py and no test regresses, so added_failure_count is the set difference of the two failure-id sets and is 0. The reviewed run's own manifest carried no baseline_suite/after_suite pair (both absent), so the two arms were measured here rather than read from the reviewed record; the reviewed gate (25 passed, EXIT=0) and its declared negative control (2 failed, EXIT=1) both reproduce exactly against the reviewed head.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T160947563148-review-of-dd-path-search-rerank/head uv run --no-sync pytest -p no:cacheprovider tests/tools/",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T160947563148-review-of-dd-path-search-rerank/logs/review_head.log",
+    "revision": "786814e41af9346576fa2d0326fb8e942cf06e0d"
+  },
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T160947563148-review-of-dd-path-search-rerank/logs/review_head_unit.log (25 passed EXIT=0 at 786814e41af9346576fa2d0326fb8e942cf06e0d)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T160947563148-review-of-dd-path-search-rerank/logs/review_head_graph.log (6 passed EXIT=0 -m graph at 786814e41af9346576fa2d0326fb8e942cf06e0d)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T160947563148-review-of-dd-path-search-rerank/logs/review_base.log (224 passed EXIT=0 at 46572d2b8abd0cf3256093f9559f7129b07b92e9)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T160947563148-review-of-dd-path-search-rerank/logs/review_head.log (238 passed EXIT=0 at 786814e41af9346576fa2d0326fb8e942cf06e0d)",
+    "NODE_EVIDENCE reviewed gate: tests/tools/test_dd_path_search_rerank.py (14 passed), tests/tools/test_tools.py (11 passed), tests/tools/test_search_dd_paths_regression.py -m graph (6 passed)",
+    "NODE_EVIDENCE fragment measurement: nDCG@10 0.3451 (embedding) -> 0.4102 (reranked); grade-3-only P@5 0.2667 -> 0.3333, mean over 15 questions"
+  ],
+  "base_log_revision": "46572d2b8abd0cf3256093f9559f7129b07b92e9",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T160947563148-review-of-dd-path-search-rerank/base uv run --no-sync pytest -p no:cacheprovider tests/tools/",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T160947563148-review-of-dd-path-search-rerank/logs/review_base.log",
+    "revision": "46572d2b8abd0cf3256093f9559f7129b07b92e9"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/llm/server.py:1882",
+    "imas_codex/llm/server.py:375",
+    "imas_codex/tools/__init__.py:48",
+    "imas_codex/tools/graph_search.py:446",
+    "imas_codex/tools/graph_search.py:364"
+  ],
+  "completed_at": "2026-10-07T16:28:56.665Z",
+  "dispatched_at": "2026-10-07T16:09:59Z",
+  "evidence_inputs": [
+    "MERGE ORDER: the shared owner rerank_candidates/rerank_pool at this node's base and head has no decisions_key_present guard \u2014 node decisions-key-skip (dcf52306b) is NOT an ancestor of either 46572d2b8 or 786814e41, so \u00a78's second decision (every Jev caller skips cleanly when OPENROUTER_API_KEY_IMAS_CODEX is absent) reaches the DD path only once both \u00a78 nodes are merged into one tree. Not a defect of this node (it correctly reuses the owner), but the integration must carry both.",
+    "MODULE UNDER TEST: imas_codex.__file__ resolved to <scratch>/{{base,head}}/imas_codex/__init__.py in every arm; the shared .venv was used read-only (UV_PROJECT_ENVIRONMENT, --no-sync)."
+  ],
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite/after_suite arm pair, so the required added-failure figure cannot be read from its own record; this review measured the arms (base 224 passed, head 238 passed, both EXIT=0) and the count is 0. The change itself adds 14 tests and breaks none."
+    },
+    {
+      "file": "imas_codex/tools/graph_search.py",
+      "line": "364",
+      "severity": "follow-on",
+      "text": "follow-on: _rerank_dd_hits discards the note rerank_candidates returns, so a search_dd_paths caller cannot tell a rerank fallback (the decisions key absent, or the 5 s budget elapsed) from a completed rerank \u2014 the two established callers surface the same note in their report (imas_codex/llm/search_tools.py:1704 and :975). The order is still never worse than embedding order; only the fallback signal is lost."
+    },
+    {
+      "file": "tests/tools/test_dd_path_search_rerank.py",
+      "line": "133",
+      "severity": "follow-on",
+      "text": "follow-on: test_read_only_server_never_reranks and ::test_dd_only_server_never_reranks assert the module switch is False rather than that rerank_candidates is never called, so the plan's never calls the rerank is pinned at the GraphSearchTool level (test_search_does_not_rerank_when_disabled) and only indirectly at the server level; the guard is falsifiable (the declared negative control reddens exactly these two)."
+    }
+  ],
+  "follow_ons": [
+    "The reviewed record omits baseline_suite/after_suite arms; naming them would make the record self-contained (this review measured the arms itself, added_failure_count 0).",
+    "_rerank_dd_hits drops the shared owner's fallback note; surfacing it (as imas_codex/llm/search_tools.py:1704 and :975 do) would tell a search_dd_paths caller the rerank fell back.",
+    "The two rerank failures the fragment records (electron temperature, coil current) and the intent-questionable plasma volume case are judge-quality observations for the coordinator, not node defects."
+  ],
+  "head_log_revision": "786814e41af9346576fa2d0326fb8e942cf06e0d",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against 46572d2b8abd0cf3256093f9559f7129b07b92e9: 3c3a6e82e adds the switch and the single call into rerank_candidates, 743db9b52 adds the fixture/tests/fragment, 786814e41 completes the labels and re-measures; 3 files / 50 insertions in source, no source change outside the declared scope.",
+    "done_when": "the done_when names nDCG@10 before and after on the 15-question fixture and three pinned tests; the reviewed gate is recorded and reproduces here (review_head_unit.log 25 passed EXIT=0 at 786814e41af9346576fa2d0326fb8e942cf06e0d, review_head_graph.log 6 passed EXIT=0 -m graph) and the fragment reports nDCG@10 0.3451 -> 0.4102.",
+    "goal": "\u00a78's dd-path-search-rerank asks search_dd_paths to reorder its hybrid hits through the shared search-time Jev rerank behind a construction-time switch set from the server mode; the landed change does exactly that (imas_codex/tools/graph_search.py:338 _rerank_dd_hits, :364 the one call into rerank_candidates, :443 the switch; imas_codex/tools/__init__.py:48; imas_codex/llm/server.py:1882).",
+    "manifest": "status complete, commits 3c3a6e82e/743db9b52/786814e41; gate and negative-control logs reproduce at the reviewed head; it carries no baseline_suite/after_suite arm pair, so the added-failure figure was measured here (0).",
+    "write_paths": "the manifest declares six paths; the diff touches exactly those six and nothing else."
+  },
+  "justifications": {
+    "durability": "the negative control reddens tests/tools/test_dd_path_search_rerank.py::test_read_only_server_never_reranks and ::test_dd_only_server_never_reranks, but those two pin the switch flag rather than the call, one indirection short of the plan's never calls the rerank.",
+    "evidence": "the gate and the declared negative control reproduce independently at 786814e41af9346576fa2d0326fb8e942cf06e0d (review_head_unit.log 25 passed EXIT=0; review_negative_control.log 2 failed EXIT=1) and the fragment's means recompute from its per-question table, but the live Jev measurement itself was not re-run here and the reviewed record carries no baseline/after arms.",
+    "fit": "the module-global switch at imas_codex/llm/server.py:1882 mirrors the existing _no_embed idiom and every added name states its mechanism.",
+    "goal_fidelity": "imas_codex/tools/graph_search.py:443 and imas_codex/llm/server.py:1882 implement \u00a78's DD-path rerank switch and its mode default exactly, one call into the shared owner.",
+    "reuse": "imas_codex/tools/graph_search.py:364 extends the shared owner rerank_candidates rather than adding a second rerank, but discards the fallback note the other two callers surface.",
+    "scope_discipline": "the diff at imas_codex/tools/graph_search.py, imas_codex/tools/__init__.py, imas_codex/llm/server.py, tests/tools/test_dd_path_search_rerank.py, tests/tools/fixtures/dd_mapping_questions.json and the fragment touches only the six declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a78's dd-path-search-rerank asks search_dd_paths to reorder its hybrid hits through the shared search-time Jev rerank behind a construction-time switch set from the server mode; the landed change does exactly that (imas_codex/tools/graph_search.py:338 _rerank_dd_hits, :364 the one call into rerank_candidates, :443 the switch; imas_codex/tools/__init__.py:48; imas_codex/llm/server.py:1882).\nVERDICT done_when: the done_when names nDCG@10 before and after on the 15-question fixture and three pinned tests; the reviewed gate is recorded and reproduces here (review_head_unit.log 25 passed EXIT=0 at 786814e41af9346576fa2d0326fb8e942cf06e0d, review_head_graph.log 6 passed EXIT=0 -m graph) and the fragment reports nDCG@10 0.3451 -> 0.4102.\nVERDICT write_paths: the manifest declares six paths; the diff touches exactly those six and nothing else.\nVERDICT manifest: status complete, commits 3c3a6e82e/743db9b52/786814e41; gate and negative-control logs reproduce at the reviewed head; it carries no baseline_suite/after_suite arm pair, so the added-failure figure was measured here (0).\nVERDICT diff: read commit by commit against 46572d2b8abd0cf3256093f9559f7129b07b92e9: 3c3a6e82e adds the switch and the single call into rerank_candidates, 743db9b52 adds the fixture/tests/fragment, 786814e41 completes the labels and re-measures; 3 files / 50 insertions in source, no source change outside the declared scope.\nCALL_SITES: imas_codex/llm/server.py:1882, imas_codex/llm/server.py:375, imas_codex/tools/__init__.py:48, imas_codex/tools/graph_search.py:446, imas_codex/tools/graph_search.py:364\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/tools/graph_search.py:443 and imas_codex/llm/server.py:1882 implement \u00a78's DD-path rerank switch and its mode default exactly, one call into the shared owner.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate and the declared negative control reproduce independently at 786814e41af9346576fa2d0326fb8e942cf06e0d (review_head_unit.log 25 passed EXIT=0; review_negative_control.log 2 failed EXIT=1) and the fragment's means recompute from its per-question table, but the live Jev measurement itself was not re-run here and the reviewed record carries no baseline/after arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff at imas_codex/tools/graph_search.py, imas_codex/tools/__init__.py, imas_codex/llm/server.py, tests/tools/test_dd_path_search_rerank.py, tests/tools/fixtures/dd_mapping_questions.json and the fragment touches only the six declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: the negative control reddens tests/tools/test_dd_path_search_rerank.py::test_read_only_server_never_reranks and ::test_dd_only_server_never_reranks, but those two pin the switch flag rather than the call, one indirection short of the plan's never calls the rerank.\nSCORE fit: 19\nJUSTIFICATION fit: the module-global switch at imas_codex/llm/server.py:1882 mirrors the existing _no_embed idiom and every added name states its mechanism.\nSCORE reuse: 18\nJUSTIFICATION reuse: imas_codex/tools/graph_search.py:364 extends the shared owner rerank_candidates rather than adding a second rerank, but discards the fallback note the other two callers surface.\nFINDING manifest.md:n/a follow-on: the reviewed manifest carries no baseline_suite/after_suite arm pair, so the required added-failure figure cannot be read from its own record; this review measured the arms (base 224 passed, head 238 passed, both EXIT=0) and the count is 0. The change itself adds 14 tests and breaks none.\nFINDING imas_codex/tools/graph_search.py:364 follow-on: _rerank_dd_hits discards the note rerank_candidates returns, so a search_dd_paths caller cannot tell a rerank fallback (the decisions key absent, or the 5 s budget elapsed) from a completed rerank \u2014 the two established callers surface the same note in their report (imas_codex/llm/search_tools.py:1704 and :975). The order is still never worse than embedding order; only the fallback signal is lost.\nFINDING tests/tools/test_dd_path_search_rerank.py:133 follow-on: test_read_only_server_never_reranks and ::test_dd_only_server_never_reranks assert the module switch is False rather than that rerank_candidates is never called, so the plan's never calls the rerank is pinned at the GraphSearchTool level (test_search_does_not_rerank_when_disabled) and only indirectly at the server level; the guard is falsifiable (the declared negative control reddens exactly these two).\n",
+  "review_run_id": "r-20261007T160947563148-review-of-dd-path-search-rerank",
+  "reviewed_base_sha": "46572d2b8abd0cf3256093f9559f7129b07b92e9",
+  "reviewed_head_sha": "786814e41af9346576fa2d0326fb8e942cf06e0d",
+  "reviewed_run_id": "r-20261007T152205646783-dd-path-search-rerank",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:34:00Z",
+  "total": 111
+}
