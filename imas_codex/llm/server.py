@@ -175,6 +175,11 @@ _repl_lock = threading.Lock()
 _imas_tools_instance = None
 _no_embed: bool = False  # Set by AgentsServer when --no-embed is passed
 
+# Set by AgentsServer from its mode: on for a full or facility server, off for
+# a read-only or DD-only server (the public containers), so an external query
+# never spends a Jev call. Direct construction of the tools leaves it off.
+_rerank_dd_paths: bool = False
+
 # ---------------------------------------------------------------------------
 # Module-level placeholders — populated by _require_warmup() on first tool call
 # ---------------------------------------------------------------------------
@@ -367,7 +372,7 @@ def _get_imas_tools(gc: GraphClient | None = None, semantic_search: bool = False
 
         if gc is None:
             gc = _get_graph_client()
-        _imas_tools_instance = Tools(graph_client=gc)
+        _imas_tools_instance = Tools(graph_client=gc, rerank_dd_paths=_rerank_dd_paths)
         return _imas_tools_instance
 
 
@@ -1848,7 +1853,7 @@ class AgentsServer:
         """
         import time
 
-        global _no_embed
+        global _no_embed, _rerank_dd_paths
         _no_embed = self.no_embed
 
         self._started_at = time.monotonic()
@@ -1868,6 +1873,13 @@ class AgentsServer:
         # DD-only implies read-only: no write tools needed for a DD-only deployment
         if self.dd_only:
             self.read_only = True
+
+        # A full or facility server reranks DD-path search through the shared
+        # search-time Jev rerank; a read-only or DD-only server (the public
+        # containers) never does, so an external query spends nothing. The
+        # tools instance is created lazily, so the decision is recorded here
+        # where the mode is known and read when that instance is built.
+        _rerank_dd_paths = not (self.read_only or self.dd_only)
 
         name = "imas-codex-readonly" if self.read_only else "imas-codex"
         self.mcp = FastMCP(name=name)

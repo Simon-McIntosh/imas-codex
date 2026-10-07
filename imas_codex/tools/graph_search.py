@@ -19,6 +19,7 @@ from imas_codex.models.constants import SearchMode
 
 if TYPE_CHECKING:
     from imas_codex.search.fuzzy_matcher import PathFuzzyMatcher
+    from imas_codex.search.search_strategy import SearchHit
 from imas_codex.models.result_models import (
     CheckPathsResult,
     CheckPathsResultItem,
@@ -337,11 +338,39 @@ def _dd_version_clause(
     )
 
 
+def _rerank_dd_hits(query: str, hits: list[SearchHit]) -> list[SearchHit]:
+    """Reorder DD-path hits through the shared search-time Jev rerank.
+
+    The hits arrive in hybrid embedding order. Each becomes a candidate whose
+    locator is its path and whose text is its documentation and description,
+    and ``rerank_candidates`` — the shared owner used by the code and wiki
+    search tools — returns them in judged order. A failed or slow judgement
+    returns the embedding order unchanged, so the result is never worse than
+    the order the search produced. Each hit rides its own candidate so the
+    judged order maps back without a lookup.
+    """
+    from imas_codex.llm.search_tools import rerank_candidates
+
+    candidates = [
+        {
+            "_hit": hit,
+            "path": hit.path,
+            "text": " ".join(
+                part for part in (hit.documentation, hit.description) if part
+            ),
+        }
+        for hit in hits
+    ]
+    ordered, _note = rerank_candidates(query, candidates)
+    return [candidate["_hit"] for candidate in ordered]
+
+
 class GraphSearchTool:
     """Graph-backed semantic search for IMAS paths."""
 
-    def __init__(self, graph_client: GraphClient):
+    def __init__(self, graph_client: GraphClient, *, rerank: bool = False):
         self._gc = graph_client
+        self._rerank = rerank
 
     @property
     def tool_name(self) -> str:
@@ -413,6 +442,9 @@ class GraphSearchTool:
             dd_version=dd_version,
             k=max_results,
         )
+
+        if self._rerank and hits:
+            hits = _rerank_dd_hits(query, hits)
 
         mode = (
             SearchMode(search_mode)

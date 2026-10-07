@@ -45,13 +45,15 @@ class Tools(MCPProvider):
         self,
         ids_set: set[str] | None = None,
         graph_client: GraphClient | None = None,
+        *,
+        rerank_dd_paths: bool = False,
     ):
         if graph_client is None:
             raise ValueError("GraphClient is required")
 
         self.ids_set = ids_set
 
-        self.search_tool = GraphSearchTool(graph_client)
+        self.search_tool = GraphSearchTool(graph_client, rerank=rerank_dd_paths)
         self.path_tool = GraphPathTool(graph_client)
         self.list_tool = GraphListTool(graph_client)
         self.overview_tool = GraphOverviewTool(graph_client)
