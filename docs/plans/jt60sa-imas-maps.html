@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="jt60sa-imas-maps">
   <meta name="plan-title" content="JT-60SA IMAS Maps">
   <meta name="plan-summary" content="Take JT-60SA signals from discovered to validated IMAS mappings: enrich, make every signal mappable, normalise units, judge DD candidates with Jev, map">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="13.25">
   <meta name="plan-capability-version" content="1.0">
@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -251,15 +251,13 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="standalone-signals" data-choice="" data-by="" data-when="" data-recommended="singleton-source" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="standalone-signals" data-choice="singleton-source" data-by="lead" data-when="2026-10-07T06:01:18+00:00" data-recommended="singleton-source" data-recommended-by="reckon-build">
     <p class="r-dec-q">How does a signal in no SignalSource reach the mapping pipeline?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="singleton-source">a singleton SignalSource per standalone signal</button>
+      <button class="r-opt chosen" data-value="singleton-source">a singleton SignalSource per standalone signal</button>
       <button class="r-opt" data-value="claim-signals">the mapping stages also claim FacilitySignals</button>
       </p>
-    <p class="r-dec-rat">The recommendation is a singleton source. Every mapping stage, edge and
-          claim keys on SignalSource. A singleton keeps one unit of mapping, while claiming signals
-          directly would need two units through every stage.</p>
+    <p class="r-dec-rat">Lead approved §3 on 2026-10-07, and §3 is written for this option. detect_signal_sources gains a final pass that makes each signal it left ungrouped a one-member source through its own MERGE, so every mapping stage keeps keying on SignalSource and no second claim path is built for bare signals.</p>
     </div>
 <div class="r-dec" data-key="jt60sa-activation" data-choice="" data-by="" data-when="" data-recommended="after-audit" data-recommended-by="reckon-build">
     <p class="r-dec-q">When are JT-60SA mappings activated?</p>

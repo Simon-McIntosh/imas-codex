@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="98">
+<meta name="plan-version" content="99">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;deferred&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-blocks" content="jt60sa-imas-maps,facility-discovery-sequence">
@@ -253,30 +253,30 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="jev-role" data-choice="" data-by="" data-when="" data-recommended="prescreen-only" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="jev-role" data-choice="prescreen-only" data-by="lead" data-when="2026-10-07T06:01:11+00:00" data-recommended="prescreen-only" data-recommended-by="reckon-build">
     <p class="r-dec-q">After §3, does Jev select targets with escalation, or only shortlist for the reasoning model?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="selector-with-escalation">selector with escalation</button>
-      <button class="r-opt" data-value="prescreen-only">pre-screen only</button>
+      <button class="r-opt chosen" data-value="prescreen-only">pre-screen only</button>
       </p>
-    <p class="r-dec-rat">The routing in §5 covers both; the choice only sets whether a select threshold is configured. Measured in §3 (docs/research/mapping-candidate-probe.html): scored at exact-node level, the selected route never exceeded about 0.63 precision on the test split at any threshold, and was 0.4 at the dev-tuned point. Scored at section level (the IDS top-level array the map stage works in), the same selections at threshold 0.40 are 0.75 precise (12 of 16); 2 of the 4 misses are sources the labels say have no DD home. The labels bound what any measure can show: two independent labelling passes agree on 50 of 75 test sources at node level, 52 at section level and 53 at IDS level, and each label fixed one IDS, so a valid second home in another IDS scores as wrong. Jev is a strong ranker (pair AUC 0.924): its reranked top 5 kept every correct node the shortlist held, and holds the labelled section for 30 of 36 labelled sources, against 20 for the old retrieval&#x27;s top 5. Recommendation: pre-screen only. Jev routes the IDS, orders the shortlist and, through §11, widens it across IDSs, and the reasoning model chooses each source&#x27;s set of homes. This is §5&#x27;s default.</p>
+    <p class="r-dec-rat">Lead ruling 2026-10-07, accepting the recommendation. Measured in §3, the selected route never exceeded about 0.63 precision at exact-node level on the test split. Jev therefore shortlists and routes, and the reasoning model chooses the set of homes for every source with candidates. In code this means map-select-threshold stays unset in pyproject.toml, which is its current state, so no source is selected without a reasoning-model choice.</p>
     </div>
-<div class="r-dec" data-key="cli-home" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="cli-home" data-choice="discover-map" data-by="lead" data-when="2026-10-07T06:01:11+00:00">
     <p class="r-dec-q">Where does the candidate stage live on the command line?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="discover-map">imas-codex discover map FACILITY</button>
+      <button class="r-opt chosen" data-value="discover-map">imas-codex discover map FACILITY</button>
       <button class="r-opt" data-value="imas-map-candidates">imas-codex imas map candidates FACILITY</button>
       </p>
-    <p class="r-dec-rat">The recommendation is discover map . The stage is a claim loop over a facility&#x27;s discovered signals, with cost and time caps, so it shares the discover harness, status and logs. imas map keeps the work that needs a reasoning model and the mapping lifecycle (validate, activate, clear).</p>
+    <p class="r-dec-rat">Lead ruling 2026-10-07, accepting the recommendation. The candidate stage is a claim loop over a facility&#x27;s discovered signals, with cost and time caps, so it shares the discover harness, status and logs. imas map keeps the reasoning-model work and the mapping lifecycle. This is where §7 placed it.</p>
     </div>
-<div class="r-dec" data-key="none-floor" data-choice="" data-by="" data-when="" data-sections="s5,s8" data-recommended="no-floor" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="none-floor" data-choice="no-floor" data-by="lead" data-when="2026-10-07T06:01:11+00:00" data-sections="s5,s8" data-recommended="no-floor" data-recommended-by="reckon-build">
     <p class="r-dec-q">Skip sources whose best Jev score is below a floor?</p>
     <p class="r-dec-ctx">A floor skips the reasoning-model call for a source whose best same_quantity is below it. On the 75-source test split, a floor of 0.1 would route 26 sources to no_candidate. 23 of those are labelled none (precision 0.88), and the floor catches 23 of the 39 none sources (recall 0.59). The other 3 have a real DD home, and skipping them loses 3 of the 36 labelled mappings. A floor of 0.2 catches 34 of the 39 nones at 0.76 precision, but loses 11 real mappings.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="no-floor">no floor: every source reaches the reasoning model</button>
+      <button class="r-opt chosen" data-value="no-floor">no floor: every source reaches the reasoning model</button>
       <button class="r-opt" data-value="floor-0.1">floor 0.1: skip about a third of sources and lose about 8% of mappings</button>
       </p>
-    <p class="r-dec-rat">The default is no floor, because a mapping skipped by the floor is never seen again, while an unneeded reasoning call costs cents. Revisit once §9&#x27;s JET run gives the real cost of escalating every source.</p>
+    <p class="r-dec-rat">Lead ruling 2026-10-07, accepting the recommendation. A floor of 0.1 would skip 26 test sources at 0.88 precision, but it loses 3 of the 36 labelled mappings, and maps are one-to-many with real homes that score low. Every source with candidates reaches the reasoning model, which can answer none. In code this means map-floor-threshold stays unset, which is its current state.</p>
     </div>
 <div class="r-dec" data-key="home-cardinality" data-choice="every-home" data-by="Simon McIntosh" data-when="2026-10-06T22:48:21+00:00" data-sections="s8,s9,s11">
     <p class="r-dec-q">Does a signal source map to one DD home, or to every home it has?</p>
