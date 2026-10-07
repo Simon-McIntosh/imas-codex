@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by this review from the reviewed node's own gate, run as two arms in scratch extractions under $TMPDIR: baseline_suite at the reviewed base dcf52306b (tests/cli/test_discover_map.py + tests/discovery/test_decisions_key_skip.py, 12 passed, EXIT=0, review_base.log) and after_suite at the reviewed head c0c71ec3f (the same two files plus the new tests/ids/test_candidate_worker_key_skip.py, 13 passed, EXIT=0, review_head.log). Both arms ran to their summary line. added_failure_count is the set difference of the two failure id sets and is 0: the change adds one test and breaks none. The reviewed run's own manifest carried no baseline_suite/after_suite pair (both absent), so the two arms were measured here rather than read from the reviewed record; the reviewed gate (13 passed, EXIT=0) and its declared negative control (1 failed, EXIT=1) both reproduce exactly against the reviewed head.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T155558693440-review-of-candidate-worker-key-skip/head uv run --no-sync pytest -p no:cacheprovider tests/ids/test_candidate_worker_key_skip.py tests/cli/test_discover_map.py tests/discovery/test_decisions_key_skip.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155558693440-review-of-candidate-worker-key-skip/logs/review_head.log",
+    "revision": "c0c71ec3fb3b829e5712eefee455542365060143"
+  },
+  "base_log_revision": "dcf52306b2c07b4ef8532e0feea2a2c2b00024ce",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T155558693440-review-of-candidate-worker-key-skip/base uv run --no-sync pytest -p no:cacheprovider tests/cli/test_discover_map.py tests/discovery/test_decisions_key_skip.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155558693440-review-of-candidate-worker-key-skip/logs/review_base.log",
+    "revision": "dcf52306b2c07b4ef8532e0feea2a2c2b00024ce"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/ids/workers.py:1163 candidate_worker(state, on_progress=None) \u2014 the up-front judgments_available() gate added by this change; the predicate itself lives in imas_codex/ids/candidates.py:276 (landed by decisions-key-skip) and is also called at candidates.py:372 (route_ids) and candidates.py:453 (judge_candidates)."
+  ],
+  "completed_at": "2026-10-07T16:10:13.417Z",
+  "dispatched_at": "2026-10-07T15:56:09Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run records no baseline_suite/after_suite arm pair, so the required added-failure figure cannot be read from its own record and had to be reconstructed by this review (base arm at dcf52306b 12 passed EXIT=0, head arm at c0c71ec3f 13 passed EXIT=0, added_failure_count 0). Not a defect in the change \u2014 the reproducible claims the manifest does carry (gate 13 passed, negative control 1 failed EXIT=1) both reproduce exactly \u2014 but a reviewed record that omits the two arms leaves the regression question to the reviewer. Naming the arms would make the record self-contained.",
+      "type": "record-accuracy"
+    },
+    {
+      "file": "tests/cli/test_discover_map.py",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the existing candidate-worker tests in tests/cli/test_discover_map.py depend on OPENROUTER_API_KEY_IMAS_CODEX being present through tests/conftest.py's .env load (override=False) rather than setting it explicitly. This node's reviewed manifest flags it, and it is a pre-existing dependence, not introduced here \u2014 at the reviewed base, route_ids already returned None without the key, so those tests already required it), so a CI environment lacking the key would fail them at base and head alike. An autouse fixture that sets the key for those tests (mirroring tests/ids/test_candidate_judgment.py) would remove the environment dependence. The new test is unaffected: it deliberately removes the key and asserts the skip.",
+      "type": "environment-dependent-test"
+    }
+  ],
+  "head_log_revision": "c0c71ec3fb3b829e5712eefee455542365060143",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "One new call site: candidate_worker (imas_codex/ids/workers.py:1163) calls the reused predicates judgments_available, with one import added to the existing `from imas_codex.ids.candidates import (...)` block. The other two call sites (route_ids at candidates.py:372, judge_candidates at candidates.py:453) are unchanged and predate this commit. A single up-front call per stage replaces the per-source re-entry that base got through route_ids returning None.",
+    "diff": "Read commit by commit: one commit c0c71ec3fb3b829e5712eefee455542365060143 ('fix(mapping): end the candidate stage before claiming without the decisions key') changes three files, 139 insertions / 0 deletions: imas_codex/ids/workers.py (+10: the judgments_available import and a five-line up-front gate that marks the candidate phase done and returns), tests/ids/test_candidate_worker_key_skip.py (new, 109 lines, one test), and docs/evidence/fragments/jt60sa-imas-maps/candidate-worker-key-skip.html (+20).",
+    "done_when": "The node's stated measure is that candidate_worker ends its stage before its first claim when judgments_available() is false, logging one warning naming OPENROUTER_API_KEY_IMAS_CODEX and returning without claiming a source; the reviewed gate is 13 passed at the reviewed head. Verified independently: the head arm reproduces 13 passed EXIT=0 and the declared negative control reproduces 1 failed EXIT=1 under this review's own mutation, in which the single assertion `claimed == []` reddens with the claim recorder entered in a loop (33,909 'jet' claims against the 10 s test deadline).",
+    "goal_fidelity": "EXACT. \u00a78's second decision requires every Jev caller to skip cleanly when OPENROUTER_API_KEY_IMAS_CODEX is not set, with the candidate stage checking once before its first source, logging one warning naming the variable and leaving every source unjudged without a call per source. The gate does exactly that: a single judgments_available() call before the loop, the phase marked done, no claim, no route_ids/judge_candidates call, and one latched warning. The stage's prior behaviour \u2014 claim, route_ids returns None, release, reclaim \u2014 is ended at its source rather than per iteration.",
+    "manifest": "status complete; commits [c0c71ec3f]; changed_paths reconciles with the diffstat (workers.py, the new test, the fragment); the gate log and the negative-control log reproduce exactly at the reviewed head. The record carries no baseline_suite/after_suite arms, so the added-failure count is 0 by this review's own base/head measurement rather than read from the reviewed record \u2014 the one substantive record gap, reported as a follow-on.",
+    "write_paths": "Declared in the reviewed orientation: imas_codex/ids/workers.py, tests/ids/test_candidate_worker_key_skip.py, docs/evidence/fragments/jt60sa-imas-maps/candidate-worker-key-skip.html and a docs/figures/jt60sa-imas-maps/candidate-worker-key-skip directory. The diff touches the three files listed; no figure was written, which the small-node rule permits for a change whose brief names no artifact; the fragment is present and anchors the node id scoped to the section."
+  },
+  "justifications": {
+    "durability": "The new guard is falsifiable: this review's own mutation (deleting the up-front gate from the head tree at workers.py) reddens the new test (1 failed EXIT=1), and the opposite direction is also held because the existing tests/cli/test_discover_map.py candidate-worker tests fail if judgments_available() wrongly reports the key absent, so an over-eager gate would be caught. Marked down from perfect because the new test pins only the absent-key branch; the present-key branch is exercised incidentally by the pre-existing tests rather than by a test written for the gate, and no test pins that exactly one warning is emitted per stage across repeated calls to judgments_available beyond the single-call case.",
+    "evidence": "Independently reproduced, not read. The reviewed head c0c71ec3f was extracted with git archive into $TMPDIR and its declared gate re-run there with module.__file__ under the scratch tree: 13 passed, EXIT=0 (review_head.log), matching the reviewed gate_head.log exactly. The declared negative control was reproduced by this review's own mutation in a second scratch tree: 1 failed, EXIT=1 (review_negative_control.log), matching the reviewed negative_control.log. A base arm at dcf52306b gives 12 passed EXIT=0 (review_base.log), from which added_failure_count is 0. The two reviewed manifest claims both reproduce; the residual mark-down is that the reviewed record itself carries no baseline/after arm pair, so the required added-failure figure had to be reconstructed here.",
+    "fit": "Extends the mechanism decisions-key-skip already built rather than adding a second one: judgments_available (candidates.py:276, itself built on the shared decisions key accessor) is imported and reused unchanged, and the early return reuses the existing latched warning so the stage warns once rather than once per source. No new predicate, no new spelling of the variable name, no new client. The node is not named in the \u00a78 prose (which lists only decisions-key-skip and dd-path-search-rerank); it is a follow-on that closes the workers.py side of \u00a78's second decision and belongs to that section.",
+    "goal_fidelity": "Exactly reproduces the intended behaviour. On this review's reproduction of the reviewed head, with OPENROUTER_API_KEY_IMAS_CODEX absent, the stage returns promptly (elapsed well under the 10 s test deadline, not on it), claims nothing, enters neither route_ids nor judge_candidates, releases nothing, and emits exactly one warning naming the variable. Under the mutation that removes the gate, the stage claims 33,909 sources in a loop until the deadline, which is the exact failure the plan says the change removes.",
+    "reuse": "Reuses judgments_available (imas_codex/ids/candidates.py:276) and its module-level _key_absence_warned latch, both landed by decisions-key-skip; imports the predicate through the existing `from imas_codex.ids.candidates import (...)` block; calls the same _facility_block / get_mapping_route_thresholds path otherwise. No duplicated predicate and no second key check; the test reuses the existing monkeypatch-at-module-actions pattern with local recorders. Pure reuse, no new store and no new dependency.",
+    "scope_discipline": "Three files changed, all within the declared write paths: imas_codex/ids/workers.py, tests/ids/test_candidate_worker_key_skip.py, docs/evidence/fragments/jt60sa-imas-maps/candidate-worker-key-skip.html. The diffstat reconciles at three files, 139 insertions / 0 deletions, and the effect on candidates.py is zero (base and head are byte-identical there). The declared figures directory was not written (small-node rule)."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: candidate_worker (imas_codex/ids/workers.py) now checks judgments_available() once before its first claim; with OPENROUTER_API_KEY_IMAS_CODEX unset it marks the candidate phase done, logs one warning naming the variable and returns without claiming a source, ending the claim/release loop \u2014 \u00a78's second decision, exactly. EVIDENCE: head gate independently re-run 13 passed EXIT=0 in a scratch extraction at c0c71ec3f; declared negative control reproduced by this review's own mutation (1 failed, EXIT=1); base arm at dcf52306b 12 passed EXIT=0, added_failure_count 0. SCOPE: three declared files, 139 insertions / 0 deletions; candidates.py untouched. DURABILITY: the guard is falsifiable by the new test (mutation reddens it) and the inverse by the existing test_discover_map candidate-worker tests; the absent-key branch is the only one with a dedicated test. FIT: reuses judgments_available and its latched warning from decisions-key-skip; adds no second predicate or key spelling; the node is a follow-on not named in \u00a78's prose. REUSE: predicate, latch and imports all reused. Follow-ons: the reviewed record carries no baseline_suite/after_suite arms, so the added-failure figure was reconstructed here; and the pre-existing test_discover_map candidate-worker tests still depend on the decisions key being present through conftest's .env load rather than setting it explicitly (a dependence that predates this change).",
+  "review_run_id": "r-20261007T155558693440-review-of-candidate-worker-key-skip",
+  "reviewed_base_sha": "dcf52306b2c07b4ef8532e0feea2a2c2b00024ce",
+  "reviewed_head_sha": "c0c71ec3fb3b829e5712eefee455542365060143",
+  "reviewed_run_id": "r-20261007T154229329439-candidate-worker-key-skip",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:08:00Z",
+  "total": 116
+}

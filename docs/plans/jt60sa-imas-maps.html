@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="62">
+<meta name="plan-version" content="63">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -368,6 +368,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T154229329439-candidate-worker-key-skip" data-who="reckon-build" data-when="2026-10-07T15:54:49.143Z">
     <div class="r-comment-body"><p>candidate_worker now ends its stage before its first claim when judgments_available() is false — one warning names OPENROUTER_API_KEY_IMAS_CODEX, the candidate phase is marked done and the worker returns without claiming a source; gate 13 passed.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T155558693440-review-of-candidate-worker-key-skip" data-who="reckon-build" data-when="2026-10-07T16:10:13.417Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261007T154229329439-candidate-worker-key-skip at base dcf52306b / head c0c71ec3f — a parsed record scoring all six dimensions 0..20 (durability 18, evidence 19, fit 19, goal_fidelity 20, reuse 20, scope_discipline 20; total 116) is stored; the guard was falsified by the reviewer&#x27;s own mutation and added_failure_count is 0 against the reviewed node&#x27;s own gate.</p></div>
 </div>
 </section>
 </main>
