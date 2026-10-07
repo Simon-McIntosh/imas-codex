@@ -410,18 +410,18 @@ async def score_worker(
     batch_size: int = 50,
     concurrency: int = 8,
 ) -> None:
-    """Score worker: Content scoring of enriched CodeFiles.
+    """Score worker: Content-relevance judgement and description of enriched CodeFiles.
 
     Claims CodeFiles that have been triaged AND enriched
-    (``status='triaged'``, ``is_enriched=true``).  The score prompt receives
-    enrichment evidence (pattern matches, preview text) and produces the
-    description and dimension scores; a content-arm decisions call judges the
-    file's content relevance from its preview.  A file is marked ``scored``
-    only when its content decision succeeded, in one write carrying both the
-    score fields and the content-arm relevance.  A file whose content decision
-    failed is released unclaimed at its prior status, so the next pass retries
-    it.  Whether the file is ingested is decided by its content relevance, not
-    by the scorer.
+    (``status='triaged'``, ``is_enriched=true``).  A content-arm decisions call
+    judges each file's content relevance from its evidence and preview; the
+    local model then describes only the files whose content relevance reaches
+    the ingest threshold.  A file is marked ``scored`` when its content
+    decision succeeded, in one write carrying the relevance fields and, for an
+    admitted file, the description.  A file whose content decision failed is
+    released unclaimed at its prior status, so the next pass retries it.
+    Whether the file is ingested is decided by its content relevance, not by
+    the scorer.
     """
     from imas_codex.discovery.base.facility import get_facility
     from imas_codex.discovery.base.llm import acall_decisions, call_llm_structured
@@ -437,8 +437,13 @@ async def score_worker(
         apply_file_scores,
         build_triage_questions,
         build_triage_state,
+        triage_relevance,
     )
-    from imas_codex.settings import get_model, get_reasoning_effort
+    from imas_codex.settings import (
+        get_code_ingest_threshold,
+        get_model,
+        get_reasoning_effort,
+    )
 
     model = get_model("discovery-score")
     relevance_model = get_model("discovery-relevance")
@@ -513,28 +518,11 @@ async def score_worker(
         batch_start = _time.monotonic()
 
         try:
-            score_user_prompt = _build_score_user_prompt(file_groups)
-            parsed_raw, cost, _tokens = await asyncio.to_thread(
-                call_llm_structured,
-                model=model,
-                messages=[
-                    {"role": "system", "content": score_system_prompt},
-                    {"role": "user", "content": score_user_prompt},
-                ],
-                response_model=FileScoreBatch,
-                temperature=0.1,
-                service="facility-discovery",
-                reasoning_effort=get_reasoning_effort("discovery-score"),
-            )
-            assert isinstance(parsed_raw, FileScoreBatch)
-            parsed = parsed_raw
-            state.score_stats.cost += cost
-
-            # Content arm: judge each file's content relevance from its preview
-            # before the file is marked scored. The content decision and the
-            # score write are one step: a file whose decision failed is left at
-            # its prior status and unclaimed, so the next score pass reclaims
-            # and retries it rather than stranding it.
+            # Content arm first: each file's content relevance is judged from
+            # its evidence and preview, and that judgement decides whether the
+            # file is described, written and claimed. It runs before the local
+            # model is asked for anything, so a below-threshold file costs no
+            # description call.
             content_states = [
                 build_triage_state(
                     f, state.facility, facility_config, with_content=True
@@ -545,9 +533,10 @@ async def score_worker(
                 *(judge_content(s) for s in content_states), return_exceptions=True
             )
             content_decisions = []
+            failures: list[tuple[str, BaseException]] = []
             for f, res in zip(files, content_results, strict=True):
                 if isinstance(res, BaseException):
-                    logger.warning("content decision failed for %s: %s", f["path"], res)
+                    failures.append((f["path"], res))
                     continue
                 answers, answer_cost = res
                 content_decisions.append(
@@ -558,15 +547,59 @@ async def score_worker(
                         "cost": answer_cost,
                     }
                 )
+            if failures:
+                first_path, first_exc = failures[0]
+                logger.info(
+                    "content decision failed for %d of %d files in batch; first %s: %s",
+                    len(failures),
+                    len(files),
+                    first_path,
+                    first_exc,
+                )
             content_cost = sum(d["cost"] for d in content_decisions)
             state.score_stats.cost += content_cost
 
+            # The local model describes only the files whose content relevance
+            # reaches the ingest threshold; the description is written after
+            # the content decision that admitted the file.
+            ingest_threshold = get_code_ingest_threshold()
+            described_files = []
+            described_relevance: dict[str, float] = {}
+            for f, d in zip(files, content_decisions, strict=False):
+                relevance = triage_relevance(d["answers"])
+                if relevance >= ingest_threshold:
+                    described_files.append(f)
+                    described_relevance[f["path"]] = relevance
+
+            description_cost = 0.0
+            parsed_results = []
+            if described_files:
+                described_groups = _group_files_by_parent(
+                    described_files, include_siblings=False
+                )
+                score_user_prompt = _build_score_user_prompt(described_groups)
+                parsed_raw, description_cost, _tokens = await asyncio.to_thread(
+                    call_llm_structured,
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": score_system_prompt},
+                        {"role": "user", "content": score_user_prompt},
+                    ],
+                    response_model=FileScoreBatch,
+                    temperature=0.1,
+                    service="facility-discovery",
+                    reasoning_effort=get_reasoning_effort("discovery-score"),
+                )
+                assert isinstance(parsed_raw, FileScoreBatch)
+                parsed_results = parsed_raw.results
+                state.score_stats.cost += description_cost
+
             result = await asyncio.to_thread(
                 apply_file_scores,
-                parsed.results,
+                parsed_results,
                 file_id_map,
                 content_decisions,
-                batch_cost=cost,
+                batch_cost=description_cost,
                 content_cost=content_cost,
             )
             batch_total = result.get("scored", 0) + result.get("deferred", 0)
@@ -577,21 +610,22 @@ async def score_worker(
             await asyncio.to_thread(release_file_score_claims, batch_ids)
 
             if on_progress:
-                # Stream per-file score results with composite, category, description
-                decided_paths = {d["path"] for d in content_decisions}
-                score_results = []
-                for r in parsed.results:
-                    score_results.append(
-                        {
-                            "path": r.path,
-                            "score_composite": round(r.score_composite, 3),
-                            "category": r.file_category,
-                            "description": r.description,
-                            "skipped": r.path not in decided_paths,
-                        }
-                    )
+                # Stream the descriptions written for the admitted files.
+                score_results = [
+                    {
+                        "path": r.path,
+                        "score_composite": round(
+                            described_relevance.get(r.path, 0.0), 3
+                        ),
+                        "category": "",
+                        "description": r.description,
+                        "skipped": False,
+                    }
+                    for r in parsed_results
+                ]
                 on_progress(
-                    f"scored {result.get('scored', 0)} (${cost:.3f})",
+                    f"scored {result.get('scored', 0)} "
+                    f"(${description_cost + content_cost:.3f})",
                     state.score_stats,
                     score_results,
                 )
@@ -647,7 +681,6 @@ def _claim_code_files_for_ingestion(
 
     from imas_codex.config.discovery_config import build_facility_exclusion_filter
     from imas_codex.discovery.base.claims import DEFAULT_CLAIM_TIMEOUT_SECONDS
-    from imas_codex.discovery.code.scorer import CODE_RELEVANCE_EXPR
     from imas_codex.graph import GraphClient
     from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -663,13 +696,13 @@ def _claim_code_files_for_ingestion(
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
               AND sf.relevance_stage = 'content'
-              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
+              AND sf.score_composite >= $min_relevance
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}
               AND (sf.claimed_at IS NULL
                    OR sf.claimed_at < datetime() - duration($cutoff))
-            WITH sf, {CODE_RELEVANCE_EXPR} AS relevance
+            WITH sf, sf.score_composite AS relevance
             ORDER BY relevance DESC, rand()
             LIMIT $limit
             SET sf.claimed_at = datetime(), sf.claim_token = $token
@@ -844,7 +877,7 @@ async def code_worker(
 
     from imas_codex.ingestion.pipeline import ingest_files
 
-    logger.warning(
+    logger.info(
         "code_worker started (facility=%s, batch_size=%d, scan_only=%s, score_only=%s)",
         state.facility,
         batch_size,
@@ -858,7 +891,7 @@ async def code_worker(
 
     while not state.should_stop():
         if state.scan_only or state.score_only:
-            logger.warning(
+            logger.info(
                 "code_worker exiting: scan_only=%s, score_only=%s",
                 state.scan_only,
                 state.score_only,
@@ -885,7 +918,7 @@ async def code_worker(
             consecutive_idle += 1
             state.code_phase.record_idle()
             if state.code_phase.done:
-                logger.warning(
+                logger.info(
                     "code_worker exiting: phase done after %d batches "
                     "(%d files processed, %d errors)",
                     batches_processed,
@@ -894,7 +927,7 @@ async def code_worker(
                 )
                 break
             if consecutive_idle == 1 or consecutive_idle % idle_log_interval == 0:
-                logger.warning(
+                logger.debug(
                     "code_worker idle (poll #%d, phase.idle=%s, "
                     "score_phase.done=%s, processed=%d)",
                     consecutive_idle,
@@ -932,7 +965,7 @@ async def code_worker(
         all_ids = [f["id"] for f in files]
         scores = [f.get("score_composite", 0) for f in files]
 
-        logger.warning(
+        logger.info(
             "code_worker claimed %d files (scores %.2f–%.2f): %s",
             len(files),
             min(scores),
@@ -969,7 +1002,7 @@ async def code_worker(
             state.code_stats.last_batch_time = batch_elapsed
             state.code_stats.record_batch(batch_total)
 
-            logger.warning(
+            logger.info(
                 "code_worker batch #%d: ingested=%d skipped=%d chunks=%d elapsed=%.1fs",
                 batches_processed,
                 ingested_count,
@@ -1011,7 +1044,7 @@ async def code_worker(
 
         await asyncio.sleep(0.1)
 
-    logger.warning(
+    logger.info(
         "code_worker stopped (facility=%s, batches=%d, "
         "processed=%d, errors=%d, should_stop=%s)",
         state.facility,

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 
 import pytest
 
@@ -47,7 +48,12 @@ def _relevance(row: dict) -> float:
 
 
 def _answers(*nouls: float, role: str = "diagnostic_data_access") -> dict:
-    """Six-question answer set with the four scope nouls set positionally."""
+    """Answer set with the four scope nouls set positionally.
+
+    Carries the content arm's graded relevance and four facet Scores as well;
+    the names arm's question set has no score questions, so its validator
+    ignores them.
+    """
     out = {
         name: {"type": "noul", "noul": value}
         for name, value in zip(SCOPE, nouls, strict=True)
@@ -64,6 +70,40 @@ def _answers(*nouls: float, role: str = "diagnostic_data_access") -> dict:
         "probabilities": {role: 0.9, other: 0.1},
         "confidence": 0.8,
     }
+    out.update(
+        {
+            "relevance_grade": {
+                "type": "score",
+                "score": 3.0,
+                "probabilities": {0: 0.05, 1: 0.05, 2: 0.1, 3: 0.5, 4: 0.3},
+                "confidence": 0.7,
+            },
+            "data_access_depth": {
+                "type": "score",
+                "score": 4.0,
+                "probabilities": {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 1.0},
+                "confidence": 0.9,
+            },
+            "signal_processing_depth": {
+                "type": "score",
+                "score": 3.0,
+                "probabilities": {0: 0.0, 1: 0.0, 2: 0.0, 3: 1.0},
+                "confidence": 0.6,
+            },
+            "machine_description_depth": {
+                "type": "score",
+                "score": 2.0,
+                "probabilities": {0: 0.0, 1: 0.0, 2: 1.0, 3: 0.0},
+                "confidence": 0.5,
+            },
+            "imas_mapping_depth": {
+                "type": "score",
+                "score": 1.0,
+                "probabilities": {0: 0.0, 1: 1.0, 2: 0.0, 3: 0.0},
+                "confidence": 0.4,
+            },
+        }
+    )
     return out
 
 
@@ -148,6 +188,7 @@ def _stub_common(monkeypatch, claims: list[dict]):
     monkeypatch.setattr(
         "imas_codex.settings.get_reasoning_effort", lambda section: None
     )
+    monkeypatch.setattr("imas_codex.settings.get_code_ingest_threshold", lambda: 0.6)
     monkeypatch.setattr(
         "imas_codex.discovery.code.graph_ops.claim_files_for_triage", claim_once
     )
@@ -197,20 +238,28 @@ def _run_triage(monkeypatch, files, answers_by_path, *, released=None):
 def _run_score(monkeypatch, files, answers_by_path):
     graph = _CapturingGraph()
     released: list[str] = []
+    description_calls: list[list[str]] = []
     _stub_common(monkeypatch, list(files))
     monkeypatch.setattr(llm, "_apost_decisions", _post_by_path(answers_by_path))
-    batch = FileScoreBatch(
-        results=[
-            FileScoreResult(
-                path=f["path"],
-                file_category="code",
-                description="analysis helper",
-                score_analysis_code=0.5,
-            )
-            for f in files
+
+    def fake_description(**kwargs):
+        # The user prompt names the files the local model was asked to
+        # describe; record which paths reached the description call.
+        described = [
+            line.split(" ### ", 1)[1].split(" (", 1)[0]
+            for line in kwargs["messages"][1]["content"].splitlines()
+            if line.strip().startswith("### ")
         ]
-    )
-    monkeypatch.setattr(llm, "call_llm_structured", lambda **kwargs: (batch, 0.01, 10))
+        description_calls.append(described)
+        batch = FileScoreBatch(
+            results=[
+                FileScoreResult(path=p, description="analysis helper")
+                for p in described
+            ]
+        )
+        return (batch, 1.0e-2, 10)
+
+    monkeypatch.setattr(llm, "call_llm_structured", fake_description)
     monkeypatch.setattr(
         "imas_codex.discovery.code.graph_ops.release_file_score_claims",
         lambda ids: released.extend(ids),
@@ -218,10 +267,6 @@ def _run_score(monkeypatch, files, answers_by_path):
     monkeypatch.setattr(
         "imas_codex.discovery.code.scorer._build_score_system_prompt",
         lambda facility=None, focus=None: "system",
-    )
-    monkeypatch.setattr(
-        "imas_codex.discovery.code.scorer._build_score_user_prompt",
-        lambda file_groups: "user",
     )
     monkeypatch.setattr("imas_codex.discovery.code.scorer.GraphClient", lambda: graph)
 
@@ -234,7 +279,7 @@ def _run_score(monkeypatch, files, answers_by_path):
     from imas_codex.discovery.code.workers import score_worker
 
     asyncio.run(score_worker(state, on_progress=on_progress))
-    return graph, state, released
+    return graph, state, released, description_calls
 
 
 # ---------------------------------------------------------------------------
@@ -299,7 +344,7 @@ def test_content_arm_marks_scored_with_content_relevance(monkeypatch):
     path = "/analysis/src/reader.f"
     files = [_file(path, preview_text="mdsopen('jt60sa', 12345)")]
     answers = {path: _answers(0.75, 0.4, 0.2, 0.1)}
-    graph, _, _ = _run_score(monkeypatch, files, answers)
+    graph, _, _, _ = _run_score(monkeypatch, files, answers)
 
     scored_items = graph.items_for("sf.status = 'scored'")
     assert [item["id"] for item in scored_items] == [path]
@@ -308,6 +353,64 @@ def test_content_arm_marks_scored_with_content_relevance(monkeypatch):
     assert scored_items[0]["relevance_stage"] == "content"
     assert scored_items[0]["relevance_loads"] == 0.75
     assert scored_items[0]["score_reason"] == "analysis helper"
+
+
+def test_content_arm_writes_every_stage_field(monkeypatch):
+    """Every content-arm field lands in the one write: facets, grade, role."""
+    path = "/analysis/src/reader.f"
+    files = [_file(path, preview_text="mdsopen('jt60sa', 12345)")]
+    answers = {path: _answers(0.75, 0.4, 0.2, 0.1)}
+    graph, _, _, _ = _run_score(monkeypatch, files, answers)
+
+    (item,) = graph.items_for("sf.status = 'scored'")
+    # Facet values are each Score divided by its top level (4, 3, 3, 3).
+    assert item["score_composite"] == 0.75
+    assert item["score_data_access"] == 1.0
+    assert item["score_signal_processing"] == 1.0
+    assert item["score_machine_description"] == pytest.approx(0.6667, abs=1e-4)
+    assert item["score_imas_mapping"] == pytest.approx(0.3333, abs=1e-4)
+    assert item["relevance_grade"] == 3.0
+    # Each Score carries its distribution and confidence beside it.
+    assert item["score_data_access_probs"] == [0.0, 0.0, 0.0, 0.0, 1.0]
+    assert item["score_data_access_confidence"] == 0.9
+    assert item["score_signal_processing_probs"] == [0.0, 0.0, 0.0, 1.0]
+    assert item["score_signal_processing_confidence"] == 0.6
+    assert item["score_machine_description_probs"] == [0.0, 0.0, 1.0, 0.0]
+    assert item["score_machine_description_confidence"] == 0.5
+    assert item["score_imas_mapping_probs"] == [0.0, 1.0, 0.0, 0.0]
+    assert item["score_imas_mapping_confidence"] == 0.4
+    assert item["relevance_grade_probs"] == [0.05, 0.05, 0.1, 0.5, 0.3]
+    assert item["relevance_grade_confidence"] == 0.7
+    # The role distribution is aligned to the fixed role enum order.
+    assert len(item["relevance_role_probs"]) == 8
+    assert item["relevance_role_probs"][0] == 0.9  # diagnostic_data_access
+    assert item["relevance_role_confidence"] == 0.8
+
+
+def test_content_arm_describes_only_a_passing_file(monkeypatch):
+    """The local model is called only for files above the ingest threshold."""
+    passing = "/analysis/src/reader.f"
+    below = "/analysis/src/plot.f"
+    files = [
+        _file(passing, preview_text="mdsopen('jt60sa', 1)"),
+        _file(below, preview_text="plt.plot(x, y)"),
+    ]
+    answers = {
+        passing: _answers(0.75, 0.4, 0.2, 0.1),
+        below: _answers(0.2, 0.1, 0.1, 0.1),
+    }
+    graph, _, _, description_calls = _run_score(monkeypatch, files, answers)
+
+    assert description_calls == [[passing]]
+    scored = {item["id"] for item in graph.items_for("sf.status = 'scored'")}
+    assert scored == {passing, below}
+    # Only the admitted file carries a description.
+    described = {
+        item["id"]: item.get("score_reason")
+        for item in graph.items_for("sf.status = 'scored'")
+    }
+    assert described[passing] == "analysis helper"
+    assert not described[below]
 
 
 def test_content_arm_failure_leaves_file_unscored_and_claimable(monkeypatch):
@@ -319,13 +422,32 @@ def test_content_arm_failure_leaves_file_unscored_and_claimable(monkeypatch):
         "choice": "not_a_criterion",
         "probabilities": {"diagnostic_data_access": 1.0},
     }
-    graph, _, released = _run_score(monkeypatch, files, {path: bad})
+    graph, _, released, _ = _run_score(monkeypatch, files, {path: bad})
 
     # A failed content decision writes nothing: the file stays at its prior
     # status, carries no content relevance, and its claim is released so the
     # next score pass reclaims and retries it.
     assert graph.queries == [], "a failed content decision writes nothing"
     assert released == [path], "the file's claim is released for a later retry"
+
+
+def test_content_arm_reports_batch_failures_once(monkeypatch, caplog):
+    """A batch's decision failures are logged once, with a count and a reason."""
+    a = "/analysis/src/a.f"
+    b = "/analysis/src/b.f"
+    files = [_file(a, preview_text="x"), _file(b, preview_text="y")]
+    bad = _answers(0.9, 0.1, 0.1, 0.1)
+    bad["loads_diagnostic_data"] = {"type": "noul", "noul": 1.5}
+    with caplog.at_level(logging.INFO, logger="imas_codex.discovery.code.workers"):
+        _run_score(monkeypatch, files, {a: bad, b: bad})
+
+    failures = [
+        r.getMessage()
+        for r in caplog.records
+        if "content decision failed" in r.getMessage()
+    ]
+    assert len(failures) == 1, "one line per batch, not one per file"
+    assert "2 of 2" in failures[0]
 
 
 # ---------------------------------------------------------------------------

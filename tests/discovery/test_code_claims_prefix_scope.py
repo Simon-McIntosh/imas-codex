@@ -34,17 +34,9 @@ def _code_file(path, status, **extra):
     return row
 
 
-def _relevance(row):
-    """The file's relevance: the largest of the four scope probabilities."""
-    return max(
-        float(row.get(key) or 0.0)
-        for key in (
-            "relevance_loads",
-            "relevance_processes",
-            "relevance_describes",
-            "relevance_imas",
-        )
-    )
+def _composite(row):
+    """The file's stored relevance, written by both decision arms."""
+    return float(row.get("score_composite") or 0.0)
 
 
 class StubGraphClient:
@@ -84,7 +76,7 @@ class StubGraphClient:
                 r
                 for r in rows
                 if r["status"] == "triaged"
-                and _relevance(r) >= kwargs["min_relevance"]
+                and _composite(r) >= kwargs["min_relevance"]
                 and not r.get("is_enriched", False)
             ]
         if "sf.is_enriched = true" in cypher:
@@ -96,7 +88,7 @@ class StubGraphClient:
                 r
                 for r in rows
                 if r["status"] == "scored"
-                and _relevance(r) >= kwargs["min_relevance"]
+                and _composite(r) >= kwargs["min_relevance"]
                 and r.get("line_count", 0) <= kwargs["max_line_count"]
             ]
         if "sf.status = 'ingested'" in cypher:
@@ -145,8 +137,8 @@ class TestClaimsHonourPrefix:
         from imas_codex.discovery.code.graph_ops import claim_files_for_enrichment
 
         rows = [
-            _code_file(INSIDE + "/a.f", "triaged", relevance_loads=0.8),
-            _code_file(OUTSIDE + "/b.f", "triaged", relevance_loads=0.8),
+            _code_file(INSIDE + "/a.f", "triaged", score_composite=0.8),
+            _code_file(OUTSIDE + "/b.f", "triaged", score_composite=0.8),
         ]
         files = _call(
             claim_files_for_enrichment,
@@ -174,8 +166,8 @@ class TestClaimsHonourPrefix:
         from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
         rows = [
-            _code_file(INSIDE + "/a.f", "scored", relevance_loads=0.9, line_count=5),
-            _code_file(OUTSIDE + "/b.f", "scored", relevance_loads=0.9, line_count=5),
+            _code_file(INSIDE + "/a.f", "scored", score_composite=0.9, line_count=5),
+            _code_file(OUTSIDE + "/b.f", "scored", score_composite=0.9, line_count=5),
         ]
         files = _call(
             _claim_code_files_for_ingestion,
@@ -202,7 +194,7 @@ class TestHasWorkPredicatesHonourPrefix:
     def test_enrich_predicate_ignores_outside_work(self):
         from imas_codex.discovery.code.graph_ops import has_pending_enrich_work
 
-        rows = [_code_file(OUTSIDE + "/b.f", "triaged", relevance_loads=0.8)]
+        rows = [_code_file(OUTSIDE + "/b.f", "triaged", score_composite=0.8)]
         assert (
             _call(
                 has_pending_enrich_work,
@@ -214,8 +206,7 @@ class TestHasWorkPredicatesHonourPrefix:
             is False
         )
         assert (
-            _call(has_pending_enrich_work, GRAPH_OPS, rows, min_relevance=0.5)
-            is True
+            _call(has_pending_enrich_work, GRAPH_OPS, rows, min_relevance=0.5) is True
         )
 
     def test_score_predicate_ignores_outside_work(self):
@@ -231,7 +222,7 @@ class TestHasWorkPredicatesHonourPrefix:
     def test_code_predicate_ignores_outside_work(self):
         from imas_codex.discovery.code.graph_ops import has_pending_code_work
 
-        rows = [_code_file(OUTSIDE + "/b.f", "scored", relevance_loads=0.95)]
+        rows = [_code_file(OUTSIDE + "/b.f", "scored", score_composite=0.95)]
         assert (
             _call(
                 has_pending_code_work,

@@ -29,7 +29,6 @@ from imas_codex.discovery.base.claims import (
     reset_stale_claims,
     retry_on_deadlock,
 )
-from imas_codex.discovery.code.scorer import CODE_RELEVANCE_EXPR
 from imas_codex.graph import GraphClient
 from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -413,7 +412,7 @@ def claim_files_for_enrichment(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
-              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
+              AND sf.score_composite >= $min_relevance
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
               {excluded_clause}
@@ -435,11 +434,11 @@ def claim_files_for_enrichment(
 
         # Step 2: Read back only files WE successfully claimed
         result = gc.query(
-            f"""
-            MATCH (sf:CodeFile {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            """
+            MATCH (sf:CodeFile {claim_token: $token})-[:AT_FACILITY]->(f:Facility {id: $facility})
             RETURN sf.id AS id, sf.path AS path,
                    sf.language AS language,
-                   {CODE_RELEVANCE_EXPR} AS relevance
+                   sf.score_composite AS relevance
             """,
             facility=facility,
             token=claim_token,
@@ -700,7 +699,7 @@ def has_pending_enrich_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
-              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
+              AND sf.score_composite >= $min_relevance
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
               {excluded_clause}
@@ -741,7 +740,7 @@ def has_pending_code_work(
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
               AND sf.relevance_stage = 'content'
-              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
+              AND sf.score_composite >= $min_relevance
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}
