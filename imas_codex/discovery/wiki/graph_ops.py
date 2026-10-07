@@ -1613,7 +1613,13 @@ def defer_failed_documents(facility: str) -> int:
         )
         if reason is None:
             continue
-        mark_document_deferred(row["id"], reason)
+        try:
+            mark_document_deferred(row["id"], reason)
+        except Exception as e:
+            logger.error(
+                "Could not defer document %s for %s: %s", row["id"], facility, e
+            )
+            raise
         deferred += 1
 
     if deferred > 0:
@@ -1902,49 +1908,44 @@ def mark_documents_ingested(
 
 
 def mark_document_failed(document_id: str, error: str) -> None:
-    """Mark an document as failed with error message."""
-    try:
-        with GraphClient() as gc:
-            gc.query(
-                """
-                MATCH (wa:Document {id: $id})
-                SET wa.status = $failed,
-                    wa.error = $error,
-                    wa.failed_at = datetime(),
-                    wa.claimed_at = null
-                """,
-                id=document_id,
-                failed=DocumentStatus.failed.value,
-                error=error,
-            )
-    except Exception as e:
-        logger.warning(
-            "Could not mark document %s as failed (Neo4j unavailable): %s",
-            document_id,
-            e,
+    """Mark a document as failed with error message.
+
+    A failed status write raises rather than returning, so a document whose
+    failure did not reach the graph is distinguishable from one that was
+    marked. Callers decide whether to retry, halt, or count the loss.
+    """
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (wa:Document {id: $id})
+            SET wa.status = $failed,
+                wa.error = $error,
+                wa.failed_at = datetime(),
+                wa.claimed_at = null
+            """,
+            id=document_id,
+            failed=DocumentStatus.failed.value,
+            error=error,
         )
 
 
 def mark_document_deferred(document_id: str, reason: str) -> None:
-    """Mark an document as deferred (unsupported type or too large)."""
-    try:
-        with GraphClient() as gc:
-            gc.query(
-                """
-                MATCH (wa:Document {id: $id})
-                SET wa.status = $deferred,
-                    wa.defer_reason = $reason,
-                    wa.claimed_at = null
-                """,
-                id=document_id,
-                deferred=DocumentStatus.deferred.value,
-                reason=reason,
-            )
-    except Exception as e:
-        logger.warning(
-            "Could not mark document %s as deferred (Neo4j unavailable): %s",
-            document_id,
-            e,
+    """Mark a document as deferred (unsupported type or too large).
+
+    A failed status write raises rather than returning, so a deferral that did
+    not reach the graph is distinguishable from one that was marked.
+    """
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (wa:Document {id: $id})
+            SET wa.status = $deferred,
+                wa.defer_reason = $reason,
+                wa.claimed_at = null
+            """,
+            id=document_id,
+            deferred=DocumentStatus.deferred.value,
+            reason=reason,
         )
 
 
@@ -1957,6 +1958,10 @@ def mark_document_failed_or_deferred(
     mismatch) cannot succeed on retry, so it is deferred with a stated reason
     and stops being counted as a failure. Any other error is recorded as
     ``failed`` as before.
+
+    A write that does not reach the graph propagates from the underlying
+    status writer, so a terminal mark that did not land is not reported as if
+    it had.
 
     Returns:
         The deferral reason when deferred, otherwise ``None``.

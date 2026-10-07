@@ -2736,9 +2736,17 @@ class DocumentPipeline:
 
             except Exception as e:
                 logger.error("Failed to ingest document %s: %s", document_id, e)
-                defer_reason = mark_document_failed_or_deferred(
-                    document_id, str(e), document_type
-                )
+                try:
+                    defer_reason = mark_document_failed_or_deferred(
+                        document_id, str(e), document_type
+                    )
+                except Exception as write_error:
+                    logger.error(
+                        "Could not record terminal status for document %s: %s",
+                        document_id,
+                        write_error,
+                    )
+                    raise
                 if defer_reason is not None:
                     total_stats["documents_deferred"] += 1
                 else:

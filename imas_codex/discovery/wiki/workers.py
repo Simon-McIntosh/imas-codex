@@ -775,7 +775,15 @@ async def docs_worker(
                     logger.debug(
                         "Deferring oversized document %s: %s", filename, reason
                     )
-                    await asyncio.to_thread(mark_document_deferred, document_id, reason)
+                    try:
+                        await asyncio.to_thread(
+                            mark_document_deferred, document_id, reason
+                        )
+                    except Exception as e:
+                        logger.error(
+                            "Could not defer oversized document %s: %s", filename, e
+                        )
+                        raise
                     continue
 
                 # Check if type is text-extractable
@@ -784,7 +792,17 @@ async def docs_worker(
                     logger.debug(
                         "Deferring non-ingestable document %s: %s", filename, reason
                     )
-                    await asyncio.to_thread(mark_document_deferred, document_id, reason)
+                    try:
+                        await asyncio.to_thread(
+                            mark_document_deferred, document_id, reason
+                        )
+                    except Exception as e:
+                        logger.error(
+                            "Could not defer non-ingestable document %s: %s",
+                            filename,
+                            e,
+                        )
+                        raise
                     continue
 
                 # Download and ingest
@@ -1102,7 +1120,17 @@ async def docs_score_worker(
             if is_infrastructure_error(e):
                 raise
             for document in documents:
-                await asyncio.to_thread(mark_document_failed, document["id"], str(e))
+                try:
+                    await asyncio.to_thread(
+                        mark_document_failed, document["id"], str(e)
+                    )
+                except Exception as write_error:
+                    logger.error(
+                        "Could not mark document %s as failed: %s",
+                        document["id"],
+                        write_error,
+                    )
+                    raise
 
 
 async def image_score_worker(

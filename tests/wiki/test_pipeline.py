@@ -645,3 +645,31 @@ class TestIngestFromGraphFailureRouting:
 
         assert stats["documents_failed"] == 1
         assert stats["documents_deferred"] == 0
+
+    def test_status_write_failure_propagates(self):
+        """A terminal status write that fails surfaces, not silently swallowed."""
+        import asyncio
+        from unittest.mock import AsyncMock, patch
+
+        from imas_codex.discovery.wiki import pipeline as pl
+
+        pipeline = self._pipeline()
+        with (
+            patch.object(
+                pl, "get_pending_wiki_documents", return_value=self._pending()
+            ),
+            patch.object(pl, "fetch_document_size", return_value=1024),
+            patch.object(
+                pl,
+                "fetch_document_content",
+                new=AsyncMock(side_effect=RuntimeError("HTTP Error 404: Not Found")),
+            ),
+            patch.object(
+                pl,
+                "mark_document_failed_or_deferred",
+                side_effect=RuntimeError("Neo4j unavailable"),
+            ),
+            patch.object(pl, "GraphClient"),
+        ):
+            with pytest.raises(RuntimeError):
+                asyncio.run(pipeline.ingest_from_graph())
