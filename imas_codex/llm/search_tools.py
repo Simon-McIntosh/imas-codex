@@ -55,10 +55,9 @@ _DOC_SIGNAL_CAP = 16
 # ---------------------------------------------------------------------------
 
 # The rerank scores a pool larger than the k a search tool returns, so an answer
-# embedding ranks below k can still be lifted into the report. The value is the
-# smallest pool whose nDCG@10 stays within 0.02 of the best measured over a
-# candidate pool sweep, under a 5 s p95 wall time; the sweep table is in the
-# deployed tools' evidence record.
+# embedding ranks below k can still be lifted into the report. The value carries
+# the pool the prototype scored at, and the sweep that would set it from nDCG@10
+# and p95 wall time against acceptance targets has not been run on this branch.
 RERANK_POOL = 100
 
 # Wall-time budget for one query's rerank, sized from the prototype's ~2 s for
