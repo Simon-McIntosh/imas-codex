@@ -1,0 +1,55 @@
+<section>
+  <h2 id="include-extensions-title">Fortran include files (.bf, .inc) now reach the code scanner</h2>
+  <p id="include-extensions-what">
+    The code scanner enumerates remote files by extension: it lists only the
+    extensions that are keys of <code>EXTENSION_TO_LANGUAGE</code>
+    (<code>imas_codex/ingestion/readers/remote.py</code>), read through
+    <code>_get_extensions_list</code> in
+    <code>imas_codex/discovery/code/scanner.py</code>. That map had neither
+    <code>.bf</code> nor <code>.inc</code>, so no Fortran include file at any
+    facility could be listed and none could get a <code>CodeFile</code> row.
+    The change adds <code>.bf</code> and <code>.inc</code>, both mapped to
+    <code>fortran</code>, to that map, and adds the same two to the
+    <code>fortran</code> entry of
+    <code>imas_codex/config/patterns/file_types.yaml</code>, so both extension
+    lists name them. The scanner therefore returns <code>bf</code> and
+    <code>inc</code> in its extension list, and <code>detect_language</code>
+    maps both to <code>fortran</code>.
+  </p>
+  <p id="include-extensions-quoting">
+    A JT-60SA include name begins with <code>#</code>, which opens a comment in
+    a shell. Both fetch builders already pass each path through
+    <code>shlex.quote</code>; the new tests pin that. The remote listing in
+    <code>imas_codex/remote/scripts/scan_files.py</code> interpolated the
+    scanned path unquoted into a <code>find</code> command; it now quotes it
+    with <code>shlex.quote</code>. The same unquoted interpolation remains at
+    <code>imas_codex/remote/scripts/discover_files.py:150</code>, which is
+    outside this node's write scope and is recorded as a follow-on.
+  </p>
+  <p id="include-extensions-evidence">
+    Gate <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+    PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider
+    tests/discovery/test_code_include_extensions.py
+    tests/discovery/test_code_pipeline.py</code> exits <strong>0</strong> at
+    revision <code>258d1831e</code> on the fleet allocation
+    (<code>98dci4-clu-2018</code>, job 1277272): <strong>99 passed</strong>
+    (8 new in the include-extensions tests; 91 in the code-pipeline suite). The
+    new tests assert <code>bf</code> and <code>inc</code> are in
+    <code>_get_extensions_list()</code> and map to <code>fortran</code>, that
+    both the scanner map and the <code>file_types.yaml</code> Fortran entry name
+    them, and that <code>/analysis/src/client_eqdbms.EQ32.Rev1/inc/F/#AAA.bf</code>
+    reaches the remote command shell-quoted through <code>_fetch_sequential</code>,
+    <code>_fetch_batch_tar</code> and the <code>scan_files.py</code> find builder
+    (subprocess mocked, no ssh).
+  </p>
+  <p id="include-extensions-negative-control">
+    Negative control (<code>negative-control.log</code>): the extension-list
+    test run against a copy whose map lacks <code>.bf</code> exits
+    <code>1</code>, first failure
+    <em>.bf missing from the scan extension list</em> at
+    <code>test_scanner_extension_list_has_bf_and_inc</code>. The head arm's
+    mutation is the inverse of the fix; the log's last line reads
+    <code>EXIT=1</code> and the head arm at the same test reads
+    <code>EXIT=0</code>.
+  </p>
+</section>
