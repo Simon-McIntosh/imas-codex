@@ -92,6 +92,7 @@ def relevance_predicate(
     alias: str,
     stage: str,
     threshold_param: str = "$min_relevance",
+    facet_threshold_param: str | None = None,
 ) -> str:
     """The stage-and-relevance predicate every claim and has-work site shares.
 
@@ -100,11 +101,23 @@ def relevance_predicate(
     *threshold_param*.  Rendered from one owner, a file's status and the
     relevance that carried it cannot drift apart between the claim, the
     has-work check and the count.
+
+    When *facet_threshold_param* is given, the predicate also admits a file
+    whose strongest facet reaches it.  A content-stage file whose composite is
+    below the ingest gate can still carry the machine description or signal
+    processing a mapper needs, so the clause reads the four facet fields the
+    content arm writes.  It renders from :data:`ADMISSION_FACET_FIELDS`, the
+    same list :func:`content_facet_relevance` reads, so the Cypher and Python
+    arms cannot drift.
     """
-    return (
-        f"{alias}.relevance_stage = {stage!r} "
-        f"AND {alias}.score_composite >= {threshold_param}"
+    base = f"{alias}.relevance_stage = {stage!r}"
+    if facet_threshold_param is None:
+        return f"{base} AND {alias}.score_composite >= {threshold_param}"
+    facet_clause = " OR ".join(
+        f"{alias}.{field} >= {facet_threshold_param}"
+        for field in ADMISSION_FACET_FIELDS
     )
+    return f"{base} AND ({alias}.score_composite >= {threshold_param} OR {facet_clause})"
 
 
 # The content arm's graded Score questions and the CodeFile field each fills.
@@ -117,6 +130,13 @@ FACET_QUESTION_FIELDS = {
     "imas_mapping_depth": "score_imas_mapping",
 }
 RELEVANCE_GRADE_QUESTION = "relevance_grade"
+
+# The facet fields the admission clause reads, in the order the content arm
+# writes them.  Both the Cypher clause in :func:`relevance_predicate` and the
+# Python value in :func:`content_facet_relevance` read this one list, so a
+# facet the clause admits and a facet the description choice admits are the
+# same four values.
+ADMISSION_FACET_FIELDS = tuple(FACET_QUESTION_FIELDS.values())
 
 # The role enum's fixed order. ``relevance_role_probs`` follows it, so a
 # reader can compare two files' role distributions index by index.
@@ -243,6 +263,43 @@ def _content_top_levels() -> dict[str, int]:
         for name, question in questions.items()
         if question.get("type") == "score"
     }
+
+
+def content_facet_relevance(answers: dict[str, Any]) -> float:
+    """A file's strongest facet from one content decision's answers.
+
+    Each facet answer's Score divided by its top level, over the four facet
+    questions :data:`ADMISSION_FACET_FIELDS` names — the same values the
+    admission clause compares against the stored facet fields.  ``answers`` is
+    a content-arm decision, which carries a ``score`` per facet; the names arm
+    does not, so a name-arm answer yields 0.
+    """
+    top_levels = _content_top_levels()
+    best = 0.0
+    for question in FACET_QUESTION_FIELDS:
+        answer = answers.get(question) or {}
+        top = top_levels.get(question, 0)
+        score = float(answer.get("score", 0.0) or 0.0)
+        best = max(best, score / top if top > 0 else 0.0)
+    return best
+
+
+def content_admits(
+    answers: dict[str, Any],
+    composite_threshold: float,
+    facet_threshold: float,
+) -> bool:
+    """Whether a content decision admits a file to ingestion.
+
+    True when the content-arm composite reaches *composite_threshold*, or when
+    the strongest facet reaches *facet_threshold* — the Python mirror of the
+    clause :func:`relevance_predicate` renders, so the description choice and
+    the ingest claim agree.
+    """
+    return (
+        triage_relevance(answers) >= composite_threshold
+        or content_facet_relevance(answers) >= facet_threshold
+    )
 
 
 def _relevance_item(

@@ -1062,6 +1062,26 @@ def get_code_ingest_threshold() -> float:
     return float(_get_section("discovery").get("code-ingest-threshold", 0.5))
 
 
+def get_code_facet_admission_threshold() -> float:
+    """Get the minimum content-arm facet value that admits a code file.
+
+    A content-stage file is admitted to ingestion when its composite reaches
+    :func:`get_code_ingest_threshold`, or when its strongest facet
+    (``score_data_access``, ``score_signal_processing``,
+    ``score_machine_description`` or ``score_imas_mapping``) reaches this
+    threshold.  A file whose composite is below the ingest gate can still
+    carry the machine description or signal processing a mapper needs.
+
+    Priority: IMAS_CODEX_CODE_FACET_ADMISSION_THRESHOLD env →
+    [discovery].code-facet-admission-threshold → 0.85.
+    """
+    if env := os.getenv("IMAS_CODEX_CODE_FACET_ADMISSION_THRESHOLD"):
+        return float(env)
+    return float(
+        _get_section("discovery").get("code-facet-admission-threshold", 0.85)
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class RouteThresholds:
     """Thresholds that route a judged source between select, escalate and reject.

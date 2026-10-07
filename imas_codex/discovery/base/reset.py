@@ -435,6 +435,13 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
         source_statuses=["ingested"],
         clear_fields=["ingested_at"],
     ),
+    "content": ResetSpec(
+        label="CodeFile",
+        target_status="triaged",
+        source_statuses=["scored"],
+        clear_fields=_CODE_SCORE_FIELDS + ["skip_reason"],
+        source_filter="n.relevance_stage = 'content' AND n.status = 'skipped'",
+    ),
 }
 
 # ---------------------------------------------------------------------------
