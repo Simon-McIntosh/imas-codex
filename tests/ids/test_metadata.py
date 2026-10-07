@@ -516,20 +516,43 @@ class TestPopulateMetadata:
         assert "ids_properties/provenance/node/sources" not in result.llm_fields
 
     def test_populate_no_signals_produces_fallback_description(self):
-        """Test that no signals arg still succeeds (uses fallback message)."""
+        """Test that no signals arg still succeeds (uses fallback message).
+
+        The LLM call is mocked so the test makes no live request: with the
+        ids-mapping seat routed to the local lane, an unmocked call would
+        reach a real endpoint and depend on its latency.
+        """
         gc = MagicMock()
         gc.query.return_value = []
 
-        result = populate_metadata(
-            "jet",
-            "pf_active",
-            gc=gc,
-            dd_version="4.0.0",
-            mapped_signals=None,
+        mock_response = MetadataPopulationResponse(
+            comment="Fallback description",
+            homogeneous_time=1,
         )
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.call_llm_structured",
+                return_value=(mock_response, 0.0, 0),
+            ),
+            patch("imas_codex.settings.get_model", return_value="test-model"),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="test prompt",
+            ),
+        ):
+            result = populate_metadata(
+                "jet",
+                "pf_active",
+                gc=gc,
+                dd_version="jet-4.0.0",
+                mapped_signals=None,
+            )
 
         # Should succeed and return a result regardless
         assert isinstance(result, IDSMetadataResult)
+        assert result.facility == "jet"
+        assert result.ids_name == "pf_active"
 
     def test_populate_dd_version_in_result(self):
         """Test that dd_version from input appears in the result."""
