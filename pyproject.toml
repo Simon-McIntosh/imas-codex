@@ -282,6 +282,15 @@ triage-offset = 0.15
 # IMAS_CODEX_CODE_INGEST_THRESHOLD.
 code-triage-threshold = 0.4
 code-ingest-threshold = 0.5
+# code-facet-admission-threshold is the content-arm facet gate: a content-stage
+# file is admitted when its composite reaches code-ingest-threshold, or when its
+# strongest facet (score_data_access, score_signal_processing,
+# score_machine_description or score_imas_mapping) reaches this value.
+# Measured on the 128-file labelled sample: the highest out-of-scope facet is
+# 0.837 (lmdif.f), so the lowest threshold admitting no out-of-scope file the
+# composite rule rejects is 0.85, which admits mgset0.f (machine_description
+# 0.88). Override: IMAS_CODEX_CODE_FACET_ADMISSION_THRESHOLD.
+code-facet-admission-threshold = 0.85
 # Candidate-stage routing thresholds (get_mapping_route_thresholds). A source
 # is selected when map-select-threshold is set and any candidate's same_quantity
 # reaches it; it is rejected only when map-floor-threshold is set and no score

@@ -721,14 +721,16 @@ def has_pending_enrich_work(
 def has_pending_code_work(
     facility: str,
     min_relevance: float | None = None,
+    min_facet_relevance: float | None = None,
     max_line_count: int = 10000,
     path_prefixes: list[str] | None = None,
 ) -> bool:
     """Check if there are scored code files needing ingestion.
 
-    Only a file whose relevance came from the content arm
-    (``relevance_stage='content'``) counts; a name-arm relevance is not an
-    ingestion decision.
+    Only a file whose content decision admits it — relevance from the content
+    arm (``relevance_stage='content'``) and either the composite reaching the
+    ingest threshold or the strongest facet reaching the facet threshold —
+    counts; a name-arm relevance is not an ingestion decision.
 
     When ``path_prefixes`` is given, only CodeFiles whose ``path`` starts with
     one of the prefixes count.
@@ -737,6 +739,10 @@ def has_pending_code_work(
         from imas_codex.settings import get_code_ingest_threshold
 
         min_relevance = get_code_ingest_threshold()
+    if min_facet_relevance is None:
+        from imas_codex.settings import get_code_facet_admission_threshold
+
+        min_facet_relevance = get_code_facet_admission_threshold()
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
@@ -744,7 +750,7 @@ def has_pending_code_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
-              AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT)}
+              AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT, "$min_relevance", "$min_facet_relevance")}
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}
@@ -752,6 +758,7 @@ def has_pending_code_work(
             """,
             facility=facility,
             min_relevance=min_relevance,
+            min_facet_relevance=min_facet_relevance,
             max_line_count=max_line_count,
             **prefix_params,
             **excluded_params,

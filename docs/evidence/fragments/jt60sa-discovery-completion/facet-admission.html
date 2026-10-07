@@ -1,0 +1,75 @@
+<section>
+  <h2 id="facet-admission">A content-stage file is admitted on a strong facet alone</h2>
+  <p id="facet-admission-result">
+    The code pipeline admits a file to ingestion only when its composite
+    relevance reaches the ingest gate, so a file whose composite is weak is
+    dropped even when one facet — the machine description or the signal
+    processing a mapper needs — is strong. The ingest claim, the pending-ingest
+    and pending-embed counts, and the has-work check now also admit a
+    content-stage file whose strongest facet (<code>score_data_access</code>,
+    <code>score_signal_processing</code>, <code>score_machine_description</code>
+    or <code>score_imas_mapping</code>) reaches a new measured gate. The gate is
+    <code>code-facet-admission-threshold</code> in
+    <code>[tool.imas-codex.discovery]</code> (default <code>0.85</code>,
+    override <code>IMAS_CODEX_CODE_FACET_ADMISSION_THRESHOLD</code>). The
+    Cypher clause and the Python value read one list,
+    <code>ADMISSION_FACET_FIELDS</code>, so the claim and the description
+    choice cannot drift.
+  </p>
+  <p id="facet-admission-thresholds">
+    Measured on the 128-file labelled sample
+    (<code>sample.json</code>/<code>labels.json</code> with prototype facet
+    answers in <code>jev_score_results.json</code>): composite-only admission at
+    0.5 admits 40 files, precision 0.800, recall 0.865. Composite-or-facet
+    admission at each candidate threshold is below; <em>new S/O</em> is how many
+    out-of-scope files each threshold newly admits over the composite rule.
+  </p>
+  <table id="facet-admission-table">
+    <thead>
+      <tr>
+        <th>facet threshold</th><th>admitted</th><th>precision</th>
+        <th>recall</th><th>new S/O</th><th>newly admitted</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>0.6</td><td>45</td><td>0.733</td><td>0.892</td><th>4</th><td>G mgset0.f, O eqvacu.f, S qrfac.f, S walldt.f</td></tr>
+      <tr><td>0.7</td><td>44</td><td>0.750</td><td>0.892</td><th>3</th><td>G mgset0.f, S qrfac.f, S walldt.f</td></tr>
+      <tr><td>0.75</td><td>44</td><td>0.750</td><td>0.892</td><th>3</th><td>G mgset0.f, S qrfac.f, S walldt.f</td></tr>
+      <tr><td>0.8</td><td>43</td><td>0.767</td><td>0.892</td><th>2</th><td>G mgset0.f, S walldt.f</td></tr>
+      <tr><td><strong>0.85</strong></td><td>41</td><td><strong>0.805</strong></td><td>0.892</td><th><strong>0</strong></th><td>G mgset0.f (composite 0.480, machine_description 0.880)</td></tr>
+    </tbody>
+  </table>
+  <p id="facet-admission-threshold-choice">
+    None of the four named candidate thresholds admits no out-of-scope file the
+    composite rule rejects: the highest out-of-scope facet in the sample is
+    0.837 (<code>lmdif.f</code>), so the rule's answer sits just above it. The
+    chosen default is <code>0.85</code>, the lowest 0.05 step that admits no
+    out-of-scope file, newly admitting only <code>mgset0.f</code> (in scope,
+    label G, machine description 2.64/3 = 0.880). This is a documented
+    deviation from the four-value grid named in the node.
+  </p>
+  <p id="facet-admission-source">
+    <code>relevance_predicate</code> in
+    <code>imas_codex/discovery/code/scorer.py</code> gained an optional fourth
+    argument that appends the facet OR-clause; the four render sites (the ingest
+    claim in <code>code/workers.py</code>, the pending-ingest and pending-embed
+    counts in <code>code/parallel.py</code>, and the has-work check in
+    <code>code/graph_ops.py</code>) pass it. The Python mirror
+    <code>content_admits</code> reads the same list for the description choice.
+    A new <code>content</code> target in <code>CODE_RESET_SPECS</code> returns a
+    content-stage <code>scored</code> or <code>skipped</code> file to
+    <code>triaged</code>, clearing only the score fields and
+    <code>skip_reason</code> and keeping <code>is_enriched</code>, so the file is
+    claimable for scoring again.
+  </p>
+  <p id="facet-admission-evidence">
+    Gate <code>pytest tests/discovery tests/llm tests/ingestion
+    tests/graph/test_cypher_property_check.py</code> exits <strong>0</strong>
+    (1651 passed, 12 skipped, 6 deselected) on the fleet compute node. Every
+    changed Cypher statement was <code>EXPLAIN</code>ed against the live graph:
+    five statements, five <code>OK</code>. The negative control —
+    the facet tests run against a copy whose predicate drops the facet branch —
+    exits <strong>1</strong>, its first failure the facet-only admission test
+    (<code>test_strong_facet_admits_where_composite_does_not</code>).
+  </p>
+</section>

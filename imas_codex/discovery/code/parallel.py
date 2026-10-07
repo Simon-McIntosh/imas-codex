@@ -137,10 +137,15 @@ async def run_parallel_code_discovery(
 
         min_score = get_discovery_threshold()
 
-    from imas_codex.settings import get_code_ingest_threshold, get_code_triage_threshold
+    from imas_codex.settings import (
+        get_code_facet_admission_threshold,
+        get_code_ingest_threshold,
+        get_code_triage_threshold,
+    )
 
     min_relevance = get_code_triage_threshold()
     min_ingest_relevance = get_code_ingest_threshold()
+    min_facet_relevance = get_code_facet_admission_threshold()
 
     # Release orphaned claims from previous runs
     reset_orphaned_file_claims(facility, silent=True)
@@ -190,7 +195,10 @@ async def run_parallel_code_discovery(
     state.code_phase.set_has_work_fn(
         lambda: (
             has_pending_code_work(
-                facility, min_ingest_relevance, path_prefixes=path_prefixes
+                facility,
+                min_ingest_relevance,
+                min_facet_relevance=min_facet_relevance,
+                path_prefixes=path_prefixes,
             )
             or not state.score_phase.done
         )
@@ -354,6 +362,7 @@ def get_code_discovery_stats(
     facility: str,
     min_relevance: float | None = None,
     min_ingest_relevance: float | None = None,
+    min_facet_relevance: float | None = None,
 ) -> dict[str, int | float]:
     """Get code discovery statistics from graph for progress display.
 
@@ -363,13 +372,21 @@ def get_code_discovery_stats(
             Defaults to ``get_code_triage_threshold()``.
         min_ingest_relevance: Minimum content relevance for ingest/embed
             pending counts.  Defaults to ``get_code_ingest_threshold()``.
+        min_facet_relevance: Minimum strongest facet for ingest/embed pending
+            counts.  Defaults to ``get_code_facet_admission_threshold()``.
     """
-    from imas_codex.settings import get_code_ingest_threshold, get_code_triage_threshold
+    from imas_codex.settings import (
+        get_code_facet_admission_threshold,
+        get_code_ingest_threshold,
+        get_code_triage_threshold,
+    )
 
     if min_relevance is None:
         min_relevance = get_code_triage_threshold()
     if min_ingest_relevance is None:
         min_ingest_relevance = get_code_ingest_threshold()
+    if min_facet_relevance is None:
+        min_facet_relevance = get_code_facet_admission_threshold()
     with GraphClient() as gc:
         result = gc.query(
             """
@@ -453,7 +470,10 @@ def get_code_discovery_stats(
             WHERE cf.status = 'scored'
               AND {
                 relevance_predicate(
-                    "cf", RELEVANCE_STAGE_CONTENT, "$min_ingest_relevance"
+                    "cf",
+                    RELEVANCE_STAGE_CONTENT,
+                    "$min_ingest_relevance",
+                    "$min_facet_relevance",
                 )
             }
               AND coalesce(cf.line_count, 0) <= 10000
@@ -461,6 +481,7 @@ def get_code_discovery_stats(
             """,
             facility=facility,
             min_ingest_relevance=min_ingest_relevance,
+            min_facet_relevance=min_facet_relevance,
         )
         stats["pending_ingest"] = ingest_result[0]["pending"] if ingest_result else 0
 
@@ -501,7 +522,10 @@ def get_code_discovery_stats(
             MATCH (cc)<-[:HAS_CHUNK]-(:CodeExample)<-[:HAS_EXAMPLE]-(cf:CodeFile)
             WHERE {
                 relevance_predicate(
-                    "cf", RELEVANCE_STAGE_CONTENT, "$min_ingest_relevance"
+                    "cf",
+                    RELEVANCE_STAGE_CONTENT,
+                    "$min_ingest_relevance",
+                    "$min_facet_relevance",
                 )
             }
             RETURN count(cc) AS total,
@@ -513,6 +537,7 @@ def get_code_discovery_stats(
             """,
             facility=facility,
             min_ingest_relevance=min_ingest_relevance,
+            min_facet_relevance=min_facet_relevance,
             embed_retry_cutoff=embed_retry_cutoff_time(),
         )
         if embed_result:

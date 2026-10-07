@@ -437,9 +437,11 @@ async def score_worker(
         apply_file_scores,
         build_triage_questions,
         build_triage_state,
+        content_admits,
         triage_relevance,
     )
     from imas_codex.settings import (
+        get_code_facet_admission_threshold,
         get_code_ingest_threshold,
         get_model,
         get_reasoning_effort,
@@ -559,22 +561,23 @@ async def score_worker(
             content_cost = sum(d["cost"] for d in content_decisions)
             state.score_stats.cost += content_cost
 
-            # The local model describes only the files whose content relevance
-            # reaches the ingest threshold; the description is written after
+            # The local model describes only the files whose content decision
+            # admits them — composite reaches the ingest threshold, or a facet
+            # reaches the facet threshold; the description is written after
             # the content decision that admitted the file.  Each decision is
             # paired with its own file by path, never by position, because a
             # failed decision drops out of ``content_decisions`` and a
             # positional zip would shift every later file onto the wrong
             # decision.
             ingest_threshold = get_code_ingest_threshold()
+            facet_threshold = get_code_facet_admission_threshold()
             file_by_path = {f["path"]: f for f in files}
             described_files = []
             described_relevance: dict[str, float] = {}
             for d in content_decisions:
-                relevance = triage_relevance(d["answers"])
-                if relevance >= ingest_threshold:
+                if content_admits(d["answers"], ingest_threshold, facet_threshold):
                     described_files.append(file_by_path[d["path"]])
-                    described_relevance[d["path"]] = relevance
+                    described_relevance[d["path"]] = triage_relevance(d["answers"])
 
             description_cost = 0.0
             parsed_results = []
@@ -655,15 +658,16 @@ def _claim_code_files_for_ingestion(
     facility: str,
     limit: int = 20,
     min_relevance: float | None = None,
+    min_facet_relevance: float | None = None,
     max_line_count: int = 10000,
     path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Claim scored CodeFiles for ingestion.
 
-    Claims CodeFiles with status='scored' whose content relevance — the
-    largest of the four scope probabilities stored by the content-arm
-    decision — reaches the ingest threshold, and claims the highest relevance
-    first.  Only a file whose relevance came from the content arm
+    Claims CodeFiles with status='scored' whose content decision admits them —
+    the largest of the four scope probabilities reaches the ingest threshold,
+    or the strongest facet reaches the facet threshold — and claims the highest
+    relevance first.  Only a file whose relevance came from the content arm
     (``relevance_stage='content'``) is eligible, so a name-arm relevance can
     never carry a file into ingestion.  Skips files exceeding max_line_count
     to avoid tree-sitter hangs on very large auto-generated files.
@@ -682,6 +686,10 @@ def _claim_code_files_for_ingestion(
         from imas_codex.settings import get_code_ingest_threshold
 
         min_relevance = get_code_ingest_threshold()
+    if min_facet_relevance is None:
+        from imas_codex.settings import get_code_facet_admission_threshold
+
+        min_facet_relevance = get_code_facet_admission_threshold()
     import uuid
 
     from imas_codex.config.discovery_config import build_facility_exclusion_filter
@@ -704,7 +712,7 @@ def _claim_code_files_for_ingestion(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
-              AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT)}
+              AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT, "$min_relevance", "$min_facet_relevance")}
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}
@@ -717,6 +725,7 @@ def _claim_code_files_for_ingestion(
             """,
             facility=facility,
             min_relevance=min_relevance,
+            min_facet_relevance=min_facet_relevance,
             max_line_count=max_line_count,
             limit=limit,
             cutoff=cutoff,
