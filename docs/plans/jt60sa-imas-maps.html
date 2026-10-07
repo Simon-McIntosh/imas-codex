@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -293,6 +293,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261007T064700072212-review-of-singleton-signal-sources" data-who="reckon-build" data-when="2026-10-07T07:11:34.869Z">
     <div class="r-comment-body"><p>landing: independent review of r-20261007T061522316683-singleton-signal-sources stored as a parsed record at reviewed_base_sha 52f616dd261ce21072921abca93d8f2291fe3c19 and reviewed_head_sha 1b8457bbf16b057141a52193b629e5cab20d16d3, scoring all six dimensions (goal_fidelity 19, evidence 17, scope_discipline 20, durability 17, fit 19, reuse 19; total 111) with added_failure_count 0 and added_failure_ids []; the one-member-source pass is correct as implemented and four follow-ons are recorded.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261007T061522316683-singleton-signal-sources" data-who="reckon-build" data-when="2026-10-07T07:29:30.748Z">
+    <div class="r-comment-body"><p>landing: detect_signal_sources gained a final pass giving every ungrouped discovered signal a one-member SignalSource keyed by the signal (accessor, or id when the accessor is null) with itself as representative, threshold unchanged, and the unused create_signal_source was deleted; the default gate uv run --no-sync pytest tests/discovery tests/ids exits 0 with 1773 passed plus a live -m graph round trip at 1 passed that also pins a channel-like singleton being claimed for individual enrichment rather than bulk-skipped.</p></div>
 </div>
 </section>
 </main>
