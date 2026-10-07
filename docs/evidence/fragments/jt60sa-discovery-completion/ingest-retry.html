@@ -1,22 +1,24 @@
 <section>
-  <h2 id="ingest-retry-code-ingest-reingests-the-failed-files">JT-60SA code re-ingest clears the 29 failed files and settles the two unclaimable ones</h2>
+  <h2 id="ingest-retry-code-ingest-reingests-the-failed-files">JT-60SA code re-ingest: the 29 failed files stay failed, and why</h2>
   <p id="ingest-retry-scope">
     Operational node. No source or test change. Run single-writer from
     <code>98dci4-clu-2018</code> (job <code>1277272</code>, in place, no
     <code>srun</code>) against the JT-60SA hop, after confirming no other
-    <code>discover code jt-60sa</code> process was live. Two commands: a scoped
-    <code>--reset-to scored</code> pass carrying one <code>--path-prefix</code>
-    per failed file's full path, then a second unscoped pass.
+    <code>discover code jt-60sa</code> process was live (the peer's
+    <code>discover signals</code> pass is a different command). Two commands: a
+    scoped <code>--reset-to scored</code> pass carrying one
+    <code>--path-prefix</code> per failed file's full path, then a second
+    unscoped pass.
   </p>
   <p id="ingest-retry-before">
-    <strong>Before.</strong> A bounded read at 2026-10-07T12:06Z returned the
-    JT-60SA CodeFile census below: <strong>29</strong> files at
-    <code>failed</code>, every one carrying the CodeExample duplicate-key
-    refusal on <code>jt-60sa:eqdb_io:e548f073</code> (node 1358),
+    <strong>Before</strong> (read at 2026-10-07T12:06Z). <strong>29</strong>
+    files at <code>failed</code>, every one carrying the CodeExample
+    duplicate-key refusal on <code>jt-60sa:eqdb_io:e548f073</code> (node 1358),
     <code>jt-60sa:mdbget:128ebdc3</code> (node 7242) or
     <code>jt-60sa:setvtcx:be55b2c6</code> (node 10219). Two content-stage files
     sat at <code>scored</code> with composites 0.80 and 0.75 and
-    <code>line_count</code> 10374 and 10467.
+    <code>line_count</code> 10374 and 10467 — above the claim's
+    <code>max_line_count</code> ceiling, so unreachable.
   </p>
   <table id="ingest-retry-before-table">
     <caption>JT-60SA CodeFile status before the run (2026-10-07T12:06Z)</caption>
@@ -28,15 +30,79 @@
       <tr><td>failed</td><td>29</td></tr>
     </tbody>
   </table>
+  <p id="ingest-retry-reset">
+    <strong>The reset was exact.</strong> The scoped pass logged
+    <code>Reset 29 CodeFile nodes to 'scored'</code> and
+    <code>Reset 29 file(s) to 'scored' for reprocessing</code> — one per failed
+    file, none other. Its summary: <code>0 scanned, 0 scored, 29 code
+    ingested</code>, cost $0.00, 479.4&nbsp;s.
+  </p>
   <p id="ingest-retry-after">
-    <strong>After — in flight.</strong> The scoped reset pass reset exactly 29
-    files (<code>Reset 29 CodeFile nodes to 'scored'</code>). The same command's
-    ingest stage then found a <code>CodeExample</code> already present for each
-    reset file (<code>_check_already_ingested</code>, keyed on
-    <code>facility_id</code> + <code>source_file</code>) and marked all 29
-    <code>ingested</code> without a re-fetch: three batches of 10/10/9, each
-    <code>All files already ingested</code>, 0 chunks. The unscoped second pass
-    that settles the two oversize eslice files as <code>skipped</code> follows.
-    Final counts, chunk coverage and spend are recorded once both passes exit.
+    <strong>After</strong> (read at 2026-10-07T12:27Z, after the unscoped pass).
+    The unscoped pass settled the two oversize eslice files
+    (<code>Settled 2 admitted files as skipped (exceeds max_line_count)</code>)
+    and ingested nothing else (<code>0 scanned, 0 scored, 0 code ingested</code>,
+    cost $0.00, 287.3&nbsp;s). The 29 files are still <code>failed</code>, now
+    with reason <code>no ingestion outcome recorded</code>, not a CodeExample
+    collision.
+  </p>
+  <table id="ingest-retry-after-table">
+    <caption>JT-60SA CodeFile status after both passes (2026-10-07T12:27Z)</caption>
+    <thead><tr><th>status</th><th>files</th><th>examples</th><th>chunks</th></tr></thead>
+    <tbody>
+      <tr><td>skipped</td><td>1906</td><td>0</td><td>0</td></tr>
+      <tr><td>scored</td><td>721</td><td>0</td><td>0</td></tr>
+      <tr><td>ingested</td><td>552</td><td>552</td><td>2917</td></tr>
+      <tr><td>failed</td><td>29</td><td>29</td><td>133</td></tr>
+    </tbody>
+  </table>
+  <p id="ingest-retry-targets">
+    <strong>Measured against the §31 targets.</strong> Content-stage files at
+    <code>scored</code> with composite &ge; 0.5 that the claim cannot take:
+    <strong>2 &rarr; 0</strong> (target met — both eslice files now
+    <code>skipped</code>). JT-60SA CodeFiles at <code>failed</code>:
+    <strong>29 &rarr; 29</strong> (target 0 — <em>not met</em>). Files actually
+    re-ingested: <strong>0</strong>, because none was ever fetched: the ingest
+    stage found a <code>CodeExample</code> already present for each reset file
+    and marked it done without a fetch.
+  </p>
+  <p id="ingest-retry-defect">
+    <strong>Root cause — a product defect, outside this node's scope.</strong>
+    <code>_check_already_ingested</code>
+    (<code>imas_codex/ingestion/pipeline.py</code>) reports a file as already
+    ingested when a <code>CodeExample</code> with its
+    <code>facility_id</code>&nbsp;+&nbsp;<code>source_file</code> exists — which
+    is exactly the collision node left by the earlier concurrent run (verified:
+    all 29 failed files carry a <code>CodeExample</code> whose
+    <code>source_file</code> equals the file's <code>path</code>). With every
+    path so reported, <code>ingest_files</code> reaches
+    <code>if not paths_to_ingest: return stats</code> (line&nbsp;413) and returns
+    <strong>before</strong> <code>stats["outcomes"] = outcomes</code>
+    (line&nbsp;643), so the caller receives no per-file outcomes. The batch
+    handler in <code>imas_codex/discovery/code/workers.py</code> then treats
+    every claimed file's missing outcome as a failure at
+    <code>_mark_file_failed(f["id"], "no ingestion outcome recorded")</code>,
+    and all 29 are written back to <code>failed</code>. This is the failure
+    mode §31 item&nbsp;2 set out to remove — one file's outcome decided by
+    another's — reappearing through the early-return path, which violates the
+    contract the same file states at lines&nbsp;361&ndash;363
+    (&ldquo;every path asked for ends with exactly one outcome&rdquo;). The node
+    holds a no-code-change fence, so this is reported, not repaired.
+  </p>
+  <p id="ingest-retry-negative-control">
+    <strong>Negative control, and it held.</strong> An ingested file outside the
+    failed set keeps its <code>ingested_at</code> and chunk count across the
+    run: 0 of the 20 sampled ingested files changed <code>ingested_at</code>
+    between the before and after reads, and the facility-wide ingested census
+    is unchanged at 552 files / 2917 chunks. The 29 files' own 29 examples /
+    133 chunks are the pre-existing collision nodes, untouched by either pass.
+  </p>
+  <p id="ingest-retry-spend">
+    <strong>Spend.</strong> Both passes together: <strong>$0.00</strong> of
+    decision spend (no LLM call — the files were neither scanned nor scored;
+    the 29 were already claimed as already-ingested). Logs:
+    <code>run1_reset_ingest.log</code>, <code>run2_unscoped.log</code>,
+    <code>before.log</code>, <code>after_run1.log</code>,
+    <code>after_run2.log</code> under the run directory.
   </p>
 </section>
