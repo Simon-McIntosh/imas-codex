@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "abstaining": false,
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run r-20261007T152239857269-incremental-rejudge declares no baseline_suite and no after_suite (both null in its manifest, confirmed in its classification.json manifest.data), so there is no pair of reviewed gate-log failure sets to difference: added_failure_count is 0 with an empty id list rather than a measured delta. Its single gate.log is an after arm and reads 68 passed, 0 failed, EXIT=0; I re-ran that same command at the reviewed head 14792e1d4 and reproduced 68 passed EXIT=0 (review-gate.log). I did not substitute a suite run of my own for the missing baseline arm.",
+  "base_log_revision": null,
+  "completed_at": "2026-10-07T15:58:54.315Z",
+  "dispatched_at": "2026-10-07T15:46:04Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/graph_ops.py",
+      "line": "517",
+      "severity": "follow-on",
+      "text": "The resume key conflates 'no recorded answer' with 'an answer whose facet confidence is 0.0'. The re-judge claim selects on coalesce(sf.score_data_access_confidence, 0.0) = 0.0 (graph_ops.py:517), and the explicit reset clears that field to absent (reset.py:480 clears _CODE_REJUDGE_FIELDS, of which score_data_access_confidence is one). A file whose content decision SUCCEEDS but returns a data-access confidence of 0.0 is written with confidence 0.0, so it never drains: within a pass the fresh-file guard stops re-judging it, but the next --rejudge-ingested pass re-claims and re-judges it again, indefinitely, because the reset no longer intervenes between passes. That is the same never-drains/over-count behaviour section 36 set out to remove, narrowed to files whose answer is a genuine zero confidence. The predicate is pre-existing and the plan names it, so this is a residual of the design rather than a done-when failure: the named tests use a non-zero confidence so none exercises the zero-answer path (test_code_ingested_rejudge.py:575,600). A one-line fix would drain on a field the re-judge always sets non-null (e.g. scored_at, or a dedicated re-judge marker) rather than on confidence."
+    }
+  ],
+  "head_log_revision": "14792e1d4b9d6f63d58fab7096f1edaf03b2b1d3",
+  "item_verdicts": {
+    "diff": "read the reviewed base 92aa5c19 to head 14792e1d4 in the reviewed worktree: two commits, 4 files, +348/-22. code.py stops running reset_to_status unconditionally in the re-judge branch and runs it only when reset_to == 'ingested'; workers.py filters each claimed batch to files not already attempted this pass and drops attempted files from the batch; the test file gains four tests; the evidence fragment is added.",
+    "done_when": "read the four done-when clauses and checked each: (1) test_second_pass_* drives two passes over three ingested files, one decision fails on pass one, and asserts the second pass judges only that file (per_pass[1] == [failed]). (2) test_no_file_is_judged_twice_* asserts the judged path list has no duplicate and rejudged == the distinct answered files. (3) the negative control log (negative-control-rejudge.log) restores the per-pass full reset in the worker and exits EXIT=1 at that first assertion. (4) the gate command exits 0. I re-ran clause (4) at the reviewed head: 68 passed, EXIT=0.",
+    "goal": "read plan section 36 against the reviewed run r-20261007T152239857269-incremental-rejudge: the ingested re-judge must reset once per request and resume on the files a prior pass left unanswered, fix the per-file attempted guard so no file is judged twice in one pass, and make the reported count equal the distinct files judged. The run moved the reset out of the per-invocation re-judge branch to an explicit --reset-to ingested step (owner reset_to_status) and made the claim take only ingested content-stage files with no recorded answer.",
+    "manifest": "read the reviewed manifest.md: status complete, commits 5eb1a5c01/14792e1d4, the gate command and its 68-passed EXIT=0 result, the negative_control_log path, a failure_attribution for an earlier test-helper draft, and the evidence_inputs naming the unchanged reset owner, the unchanged claim predicate, and the fresh/resume CLI forms.",
+    "write_paths": "read the reviewed run's declared write paths; the two commits 5eb1a5c01 and 14792e1d4 touch only imas_codex/cli/discover/code.py, imas_codex/discovery/code/workers.py, tests/discovery/test_code_ingested_rejudge.py and docs/evidence/fragments/jt60sa-discovery-completion/incremental-rejudge.html, all inside them. reset.py and graph_ops.py were declared but correctly not modified (the reset spec and the claim predicate are reused unchanged)."
+  },
+  "justifications": {
+    "durability": "the change is committed source plus tests at head 14792e1d4 and the gate reproduces from a clean worktree, so it survives; the reset/claim coupling is documented in code, help text and the evidence fragment. Held below full because the resume guarantee rests on a confidence != 0 drain key that conflates an absent answer with a zero-confidence answer (follow-on), so for that narrow case the fix's own goal is not durable.",
+    "evidence": "strong: a gate log at revision 5eb1a5c01 (68 passed, EXIT=0) that I reproduced at the reviewed head; a genuine negative control whose red arm I read (negative-control-rejudge.log, EXIT=1, the second pass re-judging all three files) and whose mutation is the exact inverse of the landed code (a per-pass reset the landed worker no longer performs); deterministic in-memory tests that stub the HTTP seam; and an evidence fragment recording the measure, the gate and the negative control. Not full because the reviewed run declares no baseline_suite, so there is no measured before/after failure delta, and the negative control is recorded rather than independently re-executed (re-running it needs a write into the reviewed worktree, outside this node's scope).",
+    "fit": "high: the reset stays on reset_to_status with CODE_RESET_SPECS['ingested'], the re-judge reaches the files through the existing claim_files_for_scoring path with ingested_rejudge=True, and the write goes through apply_ingested_rejudge - exactly the owners section 36 names. No parallel reset path or second claim was introduced.",
+    "goal_fidelity": "section 36 is met: the reset is the explicit once-per-request --reset-to ingested step and its owner stays reset_to_status; a plain --rejudge-ingested clears nothing and its claim takes only ingested content-stage files with no recorded answer, so a following pass resumes on the files a prior pass left unanswered; the worker filters each batch to fresh files so no file is judged twice in one pass and rejudged counts distinct answered files. Held below full because the plan's 'the reset runs once, when a re-judge is requested' is realised as an opt-in flag on the same invocation (a form the plan explicitly permits), and because the drain key that makes resume work also drains a genuine zero-confidence answer (see the follow-on).",
+    "reuse": "high: CODE_RESET_SPECS['ingested'] (reset.py:480) and reset_to_status are reused unchanged, the claim predicate coalesce(sf.score_data_access_confidence, 0.0) = 0.0 (graph_ops.py:517) is reused unchanged, and apply_ingested_rejudge writes the judgment through the shared _relevance_item; nothing was re-spelled. The fresh-file filter is a small local guard, not a second mechanism.",
+    "scope_discipline": "exemplary: only four files changed, all declared; the reset spec in reset.py and the claim predicate in graph_ops.py are reused unchanged rather than edited, so the plan's 'reset owner stays reset_to_status, no second pipeline' is honoured literally; no plan HTML, facility YAML or unrelated source was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read plan section 36 against r-20261007T152239857269-incremental-rejudge; the reset is moved to the explicit once-per-request --reset-to ingested step (owner reset_to_status) and a plain --rejudge-ingested resumes on files with no recorded answer; the worker filters each batch to fresh files so none is judged twice in a pass.\nVERDICT done_when: all four clauses checked - the two-pass test is test_second_pass_judges_only_the_file_the_first_left_unanswered, the no-double-judge/count test is test_no_file_is_judged_twice_in_one_pass_and_count_matches, the negative control (per-pass reset restored) exits EXIT=1 at the first assertion, and I re-ran the gate at head 14792e1d4: 68 passed, EXIT=0.\nVERDICT write_paths: only code.py, workers.py, test_code_ingested_rejudge.py and the evidence fragment changed, all declared; reset.py and graph_ops.py are reused unchanged as the plan directs.\nVERDICT manifest: status complete, the four tests, gate 68 passed EXIT=0, negative_control_log recorded, the two CLI forms named.\nVERDICT diff: base 92aa5c19 to head 14792e1d4, 4 files +348/-22, two commits.\nVERDICT evidence: gate log reproduced at head; a real red negative-control log whose mutation is the inverse of the landed code; the run declares no baseline_suite, so added_failure_count is 0 with a note.\nSCORE goal_fidelity: 18\nSCORE evidence: 18\nSCORE scope_discipline: 19\nSCORE durability: 18\nSCORE fit: 19\nSCORE reuse: 19\nFINDING graph_ops.py:517 follow-on: the re-judge claim drains on coalesce(score_data_access_confidence, 0.0) = 0.0, so a file whose successful answer carries confidence 0.0 never drains and is re-judged on every resume pass - the over-count section 36 removes for all other files. Drain on a field the re-judge always sets non-null instead.\n",
+  "review_run_id": "r-20261007T154553614109-review-of-incremental-rejudge",
+  "reviewed_base_sha": "92aa5c19fb7c07e3e956903f46977b418da43713",
+  "reviewed_head_sha": "14792e1d4b9d6f63d58fab7096f1edaf03b2b1d3",
+  "reviewed_run_id": "r-20261007T152239857269-incremental-rejudge",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:54:11+00:00",
+  "total": 111
+}
