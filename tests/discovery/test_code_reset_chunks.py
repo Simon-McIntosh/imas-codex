@@ -83,4 +83,18 @@ def test_code_reset_clear_fields_come_from_the_scorer_registry():
     assert set(reset_module.CODE_RELEVANCE_FIELDS).issubset(cleared)
     kept = set(CODE_RESET_SPECS["triaged"].clear_fields)
     assert set(reset_module.CODE_RELEVANCE_FIELDS).isdisjoint(kept)
-    assert set(scorer.RELEVANCE_FIELDS) == set(reset_module.CODE_RELEVANCE_FIELDS)
+    # The scorer reads the registry itself rather than a copy of it, so the two
+    # cannot part company.  Compared by identity: a copied tuple would satisfy
+    # an equality check and then drift the moment either list changed.
+    assert scorer.RELEVANCE_FIELDS is reset_module.CODE_RELEVANCE_FIELDS
+
+
+def test_every_relevance_question_writes_a_registered_field():
+    """The decision map names a field for every question the arms ask."""
+    questions = set(scorer.SCOPE_NOULS) | {"is_simulation"}
+    assert set(scorer._RELEVANCE_FIELDS) == questions
+    # A field the registry does not carry is refused where the map is built, so
+    # a registry and a map that disagree fail at import rather than storing a
+    # name no reset will clear.
+    with pytest.raises(KeyError):
+        scorer._relevance_field("relevance_not_a_field")
