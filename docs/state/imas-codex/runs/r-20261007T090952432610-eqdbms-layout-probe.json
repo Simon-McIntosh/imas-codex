@@ -1,0 +1,663 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "504da5c66835324b600d88af6e25923b5617a1bd",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 10800945,
+      "input_tokens_cumulative": 10800945,
+      "output_tokens": 53530,
+      "output_tokens_cumulative": 53530,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 122,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "6627d3e111298cdddbfdf8d806ae0bac35957f15"
+  ],
+  "completed_at": "2026-10-07T09:41:38.407Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-07T09:10:04Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "#AAA/#GEO/#EQU/#EQV/#OUT/#PAR/#VAC/#MSEDB/#EQ2M",
+    "client_eqdbms.EQ32.Rev1/eqdbms/EQDB",
+    "reader/writer"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "test -s /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/eqdbms-layout-probe/out_verify.txt",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T090952432610-eqdbms-layout-probe/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.99,
+    "at_dispatch": 0.99,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "section 14 stays open on its EQDBMS search criterion",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T09:54:53.304757+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-07T09:09:53Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 2,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": 5,
+    "mean_context": 127273,
+    "observed_at": "2026-10-07T09:09:51Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 2,
+      "aggregate_tokens_per_second": 493.742,
+      "detail": "",
+      "mean_tokens_per_second": 40.471,
+      "observed_at": "2026-10-07T09:09:51Z",
+      "runs": 12.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-07T09:41:38.407Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T090952432610-eqdbms-layout-probe/manifest.md",
+  "member": "disposable-r-20261007T090952432610-eqdbms-layout-probe",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "eqdbms-layout-probe",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 978,
+          "cached_input_tokens": 814354,
+          "input_tokens": 815334,
+          "output_tokens": 1474,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 816808,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "per §14's eqdbms-layout comment: from the graph at facility jt-60sa (CodeFile, CodeChunk, WikiPage and Document text under /analysis/src/client_eqdbms.EQ32.Rev1, /analysis/src/SAeqread, /analysis/lib/eqdbms, /analysis/lib/JT60SAEQDB and the EDAS eqread_pac trees), find the definition of the EQDBMS record layout, the structure, common block or field list a reader decodes an equilibrium record with; give its file, its CodeFile status, score_composite, relevance_stage and chunk count, or state that no ingested file holds it; then, when ssh -o BatchMode=yes jt-60sa hostname succeeds through a /tmp/sshwrap/ssh wrapper that execs /usr/bin/ssh -F $HOME/.ssh/config with all arguments (PATH=/tmp/sshwrap:$PATH), grep those trees on the host read-only for the layout's definition and name any file the graph lacks, and if the hop is down say so and classify from the graph; report the rank of the layout's chunks for _search_code('EQDBMS record layout', facility='jt-60sa') with the rerank on and off; state whether the section 14 criterion names the right sources or the layout needs ingesting; write the evidence fragment; scripts and output in /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/eqdbms-layout-probe/; no graph write, no code change, no discover run",
+    "estimated_hours": null,
+    "goal": "Locate where the JT-60SA EQDBMS record layout is defined and whether search can find it",
+    "id": "eqdbms-layout-probe",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-07T09:09:53Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 2,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": 5,
+      "mean_context": 127273,
+      "observed_at": "2026-10-07T09:09:51Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 2,
+        "aggregate_tokens_per_second": 493.742,
+        "detail": "",
+        "mean_tokens_per_second": 40.471,
+        "observed_at": "2026-10-07T09:09:51Z",
+        "runs": 12.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T090952432610-eqdbms-layout-probe/manifest.md",
+    "negative_control": "the same graph search applied to a field name a returned eqread_pac chunk is known to carry finds that chunk, confirming the procedure can locate a definition that is ingested",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§14",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/eqdbms-layout-probe",
+      "docs/evidence/fragments/jt60sa-discovery-completion/eqdbms-layout-probe.html",
+      "docs/figures/jt60sa-discovery-completion/eqdbms-layout-probe"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 6338567.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "eqdbms-layout-probe",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-07T09:09:58.531854+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.83,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 543.769,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 3771.24,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 12,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 59.6,
+          "peak_utilisation_p90_pct": 75.9,
+          "peak_utilisation_runs": 315,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 61,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 2
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 30.752714,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.836925709328704,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 30.752714,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.836925709328704,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 30.752714,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.836925709328704,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.85,
+      "codex": 0.06,
+      "codex-astra": 0,
+      "codex-luna": 0.01,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 1766,
+    "usage": {
+      "cost": 0.000184506,
+      "input_tokens": 4393,
+      "output_tokens": 89
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.99,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6627d3e111298cdddbfdf8d806ae0bac35957f15",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "504da5c66835324b600d88af6e25923b5617a1bd",
+    "reviewed_head_sha": "6627d3e111298cdddbfdf8d806ae0bac35957f15",
+    "scores": {
+      "durability": 8,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 104
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261007T090952432610-eqdbms-layout-probe",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§14",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "b8db4702-b42a-49f2-9f5c-4eefecf20c16",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10977928,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1886.468,
+    "generated_tokens": 60741,
+    "generation_seconds": 1494.399,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.3,
+    "machine_seconds": 392.069,
+    "peak_input_tokens": 175683,
+    "tokens_per_second": 40.65,
+    "wall_tokens_per_second": 32.2
+  },
+  "time_budget": "45m",
+  "tool_steps": 99.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1894,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-07T09:41:40Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-07T09:10:08Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261007T090952432610-eqdbms-layout-probe",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7926,
+    "worker_pid": 363453
+  },
+  "worker_seconds": 1872,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
