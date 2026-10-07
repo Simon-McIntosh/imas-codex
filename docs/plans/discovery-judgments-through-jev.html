@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;}">
-<meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
+<meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -172,56 +172,12 @@
 
     
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
     <h2 id="s9">§9 — Search-time reranking with Jev</h2>
-<section data-reckon="section" data-id="s9" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>The lead decided this on 2026-10-07. <code>score_composite</code> stays a code-assembled value, and the search tools gain a Jev rerank.</p>
-<p>The two answer different questions:</p>
-<ul>
-<li>The composite is absolute. It says how much a file matters for diagnostic mapping in general. Asked directly as one holistic Score it reached AUC 0.894, against 0.962 for the composite assembled in code.</li>
-<li>A rerank is relative to a query. Given this question, which retrieved candidates are most useful? That is the TypeSafe rerank pattern: one comparable Score per candidate, with the query and the candidate's text as the state.</li>
-</ul>
-<p><strong>Prototype first</strong> (node <code>search-rerank-prototype</code>):</p>
-<ul>
-<li>15–20 real queries over the JT-60SA code and wiki content now ingested. Examples: where the flux-loop positions are defined, how getseldata reads EDDB, which routine writes the equilibrium to EDDB.</li>
-<li>For each query, the top 30 candidates from <code>_search_code</code> or <code>_search_docs</code> in <code>imas_codex/llm/search_tools.py</code>, hand-labelled relevant or not.</li>
-<li>Embedding-only order compared with the order after a Jev relevance Score per candidate, by nDCG@10 and mean reciprocal rank.</li>
-<li>Cost and latency per query recorded.</li>
-<li>The prototype's scripts and raw data are in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/</code>, because a dispatch cannot write outside the repository. The evidence is in the plan's fragments.</li>
-</ul>
-<p><strong>Prototype result</strong> (landed 2026-10-07, <a href="search-rerank-prototype">evidence</a>):</p>
-<ul>
-<li>Mean nDCG@10 rises from 0.246 to 0.509 over 18 questions, and from 0.340 to 0.704 over the 13 whose top 30 holds a relevant candidate. The paired gain is +0.36 (95% CI 0.22–0.52). The rerank is better on 11 questions, worse on Q10 and equal on Q03.</li>
-<li>MRR rises from 0.384 to 0.544.</li>
-<li>A random order scores 0.207, so the embedding order carries only a little signal above chance within the top 30.</li>
-<li>The rerank costs $0.019 for 540 calls. Wall time is about 2 s per question for 30 candidates (median 2.04 s, max 2.58 s).</li>
-<li>Five questions retrieved no relevant candidate at all, which a rerank cannot repair. §10 classifies them.</li>
-</ul>
-<p><strong>Docs score ties first</strong> (node <code>docs-score-ties</code>). §11 found that <code>_search_docs</code> scores saturate at exactly 1.0. For Q14, 268 chunks tie there and are ordered arbitrarily by set order, so the answers with the 2nd- and 4th-highest cosine in the facility land at ranks 164 and 181.</p>
-<ul>
-<li>The node measures, over the 18 §9 questions by nDCG@10 with Q16 as the control:
-<ul>
-<li>the current order;</li>
-<li>a secondary sort by raw cosine within tied scores;</li>
-<li>the score without its clamp;</li>
-<li>the reserved-vector-slot change §11 recommends (20 leaders at ranks 10–29).</li>
-</ul></li>
-<li>It deploys the variant that keeps Q16 and lifts the most answers into the top 30, in <code>imas_codex/llm/search_tools.py</code>, with a test that a tie at the clamp is broken by cosine or no longer occurs.</li>
-</ul>
-<p><strong>Deploy</strong> (node <code>search-rerank</code>), after <code>docs-score-ties</code>, since both write <code>search_tools.py</code>:</p>
-<ul>
-<li>The rerank is one function, <code>rerank_candidates</code>, in <code>imas_codex/llm/search_tools.py</code>, which both <code>_search_code</code> and <code>_search_docs</code> call. It scores through <code>decide_batch</code> in <code>imas_codex/discovery/base/judgment.py</code>, the batch decision core. <code>decide_batch</code> applies the concurrency bound and the wall-time budget, totals the cost, and returns a failed or unscored item as None. This node creates that module with that one function; §3 builds the judge-and-apply function on it, so the plan has one decision loop.</li>
-<li><code>find_code</code> in <code>imas_codex/graph/domain_queries.py</code>, the REPL's code search over the same <code>code_chunk_embedding</code> index, calls <code>rerank_candidates</code> too, so one code query returns one order through either path.</li>
-<li><code>_search_code</code> and <code>_search_docs</code> rerank their top candidates through <code>rerank_candidates</code>, on the existing <code>discovery-relevance</code> seat, so the rerank adds no seat, with the query and each candidate's text as state.</li>
-<li>Because ranking is not a gate, a failed or slow rerank returns the embedding order unchanged and says so in the result, rather than failing the search.</li>
-<li>The rerank scores a pool larger than the 30 it returns. §12 found the code answers inside the merged pool but beyond rank 30: <code>eqgrd.f</code> at 85 of 135, and <code>shtrd.f</code> once the vector cut reaches 50. A rerank over the top 30 alone cannot reach either. The node sizes the pool, for example 100 or 150, from recall over the §9 labels against cost and wall time, and reports both.</li>
-<li>The rerank runs its candidates concurrently under a wall-time budget, sized from the measured 2 s per question. A candidate still unscored when the budget runs out keeps its embedding position.</li>
-<li>The rerank waits for the code score-stage node to merge, because that node also writes <code>imas_codex/llm/search_tools.py</code>.</li>
-</ul>
-<p>Done when:</p>
-<ul>
-<li>The prototype's measured nDCG@10 and MRR, for both orders, are recorded.</li>
-<li>If the rerank wins, the deployed tools rerank with that measured gain reproduced on the same queries.</li>
-</ul>
+<section data-reckon="section" data-id="s9" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed <code>decide_batch</code> and <code>rerank_pool</code> in <code>imas_codex/discovery/base/judgment.py</code>, and <code>rerank_candidates</code> in <code>imas_codex/llm/search_tools.py</code>. <code>search_code</code>, <code>search_docs</code> and <code>find_code</code> rerank a pool of 60 by one Jev Score per candidate, at concurrency 32 under a 5 s budget, and fall back to the embedding order with a note. Live p95 is 3.6–3.9 s at pool 60. The gain over the embedding order reproduces on the prototype's labels (0.498 against 0.267). The census answers at ranks 159–181 stay beyond any affordable pool. Merged and gated at 202 passed; review 95/120. <a href="search-rerank">full record</a></p>
+</section>
 
     <section class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
@@ -244,6 +200,10 @@
   <p class="landed-summary">Landed: the two code answers are not missed at candidate generation, contrary to this section's premise. <code>eqgrd.f</code> is generated at merged rank 85 of 135 and <code>shtrd.f</code> enters the pool at a vector cut of 50; the top-30 cap discards both. Widening the cut or adding a lexical term does not help. Embedding file descriptions doubles mean nDCG@10 over the 12 code questions (0.19 to 0.42) but fails the Q06 control. The fix moves to §9's rerank, which now scores a larger pool. Review 104/120. <a href="code-candidate-probe">full record</a></p>
 </section>
 
+    <h2 id="s13">§13 — Label what the rerank lifts, and place the four deep misses</h2>
+<section data-reckon="section" data-id="s13" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>The search-rerank sweep left two readings unsettled. First, a deeper pool lifts candidates from embedding ranks 31–150 into the top ten, and those candidates carry no hand label. The whole-set nDCG@10 therefore counts every lifted candidate as irrelevant and penalises depth by construction, while the labelled-only nDCG@10 ignores them. The two readings disagree on whether 60 or 150 ranks better: labelled-only gives 0.482 at 60 and 0.653 at 150. Second, the four census answers (<code>eqgrd.f</code>, <code>shtrd.f</code>, <code>use_compiler-en</code>, <code>use_login-en</code>) sit at embedding ranks 159 to 181 for their questions, beyond any pool the 5 s budget can score.</p><p>This section is evidence only. Label every candidate that the reranked order at pools 60 and 150 places in the top ten and that has no label yet, under the prototype's rule, its labels file and its 18 questions, all in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/</code>. Then recompute whole-set nDCG@10 at both pools from the sweep's saved scores in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank/sweep.json</code>, with no new Jev calls. For each of the four census answers, record its embedding cosine to the query, whether the full-text index matches it, and the rank it takes under the query reworded in the vocabulary of its own path and title. That says whether the miss is the embedding, the query wording or the absence of a text match.</p><p>Done when the evidence fragment carries the relabelled whole-set table at pools 60 and 150 beside the labelled-only figures, and the four-answer table with cosine, text match and reworded rank. The scripts go in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/rerank-depth-labels/</code>. Live graph reads only: no graph write, no code change.</p>
+
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-djj-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-07" data-recommends-skill="" data-resolved-at="2026-10-07T01:20:37+00:00" data-resolved-by="reckon-build">
@@ -260,10 +220,11 @@
 </section>
   <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
-<div class="r-gate" data-id="g-djj-1" data-section="s4" data-gated-sections="s4,s6" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-djj-1" data-section="s4" data-gated-sections="s4,s6" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">call_decisions validates score-type answers (score within the level range, probabilities over the offered levels summing to 1 within the rounding tolerance), which the path and signal judgments rely on for their facet Scores</h4>
     <p class="r-gate-required-evidence">jt60sa-discovery-completion#s25</p>
-    </div>
+    <a class="r-gate-evidence" href="call_decisions refuses malformed score answers at the decisions seam (commit f9798ad7c, _validate_decisions_answers in imas_codex/discovery/base/llm.py): score within [0, top level], distribution over the offered levels summing to 1 within 0.005 per offered option, confidence in [0, 1]; pinned by seven score tests in tests/discovery/test_llm_decisions.py">Evidence</a>
+</div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261007T013029393604-search-rerank-prototype" data-who="reckon-build" data-when="2026-10-07T01:57:31.083Z">
@@ -332,6 +293,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20261007T042533534406-code-candidate-probe" data-who="reckon-build" data-when="2026-10-07T04:55:29.522Z">
     <div class="r-comment-body"><p>Node code-candidate-probe measured candidate generation over the 12 §9 code questions by nDCG@10 — mean 0.1898 (current cut30), 0.1817 (cut50), 0.1984 (cut100), 0.1845 (bounded lexical term), 0.4240 (CodeFile description beside chunk text) — with the Q06 control reproducing §9's 0.423 exactly (0.4226) and both missed answers outside the top 30 in every arm, because both are already generated and ranked out (eqgrd.f via the hybrid text stage at rank 85 of 135; shtrd.f::chunk_1 entering the vector stage at cut 50 but landing at merged rank 113); no candidate-generation widening reaches them, and the one large gain (description embedding) fails the Q06 control and costs ~15 s/query.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s3-rerank-core-landed" data-who="reckon-build" data-when="2026-10-07T10:50:00Z">
+    <div class="r-comment-body"><p>The batch decision core this section builds on is in the tree: <code>decide_batch</code> and <code>rerank_pool</code> in <code>imas_codex/discovery/base/judgment.py</code>, which import nothing from <code>imas_codex/llm/</code>. Only the search rerank calls them so far. The node that builds the judge function on <code>decide_batch</code> also adds the guard the search-rerank review asked for: a committed test that <code>RERANK_POOL</code> in <code>imas_codex/llm/search_tools.py</code> exceeds the k the search tools return. Today the tests reference the constant symbolically, so a regression to 30 passes the suite.</p></div>
 </div>
 </section>
 </main>
