@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T06:45:53.928Z",
+  "dispatched_at": "2026-10-05T06:41:35Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/wiki/pipeline.py:319",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner to extend (or a database-keyed chunk property it consumes) is the difference between one linkage and a parallel one, and \u00a73's done-when depends on the edges existing.",
+      "text": "\u00a73 says the handbook page's chunk \"carries a `DOCUMENTS` edge \u2026 to every FacilitySignal of the database it fronts\" but never names how the edge is written; the existing writer is `link_chunks_to_entities` (`imas_codex/discovery/wiki/pipeline.py:252`), whose `DOCUMENTS` MERGE at line 319 keys off chunk properties `ppf_paths_mentioned`/`mdsplus_paths_mentioned` that no EDAS path sets \u2014 so \u00a73 either silently adds a second chunk\u2192signal edge-writer or the edges never exist",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s2",
+      "id": "interface_budget-1",
+      "reason": "\u00a73 and \u00a76 already model the required accounting; \u00a72 should state that the typed slots retire the prototype's `class:T`/`shots:E080000-` keyword parking or why no retirement is possible.",
+      "text": "the section extends `schemas/facility.yaml` with `data_class`, `shot_range` and `pid` on FacilitySignal (facility.yaml:2240/2246/2251) plus the `SignalDataClass` enum (facility.yaml:102) \u2014 public-definition surface \u2014 without the \"Interface accounting\" sentence its siblings \u00a73 and \u00a76 carry, naming no definition it retires or merges",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s6",
+      "id": "interface_budget-2",
+      "reason": "refusal_families is a tracked family this week at 0; the section must say what refusal it retires or merges, or why nothing can be.",
+      "text": "the section's interface accounting covers only the config block; its own done-when adds a refusal (\"`discover signals` and `discover code` run that check before a remote scan and refuse when the floor is not met\"), a new member of the refusal family (\u00a76 text, plan line 287) \u2014 no retirement or merge is named",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "163716c0eb2d4de83ca816793a07fb273e2c666e47eb272f9d5bebf6d9012e96",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 20,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:47:31.245769+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:47:31.897543+00:00"
+    },
+    "interface_budget-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:47:32.430125+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T064131341415-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "d1860899b8cba27460ddb60addd51a358c3dc748",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a76's `resolve_remote_environment` (`imas_codex/remote/environment.py:62`) hides block-plus-data-system-override precedence behind one function and keeps the executor parameter-only; \u00a72 and \u00a77 add slots and an ordering fix, not new surface spread across wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a73 reuses the existing `DOCUMENTS` relationship but never names the mechanism that writes the chunk\u2192FacilitySignal edges, which has an owner to extend; a second edge-writer would fork it.",
+    "interface_budget": "a finding \u2014 \u00a72 adds three FacilitySignal properties and a `SignalDataClass` enum (public_definitions) and \u00a76 adds a preflight refusal to `discover signals`/`discover code`, neither section naming what it retires or merges or why nothing can be.",
+    "reuse_search": "pass \u2014 the plan searched the mechanisms it names and cites their owners: \u00a76 names `imas_codex/remote/python.py` (`get_python_status`, `PythonVersion.meets_minimum`, `MIN_PYTHON`) and `imas_codex/remote/tools.py` (`check_tool`/`check_all_tools`), all present; \u00a73 cites the existing `WikiChunk` `DOCUMENTS` relationship (`documents_signals`, `imas_codex/schemas/facility.yaml:3831`) that `search_tools.py:547` and `:818` already traverse; \u00a77 names `seed_worker` in `imas_codex/discovery/signals/parallel.py:2360`, where the ordering defect reproduces.",
+    "thin_wrapper": "pass \u2014 \u00a76 explicitly extends `get_python_status`/`check_all_tools` and adds no CLI command, and \u00a73 reuses the existing `WikiChunk-[:DOCUMENTS]->FacilitySignal` edge rather than a parallel `DOCUMENTED_IN` edge; both wrappers name why the existing mechanism cannot simply carry the addition."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:47:04.329378+00:00"
+}

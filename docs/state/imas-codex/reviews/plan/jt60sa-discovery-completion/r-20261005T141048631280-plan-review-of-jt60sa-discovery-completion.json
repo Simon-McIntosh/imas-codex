@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T14:15:42.768Z",
+  "dispatched_at": "2026-10-05T14:10:52Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:207",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a719 as written lands a link fix whose stated symptom (a non-null path in the code-context lookup) it does not produce, so the done-when \"the code-context lookup renders a source path for a jt-60sa chunk\" would be met only by also correcting the query the section never names.",
+      "text": "\u00a719's central premise is incomplete: it says the code-context lookup \"resolves `source_path` to null for them\" and proposes to repair it by linking the orphaned jt-60sa `CodeChunk` rows, but the lookup's Cypher is `OPTIONAL MATCH (src)-[:HAS_CHUNK]->(node)` then `RETURN src.path AS source_path`, where `src` is the `CodeExample` (the only node type that carries an outbound `HAS_CHUNK` \u2014 schema `facility.yaml` and the chunk write at `imas_codex/ingestion/pipeline.py:522` both confirm it), and `CodeExample` has no `path` attribute (it carries `source_file`). So `source_path` is null whether or not the `HAS_CHUNK` edge exists, and every link the plan adds leaves the enrichment prompt still rendering an empty path. The string the prompt wants already has an owner \u2014 the denormalized `CodeChunk.source_file` (`imas_codex/schemas/facility.yaml:3288`), which \u00a716 chose as the canonical source for `find_code` when it removed that function's CodeFile join \u2014 so the repair is to read `node.source_file` in `_build_code_context_query` (or `CodeFile.path` via `FROM_FILE`/`HAS_EXAMPLE`), extending the existing owner, rather than adding edges that the query never reads.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html \u00a719",
+      "id": "thin_wrapper-1",
+      "reason": "the section should drop the parallel-link-pass alternative and relink only by re-driving the existing writer, keeping one owner for the `HAS_CHUNK` edge.",
+      "text": "the section offers \"a new link pass added beside the existing ones in `imas_codex/ingestion/graph.py` (`link_chunks_to_imas_paths`, `link_chunks_to_data_nodes`)\" as a second way to relink the 201 existing chunks, but the `HAS_CHUNK` edge is written by the chunk write at `imas_codex/ingestion/pipeline.py:512-524`, and the two named `link_chunks_to_*` functions link chunks to IMAS paths and MDSplus data nodes \u2014 different targets from a CodeExample. A third link pass would be a second writer of an edge the pipeline already owns, in a module that owns neither the edge nor its source, which is the single-owner discipline \u00a79 and \u00a715 were landed to enforce. The path the plan already gives (re-ingest the 21 scored files, which re-drives the owning writer) achieves the same result with one writer.",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "013481a5f83e43fad3b7c90479fbf2b44a9d53036402a505fcb505ceb77392ba",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 105,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:17:08.167181+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:17:08.849289+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T141048631280-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "2d8fd5dd443d2977d194084a693d842a68c1cf40",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 new behaviour lands as single owners rather than a spread of shallow wrappers: `resolve_remote_environment` (\u00a76, one resolver passed down as parameters), `pending_embed_predicate` (\u00a717, predicate rendered once for fetch/count/progress), `persist_data_access` (\u00a79, the only DataAccess MERGE), `GraphClient.ensure_vector_indexes` (\u00a715, the only CREATE VECTOR INDEX composer).",
+    "duplicate_owner": "a finding \u2014 \u00a719 attributes the null `source_path` on jt-60sa chunks to a missing `HAS_CHUNK` edge, but the code-context lookup reads `src.path` off the CodeExample (`imas_codex/discovery/signals/parallel.py:207`), a property the CodeExample schema does not carry; the source path is already owned by the denormalized `CodeChunk.source_file`.",
+    "interface_budget": "pass \u2014 week figures public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the two implementable sections add no surface \u2014 \u00a714 reuses the pre-existing `--root` scoping option and the `--path-prefix` option added in \u00a72, and \u00a719 states \"Interface budget: nothing added\", pinning the behaviour with a test rather than a new view or option.",
+    "reuse_search": "pass \u2014 every mechanism the plan proposes cites the owner it extends: `resolve_service_url` for SLURM service discovery (\u00a78/\u00a710/\u00a711), `ensure_vector_indexes` for vector-index DDL (\u00a715), `check_tool`/`check_all_tools` for the environment probe (\u00a76), the existing `WikiChunk-[:DOCUMENTS]->FacilitySignal` edge for the handbook link (\u00a73), and the existing `--root` (paths) / `--path-prefix` (code) scoping options in \u00a714/\u00a719.",
+    "thin_wrapper": "pass \u2014 the plan declines parallel layers where it can: \"no discover preflight command is added\" (\u00a76, extending `tools status`), the \u00a76 review record shows `remote_environment` resolved in the facility-aware layer with the executor left facility-agnostic, and \u00a719 states \"never a hand-written MERGE or a fresh helper\", preferring to reach the relink from the existing `ingest_files` call path."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:15:58.142777+00:00"
+}

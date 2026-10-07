@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "backend": "clive",
+  "completed_at": "",
+  "dispatched_at": "2026-09-18T12:59:49.273384+00:00",
+  "findings": [
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "174",
+      "text": "the default factory carries the whole repair, yet reverting that one line to get_graph_uri leaves all five tests in tests/graph/test_client_address_resolution.py passing while forcing the helper to return None fails two of them, so the suite does not pin the change this node exists to make."
+    },
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "139",
+      "text": "an explicitly set NEO4J_URI is discarded inside a SLURM step, because the direct resolution replaces the profile URI before the environment escape hatch is consulted, while imas_codex/graph/profiles.py:433 records that hatch as always winning and the new precedence is documented nowhere (measured: with SLURM_JOB_ID and NEO4J_URI=bolt://example.invalid:1 set, the resolved address was still bolt://98dci4-gpu-0002:7687)."
+    },
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "109",
+      "text": "every exception out of resolve_location is swallowed into None, which silently restores the loopback endpoint this node repaired, and that branch carries no test."
+    },
+    {
+      "file": "tests/graph/test_client_address_resolution.py",
+      "line": "69",
+      "text": "the monkeypatch targets the client module, but imas_codex/graph/client.py:119 imports _resolve_compute_host from imas_codex.remote.locations inside the function, so line 69 is inert and only the patch on the line after it has effect."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/graph/test_client_address_resolution.py:52-66 does fail when the helper behaviour is regressed (measured: 2 failed with the helper forced to return None), but reverting imas_codex/graph/client.py:174 to get_graph_uri leaves all five tests passing, and no test drives _resolve_graph_uri with SLURM_JOB_ID set.",
+    "evidence": "/home/ITER/mcintos/gcprobe/slurm_step.log:1-24 captures the srun command, the step host, GraphClient.uri bolt://98dci4-gpu-0002:7687, count 5130 and CAPTURE_EXIT=0 in one log, sacct corroborates jobs 1273478 and 1273455 as COMPLETED on 98dci4-clu-3141, and the only dock is that the contrast log step_before.log:122 carries STEP_EXIT=1, run_step.sh's echoed probe status rather than the step's exit code.",
+    "fit": "the new helpers follow the module's local-import and docstring idiom and carry no plan label, but imas_codex/graph/client.py:139-145 overrides an explicitly set NEO4J_URI that imas_codex/graph/profiles.py:433 documents as an escape hatch that always wins, and tests/graph/test_client_address_resolution.py:69 patches an attribute the code never reads.",
+    "goal_fidelity": "imas_codex/graph/client.py:174 routes the default client URI through _resolve_graph_uri, and an independent login-node re-run at the reviewed revision resolves bolt://98dci4-gpu-0002:7687 with count(StandardName) 5130, while the in-step capture records GraphClient.uri resolving the same address inside a SLURM step, so the done-when holds as far as an independent observer can measure it.",
+    "scope_discipline": "git diff --stat a157681223a8ceb8a009859fa692dc8b5a14978e 82fe00ac645b7055ee97d2c99d71a658930e196f shows the three commits touch exactly the five declared write paths, imas_codex/graph/client.py, tests/graph/test_client_address_resolution.py, docs/evidence/sn-release-readiness/graph-client-slurm-resolution.md, docs/plans/sn-release-readiness.html and the landed archive record, with one purpose each and no edit outside them."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/graph/client.py:174 routes the default client URI through _resolve_graph_uri, and an independent login-node re-run at the reviewed revision resolves bolt://98dci4-gpu-0002:7687 with count(StandardName) 5130, while the in-step capture records GraphClient.uri resolving the same address inside a SLURM step, so the done-when holds as far as an independent observer can measure it.\nSCORE evidence: 19\nJUSTIFICATION evidence: /home/ITER/mcintos/gcprobe/slurm_step.log:1-24 captures the srun command, the step host, GraphClient.uri bolt://98dci4-gpu-0002:7687, count 5130 and CAPTURE_EXIT=0 in one log, sacct corroborates jobs 1273478 and 1273455 as COMPLETED on 98dci4-clu-3141, and the only dock is that the contrast log step_before.log:122 carries STEP_EXIT=1, run_step.sh's echoed probe status rather than the step's exit code.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a157681223a8ceb8a009859fa692dc8b5a14978e 82fe00ac645b7055ee97d2c99d71a658930e196f shows the three commits touch exactly the five declared write paths, imas_codex/graph/client.py, tests/graph/test_client_address_resolution.py, docs/evidence/sn-release-readiness/graph-client-slurm-resolution.md, docs/plans/sn-release-readiness.html and the landed archive record, with one purpose each and no edit outside them.\nSCORE durability: 12\nJUSTIFICATION durability: tests/graph/test_client_address_resolution.py:52-66 does fail when the helper behaviour is regressed (measured: 2 failed with the helper forced to return None), but reverting imas_codex/graph/client.py:174 to get_graph_uri leaves all five tests passing, and no test drives _resolve_graph_uri with SLURM_JOB_ID set.\nSCORE fit: 14\nJUSTIFICATION fit: the new helpers follow the module's local-import and docstring idiom and carry no plan label, but imas_codex/graph/client.py:139-145 overrides an explicitly set NEO4J_URI that imas_codex/graph/profiles.py:433 documents as an escape hatch that always wins, and tests/graph/test_client_address_resolution.py:69 patches an attribute the code never reads.\nFINDING imas_codex/graph/client.py:174 the default factory carries the whole repair, yet reverting that one line to get_graph_uri leaves all five tests in tests/graph/test_client_address_resolution.py passing while forcing the helper to return None fails two of them, so the suite does not pin the change this node exists to make.\nFINDING imas_codex/graph/client.py:139 an explicitly set NEO4J_URI is discarded inside a SLURM step, because the direct resolution replaces the profile URI before the environment escape hatch is consulted, while imas_codex/graph/profiles.py:433 records that hatch as always winning and the new precedence is documented nowhere (measured: with SLURM_JOB_ID and NEO4J_URI=bolt://example.invalid:1 set, the resolved address was still bolt://98dci4-gpu-0002:7687).\nFINDING imas_codex/graph/client.py:109 every exception out of resolve_location is swallowed into None, which silently restores the loopback endpoint this node repaired, and that branch carries no test.\nFINDING tests/graph/test_client_address_resolution.py:69 the monkeypatch targets the client module, but imas_codex/graph/client.py:119 imports _resolve_compute_host from imas_codex.remote.locations inside the function, so line 69 is inert and only the patch on the line after it has effect.",
+  "review_run_id": "r-20260918T125949273384-review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+  "reviewed_base": "a157681223a8ceb8a009859fa692dc8b5a14978e",
+  "reviewed_commit": "82fe00ac645b7055ee97d2c99d71a658930e196f",
+  "reviewed_run_id": "r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+  "scores": {
+    "durability": 12,
+    "evidence": 19,
+    "fit": 14,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-18T13:42:31.268622+00:00",
+  "total": 84
+}

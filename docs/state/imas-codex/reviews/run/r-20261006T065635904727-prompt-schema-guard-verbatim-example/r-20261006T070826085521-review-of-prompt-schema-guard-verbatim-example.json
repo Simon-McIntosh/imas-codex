@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log, so the added-failure count was not taken; the single recorded head-arm gate (tests/llm tests/discovery) is EXIT=0 with 1426 passed, 9 skipped, 5 deselected",
+  "call_site_count": 10,
+  "call_sites": [
+    "paths/triage",
+    "paths/scorer",
+    "code/triage",
+    "code/scorer",
+    "wiki/scorer",
+    "wiki/document-scorer",
+    "wiki/image-captioner",
+    "signals/enrichment",
+    "signals/source_unwind",
+    "discovery/static-enricher"
+  ],
+  "completed_at": "2026-10-06T07:16:39.124Z",
+  "dispatched_at": "2026-10-06T07:08:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/prompt-schema-guard-verbatim-example.html",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "the measure paragraph cites the gate result `at 253de5f69`, but logs-gate.log's own header records that same 1426-passed / EXIT=0 measurement at revision e0feeb38f, so the quoted figure is misattributed to the base revision rather than the revision it ran at."
+    },
+    {
+      "file": "manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "the reviewed manifest names no baseline_suite or after_suite arm, so the added-failure count against base is unmeasured rather than zero; only the single head-arm total is recorded."
+    },
+    {
+      "file": "tests/llm/test_prompt_schema_coverage.py",
+      "line": "224",
+      "severity": "follow-on",
+      "text": "the parametrised test resolves the model by `_model_objects()[model_name]`; a future call site whose response_model is not a scanned `*Batch` class would raise a bare KeyError (a test error naming no prompt) instead of an assertion that names the prompt, so the guard's failure would not point at the offending pair."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified the walk derives 10 prompt\u2192model pairs, all asserted verbatim",
+    "diff": "read the single commit e0feeb38f against base 253de5f69; two files, 29 insertions / 30 deletions, all inside the declared scope; no baseline arm is recorded.",
+    "done_when": "\u00a723's done-when is composite across two nodes; this node owns `the coverage test asserts each call site's generated example appears verbatim in its rendered prompt, the negative control is red, and pytest tests/llm tests/discovery exits 0` \u2014 all three hold (reveviewed commit, negctl-mutated.log EXIT=1, logs-gate.log EXIT=0). The clause `signals/individualization is deleted with no render call site left` belongs to the sibling supersede node and is outside this run's scope.",
+    "goal": "read \u00a723 and the node goal; the landed change tightens tests/llm/test_prompt_schema_coverage.py to assert get_pydantic_schema_json(response_model) appears verbatim in render_prompt(name) for every derived pair, which is the guard-node goal.",
+    "manifest": "read; it states the gate command and result, names the four logs, records the landing, and declares status complete with a checkpoint.",
+    "write_paths": "read the manifest's declared paths; both changed paths lie inside them and no file outside them is touched."
+  },
+  "justifications": {
+    "durability": "the assertion is verbatim containment of the block the generator produces, so a prompt that drops, truncates or swaps its generated example fails; my independent prose-only control confirms the specific defect \u00a723 names (prose naming a field masking a missing block) is closed, and the positive control test_walk_reaches_expected_prompts still pins the walk. A residual shape gap: the parametrised test indexes _model_objects()[model_name], so a future derived pair whose model is not a scanned *Batch class raises a bare KeyError rather than an assertion naming the prompt.",
+    "evidence": "logs-gate.log names revision e0feeb38f, tree prompt-schema-guard-verbatim-example, command `uv run pytest tests/llm tests/discovery` and records 1426 passed / 9 skipped / 5 deselected / EXIT=0; negctl-mutated.log records 1 failed, 10 passed, EXIT=1 with FAILED \u2026::test_prompt_carries_generated_example_verbatim[paths/triage] and negctl-pristine.log records 11 passed, so the guard fires on a mutated example and the harness reaches the scratch tree. I independently reproduced both: all ten derived pairs pass the verbatim check against current source, and a prose-only rendering (every field name present, generated block absent) passes the old field-membership check and is refused by the new one. The reviewed manifest records no baseline_suite or after_suite arm, so added failures are unmeasured rather than zero.",
+    "fit": "commit subject `test(llm): require each prompt's generated schema example verbatim` is conventional and the body states what changed and why; no plan, sprint or version label and no author or AI attribution appear in the message, the test docstring, or the helper names.",
+    "goal_fidelity": "\u00a723's guard node requires the coverage test to assert that get_pydantic_schema_json(response_model) from imas_codex/llm/prompt_loader.py appears verbatim in render_prompt(name) for each prompt\u2192model pair the call-site AST walk derives; tests/llm/test_prompt_schema_coverage.py:220-228 now does exactly that, parametrised over sorted(_collect_pairs()) and asserting `generated in rendered`, and the dead _schema_field_names helper is removed.",
+    "reuse": "the test reuses the existing _collect_pairs/_model_objects AST walk and the canonical imas_codex/llm/prompt_loader.get_pydantic_schema_json generator rather than re-deriving the example format \u2014 the plan's stated anchoring \u2014 and deletes the now-dead field-name helper instead of leaving it orphaned.",
+    "scope_discipline": "the reviewed commit e0feeb38f touches only tests/llm/test_prompt_schema_coverage.py and docs/evidence/fragments/jt60sa-discovery-completion/prompt-schema-guard-verbatim-example.html, both inside the declared write paths (which also include docs/figures/jt60sa-discovery-completion/prompt-schema-guard-verbatim-example); the sibling \u00a723 supersede node's file imas_codex/llm/prompts/signals/individualization.md is untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read \u00a723 and the node goal; the landed change tightens tests/llm/test_prompt_schema_coverage.py to assert get_pydantic_schema_json(response_model) appears verbatim in render_prompt(name) for every derived pair, which is the guard-node goal.\nVERDICT done_when: \u00a723's done-when is composite across two nodes; this node owns `the coverage test asserts each call site's generated example appears verbatim in its rendered prompt, the negative control is red, and pytest tests/llm tests/discovery exits 0` \u2014 all three hold (reviewed commit, negctl-mutated.log EXIT=1, logs-gate.log EXIT=0). The clause `signals/individualization is deleted with no render call site left` belongs to the sibling supersede node and is outside this run's scope.\nVERDICT write_paths: read the manifest's declared paths; both changed paths lie inside them and no file outside them is touched.\nVERDICT manifest: read; it states the gate command and result, names the four logs, records the landing, and declares status complete with a checkpoint.\nVERDICT diff: read the single commit e0feeb38f against base 253de5f69; two files, 29 insertions / 30 deletions, all inside the declared scope; no baseline arm is recorded.\nCALL_SITES: 10 derived prompt\u2192model pairs: paths/triage, paths/scorer, code/triage, code/scorer, wiki/scorer, wiki/document-scorer, wiki/image-captioner, signals/enrichment, signals/source_unwind, discovery/static-enricher\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: \u00a723's guard node requires the coverage test to assert that get_pydantic_schema_json(response_model) from imas_codex/llm/prompt_loader.py appears verbatim in render_prompt(name) for each prompt\u2192model pair the call-site AST walk derives; tests/llm/test_prompt_schema_coverage.py:220-228 now does exactly that, parametrised over sorted(_collect_pairs()) and asserting `generated in rendered`, and the dead _schema_field_names helper is removed.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs-gate.log names revision e0feeb38f, tree prompt-schema-guard-verbatim-example, command `uv run pytest tests/llm tests/discovery` and records 1426 passed / 9 skipped / 5 deselected / EXIT=0; negctl-mutated.log records 1 failed, 10 passed, EXIT=1 with FAILED \u2026::test_prompt_carries_generated_example_verbatim[paths/triage] and negctl-pristine.log records 11 passed, so the guard fires on a mutated example and the harness reaches the scratch tree. I independently reproduced both: all ten derived pairs pass the verbatim check against current source, and a prose-only rendering (every field name present, generated block absent) passes the old field-membership check and is refused by the new one. The reviewed manifest records no baseline_suite or after_suite arm, so added failures are unmeasured rather than zero.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the reviewed commit e0feeb38f touches only tests/llm/test_prompt_schema_coverage.py and docs/evidence/fragments/jt60sa-discovery-completion/prompt-schema-guard-verbatim-example.html, both inside the declared write paths (which also include docs/figures/jt60sa-discovery-completion/prompt-schema-guard-verbatim-example); the sibling \u00a723 supersede node's file imas_codex/llm/prompts/signals/individualization.md is untouched.\nSCORE durability: 19\nJUSTIFICATION durability: the assertion is verbatim containment of the block the generator produces, so a prompt that drops, truncates or swaps its generated example fails; my independent prose-only control confirms the specific defect \u00a723 names (prose naming a field masking a missing block) is closed, and the positive control test_walk_reaches_expected_prompts still pins the walk. A residual shape gap: the parametrised test indexes _model_objects()[model_name], so a future derived pair whose model is not a scanned *Batch class raises a bare KeyError rather than an assertion naming the prompt.\nSCORE fit: 19\nJUSTIFICATION fit: commit subject `test(llm): require each prompt's generated schema example verbatim` is conventional and the body states what changed and why; no plan, sprint or version label and no author or AI attribution appear in the message, the test docstring, or the helper names.\nSCORE reuse: 20\nJUSTIFICATION reuse: the test reuses the existing _collect_pairs/_model_objects AST walk and the canonical imas_codex/llm/prompt_loader.get_pydantic_schema_json generator rather than re-deriving the example format \u2014 the plan's stated anchoring \u2014 and deletes the now-dead field-name helper instead of leaving it orphaned.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/prompt-schema-guard-verbatim-example.html:11 follow-on: the measure paragraph cites the gate result `at 253de5f69`, but logs-gate.log's own header records that same 1426-passed / EXIT=0 measurement at revision e0feeb38f, so the quoted figure is misattributed to the base revision rather than the revision it ran at.\nFINDING manifest.md:15 follow-on: the reviewed manifest names no baseline_suite or after_suite arm, so the added-failure count against base is unmeasured rather than zero; only the single head-arm total is recorded.\nFINDING tests/llm/test_prompt_schema_coverage.py:224 follow-on: the parametrised test resolves the model by `_model_objects()[model_name]`; a future call site whose response_model is not a scanned `*Batch` class would raise a bare KeyError (a test error naming no prompt) instead of an assertion that names the prompt, so the guard's failure would not point at the offending pair.",
+  "review_run_id": "r-20261006T070826085521-review-of-prompt-schema-guard-verbatim-example",
+  "reviewed_base_sha": "253de5f6939753840a34a8d61887e7acf77e4cef",
+  "reviewed_head_sha": "e0feeb38f0c45e540df75f616852e9b90ac7b01e",
+  "reviewed_run_id": "r-20261006T065635904727-prompt-schema-guard-verbatim-example",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T07:15:00+00:00",
+  "total": 113
+}

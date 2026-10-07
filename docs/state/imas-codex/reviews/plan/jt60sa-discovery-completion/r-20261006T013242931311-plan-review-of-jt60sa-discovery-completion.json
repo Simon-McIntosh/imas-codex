@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:36:50.070Z",
+  "dispatched_at": "2026-10-06T01:32:52Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/services.py:295",
+      "id": "reuse_search-1",
+      "reason": "\u00a721 must either migrate these defaults to a surviving seat (e.g. `discovery-triage`/`discovery-score`) or keep a seat resolvable for them, and widen its verification regex to the bare string literal, otherwise the seat retirement breaks the discovery health check and service monitor and the plan's own completion criterion is unsatisfiable as written.",
+      "text": "\u00a721 retires the `language` seat but misses consumers that name it only through a default parameter: `llm_health_check(section: str = \"language\")` (services.py:295), `llm_deep_health_check` (services.py:325) and `create_service_monitor(..., model_section: str = \"language\", ...)` (services.py:980, whose lambda at :1031 calls `llm_health_check`), plus `DiscoveryConfig.model_section` (common.py:126) and `create_discovery_monitor(..., model_section: str = \"language\")` (common.py:510). These route the default into `get_model(section)` (`_probe_litellm_local` at services.py:632), so once `language` leaves `MODEL_SECTIONS` the default health-check path raises `Unknown model section`. The plan's own done-when regex `rg 'get_model(_config)?\\(\"(language|vision)\"\\)|\\[tool\\.imas-codex\\.(language|vision)\\]' imas_codex pyproject.toml` cannot match a bare `\"language\"` string literal, so it reports clean while these five references survive \u2014 an instrument blind to exactly the consumers it exists to find.",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "dae90ba47e117fdd0396450082c3c2680e777f2e0778185b185f7f313370a4af",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 138,
+  "project": "imas-codex",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T01:39:50.749041+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T013242931311-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "d8aedaea8dcbe9b519cf7f588b18b13df397bb03",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the six new seats extend the existing resolver (`MODEL_SECTIONS` / `get_model` / `register_model_endpoints` in `imas_codex/settings.py`) rather than adding a parallel module; \u00a721 introduces no new package and hides nothing behind a wider surface.",
+    "duplicate_owner": "pass \u2014 the plan names and extends the owner (`imas_codex/settings.py` `MODEL_SECTIONS`/`get_model`, and the `sn-compose` seat shape it cites); \u00a714 likewise reuses `seed_facility_roots` and the single `render_path_prefix_clause` in `imas_codex/graph/query_builder.py` rather than forking a prefix renderer.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a721 names what it retires (`language` and `vision`, \"no compatibility alias, per the repository's greenfield rule\") and states why nothing else changes model (`cluster-labels` and `ids-mapping` keep `openrouter/openai/gpt-5.4`, `[embedding]` untouched), so the added seat surface is accounted for and no CLI option, MCP view or refusal family is added.",
+    "reuse_search": "a finding \u2014 the plan inventoried the `language` seat's direct `get_model(\"language\")` call sites per file but did not search for its prototype consumers, and default-parameter references to the seat survive in `imas_codex/discovery/base/services.py` and `imas_codex/cli/discover/common.py`.",
+    "thin_wrapper": "pass \u2014 no wrapper is added; the seats are configuration entries resolved by the existing `get_model` machinery, and `acall_llm_structured` already accepts the `reasoning_effort` kwarg (\u00a721 threads an existing parameter, it does not add plumbing)."
+  },
+  "section_digests": {
+    "_document": "b225cc1d7f94a0453b118b8848604b55600914e6a4f5614dba82c01858630d3e",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "7b77f33c4b3994529e952bd3a5484413fe4e86948613ab939129b27514ba0929",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "21b3f22b4cd0e8b77e70a0f2cdde26f3000776d1afa5abfec6da4cb686f9fe19",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:37:13.204726+00:00"
+}

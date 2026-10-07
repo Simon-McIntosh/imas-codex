@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Both arms were read from the reviewed run's own gate logs: baseline_suite (c323401f, EXIT=0, completed, 0 failures) and after_suite (ca823b29b, EXIT=0, completed, 0 failures) in run dir r-20261005T084026008625-delete-graph-client-slurm-duplicate. No test fails at head that passes at base; the head suite is 255 passed against 260 passed at base after the intended retirement of five cases. added_failure_count=0.",
+  "backend": "local",
+  "base_log_revision": "c323401f933fc08cf81dfe30899a23825227dce1",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/graph/client.py:_resolve_graph_uri (GraphClient.uri default_factory)"
+  ],
+  "completed_at": "2026-10-05T09:21:56.413Z",
+  "dispatched_at": "2026-10-05T09:13:27Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "100",
+      "severity": "follow-on",
+      "text": "NEO4J_URI no longer bypasses an unreadable location configuration: the deleted _resolve_graph_uri returned os.environ['NEO4J_URI'] before it touched anything else, whereas the new body calls get_graph_uri() -> resolve_neo4j(), which calls resolve_location() at profiles.py:399 before it applies the env escape hatch at profiles.py:424. Measured by the reviewer: with get_graph_location pinned to titan, resolve_location forced to raise, and NEO4J_URI=bolt://example.invalid:1 set, _resolve_graph_uri() raised RuntimeError('location config unreadable') instead of returning the explicit URI. The documented escape hatch therefore no longer survives a broken location config as it did before the change. It does not block this node, whose done-when deliberately keeps the raise, and NEO4J_URI still wins whenever the location reads."
+    },
+    {
+      "file": "tests/remote/test_locations_resolution.py",
+      "line": "140",
+      "severity": "follow-on",
+      "text": "Record observation, not a code defect: the reviewed manifest omits tests/remote/test_locations_resolution.py from orientation_write_paths even though the diff edits it; the path is authorised in the resume advice, but a reader of the manifest alone cannot see the widened scope without also reading the resume stream."
+    }
+  ],
+  "head_log_revision": "ca823b29b1bb1e47198c9e62dfeb7fb68c53296a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified GraphClient() default construction reaches the change through imas_codex/graph/client.py::_resolve_graph_uri (the uri field's default_factory); production users include imas_codex/standard_names/loop.py, imas_codex/discovery/mdsplus/graph_ops.py and imas_codex/ingestion/graph.py.",
+    "diff": "read c323401f to ca823b29b commit by commit: client.py deletes _slurm_service_uri and reduces _resolve_graph_uri to get_graph_uri(); the test module is rewritten to assert the address through the profile layer (6 cases); two superseded remote cases that pinned the deleted delegation are removed.",
+    "done_when": "the done-when's three conditions are all met and recorded: rg over imas_codex/graph is empty, the named gate exits 0 (after-gate.log, 255 passed), and GraphClient().uri from compute node 98dci4-clu-2018 is bolt://98dci4-gpu-0002:7687 (compute-node-uri.log).",
+    "goal": "plan \u00a710 asks to delete the client's SLURM duplicate and rework tests/graph/test_client_address_resolution.py; client.py:88-100 now holds no discovery and the reworked module passes 6 cases, independently re-run by the reviewer (6 passed).",
+    "manifest": "read; status complete, tests and test_logs present, negative_control_log present and red, and baseline_suite/after_suite carry both arm logs with completed=true and failure_count 0.",
+    "write_paths": "read the declared paths; every path in the diff is inside them once the coordinator's resume-advice scope extension for tests/remote/test_locations_resolution.py is counted, which the manifest and fragment disclose."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_client_address_resolution.py guards the preserved raise (negative-control.log reds it), the real-owner end-to-end path (test_a_compute_step_reaches_the_discovered_service_node drives _service_url_for_slurm, not a stub) and the factory wiring; the deduction is that the node's own change is a deletion, so no test reds if a client-side SLURM duplicate were reintroduced and the rg done-when, not a test, is the only guard for the duplication removed.",
+    "evidence": "after-gate.log carries rev=ca823b29b and records 255 passed, 1 skipped, EXIT=0 (down from 260 passed at base after the intended -5 retired cases); negative-control.log is red (1 failed, DID NOT RAISE, EXIT=1) and compute-node-uri.log records the live address, so each part of the done-when has its own recorded artifact rather than a claim.",
+    "fit": "client.py reduces to a one-line delegation with a rewritten docstring in the module's own idiom and the test module uses the repository's LocationInfo/patch.object patterns; no plan label, ticket reference or author attribution appears in any changed symbol, filename or comment.",
+    "goal_fidelity": "imas_codex/graph/client.py:88-100 deletes _slurm_service_uri and the SLURM_JOB_ID branch so _resolve_graph_uri is get_graph_uri() alone; rg '_slurm_service_uri|discover_compute_node_local|_resolve_compute_host' imas_codex/graph is empty and the run's compute-node-uri.log records bolt://98dci4-gpu-0002:7687 from 98dci4-clu-2018, so the profile layer (profiles.py:307-324 Mode 2 via resolve_service_url) is the sole path to the scheduled address.",
+    "reuse": "the change removes a duplicate rather than forking a capability: _resolve_graph_uri now extends the profile layer, which already owns SLURM service resolution through imas_codex/remote/locations.py::_service_url_for_slurm, so the graph and embedding paths share one owner and cannot diverge.",
+    "scope_discipline": "git diff c323401f..ca823b29b touches four paths: imas_codex/graph/client.py, tests/graph/test_client_address_resolution.py, tests/remote/test_locations_resolution.py and the evidence fragment; the remote test path is outside the original four declared write paths but is authorised in the reviewed run's resume advice ('Your scope now includes tests/remote/test_locations_resolution.py'), and no unrelated or dependency churn is present."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: c323401f933fc08cf81dfe30899a23825227dce1\nreviewed_head_sha: ca823b29b1bb1e47198c9e62dfeb7fb68c53296a\nVERDICT goal: plan \u00a710 asks to delete the client's SLURM duplicate and rework tests/graph/test_client_address_resolution.py; client.py:88-100 now holds no discovery and the reworked module passes 6 cases, independently re-run by the reviewer (6 passed).\nVERDICT done_when: the done-when's three conditions are all met and recorded: rg over imas_codex/graph is empty, the named gate exits 0 (after-gate.log, 255 passed), and GraphClient().uri from compute node 98dci4-clu-2018 is bolt://98dci4-gpu-0002:7687 (compute-node-uri.log).\nVERDICT write_paths: read the declared paths; every path in the diff is inside them once the coordinator's resume-advice scope extension for tests/remote/test_locations_resolution.py is counted, which the manifest and fragment disclose.\nVERDICT manifest: read; status complete, tests and test_logs present, negative_control_log present and red, and baseline_suite/after_suite carry both arm logs with completed=true and failure_count 0.\nVERDICT diff: read c323401f to ca823b29b commit by commit: client.py deletes _slurm_service_uri and reduces _resolve_graph_uri to get_graph_uri(); the test module is rewritten to assert the address through the profile layer (6 cases); two superseded remote cases that pinned the deleted delegation are removed.\nCALL_SITES: verified GraphClient() default construction reaches the change through imas_codex/graph/client.py::_resolve_graph_uri (the uri field's default_factory); production users include imas_codex/standard_names/loop.py, imas_codex/discovery/mdsplus/graph_ops.py and imas_codex/ingestion/graph.py.\nADDED_FAILURES: 0 (both arms EXIT=0, no FAILED/ERROR line in either gate log)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/graph/client.py:88-100 deletes _slurm_service_uri and the SLURM_JOB_ID branch so _resolve_graph_uri is get_graph_uri() alone; rg '_slurm_service_uri|discover_compute_node_local|_resolve_compute_host' imas_codex/graph is empty and the run's compute-node-uri.log records bolt://98dci4-gpu-0002:7687 from 98dci4-clu-2018, so the profile layer (profiles.py:307-324 Mode 2 via resolve_service_url) is the sole path to the scheduled address.\nSCORE evidence: 18\nJUSTIFICATION evidence: after-gate.log carries rev=ca823b29b and records 255 passed, 1 skipped, EXIT=0 (down from 260 passed at base after the intended -5 retired cases); negative-control.log is red (1 failed, DID NOT RAISE, EXIT=1) and compute-node-uri.log records the live address, so each part of the done-when has its own recorded artifact rather than a claim.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff c323401f..ca823b29b touches four paths: imas_codex/graph/client.py, tests/graph/test_client_address_resolution.py, tests/remote/test_locations_resolution.py and the evidence fragment; the remote test path is outside the original four declared write paths but is authorised in the reviewed run's resume advice ('Your scope now includes tests/remote/test_locations_resolution.py'), and no unrelated or dependency churn is present.\nSCORE durability: 16\nJUSTIFICATION durability: tests/graph/test_client_address_resolution.py guards the preserved raise (negative-control.log reds it), the real-owner end-to-end path (test_a_compute_step_reaches_the_discovered_service_node drives _service_url_for_slurm, not a stub) and the factory wiring; the deduction is that the node's own change is a deletion, so no test reds if a client-side SLURM duplicate were reintroduced and the rg done-when, not a test, is the only guard for the duplication removed.\nSCORE fit: 18\nJUSTIFICATION fit: client.py reduces to a one-line delegation with a rewritten docstring in the module's own idiom and the test module uses the repository's LocationInfo/patch.object patterns; no plan label, ticket reference or author attribution appears in any changed symbol, filename or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change removes a duplicate rather than forking a capability: _resolve_graph_uri now extends the profile layer, which already owns SLURM service resolution through imas_codex/remote/locations.py::_service_url_for_slurm, so the graph and embedding paths share one owner and cannot diverge.\nFINDING imas_codex/graph/client.py:100 follow-on: NEO4J_URI no longer bypasses an unreadable location configuration: the deleted _resolve_graph_uri returned os.environ['NEO4J_URI'] before it touched anything else, whereas the new body calls get_graph_uri() -> resolve_neo4j(), which calls resolve_location() at profiles.py:399 before it applies the env escape hatch at profiles.py:424. Measured by the reviewer: with get_graph_location pinned to titan, resolve_location forced to raise, and NEO4J_URI=bolt://example.invalid:1 set, _resolve_graph_uri() raised RuntimeError('location config unreadable') instead of returning the explicit URI. The documented escape hatch therefore no longer survives a broken location config as it did before the change. It does not block this node, whose done-when deliberately keeps the raise, and NEO4J_URI still wins whenever the location reads.\nFINDING tests/remote/test_locations_resolution.py:140 follow-on: Record observation, not a code defect: the reviewed manifest omits tests/remote/test_locations_resolution.py from orientation_write_paths even though the diff edits it; the path is authorised in the resume advice, but a reader of the manifest alone cannot see the widened scope without also reading the resume stream.",
+  "review_run_id": "r-20261005T091323183650-review-of-delete-graph-client-slurm-duplicate",
+  "reviewed_base_sha": "c323401f933fc08cf81dfe30899a23825227dce1",
+  "reviewed_head_sha": "ca823b29b1bb1e47198c9e62dfeb7fb68c53296a",
+  "reviewed_run_id": "r-20261005T084026008625-delete-graph-client-slurm-duplicate",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T09:20:21.673286+00:00",
+  "total": 109,
+  "verdict": "SOUND WITH FINDINGS"
+}

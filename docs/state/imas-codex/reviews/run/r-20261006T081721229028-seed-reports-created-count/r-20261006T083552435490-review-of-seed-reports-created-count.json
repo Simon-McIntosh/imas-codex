@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own baseline_suite and after_suite arms. baseline_suite at 5e0d75eb5 and after_suite at 25ba64112 (the code commit; the reviewed head 049ef4f47 adds only a fragment line and is code-identical) both end `==== 4 failed, 1728 passed, 357 deselected` and `==== 4 failed, 1732 passed, 357 deselected` respectively with a bare EXIT=1, and carry the identical four failing ids: tests/graph/test_dd_aux_streaming.py::test_embed_identifier_schemas_emits_items, tests/graph/test_dd_aux_streaming.py::test_embed_ids_nodes_emits_items, tests/graph/test_vector_quantization.py::TestDimensionMismatchDetection::test_drops_index_with_wrong_dimension, tests/graph/test_vector_quantization.py::TestDimensionMismatchDetection::test_drops_multiple_mismatched_indexes. Head-minus-base added failures = 0 with no ids.",
+  "base_log_revision": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "base_log_revision_arm": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/paths/frontier.py:565",
+    "imas_codex/discovery/paths/frontier.py:569"
+  ],
+  "completed_at": "2026-10-06T08:42:01.504Z",
+  "dispatched_at": "2026-10-06T08:35:58Z",
+  "findings": [
+    {
+      "file": "tests/graph/test_create_nodes_create_only.py",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the created count is pinned by a fake session that emulates MERGE/ON CREATE SET and the new RETURN aggregate; the Cypher is only EXPLAIN-verified, so the database's own behaviour of the mark-then-REMOVE-then-sum statement (and that a second create-only MERGE of the same rows reports 0) is never executed. A `-m graph` test that runs the create-only write twice and reads created 1 then 0 would exercise Neo4j's semantics rather than a local model of them, which is where the sibling seed-fix review also drew its line."
+    }
+  ],
+  "head_log_revision": "25ba64112",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "46 lines in client.py (create-only node_query becomes MERGE with ON CREATE SET n += item, n._created_by_merge = true, WITH the mark, REMOVE it and RETURN sum(CASE...); empty list returns created=0; the loop reads result.single() and accumulates), 14 in frontier.py (reads [\"created\"], sums canonical and alias, returns created), and the two test files gain a _Result.double and three create-only/seed assertions.",
+    "done_when": "the create-only write reports nodes created, the seed returns that count, and a test seeds two existing roots plus one new root and expects 1 while the default create_nodes count is unchanged; the declared negative control (created replaced by processed) fails; the focused gate is green and the gate shows no failure beyond the four that fail at base. All present.",
+    "goal": "\u00a714's seed-count node makes the create-only branch of GraphClient.create_nodes report how many nodes it created, and seed_facility_roots return that count for its canonical and alias rows, so --add-roots stops printing every configured root as added; implemented at 049ef4f47.",
+    "manifest": "present and self-consistent: status complete, commits 049ef4f47/25ba64112/4c6da9acb/05854ed70, changed_paths matching the diff, gate logs named, and the negative-control note naming the checked mutation; its baseline_suite and after_suite arms carry the four pre-existing ids on both sides.",
+    "write_paths": "the diff 5e0d75eb5..049ef4f47 touches exactly five paths \u2014 imas_codex/graph/client.py, imas_codex/discovery/paths/frontier.py, tests/graph/test_create_nodes_create_only.py, tests/discovery/test_seed_existing_roots.py and the evidence fragment \u2014 all within the declared scope; the granted figures directory is untouched and the reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "the mark is cleared in the same statement it is set, so no `_created_by_merge` property can persist, and the default upsert path is byte-identical in behaviour and reports no new key, so no existing caller changes; the count is now correct for every caller of the seed, which is what retires the prior review's reporting follow-on.",
+    "evidence": "I copied the reviewed head into $TMPDIR and reran the focused suite \u2014 11 passed (EXIT=0) \u2014 and independently applied the declared mutation (created <- processed) to a second copy: test_seed_reports_only_created_roots then fails at `assert 3 == 1`, EXIT=1, so the guard fires. The head gate reads 4 failed/1732 passed and the base gate 4 failed/1728 passed with the same four ids, so added failures are 0. Two deductions: the head gate header names the code commit 25ba64112 rather than the reviewed head 049ef4f47 (they are code-identical \u2014 the head adds only a fragment line), and the created-count semantics rest on a fake session's model of MERGE/ON CREATE SET plus an EXPLAIN of the Cypher, not on a live-graph execution.",
+    "fit": "four conventional commits, each with a body stating what changed and why; no AI attribution and no plan, sprint or ticket identifier or phase name in subjects, bodies, symbol names, filenames or comments.",
+    "goal_fidelity": "every clause holds \u2014 create_only reports created (client.py:674-750), seed_facility_roots returns it for canonical and alias rows (frontier.py:565-593), test_create_only_reports_created_count seeds two existing plus one new and asserts created==1 while processed==3, test_default_reports_processed_and_no_created_count asserts the key is absent under the default, and test_seed_reports_only_created_roots drives the seed to 1.",
+    "reuse": "the change extends the existing create_nodes owner with a returned count and reuses the codebase's ON CREATE SET idiom rather than adding an abstraction; the marker-and-REMOVE technique is the minimum needed to recover a created count from MERGE.",
+    "scope_discipline": "the diff is confined to the five declared paths, deletes nothing, and leaves the reviewed worktree clean."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a714's seed-count node makes the create-only branch of GraphClient.create_nodes report how many nodes it created, and seed_facility_roots return that count for its canonical and alias rows, so --add-roots stops printing every configured root as added; implemented at 049ef4f47.\nVERDICT done_when: the create-only write reports nodes created, the seed returns that count, and a test seeds two existing roots plus one new root and expects 1 while the default create_nodes count is unchanged; the declared negative control (created replaced by processed) fails; the focused gate is green and the gate shows no failure beyond the four that fail at base. All present.\nVERDICT write_paths: the diff 5e0d75eb5..049ef4f47 touches exactly five paths \u2014 imas_codex/graph/client.py, imas_codex/discovery/paths/frontier.py, tests/graph/test_create_nodes_create_only.py, tests/discovery/test_seed_existing_roots.py and the evidence fragment \u2014 all within the declared scope; the granted figures directory is untouched and the reviewed worktree is clean.\nVERDICT manifest: present and self-consistent: status complete, commits 049ef4f47/25ba64112/4c6da9acb/05854ed70, changed_paths matching the diff, gate logs named, and the negative-control note naming the checked mutation; its baseline_suite and after_suite arms carry the four pre-existing ids on both sides.\nVERDICT diff: 46 lines in client.py (create-only node_query becomes MERGE with ON CREATE SET n += item, n._created_by_merge = true, WITH the mark, REMOVE it and RETURN sum(CASE...); empty list returns created=0; the loop reads result.single() and accumulates), 14 in frontier.py (reads [\"created\"], sums canonical and alias, returns created), and the two test files gain a _Result.double and three create-only/seed assertions.\nVERDICT call_sites: the only production call sites of create_nodes(create_only=True) are the canonical and alias root writes in seed_facility_roots (imas_codex/discovery/paths/frontier.py:565 and :569); both now consume the new key, and no other production caller reads a created count from this method, so the added key changes no existing caller.\nCALL_SITES: imas_codex/discovery/paths/frontier.py:565, imas_codex/discovery/paths/frontier.py:569\nSCORE goal_fidelity: 20\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 19\nSCORE fit: 20\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: every clause holds \u2014 create_only reports created (client.py:674-750), seed_facility_roots returns it for canonical and alias rows (frontier.py:565-593), test_create_only_reports_created_count seeds two existing plus one new and asserts created==1 while processed==3, test_default_reports_processed_and_no_created_count asserts the key is absent under the default, and test_seed_reports_only_created_roots drives the seed to 1.\nJUSTIFICATION evidence: I copied the reviewed head into $TMPDIR and reran the focused suite \u2014 11 passed (EXIT=0) \u2014 and independently applied the declared mutation (created <- processed) to a second copy: test_seed_reports_only_created_roots then fails at `assert 3 == 1`, EXIT=1, so the guard fires. The head gate reads 4 failed/1732 passed and the base gate 4 failed/1728 passed with the same four ids, so added failures are 0. Two deductions: the head gate header names the code commit 25ba64112 rather than the reviewed head 049ef4f47 (they are code-identical \u2014 the head adds only a fragment line), and the created-count semantics rest on a fake session's model of MERGE/ON CREATE SET plus an EXPLAIN of the Cypher, not on a live-graph execution.\nJUSTIFICATION scope_discipline: the diff is confined to the five declared paths, deletes nothing, and leaves the reviewed worktree clean.\nJUSTIFICATION durability: the mark is cleared in the same statement it is set, so no `_created_by_merge` property can persist, and the default upsert path is byte-identical in behaviour and reports no new key, so no existing caller changes; the count is now correct for every caller of the seed, which is what retires the prior review's reporting follow-on.\nJUSTIFICATION fit: four conventional commits, each with a body stating what changed and why; no AI attribution and no plan, sprint or ticket identifier or phase name in subjects, bodies, symbol names, filenames or comments.\nJUSTIFICATION reuse: the change extends the existing create_nodes owner with a returned count and reuses the codebase's ON CREATE SET idiom rather than adding an abstraction; the marker-and-REMOVE technique is the minimum needed to recover a created count from MERGE.\nFINDING tests/graph/test_create_nodes_create_only.py:0 follow-on: the created count is pinned by a fake session that emulates MERGE/ON CREATE SET and the new RETURN aggregate; the Cypher is only EXPLAIN-verified, so the database's own behaviour of the mark-then-REMOVE-then-sum statement (and that a second create-only MERGE of the same rows reports 0) is never executed. A `-m graph` test that runs the create-only write twice and reads created 1 then 0 would exercise Neo4j's semantics rather than a local model of them, which is where the sibling seed-fix review also drew its line.\nreviewed_base_sha: 5e0d75eb5c267885cac96fb14469125d94860b7d\nreviewed_head_sha: 049ef4f473d6a4e316375672bb286446c8257e0c\n",
+  "review_run_id": "r-20261006T083552435490-review-of-seed-reports-created-count",
+  "reviewed_base": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "reviewed_base_sha": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "reviewed_commit": "049ef4f473d6a4e316375672bb286446c8257e0c",
+  "reviewed_head_sha": "049ef4f473d6a4e316375672bb286446c8257e0c",
+  "reviewed_run_id": "r-20261006T081721229028-seed-reports-created-count",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:37:32.970862+00:00",
+  "total": 117
+}

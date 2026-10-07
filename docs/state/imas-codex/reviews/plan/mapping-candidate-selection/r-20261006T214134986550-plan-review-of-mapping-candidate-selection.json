@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T21:44:44.790Z",
+  "dispatched_at": "2026-10-06T21:41:42Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/tools.py:541",
+      "id": "reuse_search-1",
+      "reason": "the section must either name fetch_source_code_refs as the per-source code reader it considered and state why the embedding bridge cannot be merged into it, or fold the raised-escalation code context into that existing reader instead of keeping two per-source code paths.",
+      "text": "\u00a78 keeps compute_semantic_matches as the per-source wiki/code bridge and asserts \"Nothing else produces that per-source bridge\", naming only fetch_wiki_context and fetch_code_context as non-replacements, but it never names fetch_source_code_refs (imas_codex/ids/tools.py:541), the existing per-source SignalSource\u2192representative FacilitySignal\u2192SignalNode\u2192CodeChunk reader already wired into the same mapping prompts at imas_codex/ids/mapping.py:990 and imas_codex/ids/mapping.py:1185; the plan therefore performs the per-source-code half of its reuse search without citing the mechanism it most resembles",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/graph_ops.py:306",
+      "id": "reuse_search-2",
+      "reason": "the deletion is correct (the ids copy is dead), so this only asks the author to name grouping.py as the node-creation owner in one line; it does not alter the node's work.",
+      "text": "the plan deletes ids/graph_ops.py's create_signal_source as \"whose only caller is tests/ids/test_graph_ops.py\" (verified: the sole non-definition reference is tests/ids/test_graph_ops.py:14,207), but the same-named production creator create_signal_source lives at imas_codex/discovery/base/grouping.py:26 and is the surviving owner of SignalSource node creation; \u00a78's \"every create \u2026 of a SignalSource \u2192 IMASNode edge then lives in one module\" claim is true of the relationship only, and the section does not say so",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e2ac5ea018ac5a295430e686f63f7309c333e66b85ae5686561d8e6e54ce61af",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 51,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-06T21:45:08.174306+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-2",
+      "reason": "",
+      "when": "2026-10-06T21:45:09.904276+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:45:08.174306+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:45:09.904276+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v51.json",
+  "review_run_id": "r-20261006T214134986550-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "8ef8ecc89306de62bf8f360ede7db322c721c8a0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 imas_codex/ids/candidates.py hides retrieval, batched judgment and routing behind retrieve_candidates/route_ids/judge_candidates/route and three frozen dataclasses (479 lines), and \u00a78 concentrates every SignalSource\u2192IMASNode edge write, delete, reader and route count in graph_ops.py behind that module's gc-threaded functions.",
+    "duplicate_owner": "pass \u2014 the plan's MAPS_TO_IMAS census matches the tree exactly (three MATCH-gated writers at imas_codex/ids/models.py:580, imas_codex/ids/graph_ops.py:367, imas_codex/ids/mapping.py:2008 and the one delete at imas_codex/cli/map.py:661), and \u00a78 consolidates all four into graph_ops.py beside write_candidates/clear_candidates, moving count_candidates_by_route to the same owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 adds no CLI option, MCP view or refusal family (its new refusals reuse the existing CandidateWriteError) and names what it retires: --skip-metadata, --skip-errors, count_sources_by_mapping_status, and the SignalSource fields mapping_target_path and mapping_target_ids.",
+    "reuse_search": "a finding \u2014 the plan cites and extends the right mechanisms (hybrid_dd_search, call_decisions in discovery/base/llm.py, claims.py claim_batch/has_pending, PipelineCost, graph_ops.py), but \u00a78's uniqueness claim for the per-source wiki/code bridge omits the existing per-source code reader fetch_source_code_refs.",
+    "thin_wrapper": "pass \u2014 the \u00a78 additions read_candidates and select_candidate are not wrappers over write_candidates: select_candidate is justified in the plan's own text (a pick must flag one existing edge, while write_candidates deletes and rewrites a source's whole shortlist), and workers.py's claim helpers delegate to claims.py by the pattern \u00a77 already established."
+  },
+  "section_digests": {
+    "_document": "bfd320a268c1925095f3577ace21fcd1ba04db37665ccb02d0665e5b4b73f540",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "af929b9b022df9571bfffbbc0337b94de7fbed283553d10ea4f3306bdf816706",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T21:45:06.583019+00:00"
+}

@@ -1,0 +1,43 @@
+{
+  "absent": [],
+  "backend": "clive",
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T10:31:05.476736+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/unbound-source-backlog/accepted-names-without-producers.md",
+      "line": "9",
+      "text": "the cohort definition \u2014 name_stage accepted with no incoming PRODUCED_NAME edge \u2014 is asserted but never written down; the raw output, its positive controls and the 146 KB export receipt live only under the crew run directory named at lines 162-173, which retention may recycle, so the nine-name count cannot be re-derived from the repository alone, whereas the same plan's docs/evidence/unbound-source-backlog/plan-figure-audit.md:40-55 records the exact Cypher beside every re-measured figure."
+    },
+    {
+      "file": "tests/docs/test_documentation_layout.py",
+      "line": "8",
+      "text": "the only check that reads the docs tree never runs: pytest.importorskip(\"reckon.resources\") skips the whole module because reckon is neither declared in pyproject.toml nor installed by any workflow under .github/workflows, observed as \"collected 0 items / 1 skipped\" at this revision, so the typed-path layout the new evidence file and archive anchor must satisfy is unenforced."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/docs/test_documentation_layout.py:8 unconditionally skips because reckon.resources is not a declared dependency, so no test fails if this record, its archive path or its measured counts decay.",
+    "evidence": "every done-when clause carries a named log, and independent checking reproduced the cited code exactly at graph_ops.py:18483-18494, edit.py:1931-1938 and export.py:607 plus the emitted-0 and halo_current gate failure in export-report.json, while the cohort's defining query is missing from the landed record.",
+    "fit": "the evidence document, the archive anchor at docs/evidence/archive/unbound-source-backlog-landed.html:1-14 and the plan comment section follow the family idiom, and both commit subjects use conventional form with no plan or ticket identifier.",
+    "goal_fidelity": "docs/evidence/unbound-source-backlog/accepted-names-without-producers.md:23-33 gives every one of the nine accepted source-free identities a named mechanism and lines 40-109 name the writer, both guard predicates and the excluded liveness writer, so both halves of the goal are answered in the goal's own terms.",
+    "scope_discipline": "the two commits against 1f246a61406f0557a77ee6aa84f203f86268f795 add 237 insertions across exactly the three declared write paths, with no code, plan-metadata or unrelated file in either commit."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/unbound-source-backlog/accepted-names-without-producers.md:23-33 gives every one of the nine accepted source-free identities a named mechanism and lines 40-109 name the writer, both guard predicates and the excluded liveness writer, so both halves of the goal are answered in the goal's own terms.\nSCORE evidence: 18\nJUSTIFICATION evidence: every done-when clause carries a named log, and independent checking reproduced the cited code exactly at graph_ops.py:18483-18494, edit.py:1931-1938 and export.py:607 plus the emitted-0 and halo_current gate failure in export-report.json, while the cohort's defining query is missing from the landed record.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits against 1f246a61406f0557a77ee6aa84f203f86268f795 add 237 insertions across exactly the three declared write paths, with no code, plan-metadata or unrelated file in either commit.\nSCORE durability: 8\nJUSTIFICATION durability: tests/docs/test_documentation_layout.py:8 unconditionally skips because reckon.resources is not a declared dependency, so no test fails if this record, its archive path or its measured counts decay.\nSCORE fit: 20\nJUSTIFICATION fit: the evidence document, the archive anchor at docs/evidence/archive/unbound-source-backlog-landed.html:1-14 and the plan comment section follow the family idiom, and both commit subjects use conventional form with no plan or ticket identifier.\nFINDING docs/evidence/unbound-source-backlog/accepted-names-without-producers.md:9 the cohort definition \u2014 name_stage accepted with no incoming PRODUCED_NAME edge \u2014 is asserted but never written down; the raw output, its positive controls and the 146 KB export receipt live only under the crew run directory named at lines 162-173, which retention may recycle, so the nine-name count cannot be re-derived from the repository alone, whereas the same plan's docs/evidence/unbound-source-backlog/plan-figure-audit.md:40-55 records the exact Cypher beside every re-measured figure.\nFINDING tests/docs/test_documentation_layout.py:8 the only check that reads the docs tree never runs: pytest.importorskip(\"reckon.resources\") skips the whole module because reckon is neither declared in pyproject.toml nor installed by any workflow under .github/workflows, observed as \"collected 0 items / 1 skipped\" at this revision, so the typed-path layout the new evidence file and archive anchor must satisfy is unenforced.",
+  "review_run_id": "r-20260917T103105476736-review-of-n-usb-accepted-names-without-a-producing-source-are-traced",
+  "reviewed_base": "1f246a61406f0557a77ee6aa84f203f86268f795",
+  "reviewed_commit": "c225749ee93185cb2e48b896ffe5eb9731af2019",
+  "reviewed_run_id": "r-20260915T190723000709-n-usb-accepted-names-without-a-producing-source-are-traced",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T11:17:41Z",
+  "total": 86
+}

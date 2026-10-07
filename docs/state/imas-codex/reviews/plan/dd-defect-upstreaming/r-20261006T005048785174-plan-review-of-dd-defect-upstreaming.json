@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T00:53:25.426Z",
+  "dispatched_at": "2026-10-06T00:50:53Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/dd-defect-upstreaming.html#s2",
+      "id": "reuse_search-1",
+      "reason": "the protocol should cite and extend the existing owner (record the filed issue URL and the eventual resolving DD version back through the ddgap triage API) instead of leaving the disposition only in plan prose.",
+      "text": "\u00a72's protocol files an upstream DD issue and PR but never names the mechanism that already owns \"carry a DD defect upstream\": the DDGap lifecycle reachable through `sn ddgap --triage` (`imas_codex/standard_names/dd_gaps.py`), which carries `DDGapStatus.upstream_issue` and an `--upstream-url`, and `dd_resolutions.py` which records `upstream_reference`, `upstream_commit_reference` and `retiring_release`. The plan's \u00a71 table is itself a restatement of the DDGap defect records (`sn ddgap --list`) rather than a pointer to them.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/dd_gaps.py:96",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner turns a manual one-off into a recorded lifecycle fact and is the difference between a contribution that is tracked and one that is forgotten.",
+      "text": "the `upstream_issue \u2192 resolved_upstream` transition (with `upstream_url` and `resolved_dd_version`) is the owner of the exact relationship \u00a72 steps 3\u20134 create manually; the plan proposes the relationship without extending or deferring to that owner, so a filed issue's URL and its resolving version would live only in a plan table and never in the graph the pipeline reads.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/vocab_adjudication.py:20",
+      "id": "duplicate_owner-2",
+      "reason": "the section should route the token decision through the existing adjudication path rather than through a plan-level question, so the ISN grammar and the recorded refusal stay consistent.",
+      "text": "\u00a74 raises whether `field_map_grid` should become an ISN token and frames it as an open \"vocabulary rotation\", but the codebase already owns grammar-token adjudication (`VocabGapAdjudicationRow`, `sn` vocab-gap adjudications, and `imas_codex/standard_names/vocab_token_filter.py`), and the DD-unit prior art is already documented in `docs/research/dd-unit-bugs.html`. The section does not say how its outcome would be recorded through that owner.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "06fee8626401f4f4dc82e2dc23e27fb0c6cc82ecbebb63b169c5cf81a617fe54",
+  "plan_slug": "dd-defect-upstreaming",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T005048785174-plan-review-of-dd-defect-upstreaming",
+  "reviewed_blob_sha": "0211bb1ad000d9d5fa954e41ddfbc3778c6cc28b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan proposes no new module; its content is disposition and process, not code, so there is no interface-to-behaviour ratio to judge.",
+    "duplicate_owner": "a finding \u2014 the plan re-derives, in prose, an upstream DD-defect record and a vocabulary-rotation decision that `imas_codex/standard_names/dd_gaps.py` and `imas_codex/standard_names/vocab_adjudication.py` already own.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds nothing to any family, so no section needs to name a retirement or merge.",
+    "reuse_search": "a finding \u2014 \u00a72 and \u00a74 propose a manual upstream-reporting protocol and an ISN vocabulary rotation without citing the existing owners that already model a recorded upstream DD defect (`imas_codex/standard_names/dd_gaps.py`) and a grammar-token adjudication (`imas_codex/standard_names/vocab_adjudication.py`).",
+    "thin_wrapper": "pass \u2014 no wrapper over existing machinery is proposed."
+  },
+  "section_digests": {
+    "_document": "d43df613332a7b455feddde373eab4274173b6769d8b46f729530fc324b9dd04",
+    "s1": "59d52c883c6a8f80dd0d6f73067e71e761ccfbc44c3b6268634508ebfba6bef4",
+    "s2": "914cf28691b1c4fe0a69c5c5b646c6c8a4015a3c600434c889c00b521891f7e9",
+    "s3": "a4d46f70e8d7b426a3cd98bcc9e94238ff7eee6ef95490254af3a9fc248c3546",
+    "s4": "241b83d5805702fff318b107428fa6a749547cf0c039e268b4265893464a24e5",
+    "scope": "24e79447938898378720cd88d809202953fa437c1cb5b6b13ed3e329eba0ef61"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T00:54:03.963874+00:00"
+}

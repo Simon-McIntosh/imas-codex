@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logging. The run's manifest records no baseline_suite/after_suite objects (classification.json: baseline_suite null, after_suite null); the single gate arm it recorded is at the head state \u2014 gate.log, EXIT=0, 1458 passed, failure_count 0 \u2014 so no failure exists in the head arm and added failures (failures present in head but not in a base arm) are bounded at 0 with added_failure_ids empty. This review independently reproduced the head arm in a scratch extraction of 4db9c94ef (repro-head-gate.log, 1458 passed, EXIT=0) and its negative control (repro-negative-control.log, 1 failed, EXIT=1 on the removed local branch).",
+  "backend": "local",
+  "backend_note": "reviewed the run's full delta ba4dda34..4db9c94ef; no prior review of this run exists.",
+  "base_log_revision": null,
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/base/llm.py:2165 (_build_kwargs now uses _is_local_client_model)",
+    "imas_codex/discovery/base/llm.py:2266 (_completion_local on the synchronous local path)",
+    "imas_codex/discovery/base/llm.py:2268 (litellm.completion fallback for non-local models)",
+    "imas_codex/discovery/base/llm.py:2451 (acall_llm_structured predicate)",
+    "imas_codex/discovery/base/llm.py:2907 (_acall_frozen_structured_transport predicate)",
+    "imas_codex/discovery/base/llm.py:2804 (_call_frozen_structured_transport synchronous litellm \u2014 no production caller; recorded follow-on)"
+  ],
+  "completed_at": "2026-10-06T03:31:47.396Z",
+  "dispatched_at": "2026-10-06T03:21:54Z",
+  "findings": [],
+  "head_log_revision": "4db9c94ef210ce034f19b9a1b6cc3ac652cfa741",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the routed sites: call_llm_structured (llm.py:2266 `_completion_local` vs :2268 `litellm.completion`), _build_kwargs (llm.py:2165), acall_llm_structured (llm.py:2451), _acall_frozen_structured_transport (llm.py:2907); the recorded follow-on _call_frozen_structured_transport (sync, llm.py:2804 `litellm.completion`) has no production caller in imas_codex/ (only tests/discovery/test_llm_wrapper_coercion.py), so it is a latent gap, not an active break.",
+    "diff": "read 4db9c94ef: llm.py adds `_LOCAL_SYNC_CLIENTS`, `_get_local_sync_client`, `_local_call_kwargs`, `_completion_local`, `_LOCAL_CLIENT_MODEL_PREFIXES` and `_is_local_client_model`; rewrites `_acompletion_local` to use the shared translation; and replaces three inline startswith tests with the predicate, routing `call_llm_structured` through `_completion_local`.",
+    "done_when": "the node does not alter \u00a721's other done-when items, all of which still hold at 4db9c94ef (module import resolves and the declared gate is green). The gate `pytest tests/discovery tests/llm tests/core/test_settings.py` exits 0 at 4db9c94ef (1458 passed, 9 skipped, 5 deselected), reproduced by this review in a scratch tree (repro-head-gate.log).",
+    "goal": "\u00a721's third node lands: one predicate over the named client-prefix set replaces the three inline tests; the local request translation is one function; `_completion_local` + `_get_local_sync_client` are the synchronous siblings of the async pair; and `call_llm_structured` routes a local model through the dedicated client so it never reaches litellm's provider dispatch.",
+    "manifest": "read; status complete; the run records the gate via `tests`/`test_logs` at the worktree state (gate.log, EXIT=0, 1458 passed) and a negative control (negative-control.log, EXIT=1). Note the run's manifest carries no `baseline_suite`/`after_suite` objects (classification.json records both null); the single gate arm it recorded is green at the head state, so added failures are bounded at zero.",
+    "write_paths": "the diff 4db9c94ef touches exactly the three declared paths (A/M/A); no undeclared file is modified."
+  },
+  "justifications": {
+    "durability": "the added tests pin the behaviour and redden on the exact regression they guard: the predicate is pinned for both prefixes, the client-prefix set is pinned as a strict subset of _LOCAL_MODEL_PREFIXES (so folding the two meanings is caught), and the sync and async paths each have a positive routing test with a litellm-must-not-run guard. Docked one point because the real `_get_local_sync_client` construction (OpenAI client, httpx limits) is not exercised by any unit test \u2014 every sync test monkeypatches it \u2014 so only the live check covers the constructed client, and the new `_LOCAL_SYNC_CLIENTS` cache is keyed by api_base alone (inherited from the async sibling) with no test pinning cache reuse; the mechanism is nonetheless shared with the proven async path via `_local_call_kwargs`.",
+    "evidence": "the invariant is measured by tests and independently reproduced by this review. The head arm was re-run by this review in a scratch extraction of 4db9c94ef (repro-head-gate.log: module.__file__ under the scratch tree, 1458 passed, 9 skipped, 5 deselected, EXIT=0), matching the run's own gate.log line for line; the new artifact tests alone pass (repro-focused.log, 10 passed, EXIT=0). The negative control that removes the local branch from call_llm_structured reddens the guard: repro-negative-control.log, 'AssertionError: litellm.completion used for a local model', 1 failed, EXIT=1 \u2014 the run's own negative-control.log records the same divergence. The live check (live_check.log) sends a structured triage call through discovery-triage and returns parsed JSON at cost $0.00 from the local endpoint.",
+    "fit": "names are capability-based and mechanism-named \u2014 `_is_local_client_model`, `_LOCAL_CLIENT_MODEL_PREFIXES`, `_local_call_kwargs`, `_completion_local`, `_get_local_sync_client` \u2014 with docstrings stating the mechanism (the narrower prefix set, the cached client, the shared translation). No plan label, sprint id, ticket reference or author attribution appears in the source, tests or fragment; the commit message carries a body and no plan identifiers.",
+    "goal_fidelity": "the delta delivers \u00a721's third node exactly. `_LOCAL_CLIENT_MODEL_PREFIXES` is declared beside `_LOCAL_MODEL_PREFIXES` and read by one predicate `_is_local_client_model` (llm.py:940-951) that replaces all three inline `model.startswith((\"local/\", \"hosted_vllm/\"))` tests \u2014 `_build_kwargs` (llm.py:2165), `acall_llm_structured` (llm.py:2451) and `_acall_frozen_structured_transport` (llm.py:2907). The request translation in `_acompletion_local` (prefix strip + call arguments) is now one function `_local_call_kwargs` (llm.py:143-177) shared by the async path and the new synchronous sibling `_completion_local` (llm.py:190-198), backed by a cached synchronous `OpenAI` client per `api_base` `_get_local_sync_client` (llm.py:114-138) beside `_get_local_client`. `call_llm_structured` now routes a local model through `_completion_local` gated by `_use_local = _is_local_client_model(model) and _is_local_api_base(kwargs.get(\"api_base\"))` (llm.py:2255-2268), so code-file triage/scoring no longer hand a `local/` id to litellm's provider dispatch. `ollama/` and `openai/localhost` keep litellm routing because the predicate reads only the two client prefixes.",
+    "reuse": "the delta removes duplication rather than adding it: the three inline prefix tests collapse into one predicate, the async request translation is extracted into `_local_call_kwargs` and shared by the new synchronous sibling instead of being copied, and the sync client mirrors the existing `_get_local_client` design (isolated pooled client per api_base, max_retries=0 with the caller's own retry loop). No second routing mechanism or duplicate helper is forked.",
+    "scope_discipline": "the delta touches exactly the three declared paths \u2014 imas_codex/discovery/base/llm.py, tests/discovery/test_llm_local_routing.py, docs/evidence/fragments/jt60sa-discovery-completion/sync-local-route.html (git show --name-status: A/M/A, no other path). No file outside the node's named three LLM-layer files is modified; the declared figures directory carries no file and is not required by \u00a721's done-when."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a721 node 3 lands \u2014 one predicate `_is_local_client_model` over `_LOCAL_CLIENT_MODEL_PREFIXES` replaces the three inline startswith tests (_build_kwargs llm.py:2165; acall_llm_structured :2451; _acall_frozen_structured_transport :2907); `_local_call_kwargs` is the one shared translation; `_completion_local` + `_get_local_sync_client` are the sync siblings; call_llm_structured routes local models through the dedicated client (:2266).\nVERDICT done_when: gate `pytest tests/discovery tests/llm tests/core/test_settings.py` exits 0 at 4db9c94ef (1458 passed, 9 skipped, 5 deselected), independently reproduced in a scratch tree (repro-head-gate.log).\nVERDICT write_paths: the diff touches exactly imas_codex/discovery/base/llm.py, tests/discovery/test_llm_local_routing.py and docs/evidence/fragments/jt60sa-discovery-completion/sync-local-route.html.\nVERDICT manifest: read; complete; one green gate arm (gate.log EXIT=0) and a red negative control (negative-control.log EXIT=1); no baseline_suite/after_suite objects recorded.\nVERDICT diff: predicate + shared translation + sync client pair + routed call_llm_structured; ollama/ and openai/localhost keep litellm routing.\nCALL_SITES: imas_codex/discovery/base/llm.py:2165 (_build_kwargs predicate), :2266 (_completion_local call), :2268 (litellm fallback), :2451 (acall_llm_structured predicate), :2907 (_acall_frozen_structured_transport predicate), :2804 (_call_frozen_structured_transport sync litellm \u2014 no production caller, recorded follow-on)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the delta delivers the third node exactly \u2014 one predicate replacing all three inline tests, one shared translation, a synchronous sibling pair, and call_llm_structured routed through the dedicated local client.\nSCORE evidence: 20\nJUSTIFICATION evidence: head arm independently reproduced (repro-head-gate.log 1458 passed EXIT=0 at the scratch module.__file__) and the negative control reproduced red (repro-negative-control.log 'litellm.completion used for a local model' EXIT=1).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the delta touches exactly the three declared paths and nothing else.\nSCORE durability: 19\nJUSTIFICATION durability: tests pin the predicate, the subset relation and both routing paths and redden on the mutation; docked one point because the real `_get_local_sync_client` construction is only covered by the live check and the per-api_base client cache has no reuse test.\nSCORE fit: 20\nJUSTIFICATION fit: capability-named symbols with mechanism docstrings; no plan label, ticket reference or attribution in source, tests or fragment.\nSCORE reuse: 20\nJUSTIFICATION reuse: collapses three inline tests into one predicate and extracts one shared translation function shared by the new sync sibling rather than copying it.\n",
+  "review_run_id": "r-20261006T032144667543-review-of-sync-local-route",
+  "reviewed_base_sha": "ba4dda34f621700118a6a8c1ade77e4ad10d9721",
+  "reviewed_head_sha": "4db9c94ef210ce034f19b9a1b6cc3ac652cfa741",
+  "reviewed_run_id": "r-20261006T030834755569-sync-local-route",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T03:30:00+00:00",
+  "total": 119,
+  "verdict": "SOUND"
+}

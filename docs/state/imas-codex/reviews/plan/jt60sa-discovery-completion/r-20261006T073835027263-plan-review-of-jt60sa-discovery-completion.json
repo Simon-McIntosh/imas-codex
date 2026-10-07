@@ -1,0 +1,94 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T07:45:09.946Z",
+  "dispatched_at": "2026-10-06T07:38:41Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/client.py:585",
+      "id": "duplicate_owner-1",
+      "reason": "seed_facility_roots and its callers reach only the plural writer, so the seed-fix works as designed; the singular writer is an uncensused sibling for a later pass, not a defect in this fix.",
+      "text": "\u00a714 names GraphClient.create_nodes (client.py:605) as \"the node-creation owner\" and gives it a create-only mode, but its sibling create_node (client.py:585, singular) issues the identical `MERGE (n {id}) SET n += $props` overwrite and is left unchanged, so the plan's census of the overwriting-write family names one of two members",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:545",
+      "id": "duplicate_owner-2",
+      "reason": "those sites filter a single literal prefix where the renderer emits the `any(prefix IN $param)` list form, so they are a distinct predicate rather than a bypass of the new owner.",
+      "text": "render_path_prefix_clause (imas_codex/graph/query_builder.py:268) declares itself \"the single renderer for the prefix predicate shared by the path claims and the scoped status reset; do not spell the predicate inline\", yet domain_queries.py:545 and :591 hand-write `n.path STARTS WITH $path_prefix` and graph_search.py:1016 hand-writes `p.id STARTS WITH $prefix`; \u00a714 established the owner but did not route these instances through it",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/remote/tunnel.py:538",
+      "id": "reuse_search-1",
+      "reason": "locations.py:277 deliberately delegates to tunnel.discover_compute_node_local, so this is intentional layering (owner over primitives), not a forked owner; no consumer holds a fourth copy.",
+      "text": "\u00a78/\u00a710 assert _service_url_for_slurm (imas_codex/remote/locations.py:277) is \"the single owner of SLURM service-node discovery\" and delete the graph-client copy, but the squeue/ssh node-discovery primitives discover_compute_node and discover_compute_node_local (tunnel.py:538, :579) remain and are still reached from cli/tunnel.py:61 and directly by locations.py:268, so the \"single owner\" is a two-layer stack rather than one owner",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "f85abff5ad90ac5b6439f910f001f4515c6ebfdebf789f93efdb007eaf599ac7",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 192,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "The seed fix and every seed caller reach only the plural create_nodes; the singular create_node shares the overwriting write but no node of this plan calls it, so changing it widens scope beyond what the seed defect needs. It is noted in the landing for a later pass.",
+      "when": "2026-10-06T07:45:28.900101+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "Those sites filter one literal prefix, a different predicate from the list-form any(prefix IN $param) the shared renderer emits, so they are not bypasses of that owner and stay as they are.",
+      "when": "2026-10-06T07:45:29.534909+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "locations.py deliberately delegates to tunnel.discover_compute_node_local, so the service resolver owns discovery over shared squeue primitives; that is layering, not a forked owner, and no consumer holds another copy.",
+      "when": "2026-10-06T07:45:30.098326+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T073835027263-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "5f072109823081586aa633e77ecdf42f0c3b2352",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a714 hides the prefix predicate behind one renderer that funnels seven claim sites plus the reset, and hides the additive-write semantic behind the node-creation owner, rather than adding modules; \u00a78/\u00a710 collapse five SLURM node-discovery copies into one resolver.",
+    "duplicate_owner": "a finding \u2014 the plan's \"single owner\" claims are partial censuses: the node-creation writer family has a second overwriting member left unnamed, and the prefix renderer is bypassed by two hand-written instances the plan did not route.",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no CLI option (reuses --root and --path-prefix) and names seed_missing_roots and create_child_paths as retired, \u00a721 retires the language and vision seats (imas_codex/settings.py:141) for the six function seats, \u00a722 retires _DEFAULT_SCHEMA_NEEDS, and \u00a723 deletes a prompt, so every section that touched a family accounts for it.",
+    "reuse_search": "pass \u2014 the plan names and extends real owners, verified in the tree: render_path_prefix_clause (imas_codex/graph/query_builder.py:268), create_nodes (imas_codex/graph/client.py:605), reset_to_status (imas_codex/discovery/base/reset.py:59), seed_facility_roots (imas_codex/discovery/paths/frontier.py:426), _service_url_for_slurm (imas_codex/remote/locations.py:277) and ensure_vector_indexes (imas_codex/graph/client.py).",
+    "thin_wrapper": "pass \u2014 the plan extends owners (create_nodes gains a create-only mode, reset_to_status gains path_prefixes) and retires the workaround seed_missing_roots and the dead create_child_paths instead of layering a parallel mechanism; the wrapper-with-no-justification defect is absent."
+  },
+  "section_digests": {
+    "_document": "105f5d77458c8dc162350b589b042341cbbbd47a9cb320eea1eead92d4f8922b",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "cdf09cae1f2b5236ae9b1d931ff8a43b07fa339d4c51c156694f50e35cbbf9e6",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T07:45:18.834369+00:00"
+}

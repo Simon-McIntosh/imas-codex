@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T03:01:18.443Z",
+  "dispatched_at": "2026-10-06T02:55:47Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/code/workers.py:291",
+      "id": "deep_module-1",
+      "reason": "the plan must land the synchronous local-call support before or with the seat migration that makes the seats local, otherwise the already-landed node ships a live breakage of facility code discovery (its production claim that only the async variant is reached is contradicted by workers.py).",
+      "text": "the async `triage_worker` calls `asyncio.to_thread(call_llm_structured, model=get_model(\"discovery-triage\"))` and `score_worker` (workers.py:463) calls the same synchronous function with `get_model(\"discovery-score\")`; the first \u00a721 node has already pointed both seats at `local/deepseek-v4.1-flash` (pyproject.toml:396,403) and `call_llm_structured` (llm.py:2194) hands the model id straight to `litellm.completion` with no local branch, so production code-file triage and scoring fail at runtime until the plan's third node lands \u2014 the node's own evidence fragment calls this latent on the claim \"the production pipeline uses the async variant\", which is false for these two workers.",
+      "type": "deep_module",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "88eb4033fc3823bb9dc43f03c1aa14c415464cd5a45f1a7ce3d49ce511ced40a",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 146,
+  "project": "imas-codex",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T03:02:42.663627+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T025539661723-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "8ae3d4f0d3872bda0b6307065ae3de69e4cda603",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 `call_llm_structured` and `acall_llm_structured`, the two entry points into imas_codex/discovery/base/llm.py, do not share one local-routing abstraction; the plan adds the local branch to the async path only and defers the synchronous one to a later node.",
+    "duplicate_owner": "pass \u2014 the plan extends owners rather than forking them: the new narrower local-model prefix set is declared beside and drawn from `_LOCAL_MODEL_PREFIXES` in imas_codex/discovery/base/llm.py:881 with a subset test, `_LOCAL_ENDPOINT_PREFIXES` in imas_codex/settings.py:333 is explicitly left untouched, and \u00a714's seed list stays in the facility `discovery_roots` owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a721 is the only section adding interface surface (six model seats, their env vars and pyproject tables) and its own text names what they retire and merge \u2014 `language` and `vision` are retired and their consumers folded into the six function seats.",
+    "reuse_search": "pass \u2014 the plan cites by name and file the machinery it extends (\u00a721 mirrors the standard-names `sn-compose`/`sn-review` seats and reuses `get_model`/`register_model_endpoints`/`get_reasoning_effort`; \u00a714 reuses `seed_facility_roots` in imas_codex/discovery/paths/frontier.py:426 and the single `render_path_prefix_clause` in imas_codex/graph/query_builder.py:268), and the duplication it retires is named (the five hand-written `CREATE VECTOR INDEX` copies, \u00a715).",
+    "thin_wrapper": "pass \u2014 \u00a721 states in its own text why the existing async local helpers (`_get_local_client`, `_acompletion_local`) cannot be reused synchronously and shares their request translation as one function rather than forking it; \u00a714 extends the existing `discover paths --root` claim rather than adding a parallel one."
+  },
+  "section_digests": {
+    "_document": "0fa45fc263f84e10f7e3278d0c9ba9991e0bb3e76dd38ee522bafd191e48f99f",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "336f8b672bcad33fb0cbf5edc9789ed7e30bf9b6ff2410b1e0ef17a51eac72e1",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "2fef40244a0bc99a29d0911d6a9c22752f34a118de3926c5333e253311b8eddb",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T03:01:38.042807+00:00"
+}

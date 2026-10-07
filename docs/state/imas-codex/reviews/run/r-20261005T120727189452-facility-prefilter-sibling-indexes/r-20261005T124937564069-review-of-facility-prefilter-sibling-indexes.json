@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-05T12:54:13.859Z",
+  "dispatched_at": "2026-10-05T12:49:47Z",
+  "findings": [
+    {
+      "file": "imas_codex/schemas/facility.yaml",
+      "line": "2314",
+      "severity": "follow-on",
+      "text": "The three new vector_index_filters annotations reach the live graph only through the generated, gitignored imas_codex/graph/schema_context_data.py; a client whose generated module predates these annotations computes the expected property set as {embedding} for the three indexes and its ensure_vector_indexes would drop and recreate them without facility_id, reverting the rebuild this node measured. The main checkout must run build-models --force at integration before the annotated rebuild is trusted."
+    },
+    {
+      "file": "imas_codex/graph/domain_queries.py",
+      "line": "483",
+      "severity": "follow-on",
+      "text": "find_code now coalesces source_file from the denormalized cc.source_file because jt-60sa CodeChunks carry no CODE_EXAMPLE_ID link to a CodeExample, so the CodeExample join yields nothing for that facility; any other consumer relying on that link for source_file still returns nothing for jt-60sa, an ingestion-side gap outside this node's write scope."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No new public interface is added, so there are no new production call sites to verify; the changed call sites are existing internal search functions already covered by tests/search and tests/llm.",
+    "diff": "Read the full diff of the three source files and three test files; the facility predicate is inside SEARCH, the over-fetch is conditionally widened, the CodeFile join is removed, and the swallowed exception is narrowed.",
+    "done_when": "Read the \u00a7 done-when; the gate it names exits 0 (732 passed) and the live-search and index-state evidence show a jt-60sa signal and handbook chunk returned at default k and the two domain_queries searches carrying the predicate inside SEARCH with no AT_FACILITY post-filter.",
+    "goal": "Read \u00a716 of jt60sa-discovery-completion; the landed change implements exactly the seven edits it enumerates, with the out-of-scope _find_data_nodes_semantic exception preserved as the plan states.",
+    "manifest": "Read the delivered manifest.md; it carries the revision pair, the two suite records, the negative-control log and the follow-ons, and its claims reconcile with the gate logs and live logs it names.",
+    "write_paths": "Read the reviewed run's declared write paths against git diff --name-only b5c36b0a23 0f70183c3; all seven changed paths are within the grant."
+  },
+  "justifications": {
+    "durability": "tests pin the in-SEARCH predicate for all three searches and the over-fetch rule (TestSearchSignals/TestSearchDocs/TestFindCode/TestFindSignals), and the widened-cut tests fail when the widening is removed, so the guard is falsifiable; deducted because the three new annotations reach the live graph only through the gitignored generated schema_context_data.py, so a stale client's ensure_vector_indexes would drop and recreate the indexes without facility_id and silently revert the rebuild the node measured.",
+    "evidence": "gate at the code head 16d1948fa is 732 passed, 10 skipped, exit 0 against a base of 684 passed, 0 failed (facility-prefilter-sibling-indexes-gate-after5.log / -gate-base.log); live _search_signals and _search_docs return jt-60sa rows at default k=10 (live-search.log) and all four indexes read state=ONLINE properties=['embedding','facility_id'] (index-state.log); four negative controls are real red arms, each EXIT=1 with the named test failing.",
+    "fit": "Matches the \u00a712 pattern the plan names: annotation on the embedding slot, facility predicate inside SEARCH, comment stating the mechanism rather than the plan, conventional two-part commits; the code-example except is narrowed to (ClientError, DatabaseError) as \u00a73 did for the fulltext branches.",
+    "goal_fidelity": "\u00a716's four claims are all delivered: facility.yaml registers vector_index_filters on the FacilitySignal/WikiChunk/CodeExample embedding slots (lines 2314, 3823, 3309), search_tools.py renders the facility predicate inside SEARCH for _vector_search_signals/_vector_search_wiki_chunks/_vector_search_code_examples, domain_queries.py moves _find_signals_semantic/_find_wiki_semantic/find_code onto the facility_id property pre-filter with no AT_FACILITY post-filter, and the over-fetch is retained only beside a non-facility post-filter.",
+    "reuse": "One facility-filter mechanism now covers every index carrying facility_id \u2014 search_tools.py and domain_queries.py both pre-filter on the registered property, the redundant CodeFile join in find_code is retired rather than paralleled, and the pool of model labels not annotated (_find_data_nodes_semantic) is named and left, so no second mechanism was introduced.",
+    "scope_discipline": "Every changed path (facility.yaml, llm/search_tools.py, graph/domain_queries.py, three test files, one evidence fragment) lies inside the declared write_paths; the worktree is clean at HEAD and no path outside the grant was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a716's seven edits are all implemented as written.\nVERDICT done_when: the named gate exits 0 and the live-search and index-state evidence is present.\nVERDICT write_paths: all changed paths are within the declared grant, worktree clean.\nVERDICT manifest: carries the revision pair, both suite records, a negative-control log and the follow-ons, reconciling with its evidence.\nVERDICT diff: facility predicate inside SEARCH in all three searches and the two domain_queries searches, over-fetch retained only beside a non-facility post-filter, CodeFile join retired, swallow narrowed.\nVERDICT call_sites: no new public interface; changed call sites are existing internal search functions already covered by tests/search and tests/llm.\nSCORE goal_fidelity: 19\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 19\nSCORE reuse: 20\nFINDING imas_codex/schemas/facility.yaml:2314 follow-on: the annotations reach the graph only via the generated gitignored schema_context_data.py, so a stale client would drop and recreate the indexes without facility_id and revert the rebuild; main checkout must rebuild generated models at integration.\nFINDING imas_codex/graph/domain_queries.py:483 follow-on: jt-60sa CodeChunks carry no CODE_EXAMPLE_ID link, so any consumer relying on the CodeExample join for source_file still yields nothing for that facility; the denormalized cc.source_file covers find_code only.",
+  "review_run_id": "r-20261005T124937564069-review-of-facility-prefilter-sibling-indexes",
+  "reviewed_base_sha": "b5c36b0a23eb3de21e2af3efd5b2b8abef962828",
+  "reviewed_head_sha": "0f70183c3f96c6eb5d44200ad2d85a2e21b7b7e6",
+  "reviewed_run_id": "r-20261005T120727189452-facility-prefilter-sibling-indexes",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:55:00+00:00",
+  "total": 114
+}

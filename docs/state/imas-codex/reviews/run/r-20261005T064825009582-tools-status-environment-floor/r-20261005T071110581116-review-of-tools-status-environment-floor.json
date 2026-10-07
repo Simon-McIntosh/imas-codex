@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "b47967a65",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/tools.py:100",
+    "imas_codex/cli/tools.py:107",
+    "imas_codex/cli/discover/signals.py:163",
+    "imas_codex/cli/discover/code.py:173",
+    "imas_codex/remote/python.py:266",
+    "imas_codex/remote/tools.py:703"
+  ],
+  "completed_at": "2026-10-05T07:19:47.823Z",
+  "dispatched_at": "2026-10-05T07:11:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/tools-status-environment-floor.html",
+      "line": "62",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the base arm is tests/remote at 887486007, but the retained log header names revision b47967a65 and command tests/remote/test_executor.py tests/remote/test_remote_environment.py tests/remote/test_ssh_worker.py, so the base-green claim is not tied to the revision the fragment names."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/tools-status-environment-floor.html",
+      "line": "110",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment says the live fail measure shows bare python3 3.5.6 below the 3.12 floor, but /tmp/jt60sa-toolsenv-live-fail.log shows an interpreter not probed with Command 'probe_environment.py' returned non-zero exit status 1, so the live arm exercises the probe transport error, not the below-floor verdict the unit test covers."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/tools-status-environment-floor.html",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment quotes EXIT=1 (and EXIT=0 at line 88) as part of the command output, but the retained live logs /tmp/jt60sa-toolsenv-live-pass.log and /tmp/jt60sa-toolsenv-live-fail.log contain no EXIT= line, so both exit codes are asserted rather than shown."
+    },
+    {
+      "file": "imas_codex/cli/tools.py",
+      "line": "100",
+      "severity": "follow-on",
+      "text": "follow-on: tools status calls check_all_tools, which probes the remote environment at imas_codex/remote/tools.py:703, and get_python_status, which probes again at imas_codex/remote/python.py:266, so one invocation opens two environment probes and the CLI renders only the python_status result."
+    }
+  ],
+  "head_log_revision": "b47967a65",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read base 887486007d862b2a920b71c02c7138e821929901 to head b47967a659fd7e631ce24e41a26cd47437afc19c: a new stdlib-only probe script, the floor probe in python.py and tools.py, the CLI environment section and non-zero exit, the discover gate helper and its two call sites, and two new test files.",
+    "done_when": "the node done-when is tools status jt-60sa passing on the 3.12 recipe and failing naming the floor without it, plus the discover refusal; the retained live logs show both and the focused gate is 81 passed EXIT=0.",
+    "goal": "the node goal is to extend the facility tool probe to report the facility remote_environment block's interpreter floor and per-module importability and to gate discover signals/code on an unmet floor; imas_codex/remote/tools.py:550 probe_remote_environment and imas_codex/remote/python.py:266 deliver it.",
+    "manifest": "read; status complete, gate uv run pytest tests/remote tests/cli/test_tools_status_environment.py 81 passed EXIT=0 at b47967a65, negative control red on the floor test, baseline_suite and after_suite both completed with failure_count 0.",
+    "write_paths": "read the reviewed manifest's declared paths; git diff --name-only 887486007..b47967a659fd7e631ce24e41a26cd47437afc19c lists exactly the ten declared paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/remote/test_tools_environment.py and tests/cli/test_tools_status_environment.py assert the floor, module verdicts and the CLI exit, and the negative control reddens test_floor_is_the_blocks_not_the_global_minimum when the block floor is ignored.",
+    "evidence": "/tmp/jt60sa-toolsenv-base.log records 66 passed EXIT=0, /tmp/jt60sa-toolsenv-tests.log 81 passed EXIT=0, and /tmp/jt60sa-toolsenv-negative.log reddens the floor test, but the landing fragment's base-arm revision and its live fail-mechanism narrative disagree with the retained logs.",
+    "fit": "the change extends the existing owners, imas_codex/remote/python.py's floor primitive and imas_codex/remote/tools.py's check_all_tools and the existing tools status command, with one prober, though tools status now probes the environment twice.",
+    "goal_fidelity": "imas_codex/remote/python.py:266 judges the block interpreter with PythonVersion.meets_minimum against the block floor and imas_codex/cli/discover/common.py:441 refuses a scan with the floor and the fix, matching plan section 6.",
+    "scope_discipline": "git diff --stat 887486007..b47967a65 lists the ten declared paths, with no dependency, schema or plan change and no new CLI command."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 887486007d862b2a920b71c02c7138e821929901\nreviewed_head_sha: b47967a659fd7e631ce24e41a26cd47437afc19c\nVERDICT goal: the node goal is to extend the facility tool probe to report the facility remote_environment block's interpreter floor and per-module importability and to gate discover signals/code on an unmet floor; imas_codex/remote/tools.py:550 probe_remote_environment and imas_codex/remote/python.py:266 deliver it.\nVERDICT done_when: the node done-when is tools status jt-60sa passing on the 3.12 recipe and failing naming the floor without it, plus the discover refusal; the retained live logs show both and the focused gate is 81 passed EXIT=0.\nVERDICT write_paths: read the reviewed manifest's declared paths; git diff --name-only 887486007..b47967a659fd7e631ce24e41a26cd47437afc19c lists exactly the ten declared paths and nothing else.\nVERDICT manifest: read; status complete, gate uv run pytest tests/remote tests/cli/test_tools_status_environment.py 81 passed EXIT=0 at b47967a65, negative control red on the floor test, baseline_suite and after_suite both completed with failure_count 0.\nVERDICT diff: read base 887486007d862b2a920b71c02c7138e821929901 to head b47967a659fd7e631ce24e41a26cd47437afc19c: a new stdlib-only probe script, the floor probe in python.py and tools.py, the CLI environment section and non-zero exit, the discover gate helper and its two call sites, and two new test files.\nCALL_SITES: imas_codex/cli/tools.py:100, imas_codex/cli/tools.py:107, imas_codex/cli/discover/signals.py:163, imas_codex/cli/discover/code.py:173, imas_codex/remote/python.py:266, imas_codex/remote/tools.py:703\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/remote/python.py:266 judges the block interpreter with PythonVersion.meets_minimum against the block floor and imas_codex/cli/discover/common.py:441 refuses a scan with the floor and the fix, matching plan section 6.\nSCORE evidence: 16\nJUSTIFICATION evidence: /tmp/jt60sa-toolsenv-base.log records 66 passed EXIT=0, /tmp/jt60sa-toolsenv-tests.log 81 passed EXIT=0, and /tmp/jt60sa-toolsenv-negative.log reddens the floor test, but the landing fragment's base-arm revision and its live fail-mechanism narrative disagree with the retained logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 887486007..b47967a65 lists the ten declared paths, with no dependency, schema or plan change and no new CLI command.\nSCORE durability: 17\nJUSTIFICATION durability: tests/remote/test_tools_environment.py and tests/cli/test_tools_status_environment.py assert the floor, module verdicts and the CLI exit, and the negative control reddens test_floor_is_the_blocks_not_the_global_minimum when the block floor is ignored.\nSCORE fit: 18\nJUSTIFICATION fit: the change extends the existing owners, imas_codex/remote/python.py's floor primitive and imas_codex/remote/tools.py's check_all_tools and the existing tools status command, with one prober, though tools status now probes the environment twice.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/tools-status-environment-floor.html:62 follow-on: the fragment states the base arm is tests/remote at 887486007, but the retained log header names revision b47967a65 and command tests/remote/test_executor.py tests/remote/test_remote_environment.py tests/remote/test_ssh_worker.py, so the base-green claim is not tied to the revision the fragment names.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/tools-status-environment-floor.html:110 follow-on: the fragment says the live fail measure shows bare python3 3.5.6 below the 3.12 floor, but /tmp/jt60sa-toolsenv-live-fail.log shows an interpreter not probed with Command 'probe_environment.py' returned non-zero exit status 1, so the live arm exercises the probe transport error, not the below-floor verdict the unit test covers.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/tools-status-environment-floor.html:96 follow-on: the fragment quotes EXIT=1 (and EXIT=0 at line 88) as part of the command output, but the retained live logs /tmp/jt60sa-toolsenv-live-pass.log and /tmp/jt60sa-toolsenv-live-fail.log contain no EXIT= line, so both exit codes are asserted rather than shown.\nFINDING imas_codex/cli/tools.py:100 follow-on: tools status calls check_all_tools, which probes the remote environment at imas_codex/remote/tools.py:703, and get_python_status, which probes again at imas_codex/remote/python.py:266, so one invocation opens two environment probes and the CLI renders only the python_status result.\n",
+  "review_run_id": "r-20261005T071110581116-review-of-tools-status-environment-floor",
+  "reviewed_base_sha": "887486007d862b2a920b71c02c7138e821929901",
+  "reviewed_head_sha": "b47967a659fd7e631ce24e41a26cd47437afc19c",
+  "reviewed_run_id": "r-20261005T064825009582-tools-status-environment-floor",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:18:35.433241+00:00",
+  "total": 90,
+  "verdict": "SOUND WITH FINDINGS"
+}

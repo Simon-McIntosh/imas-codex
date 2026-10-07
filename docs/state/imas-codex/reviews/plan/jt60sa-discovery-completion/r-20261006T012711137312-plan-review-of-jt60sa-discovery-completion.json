@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-06T01:27:11.137312+00:00",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/frontier.py:426",
+      "id": "duplicate_owner-1",
+      "reason": "the section should extend the `discovery_roots` declaration (the durable owner) rather than seed two more one-off roots, so the trees survive the next full run and the recurring \"tree exists but was never declared\" defect is closed rather than deferred.",
+      "text": "\u00a714 seeds `client_eqdbms.EQ32.Rev1` and `SAeqfame` as depth-0 roots through a per-run `--root` argument, but the owner of \"which trees a facility seeds\" is `seed_facility_roots` reading the facility config's `discovery_roots` (frontier.py:456, and `add_missing_discovery_roots` at frontier.py:588 which adds only roots not already in the graph); the plan's own before-state shows `SAeqread` already carries 10 FacilityPath rows from exactly that config list while the two new trees are absent from it, so a run-time seed fixes today's rows and leaves the declaration incomplete for the next scan of the same trees.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:544",
+      "id": "duplicate_owner-2",
+      "reason": "the plan's single-renderer claim is scoped to the path claims and the scoped reset, and `find_code`'s single scalar prefix filter is a different shape from the list-membership clause the renderer emits, so naming it would correct the docstring's aperture but not change the design.",
+      "text": "\u00a714 introduces `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268) as \"the single renderer for the prefix predicate\" with a docstring telling callers not to spell the clause inline, yet `find_code` still spells `n.path STARTS WITH $path_prefix` inline twice (domain_queries.py:544 and :591) over the same `path` property.",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:2466",
+      "id": "duplicate_owner-3",
+      "reason": "\u00a79's text explicitly scopes the claim to signals discovery (\"the only DataAccess MERGE in signals discovery\") and routes the bespoke signals MDSplus branch through it, so the section is accurate as written and only the section title reads broader than it delivers.",
+      "text": "the \u00a79 invariant is stated as \"one DataAccess writer\" but `persist_data_access` is only the sole writer inside signals discovery: `MERGE (da:DataAccess \u2026)` is also written directly at imas_codex/discovery/mdsplus/graph_ops.py:1750 and imas_codex/discovery/code/graph_ops.py:850 (`persist_data_access_templates`), each with its own node-shape.",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "8f69becaf418275eeebc8502972e4be72a2a869bcb7e675c453aca21cb1dc941",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 136,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T012711137312-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "15cb691bdd1190000ea23b12d38ceb33b6a56db3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan's two substantive new homes hide real grammar behind small interfaces: `GraphClient.ensure_vector_indexes` (imas_codex/graph/client.py:407) with its one DDL composer `_vector_index_ddl` (imas_codex/graph/client.py:93) owns every index create/drop, and `resolve_remote_environment` (imas_codex/remote/environment.py:62) hides the facility/data-system precedence merge behind one call; neither spreads the same machinery across parallel wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a714 solves the missing equilibrium trees by a run-time `--root` seed instead of extending the durable root-declaration owner, so the facility's `discovery_roots` stays incomplete and the same defect recurs for the next undeclared tree.",
+    "interface_budget": "pass \u2014 the supplied figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, so no section this week grew any of those families; \u00a76's earlier review already shows the plan's habit of accounting for interface surface by extending `tools status` (imas_codex/remote/tools.py) rather than adding a `discover preflight` command.",
+    "reuse_search": "pass \u2014 every section that adds machinery names the mechanism it extends and the code bears it out: the facility filter extends the pre-existing `build_vector_search` (imas_codex/graph/vector_search.py:17, `prefilter_clauses` at :49) rather than adding a second SEARCH builder, and \u00a78/\u00a710 extend `remote.locations.resolve_service_url` (imas_codex/remote/locations.py:206) as the single SLURM service-resolution owner.",
+    "thin_wrapper": "pass \u2014 the one wrapper the plan adds, the facility-aware `run_python_script` over the executor (imas_codex/remote/tools.py:160), states in its own docstring why the executor stays facility-agnostic and receives `python_command`/`setup_commands` as parameters, so the layer is justified rather than a parallel mechanism."
+  },
+  "section_digests": {
+    "_document": "dd6e47e1620717054d2f3497567b7ac712d3d026140be21dd9cd35c2cc716744",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "7b77f33c4b3994529e952bd3a5484413fe4e86948613ab939129b27514ba0929",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-id",
+  "timestamp": "2026-10-06T01:46:45.050631+00:00"
+}

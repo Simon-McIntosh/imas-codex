@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:19:56.330Z",
+  "dispatched_at": "2026-10-06T09:13:32Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/code/graph_ops.py:141",
+      "id": "deep_module-1",
+      "reason": "the node's brief says to embed a one-line renderer at every call site, which reproduces the fragility the renderer was introduced to remove; a deep helper returning clause-plus-params would change what the node writes and what its test asserts.",
+      "text": "the render-and-bind block (`prefix_clause = render_path_prefix_clause(alias,\"prefixes\"); params[\"prefixes\"] = list(path_prefixes)`) is copy-pasted today at claim_paths_for_file_scan (graph_ops.py:141), has_pending_scan_work (graph_ops.py:566), and the plan adds the identical block to claim_files_for_triage (graph_ops.py:279), claim_files_for_enrichment (graph_ops.py:362), claim_files_for_scoring (graph_ops.py:446), the ingest claim (imas_codex/discovery/code/workers.py:526) and has_pending_triage_work/enrich_work/score_work/code_work/link_work (graph_ops.py:593-670) \u2014 eleven sites, each separately binding the parameter name the renderer was handed, so a caller that changes the alias or the param string silently detaches the clause from its `$prefixes` binding; one helper owning both the clause and its parameters would hide the mechanism behind a single interface and delete nine hand-written blocks",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:545",
+      "id": "duplicate_owner-1",
+      "reason": "these take a single caller-computed prefix rather than a user-supplied list, so folding them into the list renderer is a different operation; naming them would let the author state the renderer's scope instead of claiming the tree holds only one, but no code change follows.",
+      "text": "the plan asserts render_path_prefix_clause is the one renderer for the path-prefix predicate, but other path-prefix predicates remain spelled by hand and are not named anywhere in \u00a714: `n.path STARTS WITH $path_prefix` at domain_queries.py:545 and :591, `n.path STARTS WITH $prefix` at imas_codex/llm/server.py:1034, and, inside the renderer's own module, the graph_search DSL's `__starts_with` operator (query_builder.py:48)",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "3d1a90b703b022d7977157cd852091494d2dc2b8b58485f657ebc9b6fab70f82",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 207,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T091324233707-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "3c0cab6729738347b1d693c4b3c3d850dcff31d5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the path-prefix scope is spread as a repeated render-then-bind block across the existing two sites and the nine functions the code-claims node adds, so the renderer hides the clause but not its parameter and every site can desync them.",
+    "duplicate_owner": "a finding \u2014 the plan's claim that render_path_prefix_clause is the single renderer for the path-prefix predicate is narrower than the tree: several other path-prefix predicates remain uncited, so the author should state the renderer's scope.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the remaining sections reuse existing CLI options (--root, --reset-to, --path-prefix, --min-score, --focus) and the section names what it retires (seed_missing_roots, create_child_paths), so no unaccounted surface is added.",
+    "reuse_search": "pass \u2014 the plan searched the code and cites the owners it extends (render_path_prefix_clause, reset_to_status, create_nodes ON CREATE SET, seed_facility_roots) and explicitly names the one caller it declines to convert (the signals scanner filter keeps extra_filter).",
+    "thin_wrapper": "pass \u2014 no wrapper is proposed over existing machinery; the code-claims node extends the claims and predicates in place and the seed reuses create_nodes' create-only path rather than layering beside it."
+  },
+  "section_digests": {
+    "_document": "2c01167777dff15a911759db4430e405917b0054142f449147249dc8aed64c84",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "2da66ab384cfc8856f8396a305ef3dc5944e9f268a9353b90f57dcf220a59f8b",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T09:37:00.515711+00:00"
+}

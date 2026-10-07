@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:24:15.494Z",
+  "dispatched_at": "2026-10-05T15:18:26Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/server.py:827",
+      "id": "duplicate_owner-1",
+      "reason": "the rg is the only thing pinning the removal of the duplicated CodeFile\u2192HAS_CHUNK traversal, and as written it cannot see two of the five sites the change exists to fix, so the dead join can remain in server.py and schema_context.py undetected.",
+      "text": "\u00a719 says all five readers embed the new fragment and that \"a test pins the rendered join and expression\" with done-when `rg 'CODE_EXAMPLE_ID|coalesce\\(.*source_file' imas_codex`, but two of the five declared sites do not contain either token: `imas_codex/llm/server.py:827` is `OPTIONAL MATCH (sf:CodeFile)-[:HAS_CHUNK]->(node) \u2026 sf.path AS source_file` and `imas_codex/graph/schema_context.py:95` is `MATCH (cf:CodeFile)-[:HAS_CHUNK]->(node)`, so neither a wrong traversal is removed nor a prior-art duplicate detected by the named guard \u2014 the fragment owner (new function in imas_codex/ingestion/graph.py) covers them only if the guard is widened to the `CodeFile)-\\[:HAS_CHUNK\\]` form",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "131a8acebef981dc355fafa038e565ca712ab4b26af8a644ecf86e11b717cf1c",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 114,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T15:27:11.482308+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T151819722353-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "3e8738a7c0dfbc061194f7b9024585679334bb99",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a719's one fragment-renderer in `imas_codex/ingestion/graph.py` hides the `OPTIONAL MATCH \u2026 HAS_CHUNK` traversal and the `coalesce(ce.source_file, cc.source_file)` expression behind a single call parameterised by chunk alias and output name, collapsing five divergent resolutions into one; \u00a714 adds no module, extending two existing owners.",
+    "duplicate_owner": "a finding \u2014 the plan declares the dead `CodeFile-[:HAS_CHUNK]` arm dead and to be removed from all five readers, but two of the five named sites carry neither `CODE_EXAMPLE_ID` nor `coalesce(source_file)`, so the plan's own done-when rg is blind to them and the duplicate traversal survives while the guard reads clean.",
+    "interface_budget": "pass \u2014 supplied figures public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 reuses the existing `--root` CLI option and adds no CLI/MCP/refusal surface, and \u00a719 adds one helper to `imas_codex/ingestion/graph.py` while naming the dead `CODE_EXAMPLE_ID` and `CodeFile-[:HAS_CHUNK]` arms it retires, so its added surface is accounted for in its own text.",
+    "reuse_search": "pass \u2014 \u00a714 extends the existing `--root` branch of `discover paths` (`imas_codex/cli/discover/paths.py:258` \u2192 `seed_facility_roots(..., root_paths=...)`), the seed's own upsert, and `PATH_RESET_SPECS` (`imas_codex/discovery/base/reset.py:240`) rather than adding a re-expansion path, and names the exclusion record (`persist_scan_results`, `frontier.py:1816`) it reads first; \u00a719 ratifies `imas_codex/ingestion/graph.py` (read-side `HAS_CHUNK` Cypher at graph.py:185\u2013263) and the single edge writer in `imas_codex/ingestion/pipeline.py:517` (MERGE `(e)-[:HAS_CHUNK]->(c)`), both of which I opened and confirmed.",
+    "thin_wrapper": "pass \u2014 neither section adds a wrapper over working machinery: \u00a719 replaces five divergent query fragments with one shared owner (the diverge justifies the consolidation), and \u00a714 extends the seed/reset owners in place rather than layering over them."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T15:25:07.268323+00:00"
+}

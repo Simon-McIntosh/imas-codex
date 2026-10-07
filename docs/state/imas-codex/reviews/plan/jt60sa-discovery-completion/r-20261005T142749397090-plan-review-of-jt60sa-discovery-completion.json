@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T14:33:27.975Z",
+  "dispatched_at": "2026-10-05T14:27:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s14",
+      "id": "reuse_search-1",
+      "reason": "the section must scope the reset to the three trees (`reset_to_status(..., extra_filter=...)` already supports it) or state the facility-wide consequence, otherwise the first implementer burns the whole facility's scoring to repair one root.",
+      "text": "the section runs `discover paths jt-60sa --reset-to scanned --root /analysis/src` as though `--root` scopes the reset to that tree, but the CLI calls `reset_to_status(spec, facility)` with no `extra_filter` (`imas_codex/cli/discover/paths.py:247`), so `--root` is applied only to the subsequent discovery run and the reset hits every jt-60sa path whose status is `triaged` or `scored` (source_statuses at `imas_codex/discovery/base/reset.py:250-251`) \u2014 the plan's own \u00a71 measures 3,778 scored, all of which would return to `scanned` for a full re-triage and re-score at LLM cost",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s14",
+      "id": "reuse_search-2",
+      "reason": "the mechanism the section depends on is unverified against the code and may be a no-op, so the section must clear `expanded_at` (or verify it is null for that row) before relying on the reset, else the done-when cannot be met by the command it names.",
+      "text": "the section asserts that resetting the `/analysis/src` row to `scanned` \"re-lists it and creates child rows through persist_scan_results\", but re-listing is done by `claim_paths_for_expanding`, which requires `expanded_at IS NULL` (`imas_codex/discovery/paths/parallel.py:547-549`), and `PATH_RESET_SPECS[\"scanned\"]` clears triage/enrich/score fields but not `expanded_at` (`imas_codex/discovery/base/reset.py:251-256`), so if `/analysis/src` was previously expanded the reset \u2192 triage \u2192 expand cycle never fires and the three trees stay unlisted",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "50a5be33bdb4e0f84cdced7e4a98d8f7a0d7ae4285052ecda362546da7754ce3",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 108,
+  "project": "imas-codex",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:34:45.914689+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:34:46.500728+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T142749397090-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "6b7ee7a01edf421a712c23671b80bcee4a1afabe",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a719 hides one expression (`coalesce` source-path) behind a single rendered-fragment function used by three sites, and \u00a714 adds no module at all, so neither section spreads complexity over shallow wrappers.",
+    "duplicate_owner": "pass \u2014 \u00a714 reuses `imas_codex/discovery/base/reset.py` (the reset owner) rather than forking a re-list path, and \u00a719 explicitly keeps the `HAS_CHUNK` edge with its single writer (`imas_codex/ingestion/pipeline.py:522`) and consolidates the duplicated `coalesce` into one fragment rather than adding a second link pass.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no CLI option (it reuses the existing `--reset-to`/`--root`) and \u00a719 states \"Interface budget: nothing added\" and names the two inlined copies the fragment replaces, so neither section adds surface without accounting for it.",
+    "reuse_search": "a finding \u2014 \u00a714 cites the existing `PATH_RESET_SPECS[\"scanned\"]` reset to re-list `/analysis/src`, but the code shows the cited mechanism does not behave as the plan claims (unscoped reset; `expanded_at` not cleared), so the plan's account of the prior art is wrong on the point the section rests on.",
+    "thin_wrapper": "pass \u2014 \u00a719's fragment helper is the repo's existing `build_*_predicate(alias)` convention (`parallel.py::build_enrich_claimable_predicate`, `build_category_predicate`), justified as consolidating two inlined copies and pinned by a test; \u00a714 adds no layer over the reset CLI."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:33:43.622639+00:00"
+}

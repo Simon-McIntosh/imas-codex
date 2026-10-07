@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own suite logs. baseline_suite (base-arm.log, revision 8736d628d, EXIT=0, completed true, failure_count 0) and after_suite (gate.log, revision e14edf6d, EXIT=0, completed true, failure_count 0). Both arms are green, which bounds added failures at 0; added_failure_ids is empty. This review independently re-ran the head arm in a scratch extraction of e14edf6d (head-arm-repro.log, 133 passed, EXIT=0) and its negative control (negative-control-repro.log, EXIT=1 on the reverted hand-off).",
+  "backend": "local",
+  "backend_note": "reviewed only the delta d3643e2d..e14edf6d gained by the run since the prior review (which covered 8736d628d..d3643e2d, recorded at r-20261005T112754675095-one-probe-one-writer.at-d3643e2db7036d94baadf3fd42d598f316fcbd9c.json).",
+  "base_log_revision": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/remote/python.py:625 (setup_python_env probe)",
+    "imas_codex/remote/python.py:677-681 (setup_python_env hands environment into create_venv)",
+    "imas_codex/remote/python.py:498 (create_venv probes only when environment omitted)",
+    "imas_codex/cli/tools.py:503 (setup_python_env caller)",
+    "tests/cli/test_tools_status_environment.py:202 and :228 (install-path probe-count test)"
+  ],
+  "completed_at": "2026-10-05T12:43:17.658Z",
+  "dispatched_at": "2026-10-05T12:34:46Z",
+  "findings": [],
+  "head_log_revision": "e14edf6d231f40c96493200a833a30f8acdce5a3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the delta's call path \u2014 setup_python_env (python.py:572) -> create_venv (python.py:677); cli/tools.py:503 is the sole setup_python_env caller; create_venv's other reference is the module docstring example.",
+    "diff": "read d3643e2d..e14edf6d: python.py adds `environment: dict | None = None` to `create_venv` guarding the probe behind `if environment is None`, and threads `environment=environment` from `setup_python_env`; the test file broadens `_stub_probe` to patch `remote_python.probe_remote_environment` in addition to `remote_tools` and adds `test_install_probes_the_environment_once`.",
+    "done_when": "the delta does not alter \u00a79's earlier done-when items, all of which still hold at e14edf6d (the run's gate.log records 133 passed, EXIT=0), and it adds the install-path probe-count test that closes the follow-on from the prior review. `pytest tests/remote tests/cli/test_tools_status_environment.py tests/discovery/test_signals_pipeline.py` exits 0 at e14edf6d (133 passed), reproduced by this review in a scratch tree.",
+    "goal": "one probe across the install path lands: `create_venv` takes an optional resolved `environment` and probes only when it is omitted (python.py:496-498), and `setup_python_env` hands its python.py:625 probe down to python.py:677-681, so `tools install <facility>` opens the remote environment once.",
+    "manifest": "read; status complete; the run's after_suite now records revision e14edf6d with gate.log (133 passed, completed true, failure_count 0) and baseline_suite records 8736d628d with base-arm.log (124 passed, completed true, failure_count 0), so the manifest is current for the revision under review.",
+    "write_paths": "the diff touches exactly the two declared paths; no undeclared file is modified."
+  },
+  "justifications": {
+    "durability": "the added test pins the install-path probe count behaviourally and reddens on the exact regression it guards. Docked one point because its counter is visible only through the two directly-imported probe names it monkeypatches (remote_tools and remote_python), so a future re-import style for `probe_remote_environment` could silently stop being counted; and no standalone test pins `create_venv`'s single probe when it is called directly with `environment` omitted, though that path probes once by construction.",
+    "evidence": "the invariant is measured by a test and independently reproduced. `test_install_probes_the_environment_once` (tests/cli/test_tools_status_environment.py:202) counts calls to `probe_remote_environment` across a full `setup_python_env` run and asserts one. Head arm re-run by this review in a scratch extraction of e14edf6d (head-arm-repro.log: module.__file__ under the scratch tree, 133 passed, EXIT=0); the negative control that reverts the hand-off reddens it (negative-control-repro.log: 'expected one probe, saw 2', EXIT=1). The reviewed run's own suite logs agree: base-arm.log (8736d628d, 124 passed, EXIT=0) and gate.log (e14edf6d, 133 passed, EXIT=0).",
+    "fit": "`environment` is a capability-named parameter carrying a mechanism docstring (python.py:450-455), the inline comment states the invariant (python.py:494-495), and the test name `test_install_probes_the_environment_once` names behaviour; no plan label, sprint id, ticket reference or author attribution appears in the delta.",
+    "goal_fidelity": "the delta delivers exactly its title \u2014 one environment probe across the install path. `create_venv` (python.py:437,442) accepts an already-resolved `environment`; `setup_python_env` probes once at python.py:625 and hands that mapping into the venv step at python.py:677-681, so `imas-codex tools install <facility>` now opens the remote environment once. The probe sites reached by the install path are exactly `_probe_facility_environment` (python.py:156) at python.py:625; `check_tool`, `install_uv` and `install_python` do not probe, and `tools install` calls `install_tool` + `setup_python_env` rather than `check_all_tools`, so no second probe is reachable. This repairs the prior review's python.py:670 follow-on finding.",
+    "reuse": "the delta extends the existing single-probe mechanism \u2014 the `_probe_facility_environment`/`environment=` threading already present on `get_python_status` \u2014 rather than introducing a second probe path or a wrapper, and no duplicate probe-or-None helper is forked.",
+    "scope_discipline": "the delta d3643e2d..e14edf6d touches exactly the two declared paths \u2014 imas_codex/remote/python.py and tests/cli/test_tools_status_environment.py \u2014 and nothing else (git diff --stat: 2 files, 53 insertions, 6 deletions)."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: one probe across the install path lands \u2014 `create_venv` (python.py:437,442) takes an optional resolved `environment` and probes only when omitted (python.py:496-498), and `setup_python_env` hands its python.py:625 probe into the venv step at python.py:677-681, so `tools install <facility>` opens the remote environment once; this repairs the prior review's python.py:670 follow-on.\nVERDICT done_when: \u00a79's earlier items still hold at e14edf6d (gate.log 133 passed, EXIT=0) and the install-path probe-count test closes the follow-on; pytest tests/remote tests/cli/test_tools_status_environment.py tests/discovery/test_signals_pipeline.py exits 0 at e14edf6d, reproduced by this review in a scratch tree.\nVERDICT write_paths: the diff d3643e2d..e14edf6d touches exactly imas_codex/remote/python.py and tests/cli/test_tools_status_environment.py.\nVERDICT manifest: read; after_suite now at e14edf6d (gate.log, 133 passed, completed true, 0 failures) and baseline_suite at 8736d628d (base-arm.log, 124 passed, completed true, 0 failures).\nVERDICT diff: python.py guards the probe behind `if environment is None` and threads `environment=environment` from setup_python_env; the test patches both probe sites and adds test_install_probes_the_environment_once.\nCALL_SITES: imas_codex/remote/python.py:625 (setup_python_env probe), :677-681 (create_venv call with environment=), :498 (create_venv's own probe when environment omitted); imas_codex/cli/tools.py:503 (setup_python_env caller); tests/cli/test_tools_status_environment.py:202 and :228 (install-path probe-count test)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the delta delivers one environment probe across the install path \u2014 create_venv accepts an already-resolved environment and setup_python_env hands its single python.py:625 probe into the venv step, with no other probe site reachable from tools install.\nSCORE evidence: 20\nJUSTIFICATION evidence: the invariant is measured by test_install_probes_the_environment_once and independently reproduced (head-arm-repro.log 133 passed EXIT=0 at the scratch module.__file__; negative-control-repro.log 'expected one probe, saw 2' EXIT=1), with the run's own suites both EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the delta touches exactly the two declared paths and nothing else.\nSCORE durability: 19\nJUSTIFICATION durability: the new test pins the install-path probe count and reddens on the reverted hand-off; docked one point because its counter is visible only through the two directly-imported probe names it patches, and no standalone test pins create_venv's own single probe when called directly with environment omitted.\nSCORE fit: 20\nJUSTIFICATION fit: `environment` and `test_install_probes_the_environment_once` are capability-named with mechanism comments; no plan label, ticket reference or attribution appears.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta extends the existing single-probe mechanism rather than forking a probe helper or adding a second path.\n",
+  "review_run_id": "r-20261005T123441733965-review-of-one-probe-one-writer",
+  "reviewed_base_sha": "d3643e2db7036d94baadf3fd42d598f316fcbd9c",
+  "reviewed_head_sha": "e14edf6d231f40c96493200a833a30f8acdce5a3",
+  "reviewed_run_id": "r-20261005T112754675095-one-probe-one-writer",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:42:04.202829+00:00",
+  "total": 119,
+  "verdict": "SOUND"
+}

@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest names no baseline_suite or after_suite arm, so its own record carried no measured pair; the reviewer took both arms. tests/discovery at base 8620aafc9 reads 1167 passed ... EXIT=0 and at the reviewed head bbbd783a8 reads 1177 passed ... EXIT=0, with no FAILED ids on either side. Head-minus-base added failures = 0 with no ids.",
+  "base_log_revision": "8620aafc9ef41e28fcae6e4ddcc0e9b76dd23248",
+  "call_site_count": 13,
+  "call_sites": [
+    "imas_codex/cli/discover/code.py:314",
+    "imas_codex/discovery/code/parallel.py:164",
+    "imas_codex/discovery/code/parallel.py:168",
+    "imas_codex/discovery/code/parallel.py:174",
+    "imas_codex/discovery/code/parallel.py:180",
+    "imas_codex/discovery/code/parallel.py:186",
+    "imas_codex/discovery/code/parallel.py:193",
+    "imas_codex/discovery/code/workers.py:260",
+    "imas_codex/discovery/code/workers.py:434",
+    "imas_codex/discovery/code/workers.py:778",
+    "imas_codex/discovery/code/workers.py:968",
+    "imas_codex/discovery/code/workers.py:1102",
+    "imas_codex/discovery/code/workers.py:1146"
+  ],
+  "completed_at": "2026-10-06T10:38:49.606Z",
+  "dispatched_at": "2026-10-06T10:17:15Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "1102",
+      "severity": "follow-on",
+      "text": "follow-on: link_worker calls has_pending_link_work(state.facility) without path_prefixes (also at :1146 and again at the final pass), so a scoped run's link loop still detects facility-wide ingested-unlinked CodeFiles and drives link_code_evidence_to_signals over the whole facility; the phase gate at parallel.py:193 is scoped but this worker's own loop is not, so the scope promise the change makes in its docstring is not held for the link stage."
+    },
+    {
+      "file": "tests/graph/test_path_prefix_filter.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the node added six tests in tests/graph/test_path_prefix_filter.py, but its recorded gate command is `pytest tests/discovery`, which does not select that directory, so those six tests ran under no gate in the run's own evidence and the helper's own unit tests are covered only by the transitive discovery tests."
+    },
+    {
+      "file": "imas_codex/discovery/code/graph_ops.py",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the run's gate log header names revision 8620aafc9, the base, while the reviewed head is bbbd783a, so the recorded green result is not keyed to the commit that landed; the worker ran the suite on the working tree before committing, and a run whose final commit is the change should log the gate at that head (the reviewer supplied both arms to close the gap)."
+    },
+    {
+      "file": "imas_codex/discovery/code/parallel.py",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries neither a baseline_suite nor an after_suite arm, so its own record holds no measured added-failure pair and the count had to be re-derived from arms the reviewer ran; recording the two suite fields would let the promotion audit read added failures without a second measurement."
+    }
+  ],
+  "head_log_revision": "bbbd783a84f351a4cd5e3319ebad17dd3d7f4285",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 13 production call site(s)",
+    "diff": "one commit, bbbd783a, seven files; imas_codex/graph/query_builder.py adds build_path_prefix_filter(alias, prefixes) returning (clause, params) and (\"\", {}) for an empty list; imas_codex/discovery/code/graph_ops.py routes claim_files_for_triage/enrichment/scoring, claim_paths_for_file_scan, has_pending_scan_work and the five has-work predicates through the helper with **prefix_params, escaping the Facility map brace as {{id: $facility}}; imas_codex/discovery/code/workers.py adds path_prefixes to _claim_code_files_for_ingestion and forwards state.path_prefixes from the triage, enrich, score and code workers; imas_codex/discovery/code/parallel.py wires the five phase has-work fns with the run's list.",
+    "done_when": "the done_when names build_path_prefix_filter beside render_path_prefix_clause in imas_codex/graph/query_builder.py:281 returning clause and params together, the four claims and five predicates taking the list, a per-stage inside/outside test, a recorded red ingest-claim log, and `uv run pytest tests/discovery` exiting 0; every element is present and I reproduced the gate and the negative control.",
+    "goal": "the node's goal is to make every discover code claim honour --path-prefix; the landed change threads the run's prefix list into the triage, enrichment, scoring and ingestion claims and the five has-work predicates in imas_codex/discovery/code/graph_ops.py and imas_codex/discovery/code/workers.py, so each claim filters on CodeFile.path and each phase gate ignores outside work; the one place left unscoped is link_worker, which still calls has_pending_link_work(state.facility) without the list.",
+    "manifest": "present and self-consistent (status complete, commit bbbd783a, changed_paths matching the diff, two gate logs named, negative-control note naming the checked mutation); one inaccuracy - it reports tests/discovery/test_code_claims_prefix_scope.py as 12 tests when the file holds 10, and it carries neither a baseline_suite nor an after_suite arm.",
+    "write_paths": "the manifest declares eight write paths and the single commit bbbd783a touches exactly seven of them (four source files, two test files, one evidence fragment); the granted docs/figures directory is untouched, nothing outside the declared scope was written, and the reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "the scoping tests are sensitive to the defect they guard - the stub evaluates the query text it is handed, so dropping a claim's {prefix_clause} makes that claim return the outside row and reddens its test, as I confirmed for the ingest claim by reproducing the mutation; one assertion is weaker, tests/graph/test_path_prefix_filter.py:16-18 compares the helper's clause against render_path_prefix_clause(\"sf\", \"prefixes\"), the very call the implementation makes, so it holds by construction and pins delegation rather than behaviour.",
+    "evidence": "I read the recorded gate and reproduced both arms in scratch trees - base 8620aafc9 tests/discovery 1167 passed EXIT=0, head bbbd783a 1177 passed EXIT=0, zero FAILED ids on either side - and reproduction of the declared mutation (the {prefix_clause} line removed from the ingest claim at workers.py:570) leaves the outside file claimed and fails tests/discovery/test_code_claims_prefix_scope.py::TestClaimsHonourPrefix::test_ingest_claim_ignores_files_outside_the_prefix, EXIT=1; deduction because the run's own gate log header names revision 8620aafc9, not the reviewed head, so its recorded result is not tied to the commit that landed.",
+    "fit": "build_path_prefix_filter sits beside render_path_prefix_clause in imas_codex/graph/query_builder.py:281, the docstrings name the mechanism (the value travels with the predicate) rather than a plan item, the commit subject and body are conventional with no plan, ticket or phase identifier and no AI attribution, and the single-commit change leaves the surrounding claim style intact.",
+    "goal_fidelity": "imas_codex/discovery/code/graph_ops.py:304-744 applies build_path_prefix_filter to the triage, enrich, score, scan and five has-work predicates on CodeFile.path and FacilityPath.path, and imas_codex/discovery/code/workers.py:566 applies it to the ingest claim, so every claim the goal names honours the scope; deduction only because imas_codex/discovery/code/workers.py:1102 leaves the link worker's own has-work call unscoped, so a scoped run's link loop still sees facility-wide ingested-unlinked files.",
+    "reuse": "imas_codex/graph/query_builder.py:298 wraps the existing render_path_prefix_clause owner instead of forking it, and every claim and predicate that previously hand-rolled `if path_prefixes: prefix_clause = render_path_prefix_clause(...)` now calls the one helper, so the capability has a single owner and the before-duplication is removed.",
+    "scope_discipline": "the diff of bbbd783a touches only imas_codex/graph/query_builder.py, imas_codex/discovery/code/graph_ops.py, imas_codex/discovery/code/workers.py, imas_codex/discovery/code/parallel.py, the two test files and docs/evidence/fragments/jt60sa-discovery-completion/code-claims-honour-prefix.html, all inside the declared write paths, with the granted figures directory unused and the worktree clean."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make every discover code claim honour --path-prefix; the landed change threads the run's prefix list into the triage, enrichment, scoring and ingestion claims and the five has-work predicates in imas_codex/discovery/code/graph_ops.py and imas_codex/discovery/code/workers.py, so each claim filters on CodeFile.path and each phase gate ignores outside work; the one place left unscoped is link_worker, which still calls has_pending_link_work(state.facility) without the list.\nVERDICT done_when: the done_when names build_path_prefix_filter beside render_path_prefix_clause in imas_codex/graph/query_builder.py:281 returning clause and params together, the four claims and five predicates taking the list, a per-stage inside/outside test, a recorded red ingest-claim log, and `uv run pytest tests/discovery` exiting 0; every element is present and I reproduced the gate and the negative control.\nVERDICT write_paths: the manifest declares eight write paths and the single commit bbbd783a touches exactly seven of them (four source files, two test files, one evidence fragment); the granted docs/figures directory is untouched, nothing outside the declared scope was written, and the reviewed worktree is clean.\nVERDICT manifest: present and self-consistent (status complete, commit bbbd783a, changed_paths matching the diff, two gate logs named, negative-control note naming the checked mutation); one inaccuracy - it reports tests/discovery/test_code_claims_prefix_scope.py as 12 tests when the file holds 10, and it carries neither a baseline_suite nor an after_suite arm.\nVERDICT diff: one commit, bbbd783a, seven files; imas_codex/graph/query_builder.py adds build_path_prefix_filter(alias, prefixes) returning (clause, params) and (\"\", {}) for an empty list; imas_codex/discovery/code/graph_ops.py routes claim_files_for_triage/enrichment/scoring, claim_paths_for_file_scan, has_pending_scan_work and the five has-work predicates through the helper with **prefix_params, escaping the Facility map brace as {{id: $facility}}; imas_codex/discovery/code/workers.py adds path_prefixes to _claim_code_files_for_ingestion and forwards state.path_prefixes from the triage, enrich, score and code workers; imas_codex/discovery/code/parallel.py wires the five phase has-work fns with the run's list.\nVERDICT call_sites: run_parallel_code_discovery (imas_codex/cli/discover/code.py:314 passes path_prefixes=list(path_prefixes) or None) wires the five predicates at imas_codex/discovery/code/parallel.py:164-193; the stage workers call the claims at imas_codex/discovery/code/workers.py:260 (triage), :434 (score), :778 (ingest) and :968 (enrich), each passing state.path_prefixes; link_worker at :1102 and :1146 calls has_pending_link_work with only state.facility and so remains unscoped.\nCALL_SITES: imas_codex/cli/discover/code.py:314, imas_codex/discovery/code/parallel.py:164, imas_codex/discovery/code/parallel.py:168, imas_codex/discovery/code/parallel.py:174, imas_codex/discovery/code/parallel.py:180, imas_codex/discovery/code/parallel.py:186, imas_codex/discovery/code/parallel.py:193, imas_codex/discovery/code/workers.py:260, imas_codex/discovery/code/workers.py:434, imas_codex/discovery/code/workers.py:778, imas_codex/discovery/code/workers.py:968, imas_codex/discovery/code/workers.py:1102, imas_codex/discovery/code/workers.py:1146\nSCORE goal_fidelity: 17\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 19\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: imas_codex/discovery/code/graph_ops.py:304-744 applies build_path_prefix_filter to the triage, enrich, score, scan and five has-work predicates on CodeFile.path and FacilityPath.path, and imas_codex/discovery/code/workers.py:566 applies it to the ingest claim, so every claim the goal names honours the scope; deduction only because imas_codex/discovery/code/workers.py:1102 leaves the link worker's own has-work call unscoped, so a scoped run's link loop still sees facility-wide ingested-unlinked files.\nJUSTIFICATION evidence: I read the recorded gate and reproduced both arms in scratch trees - base 8620aafc9 tests/discovery 1167 passed EXIT=0, head bbbd783a 1177 passed EXIT=0, zero FAILED ids on either side - and reproduction of the declared mutation (the {prefix_clause} line removed from the ingest claim at workers.py:570) leaves the outside file claimed and fails tests/discovery/test_code_claims_prefix_scope.py::TestClaimsHonourPrefix::test_ingest_claim_ignores_files_outside_the_prefix, EXIT=1; deduction because the run's own gate log header names revision 8620aafc9, not the reviewed head, so its recorded result is not tied to the commit that landed.\nJUSTIFICATION scope_discipline: the diff of bbbd783a touches only imas_codex/graph/query_builder.py, imas_codex/discovery/code/graph_ops.py, imas_codex/discovery/code/workers.py, imas_codex/discovery/code/parallel.py, the two test files and docs/evidence/fragments/jt60sa-discovery-completion/code-claims-honour-prefix.html, all inside the declared write paths, with the granted figures directory unused and the worktree clean.\nJUSTIFICATION durability: the scoping tests are sensitive to the defect they guard - the stub evaluates the query text it is handed, so dropping a claim's {prefix_clause} makes that claim return the outside row and reddens its test, as I confirmed for the ingest claim by reproducing the mutation; one assertion is weaker, tests/graph/test_path_prefix_filter.py:16-18 compares the helper's clause against render_path_prefix_clause(\"sf\", \"prefixes\"), the very call the implementation makes, so it holds by construction and pins delegation rather than behaviour.\nJUSTIFICATION fit: build_path_prefix_filter sits beside render_path_prefix_clause in imas_codex/graph/query_builder.py:281, the docstrings name the mechanism (the value travels with the predicate) rather than a plan item, the commit subject and body are conventional with no plan, ticket or phase identifier and no AI attribution, and the single-commit change leaves the surrounding claim style intact.\nJUSTIFICATION reuse: imas_codex/graph/query_builder.py:298 wraps the existing render_path_prefix_clause owner instead of forking it, and every claim and predicate that previously hand-rolled `if path_prefixes: prefix_clause = render_path_prefix_clause(...)` now calls the one helper, so the capability has a single owner and the before-duplication is removed.\nFINDING imas_codex/discovery/code/workers.py:1102 follow-on: link_worker calls has_pending_link_work(state.facility) without path_prefixes (also at :1146 and again at the final pass), so a scoped run's link loop still detects facility-wide ingested-unlinked CodeFiles and drives link_code_evidence_to_signals over the whole facility; the phase gate at parallel.py:193 is scoped but this worker's own loop is not, so the scope promise the change makes in its docstring is not held for the link stage.\nFINDING tests/graph/test_path_prefix_filter.py:1 follow-on: the node added six tests in tests/graph/test_path_prefix_filter.py, but its recorded gate command is `pytest tests/discovery`, which does not select that directory, so those six tests ran under no gate in the run's own evidence and the helper's own unit tests are covered only by the transitive discovery tests.\nFINDING imas_codex/discovery/code/graph_ops.py:0 follow-on: the run's gate log header names revision 8620aafc9, the base, while the reviewed head is bbbd783a, so the recorded green result is not keyed to the commit that landed; the worker ran the suite on the working tree before committing, and a run whose final commit is the change should log the gate at that head (the reviewer supplied both arms to close the gap).\nFINDING imas_codex/discovery/code/parallel.py:0 follow-on: the reviewed manifest carries neither a baseline_suite nor an after_suite arm, so its own record holds no measured added-failure pair and the count had to be re-derived from arms the reviewer ran; recording the two suite fields would let the promotion audit read added failures without a second measurement.\nreviewed_base_sha: 8620aafc9ef41e28fcae6e4ddcc0e9b76dd23248\nreviewed_head_sha: bbbd783a84f351a4cd5e3319ebad17dd3d7f4285",
+  "review_run_id": "r-20261006T101708692100-review-of-code-claims-honour-prefix",
+  "reviewed_base": "8620aafc9ef41e28fcae6e4ddcc0e9b76dd23248",
+  "reviewed_base_sha": "8620aafc9ef41e28fcae6e4ddcc0e9b76dd23248",
+  "reviewed_commit": "bbbd783a84f351a4cd5e3319ebad17dd3d7f4285",
+  "reviewed_head_sha": "bbbd783a84f351a4cd5e3319ebad17dd3d7f4285",
+  "reviewed_run_id": "r-20261006T093927252234-code-claims-honour-prefix",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T10:32:31.086266+00:00",
+  "total": 110
+}

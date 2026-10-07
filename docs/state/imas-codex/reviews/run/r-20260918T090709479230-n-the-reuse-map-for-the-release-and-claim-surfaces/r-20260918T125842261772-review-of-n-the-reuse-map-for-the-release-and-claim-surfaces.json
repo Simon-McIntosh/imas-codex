@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "backend": "clive",
+  "completed_at": "",
+  "dispatched_at": "2026-09-18T12:58:42.261772+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/sn-west-catalog-release/reuse-map.md",
+      "line": "47",
+      "text": "the seam test cited for surface 1 (tests/standard_names/test_catalog_release.py:300) is test_empty_input_is_an_error, a sanitize_build_metadata test; the github_client seam is injected at tests/standard_names/test_catalog_release.py:714-737 (github_client=Refusing()/Recording()), so the map's only test pointer for the REST transport leads a reader to an unrelated test."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/reuse-map.md",
+      "line": "67",
+      "text": "the payload-key anchor (:453-:458) holds for exclusion_by_reason (export.py:453), accounted_exclusions (:454) and accounting_residue (:455-:458) but not for the two keys named first: exclusion_ledger is export.py:417 and exclusion_records :418, so a reader sent to :453-:458 to find exclusion_ledger lands 36 lines low."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/reuse-map.md",
+      "line": "97",
+      "text": "the claim's WHERE clause is graph_ops.py:10463, not :10456 (that line is token = str(uuid.uuid4())); the adjacent definition (:10444) and charge (:10471) anchors are exact, so this is an isolated slip in the one clause the open attempt-budget followup edits."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/reuse-map.md",
+      "line": "178",
+      "text": "entry 5 omits the caller-inputs line the map's own header (reuse-map.md:3-5) claims for every located entry: grep -c \"A caller must supply\" over the map returns 4, not 5, so the entry a wiring node would consume states the refusal precondition but not what the caller supplies."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/reuse-map.md",
+      "line": "209",
+      "text": "the name-axis sibling is described as invoked at loop.py:1783, but 1783 is its import line inside the local-import block and the invocation is loop.py:1799 (entry_result = await _global_maintenance_call(reconcile_reviewable_name_stage, default={})), so the pointer on the one surface with no caller stops short of the call shape a wiring node needs."
+    }
+  ],
+  "justifications": {
+    "durability": "no test fails if the map rots, and docs/plans/sn-west-catalog-release.html:447 still cites :10337/:15672 for symbols the map re-measures at graph_ops.py:10444/:15914 while nothing asserts the map's anchors resolve.",
+    "evidence": "of 51 sampled anchors, 48 resolve to the exact line at the pinned revision 4c9d1dabb, including both headline claims (the plan's stale numbers and the docs-axis reconciler having no production caller), while four pointers (reuse-map.md:47, :67, :97, :209) do not.",
+    "fit": "the map sits with its siblings under docs/evidence/sn-west-catalog-release/ and the map's landing anchors follow the established idiom (docs/evidence/archive/sn-west-catalog-release-landed.html id=release-surface-reuse-map; docs/plans/sn-west-catalog-release.html:1107 in data-section=release-contract) with no plan label in any name.",
+    "goal_fidelity": "reuse-map.md:3 states the 5-of-5 tally and each of the five entries names its symbol, quotes its signature and pins a file:line at 4c9d1dabb, but entry 5 (reuse-map.md:178) carries no caller-inputs line and four sampled anchors point at the wrong line.",
+    "scope_discipline": "the diff 4c9d1dabb..5dc40b55e touches exactly the three declared paths and nothing else, in two commits that each carry a body and no attribution trailer."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: reuse-map.md:3 states the 5-of-5 tally and each of the five entries names its symbol, quotes its signature and pins a file:line at 4c9d1dabb, but entry 5 (reuse-map.md:178) carries no caller-inputs line and four sampled anchors point at the wrong line.\nSCORE evidence: 16\nJUSTIFICATION evidence: of 51 sampled anchors, 48 resolve to the exact line at the pinned revision 4c9d1dabb, including both headline claims (the plan's stale numbers and the docs-axis reconciler having no production caller), while four pointers (reuse-map.md:47, :67, :97, :209) do not.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff 4c9d1dabb..5dc40b55e touches exactly the three declared paths and nothing else, in two commits that each carry a body and no attribution trailer.\nSCORE durability: 12\nJUSTIFICATION durability: no test fails if the map rots, and docs/plans/sn-west-catalog-release.html:447 still cites :10337/:15672 for symbols the map re-measures at graph_ops.py:10444/:15914 while nothing asserts the map's anchors resolve.\nSCORE fit: 18\nJUSTIFICATION fit: the map sits with its siblings under docs/evidence/sn-west-catalog-release/ and the map's landing anchors follow the established idiom (docs/evidence/archive/sn-west-catalog-release-landed.html id=release-surface-reuse-map; docs/plans/sn-west-catalog-release.html:1107 in data-section=release-contract) with no plan label in any name.\nFINDING docs/evidence/sn-west-catalog-release/reuse-map.md:47 the seam test cited for surface 1 (tests/standard_names/test_catalog_release.py:300) is test_empty_input_is_an_error, a sanitize_build_metadata test; the github_client seam is injected at tests/standard_names/test_catalog_release.py:714-737, so the only test pointer for the REST transport leads to an unrelated test.\nFINDING docs/evidence/sn-west-catalog-release/reuse-map.md:67 the payload-key anchor (:453-:458) holds for exclusion_by_reason, accounted_exclusions and accounting_residue but not for the two keys named first: exclusion_ledger is export.py:417 and exclusion_records export.py:418.\nFINDING docs/evidence/sn-west-catalog-release/reuse-map.md:97 the claim's WHERE clause is graph_ops.py:10463, not :10456 (that line is token = str(uuid.uuid4())); the adjacent definition (:10444) and charge (:10471) anchors are exact.\nFINDING docs/evidence/sn-west-catalog-release/reuse-map.md:178 entry 5 omits the caller-inputs line the map's own header (reuse-map.md:3-5) claims for every located entry; grep -c \"A caller must supply\" over the map returns 4, not 5.\nFINDING docs/evidence/sn-west-catalog-release/reuse-map.md:209 the name-axis sibling is described as invoked at loop.py:1783, but 1783 is its import line and the invocation is loop.py:1799, so the pointer on the only surface with no caller stops short of the call shape.\n",
+  "review_run_id": "r-20260918T125842261772-review-of-n-the-reuse-map-for-the-release-and-claim-surfaces",
+  "reviewed_base": "4c9d1dabb4ab0afb679ccf15b85eb552e585169c",
+  "reviewed_commit": "5dc40b55ebce0fb8beead01b8298967022659364",
+  "reviewed_run_id": "r-20260918T090709479230-n-the-reuse-map-for-the-release-and-claim-surfaces",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-18T13:18:02Z",
+  "total": 84
+}

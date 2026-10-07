@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T17:17:58.501Z",
+  "dispatched_at": "2026-10-06T17:12:15Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/tools.py:168",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should say whether it extends analyze_units with an unknown-unit verdict or deliberately forks the pint test, so the unit logic has one owner rather than two.",
+      "text": "\u00a74's unit filter (\"uses the dimension check behind analyze_units\"; \"drops a candidate only when both units are known and their dimensions differ\") needs a dimensionality comparison that analyze_units computes internally (q_sig.dimensionality == q_imas.dimensionality) but does not expose: analyze_units returns only a `compatible` bool, and returns compatible=False when either unit is unknown, so it cannot be called as-is to get \u00a74's keep-if-unknown semantics; candidates.py will therefore fork the pint comparison rather than extend its owner.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/graph_ops.py:357",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a78 must either guard both MATCH-gated writers or state why graph_ops.py:357 is deliberately out of scope, and the plan should name the single owner of signal\u2192IMAS edge writes so \u00a76's write_candidates and \u00a78's persist are co-located rather than split across two modules.",
+      "text": "MAPS_TO_IMAS is written by two owners: imas_codex/ids/models.py:580 (the persist path \u00a78 guards) and imas_codex/ids/graph_ops.py:357 in create_signal_source, which writes through the same `MATCH (ip:IMASNode {id: m.target_path})` + MERGE, so a target path naming no node drops the edge silently \u2014 the exact silent-drop \u00a78 exists to close; \u00a78 adds the returned-count guard only to models.py, leaving its goal \"A binding can no longer vanish silently\" unmet for the graph_ops writer, and \u00a71 names models.py as the MAPS_TO_IMAS writer while \u00a76 adds write_candidates to graph_ops.py without naming that module as a signal\u2192IMAS edge owner. The two writers are the complete census of MAPS_TO_IMAS write sites in imas_codex/ids/ (models.py:580, graph_ops.py:357).",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "fb16449a71ac8b93fdf81c41e5d6277251d8a20bf847639b56af823725fde4a7",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 8,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T17:18:49.697684+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-06T17:18:51.965397+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T17:18:49.697684+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T17:18:51.965397+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v8.json",
+  "review_run_id": "r-20261006T171209885708-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "35f48af8bf1b6bdebfe3252a1999b1aaa7f7cb7c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one new module, imas_codex/ids/candidates.py, hides batched embedding, hybrid search, cluster expansion, unit filtering, LLM state construction, batching form, probability parsing and threshold routing behind retrieve_candidates, judge_candidates and route; a large body of work behind four functions and three dataclasses.",
+    "duplicate_owner": "a finding \u2014 \u00a74 re-implements the pint dimensionality test that analyze_units owns, and \u00a78 guards only one of the two MATCH-gated MAPS_TO_IMAS writers.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 states it retires nothing in the model-seat/accessor families and why (\u00a75 \"It retires nothing in these families \u2026\"), \u00a76 states why MAPPING_CANDIDATE cannot merge into MAPS_TO_IMAS, \u00a77 names seven helpers\u2192three and two `imas map run` options retired, \u00a78 retires compute_semantic_matches and two options, and \u00a74 names the inline construction (mapping.py:781\u2013843) and the ClusterSearcher load it deletes.",
+    "reuse_search": "pass \u2014 the plan searched the codebase it names and cites the mechanisms it extends: hybrid_dd_search (imas_codex/graph/dd_search.py:97, whose embedding= argument it names exists), cluster_search (dd_search.py:869), analyze_units (imas_codex/ids/tools.py:168), compute_semantic_matches (tools.py:769, sole caller imas_codex/ids/mapping.py:689), OrphanRecoverySpec/run_discovery_engine (verified: run_mapping_engine imas_codex/ids/workers.py:903\u2013990 wires exactly these), DiscoveryConfig/run_discovery/DISCOVERY_DOMAINS (imas_codex/cli/discover/common.py:30,212), MODEL_SECTIONS (imas_codex/settings.py:141), get_triage_threshold (settings.py:1014), and the \u00a725 decisions layer.",
+    "thin_wrapper": "pass \u2014 \u00a77 generalises the seven workers.py claim/release/pending helpers in place into imas_codex/discovery/base/claims.py, which already owns release_claim/reset_stale_claims/claimed_field; \u00a75 calls the \u00a725 call_decisions layer rather than wrapping it; \u00a74 moves the existing shortlist construction rather than layering over it."
+  },
+  "section_digests": {
+    "_document": "fe693026503f9013804697728088f9f292dafe5bcdcd0bedf13da88a2ec84229",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d0dd585306f391637f0c3688cd62b05f118349fc15a69073e4f1de35e8689637",
+    "s4": "1731b64073c60517007879863e318e9f1d47a607814e118e62b442a0678038e5",
+    "s5": "b39ebcbff71ed4d97b6edcbfe4add80ab8983164853fb355a8832cccadd3e23f",
+    "s6": "66529e5f7ab7a05752dc03d57d6b7d9dd9e9f37a91b4a135a76a0af90e6add30",
+    "s7": "ca13290c5cef84cc8020510a9a70707bb22a3af9007aed2e17383ae24fb210b1",
+    "s8": "1a8df02546802f3be70dc2be41678af1e1b281bf3fa76ef6cfc41cb8305a8596",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T17:18:47.531605+00:00"
+}

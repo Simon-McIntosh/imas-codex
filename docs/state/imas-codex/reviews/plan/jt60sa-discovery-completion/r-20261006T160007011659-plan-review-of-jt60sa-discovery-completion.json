@@ -1,0 +1,141 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T16:07:38.277Z",
+  "dispatched_at": "2026-10-06T16:00:13Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:2983",
+      "id": "reuse_search-1",
+      "reason": "if the search had been run the author would have found the existing gate vocabulary and either extended it or justified a fork, which is the whole decision \u00a725 turns on.",
+      "text": "the reuse map for \u00a725's relevance decision already exists as CodeFile's `triage_*` dimension scores (`triage_data_access` 2992, `triage_imas` 3004, `triage_documentation` 3001, `triage_modeling_code` 2983) and its `score_*` siblings (`score_data_access` 2957, `score_imas` 2966), driven by the `discovery-triage` seat and `imas_codex/llm/prompts/code/triage.md`; the plan's design text cites the call layer, `render_prompt`, `get_model` and `facility.data_access_patterns` as reuse, but never this mechanism, so the reviewer cannot tell whether the author searched it",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/settings.py:144",
+      "id": "thin_wrapper-1",
+      "reason": "a parallel seat plus template for one function doubles the surface a future scope change would need to keep in step, and the honest change is to widen the existing prompt and its `discovery-triage` seat.",
+      "text": "\u00a725 introduces `discovery-relevance` as a new seat and `code/relevance.md` as a new prompt for the triage stage, a second thin layer over the same `discovery-triage` seat and `code/triage.md` prompt that already occupy the triage call site (`imas_codex/discovery/code/scorer.py:256`), with no stated reason the existing seat and template cannot carry the widened L/P/G/I questions",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:2957",
+      "id": "duplicate_owner-1",
+      "reason": "naming the existing dimension owner lets the author widen its rubric for the new scope rule instead of forking a second vocabulary that the ingest gate and any downstream indicator count would then have to join across two field families.",
+      "text": "the eight proposed CodeFile fields duplicate the existing triage and scoring dimension family: `relevance_loads` duplicates `triage_data_access` (facility.yaml:2992), `relevance_imas` duplicates `triage_imas` (3004) and `score_imas` (2966), `relevance_describes` duplicates `triage_documentation` (3001) and `score_documentation` (3071), `relevance_simulation` duplicates `triage_modeling_code` (2983) and `score_modeling_code`, and `relevance_role` overlaps the DiscoveryRootCategory taxonomy the per-purpose scores are already aligned to; six of the eight fields restate an owner that already exists, and the plan leaves the old dimensions orphaned rather than migrating them",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/llm.py:2203",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the interface it adds in its own text as the rule requires, and doing so is what forces the retire/merge decision that also resolves the reuse and duplicate findings above.",
+      "text": "\u00a725 adds surface by adding `call_decisions` and `acall_decisions` beside `call_llm_structured`, a new `discovery-relevance` seat, `code-triage-threshold` and `code-ingest-threshold` settings, and eight CodeFile fields, and the section text retires or merges nothing (it only narrows `--min-score`'s existing reading and names no surface it drops), nor says why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4f89be66f87cbd63c4ccd01c3a3e2db5f3860b62649b3f1326d6cd588b4861a5",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 241,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-06T16:10:07.943120+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-06T16:10:23.194745+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T16:10:38.212050+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-06T16:10:53.706656+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T16:10:38.212050+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T16:10:53.706656+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T16:10:07.943120+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T16:10:23.194745+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-discovery-completion.v241.json",
+  "review_run_id": "r-20261006T160007011659-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "5e90073e37f0e50fd5179499ba27423691496c99",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `call_decisions()`/`acall_decisions()`, placed beside `call_llm_structured` in the owning `imas_codex/discovery/base/llm.py`, hide the request shape, per-answer validation, retry and cost extraction behind one call; \u00a714's `build_path_prefix_filter` (`imas_codex/graph/query_builder.py:282`) likewise bundles clause and bound parameters behind one call.",
+    "duplicate_owner": "a finding \u2014 \u00a725 adds eight `relevance_*` CodeFile fields beside an existing triage/scoring dimension family that already encodes the same concepts; the owner to extend is the CodeFile dimension set in `imas_codex/schemas/facility.yaml:2957-3006`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a725 adds two public functions (`call_decisions`, `acall_decisions`), a new `discovery-relevance` seat, two settings and eight schema fields, and names nothing it retires or merges, nor why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a725 reuses the call, prompt, seat and facility-pattern machinery, but never cites the pre-existing per-dimension code triage taxonomy (`triage_data_access`/`triage_imas`/`triage_documentation` at `imas_codex/schemas/facility.yaml:2983-3006`) or the `discovery-triage` seat and `code/triage.md` prompt that already do what the new relevance subsystem is about to add.",
+    "thin_wrapper": "a finding \u2014 the new `discovery-relevance` seat and `imas_codex/llm/prompts/code/relevance.md` template are a parallel layer over the existing code triage mechanism (`discovery-triage` seat at `imas_codex/settings.py:144`, `code/triage.md`, `apply_triage_results` at `imas_codex/discovery/code/scorer.py:445`), and the design does not say why that mechanism cannot be extended to the widened scope rule instead."
+  },
+  "section_digests": {
+    "_document": "4667c0f839247f9db145897bdbd9716823d2212f97e5ae64f5a1f0b351eb69df",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "ea093845012af148321609dc0ccef4ad78f3fc5209bb8e337d40245f676f6968",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "c014d9c0b2fec663e1f07a721658d81f134c0c13da9253f2574652517102a7d1",
+    "s25": "3dfa7fa1d78d4f86d73c3ab298174fd384b4bac06a63e0e1cd3b04b0ad406896",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T16:08:51.680247+00:00"
+}

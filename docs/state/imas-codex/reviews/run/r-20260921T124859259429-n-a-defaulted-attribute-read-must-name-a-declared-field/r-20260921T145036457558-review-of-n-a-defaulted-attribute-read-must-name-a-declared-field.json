@@ -1,0 +1,55 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "backend": "clive",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-21T14:50:36.457558+00:00",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "1713",
+      "text": "the object at the plan's own cited defect site is annotated Any, so the resolver returns unresolved for it and the node's declared negative control is inert: reintroducing getattr(audit_report, \"findings\", []) at :1724 leaves the gate at 8 passed with the site reported unresolved."
+    },
+    {
+      "file": "tests/standard_names/test_declared_attribute_access.py",
+      "line": "381",
+      "text": "the resolved floor bounds only what the scan resolves, so a new defaulted read on an unannotated object joins the unresolved set invisibly: 13 of 18 sites are already unresolved and I measured 14 with the gate still green."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits against f15d33851; 575604029 adds only the 486-line test, ed3c67f88 adds only the two docs hunks, no runtime module touched.",
+    "done_when": "re-ran the named file against a git-archive extraction of landed HEAD ed3c67f88; 8 passed, and its scan reports 18 sites, 5 resolved, 0 violations, matching the manifest.",
+    "goal": "read the source goal; tests/standard_names/test_declared_attribute_access.py:368 refuses a three-argument getattr naming an undeclared field over imas_codex/standard_names/review, so the goal is met.",
+    "manifest": "read; it names the gate log and its 8-passed result, the negative-control log, and at line 39 reports the cited defect does not reproduce on f15d33851, which I confirmed at that base.",
+    "write_paths": "git show --name-only on 575604029 and ed3c67f88 lists only the three declared paths, and the source worktree is clean, so the fence held."
+  },
+  "justifications": {
+    "durability": "the file pins each judgement branch and a resolved floor at :480, but the floor bounds only what it resolves, so unresolved sites can grow while the gate stays green.",
+    "evidence": "the manifest aperture of 18/5/0/13 reproduces on its own scan at test_declared_attribute_access.py:323, but the declared negative control does not fire: with pipeline.py:1724 reading getattr(audit_report, \"findings\", []) the gate stays at 8 passed.",
+    "fit": "the module follows the repository pytest and dataclass idiom (test_declared_attribute_access.py:45-73) and carries no plan label or attribution.",
+    "goal_fidelity": "test_declared_attribute_access.py:368 refuses an undeclared literal attribute and :434 accepts a declared one, so the check does what the goal states.",
+    "scope_discipline": "both commits touch exactly the three declared paths and nothing else, and the docs hunks are the required landing record and evidence anchor."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the source goal; tests/standard_names/test_declared_attribute_access.py:368 refuses a three-argument getattr naming an undeclared field over imas_codex/standard_names/review, so the goal is met.\nVERDICT done_when: re-ran the named file against a git-archive extraction of landed HEAD ed3c67f88; 8 passed, and its scan reports 18 sites, 5 resolved, 0 violations, matching the manifest.\nVERDICT write_paths: git show --name-only on 575604029 and ed3c67f88 lists only the three declared paths, and the source worktree is clean, so the fence held.\nVERDICT manifest: read; it names the gate log and its 8-passed result, the negative-control log, and at line 39 reports the cited defect does not reproduce on f15d33851, which I confirmed at that base.\nVERDICT diff: read both commits against f15d33851; 575604029 adds only the 486-line test, ed3c67f88 adds only the two docs hunks, no runtime module touched.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: test_declared_attribute_access.py:368 refuses an undeclared literal attribute and :434 accepts a declared one, so the check does what the goal states.\nSCORE evidence: 11\nJUSTIFICATION evidence: the manifest aperture of 18/5/0/13 reproduces on its own scan at test_declared_attribute_access.py:323, but the declared negative control does not fire: with pipeline.py:1724 reading getattr(audit_report, \"findings\", []) the gate stays at 8 passed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both commits touch exactly the three declared paths and nothing else, and the docs hunks are the required landing record and evidence anchor.\nSCORE durability: 14\nJUSTIFICATION durability: the file pins each judgement branch and a resolved floor at :480, but the floor bounds only what it resolves, so unresolved sites can grow while the gate stays green.\nSCORE fit: 18\nJUSTIFICATION fit: the module follows the repository pytest and dataclass idiom (test_declared_attribute_access.py:45-73) and carries no plan label or attribution.\nFINDING imas_codex/standard_names/review/pipeline.py:1713 the object at the plan's own cited defect site is annotated Any, so the resolver returns unresolved for it and the node's declared negative control is inert: reintroducing getattr(audit_report, \"findings\", []) at :1724 leaves the gate at 8 passed with the site reported unresolved.\nFINDING tests/standard_names/test_declared_attribute_access.py:381 the resolved floor bounds only what the scan resolves, so a new defaulted read on an unannotated object joins the unresolved set invisibly: 13 of 18 sites are already unresolved and I measured 14 with the gate still green.",
+  "review_run_id": "r-20260921T145036457558-review-of-n-a-defaulted-attribute-read-must-name-a-declared-field",
+  "reviewed_base": "f15d33851c99c19d464ecb3d225f4e3cdd830383",
+  "reviewed_commit": "ed3c67f88d0b569019d87242cc6c2238da5a8e4d",
+  "reviewed_run_id": "r-20260921T124859259429-n-a-defaulted-attribute-read-must-name-a-declared-field",
+  "scores": {
+    "durability": 14,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-21T15:32:52.252862+00:00",
+  "total": 79,
+  "verdict": "MUST-FIX"
+}

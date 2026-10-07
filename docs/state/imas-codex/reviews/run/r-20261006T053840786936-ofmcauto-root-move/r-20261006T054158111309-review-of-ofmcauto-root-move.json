@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. The reviewed manifest records baseline_suite and after_suite as null (the node is not an armed test node, so it declares no arm fields), so the derivation falls back to the run's own gate logs. The reviewed run carries one gate log, compliance-gate.log, whose header names revision ecf996bf4, command `uv run --no-sync pytest tests/config/test_facility_config_compliance.py -p no:cacheprovider`, and whose summary line reads `29 passed, 2 warnings in 1.04s` with EXIT=0 and no failing test id. There is no separate base-arm log. added_failures over that single readable head arm returns 0 with no ids. This review independently reproduced the head arm at ba21eaa73 (reviewer-gate.log, header module.__file__ resolves under the reviewed tree, `29 passed, 1 warning`, EXIT=0) so the head arm is confirmed green and the facility config compliance suite is the correct gate for a discovery_roots value edit even though it does not pin the value itself.",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T05:48:00.002Z",
+  "dispatched_at": "2026-10-06T05:42:03Z",
+  "findings": [
+    {
+      "file": "imas_codex/config/facilities/jt-60sa.yaml",
+      "line": "145",
+      "severity": "follow-on",
+      "text": "follow-on: the discovery_roots entry value is not pinned by any test. tests/config/test_facility_config_compliance.py validates schema, enum membership and required fields but asserts nothing about the specific path list, so a later edit that reverted this entry to the stale /analysis/src/ofmcauto, or to any other path, would pass the gate green. This is inherent to a host-path config value (no test can assert a remote directory exists without the hop), so it is recorded rather than fixed; a cheap partial pin would assert the entry is absent from the list, which is the failure this change repairs."
+    }
+  ],
+  "head_log_revision": "ba21eaa7312e9461407d7c9c7b8b9b54e3cce811",
+  "item_aggregate": 1,
+  "item_verdicts": {
+    "call_sites": "n/a \u2014 a config value edit, no production call site is added or changed; the sole consumer is get_facility() in imas_codex/discovery/base/facility.py, which reads the committed file only.",
+    "diff": "one line: imas_codex/config/facilities/jt-60sa.yaml:145 changes `- /analysis/src/ofmcauto` to `- /analysis/src/OFMC/ofmcauto`; the entry is unique in the file (base grep -c reads 1, head grep -c reads 1 for the moved path); the accompanying docs/evidence/fragments/jt60sa-discovery-completion/ofmcauto-root-move.html is a 24-line evidence fragment; no other source changes.",
+    "done_when": "\u00a714's root-move node asks for exactly three things: replace the one public discovery_roots entry with the moved path, confirm the new path with one ls -ld on the host, and leave the stale graph row alone. All three hold at ba21eaa73: the entry is repointed, this review reproduced `ssh -o BatchMode=yes jt-60sa 'ls -ld /analysis/src/OFMC/ofmcauto'` => `drwxr-xr-x+ 10 h060029 g1053 5632 Oct  6 14:43 /analysis/src/OFMC/ofmcauto` with the stale path answering `No such file or directory`, and the diff makes no graph or discover change.",
+    "goal": "\u00a714's root-move node fixes one public root whose tree moved on the host: /analysis/src/ofmcauto no longer exists, the tree is at /analysis/src/OFMC/ofmcauto. The one-line change at ba21eaa73 does exactly that and nothing else.",
+    "manifest": "the run's manifest is present, complete and self-consistent; its landing, changed_paths and artifacts lines agree with the diff and the gate log it names; the declared negative control (base grep 1, head grep 0) is a real observable and this review reproduced it.",
+    "write_paths": "the diff ecf996bf4..ba21eaa73 touches exactly imas_codex/config/facilities/jt-60sa.yaml and docs/evidence/fragments/jt60sa-discovery-completion/ofmcauto-root-move.html, both within the node's granted paths; the worktree at ba21eaa73 is clean; docs/figures/jt60sa-discovery-completion/ofmcauto-root-move (also granted) is untouched, correct for a node whose done-when names no figure."
+  },
+  "justifications": {
+    "durability": "the value is the live host state, which this review confirmed independently (new path a directory, stale path absent), and the facility config compliance suite stays green at the head (reviewer-gate.log, 29 passed, EXIT=0). The durability ceiling is that no test pins the entry value \u2014 the compliance suite is schema-only \u2014 so the change is not defended against a later revert beyond the host fact itself; recorded as a follow-on finding, not a defect in this change.",
+    "evidence": "I reproduced every load-bearing claim at the reviewed head: the host answers `intr26-2` and `ls -ld /analysis/src/OFMC/ofmcauto` returns a real directory while `/analysis/src/ofmcauto` returns No such file or directory; /analysis/src/OFMC contains exactly the siblings the plan names (exec, ofmcplt07, ofmcplt08, slw70xp and the ofmc_inp_conv_V05.namelist); the loaded config from the reviewed tree reports has_moved True and has_stale False; the compliance gate passes 29 with EXIT=0. The one deduction is that the reviewed run's gate log header names the base revision (ecf996bf4) though it ran in the worktree carrying the uncommitted change, so its revision stamp is loose \u2014 the conclusion is unaffected because I re-ran the gate with module.__file__ resolving under the reviewed tree.",
+    "fit": "the commit is a conventional `fix(facilities):` with a body stating what changed and why; no plan label, phase name, ticket number or author attribution appears in the commit, the fragment or the yaml; the fragment element ids all open with the node id (ofmcauto-root-move-change/-host/-gate), matching the reviewed node; the moved path is written as the plan spells it.",
+    "goal_fidelity": "the plan's root-move node is implemented exactly as written at ba21eaa73: the single public discovery_roots entry /analysis/src/ofmcauto becomes /analysis/src/OFMC/ofmcauto (jt-60sa.yaml:145), the host confirmation is one ls -ld, and the stale graph row is untouched (no discover run, no graph write anywhere in the diff).",
+    "reuse": "no abstraction is added; the change is a value edit in the existing discovery_roots list, and the seed/scoping mechanism that consumes it (get_facility, seed_facility_roots) is the existing one.",
+    "scope_discipline": "the diff touches exactly the two declared paths with one deletion and one insertion in the yaml; no plan-version or plan-modified meta line is in the diff; the worktree is clean at ba21eaa73; the granted figures directory is correctly left empty for a text-only change."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a714's root-move node fixes one public root whose tree moved on the host: /analysis/src/ofmcauto no longer exists, the tree is at /analysis/src/OFMC/ofmcauto. The one-line change at ba21eaa73 does exactly that and nothing else.\nVERDICT done_when: replaces the one public discovery_roots entry with the moved path, confirms it with one ls -ld on the host, leaves the stale graph row alone \u2014 all three hold, and this review reproduced the host ls -ld and the green gate.\nVERDICT write_paths: the diff ecf996bf4..ba21eaa73 touches exactly imas_codex/config/facilities/jt-60sa.yaml and the ofmcauto-root-move.html evidence fragment, both granted; the worktree is clean; the granted figures directory is untouched.\nVERDICT manifest: complete and self-consistent; landing, changed_paths and artifacts agree with the diff and the named gate log; the declared negative control reproduces.\nVERDICT diff: jt-60sa.yaml:145 changes `- /analysis/src/ofmcauto -> - /analysis/src/OFMC/ofmcauto`; the entry is unique; the fragment is 24 added lines; no other change.\nVERDICT call_sites: n/a \u2014 config value edit; sole consumer get_facility() reads the committed file.\nSCORE goal_fidelity: 20\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 20\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: the plan's root-move node is implemented exactly as written at ba21eaa73; the single entry is repointed, the host confirmation is one ls -ld, and no graph row is touched.\nJUSTIFICATION evidence: I reproduced the host state independently (intr26-2; new path a directory; stale path absent; OFMC holds exactly the named siblings), read the loaded config from the reviewed tree (has_moved True, has_stale False), and re-ran the compliance gate green at ba21eaa73; the deduction is the reviewed gate log's loose revision stamp.\nJUSTIFICATION scope_discipline: two declared paths only, one deletion and one insertion in the yaml, clean worktree, no plan meta line touched, figures directory correctly empty.\nJUSTIFICATION durability: the value equals live host state and the suite is green, but no test pins the entry value \u2014 recorded as a follow-on.\nJUSTIFICATION fit: conventional commit with body, no plan label or attribution in code/commit/fragment, fragment ids open with the node id.\nJUSTIFICATION reuse: a value edit in the existing discovery_roots list; no new abstraction.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:145 follow-on: the entry value is unpinned by any test; a revert would pass the schema-only gate green.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:145 note: the reviewed run's gate-log header names the base revision though it ran in the changed worktree; conclusion unaffected.\nreviewed_base_sha: ecf996bf49e460a297d38f09b24efc8c7f310bc2\nreviewed_head_sha: ba21eaa7312e9461407d7c9c7b8b9b54e3cce811",
+  "review_run_id": "r-20261006T054158111309-review-of-ofmcauto-root-move",
+  "reviewed_base": "ecf996bf49e460a297d38f09b24efc8c7f310bc2",
+  "reviewed_base_sha": "ecf996bf49e460a297d38f09b24efc8c7f310bc2",
+  "reviewed_commit": "ba21eaa7312e9461407d7c9c7b8b9b54e3cce811",
+  "reviewed_head_sha": "ba21eaa7312e9461407d7c9c7b8b9b54e3cce811",
+  "reviewed_run_id": "r-20261006T053840786936-ofmcauto-root-move",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:37:32.907384+00:00",
+  "total": 114
+}

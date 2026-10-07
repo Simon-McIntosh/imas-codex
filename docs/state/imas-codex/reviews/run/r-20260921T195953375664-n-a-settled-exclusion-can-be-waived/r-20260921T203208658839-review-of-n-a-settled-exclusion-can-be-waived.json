@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "backend": "clive",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:4526",
+    "imas_codex/cli/sn.py:4657",
+    "imas_codex/standard_names/catalog_release.py:2290"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-21T20:32:08.658839+00:00",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/export.py",
+      "line": "2773",
+      "text": "the waived test precedes the emitted test at export.py:2776, so a declared path that also reaches a name is reported uncarried and waived rather than carried, moving it out of the carried list the generability verdict builds at export.py:2519 and hiding that the declaration entry is stale; the code it replaced reported such a row emitted, and no test covers the combination because every call at tests/standard_names/test_waived_sources.py:92 passes standard_name_id=None and exported_ids=set()."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read all three commits against base cdf7fcaf7 \u2014 b764cec8e adds the loader, the disposition function and the seven tests, 35e554954 and 2795d927d add the evidence anchor and the plan record, and no other file or statement differs.",
+    "done_when": "read the node's evidence fence \u2014 seven named focused tests, a two-direction mutation, and a base/head suite comparison \u2014 and every figure is recorded; I recomputed the comparison from the two logs myself (base 24 ids, head 23, head a subset of base) and reproduced the archive tree's skip through the same instrument.",
+    "goal": "read the source goal \u2014 build the producer that sets the waived disposition from the lead's declaration \u2014 and imas_codex/standard_names/export.py:2872 reads the declaration once per export before any staging output, feeding the per-row decision at export.py:3407 whose membership test at export.py:2773 is the only grant, so the disposition the mechanism at export.py:2476 already read now has a producer.",
+    "manifest": "read the run's manifest.md; its stated results reproduce against the logs it names \u2014 focused.log 7 passed, negative_control.log 2 failed and 5 passed at exit 1 with the declared sentence as line one, base_suite.log 21 failed plus 3 errors, head_suite.log 20 failed plus 3 errors.",
+    "write_paths": "read the five declared paths and the diff cdf7fcaf7..2795d927d \u2014 four files landed, all inside them (docs/figures/unbound-source-backlog was not used), and imas_codex/standard_names/waived_sources.yaml is byte-identical to the base revision by sha256."
+  },
+  "justifications": {
+    "durability": "the declared mutation reddens tests/standard_names/test_waived_sources.py:102 and :113 at exit 1, so replacing exact membership with a segment rule fails a test rather than passing quietly.",
+    "evidence": "the seven tests at tests/standard_names/test_waived_sources.py:102-181 pass and I reproduced the base/head failure-id sets from logs/base_suite.log and logs/head_suite.log myself, reconciling the nine extra head passes as seven new tests plus two instrument movements.",
+    "fit": "export.py:2669 uses the Path(__file__).with_name idiom already used at imas_codex/standard_names/benchmark_reference.py:61, and no symbol, comment or commit message carries a plan label or attribution.",
+    "goal_fidelity": "export.py:2872 loads the declaration before any staging output exists and export.py:2773 waives only on exact membership, so the gap the goal names \u2014 that no code set the disposition \u2014 is closed.",
+    "scope_discipline": "the four landed paths sit inside the five declared at manifest.md:3 and waived_sources.yaml is unchanged from the base revision, whose blob hashes adb7d7dcde31f989."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the source goal \u2014 build the producer that sets the waived disposition from the lead's declaration \u2014 and imas_codex/standard_names/export.py:2872 reads the declaration once per export before any staging output, feeding the per-row decision at export.py:3407 whose membership test at export.py:2773 is the only grant, so the disposition the mechanism at export.py:2476 already read now has a producer.\nVERDICT done_when: read the node's evidence fence \u2014 seven named focused tests, a two-direction mutation, and a base/head suite comparison \u2014 and every figure is recorded; I recomputed the comparison from the two logs myself (base 24 ids, head 23, head a subset of base) and reproduced the archive tree's skip through the same instrument.\nVERDICT write_paths: read the five declared paths and the diff cdf7fcaf7..2795d927d \u2014 four files landed, all inside them (docs/figures/unbound-source-backlog was not used), and imas_codex/standard_names/waived_sources.yaml is byte-identical to the base revision by sha256.\nVERDICT manifest: read the run's manifest.md; its stated results reproduce against the logs it names \u2014 focused.log 7 passed, negative_control.log 2 failed and 5 passed at exit 1 with the declared sentence as line one, base_suite.log 21 failed plus 3 errors, head_suite.log 20 failed plus 3 errors.\nVERDICT diff: read all three commits against base cdf7fcaf7 \u2014 b764cec8e adds the loader, the disposition function and the seven tests, 35e554954 and 2795d927d add the evidence anchor and the plan record, and no other file or statement differs.\nCALL_SITES: imas_codex/cli/sn.py:4526, imas_codex/cli/sn.py:4657, imas_codex/standard_names/catalog_release.py:2290\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: export.py:2872 loads the declaration before any staging output exists and export.py:2773 waives only on exact membership, so the gap the goal names \u2014 that no code set the disposition \u2014 is closed.\nSCORE evidence: 18\nJUSTIFICATION evidence: the seven tests at tests/standard_names/test_waived_sources.py:102-181 pass and I reproduced the base/head failure-id sets from logs/base_suite.log and logs/head_suite.log myself, reconciling the nine extra head passes as seven new tests plus two instrument movements.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the four landed paths sit inside the five declared at manifest.md:3 and waived_sources.yaml is unchanged from the base revision, whose blob hashes adb7d7dcde31f989.\nSCORE durability: 18\nJUSTIFICATION durability: the declared mutation reddens tests/standard_names/test_waived_sources.py:102 and :113 at exit 1, so replacing exact membership with a segment rule fails a test rather than passing quietly.\nSCORE fit: 17\nJUSTIFICATION fit: export.py:2669 uses the Path(__file__).with_name idiom already used at imas_codex/standard_names/benchmark_reference.py:61, and no symbol, comment or commit message carries a plan label or attribution.\nFINDING imas_codex/standard_names/export.py:2773 the waived test precedes the emitted test at export.py:2776, so a declared path that also reaches a name is reported uncarried and waived rather than carried, moving it out of the carried list the generability verdict builds at export.py:2519 and hiding that the declaration entry is stale; the code it replaced reported such a row emitted, and no test covers the combination because every call at tests/standard_names/test_waived_sources.py:92 passes standard_name_id=None and exported_ids=set().",
+  "review_run_id": "r-20260921T203208658839-review-of-n-a-settled-exclusion-can-be-waived",
+  "reviewed_base": "cdf7fcaf757915b8bb96c67f78c0cb5bd8e47425",
+  "reviewed_commit": "2795d927dea1e2c1a623375d07140071481cb444",
+  "reviewed_run_id": "r-20260921T195953375664-n-a-settled-exclusion-can-be-waived",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-21T20:39:34.045539+00:00",
+  "total": 91
+}

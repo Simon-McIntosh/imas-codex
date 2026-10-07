@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T06:31:42.443Z",
+  "dispatched_at": "2026-10-05T06:28:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/jt60sa-discovery-completion.html:309",
+      "id": "duplicate_owner-1",
+      "reason": "an implementer reading the decision block would add a second, ownerless edge beside DOCUMENTS, exactly the duplicate the plan's \u00a73 forbids.",
+      "text": "the `signal-metadata-slots`\u2026 `dynamic-page-handling` decision rationale still says every scanned FacilitySignal links to its page \"through DOCUMENTED_IN\", while \u00a73 body and the acted-on review comment use the existing `DOCUMENTS` relationship owned by `WikiChunk.documents_signals` (imas_codex/schemas/facility.yaml:3831); `grep -rn DOCUMENTED_IN imas_codex/` returns nothing, so the decision text names an edge with no owner and contradicts the plan's own rule against \"a second edge with a second owner\"",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/jt60sa-discovery-completion.html#s3",
+      "id": "interface_budget-1",
+      "reason": "all four families are at 0 this week so no ceiling is approached, and \u00a73 already accounts for the enum family by keeping WikiPageStatus closed; the omission is a formality rather than a design risk.",
+      "text": "\u00a73 adds a `fronts_database` property to WikiPage (new interface surface, absent from imas_codex/schemas/facility.yaml, confirmed by `grep -rn fronts_database imas_codex/`) without naming what it retires or merges, or stating why nothing can be",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "60bebdd3866c463ffc01cd7f530d49e9b9317e6ee5196102d6eaa55eb441bc5b",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 13,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:32:33.012231+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:32:33.755177+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T062854652495-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "02abf01a4b2b44389b3e417d5ef645dde05d3d7c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new shallow-wrapper family is proposed; \u00a76's remote_environment is merged by one resolver in the facility-aware layer and passed to a deliberately facility-agnostic executor, and \u00a72/\u00a73 add a schema slot and a scorer rule rather than new modules.",
+    "duplicate_owner": "a finding \u2014 the decision block still routes the handbook-page linkage through a `DOCUMENTED_IN` edge, which exists nowhere in the codebase and would fork the owner at imas_codex/schemas/facility.yaml:3831.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 names its retirement (`data_access_patterns.setup_commands` removed from schema and tcv.yaml) and \u00a72 names the unreleased keywords stopgap it replaces, but \u00a73 adds the `fronts_database` property on WikiPage without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the plan cites the existing owner for each mechanism it extends: \u00a73 reuses `WikiChunk.documents_signals` / `[:DOCUMENTS]` (imas_codex/schemas/facility.yaml:3831, imas_codex/discovery/wiki/pipeline.py:281,319) rather than a new edge; \u00a76 extends `_resolve_ssh_host`/`check_all_tools` (imas_codex/remote/tools.py:85,471) and `get_python_status`/`PythonVersion.meets_minimum` (imas_codex/remote/python.py:146,66); \u00a74 cites the pypdf declaration.",
+    "thin_wrapper": "pass \u2014 \u00a76 states why the existing probe and resolver are extended rather than supplemented (\"the facility probe that already exists is extended, not duplicated\"; \"no new CLI command is added\"), and \u00a73 reuses the existing DOCUMENTS edge instead of a parallel one."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:32:10.949589+00:00"
+}

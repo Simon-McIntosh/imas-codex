@@ -1,0 +1,46 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T10:36:06.252797+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/sn-grammar-refinement/plan-figure-audit.md",
+      "line": "35",
+      "text": "the instrument table cites /tmp/sgr_probe5.log, which does not exist on disk while the four sibling /tmp logs do, so the cited instrument for the component-token and completeness figures resolves nowhere; the durable copy is logs/sgr_probe5.log in the run directory."
+    },
+    {
+      "file": "docs/evidence/sn-grammar-refinement/plan-figure-audit.md",
+      "line": "55",
+      "text": "the asserted second figure, 225 publishable of 253 defect-bearing names, is compared against 2,528 accepted live names, the whole live cohort, so that column does not re-measure the asserted quantity and a reader cannot see how many of the re-measured 304 operator-bearing names are publishable."
+    },
+    {
+      "file": "docs/evidence/sn-grammar-refinement/plan-figure-audit.md",
+      "line": "60",
+      "text": "the row substitutes a schema surface, 486 names carrying a component token with 265 live over 16 tokens, for the asserted stem partition of 505 component-prefixed stems bearing 345 single-component and 176 true vector components, so the 176 figure that the plan sizes completion work from carries no verdict."
+    }
+  ],
+  "justifications": {
+    "durability": "nothing re-runs the doc audit against this record. The evidence file passes audit-doc at line 31 and I reproduced exit 0, but no test or CI job fails if the file or its two anchor comments regresses, and the probe log cited at line 35 has already stopped resolving.",
+    "evidence": "the gate is recorded and I reproduced it, with reckon audit-doc exiting 0 and OK on the evidence file and on both HTML records, and the recorded counts agreeing with the output dumps at logs/sgr_measure_out.json; the deduction is that rows 2 and 7 at lines 55 and 60 compare a different quantity than the one asserted, and the instrument citation at line 35 does not resolve.",
+    "fit": "the evidence file follows the docs/evidence idiom with its meta header and audit-clean HTML, and docs/plans/sn-grammar-refinement.html:550 matches sibling landing comments in data-section and c-run id form with no plan label, ticket or version in any name; the deduction is that lines 32-36 cite volatile /tmp instrument paths where the manifest at line 47 names durable run-directory copies.",
+    "goal_fidelity": "docs/evidence/sn-grammar-refinement/plan-figure-audit.md:54-62 re-measures nine plan figures with per-row verdicts, lines 118-146 classify the first unstarted beat as still-required on the measured count of 2 of 148 bases complete, lines 148-161 restate effort at 16-23 worker-hours, and an independent round trip of my own over the live graph with imas_standard_names 0.9.3 reproduced the two load-bearing numbers exactly, 2,967 live names and 8 accepted non-canonical identities.",
+    "scope_discipline": "commit e6991732e touches exactly the three declared paths with 260 insertions and no deletions, the worktree is clean, the plan-version and plan-modified meta lines are untouched in the diff, and the no-mutation claim holds: all five measurement scripts carry no SET, MERGE, CREATE or DELETE statement, which I grepped for myself."
+  },
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/sn-grammar-refinement/plan-figure-audit.md:54-62 re-measures nine plan figures with per-row verdicts, lines 118-146 classify the first unstarted beat as still-required on the measured count of 2 of 148 bases complete, lines 148-161 restate effort at 16-23 worker-hours, and an independent round trip of my own over the live graph with imas_standard_names 0.9.3 reproduced the two load-bearing numbers exactly, 2,967 live names and 8 accepted non-canonical identities.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate is recorded and I reproduced it, with reckon audit-doc exiting 0 and OK on the evidence file and on both HTML records, and the recorded counts agreeing with the output dumps at logs/sgr_measure_out.json; the deduction is that rows 2 and 7 at lines 55 and 60 compare a different quantity than the one asserted, and the instrument citation at line 35 does not resolve.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: commit e6991732e touches exactly the three declared paths with 260 insertions and no deletions, the worktree is clean, the plan-version and plan-modified meta lines are untouched in the diff, and the no-mutation claim holds: all five measurement scripts carry no SET, MERGE, CREATE or DELETE statement, which I grepped for myself.\nSCORE durability: 8\nJUSTIFICATION durability: nothing re-runs the doc audit against this record. The evidence file passes audit-doc at line 31 and I reproduced exit 0, but no test or CI job fails if the file or its two anchor comments regresses, and the probe log cited at line 35 has already stopped resolving.\nSCORE fit: 18\nJUSTIFICATION fit: the evidence file follows the docs/evidence idiom with its meta header and audit-clean HTML, and docs/plans/sn-grammar-refinement.html:550 matches sibling landing comments in data-section and c-run id form with no plan label, ticket or version in any name; the deduction is that lines 32-36 cite volatile /tmp instrument paths where the manifest at line 47 names durable run-directory copies.\nFINDING docs/evidence/sn-grammar-refinement/plan-figure-audit.md:35 the instrument table cites /tmp/sgr_probe5.log, which does not exist on disk while the four sibling /tmp logs do, so the cited instrument for the component-token and completeness figures resolves nowhere; the durable copy is logs/sgr_probe5.log in the run directory.\nFINDING docs/evidence/sn-grammar-refinement/plan-figure-audit.md:55 the asserted second figure, 225 publishable of 253 defect-bearing names, is compared against 2,528 accepted live names, the whole live cohort, so that column does not re-measure the asserted quantity and a reader cannot see how many of the re-measured 304 operator-bearing names are publishable.\nFINDING docs/evidence/sn-grammar-refinement/plan-figure-audit.md:60 the row substitutes a schema surface, 486 names carrying a component token with 265 live over 16 tokens, for the asserted stem partition of 505 component-prefixed stems bearing 345 single-component and 176 true vector components, so the 176 figure that the plan sizes completion work from carries no verdict.",
+  "review_run_id": "r-20260917T103606252797-review-of-n-audit-sn-grammar-refinement-headline-figures-are-remeasured",
+  "reviewed_base": "5ea0d73b441b6991fc29b9dbb03e13bc5b63b43c",
+  "reviewed_commit": "e6991732e52b9fa209c4bea450fc077515cdfec0",
+  "reviewed_run_id": "r-20260917T045808366431-n-audit-sn-grammar-refinement-headline-figures-are-remeasured",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T11:42:00.552342+00:00",
+  "total": 82
+}

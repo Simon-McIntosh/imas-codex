@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T03:41:09.527Z",
+  "dispatched_at": "2026-10-07T03:27:55Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/documents/pipeline.py:74",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's own node write path includes `documents/pipeline.py` specifically to make this deletion, so the author must either extend `base/image.py` with the claim-aware predicate or drop the deletion; as written it silently changes document-discovery behaviour under the banner of removing a duplicate.",
+      "text": "the plan deletes `_has_pending_image_scores` claiming it \"duplicates the public `has_pending_image_work`\" (`imas_codex/discovery/base/image.py:354`), but the two predicates are not duplicates: `_has_pending_image_scores` selects `img.status = 'ingested' AND img.claimed_at IS NULL`, while `has_pending_image_work` selects `img.status = 'ingested' AND img.description IS NULL`; they can and will disagree (a claimed image mid-scoring, or an unclaimed image that already has a description), so deleting the pipeline one and calling the image one changes which images the document pipeline reports as pending \u2014 and the deeper difference is that `has_pending_image_work` swallows exceptions returning `False` where the pipeline helper does not; the owner to extend is `imas_codex/discovery/base/image.py`, which should gain the claim-aware predicate (or the plan should keep the pipeline predicate and state the difference) rather than the plan asserting a duplicate that does not exist",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/common.py:30",
+      "id": "duplicate_owner-2",
+      "reason": "the registry's finer stage list is legitimately more granular than the domain list, so a divergence is expected, but the plan's claim that its domains *are* `DISCOVERY_DOMAINS` is inaccurate and should be corrected to \"derived from\" so a later domain addition does not leave one list stale.",
+      "text": "the same \"one set, two owners\" defect recurs one level up: `DISCOVERY_DOMAINS = (\"paths\",\"wiki\",\"signals\",\"code\",\"documents\",\"map\")` already owns the domain enumeration, and \u00a72's registry introduces a second, finer nine-stage enumeration (\"Its domains are the existing `DISCOVERY_DOMAINS`\") whose stages (signals scan/enrich/check, candidates, mapping) do not map one-to-one onto those six domains, so the two enumerations overlap without either deriving from the other and will drift when a domain is added; the owner to extend is `DISCOVERY_DOMAINS` in `common.py` (or the registry should declare a mapping onto it)",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/cli/discover/__init__.py:44",
+      "id": "duplicate_owner-3",
+      "reason": "an inventory, not a defect; recorded so the author sees the full set of sites that already encode the domain order the registry re-declares.",
+      "text": "census of the same type completed: the enumeration and dispatch sites a new sequencing command must reconcile are the `discover` group (`imas_codex/cli/discover/__init__.py:44`) where the six domain commands are registered (`:521-526`), the `DISCOVERY_DOMAINS` tuple (`common.py:30`), and the `--domain` filter already carried by `discover status` (`__init__.py:108`) and `discover clear` (`:187`); no target outside these owns the domain set, so the finding above lists every site the plan must touch rather than the first",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "32ee2db81d5e685f55581157c17a1db51668ec3126cabad4803c192c0bb99776",
+  "plan_slug": "facility-discovery-sequence",
+  "plan_version": 7,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T03:42:33.835718+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-07T03:42:35.746474+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-3",
+      "reason": "an inventory of the sites that encode the domain order, not a defect; the registry derives its domain field from DISCOVERY_DOMAINS and leaves the discover group, status and clear --domain filters unchanged",
+      "when": "2026-10-07T03:42:38.315692+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-07T03:42:33.835718+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-07T03:42:35.746474+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "an inventory of the sites that encode the domain order, not a defect; the registry derives its domain field from DISCOVERY_DOMAINS and leaves the discover group, status and clear --domain filters unchanged",
+      "when": "2026-10-07T03:42:38.315692+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-facility-discovery-sequence.v7.json",
+  "review_run_id": "r-20261007T032744859745-plan-review-of-facility-discovery-sequence",
+  "reviewed_blob_sha": "32ac9a56d58b8b9aacd83c60b8ace76b3a39679b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `imas_codex/cli/discover/sequence.py` hides ordering, access probing, budget partitioning and per-stage fault isolation behind the single `discover run FACILITY` command; the stage metadata is a data registry (a table), not a spread of small wrappers over the same machinery.",
+    "duplicate_owner": "a finding \u2014 the plan's dedup target is wrong, and it would leave two enumerations of one domain set.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 names the added surface (`discover run` plus five options) and states nothing is retired and why the per-domain commands and their stage-specific options cannot be collapsed into the sequence (\"the per-domain commands stay the way to run one stage with its stage-specific options, for example `discover signals --category`, which the sequence does not re-declare\").",
+    "reuse_search": "pass \u2014 the plan searched the codebase it extends and cites it with line numbers I verified against the source: `DISCOVERY_DOMAINS` (`imas_codex/cli/discover/common.py:30`), `run_discovery` (`common.py:212`), `ensure_remote_environment` (`common.py:443`), `create_discovery_monitor` (`common.py:502`), the three check functions (`imas_codex/discovery/base/services.py:159,178,200`), the per-domain `has_pending_*` predicates, and `discover_mappable_ids` (`imas_codex/ids/tools.py:376`); no existing cross-domain sequencing command exists, so the orchestrator is genuinely new and not a missed reuse.",
+    "thin_wrapper": "pass \u2014 the `ctx.invoke` runner is a thin layer, and the plan states in its own text why the existing commands cannot be folded into it instead: invoking each stage's click command is \"the only path that reuses each stage whole, without refactoring seven commands or starting subprocesses\" (\u00a73)."
+  },
+  "section_digests": {
+    "_document": "cf0e8d6064a2c12b00ef93f2cd9132d15e2568894f9e7bb7bb18b30b9b131222",
+    "s1": "3992671283458b0f4b8b18b7b0aed3eeb299da5f7c62dba76e5df85f856f9819",
+    "s2": "e9fd460a94093fa9f0bf422b2a836b1823a0406fdf18b2c49e854c3e813d37a9",
+    "s3": "617ee65193067405095e3e7862ebdc848f3924016fc56703063a351c66e11a27",
+    "s4": "5de31b0a21c57f314ee8c03653c64f4203bbb25998353ff30aa84bdc4df58b1e",
+    "s5": "35854a905209a1dcd19601ea1a80cc5bb1f8dce9ff6b03379aec21d9ea74ccdd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:42:32.461362+00:00"
+}

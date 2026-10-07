@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T14:49:18.334Z",
+  "dispatched_at": "2026-10-05T14:43:05Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/frontier.py:1929",
+      "id": "reuse_search-1",
+      "reason": "as written the node's stated mechanism cannot satisfy its done-when, so the author must re-point the reuse at the leaf roots (or the section is only discoverable by its fallback).",
+      "text": "\u00a714 states that re-seeding `/analysis/src` \"lists it again and persist_scan_results creates child rows for its direct children\", but its own mechanism cannot do this: persist_scan_results creates children only in the expansion branch (is_expanding=True), while a first scan sets status='scanned' with should_create_children=False (frontier.py:1929-1941); expansion then claims only paths matching `status=triaged AND should_expand=true AND expanded_at IS NULL` (imas_codex/discovery/paths/parallel.py:547-549). `/analysis/src` already carries expanded_at (its children SAselene/edas2 exist), and grep of imas_codex/discovery finds no writer that ever clears expanded_at \u2014 create_nodes does `SET n += item` and the seed item omits the key, and neither PATH_RESET_SPECS entry clears it (imas_codex/discovery/base/reset.py:240-255). So the seeded re-listing cannot create the three trees and the section stops at its own fallback. The same section's first diagnostic is also unsupported: the facility `excludes:` block (imas_codex/config/facilities/jt-60sa.yaml:57-65) and the default patterns (imas_codex/config/patterns/exclude.yaml) hold no pattern matching `client_eqdbms.EQ32.Rev1` or `SAeqfame`, so there is nothing to narrow. The mechanism the section should name is already present \u2014 `seed_facility_roots(facility, root_paths=\u2026)` creates a row for each path passed (frontier.py:526-538), reached from the CLI as `discover paths jt-60sa --root <path>` (imas_codex/cli/discover/paths.py:258-265) \u2014 so passing the three leaf trees as roots seeds their rows directly.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/vector_search.py:17",
+      "id": "duplicate_owner-1",
+      "reason": "the author should name the module that owns the fragment \u2014 imas_codex/graph/vector_search.py already owns the rendered-Cypher helper set and is imported by both graph and discovery callers \u2014 so the three sites extend one owner rather than each importing a new one.",
+      "text": "\u00a719 says the `coalesce(ce.source_file, cc.source_file)` expression is \"extracted once as a rendered fragment beside the other shared Cypher helpers\" but never names where that is, and there is no such shared module: `build_vector_search` lives in imas_codex/graph/vector_search.py:17, the clause helpers in imas_codex/graph/dd_domain_classifier.py:359-1097, and the two existing copies of the expression sit in different packages (imas_codex/graph/domain_queries.py:483 and imas_codex/llm/search_tools.py:1659). A consolidation without a named owner can become a fourth location imported by a third package (discovery/signals), which is the duplicate the section exists to remove.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "32f40a65d4a4cbbe771868fcce8e29212954c272bb0288a9768a913087c70367",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 110,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:50:49.065241+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:50:48.353320+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T144300676603-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "f7101f0650f1f3f01cdc67fecd4f5a8bc3a9c310",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 neither open section adds a module that spreads complexity across shallow wrappers; \u00a719 is one consolidation plus one measurement, \u00a714 is a single operator run through existing paths.",
+    "duplicate_owner": "a finding \u2014 \u00a719 consolidates `coalesce(ce.source_file, cc.source_file)` into \"a rendered fragment beside the other shared Cypher helpers\" but names no owning module, and no single shared-Cypher-fragments module exists, so the fragment can land as a fourth location reachable from a third package.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a719 adds no CLI option, MCP view or refusal family and names the three sites it merges, and \u00a714 adds no interface, so nothing retires or is declined.",
+    "reuse_search": "a finding \u2014 \u00a714 reuses `discover paths --root` / `seed_facility_roots` but its account of what that machinery does is wrong: re-seeding the parent `/analysis/src` does not create child rows, and the existing capability to seed the three leaf trees directly is not named.",
+    "thin_wrapper": "pass \u2014 \u00a719's shared fragment is an extracted expression (not a wrapper over existing machinery) and matches the repo's existing rendered-Cypher helper pattern (`build_vector_search`, `_ids_filter_clause`); \u00a714 adds no layer at all."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:49:35.883473+00:00"
+}

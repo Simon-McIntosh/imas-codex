@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:_fetch_code_chunks",
+    "imas_codex/llm/search_tools.py:_search_code",
+    "imas_codex/llm/server.py:_search_code_chunks"
+  ],
+  "completed_at": "2026-10-05T16:53:31.589Z",
+  "dispatched_at": "2026-10-05T16:43:08Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "2233",
+      "severity": "follow-on",
+      "text": "follow-on: the reader tests assert the composed Cypher contains render_chunk_source's text, so they guard the wiring but not the runtime result \u2014 a wrong HAS_CHUNK direction or a coalesce binding the wrong value fails no test, and the live jt-60sa check is evidence rather than a regression guard."
+    },
+    {
+      "file": "imas_codex/llm/server.py",
+      "line": "617",
+      "severity": "follow-on",
+      "text": "follow-on: source_facility is now read from node.facility_id (the chunk) where the retired arm read the CodeFile's facility_id; for a chunk whose own facility_id differs from its CodeFile's the reported facility changes and no test pins the new source."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s): imas_codex/discovery/signals/parallel.py:_fetch_code_chunks, imas_codex/llm/search_tools.py:_search_code, imas_codex/llm/server.py:_search_code_chunks",
+    "diff": "read bb1f4911d in full \u2014 parallel.py swaps src.path for the renderer's source_path, server.py extracts _code_chunk_search_query embedding the renderer and drops the (sf:CodeFile)-[:HAS_CHUNK]->(node) arm, search_tools.py drops its inline coalesce arm for the renderer's identical binding, and the two test files add three pinning cases; no other path is touched.",
+    "done_when": "the done-when names each reader embedding the renderer, the rg 'CODE_EXAMPLE_ID|CodeFile\\)-\\[:HAS_CHUNK\\]|coalesce\\(.*source_file' imas_codex matching only the renderer, a live jt-60sa non-null source path recorded in the fragment, a pinning test per reader, and the gate exit 0; rg over imas_codex returned only imas_codex/graph/query_builder.py:89, gate.log records 312 passed / 8 skipped at EXIT=0, live-check.log shows source_path non-null for 3/3 rows, and three pinning tests were added.",
+    "goal": "the node's goal is to embed render_chunk_source in the three remaining CodeChunk source readers so each resolves a chunk's source through the one declared HAS_CHUNK edge; imas_codex/discovery/signals/parallel.py:206 renders it for ('node','source_path'), imas_codex/llm/server.py:613 for ('node','source_file') and imas_codex/llm/search_tools.py:1651 for ('cc','source_file'), and all three land.",
+    "manifest": "read; it declares status complete with commit bb1f4911d and records the gate and its logs, but baseline_suite and after_suite are both null, so the run names no suite arms and its own added-failure derivation is unmeasured \u2014 the count rests on the head gate log alone.",
+    "write_paths": "the declared write paths are three source modules, two test files, one fragment and a figures dir; git diff --name-only 065f651838b7ca9e31e1881bae15c9b14e7c7f59..bb1f4911db4a4a5af688378bc92f81605c50f506 returns exactly the three modules, the two tests and the fragment, so the diff is inside the fence and the figures dir is untouched."
+  },
+  "justifications": {
+    "durability": "the three added assertions redden if a reader stops embedding the renderer (negative-control.log fails tests/llm/test_search_tools.py:2233), but they pin only the composed Cypher text \u2014 no test asserts the runtime-resolved source path, so the live check is evidence rather than a guard.",
+    "evidence": "gate.log records 312 passed / 8 skipped at EXIT=0 and live-check.log records a non-null source_path for 3/3 jt-60sa rows, and I reproduced the arms independently (base 065f6518: 309 passed; head bb1f4911d: 312 passed), but the reviewed manifest names neither baseline_suite nor after_suite so its own added-failure count is unmeasured.",
+    "fit": "the readers splice one shared renderer and the new helper _code_chunk_search_query at server.py:603 is named by mechanism, with no plan, phase or version label in the diff.",
+    "goal_fidelity": "all three readers now embed render_chunk_source \u2014 parallel.py:206 (source_path), server.py:613 (source_file) and search_tools.py:1651 (source_file) \u2014 so 'every reader resolves through the one declared HAS_CHUNK edge' holds.",
+    "reuse": "the change extends the owner render_chunk_source at imas_codex/graph/query_builder.py:68 rather than forking it, and _code_chunk_search_query composes that owner rather than re-implementing source resolution.",
+    "scope_discipline": "git diff --name-only 065f6518..bb1f4911d returns exactly the three source modules, two test files and the fragment, all within the declared write paths, and the reviewed worktree is clean."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to embed render_chunk_source in the three remaining CodeChunk source readers so each resolves a chunk's source through the one declared HAS_CHUNK edge; imas_codex/discovery/signals/parallel.py:206 renders it for ('node','source_path'), imas_codex/llm/server.py:613 for ('node','source_file') and imas_codex/llm/search_tools.py:1651 for ('cc','source_file'), and all three land.\nVERDICT done_when: the done-when names each reader embedding the renderer, the rg 'CODE_EXAMPLE_ID|CodeFile\\)-\\[:HAS_CHUNK\\]|coalesce\\(.*source_file' imas_codex matching only the renderer, a live jt-60sa non-null source path recorded in the fragment, a pinning test per reader, and the gate exit 0; rg over imas_codex returned only imas_codex/graph/query_builder.py:89, gate.log records 312 passed / 8 skipped at EXIT=0, live-check.log shows source_path non-null for 3/3 rows, and three pinning tests were added.\nVERDICT write_paths: the declared write paths are three source modules, two test files, one fragment and a figures dir; git diff --name-only 065f651838b7ca9e31e1881bae15c9b14e7c7f59..bb1f4911db4a4a5af688378bc92f81605c50f506 returns exactly the three modules, the two tests and the fragment, so the diff is inside the fence and the figures dir is untouched.\nVERDICT manifest: read; it declares status complete with commit bb1f4911d and records the gate and its logs, but baseline_suite and after_suite are both null, so the run names no suite arms and its own added-failure derivation is unmeasured \u2014 the count rests on the head gate log alone.\nVERDICT diff: read bb1f4911d in full \u2014 parallel.py swaps src.path for the renderer's source_path, server.py extracts _code_chunk_search_query embedding the renderer and drops the (sf:CodeFile)-[:HAS_CHUNK]->(node) arm, search_tools.py drops its inline coalesce arm for the renderer's identical binding, and the two test files add three pinning cases; no other path is touched.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:_fetch_code_chunks, imas_codex/llm/search_tools.py:_search_code, imas_codex/llm/server.py:_search_code_chunks\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: all three readers now embed render_chunk_source \u2014 parallel.py:206 (source_path), server.py:613 (source_file) and search_tools.py:1651 (source_file) \u2014 so 'every reader resolves through the one declared HAS_CHUNK edge' holds.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate.log records 312 passed / 8 skipped at EXIT=0 and live-check.log records a non-null source_path for 3/3 jt-60sa rows, and I reproduced the arms independently (base 065f6518: 309 passed; head bb1f4911d: 312 passed), but the reviewed manifest names neither baseline_suite nor after_suite so its own added-failure count is unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 065f6518..bb1f4911d returns exactly the three source modules, two test files and the fragment, all within the declared write paths, and the reviewed worktree is clean.\nSCORE durability: 17\nJUSTIFICATION durability: the three added assertions redden if a reader stops embedding the renderer (negative-control.log fails tests/llm/test_search_tools.py:2233), but they pin only the composed Cypher text \u2014 no test asserts the runtime-resolved source path, so the live check is evidence rather than a guard.\nSCORE fit: 19\nJUSTIFICATION fit: the readers splice one shared renderer and the new helper _code_chunk_search_query at server.py:603 is named by mechanism, with no plan, phase or version label in the diff.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the owner render_chunk_source at imas_codex/graph/query_builder.py:68 rather than forking it, and _code_chunk_search_query composes that owner rather than re-implementing source resolution.\nFINDING tests/llm/test_search_tools.py:2233 follow-on: the reader tests assert the composed Cypher contains render_chunk_source's text, so they guard the wiring but not the runtime result \u2014 a wrong HAS_CHUNK direction or a coalesce binding the wrong value fails no test, and the live jt-60sa check is evidence rather than a regression guard.\nFINDING imas_codex/llm/server.py:617 follow-on: source_facility is now read from node.facility_id (the chunk) where the retired arm read the CodeFile's facility_id; for a chunk whose own facility_id differs from its CodeFile's the reported facility changes and no test pins the new source.",
+  "review_run_id": "r-20261005T164302443006-review-of-chunk-source-readers",
+  "reviewed_base_sha": "065f651838b7ca9e31e1881bae15c9b14e7c7f59",
+  "reviewed_head_sha": "bb1f4911db4a4a5af688378bc92f81605c50f506",
+  "reviewed_run_id": "r-20261005T162841853203-chunk-source-readers",
+  "reviewer_run_id": "r-20261005T164302443006-review-of-chunk-source-readers",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:51:36.222725+00:00",
+  "total": 114
+}

@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:2516 (scanner.scan)",
+    "imas_codex/discovery/signals/parallel.py:4665 (scanner.check)",
+    "imas_codex/discovery/signals/scanners/base.py:140",
+    "178 (get_scanner/get_scanners_for_facility registry)",
+    "imas_codex/cli/discover/signals.py:175 (discover signals entry point)"
+  ],
+  "completed_at": "2026-10-05T06:08:22.461Z",
+  "dispatched_at": "2026-10-05T06:01:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/signal-typed-slots.html",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the gate ran \"at b98b02a39\" and reports 59 passed (55 baseline + 4 new), but b98b02a39 is the base commit and predates the change, so its tree holds neither the typed slots nor tests/discovery/test_edas_scanner.py and a reader who checks out the cited revision cannot reproduce the stated result; the run's own gate log (/tmp/jt60sa-slots-tests.log:1) and the manifest both record the gate at 42c171fdd."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T055214976074-signal-typed-slots/manifest.md",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: test_logs names only the baseline and test logs, so the build-models/import-exposure arm of the gate -- the only recorded evidence that the gitignored regenerated models expose the new slots -- is not pointed at by a cited path even though /tmp/jt60sa-slots-build.log exists, leaving half the measure checkable only from the manifest's own prose."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against b98b02a39; one commit adds the enum and slots, routes the scanner's catalogue values from keywords into the slots, reads the data class back from the slot in check(), and adds four tests -- no production file outside the scanner and schema changed.",
+    "done_when": "the node's measure is the brief's gate -- build-models, an import assertion that the regenerated FacilitySignal exposes the slots, and three scanner test files green; the manifest records 59 passed EXIT=0 against a 55-passed baseline and /tmp/jt60sa-slots-tests.log carries the same summary line at rev=42c171fdd, and my independent re-run of the three named files reproduced 59 passed EXIT=0.",
+    "goal": "the goal is FacilitySignal carrying data_class, shot_range and pid as typed LinkML slots with the regenerated models exposing them and the EDAS scanner writing catalogue values to the slots instead of keywords; the diff adds the SignalDataClass enum and the three slots at imas_codex/schemas/facility.yaml:102,2240-2251, moves scan() onto the slots and check() onto the slot at imas_codex/discovery/signals/scanners/edas.py:199 and :280, and no live scan was attempted, so the goal is met.",
+    "manifest": "read; it records status complete, the change paths, the 59/55/EXIT=0 gate results, the negative-control log and a checkpoint, and its headline slot claims (SignalDataClass members, FacilitySignal field annotations) survive my own check of the regenerated models.",
+    "write_paths": "the manifest declares facility.yaml, the EDAS scanner, tests/discovery/test_scanners.py, tests/discovery/test_signal_checking.py, tests/discovery/test_edas_scanner.py and the evidence fragment; git show --stat 42c171fdd lists exactly four files -- facility.yaml (+28), edas.py (+29/-21), tests/discovery/test_edas_scanner.py (+156) and the evidence fragment (+22) -- every one inside the declared fence and no generated model staged."
+  },
+  "justifications": {
+    "durability": "reinstating the regression removes the new guards' protection -- /tmp/jt60sa-slots-negative-control.log:8-19,32-33 shows reverting the keyword-to-slot move in scan() reddens test_scan_populates_typed_slots and test_scan_keywords_carry_no_typed_values, and reverting check() to read keywords would send data_class \"\" instead of \"O\" and redden tests/discovery/test_edas_scanner.py:155.",
+    "evidence": "the gate measures the done_when and its result is recorded -- /tmp/jt60sa-slots-tests.log:41 (59 passed) and /tmp/jt60sa-slots-baseline.log (55 passed) at rev=42c171fdd, reproduced independently by me -- but the committed evidence fragment cites the wrong revision and the model-exposure arm is recorded in prose rather than a cited log.",
+    "fit": "the enum and slots follow the surrounding schema idiom at imas_codex/schemas/facility.yaml:99-108, the scanner keeps module-level mapping constants rather than a new wrapper, and no symbol, comment or commit subject carries a plan label, so the change reads as the repo's own style.",
+    "goal_fidelity": "the deliverable is met at imas_codex/discovery/signals/scanners/edas.py:199 (slots written) and :280 (slot read back), and the regenerated imas_codex/graph/models.py:2294,15433-15435 exposes SignalDataClass and all three fields, but the landed evidence fragment points a reader at the base revision, which does not contain the change.",
+    "scope_discipline": "git show --stat 42c171fdd lists only the four declared paths (facility.yaml, edas.py, test_edas_scanner.py, the evidence fragment) with no generated model and no file outside the fence, and the brief's \"do not edit parallel.py\" is honoured."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261005T055214976074-signal-typed-slots (imas-codex, plan jt60sa-discovery-completion section 2, node signal-typed-slots), base b98b02a39d6785497b7d1c8d3a4fb598ae51ad64, head 42c171fdd0b2be04ae2c7d9048b22627595a0b57.\nreviewed_base_sha: b98b02a39d6785497b7d1c8d3a4fb598ae51ad64\nreviewed_head_sha: 42c171fdd0b2be04ae2c7d9048b22627595a0b57\nVERDICT goal: the goal is FacilitySignal carrying data_class, shot_range and pid as typed LinkML slots with the regenerated models exposing them and the EDAS scanner writing catalogue values to the slots instead of keywords; the diff adds the SignalDataClass enum and the three slots at imas_codex/schemas/facility.yaml:102,2240-2251, moves scan() onto the slots and check() onto the slot at imas_codex/discovery/signals/scanners/edas.py:199 and :280, and no live scan was attempted, so the goal is met.\nVERDICT done_when: the node's measure is the brief's gate -- build-models, an import assertion that the regenerated FacilitySignal exposes the slots, and three scanner test files green; the manifest records 59 passed EXIT=0 against a 55-passed baseline and /tmp/jt60sa-slots-tests.log carries the same summary line at rev=42c171fdd, and my independent re-run of the three named files reproduced 59 passed EXIT=0.\nVERDICT write_paths: the manifest declares facility.yaml, the EDAS scanner, tests/discovery/test_scanners.py, tests/discovery/test_signal_checking.py, tests/discovery/test_edas_scanner.py and the evidence fragment; git show --stat 42c171fdd lists exactly four files -- facility.yaml (+28), edas.py (+29/-21), tests/discovery/test_edas_scanner.py (+156) and the evidence fragment (+22) -- every one inside the declared fence and no generated model staged.\nVERDICT manifest: read; it records status complete, the change paths, the 59/55/EXIT=0 gate results, the negative-control log and a checkpoint, and its headline slot claims (SignalDataClass members, FacilitySignal field annotations) survive my own check of the regenerated models.\nVERDICT diff: read commit by commit against b98b02a39; one commit adds the enum and slots, routes the scanner's catalogue values from keywords into the slots, reads the data class back from the slot in check(), and adds four tests -- no production file outside the scanner and schema changed.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:2516 (scanner.scan), imas_codex/discovery/signals/parallel.py:4665 (scanner.check), imas_codex/discovery/signals/scanners/base.py:140,178 (get_scanner/get_scanners_for_facility registry), imas_codex/cli/discover/signals.py:175 (discover signals entry point)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the deliverable is met at imas_codex/discovery/signals/scanners/edas.py:199 (slots written) and :280 (slot read back), and the regenerated imas_codex/graph/models.py:2294,15433-15435 exposes SignalDataClass and all three fields, but the landed evidence fragment points a reader at the base revision, which does not contain the change.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate measures the done_when and its result is recorded -- /tmp/jt60sa-slots-tests.log:41 (59 passed) and /tmp/jt60sa-slots-baseline.log (55 passed) at rev=42c171fdd, reproduced independently by me -- but the committed evidence fragment cites the wrong revision and the model-exposure arm is recorded in prose rather than a cited log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 42c171fdd lists only the four declared paths (facility.yaml, edas.py, test_edas_scanner.py, the evidence fragment) with no generated model and no file outside the fence, and the brief's \"do not edit parallel.py\" is honoured.\nSCORE durability: 19\nJUSTIFICATION durability: reinstating the regression removes the new guards' protection -- /tmp/jt60sa-slots-negative-control.log:8-19,32-33 shows reverting the keyword-to-slot move in scan() reddens test_scan_populates_typed_slots and test_scan_keywords_carry_no_typed_values, and reverting check() to read keywords would send data_class \"\" instead of \"O\" and redden tests/discovery/test_edas_scanner.py:155.\nSCORE fit: 19\nJUSTIFICATION fit: the enum and slots follow the surrounding schema idiom at imas_codex/schemas/facility.yaml:99-108, the scanner keeps module-level mapping constants rather than a new wrapper, and no symbol, comment or commit subject carries a plan label, so the change reads as the repo's own style.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/signal-typed-slots.html:18 follow-on: the fragment states the gate ran \"at b98b02a39\" and reports 59 passed (55 baseline + 4 new), but b98b02a39 is the base commit and predates the change, so its tree holds neither the typed slots nor tests/discovery/test_edas_scanner.py and a reader who checks out the cited revision cannot reproduce the stated result; the run's own gate log (/tmp/jt60sa-slots-tests.log:1) and the manifest both record the gate at 42c171fdd.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T055214976074-signal-typed-slots/manifest.md:14 follow-on: test_logs names only the baseline and test logs, so the build-models/import-exposure arm of the gate -- the only recorded evidence that the gitignored regenerated models expose the new slots -- is not pointed at by a cited path even though /tmp/jt60sa-slots-build.log exists, leaving half the measure checkable only from the manifest's own prose.\nFINAL: SOUND WITH FINDINGS. The change does what the node set out to do: the EDDB catalogue's data class, shot range and PID are now typed LinkML slots on FacilitySignal, the scanner routes the values into them and reads the class back from the slot, and the keywords stopgap is gone. The gate is recorded and reproduces green independently (59 passed, EXIT=0), and a negative control shows the new guards fire. The two findings are documentation defects on a landed deliverable, not code defects: the evidence fragment cites the base revision rather than the head it measured, and the model-exposure arm is not cited by path. Neither blocks landing; both are cheap follow-ons.\n",
+  "review_run_id": "r-20261005T060100948566-review-of-signal-typed-slots",
+  "reviewed_base_sha": "b98b02a39d6785497b7d1c8d3a4fb598ae51ad64",
+  "reviewed_head_sha": "42c171fdd0b2be04ae2c7d9048b22627595a0b57",
+  "reviewed_run_id": "r-20261005T055214976074-signal-typed-slots",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:07:19.161839+00:00",
+  "total": 95,
+  "verdict": "SOUND WITH FINDINGS"
+}

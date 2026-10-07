@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T06:51:16.656Z",
+  "dispatched_at": "2026-10-06T06:47:54Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/prompt_loader.py:214",
+      "id": "reuse_search-1",
+      "reason": "the guard node should anchor on the generator it already depends on (assert get_pydantic_schema_json(model) appears in render_prompt(name), or compare the parsed keys against the generator's output) instead of re-deriving the block's format.",
+      "text": "\u00a723's guard node plans to hand-extract the JSON example from the rendered prompt and parse it, but get_pydantic_schema_json already generates that block (the shared partials render its output verbatim via {{ <name>_schema_example }}), so the parse duplicates knowledge of the block's fencing/indentation that the generator owns and drifts if the partial's framing changes",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4868add45cac6571e3b5119ff2bb4cedf997a2d671d3902e8b822eab9a21e1fd",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 181,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T064748931776-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "95b2764fecc220eacb0b050371fa8c4095401b11",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the only new module-level mechanism the plan adds is a consolidation: render_path_prefix_clause in imas_codex/graph/query_builder.py:268 is a single small renderer that replaces five hand-wired path claims, two code-scan claims and the reset's inline clause, a net reduction in surface rather than a spread of shallow wrappers.",
+    "duplicate_owner": "pass \u2014 the plan consolidates rather than forks: reset_to_status renders its own prefix scope through render_path_prefix_clause, discover paths passes its --root list, discover code its --path-prefix list, and no second prefix-predicate owner is introduced beside imas_codex/graph/query_builder.py:268.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 accounts for its one added public definition (render_path_prefix_clause) by naming the five inline copies it retires, reuses the existing --root/--path-prefix/--reset-to options, and \u00a723 retires a prompt file (signals/individualization.md) and edits a test, adding no interface family.",
+    "reuse_search": "a finding \u2014 the plan cites existing machinery well throughout (\u00a714 names seed_facility_roots/get_facility/reset_to_status/CODE_RESET_SPECS/render_path_prefix_clause; \u00a723 names load_prompts/_register_prompts/render_prompt and the guard test), but \u00a723's guard node proposes to extract and parse the JSON example out of the rendered prose without naming get_pydantic_schema_json in imas_codex/llm/prompt_loader.py, the owner that already generates that exact block.",
+    "thin_wrapper": "pass \u2014 \u00a714 extends reset_to_status (imas_codex/discovery/base/reset.py:59) with a path_prefixes argument and justifies the extension in its own text (\"callers pass only the list and stop hand-wiring the clause\"); \u00a723 tightens an existing test rather than wrapping a mechanism, and neither adds a layer over machinery it does not extend."
+  },
+  "section_digests": {
+    "_document": "938a528d8f1f64359857d0297d48e6a576691afea161ad457db225b32aae5a49",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "f2655710d4eb8d7535c00033afdb8672adbfbcd5e9608800d5d329e50bdd54f2",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "03330d59efaeba14589e4af6fdbc822bc3e0f200c48ccafc83d82289d99ccd99",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T06:55:57.882742+00:00"
+}

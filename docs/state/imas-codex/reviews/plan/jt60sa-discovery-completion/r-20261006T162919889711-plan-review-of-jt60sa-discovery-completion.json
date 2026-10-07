@@ -1,0 +1,99 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T16:35:04.408Z",
+  "dispatched_at": "2026-10-06T16:29:26Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/query_builder.py:282",
+      "id": "reuse_search-1",
+      "reason": "the author would delete or mark landed the helper and code-claims nodes rather than dispatch work that is already in the tree, which the plan's own \u00a714 text otherwise presents as pending.",
+      "text": "\u00a714 states it will \"add one helper beside the renderer in `imas_codex/graph/query_builder.py` that returns the clause and its parameters together for an alias and a prefix list, and returns an empty clause and no parameters when the list is empty\", but `build_path_prefix_filter(alias, prefixes, *, negated=False, param=\"prefixes\")` already exists at query_builder.py:282 (commit bbbd783a8) and returns exactly `(clause, {param: list(prefixes)})`, empty when the list is empty; every code claim already calls it \u2014 imas_codex/discovery/code/graph_ops.py:133,308,406,495,593,636,663,696,732,762; imas_codex/discovery/code/workers.py:567; imas_codex/discovery/paths/parallel.py:501,562,624,747,832; and its own test tests/graph/test_path_prefix_filter.py. \u00a714's \"code-claims node\" (thread the prefix list through every code claim and all five has-work predicates) is therefore already landed: `has_pending_scan_work`, `has_pending_triage_work`, `has_pending_enrich_work`, `has_pending_score_work`, `has_pending_code_work` and `has_pending_link_work` all take `path_prefixes` and render through the helper (graph_ops.py:579,627,655,682,717,754).",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/client.py:605",
+      "id": "duplicate_owner-1",
+      "reason": "the author would collapse \u00a714's seed-fix, seed-count and reset-width nodes as already committed, leaving only the genuinely open items (the scoped paths/code runs and the sensor-order receipt).",
+      "text": "\u00a714 states \"the node extends that owner with a create-only option, off by default, which sets node properties only when the node is created, through the `ON CREATE SET` form\", but `GraphClient.create_nodes(..., create_only: bool = False)` already exists at client.py:605\u2013611, defaults off, documents \"apply properties only when the node is created (ON CREATE SET), leaving an existing node's properties untouched\", and already implements \u00a714's \"seed-count node\" \u2014 it returns `\"created\": N, the number of nodes this call actually created` (client.py:626,687). The reset owner already carries \u00a714's other additions: `ResetSpec.source_filter` at imas_codex/discovery/base/reset.py:38 and `reset_to_status(..., path_prefixes=\u2026)` at reset.py:72, rendering `n.status IN $source_statuses OR (<source_filter>)` at reset.py:104. And \u00a714's retirements are done: `seed_missing_roots` and `create_child_paths` no longer exist anywhere in `imas_codex/`. The stale text also contradicts itself, describing the seed-fix as landed (\"merge 4a207b209\") while the create-only option it landed is presented as forthcoming.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b3e42e542ca41aa9b4f4219d7c7df07c77d23391d7b92d0873b426626e04f5d7",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 249,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-1",
+      "reason": "\u00a714 is a cumulative landing record: the helper, the create-only option, the reset source filter and the retirements it describes landed in its recorded merges (63ad2a459, 4a207b209 and the seed and reset nodes), and the section's comments and evidence name each landing. The prose reads as prospective, but no code change and no node follows from it, and \u00a725's dispatch does not depend on it.",
+      "when": "2026-10-06T16:36:01.105917+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "\u00a714 is a cumulative landing record: the helper, the create-only option, the reset source filter and the retirements it describes landed in its recorded merges (63ad2a459, 4a207b209 and the seed and reset nodes), and the section's comments and evidence name each landing. The prose reads as prospective, but no code change and no node follows from it, and \u00a725's dispatch does not depend on it.",
+      "when": "2026-10-06T16:36:03.615901+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "\u00a714 is a cumulative landing record: the helper, the create-only option, the reset source filter and the retirements it describes landed in its recorded merges (63ad2a459, 4a207b209 and the seed and reset nodes), and the section's comments and evidence name each landing. The prose reads as prospective, but no code change and no node follows from it, and \u00a725's dispatch does not depend on it.",
+      "when": "2026-10-06T16:36:03.615901+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "\u00a714 is a cumulative landing record: the helper, the create-only option, the reset source filter and the retirements it describes landed in its recorded merges (63ad2a459, 4a207b209 and the seed and reset nodes), and the section's comments and evidence name each landing. The prose reads as prospective, but no code change and no node follows from it, and \u00a725's dispatch does not depend on it.",
+      "when": "2026-10-06T16:36:01.105917+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-discovery-completion.v249.json",
+  "review_run_id": "r-20261006T162919889711-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "92996490b9b2bf7dda9eb2a385c71c040f69cf6e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a725 hides the decisions transport, retry and validation behind `call_decisions`/`acall_decisions` placed beside `call_llm_structured` in its existing owner `imas_codex/discovery/base/llm.py.",
+    "duplicate_owner": "a finding \u2014 \u00a714 re-describes four shared owners whose mechanisms already exist (`imas_codex/graph/query_builder.py`, `imas_codex/graph/client.py`, `imas_codex/discovery/base/reset.py`, `imas_codex/discovery/paths/frontier.py`) instead of citing them, and two named retirements (`seed_missing_roots`, `create_child_paths`) are already gone.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a725's \"Interface account\" names its eleven retired CodeFile fields, the retired `code/triage.md` rubric, the retired `discovery-triage` seat use and `--min-score` ingest meaning, and the added call functions, seat, settings and fields; \u00a714 names its own retirements (`seed_missing_roots` retired, `create_child_paths` deleted).",
+    "reuse_search": "a finding \u2014 \u00a714's still-pending nodes describe machinery that already exists and is committed in the tree, and the plan cites none of it: `build_path_prefix_filter` (the clause+params helper \u00a714 says it will \"add\"), `create_nodes(create_only=\u2026)` (\u00a714's \"create-only option, off by default\"), and `ResetSpec.source_filter`/`reset_to_status(path_prefixes=\u2026)` (both \u00a714 says the spec/function \"gains\").",
+    "thin_wrapper": "pass \u2014 \u00a725 justifies its one extraction (`_service_headers`) by naming the two call sites that share it, and \u00a714 explains why `extra_filter` cannot carry the widened reset (AND-append vs OR) rather than wrapping it."
+  },
+  "section_digests": {
+    "_document": "4667c0f839247f9db145897bdbd9716823d2212f97e5ae64f5a1f0b351eb69df",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "ea093845012af148321609dc0ccef4ad78f3fc5209bb8e337d40245f676f6968",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "c014d9c0b2fec663e1f07a721658d81f134c0c13da9253f2574652517102a7d1",
+    "s25": "fddade6c26bf716d08b1f5c489edf9e5fcfaec11db25fb44c8d56f9d89d0adc2",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T16:35:58.938320+00:00"
+}

@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. The reviewed manifest records no baseline_suite and no after_suite arm (this is a scoped discovery-run node, not an armed test node), so the derivation falls back to the run's own gate. The gate here is the scoped discovery run itself: run.stdout (probe/run.stdout) ends with `Discovery complete: scanned=13, scored=10, cost=$0.000, elapsed=19m 55s`, `Graph state: total=8359, scored=3753 (44.9%), pending=0`, and a bare `EXIT=0`; the run-window log carries 0 ERROR/Traceback/abort lines and no failing test id. There is no separate base arm. added_failures over that single readable head arm returns 0 with no ids. The commit changes only an evidence fragment under docs/, so no code is under test and no suite run is owed (Test Execution Protocol: nothing the tests cover changed). This review independently reproduced the run's effect against the live graph (compare.py over the run's own before.json/after.json plus a fresh Cypher read) rather than re-running the discovery, which would be an unscoped live change.",
+  "base_log_revision": null,
+  "base_log_revision_arm": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T07:33:47.306Z",
+  "dispatched_at": "2026-10-06T07:25:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the \u00a714 narrative says the partial first run left 'twelve child directories at scanned', but the measured before-state is seven scanned of twelve total (three+two+two per tree); the node's fragment records this honestly and the observed end state (0 scanned) satisfies the done-when, so the plan's count should be corrected in writeback rather than the run changed."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the three tree roots regressed scored -> discovered during the run (the re-seed sets status=discovered on existing seed rows) and were not re-scored before the run's time bound; this is inside the three trees so it does not violate the outside=0 rule, but the roots now read discovered rather than scored and need re-scoring for the trees to read fully scored."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's evidence note calls the seven abort/malformed log lines 'logged today' when three are from 2026-03-12 (10:00-11:03); the load-bearing claim \u2014 none in this run's 09:00-09:20 window \u2014 is correct and independently confirmed."
+    }
+  ],
+  "head_log_revision": "7b6d8e11c41499cfcade4ced24d751f4226cca4f",
+  "item_aggregate": 1,
+  "item_verdicts": {
+    "call_sites": "n/a \u2014 a scoped discovery run plus its evidence fragment; no production call site is added or changed. The mechanism it exercises (seeded roots + prefix-scoped claims) is unchanged from the code-reset node's renderer work.",
+    "diff": "one new file: docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html, 46 added lines; no source, config or graph write anywhere in the diff (253de5f69..7b6d8e11).",
+    "done_when": "\u00a714's paths-resume node is done when (a) the twelve child directories have left scanned, (b) the count of jt-60sa rows outside the three trees whose status changed reads 0, and (c) spend is $0. All three hold: the before/after snapshots show 0 scanned rows under all three trees with the seven scanned-before children moved to scored, the outside-change set is empty (0 changed / 0 added / 0 deleted, total 8339 -> 8359 with all 20 new rows inside the trees), and the run reports cost=$0.000. This review reproduced (a) and (b) from the run's own JSON and from a fresh live-graph query.",
+    "goal": "\u00a714's paths-resume node re-runs the scoped paths discovery after the \u00a722 abort repair so the child directories the partial first run left at scanned are processed, with the same three --root flags and --time 20 and never with --reset-to/--add-roots/--root /analysis/src. The command at 7b6d8e11 (probe/run_paths.sh) matches token-for-token and every scanned child reached scored.",
+    "manifest": "the run's manifest is present, complete and self-consistent; its tests, test_logs, artifacts agree with the commit subject, the fragment and the run log it names, and commit 7b6d8e11 adds no source. The declared negative control (a Cypher count of jt-60sa FacilityPath rows whose path is exactly /analysis/src reads 0) is a real observable and this review reproduced it.",
+    "write_paths": "the diff 253de5f69..7b6d8e11 touches exactly docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html, within the node's granted paths; the worktree at 7b6d8e11 is clean; docs/figures/jt60sa-discovery-completion/equilibrium-tree-paths-resume (also granted) is untouched, correct for a node whose done-when names no figure and whose fragment carries a status table."
+  },
+  "justifications": {
+    "durability": "the graph effect is durable and I verified it against the live graph, and the fragment is committed and self-contained; the deduction is that this run's re-seed of the three roots set them from scored back to discovered \u2014 create_nodes sets status=discovered on existing seed rows \u2014 and they were not re-scored before the run's time bound, so the three tree roots now read discovered rather than scored. That is a real side effect the node disclosed as a follow-on; a live-run node pins nothing in a test.",
+    "evidence": "I reproduced every load-bearing claim at the reviewed head: compare.py over the run's own probe/before.json and probe/after.json yields exactly the fragment's per-tree table and the 7/7 scanned-to-scored transition with 0 outside changes; a fresh live-graph query reads total 8359, 0 scanned rows under any tree, all seven originally-scanned children scored, and 0 rows with path exactly /analysis/src; the CLI log confirms the 4 abort lines from today are at 06:44-06:47, before this node launched, with 3 more from 2026-03-12, and none in the 09:00-09:20 window. Deductions: the manifest overstates 'the 7 abort/malformed lines logged today' (three are from March), and the plan narrative's 'twelve scanned' is reconciled against the plan rather than the node.",
+    "fit": "the commit is a conventional `docs(evidence):` with a body stating what changed and why; no plan label, phase name, ticket number or author attribution appears in the commit or the fragment; the fragment element ids all open with the node id (equilibrium-tree-paths-resume-record/-counts/-children/-evidence).",
+    "goal_fidelity": "the plan's paths-resume node is implemented exactly as written at 7b6d8e11: the command carries the three --root flags and --time 20, records 0 rows outside the three trees changed and $0 spend, and every child that sat at scanned moved to scored; one point held back because the fragment states the finish_reason outcome materially (0 aborts) but not under that label.",
+    "reuse": "no abstraction is added; the node re-used the existing seeded-root and prefix-scoped discovery mechanism (seed_facility_roots, the scoped claims) unchanged.",
+    "scope_discipline": "the diff is a single added fragment; the run carried exactly the three named roots with no reset and no add-roots, changed no jt-60sa row outside them, and left the worktree clean at 7b6d8e11."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a714's paths-resume node re-runs `discover paths jt-60sa` scoped to the three equilibrium tree roots after the \u00a722 abort repair, so the child directories the partial first run left at scanned are processed; the run at 7b6d8e11 executed exactly that command and every child left scanned.\nVERDICT done_when: the twelve children are all off scanned (the seven that were scanned moved to scored, the other five were already triaged/skipped), the count of jt-60sa rows outside the three trees whose status changed reads 0 (0 changed, 0 added, 0 deleted), and spend is $0 \u2014 all three hold and this review reproduced each from before.json/after.json and the live graph.\nVERDICT write_paths: the diff 253de5f69..7b6d8e11 touches exactly one file, the evidence fragment; the worktree is clean; the granted figures directory is untouched.\nVERDICT manifest: complete and self-consistent; landing, changed_paths, artifacts and tests agree with the diff, the run log (EXIT=0) and the before/after snapshots; the declared negative control (/analysis/src rows = 0) reproduces.\nVERDICT diff: one new file, docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html, 46 added lines; no source, config or graph change.\nVERDICT call_sites: n/a \u2014 a scoped discovery run plus its evidence fragment; no production call site is added or changed.\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 20\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: the command matches the plan token-for-token (three --root flags, --time 20, no --reset-to, no --add-roots, no --root /analysis/src) and the substantive done-when holds \u2014 0 scanned rows under all three trees, 0 outside rows changed, $0 spend; one point held back because the plan asks the fragment to record the run's finish_reason outcomes and the fragment records the material outcome (0 aborted/malformed replies) without the literal finish_reason framing.\nJUSTIFICATION evidence: I reproduced every headline claim independently \u2014 compare.py over the run's own before.json/after.json yields exactly the fragment's per-tree table and the 7/7 scanned-to-scored transition, and a fresh live-graph query reads total 8359, 0 scanned rows under any tree, all seven originally-scanned children scored, and 0 rows with path exactly /analysis/src; the run window (09:00-09:20 local) carries 0 ERROR/Traceback/abort lines and EXIT=0. Two deductions: the manifest says the seven abort lines are 'logged today' while three are from 2026-03-12 (the in-window claim is unaffected), and one finding (the plan's 'twelve scanned' narrative) reconciles against the plan rather than the node.\nJUSTIFICATION scope_discipline: the diff is a single added fragment; the run carried exactly the three named roots, changed no row outside them, and used no reset; the worktree is clean at 7b6d8e11.\nJUSTIFICATION durability: the graph effect is durable and verified live, and the fragment is committed; the deduction is that this run's re-seed of the three roots set them from scored back to discovered (create_nodes sets status=discovered on existing seed rows) and they were not re-scored, so the tree roots now read discovered rather than scored \u2014 a real side effect the node honestly disclosed as a follow-on, and one that no test can pin (a live-run node).\nJUSTIFICATION fit: conventional `docs(evidence):` subject with a body stating what changed and why; no plan label, phase name, ticket number or author attribution in the commit or the fragment; the fragment element ids all open with the node id.\nJUSTIFICATION reuse: no abstraction is added; the node reused the existing seeded-root and prefix-scoped discovery mechanism unchanged.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html:0 follow-on: the \u00a714 narrative says the partial first run left 'twelve child directories at scanned', but the measured before-state is seven scanned of twelve total (three+two+two per tree); the node's fragment records this honestly and the observed end state (0 scanned) is what the done-when requires, so the plan's count should be corrected in writeback rather than the run changed.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html:0 follow-on: the three tree roots regressed scored -> discovered during the run (the re-seed sets status=discovered on existing rows) and were not re-scored before the run's time bound; inside the three trees so it does not violate the outside=0 rule, but the roots now need re-scoring for the trees to read fully scored.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-tree-paths-resume.html:0 follow-on: the reviewed manifest's evidence note calls the seven abort/malformed log lines 'logged today' when three are from 2026-03-12; the load-bearing claim (none in this run's 09:00-09:20 window) is correct.\nreviewed_base_sha: 253de5f6939753840a34a8d61887e7acf77e4cef\nreviewed_head_sha: 7b6d8e11c41499cfcade4ced24d751f4226cca4f\n",
+  "review_run_id": "r-20261006T072500925032-review-of-equilibrium-tree-paths-resume",
+  "reviewed_base": "253de5f6939753840a34a8d61887e7acf77e4cef",
+  "reviewed_base_sha": "253de5f6939753840a34a8d61887e7acf77e4cef",
+  "reviewed_commit": "7b6d8e11c41499cfcade4ced24d751f4226cca4f",
+  "reviewed_head_sha": "7b6d8e11c41499cfcade4ced24d751f4226cca4f",
+  "reviewed_run_id": "r-20261006T065557576295-equilibrium-tree-paths-resume",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:37:32.914386+00:00",
+  "total": 113
+}

@@ -1,0 +1,48 @@
+{
+  "absent": [],
+  "backend": "codex",
+  "completed_at": "",
+  "dispatched_at": "2026-09-15T19:22:06.157063+00:00",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "14",
+      "text": "the catalog validation receipt is vacuous because the reviewed worktree contains zero standard-name YAML entries; it proves that the pinned 0.9.3 tool installs and exits cleanly, but not that the forthcoming WEST catalog validates under that grammar, so the downstream populated-catalog gate remains required."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": "22",
+      "text": "no automated assertion requires the intended published grammar version itself; uv lock --check catches a pyproject/lock mismatch, but a coordinated downgrade of both files would remain green, so durability is partial rather than complete."
+    },
+    {
+      "file": "AGENTS.md",
+      "line": "51",
+      "text": "repository guidance says uv.lock is only gitignored and must not be added, while uv.lock is tracked and this node's exact done-when required regenerating it; the reviewed change correctly followed the exact node contract and established pin-update history, but the stale guidance can misdirect the next pin bump."
+    }
+  ],
+  "justifications": {
+    "durability": "pyproject.toml:22 and uv.lock:492 are mutually checked by uv lock --check and consumed by the catalog workflow, but no test rejects a coordinated regression of both files away from the intended 0.9.3 grammar.",
+    "evidence": "manifest.md:8 and the retained stream receipts record uv lock --check exit 0, a 0.9.3 lock entry, pinned-tool version 0.9.3, and both validation exits 0, but manifest.md:14 correctly concedes that validation saw zero catalog entries.",
+    "fit": "pyproject.toml:17-23 preserves the repository's stable exact-pin idiom and the commit follows repeated pyproject-plus-lock pin updates, although AGENTS.md:51-62 still contradicts the tracked-lock practice the exact node contract required.",
+    "goal_fidelity": "pyproject.toml:22 pins imas-standard-names[quality,docs] to 0.9.3 and uv.lock:492 resolves the same version, exactly satisfying the source node's one-sentence deliverable.",
+    "scope_discipline": "the diff from 61c6cc831abcebb012aa500c2dccd5e2af68c82d to dc7214c53dbd444a1ad8225f7f281b9b14bca7fb changes only pyproject.toml and uv.lock, both declared at manifest.md:3, with no unrelated payload."
+  },
+  "model": "gpt-5.6-sol",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: pyproject.toml:22 pins imas-standard-names[quality,docs] to 0.9.3 and uv.lock:492 resolves the same version, exactly satisfying the source node's one-sentence deliverable.\nSCORE evidence: 17\nJUSTIFICATION evidence: manifest.md:8 and the retained stream receipts record uv lock --check exit 0, a 0.9.3 lock entry, pinned-tool version 0.9.3, and both validation exits 0, but manifest.md:14 correctly concedes that validation saw zero catalog entries.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff from 61c6cc831abcebb012aa500c2dccd5e2af68c82d to dc7214c53dbd444a1ad8225f7f281b9b14bca7fb changes only pyproject.toml and uv.lock, both declared at manifest.md:3, with no unrelated payload.\nSCORE durability: 12\nJUSTIFICATION durability: pyproject.toml:22 and uv.lock:492 are mutually checked by uv lock --check and consumed by the catalog workflow, but no test rejects a coordinated regression of both files away from the intended 0.9.3 grammar.\nSCORE fit: 18\nJUSTIFICATION fit: pyproject.toml:17-23 preserves the repository's stable exact-pin idiom and the commit follows repeated pyproject-plus-lock pin updates, although AGENTS.md:51-62 still contradicts the tracked-lock practice the exact node contract required.\nFINDING manifest.md:14 the catalog validation receipt is vacuous because the reviewed worktree contains zero standard-name YAML entries; it proves that the pinned 0.9.3 tool installs and exits cleanly, but not that the forthcoming WEST catalog validates under that grammar, so the downstream populated-catalog gate remains required.\nFINDING pyproject.toml:22 no automated assertion requires the intended published grammar version itself; uv lock --check catches a pyproject/lock mismatch, but a coordinated downgrade of both files would remain green, so durability is partial rather than complete.\nFINDING AGENTS.md:51 repository guidance says uv.lock is only gitignored and must not be added, while uv.lock is tracked and this node's exact done-when required regenerating it; the reviewed change correctly followed the exact node contract and established pin-update history, but the stale guidance can misdirect the next pin bump.",
+  "review_run_id": "r-20260915T192206157063-review-of-n-swcr-the-catalog-pin-reaches-the-published-grammar",
+  "reviewed_base": "61c6cc831abcebb012aa500c2dccd5e2af68c82d",
+  "reviewed_commit": "dc7214c53dbd444a1ad8225f7f281b9b14bca7fb",
+  "reviewed_run_id": "r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-15T19:26:38Z",
+  "total": 87
+}

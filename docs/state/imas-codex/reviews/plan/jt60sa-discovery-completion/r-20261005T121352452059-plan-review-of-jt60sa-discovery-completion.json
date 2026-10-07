@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T12:19:10.002Z",
+  "dispatched_at": "2026-10-05T12:13:57Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/search_tools.py:471",
+      "id": "reuse_search-1",
+      "reason": "the plan's live done-when would be verified against an index name that does not exist, and the owner that rebuilds it derives the real name from the schema, so the plan text must use it.",
+      "text": "\u00a716 names the FacilitySignal index `facility_signal_embedding`, but FacilitySignal carries a `description` slot so the schema-derived name is `facility_signal_desc_embedding` (schema.py:256 suffix rule; the live query at search_tools.py:471 already uses the `_desc_` form)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/reset.py:343",
+      "id": "reuse_search-2",
+      "reason": "the plan must name the CodeChunk specs it means or drop the code parenthetical, otherwise the stated invariant \"specs that clear embeddings also clear embed_failed_at\" is unsatisfiable as written.",
+      "text": "\u00a717 says add `embed_failed_at` to \"the existing specs that clear embeddings (signals and code)\", but no `CODE_RESET_SPECS` entry clears `embedding`/`embedded_at` and its specs target the `CodeFile` label while code embeddings live on `CodeChunk`/`CodeExample`, so the code half has no target",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:151",
+      "id": "duplicate_owner-1",
+      "reason": "naming the second owner and switching it to the `facility_id` property the annotation pre-filters on keeps one facility-filter mechanism instead of two divergent ones, which is exactly the fork the item exists to prevent.",
+      "text": "\u00a716 applies the in-index facility pre-filter to three `search_tools.py` searches but leaves the same facility post-filter over the same `facility_signal_desc_embedding` (domain_queries.py:151) and `wiki_chunk_embedding` (domain_queries.py:285) indexes in `domain_queries.py`, which is reached through the MCP server's REPL surface (llm/server.py:615) and post-filters by an `AT_FACILITY` relationship predicate that cannot live inside `SEARCH`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "88aee34880078e87df66a5b00a9bff8a753c597d6b6fd5c3e7da68f5289bbe88",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 84,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:20:19.318055+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:20:18.247138+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:20:18.807124+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T121352452059-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "3b46556d2e19c304b5e58c0667be6bdd5e5b4608",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no new module; every remaining node extends a named existing owner, and \u00a79's `persist_data_access` hides one MERGE behind a single function rather than spreading the writer across call sites.",
+    "duplicate_owner": "a finding \u2014 \u00a716 unifies the facility pre-filter over `facility_signal_desc_embedding` and `wiki_chunk_embedding` in `imas_codex/llm/search_tools.py` but leaves the parallel facility post-filter over the same two indexes in `imas_codex/graph/domain_queries.py` unreconciled.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a716 (\"nothing added; the over-fetch constant is retired\") and \u00a717 (\"nothing added; the manual-clear instruction \u2026 is retired\") each account for their surface in their own text, and \u00a79 and \u00a714 add no CLI option, MCP view, or refusal family.",
+    "reuse_search": "a finding \u2014 the plan cites owners for each mechanism it extends (\u00a714's `--root`, \u00a716's \u00a712 `vector_index_filters` annotation + `GraphClient.ensure_vector_indexes`, \u00a717's `embed_worker` + reset specs, \u00a79's `probe_remote_environment` and the parallel.py writers) and those citations mostly hold, but two name machinery that does not exist as described (\u00a716's FacilitySignal index name and \u00a717's code reset specs).",
+    "thin_wrapper": "pass \u2014 the plan adds no new layer over existing machinery: \u00a717 says \"Extend the owner rather than add beside it\", \u00a716 extends the \u00a712 annotation and `build_vector_search`, and \u00a79 consolidates two writers into one rather than wrapping either."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:19:26.570690+00:00"
+}

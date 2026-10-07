@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T08:26:27.250Z",
+  "dispatched_at": "2026-10-05T08:21:24Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/wiki/pipeline.py:396",
+      "id": "deep_module-1",
+      "reason": "the plan must name the one call site in the wiki scoring/chunk-writing path that invokes the rule, or the section ships surface that no run reaches.",
+      "text": "\u00a73(b) says \"the wiki scorer gains a dynamic-page rule\", but the rule was built as five standalone helpers \u2014 detect_dynamic_page (:338), its private _is_header_only_form predicate, dynamic_page_stub (:353), fronts_databases_for_topic (:368) and apply_dynamic_page_rule (:396) \u2014 and grep over imas_codex/ (excluding tests) shows only the definition site and the __all__ list reference apply_dynamic_page_rule; scoring.py carries no call and the wiki pipeline never invokes it, so the complex behaviour \u00a73 describes is spread across shallow functions that hide nothing behind a single entry point and are operator-invoked rather than pipeline-invoked",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:2280",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a79's done-when (\"ingest_discovered_signals owns the DataAccess write and seed_worker carries no inline DataAccess MERGE\") reverses a landed ordering fix unless the write is kept reachable with zero signals and the MDSplus branch produces a DataAccess the owner can take.",
+      "text": "\u00a79(b) moves the DataAccess node write to \"beside the edge merge in ingest_discovered_signals\", but ingest_discovered_signals returns 0 at :2290 when its signal list is empty and its sole caller gates on `if result.signals` (:2584), so a scanner that returns access metadata without signals \u2014 exactly the case the landed \u00a77 write at :2546 was placed to serve (its comment at :2546-2551 says so) \u2014 would lose its DataAccess writer; separately, the MDSplus branch constructs its DataAccess inline at :2483 and never produces the ScanResult.data_access the new argument requires, so the \"one writer\" cannot be reached from that branch either",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4d1bcf3711507112d6c8d8b56abc3e0e75faa835c5a14ed1bba89fb77bd778bb",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 45,
+  "project": "imas-codex",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T08:38:54.927993+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T08:38:55.427242+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T082121408754-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "a448d7759b09b4e955b873af70384d647e914661",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a73's dynamic-page handling is a spread of five shallow helpers over one mechanism with no production entry point, so the interface \u00a73 says the scorer gains delivers no behaviour.",
+    "duplicate_owner": "a finding \u2014 \u00a79(b) consolidates the DataAccess write onto ingest_discovered_signals, but that owner cannot hold the write for the thin-client case \u00a77 deliberately separated, so the consolidation as written regresses a landed fix.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the only sections adding surface are \u00a72 (three FacilitySignal slots plus the SignalDataClass enum) and \u00a73 (the fronts_database property), and each states in its own text what it retires (the prototype class:/shots:/udpid: keyword parking) or why nothing can be retired (no existing WikiPage property records the database a rendered page is backed by).",
+    "reuse_search": "pass \u2014 the plan searched the codebase it extends and cites the owners: \u00a73 reuses link_chunks_to_entities and the existing WikiChunk-[:DOCUMENTS]->FacilitySignal edge (imas_codex/discovery/wiki/pipeline.py:469, merge at :552-568) rather than adding a DOCUMENTED_IN edge, \u00a73(c)/\u00a72 extend the existing EDAS scanner (imas_codex/discovery/signals/scanners/edas.py:53) rather than a sibling, and \u00a710 extends remote.locations.resolve_service_url (imas_codex/remote/locations.py:206) by deleting the graph client's copy.",
+    "thin_wrapper": "pass \u2014 the plan removes wrappers rather than adding them: \u00a79(a) collapses two probe call sites into one and \u00a710 deletes _slurm_service_uri; where it does extend (\u00a72 typed slots, \u00a73 property), it justifies the extension against the mechanism it replaces."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T08:38:02.194028+00:00"
+}

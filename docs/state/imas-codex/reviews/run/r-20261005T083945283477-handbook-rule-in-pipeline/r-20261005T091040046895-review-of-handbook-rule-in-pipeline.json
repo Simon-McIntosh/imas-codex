@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run (role implement) left baseline_suite/after_suite empty, so added failures were measured here from independent base/head arms over the reviewed run's own gate surface. Base c323401f9: 103 passed, EXIT=0 (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T091040046895-review-of-handbook-rule-in-pipeline/arm-base.log). Head 49304d164: 105 passed, 1 deselected, EXIT=0 (arm-head.log). Both arms ran tests/wiki/test_pipeline.py tests/wiki/test_graph_ops_unit.py tests/wiki/test_workers.py in scratch trees under /tmp extracted from git archive at the reviewed revisions, module resolved from the scratch tree. Zero added failures; the 2-test delta is TestIngestMarksDynamicPage::test_ingest_marks_dynamic_page and TestMarkDynamicHandbookPages::test_marks_page_and_embeds_stub_chunk (TestDatabaseMergeGraph is graph-marked and deselected in the default arm).",
+  "backend": "local",
+  "base_log_revision": "c323401f9",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/wiki/pipeline.py:1254 WikiIngestionPipeline.ingest_page -> detect_dynamic_page",
+    "imas_codex/discovery/wiki/pipeline.py:446 mark_dynamic_handbook_pages -> detect_dynamic_page",
+    "imas_codex/discovery/wiki/pipeline.py:1557 WikiIngestionPipeline.ingest_pages -> mark_dynamic_handbook_pages"
+  ],
+  "completed_at": "2026-10-05T09:22:54.648Z",
+  "dispatched_at": "2026-10-05T09:10:44Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "1560",
+      "severity": "follow-on",
+      "text": "follow-on: the bulk marking call at the end of ingest_pages is wrapped in a bare `except Exception: logger.warning(...)` (pipeline.py:1558-1561), so any exception in mark_dynamic_handbook_pages is swallowed and the run still reports 'Ingestion complete'. A fail-open guard for exactly the behaviour this node exists to guarantee: a fresh ingest that raises during marking leaves pages unmarked with no failure surfaced to the caller. Reproduced shape: the try/except covers the whole marking step; nothing records that it did not run."
+    },
+    {
+      "file": "tests/wiki/test_pipeline.py",
+      "line": "485",
+      "severity": "follow-on",
+      "text": "follow-on: TestDatabaseMergeGraph EXPLAINs a hand-copied duplicate of the production merge statement (tests/wiki/test_pipeline.py:485-495) rather than the statement link_chunks_to_entities actually runs (pipeline.py:585-600). The two are identical today, so the test passes, but if the production Cypher changes the test keeps EXPLAINing the stale copy and would not catch a new syntax error or parameter. The gate proves a copy of the statement parses, not the statement."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "451",
+      "severity": "follow-on",
+      "text": "follow-on: mark_dynamic_handbook_pages sets p.fronts_database (pipeline.py:451) but never sets p.status, so jt-60sa:CategoryInformation2 is marked while carrying status 'skipped' (live Cypher), not the 'ingested' the plan designs for a dynamic page so its chunk anchors the edges. Harmless against the current read path (_fetch_wiki_page matches by id/url/title without a status filter), but the plan's stated invariant does not hold for the third table and any future status-filtered read would drop it."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "1250",
+      "severity": "follow-on",
+      "text": "follow-on: ingest_page now runs a facility-wide WikiChunk scan (WHERE c.text CONTAINS '?db=') once per page (pipeline.py:1250-1252) to resolve the databases a page fronts, so a batch ingest costs O(pages x facility chunks) with a CONTAINS scan each time. The linking set is facility-invariant within a batch and could be fetched once in ingest_pages and passed down. Not a correctness defect."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "420",
+      "severity": "follow-on",
+      "text": "follow-on: mark_dynamic_handbook_pages builds its topic set only from linking chunk texts (pipeline.py:420-427), not from a page's own form, so a dynamic page whose body names its database but which no sibling ?db= link reaches is marked only if its own ingest ran the ingest_page fallback (_dynamic_page_databases). A page whose ingest was skipped and which has no inbound link would stay unmarked by the bulk pass. Latent; every jt-60sa table is reached by an inbound link today."
+    }
+  ],
+  "head_log_revision": "49304d164",
+  "item_aggregate": 7,
+  "item_verdicts": {
+    "call_sites": "detect_dynamic_page now has production call sites at pipeline.py:1254 (ingest_page) and pipeline.py:446 (mark_dynamic_handbook_pages); mark_dynamic_handbook_pages is called at pipeline.py:1557 (ingest_pages). No production caller survives the deleted apply_dynamic_page_rule.",
+    "diff": "read c323401f9 to 49304d164: pipeline.py gains _dynamic_page_databases, mark_dynamic_handbook_pages (replacing apply_dynamic_page_rule), an ingest_page marking block and an ingest_pages bulk re-apply, drops the facility_id parameter from fronts_databases_for_topic, and updates __all__; tests/wiki/test_pipeline.py gains TestIngestMarksDynamicPage, TestMarkDynamicHandbookPages and the graph-marked TestDatabaseMergeGraph; the evidence fragment records the result. Three files, +347/-59.",
+    "done_when": "the rule runs in the ingest path (pipeline.py:1254) and in the bulk pass (pipeline.py:1557); the live graph carries fronts_database on all three topics covering the seven databases; 3 stub chunks carry a non-null embedding (plus one pre-existing content chunk) and 6298 distinct FacilitySignals are reached through DOCUMENTS; the search_docs/fetch_content follow-through is the sibling MCP-surfaces node's, and _fetch_wiki_page does not filter on WikiPage.status so the skipped third topic is still fetchable by id.",
+    "goal": "section 3 done-when: the handbook tables carry fronts_database (3 topics / 7 databases, verified live), each database's signals are reached from its database's handbook page through a chunk DOCUMENTS edge, and the read path follows the one existing linkage. This node delivers the wiring, the bulk marking, the graph gate and re-embedding; the PID enumeration and the MCP surfaces belong to sibling nodes (landed already). Short of the plan's stated 'page keeps ingested' invariant for CategoryInformation2, which is marked but keeps status 'skipped'.",
+    "manifest": "read; status complete, commits 76bf7bb55c14276ced936f68fe113d7a6ed19755 and 49304d16437d31e0dbd7d3a95ccea11bd1cdd3bc, tests 105 passed plus 1 graph passed, negative control reds test_ingest_marks_dynamic_page EXIT=1; baseline_suite/after_suite left empty, so added failures were measured here from independent base/head arms (0).",
+    "write_paths": "read the reviewed manifest's declared paths; git diff --name-only c323401f9..49304d164 returns exactly the three paths the manifest's changed_paths names and nothing else."
+  },
+  "justifications": {
+    "durability": "The added tests are focused (TestIngestMarksDynamicPage, TestMarkDynamicHandbookPages, TestDatabaseMergeGraph) and the negative control is a real reproduced red, not a passing suite standing in for a guard. Loses points because the graph test EXPLAINs a hand-copied duplicate of the production merge statement (tests/wiki/test_pipeline.py:485), so a change to link_chunks_to_entities would not move the test; because the bulk marking is wrapped in a broad try/except that logs and continues (pipeline.py:1560-1561), so a marking failure leaves ingest reporting success with pages unmarked; and because the bulk pass derives topics only from linking chunks, not a page's own form, so a skipped page with no inbound ?db= link stays unmarked.",
+    "evidence": "Gate arms reproduced independently in scratch trees over the reviewed run's own surface: base c323401f9 103 passed EXIT=0 (arm-base.log), head 49304d164 105 passed EXIT=0 (arm-head.log). The live-graph EXPLAIN test reproduces (1 passed EXIT=0, arm-graph.log). The negative control reproduces: removing the detector condition from ingest_page reds TestIngestMarksDynamicPage::test_ingest_marks_dynamic_page with EXIT=1 (arm-neg.log). A bounded live query confirms the marking and 6298 distinct FacilitySignals reached through DOCUMENTS from the marked chunks, and 3 stub chunks carrying an embedding. Loses points because the stub-chunk embedding is evidenced by a Cypher count rather than an end-to-end embed of a newly created chunk, and the fragment carries no figure.",
+    "fit": "The change reuses the existing WikiChunk-[:DOCUMENTS]->FacilitySignal linkage and the existing link_chunks_to_entities writer; no new edge or property is added (fronts_database already existed), WikiPageStatus is not widened, and apply_dynamic_page_rule is removed rather than left dead. Loses points for a per-page cost introduced into ingest_page: a facility-wide WikiChunk scan (WHERE c.text CONTAINS '?db=') runs once per page (pipeline.py:1250), so ingest cost scales with pages x facility chunks, and mark_dynamic_handbook_pages re-embeds the identical stub once per chunk in the loop.",
+    "goal_fidelity": "The node closes the prior review's blocking finding: detect_dynamic_page and the rule now run from the ingest path (pipeline.py:1250-1254 inside WikiIngestionPipeline.ingest_page) and from mark_dynamic_handbook_pages at the end of ingest_pages (pipeline.py:1557), so a fresh ingest marks a dynamic table with no operator call. A bounded live-graph read shows exactly three jt-60sa handbook table topics carry fronts_database - CategoryInformation ['EDDB','PMDB'], DataInformation ['UDDB','EQDB','FAME'], CategoryInformation2 ['LCDB','MBDB'] - covering all seven per-database tables. apply_dynamic_page_rule is deleted and fronts_databases_for_topic's unused facility_id is dropped at both call sites. Loses one point: the third topic keeps status 'skipped' rather than the plan's designed 'ingested' (finding 3).",
+    "scope_discipline": "git diff --name-only c323401f9..49304d164 lists exactly the three declared paths (imas_codex/discovery/wiki/pipeline.py, tests/wiki/test_pipeline.py, docs/evidence/fragments/jt60sa-discovery-completion/handbook-rule-in-pipeline.html), +347/-59. The wider orientation_write_paths (workers.py, test_graph_ops_unit.py, test_workers.py) were declared but correctly left untouched; workers._ingest_page reaches the change through pipeline.ingest_page (workers.py:1423), so no separate edit was needed. No schema, plan, dependency or CLI-surface edit."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: c323401f933fc08cf81dfe30899a23825227dce1\nreviewed_head_sha: 49304d16437d31e0dbd7d3a95ccea11bd1cdd3bc\nVERDICT goal: the dynamic-page rule is now wired into the ingest path and a bulk pass; all three jt-60sa handbook table topics are marked (7 databases), verified live; the third topic keeps status skipped.\nVERDICT scope: exactly the three declared paths changed, +347/-59, no swept edits.\nVERDICT evidence: base 103 / head 105 both EXIT=0 over the reviewed gate surface, live-graph EXPLAIN 1 passed, negative control reproduces EXIT=1; stub embedding shown as a Cypher count.\nVERDICT fit: reuses the existing DOCUMENTS linkage and writer, no new edge/property; introduce a per-page facility-wide chunk scan and a redundant per-chunk re-embed.\nVERDICT durability: focused tests and a firing negative control; the graph test EXPLAINs a hand-copied statement, the bulk call fails open, and the bulk pass misses a skipped page with no inbound link.\nADDED FAILURES: 0 (independent base/head arms over tests/wiki/test_pipeline.py tests/wiki/test_graph_ops_unit.py tests/wiki/test_workers.py: base 103 passed at c323401f9, head 105 passed at 49304d164, both EXIT=0).",
+  "review_run_id": "r-20261005T091040046895-review-of-handbook-rule-in-pipeline",
+  "reviewed_base_sha": "c323401f933fc08cf81dfe30899a23825227dce1",
+  "reviewed_head_sha": "49304d16437d31e0dbd7d3a95ccea11bd1cdd3bc",
+  "reviewed_run_id": "r-20261005T083945283477-handbook-rule-in-pipeline",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T09:25:00+00:00",
+  "total": 90,
+  "verdict": "SOUND WITH FINDINGS"
+}

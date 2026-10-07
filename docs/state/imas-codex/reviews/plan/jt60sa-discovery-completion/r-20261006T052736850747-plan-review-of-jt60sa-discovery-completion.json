@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T05:30:54.673Z",
+  "dispatched_at": "2026-10-06T05:27:41Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/prompt_loader.py:973",
+      "id": "duplicate_owner-1",
+      "reason": "the new AST prompt-to-response-model test pins rendered text, not the store, so a silent fallback would let the test pass while the declared binding is ignored, which is the \"silently shrinks the walk\" failure the section's positive control exists to prevent; the plan should name `prompt_loader.py` as the single owner and retire or fail-closed the `_DEFAULT_SCHEMA_NEEDS` fallback for the twelve discovery prompts.",
+      "text": "\u00a722 asks every discovery prompt to declare its schema provider in frontmatter `schema_needs`, but the same prompt-to-provider binding is already owned by the `_DEFAULT_SCHEMA_NEEDS` dict, which is still consulted as a silent fallback in `get_schema_for_prompt` (prompt_loader.py:1056) and the strict source loader (prompt_loader.py:1363); the plan does not say whether that fallback is retired, so after \u00a722 the binding lives in two stores and a prompt whose frontmatter declaration was dropped or misspelled falls back to a stale dict instead of failing.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f4374247acfc13b9bf67f406ecb6e29c3f53f60d6edd437e3059d49dea4c7e65",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 167,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T052736850747-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "6f01c1bc6e4ed7a81ec6a4c33a008ea496b33c7d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a722's two changes live in one module (`imas_codex/discovery/base/llm.py`, the owner of the structured-call loops): raise on `finish_reason='abort'` and stop forwarding `response_format` inside the single local request builder; \u00a714's prefix predicate is one function (`render_path_prefix_clause`, query_builder.py:268) behind eight call sites, not a new layer.",
+    "duplicate_owner": "a finding \u2014 \u00a722 requires every discovery prompt to declare its `schema_needs` provider in frontmatter but does not name what happens to the existing `_DEFAULT_SCHEMA_NEEDS` fallback table, so one binding stays owned by two stores in `imas_codex/llm/prompt_loader.py`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a722 adds no CLI option, MCP view or error family and says so in its own text (\"This adds no error family\"), and \u00a714 adds no CLI option (its `--root`/`--path-prefix`/`--reset-to` options already exist) and names the inline paths-command block its `reset_to_status` change replaces.",
+    "reuse_search": "pass \u2014 the review searched imas-codex for each mechanism the unimplemented sections add and found the plan extending an existing owner in every case: `_local_call_kwargs` and `EmptyResponseError` in `imas_codex/discovery/base/llm.py`, `schema_needs`/`get_schema_for_prompt` in `imas_codex/llm/prompt_loader.py`, and `render_path_prefix_clause`/`reset_to_status` in `imas_codex/graph/query_builder.py` and `imas_codex/discovery/base/reset.py`.",
+    "thin_wrapper": "pass \u2014 the \u00a714 reset change extends `reset_to_status` (reset.py:59) rather than wrapping it: it gains a `path_prefixes` argument and renders its own scope through the existing renderer, retiring the paths command's inline clause (paths.py:245-248) rather than adding a parallel scoping path; \u00a722 extends the prompt-schema mechanism rather than wrapping it, and states why the local path cannot simply keep `response_format` (the engine's xgrammar abort)."
+  },
+  "section_digests": {
+    "_document": "a507e04135209e4e48d06a0ce2bbf5854ad336f732e793bbf42b21c3fe398fcd",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "d6d5a73cb0dec6ffd86906f917269a075a7911e82a8eef8ad19e5451325e0836",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "f9fc399e2e3973843d09fa1d297e0d8c25d784fc5d390a06183d054cf7ce1888",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T05:38:29.934397+00:00"
+}

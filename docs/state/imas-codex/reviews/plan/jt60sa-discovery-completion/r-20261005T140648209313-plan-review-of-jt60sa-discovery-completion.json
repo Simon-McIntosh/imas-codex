@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T14:09:49.696Z",
+  "dispatched_at": "2026-10-05T14:06:52Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ingestion/pipeline.py:517",
+      "id": "duplicate_owner-1",
+      "reason": "this plan's own \u00a76/\u00a78/\u00a710 exist precisely because a forked second copy of a shared mechanism (interpreter probe, SLURM resolution, DataAccess writer) was found and folded back onto its owner; naming imas_codex/ingestion/graph.py in \u00a719 keeps that from repeating and costs the author one line.",
+      "text": "\u00a719's relink of the 201 existing jt-60sa chunks says \"a link pass that the pipeline owns\" without naming the existing owner; imas_codex/ingestion/graph.py already holds the chunk-link passes (link_chunks_to_imas_paths:64, link_chunks_to_data_nodes:151) that ingest_files calls at pipeline.py:535 and :566, so the relink belongs as a new pass there, reached from the same ingest path, not as a fresh helper",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "977863c79e2bf86bbcf971ba0f360fe788a40ffea6b8fc801286e99447342aaf",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 104,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:10:43.941136+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T140648209313-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "cda54593c35832a1eff8f871d0b89653711133f5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan's new behaviour is hidden behind single-entry interfaces rather than spread thin: \u00a76 resolve_remote_environment() is one resolver that hid the whole per-facility interpreter/module contract behind a facility block and pass-down; \u00a717 pending_embed_predicate(alias) renders the pending/retry predicate once at a single call site.",
+    "duplicate_owner": "a finding \u2014 \u00a719 proposes \"a link pass that the pipeline owns\" to relink the 201 orphan chunks but does not name the module that already owns chunk-link passes (imas_codex/ingestion/graph.py: link_chunks_to_imas_paths, link_chunks_to_data_nodes), so a new relink helper is the path of least resistance.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the two implementable sections add nothing to any family \u2014 \u00a719 states \"Interface budget: nothing added\" and \u00a714 uses the existing `discover paths --root` and `discover code --path-prefix` options, and the landed sections net-retire surface (five DDL statements removed in \u00a715, setup_commands retired in \u00a76, the over-fetch and post-filters retired in \u00a716/\u00a718, an orphaned adjudication row removed in \u00a717).",
+    "reuse_search": "pass \u2014 every implementable section cites the mechanism it reuses by name and opens it: \u00a719 names ingest_files and the step-6 HAS_CHUNK MERGE in imas_codex/ingestion/pipeline.py:522 and reads the CodeFile-HAS_EXAMPLE-CodeExample-HAS_CHUNK shape; \u00a714 uses the existing `discover paths --root` seeding and `discover code --path-prefix` claim scope; the landed sections' review comments record reuse substitutions (the WikiChunk DOCUMENTS edge instead of a new DOCUMENTED_IN edge, GraphClient.ensure_vector_indexes, remote.locations._service_url_for_slurm).",
+    "thin_wrapper": "pass \u2014 no implementable section adds a layer over machinery it could extend: \u00a719 explicitly repairs the existing writer (\"never a hand-written MERGE\", \"the same code path\"); \u00a76 retired data_access_patterns.setup_commands rather than layering a parallel block; \u00a715 replaced five hand-written CREATE VECTOR INDEX statements with the owner instead of wrapping them."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:10:06.933892+00:00"
+}

@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "backend": "clive",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:531",
+    "imas_codex/standard_names/workers.py:3800",
+    "imas_codex/standard_names/workers.py:5664"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-21T15:41:11.760881+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+      "line": "611",
+      "text": "the row labels revision ed94158e3 \"HEAD\" while ed94158e3 is the dispatch base and the landed head is 02c315c41, so a reader reconciling the archive against the commit is handed a revision label the landed comment never sat at."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits against base ed94158e3 \u2014 23b100901 adds the two test cases and the two doc records, 02c315c41 changes only the cap's comment and the test's docstring, and no executable statement differs from the base.",
+    "done_when": "read the node's clause \u2014 a catalog-driven saturation case that fails at base d31f8cb92 \u2014 and it is unsatisfiable, because both channels close at their own caps and the bound is their sum, so the catalog route never exceeds it; the run's recorded resume-1-advice.txt accepts the over-supplied construction in its place, and the base log shows the landed file failing there with `assert 55 == 30` at test_review_comparator_budget.py:237.",
+    "goal": "read the source goal \u2014 make the comparator neighbourhood's terminal cap fail a test when it is removed; deleting the terminal break at imas_codex/standard_names/review/enrichment.py:405 from a scratch copy of the landed HEAD 02c315c41 reddens tests/standard_names/test_review_comparator_budget.py:237 with `assert 55 == 30`, so the goal is met.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/terminal-cap-guard/manifest.md; it names head-tests-final.log at 4 passed, base-tests-final.log at 2 failed and 2 passed, and negative-control-terminal-cap-removed.log at 1 failed and 3 passed, and my own runs from a git-archive extraction of the landed tree reproduce 4 passed at HEAD and exactly 1 failed, 3 passed under the declared mutation.",
+    "write_paths": "read the node's three declared paths and the diff ed94158e3..02c315c41; the test file and both doc records are inside them, while imas_codex/standard_names/review/enrichment.py:394-402 is a fourth file the dispatch fence did not name and the coordinator's recorded resume advice directed."
+  },
+  "justifications": {
+    "durability": "the declared negative control reddens only the over-supplied case, and its docstring at tests/standard_names/test_review_comparator_budget.py:182-197 tells a later reader why an over-supplied channel is the only input that can exercise the cap.",
+    "evidence": "every record the manifest names reproduces, but the gate cannot show the catalog route failing at test_review_comparator_budget.py:178, which passes with the cap removed, and the done_when's base clause stays unmet.",
+    "fit": "the file follows the sibling tests/standard_names idiom of module-level helpers and monkeypatch, and no commit message, comment or symbol carries a plan label, ticket reference or attribution.",
+    "goal_fidelity": "removing the break at imas_codex/standard_names/review/enrichment.py:405 from the committed tree leaves exactly one failure at tests/standard_names/test_review_comparator_budget.py:237, so the cap does fail a test when it is removed.",
+    "scope_discipline": "four paths land against three declared write paths, the extra being the comment-only hunk at imas_codex/standard_names/review/enrichment.py:394-402 that the coordinator's resume advice ordered rather than the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the source goal \u2014 make the comparator neighbourhood's terminal cap fail a test when it is removed; deleting the terminal break at imas_codex/standard_names/review/enrichment.py:405 from a scratch copy of the landed HEAD 02c315c41 reddens tests/standard_names/test_review_comparator_budget.py:237 with `assert 55 == 30`, so the goal is met.\nVERDICT done_when: read the node's clause \u2014 a catalog-driven saturation case that fails at base d31f8cb92 \u2014 and it is unsatisfiable, because both channels close at their own caps and the bound is their sum, so the catalog route never exceeds it; the run's recorded resume-1-advice.txt accepts the over-supplied construction in its place, and the base log shows the landed file failing there with `assert 55 == 30` at test_review_comparator_budget.py:237.\nVERDICT write_paths: read the node's three declared paths and the diff ed94158e3..02c315c41; the test file and both doc records are inside them, while imas_codex/standard_names/review/enrichment.py:394-402 is a fourth file the dispatch fence did not name and the coordinator's recorded resume advice directed.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/terminal-cap-guard/manifest.md; it names head-tests-final.log at 4 passed, base-tests-final.log at 2 failed and 2 passed, and negative-control-terminal-cap-removed.log at 1 failed and 3 passed, and my own runs from a git-archive extraction of the landed tree reproduce 4 passed at HEAD and exactly 1 failed, 3 passed under the declared mutation.\nVERDICT diff: read both commits against base ed94158e3 \u2014 23b100901 adds the two test cases and the two doc records, 02c315c41 changes only the cap's comment and the test's docstring, and no executable statement differs from the base.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:531, imas_codex/standard_names/workers.py:3800, imas_codex/standard_names/workers.py:5664\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: removing the break at imas_codex/standard_names/review/enrichment.py:405 from the committed tree leaves exactly one failure at tests/standard_names/test_review_comparator_budget.py:237, so the cap does fail a test when it is removed.\nSCORE evidence: 16\nJUSTIFICATION evidence: every record the manifest names reproduces, but the gate cannot show the catalog route failing at test_review_comparator_budget.py:178, which passes with the cap removed, and the done_when's base clause stays unmet.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: four paths land against three declared write paths, the extra being the comment-only hunk at imas_codex/standard_names/review/enrichment.py:394-402 that the coordinator's resume advice ordered rather than the fence.\nSCORE durability: 19\nJUSTIFICATION durability: the declared negative control reddens only the over-supplied case, and its docstring at tests/standard_names/test_review_comparator_budget.py:182-197 tells a later reader why an over-supplied channel is the only input that can exercise the cap.\nSCORE fit: 17\nJUSTIFICATION fit: the file follows the sibling tests/standard_names idiom of module-level helpers and monkeypatch, and no commit message, comment or symbol carries a plan label, ticket reference or attribution.\nFINDING docs/evidence/archive/sn-catalog-audit-instrument-landed.html:611 the row labels revision ed94158e3 \"HEAD\" while ed94158e3 is the dispatch base and the landed head is 02c315c41, so a reader reconciling the archive against the commit is handed a revision label the landed comment never sat at.",
+  "review_run_id": "r-20260921T154111760881-review-of-n-the-terminal-comparator-cap-has-a-test-that-fails-without-it",
+  "reviewed_base": "ed94158e3be94138ee7543e48a187ffb9b4344d2",
+  "reviewed_commit": "02c315c4120176afbd5a10226c82e22326b0f8dd",
+  "reviewed_run_id": "r-20260921T134649772050-n-the-terminal-comparator-cap-has-a-test-that-fails-without-it",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-21T16:11:22.475943+00:00",
+  "total": 85
+}

@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T11:38:37.384Z",
+  "dispatched_at": "2026-10-06T11:33:49Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/query_builder.py:296",
+      "id": "deep_module-1",
+      "reason": "the parameterisation must be settled (distinct parameter names per scope, or a helper that returns a unique key) before either \u00a724 node is implemented, or the scoped-run claims are silently mis-scoped.",
+      "text": "\u00a724 builds the new exclusion helper \"through `build_path_prefix_filter` with a `negated` flag\", but `build_path_prefix_filter` returns its parameters under the hard-coded key `prefixes` (line 298 returns `{\"prefixes\": list(prefixes)}`), and \u00a724 in the same change moves the five path claims in imas_codex/discovery/paths/parallel.py:484,540,597,715,795 off `render_path_prefix_clause(..., \"root_filter\")` onto that same helper for their `--root` scope; a claim that must both scope and exclude then binds two different lists to one `$prefixes`, so the scope predicate and its negation read the wrong list",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s24",
+      "id": "interface_budget-1",
+      "reason": "the interface budget for the week is 0 public_definitions, so the section must account for the added surface in its own text (what it folds into the owner, or why the helper is unavoidable).",
+      "text": "\u00a724 states \"The section adds that one public helper and no other\", adding one public definition to `imas_codex/graph/query_builder.py` and widening the public `build_path_prefix_filter` signature with a `negated` flag, but names no public definition it retires or merges and does not state why none can be",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s14",
+      "id": "reuse_search-1",
+      "reason": "\u00a714 is a cumulative landing record whose landed nodes are named in-line (\"The seed fix landed on 2026-10-06\", \"the paths node \u2026 and the code-reset node \u2026 landed\"), so the residual nodes are recoverable without a design change; the finding is a legibility risk, not a defect that alters the plan.",
+      "text": "\u00a714 carries `data-status=\"implementable\"` and its code-half prose reads as prospective (\"the node adds one helper beside the renderer \u2026 that returns the clause and its parameters together\"), yet every mechanism it describes is already present at the review base `fc0d90ca2`: `build_path_prefix_filter` (imas_codex/graph/query_builder.py:282) with exactly that \"clause and its parameters together / empty clause and no parameters\" contract, its use at ten sites in imas_codex/discovery/code/graph_ops.py:132,304,399,485,580,620,644,674,707,734 and imas_codex/discovery/code/workers.py:566, `reset_to_status(..., path_prefixes=...)` (imas_codex/discovery/base/reset.py:66) with the `source_filter` OR-clause (reset.py:102-103), `create_nodes(..., create_only=...)` with the `ON CREATE SET` form (imas_codex/graph/client.py:612-690), `seed_missing_roots`/`create_child_paths` already gone, and the `jt-60sa.yaml` `discovery_roots` already replacing `/analysis/src` with its eleven seeded subdirectories and moving `ofmcauto` to `/analysis/src/OFMC/ofmcauto` (imas_codex/config/facilities/jt-60sa.yaml:140-150) \u2014 so an implementer reading \u00a714's list of nodes literally would rebuild landed code and can only distinguish the residual work (the scoped code run, the root-restore, the sensor-order receipt) from the landed work by diffing the tree",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s24",
+      "id": "deep_module-2",
+      "reason": "an undercounted census invites an implementer to stop at the named fifteen and leave `has_pending_scan_work`/`has_pending_link_work` (graph_ops.py:566,726) unscoped, so a scoped run stays alive on rows outside its named trees \u2014 exactly the failure \u00a724 exists to prevent.",
+      "text": "\u00a724 estimates the exclusion helper's reach at \"about fifteen sites in all\" but the claims and phase-liveness predicates it must cover number about twenty-two: on the paths side the five path claims plus `has_pending_work` and the five `_has_pending_*_work` helpers (imas_codex/discovery/paths/parallel.py:197,265,282,301,318,338 and claims at 465,521,579,688,767), and on the code side the four claims plus six has-work predicates in imas_codex/discovery/code/graph_ops.py (claims 95,277,367,457; predicates 566,611,636,660,692,726) and the ingest claim in imas_codex/discovery/code/workers.py:564",
+      "type": "deep_module",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5dfb34f82584140f372c148f4174b34a48d83a20b481bd7250a59481448476d5",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 218,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T113343051753-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "59437631379a3336e12ef25a79c2a804f66394eb",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a724's new facility-aware exclusion helper returns its Cypher parameters under the same fixed key `prefixes` that `build_path_prefix_filter` already hard-codes for `--root` scope, so one query carrying both scopes cannot bind them apart; the interface is not in fact smaller than what it hides, because it leaks a shared parameter namespace across two callers.",
+    "duplicate_owner": "pass \u2014 the plan consolidates rather than forks: \u00a78 removes five SLURM node-discovery copies onto `resolve_service_url`, \u00a710 deletes the graph client's SLURM duplicate, \u00a715 routes vector-index DDL through `GraphClient.ensure_vector_indexes`, \u00a714 retires `seed_missing_roots` and deletes `create_child_paths`, and \u00a724 names one owner (`get_exclusion_config_for_facility`) and one renderer (`build_path_prefix_filter`) rather than re-implementing them.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a724 adds one new public helper in imas_codex/graph/query_builder.py and adds a `negated` parameter to the existing public `build_path_prefix_filter` without naming, in its own text, a public definition it retires or merges, and without stating why nothing can be.",
+    "reuse_search": "pass \u2014 the plan cites the machinery it extends by name and file (`build_path_prefix_filter`, `render_path_prefix_clause`, `get_exclusion_config_for_facility`, `GraphClient.ensure_vector_indexes`, `resolve_service_url`) rather than adding a parallel mechanism; \u00a724 extends `build_path_prefix_filter` (imas_codex/graph/query_builder.py:282) instead of forking it, and \u00a714's prose describes extending `reset_to_status` (imas_codex/discovery/base/reset.py:66) and `GraphClient.create_nodes` (imas_codex/graph/client.py:605) rather than new subsystems.",
+    "thin_wrapper": "pass \u2014 the exclusion helper \u00a724 adds is not a bare forwarder: it resolves `get_exclusion_config_for_facility(facility).path_prefixes` (imas_codex/config/discovery_config.py:506) into a negated predicate for ~15\u201322 call sites, and the plan states why the sites cannot each restate the policy and why `build_path_prefix_filter` is extended (a `negated` flag) rather than duplicated."
+  },
+  "section_digests": {
+    "_document": "09490c8adaf4c1375701ae4af3acfa5a70e2abe1b8d7dfdb44856148a560ff1a",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "ea093845012af148321609dc0ccef4ad78f3fc5209bb8e337d40245f676f6968",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "cf23274f2bf845063f4f8099492f924f2817741acec8dbf64bfb7502a8d29eb0",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T11:44:46.630692+00:00"
+}

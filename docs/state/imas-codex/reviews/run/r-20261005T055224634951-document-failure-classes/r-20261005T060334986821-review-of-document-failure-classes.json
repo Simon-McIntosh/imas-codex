@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/discover/wiki.py:387",
+    "imas_codex/discovery/documents/workers.py:258",
+    "imas_codex/discovery/wiki/workers.py:838",
+    "imas_codex/discovery/wiki/pipeline.py:2439"
+  ],
+  "completed_at": "2026-10-05T06:11:06.244Z",
+  "dispatched_at": "2026-10-05T06:03:39Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T055224634951-document-failure-classes/gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's header names the base revision b98b02a39 while the run measured the head tree 737830b4f, so the 94-passed result is not tied to the commit under review by the log itself."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit 737830b4f against b98b02a39; a classifier, two reclassification entry points and three wiring sites, all inside the declared scope.",
+    "done_when": "the node measure is code plus tests, not the live re-ingest; the manifest records the gate tests/wiki/test_graph_ops_unit.py tests/wiki/test_workers.py tests/wiki/test_pipeline.py at 94 passed and gate.log carries it.",
+    "goal": "the node goal is to have the document pipeline recover environment-fault failures and defer unsupported input with a stated reason; imas_codex/discovery/wiki/graph_ops.py:65 adds ENVIRONMENT_FAULT_PATTERNS to the recoverable set and imas_codex/discovery/wiki/graph_ops.py:1577 adds defer_failed_documents for already-failed rows.",
+    "manifest": "read; it states 94 passed EXIT=0, names gate.log and negative-control.log, and records baseline_suite and after_suite as null.",
+    "write_paths": "read the manifest's declared paths; git diff b98b02a39..737830b4f touches exactly the five declared source paths, three declared test paths and the landing fragment, nothing else."
+  },
+  "justifications": {
+    "durability": "tests/wiki/test_graph_ops_unit.py:455 asserts the environment-fault pattern is in the recover query and reddens when the pattern is removed, as negative-control.log records.",
+    "evidence": "gate.log records the manifest's exact command over the three declared files at 94 passed EXIT=0 and negative-control.log records the mutation turning two of them red.",
+    "fit": "imas_codex/discovery/wiki/graph_ops.py:86 classify_document_deferral extends the module that already owns recover_failed_documents and mark_document_deferred rather than adding a parallel owner.",
+    "goal_fidelity": "imas_codex/discovery/wiki/graph_ops.py:1577 documents defer_failed_documents reclassifying the complement recover_failed_documents leaves, which is the node deliverable.",
+    "scope_discipline": "git diff --stat b98b02a39..737830b4f lists only the nine declared paths and no dependency or config change."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to have the document pipeline recover environment-fault failures and defer unsupported input with a stated reason; imas_codex/discovery/wiki/graph_ops.py:65 adds ENVIRONMENT_FAULT_PATTERNS to the recoverable set and imas_codex/discovery/wiki/graph_ops.py:1577 adds defer_failed_documents for already-failed rows.\nVERDICT done_when: the node measure is code plus tests, not the live re-ingest; the manifest records the gate tests/wiki/test_graph_ops_unit.py tests/wiki/test_workers.py tests/wiki/test_pipeline.py at 94 passed and gate.log carries it.\nVERDICT write_paths: read the manifest's declared paths; git diff b98b02a39..737830b4f touches exactly the five declared source paths, three declared test paths and the landing fragment, nothing else.\nVERDICT manifest: read; it states 94 passed EXIT=0, names gate.log and negative-control.log, and records baseline_suite and after_suite as null.\nVERDICT diff: read commit 737830b4f against b98b02a39; a classifier, two reclassification entry points and three wiring sites, all inside the declared scope.\nCALL_SITES: imas_codex/cli/discover/wiki.py:387, imas_codex/discovery/documents/workers.py:258, imas_codex/discovery/wiki/workers.py:838, imas_codex/discovery/wiki/pipeline.py:2439\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/wiki/graph_ops.py:1577 documents defer_failed_documents reclassifying the complement recover_failed_documents leaves, which is the node deliverable.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate.log records the manifest's exact command over the three declared files at 94 passed EXIT=0 and negative-control.log records the mutation turning two of them red.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat b98b02a39..737830b4f lists only the nine declared paths and no dependency or config change.\nSCORE durability: 18\nJUSTIFICATION durability: tests/wiki/test_graph_ops_unit.py:455 asserts the environment-fault pattern is in the recover query and reddens when the pattern is removed, as negative-control.log records.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/discovery/wiki/graph_ops.py:86 classify_document_deferral extends the module that already owns recover_failed_documents and mark_document_deferred rather than adding a parallel owner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T055224634951-document-failure-classes/gate.log:1 follow-on: the gate log's header names the base revision b98b02a39 while the run measured the head tree 737830b4f, so the 94-passed result is not tied to the commit under review by the log itself.\n",
+  "review_run_id": "r-20261005T060334986821-review-of-document-failure-classes",
+  "reviewed_base_sha": "b98b02a39d6785497b7d1c8d3a4fb598ae51ad64",
+  "reviewed_head_sha": "737830b4ff12c632cdc48ad5da67583dc5d6850d",
+  "reviewed_run_id": "r-20261005T055224634951-document-failure-classes",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:10:05.659833+00:00",
+  "total": 91,
+  "verdict": "SOUND WITH FINDINGS"
+}

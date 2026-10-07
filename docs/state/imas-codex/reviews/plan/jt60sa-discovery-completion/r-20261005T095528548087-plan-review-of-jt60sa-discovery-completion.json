@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T10:02:55.250Z",
+  "dispatched_at": "2026-10-05T09:55:32Z",
+  "findings": [
+    {
+      "anchor": "scripts/gen_schema_reference.py:64",
+      "id": "reuse_search-1",
+      "reason": "a worker following \u00a712 literally updates the named chain and leaves these consumers raising at import/build, so the plan must enumerate the consumer set it claims to have covered or the change ships broken.",
+      "text": "the plan widening `GraphSchema.vector_indexes` from a 3-tuple to a 4-tuple asserts \"every consumer of the 3-tuple is updated in the same change\" but names only schema.py, gen_schema_context.py and client.py; `gen_schema_reference.py:64` unpacks `facility_schema.vector_indexes` directly as `for idx_name, label, prop in \u2026` and `schema_context.py:200,264`, `query_builder.py:42` and `llm/server.py:733` unpack the generated `VECTOR_INDEXES` 2-tuple, so each breaks with a ValueError or a silently wrong field the moment the element count changes",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/client.py:398",
+      "id": "duplicate_owner-1",
+      "reason": "adding a filter-property option to the owner's `CREATE VECTOR INDEX` (client.py:404) leaves the hand-written siblings carrying the old option set, so the plan must either extend those sites in the same change or state why the duplicated DDL is out of scope.",
+      "text": "\u00a712 claims the index DDL has one owner (the `vector_indexes` \u2192 `ensure_vector_indexes` chain), but `CREATE VECTOR INDEX \u2026 OPTIONS indexConfig` is hand-written a second time in `imas_codex/graph/build_dd.py:4694` (cluster_description_embedding, already produced by the schema-derived chain) and in `imas_codex/graph/dd_identifier_enrichment.py:356,707` (identifier_schema_embedding, imas_node_embedding), each duplicating the owner's option block",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/client.py:356",
+      "id": "duplicate_owner-2",
+      "reason": "the \u00a712 done-when (\"against the rebuilt live index\") is unreachable through the mechanism the plan names, and the author must extend the owner's recreation path or add an explicit drop step to the section rather than assume the rebuild happens.",
+      "text": "\u00a712 states the live `code_chunk_embedding` index is \"dropped and recreated through `ensure_vector_indexes`\", but that owner only issues `DROP INDEX` when a dimension mismatch is detected (client.py:381-390) and otherwise skips any index already present via `CREATE \u2026 IF NOT EXISTS` (:398, :404); with no re-embedding the dimension is unchanged, so the named mechanism cannot rebuild the index to carry the new filter property",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "604de81c4f43b3d9804e5513e707647ee11ba7d3841178cbd13ed0185360b64d",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 60,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:05:17.458782+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:05:18.075622+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:05:16.949118+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T095528548087-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "fad6748606ec218b6efbbcf11a1e08f23d008749",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; each implementable section adds capability behind an existing interface (`build_vector_search`, `ensure_vector_indexes`, `persist_data_access`, `resolve_neo4j`), and the \u00a712 change is one function gaining a pre-filter form rather than a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a712 states \"the one chain that owns the index DDL\" is `GraphSchema.vector_indexes` \u2192 `ensure_vector_indexes`, but that owner does not recreate the index the plan needs and DDL is also hand-written in two other modules.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no implementable section adds to any family, and \u00a712 states in its own text what it retires (the facility `where_clauses` post-filter entry in `_search_code`) rather than leaving the surface unaccounted.",
+    "reuse_search": "a finding \u2014 the plan searched the vector-index generation chain for \u00a712 but did not search the full set of consumers of the tuple the change widens, so a direct unpack site is unaccounted. Every other section extends a named existing owner (\u00a79 the existing probe and the two DataAccess writers in `parallel.py`, \u00a711 `resolve_neo4j`, \u00a713 the \u00a73 repair pattern, \u00a714 the `discover paths --root` filter, \u00a74 the existing `deferred` state).",
+    "thin_wrapper": "pass \u2014 `persist_data_access` (\u00a79) is a consolidation of two near-identical `MERGE (da:DataAccess \u2026)` statements (parallel.py:2488 and :2560) back behind one writer, not a new layer; it removes surface rather than adding it, and \u00a713's parameter rename is a repair of an existing function."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T10:04:10.641522+00:00"
+}

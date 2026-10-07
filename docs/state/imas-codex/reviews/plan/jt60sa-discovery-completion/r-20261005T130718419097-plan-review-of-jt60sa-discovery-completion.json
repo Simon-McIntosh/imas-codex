@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T13:11:23.496Z",
+  "dispatched_at": "2026-10-05T13:07:22Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/schema.py:274",
+      "id": "duplicate_owner-1",
+      "reason": "the predicate is a single correct literal and each site names a different node alias, so a helper buys little; the finding is advisory, not load-bearing, and the plan's per-site comment (\"diagnostic/physics_domain stay as post-filters\") already documents the intent.",
+      "text": "the plan renders the facility pre-filter predicate literally at each call site instead of through the schema owner that already declares which embedding slots carry `facility_id`; \u00a716 and \u00a718 between them write the same predicate at eight sites where a small `facility_prefilter(alias)` helper on the vector-search/schema owner would hold one string",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e262ea76c6739b77910f3496becf68d2e76bc7990e4015cdc363f4be5f9e4fda",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 97,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "the predicate is one correct literal with a different node alias at each site, rendered through the single prefilter_clauses path of build_vector_search; a helper would hold one string and buy little, as the review itself notes",
+      "when": "2026-10-05T13:11:56.898135+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T130718419097-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "a3b42f0d083702731736741ceae11e210c273555",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is introduced; \u00a716/\u00a718 add a `prefilter_clauses` argument to the one deep search-block builder already used by every vector search, and \u00a717 adds one fragment helper to the existing label-parameterised embed worker, so behaviour stays behind interfaces no larger than what they hide.",
+    "duplicate_owner": "a finding \u2014 the facility pre-filter predicate `<alias>.facility_id = $facility` is hand-written at every vector-search call site (imas_codex/llm/search_tools.py:486, imas_codex/graph/domain_queries.py:134,282,466) and \u00a718 adds two more (imas_codex/discovery/signals/scanners/wiki.py:312, imas_codex/discovery/signals/parallel.py:3563), while the schema already owns which slots carry the property via `GraphSchema.vector_index_filters` (imas_codex/graph/schema.py:274); no owner renders the predicate from that annotation.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. Each implementable section accounts for its surface in its own text: \u00a716, \u00a717 and \u00a718 each carry an explicit \"Interface budget: nothing added\" and name what they retire (the facility post-filter, the manual-clear docstring instruction, the two post-filter predicates respectively), \u00a79 adds no CLI option (it changes an internal signature and counts probe calls), and \u00a714 adds no option (it reuses `discover paths --root`).",
+    "reuse_search": "pass \u2014 every implementable section names the existing owner it extends and the code confirms it: \u00a79 rewrites the three hand-written DataAccess MERGEs into the existing `persist_data_access` (imas_codex/discovery/signals/parallel.py:2385), \u00a716/\u00a718 reuse `build_vector_search` and the `GraphSchema.vector_index_filters` annotation (imas_codex/graph/schema.py:274, imas_codex/graph/vector_search.py:17), \u00a717 extends the existing `embed_worker` fragment pattern (`_SCORE_JOINS`, embed_worker.py:64) and `reset_to`, and \u00a714 uses the existing `discover paths --root` seeding filter (imas_codex/cli/discover/paths.py:20, `seed_facility_roots`). No proposed section rebuilds machinery that already exists.",
+    "thin_wrapper": "pass \u2014 the two extractions the plan performs (\u00a79's `persist_data_access`, \u00a717's predicate fragment) each replace duplicated inline statements with a single owner and state that rationale; neither is a new layer over machinery it could have extended."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T13:11:38.869485+00:00"
+}

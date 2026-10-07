@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T01:52:46.076Z",
+  "dispatched_at": "2026-10-07T01:47:30Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/core/paths.py",
+      "id": "deep_module-1",
+      "reason": "the author must state section_of's behaviour for an input with no second segment (return the path unchanged, or refuse) and make validation.py's replacement preserve the existing fallback, which is a contract decision the section currently leaves open.",
+      "text": "section_of is specified as `<ids>/<first segment>` but one of the three copies it must replace, imas_codex/ids/validation.py:842 (`section = \"/\".join(parts[:2]) if len(parts) >= 2 else ids_name`), has an explicit fallback for a path with fewer than two segments that the specified contract does not carry; \u00a78 says validation.py \"calls it in place of its re-derivation\", so unless section_of defines the single- or zero-segment case, the replacement silently changes behaviour on a bare-IDS target_id and the map stage's section-level guard can compare against an undefined section",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "mapping-candidate-selection#s8",
+      "id": "interface_budget-1",
+      "reason": "the section's own interface-budget paragraph would be rewritten to describe the change the two unlanded nodes actually make, rather than a revision that has already shipped.",
+      "text": "the section's public-definition accounting (\"count_sources_by_mapping_status and the workers.py copy of count_candidates_by_route are deleted\") presents two deletions as part of \u00a78's surface budget, but both are already absent at HEAD: grep shows count_candidates_by_route defined only at imas_codex/ids/graph_ops.py:796 and no count_sources_by_mapping_status anywhere, so the two remaining \u00a78 nodes (map-run-chooses-candidates, map-run-maps-each-home) add section_of with no live public-definition retirement to offset it; the section should reconcile the accounting at its head and state, for the remaining nodes, what they retire or why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4578c7f821492aaa16a42197961d7126668dd0037c26d31879d92a967fcdd372",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 79,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "deep_module-1",
+      "reason": "",
+      "when": "2026-10-07T01:53:49.829873+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-07T01:53:53.744103+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T01:53:49.829873+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T01:53:53.744103+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v79.json",
+  "review_run_id": "r-20261007T014719243486-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "a0a356da016ba4b72e46ae7b7ff897221d23709a",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 section_of(path) is a deep one-function module (small interface, the IDS-top-level-ancestor rule hidden behind it), but its contract is specified only as `<ids>/<first segment>` and does not define the path that has no second segment, which is a case its named replacement site already handles.",
+    "duplicate_owner": "pass \u2014 the census is complete. Re-ran the plan's own census at HEAD: the MAPS_TO_IMAS create is one site (imas_codex/ids/graph_ops.py:728 MERGE inside write_mapping_binding) and the delete is one site (imas_codex/ids/graph_ops.py:783 inside clear_mapping_bindings); MAPPING_CANDIDATE create is one site (graph_ops.py:537) and delete two (graph_ops.py:530, :838). The section-of rule has exactly the three copies \u00a78 names and no fourth in imas_codex/ (grep for the two-segment derivation returns only graph_ops.py:608, validation.py:842 and the assembler.py:187 prefix test).",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. \u00a78 names what it retires or merges for each family it touches: it retires mapping_target_path/ids/type and two CLI options, deletes two public definitions, and merges three copies of the section rule into section_of; the strict selection flag reuses the existing CandidateWriteError family (imas_codex/ids/graph_ops.py:25) rather than adding one. The accounting is written against a pre-landing revision, however \u2014 see the finding below.",
+    "reuse_search": "pass \u2014 \u00a78 cites and extends the machinery it installs beside (claim_batch in imas_codex/discovery/base/claims.py:255, write_candidates/read_candidates in imas_codex/ids/graph_ops.py, and the three section-rule call sites); no new subsystem is proposed. The one derivation that could have hidden a rebuild \u2014 the section-node \u2192 TargetType rule \u2014 was searched for prior art: imas_codex/core/node_classifier.py:400 (classify_node_pass1) and imas_codex/graph/dd_search.py:409 (_STRUCTURE_TYPES) exist but answer a different question (physics category: quantity/geometry/structural), so extending them is not the honest change.",
+    "thin_wrapper": "pass \u2014 select_candidates is a genuinely separate operation, not a thin wrapper: \u00a78 justifies it in its own text (write_candidates deletes and rewrites every edge of a source, while a pick must flag existing edges without disturbing the shortlist), and read_candidates collapses each source's edges, section and section attributes into one query behind one signature."
+  },
+  "section_digests": {
+    "_document": "97288df4cb4c01be01f0a14a899c374f216a0d76dce137a4eaa93147f473c515",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "49fe6b47dc67cb4a5a3a7a08b070a40a4ba1149a112d708ca012d446f48a932c",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "f00c1d8868d9e32e8377cab52caa39480f9f85b100deb1ae5eaa1e1e65b8f642",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T01:53:45.714769+00:00"
+}

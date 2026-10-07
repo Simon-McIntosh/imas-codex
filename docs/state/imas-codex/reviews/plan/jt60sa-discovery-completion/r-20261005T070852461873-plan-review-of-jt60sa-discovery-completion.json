@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T07:13:51.265Z",
+  "dispatched_at": "2026-10-05T07:08:55Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/profiles.py:354",
+      "id": "reuse_search-1",
+      "reason": "\u00a78 must either extend `resolve_service_url` to own the remote auto-tunnel (env override, `ensure_tunnel`, `TUNNEL_OFFSET`) or state that `profiles.py` retains its remote-tunnel branch, otherwise \"one owner\" is not behaviour-preserving.",
+      "text": "\u00a78 says `profiles.py` will \"call `resolve_service_url`\" and \"carry no squeue call or loopback rewrite of their own\", but the graph client's remote branch does work the owner does not: the `IMAS_CODEX_TUNNEL_BOLT_<HOST>` override, `ensure_tunnel(...)` with `TUNNEL_OFFSET`, and the tunnel-port URL (`bolt://localhost:{bolt_port+offset}`), whereas `resolve_service_url` (`remote/locations.py:282-283`) returns only `{protocol}://localhost:{port}` with no tunnel establishment or offset \u2014 so a worker following \u00a78 literally drops remote Neo4j auto-tunnelling and breaks off-cluster graph access",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4dda522de427db923d4e2983b76593d2adbe0d936ea9fbecab02d795716034a6",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 28,
+  "project": "imas-codex",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:14:42.022646+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T070852461873-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "99a249996d32492f47925a1f618477a99102a373",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `resolve_remote_environment` (`remote/environment.py`) hides the block-vs-data-system-vs-caller precedence behind one function, and \u00a78 collapses four SLURM-discovery copies onto one `resolve_service_url` interface rather than adding modules.",
+    "duplicate_owner": "pass \u2014 the plan names owners rather than forking: \u00a78 identifies the four existing SLURM-discovery copies (`remote/locations.py`, `settings.py`, `embeddings/readiness.py`, `graph/profiles.py`) and \u00a76 retires `data_access_patterns.setup_commands`, whose existence before commit `8f50f6642` is confirmed by that commit's own diff.",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every interface-touching section accounts in its own text (\u00a72 retires the prototype's `class:`/`shots:`/`udpid:` keyword parking, \u00a73 states why no existing WikiPage property can be retired, \u00a76 retires `data_access_patterns.setup_commands` and states its scan-gate refusal reuses `missing_required`/`version_too_old` rather than adding a family, \u00a78 adds none and removes two private copies).",
+    "reuse_search": "a finding \u2014 the plan's prior-art claims hold for \u00a72/\u00a73/\u00a74/\u00a76/\u00a77 (verified against `schemas/facility.yaml`, `discovery/wiki/pipeline.py`, `discovery/signals/parallel.py`, `remote/environment.py`), but \u00a78's unification onto `resolve_service_url` is incomplete: the owner does not carry the graph client's remote auto-tunnel behaviour.",
+    "thin_wrapper": "pass \u2014 no section adds a wrapper over existing machinery without justification: \u00a76 keeps the executor facility-agnostic and states why the resolver sits in the facility-aware layer, \u00a78 adds no public definition, \u00a73 reuses the existing edge writer rather than forking it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:14:12.950870+00:00"
+}

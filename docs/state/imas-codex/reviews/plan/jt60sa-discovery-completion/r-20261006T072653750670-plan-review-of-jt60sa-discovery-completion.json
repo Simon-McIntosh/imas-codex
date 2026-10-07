@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T07:31:08.135Z",
+  "dispatched_at": "2026-10-06T07:26:59Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/frontier.py:587",
+      "id": "reuse_search-1",
+      "reason": "the node should route the `--root` seed through the existing additive mechanism or hoist its existence filter, rather than re-deriving the same query, which the plan's otherwise citation-heavy \u00a714 does not mention.",
+      "text": "the plan's seed-fix node proposes making `seed_facility_roots` \"create only the rows that do not exist and leave an existing row's status, depth, scores and timestamps as they are\", but `seed_missing_roots` in the same file already performs exactly this: it queries `MATCH (p:FacilityPath {facility_id}) WHERE p.path IN $paths RETURN p.path`, diffs to `missing_paths`, and delegates to `seed_facility_roots`, so the additive semantics the node plans to invent already exist one function below the one it will edit; `--add-roots` (paths.py:236) already reaches them",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/paths/frontier.py:625",
+      "id": "duplicate_owner-1",
+      "reason": "extend the owner (share one existence filter; retire the now-redundant wrapper) instead of forking it, so the two cannot drift on a facility-scoped path query.",
+      "text": "the existence check `existing_paths = {r[\"path\"] for r in result}` / `missing_paths = [...]` at frontier.py:625-628 is the sole owner of \"which roots already exist\", and \u00a714's seed-fix makes `seed_facility_roots` re-implement it, leaving two filters for one invariant (and making `seed_missing_roots` a redundant pre-filter once the seed is additive); the census of this pattern in the discovery package is one existing instance (frontier.py:625) plus the proposed one",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "195bda21821f65556d71d824c14d5c75d9b1235013da77dbc40eb172967df6fa",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 190,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T072653750670-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "ad62ec8102f1c5a74669eae2e6a43f4248c89a3e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the prefix predicate is consolidated into one renderer (`render_path_prefix_clause`, query_builder.py:268) behind its five path claims, two code-scan claims and the reset, and `reset_to_status` renders its own scope so callers pass a list rather than Cypher.",
+    "duplicate_owner": "a finding \u2014 the seed-fix would create a second root-existence filter beside the one `seed_missing_roots` already owns in the same file.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714's live nodes add no member of any of those families (`--root`, `--add-roots`, `--reset-to`, `--path-prefix` all pre-exist; the change is a YAML value plus an existing function's additive behaviour).",
+    "reuse_search": "a finding \u2014 \u00a714's seed-fix adds additive-seed behaviour to `seed_facility_roots` without citing `seed_missing_roots` (frontier.py:587), which already implements exactly \"create only the rows that do not exist\".",
+    "thin_wrapper": "pass \u2014 the plan replaces the paths command's inline prefix block with calls to existing owners (`reset_to_status`, `seed_facility_roots`) rather than layering a forwarding wrapper over them."
+  },
+  "section_digests": {
+    "_document": "105f5d77458c8dc162350b589b042341cbbbd47a9cb320eea1eead92d4f8922b",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "61ba6cc5ef4ab8ca6fbbb2a956ea152bde7357575749e8a5e494e373341e276a",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T07:45:32.416379+00:00"
+}

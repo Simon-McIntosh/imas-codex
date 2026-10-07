@@ -1,0 +1,24 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T17:06:09.160Z",
+  "dispatched_at": "2026-10-05T17:02:08Z",
+  "findings": [],
+  "plan_fingerprint": "76975526248ba78528a76f5b082e282946bc3127b5587591226c15a4e3a1bc99",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 127,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T170204166688-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "7ec5c1e10e8316b9b36512efb9315aea9729f91a",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a714 changes two existing owners in place (the PATH_RESET_SPECS clear_fields lists and the paths CLI call site) and adds no new module; \u00a720 adds one test file, so neither introduces surface without depth.",
+    "duplicate_owner": "pass \u2014 the root scoping extends the reset owner (imas_codex/discovery/base/reset.py) rather than forking a second reprocess path, the re-expansion rides the existing claim_paths_for_expanding/seed_facility_roots pair, and \u00a720 reuses the existing render_chunk_source owner; the reader tests it would pin (tests/graph/test_query_builder.py:266, tests/graph/test_domain_queries.py:284) are wiring-only mocks, so no existing owner already covers the runtime claim.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 reuses the existing --reset-to and --root options (no new option) and \u00a720 adds only a test file, so neither section adds to any of the four interface families.",
+    "reuse_search": "pass \u2014 \u00a714 cites and extends the owning mechanisms it depends on (reset_to_status and PATH_RESET_SPECS in imas_codex/discovery/base/reset.py, the extra_filter/extra_params seam already used by imas_codex/cli/discover/signals.py, seed_facility_roots' exclusion filter at imas_codex/discovery/paths/frontier.py:502, and the root_filter already carried into claim_paths_for_expanding at imas_codex/discovery/paths/parallel.py:521), and \u00a720 reuses render_chunk_source in imas_codex/graph/query_builder.py rather than adding a second resolver.",
+    "thin_wrapper": "pass \u2014 no parallel layer is proposed: \u00a714 scopes the existing reset with the existing extra_filter seam instead of wrapping it, and \u00a720 adds no production code, asserting that the renderer stays the one owner."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T17:06:24.151466+00:00"
+}
