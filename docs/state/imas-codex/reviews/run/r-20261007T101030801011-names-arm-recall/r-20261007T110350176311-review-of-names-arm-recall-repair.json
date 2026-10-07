@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run r-20261007T101030801011-names-arm-recall declares no baseline_suite and no after_suite arm (its manifest records tests/test_logs only), so both arms are absent and ledger.added_failure_ids(None, None) is empty; the reviewed node is docs-only (one evidence fragment, no test path in its write scope), so no suite arm exists.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T11:12:12.864Z",
+  "dispatched_at": "2026-10-07T11:04:00Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html",
+      "line": "113",
+      "severity": "blocking",
+      "text": "blocking: the fragment states the strongest facet any file reached was 0.83 (lmdif1.f, signal_processing) 'across all runs', but every recorded artifact disagrees: measurement.log records 'top facet ... lmdif1.f 0.81 signal_processing_depth' and a direct scan of judged.json's 106 content_full records peaks at 0.81 for that path (the identity arm's facets are all 0.0, and no facet anywhere is 0.83). The repair round reconciled the bin table but left this number, previously flagged at the same line, so the published fragment overstates by 0.02 how close the facet clause came to its 0.85 gate."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read base 6b47ac50a to head ee78e78cd; the repair commit is a single 49+/34- edit to the one docs fragment, no code, no graph write, no discover run, consistent with the node's read-only brief.",
+    "done_when": "the section \u00a729 done-when asks for a seeded 15-per-bin sample over 0.15-0.40 (75 files) plus the 31-file client_eqdbms cohort, a per-bin table and a cohort table, each admitted path with name relevance/composite/strongest facet, the fetched count and the spend at or under USD 1, read-only with no graph write; every one is present - 75+31 records, bins 0/1/0/2/3, cohort 2/31, 104 distinct paths fetched, spend $0.0689 total.",
+    "goal": "the node's one-sentence goal is to measure, read-only, how many name-skipped JT-60SA code files the content arm would admit, and the fragment carries the per-bin and cohort admissions the goal names.",
+    "manifest": "read; status complete, gate is run_measurement.py (EXIT=0), and the manifest's 'sample 3/75, cohort 2/31' quotes the identity arm of a log whose content_full arm reports 6/75 - reconciled in the fragment after the earlier blocking review, though the manifest's own tests line remains the identity arm.",
+    "write_paths": "read the manifest's declared write paths (reports/imas-codex/names-arm-recall, docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, docs/figures/...) and the commit ee78e78cd; the diff is the one fragment file, inside the scope, with no figure and no code change."
+  },
+  "justifications": {
+    "durability": "scripts (run_measurement.py, stability.py, verify_fragment.py) and their logs are recorded under reports/imas-codex/names-arm-recall, and verify_fragment.py carries a real negative control that fires (its previous-blob arm exits 1 with two per-bin MISMATCH lines); but no check covers the facet maximum, which is why the 0.83 claim survives the repair.",
+    "evidence": "the fragment's headline and per-bin table now reconcile with the primary run it cites (docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:5-11,63-67 vs measurement.log content_full 6/75 at bins 0.067/0.133/0.200), but its facet maximum still disagrees with the same log: the fragment states the strongest facet any file reached was 0.83 (docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:113) while measurement.log records 'top facet ... lmdif1.f 0.81 signal_processing_depth' and judged.json's 106 content_full records peak at 0.81 for that file.",
+    "fit": "docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:54 follows the sibling evidence-fragment idiom (section, captioned tables, element ids prefixed with the node id) and carries no plan identifier.",
+    "goal_fidelity": "docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:4 states and reports the content-arm admission the section asks for, per 0.05 bin and for the cohort.",
+    "reuse": "the measurement imports the real content arm from imas_codex/discovery/code/scorer.py and fetch_remote_files from imas_codex/ingestion/readers/remote.py rather than re-implementing either.",
+    "scope_discipline": "git diff 6b47ac50a..ee78e78cd changes only docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, inside the declared write scope; the repair commit touches no code, test, graph or plan."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's one-sentence goal is to measure, read-only, how many name-skipped JT-60SA code files the content arm would admit, and the fragment carries the per-bin and cohort admissions the goal names.\nVERDICT done_when: the section \u00a729 done-when asks for a seeded 15-per-bin sample over 0.15-0.40 (75 files) plus the 31-file client_eqdbms cohort, a per-bin table and a cohort table, each admitted path with name relevance/composite/strongest facet, the fetched count and the spend at or under USD 1, read-only with no graph write; every one is present - 75+31 records, bins 0/1/0/2/3, cohort 2/31, 104 distinct paths fetched, spend $0.0689 total.\nVERDICT write_paths: read the manifest's declared write paths (reports/imas-codex/names-arm-recall, docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, docs/figures/...) and the commit ee78e78cd; the diff is the one fragment file, inside the scope, with no figure and no code change.\nVERDICT manifest: read; status complete, gate is run_measurement.py (EXIT=0), and the manifest's 'sample 3/75, cohort 2/31' quotes the identity arm of a log whose content_full arm reports 6/75 - reconciled in the fragment after the earlier blocking review, though the manifest's own tests line remains the identity arm.\nVERDICT diff: read base 6b47ac50a to head ee78e78cd; the repair commit is a single 49+/34- edit to the one docs fragment, no code, no graph write, no discover run, consistent with the node's read-only brief.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:4 states and reports the content-arm admission the section asks for, per 0.05 bin and for the cohort.\nSCORE evidence: 12\nJUSTIFICATION evidence: the fragment's headline and per-bin table now reconcile with the primary run it cites (docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:5-11,63-67 vs measurement.log content_full 6/75 at bins 0.067/0.133/0.200), but its facet maximum still disagrees with the same log: the fragment states the strongest facet any file reached was 0.83 (docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:113) while measurement.log records 'top facet ... lmdif1.f 0.81 signal_processing_depth' and judged.json's 106 content_full records peak at 0.81 for that file.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 6b47ac50a..ee78e78cd changes only docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html, inside the declared write scope; the repair commit touches no code, test, graph or plan.\nSCORE durability: 16\nJUSTIFICATION durability: scripts (run_measurement.py, stability.py, verify_fragment.py) and their logs are recorded under reports/imas-codex/names-arm-recall, and verify_fragment.py carries a real negative control that fires (its previous-blob arm exits 1 with two per-bin MISMATCH lines); but no check covers the facet maximum, which is why the 0.83 claim survives the repair.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:54 follows the sibling evidence-fragment idiom (section, captioned tables, element ids prefixed with the node id) and carries no plan identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the measurement imports the real content arm from imas_codex/discovery/code/scorer.py and fetch_remote_files from imas_codex/ingestion/readers/remote.py rather than re-implementing either.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/names-arm-recall.html:113 blocking: the fragment states the strongest facet any file reached was 0.83 (lmdif1.f, signal_processing) 'across all runs', but every recorded artifact disagrees: measurement.log records 'top facet ... lmdif1.f 0.81 signal_processing_depth' and a direct scan of judged.json's 106 content_full records peaks at 0.81 for that path (the identity arm's facets are all 0.0, and no facet anywhere is 0.83). The repair round reconciled the bin table but left this number, previously flagged at the same line, so the published fragment overstates by 0.02 how close the facet clause came to its 0.85 gate.\n",
+  "review_run_id": "r-20261007T110350176311-review-of-names-arm-recall-repair",
+  "reviewed_base": "6b47ac50a935523cd8be8597f3ac84f2c5a62322",
+  "reviewed_base_sha": "6b47ac50a935523cd8be8597f3ac84f2c5a62322",
+  "reviewed_commit": "ee78e78cd1d6f1933601272c6b76ea65582092da",
+  "reviewed_head_sha": "ee78e78cd1d6f1933601272c6b76ea65582092da",
+  "reviewed_run_id": "r-20261007T101030801011-names-arm-recall",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:09:12+00:00",
+  "total": 104
+}
