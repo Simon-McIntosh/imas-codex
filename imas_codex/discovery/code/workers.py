@@ -750,6 +750,59 @@ def _claim_code_files_for_ingestion(
         return list(result)
 
 
+def _settle_unclaimable_files(
+    facility: str,
+    max_line_count: int = 10000,
+    path_prefixes: list[str] | None = None,
+) -> int:
+    """Mark admitted files the ingestion claim can never reach as skipped.
+
+    A file the claim would otherwise admit — content-stage, above the ingest
+    relevance floor, inside the run's path scope and outside the facility's
+    exclusion prefixes — is excluded by the claim's
+    ``coalesce(sf.line_count, 0) <= $max_line_count`` predicate when it is
+    oversized, so it waits at ``scored`` forever.  This gives exactly those rows
+    a terminal ``skipped`` state with the reason.
+
+    Returns the number of files settled.
+    """
+    from imas_codex.config.discovery_config import build_facility_exclusion_filter
+    from imas_codex.discovery.code.scorer import (
+        RELEVANCE_STAGE_CONTENT,
+        relevance_predicate,
+    )
+    from imas_codex.graph import GraphClient
+    from imas_codex.graph.query_builder import build_path_prefix_filter
+    from imas_codex.settings import (
+        get_code_facet_admission_threshold,
+        get_code_ingest_threshold,
+    )
+
+    prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
+    with GraphClient() as gc:
+        result = gc.query(
+            f"""
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            WHERE sf.status = 'scored'
+              AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT, "$min_relevance", "$min_facet_relevance")}
+              AND coalesce(sf.line_count, 0) > $max_line_count
+              {prefix_clause}
+              {excluded_clause}
+            SET sf.status = 'skipped',
+                sf.skip_reason = 'exceeds max_line_count'
+            RETURN count(sf) AS settled
+            """,
+            facility=facility,
+            min_relevance=get_code_ingest_threshold(),
+            min_facet_relevance=get_code_facet_admission_threshold(),
+            max_line_count=max_line_count,
+            **prefix_params,
+            **excluded_params,
+        )
+        return result[0]["settled"] if result else 0
+
+
 def _filter_duplicates(files: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Filter out files whose content_hash is already ingested.
 
@@ -877,6 +930,28 @@ def _mark_file_failed(file_id: str, error: str) -> None:
         )
 
 
+def _mark_file_skipped(file_id: str, reason: str) -> None:
+    """Mark a single CodeFile as skipped with a reason.
+
+    A skipped file is terminal: it will not be reclaimed, and the reason records
+    why no example was written for it.
+    """
+    from imas_codex.graph import GraphClient
+
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sf:CodeFile {id: $id})
+            SET sf.status = 'skipped',
+                sf.skip_reason = $reason,
+                sf.claimed_at = null,
+                sf.claim_token = null
+            """,
+            id=file_id,
+            reason=reason[:200],
+        )
+
+
 async def code_worker(
     state: FileDiscoveryState,
     on_progress: Callable | None = None,
@@ -907,6 +982,21 @@ async def code_worker(
     )
 
     idle_log_interval = 10  # log every Nth consecutive idle poll
+    # Give admitted files the claim can never reach a terminal state before the
+    # first poll, so the pass settles rather than waiting on them.  Only an
+    # ingest pass settles: a scan or score pass is not the stage that owns them.
+    if not (state.scan_only or state.score_only):
+        settled = await asyncio.to_thread(
+            _settle_unclaimable_files,
+            state.facility,
+            10000,
+            state.path_prefixes,
+        )
+        if settled:
+            logger.info(
+                "Settled %d admitted files as skipped (exceeds max_line_count)",
+                settled,
+            )
     consecutive_idle = 0
     batches_processed = 0
 
@@ -983,7 +1073,6 @@ async def code_worker(
             on_progress(f"ingesting {len(files)} code files", state.code_stats, None)
 
         remote_paths = [f["path"] for f in files]
-        all_ids = [f["id"] for f in files]
         scores = [f.get("score_composite", 0) for f in files]
 
         logger.info(
@@ -1009,13 +1098,33 @@ async def code_worker(
             ingested_count = ingest_stats.get("files", 0)
             skipped_count = ingest_stats.get("skipped", 0)
             chunks_count = ingest_stats.get("chunks", 0)
+            outcomes = ingest_stats.get("outcomes", {})
 
-            # Mark ALL claimed files as ingested — either their content
-            # was just processed or was already present (dedup-skipped).
-            # _mark_files_ingested skips files already marked 'failed'
-            # by ingest_files, so individual failures are preserved.
-            if ingested_count > 0 or skipped_count > 0:
-                await asyncio.to_thread(_mark_files_ingested, all_ids)
+            # Each file carries its own outcome, so one file's write failure
+            # fails only that file.  A claimed file with no outcome is a
+            # contract violation and is marked failed rather than silently
+            # ingesting.
+            ingested_ids: list[str] = []
+            for f in files:
+                outcome = outcomes.get(f["path"])
+                if outcome is None:
+                    await asyncio.to_thread(
+                        _mark_file_failed, f["id"], "no ingestion outcome recorded"
+                    )
+                elif outcome["status"] == "ingested":
+                    ingested_ids.append(f["id"])
+                elif outcome["status"] == "skipped":
+                    await asyncio.to_thread(
+                        _mark_file_skipped, f["id"], outcome.get("reason", "no chunks")
+                    )
+                else:
+                    await asyncio.to_thread(
+                        _mark_file_failed,
+                        f["id"],
+                        outcome.get("reason", "unknown failure"),
+                    )
+            if ingested_ids:
+                await asyncio.to_thread(_mark_files_ingested, ingested_ids)
 
             batch_total = ingested_count + skipped_count
             batches_processed += 1
