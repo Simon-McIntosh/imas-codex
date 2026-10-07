@@ -9,25 +9,32 @@
     <code>select_candidates(source_id, paths, gc)</code>, which marks exactly
     the listed edges selected and sets <code>candidate_route</code> to
     <code>selected</code> in the same statement, refusing a listed path with
-    no edge. <code>gather_ids_context</code> now reads each source's shortlist
+    no edge. A refused pick is all-or-nothing: the statement's writes are
+    guarded on the same match, so a partial or empty pick writes neither an
+    edge flag nor a route and leaves the shortlist unchanged.
+    <code>gather_ids_context</code> now reads each source's shortlist
     through <code>read_candidates</code> instead of re-embedding every source
     (<code>retrieve_candidates</code> is gone from
     <code>imas_codex/ids/mapping.py</code>), the <code>imas_node_embedding</code>
     arm and its post-hoc filter are removed from
-    <code>compute_semantic_matches</code>, and the <code>workers.py</code> copy
+    <code>compute_semantic_matches</code> (with its now-unused
+    <code>target_ids_name</code> and <code>dd_version</code> parameters), and
+    the <code>workers.py</code> copy
     of <code>count_candidates_by_route</code> and the caller-less
     <code>count_sources_by_mapping_status</code> are deleted with
     <code>discover status</code> and <code>discover clear</code> repointed to
     the <code>graph_ops.py</code> reader. <code>_candidate_records</code> reads
-    arms strictly, raising when a judgment has no matching candidate.
+    arms strictly, raising when a judgment has no matching candidate, and
+    <code>_prepare_section_context</code> reads the same edge-dict shape that
+    <code>gather_ids_context</code> stores.
   </p>
   <table id="map-context-reads-candidates-gate">
     <thead><tr><th>check</th><th>result</th></tr></thead>
     <tbody>
-      <tr><td><code>uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/tools/test_dd_version_filtering.py tests/test_cli.py -p no:cacheprovider</code></td><td>530 passed, 8 skipped, 2 deselected, exit 0</td></tr>
+      <tr><td><code>uv run --no-sync pytest tests/ids tests/cli/test_discover_map.py tests/tools/test_dd_version_filtering.py tests/test_cli.py -p no:cacheprovider</code></td><td>534 passed, 8 skipped, 2 deselected, exit 0</td></tr>
       <tr><td><code>grep -n retrieve_candidates imas_codex/ids/mapping.py</code></td><td>nothing</td></tr>
       <tr><td><code>grep -n imas_node_embedding imas_codex/ids/tools.py</code></td><td>nothing</td></tr>
-      <tr><td><code>grep -rn 'def count_candidates_by_route\|count_sources_by_mapping_status' imas_codex/</code></td><td>only <code>graph_ops.py:788</code></td></tr>
+      <tr><td><code>grep -rn 'def count_candidates_by_route\|count_sources_by_mapping_status' imas_codex/</code></td><td>only <code>graph_ops.py:796</code></td></tr>
       <tr><td>negative control — <code>gather_ids_context</code> calls <code>retrieve_candidates</code> in place of <code>read_candidates</code></td><td>1 failed, exit 1</td></tr>
     </tbody>
   </table>
