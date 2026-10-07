@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -101,8 +101,15 @@
       <strong>Node</strong> <code>jt60sa-signal-enrichment</code>, role implement, 1 h. Write path:
       <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment.html</code>.
       <strong>Done when</strong> no standalone or representative JT-60SA signal remains discovered,
-      except failures the fragment lists with their error. All 280 SignalSources read enriched, and the
-      fragment records the spend against the cap. The run uses foreground passes of <code>--time 8</code>.
+      except failures the fragment lists with their error. Every JT-60SA SignalSource reads enriched.
+      That is the 280 grouped sources plus the one-member sources §3's pass creates at this run's
+      preflight, about 2,249 in all; the fragment gives the counts before and after. The fragment
+      records the spend against the cap: language calls on the local <code>discovery-describe</code>
+      seat cost nothing, and the Jev rerank's real decision cost is reported separately. It also records
+      how many sources were enriched with no retrieved context. Each pass runs
+      <code>imas-codex discover signals jt-60sa --enrich-only --time 8 --cost-limit 10</code> in the
+      foreground until no claimable signal remains. The USD 10 per-pass cap sits inside the plan's USD
+      50.
     </p>
 
     <section class="section-landed">
