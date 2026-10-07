@@ -48,6 +48,7 @@ from imas_codex.graph.client import GraphClient
 from imas_codex.ids.candidates import (
     expand_cluster_siblings,
     judge_candidates,
+    judgments_available,
     retrieve_candidates,
     route,
     route_ids,
@@ -1153,6 +1154,15 @@ async def candidate_worker(
     transport failure releases the source's claim so a later pass retries it.
     """
     wlog = WorkerLogAdapter(logger, worker_name="candidate_worker")
+
+    # Without the decisions key every source the loop claims can only fail to
+    # judge, so it would claim and release until its deadline. End the stage
+    # before the first claim instead: ``judgments_available`` reports the
+    # absence once, and every source stays unjudged for a later run with the
+    # credential configured.
+    if not judgments_available():
+        state.candidate_phase.mark_done()
+        return
 
     facility_block = _facility_block(state.facility)
     thresholds = get_mapping_route_thresholds()
