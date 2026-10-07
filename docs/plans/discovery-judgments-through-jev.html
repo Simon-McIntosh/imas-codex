@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -284,6 +284,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-landing-docs-score-ties" data-who="reckon-build" data-when="2026-10-07T06:30:00Z">
     <div class="r-comment-body"><p>Node docs-score-ties landed as the cosine tie-break alone: <code>_search_docs</code> sorts by (hybrid score, raw cosine), so tie order no longer depends on set iteration. The coordinator reversed the reserved-vector-slot change after the corrected measurement, which uses a fixed denominator and goes through the tool itself. It left nDCG@10 unchanged (0.408) but lowered nDCG@30 from 0.530 to 0.478. The Q14 and Q18 answers therefore stay outside the 30-window, for the rerank over a larger pool to reach. Reviews scored 87 and then 100, with 0 added failures. Follow-ons:</p><ul><li>a test with a tie block larger than k;</li><li>gate logs that carry a header;</li><li>a pinned hash seed for the baseline arm.</li></ul><p>impl 5/11.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261007T042509171825-docs-score-ties" data-who="reckon-build" data-when="2026-10-07T06:09:32.688Z">
+    <div class="r-comment-body"><p>node docs-score-ties makes _search_docs order saturated hybrid-score ties by raw cosine alone and removes the reserved-slot fill; the tie-break leaves the visible top ten bit-identical (nDCG@10 0.4076, nDCG@30 0.5298, recall@30 0.6667, Q16 control 0.9675 all unchanged) and makes the tie order deterministic, while the reserve was measured and rejected because it lowers nDCG@30 to 0.4784 and lowers recall@30 on Q13, Q15 and Q17 (mean 0.6667 to 0.6646); the Q14 and Q18 answers it lifted are left for the rerank sized over a pool larger than 30; landing record is docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-landing-retrieval-miss-census" data-who="reckon-build" data-when="2026-10-07T02:55:00Z">
     <div class="r-comment-body"><p>Node retrieval-miss-census (ac57f30ba) classified the five misses; review 113/120. Two of the five answers are SELENE Fortran files held back by the 0.5 ingest gate while carrying machine description: <code>mgset0.f</code> (0.39, the flux-loop positions) and <code>eqgrd.f</code> (0.35, the flux grid). This bears on the graded-facet admission question that the code score stage reports on <code>mgset0.f</code>. The other four are a retrieval-scoring problem, now §11. Two adjacent findings: a WikiPage can be skipped for insufficient content while carrying should_ingest true and score 0.95 (DataAnalysis), which belongs in §5; and a code reset leaves a file's chunks behind (<code>eqgrd.f</code>), which belongs to the code reset specs. impl 2/9.</p></div>
