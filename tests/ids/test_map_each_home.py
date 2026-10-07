@@ -32,6 +32,7 @@ from imas_codex.ids.workers import (
     map_worker,
     record_mapping_verdict,
     refresh_mapping_status,
+    release_mapping_claim,
 )
 
 _NO_BINDING = "NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode {ids: $ids_name}) }"
@@ -496,6 +497,9 @@ def test_mapping_status_rule_against_the_live_graph():
             # summary pass: the claim predicate is per IDS.
             claimed = claim_sources_for_mapping(facility, "summary")
             assert [c["id"] for c in claimed] == [source_id]
+            # Release the claim just taken, so the magnetics pass's skip below
+            # can only come from the no-binding clause, not a held claim.
+            release_mapping_claim(source_id)
 
             # Only magnetics is bound: the pass that validated magnetics cannot
             # call the source validated while summary remains unbound.
@@ -510,6 +514,10 @@ def test_mapping_status_rule_against_the_live_graph():
             assert refresh_mapping_status(source_id, "magnetics") == "assigned"
             assert has_pending_validation_work(facility) is False
 
+            # The magnetics pass skips the source it is already bound into, so
+            # its own second pass cannot re-map it.
+            assert claim_sources_for_mapping(facility, "magnetics") == []
+
             # Both IDSs bound: the source is validated.
             gc.query(
                 """
@@ -521,6 +529,7 @@ def test_mapping_status_rule_against_the_live_graph():
             )
             assert refresh_mapping_status(source_id, "summary") == "validated"
         finally:
+            release_mapping_claim(source_id)
             gc.query(
                 "MATCH (sg:SignalSource {id: $source_id}) DETACH DELETE sg",
                 source_id=source_id,
