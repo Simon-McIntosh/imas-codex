@@ -45,7 +45,7 @@ class TestClassifyNode:
         assert classify_node(path_id, name) == "accessor"
 
     # Layer 2: Force-include physics concepts
-    @pytest.mark.parametrize("name", list(FORCE_INCLUDE_CONCEPTS))
+    @pytest.mark.parametrize("name", sorted(FORCE_INCLUDE_CONCEPTS))
     def test_layer2_force_include_concepts(self, name: str) -> None:
         """Physics concepts must always be classified as 'concept'."""
         assert classify_node(f"some_ids/{name}", name) == "concept"
