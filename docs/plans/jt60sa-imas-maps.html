@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -312,6 +312,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261007T103117703398-enrichment-context-rerank" data-who="reckon-build" data-when="2026-10-07T11:34:09.549Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/jt60sa-imas-maps/enrichment-context-rerank.html</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261007T114055038119-rerank-pool-return-annotation" data-who="reckon-build" data-when="2026-10-07T11:48:52.762Z">
+    <div class="r-comment-body"><p>rerank_pool&#x27;s return annotation in imas_codex/discovery/base/judgment.py now reads tuple[list[Mapping[str, Any]], str | None, float]; typing.get_type_hints(rerank_pool)[&#x27;return&#x27;] third arg is float, mypy reports no return-value error at rerank_pool, tests/discovery/test_judgment.py + tests/discovery/test_enrichment_context_rerank.py + tests/llm/test_search_tools.py pass 118 passed/8 skipped, and the diff is that one annotation line only.</p></div>
 </div>
 </section>
 </main>
