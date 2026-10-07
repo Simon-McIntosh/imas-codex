@@ -59,14 +59,31 @@ intr26-2                                       # exit 0</pre>
 
   <p id="jt60sa-code-pass-drain">
     The pipeline drained: <strong>0 triaged files remain</strong>, so nothing
-    waits for enrichment or scoring. The reset pass
-    (<code>--reset-to content --time 8</code>) reported “0 files to reset …
-    No files to reset to ‘content’” — the 235 content files had already been
-    reset on the aborted attempt — then ran <em>482 scanned, 550 scored, 353 code
-    ingested</em>, Cost <strong>$0.13</strong>, Time 408.2s. The next pass
-    reported <em>0 scanned, 0 scored, 0 code ingested</em>, Cost $0.00, Time
-    479.6s, with the worker idle for 120 polls: the drain condition was reached.
-    Total decision spend across both passes: <strong>$0.13</strong>.
+    waits for enrichment or scoring. Two executions of this node ran
+    concurrently (see below), so every command appears twice in the shared
+    facility log and the two summaries are not additive. The first
+    <code>--reset-to content --time 8</code> pass cleared the 235 content files
+    and reported <em>415 scanned, 630 scored, 344 code ingested</em>, Cost
+    <strong>$0.11</strong>, Time 425.8s. The concurrent twin then found the queue
+    already reset (0 files to reset) and reported <em>482 scanned, 550 scored,
+    353 code ingested</em>, Cost <strong>$0.13</strong>, Time 408.2s. Both drain
+    passes reported <em>0 scanned, 0 scored, 0 code ingested</em>, Cost $0.00,
+    Time 479.6s: the drain condition was reached. Total decision spend across
+    both executions: <strong>$0.24</strong>.
+  </p>
+
+  <p id="jt60sa-code-pass-concurrency">
+    <strong>Two executions of this node ran from 09:34Z to 10:13Z.</strong> The
+    run record holds two launches twelve seconds apart — this session at
+    09:34:30Z and <code>attempt-2</code> at 09:34:42Z
+    (<code>worker_pid 608258</code>, terminated by SIGTERM at 10:13:17Z, a process
+    distinct from this session's own) — both bound to
+    <code>r-20261007T084429281839-jt60sa-code-pass</code> and the same worktree.
+    The facility log carries both: line 25366 reset 235 files at 11:36:47 beside
+    line 25485 reset 0 at 11:37:07, and the two drain starts at 11:50:46 and
+    11:51:50. This doubled the decision spend to $0.24 and raced two writers on
+    one write path. It is a dispatch defect, not a pipeline one, and is raised as
+    a follow-on.
   </p>
 
   <p id="jt60sa-code-pass-facet">
