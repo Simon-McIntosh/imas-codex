@@ -40,6 +40,21 @@
     field list (5 chunks). The definitive per-section <em>write</em> layout is
     the Fortran <code>WRITE</code> statement in <code>EQDB/eqwtNN.f</code>
     (e.g. <code>eqwt10.f</code> under <code>C::EQDATA TYPE(EQIDX.EQ.'EQ10')</code>).
+    These statuses were read from the live graph between 09:12Z and 09:37Z on
+    2026-10-07, while the JT-60SA code pass was re-judging files.
+  </p>
+
+  <p id="eqdbms-layout-probe-reread">
+    <strong>Re-read at review, 2026-10-07T09:47Z.</strong> The holders above
+    reproduce exactly. Three values had moved: <code>eqwt13.f</code> is
+    skipped at the name stage, <code>eqwt2.f</code> is skipped at the content
+    stage (score_composite 0.47), and a third ingested reader carries the
+    <code>_BF</code> field list, <code>/analysis/lib/eqdbms/eqdbget.f</code>
+    (5 chunks). At 10:02Z the 31 files under
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/</code> were all
+    skipped by the name arm as <code>infrastructure_or_utility</code>, with
+    relevance 0.16 to 0.30, while the content arm admitted the EDAS copies of
+    <code>eqwt10.f</code> and <code>eqwt11.f</code> at 0.56 and 0.52.
   </p>
 
   <p id="eqdbms-layout-probe-missing">
@@ -64,7 +79,9 @@
     <strong>Rank of the layout's chunks.</strong> Under the tool's own hybrid
     order (rerank off) the layout is absent from the default pool entirely: at
     <code>k=10</code> and <code>k=30</code> every returned candidate is EDAS
-    <code>eqread_pac</code> client code, and the layout's chunks first appear
+    client code (mostly <code>eqread_pac</code>; 3 of 10 and 10 of 30 come from
+    the <code>eslice_esurf</code>, <code>eslice</code> plugin,
+    <code>eslice_data_area</code> and <code>egis</code> trees), and the layout's chunks first appear
     only at <code>k=50</code> — <code>lib/eqdbms/eqdbget2m.f</code> at
     <strong>#39</strong> (0.886), EDAS <code>EQDB/eqdbio.f</code> at #44,
     <code>SAeqfame/eqdbget.f</code> at #45–46, <code>geteddbt.c</code> at #50.
@@ -91,7 +108,18 @@
     hop to <code>localhost:2222</code> returns <em>Connection timed out during
     banner exchange</em> / <em>Connection refused</em> — the JT-60SA hop is
     <strong>down</strong>. Per the criterion, classification is therefore from
-    the graph alone, and no on-host grep was possible.
+    the graph alone, and no on-host grep was possible. The hop returned later,
+    and the independent review ran a bounded read-only <code>find</code> on the
+    host at 09:47Z. It found the standalone include files in
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/inc/F/</code>:
+    <code>#AAA.bf</code>, <code>#GEO.bf</code>, <code>#EQU.bf</code>,
+    <code>#EQV.bf</code>, <code>#OUT.bf</code>, <code>#PAR.bf</code>,
+    <code>#VAC.bf</code>, <code>#CNT.bf</code>, <code>#EQ2M.bf</code>,
+    <code>#MSEDB.bf</code> and <code>#EQTTL.bf</code>, plus
+    <code>F_1025</code> and <code>F_129</code> variants. None can reach the
+    graph: <code>.bf</code> is not a key of <code>EXTENSION_TO_LANGUAGE</code>
+    in <code>imas_codex/ingestion/readers/remote.py</code>, which is the code
+    scanner's extension list.
   </p>
 
   <p id="eqdbms-layout-probe-verdict">
