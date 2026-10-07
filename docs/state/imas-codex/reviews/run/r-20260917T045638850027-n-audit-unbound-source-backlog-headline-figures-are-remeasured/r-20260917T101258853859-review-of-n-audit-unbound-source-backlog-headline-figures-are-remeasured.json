@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "backend": "claude-code",
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T10:12:58.853859+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/unbound-source-backlog/plan-figure-audit.md",
+      "line": "132",
+      "text": "the artifact list names census.log with (exit 0), and manifest.md:17 repeats the name, but no file of that name exists in the run directory: the log on disk is literally named census.log 2>&1 because the shell redirect was captured inside the command argument, so the log carrying the first census totals and status split cannot be opened under the name given (census.json still holds the same rows, so only the citation is broken, not the measurement)."
+    },
+    {
+      "file": "docs/evidence/unbound-source-backlog/plan-figure-audit.md",
+      "line": "88",
+      "text": "the claim that neither skip writer has a blank-reason route is false as written: mark_source_skipped (graph_ops.py:11569) does require the reason argument but writes sns.skip_reason = $reason with no emptiness check, and write_skipped_sources (graph_ops.py:11646) copies r[\"skip_reason\"] verbatim, so reason=\"\" still records the blank-reason skip that the plan's still-open skip-reason-enforcement decision at docs/plans/unbound-source-backlog.html:129 proposes to refuse at the write path."
+    },
+    {
+      "file": "docs/plans/unbound-source-backlog.html",
+      "line": "10",
+      "text": "the plan-summary card meta still asserts the superseded figures (9,900 / 4,459 / 1,283 / 1,413 / 398) that section 5 re-measures at :96-125, and plan-effort-hours at :13 still says 10.0 while section 5 restates 7 worker-hours, so the roadmap card shown to the sprint contradicts the plan body in the same file."
+    },
+    {
+      "file": "docs/evidence/unbound-source-backlog/plan-figure-audit.md",
+      "line": "132-134",
+      "text": "the three (exit 0) marks are prose rather than a recorded result: no census log carries an exit status and the manifest's tests field at manifest.md:9 covers only the audit-doc runs, so the exit-status half of the done-when clause rests on the summary rather than on an artifact."
+    }
+  ],
+  "justifications": {
+    "durability": "manifest.md:9-10 arms no automated check on the figures, and I measured the node's only standing gate as blind to them: reckon audit-doc --check-links returns OK at exit 0 for the evidence file, and a copy with two headline figures altered (10,019 to 9,999, 4,626 to 4,444) still returns OK at exit 0.",
+    "evidence": "plan-figure-audit.md:59 states the verdict counts and 4+11+1=16 closes the arithmetic, census.json and the three census logs hold the query outputs, and I reproduced audit-doc --check-links at exit 0 on the evidence file, but the code claim at :88-92 is false as written, :132 names a census.log that does not exist, and no query log carries an exit status.",
+    "fit": "plan-figure-audit.md:1-31 follows the sibling evidence-file idiom (evidence HTML in markdown, numbered table with a citation column, project-absolute links) and the commit follows the conventional-subject-plus-body rule, but docs/plans/unbound-source-backlog.html:10 keeps the superseded figures and :13 the old 10.0 effort beside section 5's re-measured ones on the same page.",
+    "goal_fidelity": "plan-figure-audit.md:31-57 re-takes sixteen plan quantities against the live graph and code, and I reproduced the headline set from the census outputs (10,019 sources, 5,393 bound / 5,493 edges, 4,626 unbound, and :59 records 4 current / 11 drifted / 1 stale), so the sprint can be rescoped on current numbers even though one supporting clause of the :67 classification is false at :88-92.",
+    "scope_discipline": "the single commit 580f096ab and manifest.md:8 agree exactly on the three declared documentation paths (213 insertions, 0 deletions), with no product, test, generated or unrelated file touched and the plan-commit and plan-modified meta lines left alone."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: plan-figure-audit.md:31-57 re-takes sixteen plan quantities against the live graph and code, and I reproduced the headline set from the census outputs (10,019 sources, 5,393 bound / 5,493 edges, 4,626 unbound, and :59 records 4 current / 11 drifted / 1 stale), so the sprint can be rescoped on current numbers even though one supporting clause of the :67 classification is false at :88-92.\nSCORE evidence: 15\nJUSTIFICATION evidence: plan-figure-audit.md:59 states the verdict counts and 4+11+1=16 closes the arithmetic, census.json and the three census logs hold the query outputs, and I reproduced audit-doc --check-links at exit 0 on the evidence file, but the code claim at :88-92 is false as written, :132 names a census.log that does not exist, and no query log carries an exit status.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit 580f096ab and manifest.md:8 agree exactly on the three declared documentation paths (213 insertions, 0 deletions), with no product, test, generated or unrelated file touched and the plan-commit and plan-modified meta lines left alone.\nSCORE durability: 12\nJUSTIFICATION durability: manifest.md:9-10 arms no automated check on the figures, and I measured the node's only standing gate as blind to them: reckon audit-doc --check-links returns OK at exit 0 for the evidence file, and a copy with two headline figures altered (10,019 to 9,999, 4,626 to 4,444) still returns OK at exit 0.\nSCORE fit: 17\nJUSTIFICATION fit: plan-figure-audit.md:1-31 follows the sibling evidence-file idiom (evidence HTML in markdown, numbered table with a citation column, project-absolute links) and the commit follows the conventional-subject-plus-body rule, but docs/plans/unbound-source-backlog.html:10 keeps the superseded figures and :13 the old 10.0 effort beside section 5's re-measured ones on the same page.\nFINDING docs/evidence/unbound-source-backlog/plan-figure-audit.md:132 the artifact list names census.log with (exit 0), and manifest.md:17 repeats the name, but no file of that name exists in the run directory: the log on disk is literally named census.log 2>&1 because the shell redirect was captured inside the command argument, so the log carrying the first census totals and status split cannot be opened under the name given (census.json still holds the same rows, so only the citation is broken, not the measurement).\nFINDING docs/evidence/unbound-source-backlog/plan-figure-audit.md:88 the claim that neither skip writer has a blank-reason route is false as written: mark_source_skipped (graph_ops.py:11569) does require the reason argument but writes sns.skip_reason = $reason with no emptiness check, and write_skipped_sources (graph_ops.py:11646) copies r[\"skip_reason\"] verbatim, so reason=\"\" still records the blank-reason skip that the plan's still-open skip-reason-enforcement decision at docs/plans/unbound-source-backlog.html:129 proposes to refuse at the write path.\nFINDING docs/plans/unbound-source-backlog.html:10 the plan-summary card meta still asserts the superseded figures (9,900 / 4,459 / 1,283 / 1,413 / 398) that section 5 re-measures at :96-125, and plan-effort-hours at :13 still says 10.0 while section 5 restates 7 worker-hours, so the roadmap card shown to the sprint contradicts the plan body in the same file.\nFINDING docs/evidence/unbound-source-backlog/plan-figure-audit.md:132-134 the three (exit 0) marks are prose rather than a recorded result: no census log carries an exit status and the manifest's tests field at manifest.md:9 covers only the audit-doc runs, so the exit-status half of the done-when clause rests on the summary rather than on an artifact.",
+  "review_run_id": "r-20260917T101258853859-review-of-n-audit-unbound-source-backlog-headline-figures-are-remeasured",
+  "reviewed_base": "5ea0d73b441b6991fc29b9dbb03e13bc5b63b43c",
+  "reviewed_commit": "580f096ab54f45f0773b90a4f5b2d7765a8da00a",
+  "reviewed_run_id": "r-20260917T045638850027-n-audit-unbound-source-backlog-headline-figures-are-remeasured",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T11:45:00Z",
+  "total": 82
+}

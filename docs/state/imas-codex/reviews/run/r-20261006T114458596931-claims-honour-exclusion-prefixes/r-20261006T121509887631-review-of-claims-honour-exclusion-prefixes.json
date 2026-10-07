@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/discovery/paths/parallel.py:has_pending_work",
+    "imas_codex/discovery/paths/parallel.py:claim_paths_for_scanning",
+    "imas_codex/discovery/code/graph_ops.py:has_pending_triage_work",
+    "imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion"
+  ],
+  "completed_at": "2026-10-06T12:21:49.159Z",
+  "dispatched_at": "2026-10-06T12:15:15Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "234",
+      "severity": "blocking",
+      "text": "blocking: the exclusion clause is appended to a disjunction of five state tests; Cypher binds AND tighter than OR, so it renders as disc OR scn OR exp OR enr OR (rsc AND none(...)) and applies only to the last disjunct. A discovered, scanned, expand-eligible or enrich-eligible row under an excluded prefix is still counted as pending. This defeats the node's stated goal for the aggregate has-work predicate, and imas_codex/discovery/paths/parallel.py:1397 already documents that has_pending_work true while claims return nothing makes the phase reset loop forever."
+    },
+    {
+      "file": "tests/discovery/test_code_pipeline.py",
+      "line": "1499",
+      "severity": "follow-on",
+      "text": "follow-on: this file is outside the node's declared write paths; two assertions were relaxed from \"STARTS WITH\" not in ... and \"prefixes\" not in kwargs to weaker substring/set forms to accommodate the new exclusion clause."
+    },
+    {
+      "file": "tests/discovery/test_claims_honour_exclusions.py",
+      "line": "118",
+      "severity": "follow-on",
+      "text": "follow-on: the stub applies the exclusion as an unconditional row filter, so it cannot observe where in the WHERE clause the predicate sits; the has_pending_work assertion therefore cannot fail on a precedence-induced regression and overstates the coverage the suite gives that site."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read the single commit 64a6ed714 against base 126e8030784004a1080c0244204be11a84143407; 10 files, 545 insertions, 52 deletions, mostly the 22-site wiring plus tests.",
+    "done_when": "The done_when names the gate uv run pytest tests/discovery tests/graph/test_path_prefix_filter.py; logs/after_gate.log records exit 0 with 1218 passed against a baseline of 1188, and logs/negative_control.log records the required red with the excluded row still claimed.",
+    "goal": "The goal is that path and code claims and their has-work predicates skip rows under a facility's exclusion prefixes; the diff wires one exclusion helper at all 22 named sites (imas_codex/discovery/paths/parallel.py:214 and following), but has_pending_work does not in fact skip an excluded row.",
+    "manifest": "Read; it reports the gate and its result, and discloses the out-of-scope edit and the scope_prefixes/prefixes naming divergence under follow_ons.",
+    "write_paths": "The node was fenced to nine paths; the diff stays inside them except tests/discovery/test_code_pipeline.py, which the node was not fenced to write."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_claims_honour_exclusions.py:118 filters by excluded_prefixes irrespective of clause position, so it stays green on the precedence regression the has_pending_work change carries.",
+    "evidence": "logs/after_gate.log:1 names revision 64a6ed714 and records 1218 passed exit 0; the done-when's gate is the command that ran and its result is recorded.",
+    "fit": "imas_codex/config/discovery_config.py:541 places the new helper beside get_exclusion_config_for_facility and adds no name the naming rules forbid.",
+    "goal_fidelity": "imas_codex/discovery/paths/parallel.py:234 renders ORs before the exclusion AND, so has_pending_work counts an excluded row in four of its five states rather than skipping it.",
+    "reuse": "imas_codex/config/discovery_config.py:562 builds through build_path_prefix_filter (imas_codex/graph/query_builder.py:283) rather than rendering its own clause, extending the existing owner.",
+    "scope_discipline": "tests/discovery/test_code_pipeline.py:1499 was edited although it is outside the node's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is that path and code claims and their has-work predicates skip rows under a facility's exclusion prefixes; the diff wires one exclusion helper at all 22 named sites (imas_codex/discovery/paths/parallel.py:214 and following), but has_pending_work does not in fact skip an excluded row.\nVERDICT done_when: The done_when names the gate uv run pytest tests/discovery tests/graph/test_path_prefix_filter.py; logs/after_gate.log records exit 0 with 1218 passed against a baseline of 1188, and logs/negative_control.log records the required red with the excluded row still claimed.\nVERDICT write_paths: The node was fenced to nine paths; the diff stays inside them except tests/discovery/test_code_pipeline.py, which the node was not fenced to write.\nVERDICT manifest: Read; it reports the gate and its result, and discloses the out-of-scope edit and the scope_prefixes/prefixes naming divergence under follow_ons.\nVERDICT diff: Read the single commit 64a6ed714 against base 126e8030784004a1080c0244204be11a84143407; 10 files, 545 insertions, 52 deletions, mostly the 22-site wiring plus tests.\nCALL_SITES: imas_codex/discovery/paths/parallel.py:has_pending_work, imas_codex/discovery/paths/parallel.py:claim_paths_for_scanning, imas_codex/discovery/code/graph_ops.py:has_pending_triage_work, imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: imas_codex/discovery/paths/parallel.py:234 renders ORs before the exclusion AND, so has_pending_work counts an excluded row in four of its five states rather than skipping it.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/after_gate.log:1 names revision 64a6ed714 and records 1218 passed exit 0; the done-when's gate is the command that ran and its result is recorded.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: tests/discovery/test_code_pipeline.py:1499 was edited although it is outside the node's declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: tests/discovery/test_claims_honour_exclusions.py:118 filters by excluded_prefixes irrespective of clause position, so it stays green on the precedence regression the has_pending_work change carries.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/config/discovery_config.py:541 places the new helper beside get_exclusion_config_for_facility and adds no name the naming rules forbid.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/config/discovery_config.py:562 builds through build_path_prefix_filter (imas_codex/graph/query_builder.py:283) rather than rendering its own clause, extending the existing owner.\nFINDING imas_codex/discovery/paths/parallel.py:234 blocking: the exclusion clause is appended to a disjunction of five state tests; Cypher binds AND tighter than OR, so it renders as disc OR scn OR exp OR enr OR (rsc AND none(...)) and applies only to the last disjunct. A discovered, scanned, expand-eligible or enrich-eligible row under an excluded prefix is still counted as pending. This defeats the node's stated goal for the aggregate has-work predicate, and imas_codex/discovery/paths/parallel.py:1397 already documents that has_pending_work true while claims return nothing makes the phase reset loop forever.\nFINDING tests/discovery/test_code_pipeline.py:1499 follow-on: this file is outside the node's declared write paths; two assertions were relaxed from \"STARTS WITH\" not in ... and \"prefixes\" not in kwargs to weaker substring/set forms to accommodate the new exclusion clause.\nFINDING tests/discovery/test_claims_honour_exclusions.py:118 follow-on: the stub applies the exclusion as an unconditional row filter, so it cannot observe where in the WHERE clause the predicate sits; the has_pending_work assertion therefore cannot fail on a precedence-induced regression and overstates the coverage the suite gives that site.\n",
+  "review_run_id": "r-20261006T121509887631-review-of-claims-honour-exclusion-prefixes",
+  "reviewed_base_sha": "126e8030784004a1080c0244204be11a84143407",
+  "reviewed_head_sha": "64a6ed714ad223f9ee449cc96438dd247db8cd62",
+  "reviewed_run_id": "r-20261006T114458596931-claims-honour-exclusion-prefixes",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T12:25:00+00:00",
+  "total": 93
+}

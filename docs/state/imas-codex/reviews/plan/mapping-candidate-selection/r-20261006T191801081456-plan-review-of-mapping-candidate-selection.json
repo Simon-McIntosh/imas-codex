@@ -1,0 +1,104 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T19:24:07.020Z",
+  "dispatched_at": "2026-10-06T19:18:07Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/models.py:43",
+      "id": "reuse_search-1",
+      "reason": "\u00a78 must specify a derivation that yields the four TargetType values (or keep the model's classification) before retiring the field, or the transform-selection branch at mapping.py:1416 changes behaviour silently.",
+      "text": "\u00a78 says the map stage \"derives the target type from that node's data type, where claim_sources_for_mapping reads the scalar today (workers.py:237)\", but TargetType is a four-valued structural classification {struct_array, time_slice, scalar, profile} that the reasoning model produces today (the prompt target_assignment_system.md:36 asks it to choose; it is written at workers.py:554) and that mapping.py:1416/:1497 consume to select direct-write vs profile/struct handling. An IMASNode's data_type is the DD type (STRUCT_ARRAY, FLT_1D, \u2026), which cannot distinguish struct_array from time_slice and does not carry the profile/scalar split the prompt defines; the plan named the field it retires but not the mechanism that produces its value",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/map.py:646 (edge delete at :662)",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a78's invariant (\"one module owns every SignalSource \u2192 IMASNode edge\") is only half-true while the delete lives in the CLI; the author should move the delete into graph_ops.py or drop the invariant.",
+      "text": "\u00a76 adds clear_candidates to imas_codex/ids/graph_ops.py and \u00a78 moves every MAPS_TO_IMAS write into one graph_ops.py function so that \"one module then owns every SignalSource \u2192 IMASNode edge write\", but the corresponding delete of the same edge stays in the CLI: _clear_mapping (imas_codex/cli/map.py:646; `MATCH (sg)-[r:MAPS_TO_IMAS]->(:IMASNode) DELETE r` at :662) is the sole MAPS_TO_IMAS delete site in imas_codex/, and \u00a72's own investigation names this exact function as the mechanism that removed the mapping edges. The owner to extend is graph_ops.py, beside write_candidates/clear_candidates",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-candidate-selection.html#s7 (imas_codex/ids/candidates.py, retrieve_candidates \u00a74)",
+      "id": "deep_module-1",
+      "reason": "\u00a77 must state that route_ids runs before retrieve_candidates (and \u00a74's node must expose the ids_by_source dependency), or retrieval is built and gated unscoped.",
+      "text": "\u00a74's retrieve_candidates(sources, ids_by_source, \u2026) takes ids_by_source, \"the IDSs that \u00a75's routing Choice named for each source\", i.e. an output of \u00a75's route_ids, yet \u00a74's node is dispatched before \u00a75 (plan-section-depends-on: s4\u2190{s3}; s5\u2190{s25,s3,s4}) and \u00a77 states the per-batch order as \"retrieve_candidates, the judgment, route and write_candidates, in that order\" \u2014 retrieval before the IDS routing it depends on. The module's own boundary (route_ids feeds retrieval) therefore contradicts the order the module is built to serve, and an implementer following \u00a77 builds retrieval without the IDS routing that \u00a73 measured as the recall lift (0.556\u21920.694)",
+      "type": "deep_module",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e0454aad568b2ace2a362afbb20fb8ba13b5a8f3330cee7b480850d6a67ce0ce",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 22,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-06T19:24:59.077947+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T19:25:01.573968+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "deep_module-1",
+      "reason": "",
+      "when": "2026-10-06T19:25:04.378538+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T19:25:04.378538+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T19:25:01.573968+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T19:24:59.077947+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v22.json",
+  "review_run_id": "r-20261006T191801081456-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "06d3d30b3c13f37682164ce19f1d843460ee0d2c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 candidates.py's retrieval entry point consumes route_ids' ids_by_source output, yet \u00a77's stated pipeline order runs retrieval before the judgment, so the module's routing\u2192retrieval boundary is undefined at build time.",
+    "duplicate_owner": "a finding \u2014 the SignalSource \u2192 IMASNode edge delete is not consolidated: \u00a76 puts candidate clearing in graph_ops.py and \u00a78 moves every edge write there, but the MAPS_TO_IMAS delete stays in the CLI.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 names the construction it moves and the ClusterSearcher load it deletes, \u00a75 states it retires nothing and why, \u00a76 names the three mapping_target_* fields it displaces, \u00a77 collapses seven helpers to three and retires two imas map run options via \u00a78, and \u00a78 retires compute_semantic_matches, two options and three fields.",
+    "reuse_search": "a finding \u2014 \u00a78 replaces the model-produced TargetType with a derivation from IMASNode.data_type, but the existing TargetType owner (imas_codex/ids/models.py:43) is a four-valued structural classification that data_type cannot reproduce.",
+    "thin_wrapper": "pass \u2014 \u00a77 generalises the seven workers.py claim helpers into the existing claims.py owner rather than wrapping them, \u00a75 calls the \u00a725 decisions layer and builds no second client, and \u00a74's Candidate now wraps the SearchHit that hybrid_dd_search already returns instead of re-deriving it."
+  },
+  "section_digests": {
+    "_document": "565d1ef77fac0b09b09b253045583f0cd3793602d375e00e69587a95d561648e",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "7e48c769879bd07ee017e06eef98006d78eca71736a886d65e89cf7aca6382e5",
+    "s5": "d751ea219a201127dfebaa7ca93952db05d756d86dd1cb87882c0f58d131ac99",
+    "s6": "d5ee09fc179fdd8bc28c8e1f781611acc0576b54ea80fa0ed8fd860c04a91f6f",
+    "s7": "9a3f3e001fe7019e026f1e6c593cd2732fae69ddf4e48653b9f86905363f31e6",
+    "s8": "53950a07550b302d5e233a5772d56cc28715f78cecf2e73aec4331ad87682d22",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T19:24:56.672343+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:39:36.611Z",
+  "dispatched_at": "2026-10-05T15:28:24Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:3275",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a719 must add the schema reconciliation to its scope (retire or re-annotate the CodeChunk.code_example_id relationship slot so one name describes the one writer-created edge) or its stated done-when and its \"the schema does not declare\" premise are both false.",
+      "text": "CodeChunk.code_example_id is an unannotated range: CodeExample slot, so it auto-derives the relationship name CODE_EXAMPLE_ID (generated into imas_codex/graph/schema_context_data.py:2073 and referenced at imas_codex/graph/schema.py:693), yet the chunk writer creates the parent edge as (CodeExample)-[:HAS_CHUNK]->(CodeChunk) (imas_codex/ingestion/pipeline.py:522); \u00a719 removes the one reader of the declared CODE_EXAMPLE_ID arm but leaves the schema still declaring a parent relationship no writer materialises, so the generated schema context keeps advertising a phantom edge and \u00a719's own done-when \u2014 `rg 'CODE_EXAMPLE_ID|CodeFile\\)-\\[:HAS_CHUNK\\]|coalesce\\(.*source_file' imas_codex` matching \"only the helper\" \u2014 cannot hold, because schema_context_data.py:2073 matches",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8a16c18ff037892e3a7ff3c0b3e12ac031165de1fd6351765eaa4ade82004209",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 115,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T15:42:25.283412+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T152734347593-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "6bfa03f7b1e3dee5db14a090d4ceb03b01da5816",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a719's one renderer in imas_codex/ingestion/graph.py hides a two-hop OPTIONAL MATCH plus the ce/cc.source_file coalesce behind a single parameterised call that five sites embed, replacing five hand-inlined joins with one interface smaller than what it hides.",
+    "duplicate_owner": "a finding \u2014 \u00a719 leaves the schema declaring its own name for the same parent edge (CodeChunk.code_example_id -> CODE_EXAMPLE_ID) while pinning every reader on the writer's HAS_CHUNK edge; the plan mis-states that edge as \"the schema does not declare\".",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 this week; \u00a719 states in its own text \"Interface budget: nothing added\", \u00a714 adds only a key to an existing dict and a key in the seed item (no new CLI option, MCP view or refusal family), and the existing --root entry point is reused.",
+    "reuse_search": "pass \u2014 \u00a714 extends the existing seed_facility_roots (imas_codex/discovery/paths/frontier.py:426) and PATH_RESET_SPECS (imas_codex/discovery/base/reset.py:240), and \u00a719 opens the five divergent chunk-source readers (_enrich_code_chunks search_tools.py:1665, find_code domain_queries.py:480, code-context lookup discovery/signals/parallel.py:203, _search_code_chunks llm/server.py:827, schema_context.py:95) plus the single writer ingestion/pipeline.py:522; every citation verified present in the tree.",
+    "thin_wrapper": "pass \u2014 neither implementable section adds a forwarding layer: \u00a714 extends existing functions in place, and \u00a719 consolidates five readers onto one owner rather than wrapping them."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T15:40:24.525376+00:00"
+}

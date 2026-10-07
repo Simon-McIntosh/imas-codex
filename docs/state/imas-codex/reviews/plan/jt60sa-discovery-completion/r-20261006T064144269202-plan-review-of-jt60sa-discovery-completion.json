@@ -1,0 +1,75 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T06:46:59.182Z",
+  "dispatched_at": "2026-10-06T06:41:49Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/prompt_loader.py:150",
+      "id": "reuse_search-1",
+      "reason": "by its own stated criterion the node finds a listing surface and must record it and leave the file, directly contradicting the plan's stated outcome that both files are deleted; the node must define \"reachable\" as rendered by a call site, distinct from \"registered by the prompt registry\".",
+      "text": "the \u00a723 orphan node's reachability criterion states \"no MCP or CLI surface that lists every prompt file\", but `load_prompts()` reads every `.md` under `prompts/`, `list_prompts_summary()` (prompt_loader.py:199) lists them, and `MCP server._register_prompts` (imas_codex/llm/server.py:3720) registers each one \u2014 including both files \u00a723 proposes to delete",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/prompts/signals/individualization.md:4",
+      "id": "reuse_search-2",
+      "reason": "",
+      "text": "\u2014 the plan says \"the only mention of individualization in code is a log string in imas_codex/discovery/signals/parallel.py\", but the file's frontmatter carries `used_by: imas_codex.discovery.signals.parallel.individualize_source_descriptions`, and that function exists and is called (parallel.py:4245, invoked at parallel.py:5275) \u2014 it renders `signals/source_unwind`, the dynamic schema-driven successor of the same prompt family (both declare `task: individualization` and the same `used_by`), WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: the honest disposition is \"superseded by source_unwind, delete (or reconcile the two)\", not \"a file that never had a loader\"; the plan's premise sends the node looking for a loader that does not exist while missing the live function and the frontmatter pointer that make the supersession legible.",
+      "type": "reuse_search",
+      "would_change": null
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/jt60sa-discovery-completion.html#s23",
+      "id": "reuse_search-3",
+      "reason": "the node's two files need different dispositions and one criterion, so the plan should split the reachability test or state per-file how \"no loader\" is to be established, otherwise the node records a false \"loader\" for one file and stops short of the deletion it promises.",
+      "text": "the orphan node half for `imas_codex/llm/prompts/discovery/enricher.md` is sound (no call site, no `used_by`, only the `prompt_loader` docstring names it) but the two halves share one criterion that is unsatisfiable as written for the individualization file",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "93a638e9d9f417d37cded7ecfaa21315dc70b4ad5e63e660ee23d41336e4c82a",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 180,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T064144269202-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "a9dfb0be4875f034d8a72fb5e7cabcea027ab332",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the new behaviour in the open sections is added behind existing interfaces (`reset_to_status(path_prefixes=...)` renders its own scope through one `render_path_prefix_clause`; the \u00a723 guard replaces assertions inside the existing `tests/llm/test_prompt_schema_coverage.py`), so no new module spreads one mechanism across shallow wrappers.",
+    "duplicate_owner": "pass \u2014 \u00a714 removes a duplicate rather than adding one: the public `discovery_roots` in `imas_codex/config/facilities/jt-60sa.yaml` replaces the never-scanned `/analysis/src` parent, seeding goes through the existing `seed_facility_roots`, and both the path and code resets pass a prefix list to the single renderer `imas_codex/graph/query_builder.py:render_path_prefix_clause` instead of each spelling the clause.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; neither open section adds a CLI option, MCP view, refusal family or public definition. `--root`, `--path-prefix` and `--reset-to` already exist (`imas_codex/cli/discover/paths.py:21,90`, `imas_codex/cli/discover/code.py`), and \u00a723 only tightens a test and deletes files, so there is no added surface for a section to account for.",
+    "reuse_search": "a finding \u2014 the plan's \u00a723 orphan node rests on two absence claims that the code contradicts: `load_prompts()`/`list_prompts_summary` and the MCP `_register_prompts` already enumerate every prompt file, and `signals/individualization.md` is not \"only mentioned as a log string\" \u2014 its own `used_by` frontmatter names a live function.",
+    "thin_wrapper": "pass \u2014 the one candidate layer is `render_path_prefix_clause`, and the plan justifies it as a consolidation (it retires five inline path-claim clauses in `imas_codex/cli/discover/paths.py` and seven hand-wired call sites) rather than a parallel path, which is the extension the item asks for."
+  },
+  "section_digests": {
+    "_document": "938a528d8f1f64359857d0297d48e6a576691afea161ad457db225b32aae5a49",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "f2655710d4eb8d7535c00033afdb8672adbfbcd5e9608800d5d329e50bdd54f2",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "ad0940fe544c8fc0b34053944954e69bf8960f871da0f5e04d11789a1f0eec42",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T06:55:57.884880+00:00"
+}

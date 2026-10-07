@@ -1,0 +1,99 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T16:27:44.754Z",
+  "dispatched_at": "2026-10-06T16:18:25Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/server.py:2326",
+      "id": "duplicate_owner-1",
+      "reason": "correcting the named file in one sentence repairs the record without altering any code change the design requires, and the real readers are already listed.",
+      "text": "the \u00a725 migration list names `imas_codex/llm/server.py` among the readers of CodeFile's retired triage fields, but server.py reads only `FacilityPath.triage_composite`; the actual CodeFile triage-field readers are `imas_codex/discovery/code/parallel.py:411,423,449`, `imas_codex/discovery/code/graph_ops.py:414,528,703`, `imas_codex/discovery/code/workers.py:329,577,1049`, `imas_codex/discovery/code/progress.py:742,830`, `imas_codex/discovery/code/scorer.py:121,354,414` and `imas_codex/discovery/base/reset.py:_CODE_TRIAGE_FIELDS` (lines 339-351), so the stale entry sends a node to edit a file that needs no change",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/discovery/code/parallel.py:449",
+      "id": "interface_budget-1",
+      "reason": "the plan must state the ordering or the per-run override that lets \u00a714's code run reach its low-scoring trees once the code-file gate moves to `code-ingest-threshold`, otherwise the \u00a714 done-when (chunks under three trees, `JLOOP`/`JTPRB`/`JNPRB` found) is unreachable after \u00a725.",
+      "text": "\u00a725 retires code's reading of `--min-score` (\"`--min-score` keeps only its path-scan meaning, and ingest no longer reads it\"), but `discover code`'s `min_score` is precisely the code-file ingest gate today (imas_codex/discovery/code/parallel.py:449 pending-ingest count and :493 pending-embed count, and imas_codex/discovery/code/workers.py:578 ingest claim), which is why \u00a714's pending scoped code run passes `--min-score 0` and states \"the threshold has nothing left to protect here\"; the section neither names that \u00a714's run depends on the option's code-file meaning nor says whether the run must precede \u00a725, so after \u00a725 lands the same command gates the SAeqread/client_eqdbms/getseldata_v4.2 files at `code-ingest-threshold` 0.5 instead of 0",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b63ad7859b8de32986e6d87c01a3ad186b0c66758e4d673ed0a3ca108c8c69a7",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 247,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T16:29:03.191044+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-06T16:29:18.845703+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T16:29:03.191044+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T16:29:18.845703+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-discovery-completion.v247.json",
+  "review_run_id": "r-20261006T161819300290-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "104b815c071a51bc9ec07f28207f5e7b9591402e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `call_decisions()`/`acall_decisions()` hide request build, the retry loop, answer validation (noul lies in [0,1], choice membership, probability sum) and cost extraction behind one call, and \u00a714's `build_path_prefix_filter` returns clause and bound parameters together so the nine code claims cannot detach a clause from its binding; both are interfaces smaller than the behaviour behind them.",
+    "duplicate_owner": "a finding \u2014 \u00a725's reader census for the retired CodeFile triage fields lists `imas_codex/llm/server.py`, which reads only the path-triage field (`FacilityPath.triage_composite` at imas_codex/llm/server.py:2326,2348,2351), not any CodeFile field.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a725 carries an explicit Interface account that names what it retires (eleven CodeFile triage fields, the LLM rubric in code/triage.md, code's use of `get_triage_threshold`, ingest's reading of `--min-score`) against what it adds, and \u00a714 adds no CLI, MCP or refusal surface (it retires `seed_missing_roots` and `create_child_paths`); the retirements account for the additions.",
+    "reuse_search": "pass \u2014 the design sections that remain unbuilt cite the machinery they extend, and opening the code confirms each: \u00a725 reuses `_is_retryable` (imas_codex/discovery/base/llm.py:1188), `DEFAULT_RETRY_BASE_DELAY` (:694), `get_api_key_for_service` (:910), `_build_kwargs` (:1995), `get_model`/`MODEL_SECTIONS`/`_MODEL_ENV_VARS` (imas_codex/settings.py:141,212,235), `render_prompt`, and the shared `facility.data_access_patterns` source; \u00a714's residue uses the owners `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268), `build_path_prefix_filter` (:282), `reset_to_status` (imas_codex/discovery/base/reset.py:66) and `GraphClient.create_nodes` (imas_codex/graph/client.py:605).",
+    "thin_wrapper": "pass \u2014 \u00a725 states why the existing machinery cannot carry the decisions call: `call_llm_structured` (imas_codex/discovery/base/llm.py:2203) sends chat completions with a response schema in the prompt, whereas the decisions endpoint takes `{model, state, questions}` and returns a different shape, so the plan extracts `_service_headers` from `_build_kwargs` (:2152) rather than forking header construction."
+  },
+  "section_digests": {
+    "_document": "4667c0f839247f9db145897bdbd9716823d2212f97e5ae64f5a1f0b351eb69df",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "ea093845012af148321609dc0ccef4ad78f3fc5209bb8e337d40245f676f6968",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "c014d9c0b2fec663e1f07a721658d81f134c0c13da9253f2574652517102a7d1",
+    "s25": "0767e854ae35d597972e5991d0669de804deb731a1e61a53222d80a37a264e2a",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T16:28:39.903471+00:00"
+}

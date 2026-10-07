@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "backend": "claude-code",
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T10:11:30.757486+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/catalog-review-surface/plan-figure-audit.md",
+      "line": "155",
+      "text": "the bullet asserts no StandardNameChange row exists after 2026-09-07, but the same table holds 2889 such rows on a read-only probe with the property the schema declares (changed_at), and the sentence itself names two of them one clause later; the scoped query that returned zero is not identified, so a reader cannot recover which scope the zero belongs to."
+    },
+    {
+      "file": "docs/plans/catalog-review-surface.html",
+      "line": "288",
+      "text": "the landing comment repeats the unscoped no StandardNameChange row exists after 2026-09-07 without the two rows the evidence file names, so the sprint-visible record carries the false form and a reader has no qualifier to correct it against."
+    },
+    {
+      "file": "docs/evidence/catalog-review-surface/plan-figure-audit.md",
+      "line": "41",
+      "text": "the table's Where column cites the plan location rather than the instrument, so the requirement that each quantity carry the exact query or code read that produced it is met only by opening the manifest's log list and matching rows by hand."
+    },
+    {
+      "file": "docs/evidence/catalog-review-surface/plan-figure-audit.md",
+      "line": "205",
+      "text": "all at exit 0 is asserted for the ten query logs but no log records an exit status and the manifest's tests field covers only the two audit-doc runs, so the blanket claim is prose rather than a recorded result."
+    }
+  ],
+  "justifications": {
+    "durability": "the only standing check is reckon audit-doc, which fires on structure but not on values: removing the head fails at exit 1 while deleting the title, reckon-type or plan-status meta line and setting plan-status to bogus all pass, so the gate that stands behind plan-figure-audit.md cannot detect a stale or false figure.",
+    "evidence": "plan-figure-audit.md:130-132 states the three verdict counts and 5+5+2=12 closes the arithmetic, the ten named logs hold the query outputs and audit-doc re-run from the merged tree exits 0 for both artifacts, but the load-bearing sentence at :155 is false as written and no query log carries its exit status.",
+    "fit": "plan-figure-audit.md carries the required evidence meta lines and table idiom and the two commits follow the conventional-subject-plus-body rule, but the plan comment at docs/plans/catalog-review-surface.html:288 propagates the over-broad sentence instead of the scoped one.",
+    "goal_fidelity": "plan-figure-audit.md:44-127 re-takes twelve plan quantities against the live graph and code, and my own probe reproduced the headline set exactly (5130 names, 0/0/0 on three trace fields, 221 exported_at, 572 human origins, one actor), so the sprint can be rescoped on current numbers even though one supporting clause of the decisive measurement is misstated.",
+    "scope_discipline": "the two commits touch exactly the three declared paths and nothing else, and the plan edit adds one r-comment block at line 288 without altering the plan-version or plan-modified meta lines."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: plan-figure-audit.md:44-127 re-takes twelve plan quantities against the live graph and code, and my own probe reproduced the headline set exactly (5130 names, 0/0/0 on three trace fields, 221 exported_at, 572 human origins, one actor), so the sprint can be rescoped on current numbers even though one supporting clause of the decisive measurement is misstated.\nSCORE evidence: 15\nJUSTIFICATION evidence: plan-figure-audit.md:130-132 states the three verdict counts and 5+5+2=12 closes the arithmetic, the ten named logs hold the query outputs and audit-doc re-run from the merged tree exits 0 for both artifacts, but the only load-bearing sentence at :155 is false as written and no query log carries its exit status.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits touch exactly the three declared paths and nothing else, and the plan edit adds one r-composition block at line 288 without altering the plan-version or plan-modified meta lines.\nSCORE durability: 12\nJUSTIFICATION durability: the only standing check is reckon audit-doc, which fires on structure but not on values: removing the head fails at exit 1 while deleting the title, reckon-type or plan-status meta line and setting plan-status to bogus all pass, so the gate behind plan-figure-audit.md cannot detect a stale or false figure.\nSCORE fit: 17\nJUSTIFICATION fit: plan-figure-audit.md carries the required evidence meta lines and table idiom and the two commits follow the conventional-subject-plus-body rule, but the plan comment at docs/plans/catalog-review-surface.html:288 propagates the over-broad sentence instead of the scoped one.\nFINDING docs/evidence/catalog-review-surface/plan-figure-audit.md:155 the bullet asserts no StandardNameChange row exists after 2026-09-07, but the same table holds 2889 such rows on a read-only probe with the property the schema declares (changed_at), and the sentence itself names two of them one clause later; the scoped query that returned zero is not identified, so a reader cannot recover which scope the zero belongs to.\nFINDING docs/plans/catalog-review-surface.html:288 the landing comment repeats the unscoped no StandardNameChange row exists after 2026-09-07 without the two rows the evidence file names, so the sprint-visible record carries the false form and a reader has no qualifier to correct it against.\nFINDING docs/evidence/catalog-review-surface/plan-figure-audit.md:41 the table's Where column cites the plan location rather than the instrument, so the requirement that each quantity carry the exact query or code read that produced it is met only by opening the manifest's log list and matching rows by hand.\nFINDING docs/evidence/catalog-review-surface/plan-figure-audit.md:205 all at exit 0 is asserted for the ten query logs but no log records an exit status and the manifest's tests field covers only the two audit-doc runs, so the blanket claim is prose rather than a recorded result.\n",
+  "review_run_id": "r-20260917T101130757486-review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured",
+  "reviewed_base": "5ea0d73b441b6991fc29b9dbb03e13bc5b63b43c",
+  "reviewed_commit": "b99bd81241d31e361b4353b6efe8b3ac3e65b71e",
+  "reviewed_run_id": "r-20260917T045954061339-n-audit-catalog-review-surface-headline-figures-are-remeasured",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T10:39:14Z",
+  "total": 82
+}

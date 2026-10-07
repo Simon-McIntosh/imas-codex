@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T05:37:34.801Z",
+  "dispatched_at": "2026-10-06T05:32:05Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/prompt_loader.py:945",
+      "id": "thin_wrapper-1",
+      "reason": "the plan must state whether providers are re-keyed to the response model (and how the Batch-example/Result-fields pairing survives) or scope the test to the fields actually rendered, otherwise the new test passes or fails on an unreconciled provider pairing rather than on the binding it means to pin.",
+      "text": "\u00a722 says it will add a provider for any response model that lacks one, but the existing providers are not pass-throughs over the generic renderers: `_provide_file_scoring_schema` pairs `get_pydantic_schema_json(FileScoreBatch)` with `get_pydantic_schema_description(FileScoreResult)` and `_provide_file_triage_schema` pairs `FileTriageBatch`\u2019s example with `FileTriageResult`\u2019s fields, so example and field-list come from different models and the registry is keyed by context name, not by response model \u2014 yet \u00a722\u2019s AST test asserts the call site\u2019s `response_model=` schema fields appear in the rendered text, which the Batch/Result pairing does not guarantee",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0c832ea3c45b838a3f408c139d6af9560a93749ddb510dcaf5998f747226e40a",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 168,
+  "project": "imas-codex",
+  "responses": {
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "Measured 2026-10-06 against the live providers: the Batch-example/Result-fields pairing already renders every field of the call site's response model and its nested item models (FileTriageBatch 12 of 12, FileScoreBatch 14 of 14, TriageBatch 22 of 22, ScoreBatch 22 of 22 field names present), because the example is generated from the batch model and so names each nested field. The registry stays keyed by context name, a new provider follows the same pairing, and the test's assertion that the response model's fields, nested models included, appear in the rendered text pins the binding under that pairing, so neither re-keying nor narrowing the test is needed.",
+      "when": "2026-10-06T05:38:22.298569+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T053200191470-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "517e59e1332b8fdf30a27a65a160d797286f9d78",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a722 hides the whole batching/validation/schema-injection contract behind the existing prompt frontmatter and the shared partials, retiring `_DEFAULT_SCHEMA_NEEDS` so frontmatter is the single owner of the binding; \u00a714's one prefix renderer replaces the hand-wired clause in five path claims, two code-scan claims and the reset. Neither adds a module that spreads complexity over many small wrappers.",
+    "duplicate_owner": "pass \u2014 \u00a714 extends the owner rather than forking it: `reset_to_status` gains a `path_prefixes` argument and renders its own scope through `render_path_prefix_clause` (imas_codex/discovery/base/reset.py:84-98,125-126), and both CLI callers pass a list instead of hand-wiring a clause (paths `--root`, code `--path-prefix`). No placement, path-resolution, scheduler or state-reader duplicate is introduced.",
+    "interface_budget": "pass \u2014 current week\u2019s figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a722 retires `_DEFAULT_SCHEMA_NEEDS` and both fallback reads and states it adds no error family; \u00a714 adds no CLI option or MCP view and merges the hand-wired prefix clause into the one renderer. Checked under the zero budget: `_provide_*_schema` providers are module-private, so the provider addition is not a new public definition, and no section adds to cli_options, mcp_views or refusal_families.",
+    "reuse_search": "pass \u2014 the plan names and extends existing machinery in both open sections, verified in code: \u00a714 reuses `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268), the `seed_facility_roots`/`--root`/`--reset-to` path in imas_codex/cli/discover/paths.py and imas_codex/cli/discover/code.py:196-201, and the ResetSpec owners in imas_codex/discovery/base/reset.py; \u00a722 reuses `EmptyResponseError` (llm.py:475), the `empty response content` entry of RETRYABLE_PATTERNS (llm.py:717) for retry, and the existing `schema_needs` frontmatter + shared partial mechanism (imas_codex/llm/prompt_loader.py, imas_codex/llm/prompts/shared/schema/) rather than building a new schema channel.",
+    "thin_wrapper": "a finding \u2014 \u00a722 adds a schema provider per response model that lacks one, each a thin wrapper over the existing generic `get_pydantic_schema_json` / `get_pydantic_schema_description`, and does not say why the shared partial cannot render the declared model directly instead of growing the provider registry."
+  },
+  "section_digests": {
+    "_document": "a507e04135209e4e48d06a0ce2bbf5854ad336f732e793bbf42b21c3fe398fcd",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "d6d5a73cb0dec6ffd86906f917269a075a7911e82a8eef8ad19e5451325e0836",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "06ba382f03c92a4aaae96049401852172f30b28ac47d701a81c04ef9c10ad364",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T05:38:14.731077+00:00"
+}

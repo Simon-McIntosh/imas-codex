@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "backend": "clive",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-24T12:46:30.803249+00:00",
+  "findings": [
+    {
+      "file": "imas_codex/cli/llm_cli.py",
+      "line": "2210",
+      "text": "the survey's fleet surface names only cli/compute.py and cli/services.py as submission sites, but this file submits an Ollama SLURM job with sbatch and stops it at :2232 with scancel -n codex-llm-local 2>/dev/null, a name selector with discarded output, which is the same destructive-selection class section 3.1's Failure describes and is left unnamed."
+    },
+    {
+      "file": "imas_codex/graph/remote.py",
+      "line": "52",
+      "text": "the graph layer selects a SLURM job by name with squeue -n ... -u \"$USER\" | head -1 and cancels with scancel \"$JOB_ID\" 2>/dev/null || true, an unnamed submit/cancel path outside the placement ledger that section 3.1 claims to have listed."
+    },
+    {
+      "file": "imas_codex/graph/temp_neo4j.py",
+      "line": "724",
+      "text": "a third SLURM placement site, the srun dispatch of the temporary Neo4j, is not named in section 3.1, so the three findings reported for that surface are not the whole set the census claims."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260924T123408552142-n-shared-infrastructure-coupling-is-named-with-its-refactor/manifest.md",
+      "line": "9",
+      "text": "the manifest's tests line attributes the gate to revision 7e981e1ad but the log's first line names 0481ce82ee5828ec83391b337f0205c38bd5d921, and the final commit modified the surveyed file, so a reader who trusts the manifest is checking a revision the gate never measured."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the four commits against base: abb204b7c adds the survey, b148e1dac the plan section, 0481ce82e the figure, 7e981e1ad the findings-not-sites recount; every one is documentation only, and no file under imas_codex/ appears in the diff.",
+    "done_when": "The done_when asks that the survey exist, cover all five surfaces as headings, and give each finding the four parts; re-derived at 7e981e1ad I count 5 surface headings plus 11 each of **Site:**/**Shared facility:**/**Failure:**/**Refactor:** (per section 2/2/3/2/2), the figure embedded project-absolute and on disk at docs/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg, and no surface left empty, so the measure holds at head.",
+    "goal": "The goal is to name every place imas-codex reimplements or couples to shared infrastructure; docs/evidence/imas-codex-replan/shared-infrastructure-coupling.md delivers 11 four-part findings across exactly the five named surfaces, but an independent sweep of the same tree finds submit/cancel sites it does not name, so \"every place\" is not met on the fleet surface (see goal_fidelity justification and the three findings).",
+    "manifest": "Read the manifest at the run directory; it names 11 findings and 11 sites, all four deliverables, the figure, and a reasoned negative-control-none, and its headline claims survived independent re-derivation except the revision its gate is attributed to.",
+    "write_paths": "git diff --numstat 69a2fb2df0f6fbaf158f327ca5d54a690254c5b8..7e981e1ad lists exactly the four declared paths (survey +266, archive +46, figure +79, plan +55) with 446 insertions and zero deletions, so plan and archive are splices that preserved every existing line rather than whole-file rewrites."
+  },
+  "justifications": {
+    "durability": "the gate is a one-shot command whose only artifact is /tmp/shared-infrastructure-coupling-gate.log, and the node's fence (docs paths only) admitted no test file, so deleting a surface heading or splitting a four-part finding reddens nothing in the tree.",
+    "evidence": "the gate log /tmp/shared-infrastructure-coupling-gate.log records 5/5 headings, four-part arity per section and the figure, and my re-derivation at 7e981e1ad agrees (5 headings, 11/11/11/11), but the log's first line names revision 0481ce82e while the manifest attributes the run to 7e981e1ad, a tree the gate did not measure.",
+    "fit": "the survey follows the repo evidence-doc idiom at shared-infrastructure-coupling.md:1-21 (bold four-part keys, project-absolute figure embed, line numbers pinned to 69a2fb2d, an explicit bounded-census section), its files are topic-named with no plan label, and all four commits carry conventional subjects with bodies.",
+    "goal_fidelity": "docs/evidence/imas-codex-replan/shared-infrastructure-coupling.md:111-161 names only cli/compute.py and cli/services.py for SLURM placement, while rg 'scancel|sbatch|squeue|srun' over imas_codex/ finds cli/llm_cli.py:2210 (sbatch) and :2232 (scancel -n codex-llm-local), graph/remote.py:52-54 (squeue -n then scancel with output discarded) and graph/temp_neo4j.py:724 (srun) unnamed.",
+    "scope_discipline": "git diff --numstat 69a2fb2df0f6fbaf158f327ca5d54a690254c5b8..7e981e1ad lists only the four declared paths with 446 insertions and zero deletions, and no file outside the fence appears in the diff."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20260924T123408552142-n-shared-infrastructure-coupling-is-named-with-its-refactor (imas-codex, plan section 1), base 69a2fb2df0f6fbaf158f327ca5d54a690254c5b8, head 7e981e1ad6fb3b47028caa1b3f525f58fba79148.\nreviewed_base: 69a2fb2df0f6fbaf158f327ca5d54a690254c5b8\nreviewed_head: 7e981e1ad6fb3b47028caa1b3f525f58fba79148\nVERDICT goal: The goal is to name every place imas-codex reimplements or couples to shared infrastructure; docs/evidence/imas-codex-replan/shared-infrastructure-coupling.md delivers 11 four-part findings across exactly the five named surfaces, but an independent sweep of the same tree finds submit/cancel sites it does not name, so \"every place\" is not met on the fleet surface (see goal_fidelity justification and the three findings).\nVERDICT done_when: The done_when asks that the survey exist, cover all five surfaces as headings, and give each finding the four parts; re-derived at 7e981e1ad I count 5 surface headings plus 11 each of **Site:**/**Shared facility:**/**Failure:**/**Refactor:** (per section 2/2/3/2/2), the figure embedded project-absolute and on disk at docs/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg, and no surface left empty, so the measure holds at head.\nVERDICT write_paths: git diff --numstat 69a2fb2df0f6fbaf158f327ca5d54a690254c5b8..7e981e1ad lists exactly the four declared paths (survey +266, archive +46, figure +79, plan +55) with 446 insertions and zero deletions, so plan and archive are splices that preserved every existing line rather than whole-file rewrites.\nVERDICT manifest: Read the manifest at the run directory; it names 11 findings and 11 sites, all four deliverables, the figure, and a reasoned negative-control-none, and its headline claims survived independent re-derivation except the revision its gate is attributed to.\nVERDICT diff: Read the four commits against base: abb204b7c adds the survey, b148e1dac the plan section, 0481ce82e the figure, 7e981e1ad the findings-not-sites recount; every one is documentation only, and no file under imas_codex/ appears in the diff.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/imas-codex-replan/shared-infrastructure-coupling.md:111-161 names only cli/compute.py and cli/services.py for SLURM placement, while rg 'scancel|sbatch|squeue|srun' over imas_codex/ finds cli/llm_cli.py:2210 (sbatch) and :2232 (scancel -n codex-llm-local), graph/remote.py:52-54 (squeue -n then scancel with output discarded) and graph/temp_neo4j.py:724 (srun) unnamed.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate log /tmp/shared-infrastructure-coupling-gate.log records 5/5 headings, four-part arity per section and the figure, and my re-derivation at 7e981e1ad agrees (5 headings, 11/11/11/11), but the log's first line names revision 0481ce82e while the manifest attributes the run to 7e981e1ad, a tree the gate did not measure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --numstat 69a2fb2df0f6fbaf158f327ca5d54a690254c5b8..7e981e1ad lists only the four declared paths with 446 insertions and zero deletions, and no file outside the fence appears in the diff.\nSCORE durability: 8\nJUSTIFICATION durability: the gate is a one-shot command whose only artifact is /tmp/shared-infrastructure-coupling-gate.log, and the node's fence (docs paths only) admitted no test file, so deleting a surface heading or splitting a four-part finding reddens nothing in the tree.\nSCORE fit: 19\nJUSTIFICATION fit: the survey follows the repo evidence-doc idiom at shared-infrastructure-coupling.md:1-21 (bold four-part keys, project-absolute figure embed, line numbers pinned to 69a2fb2d, an explicit bounded-census section), its files are topic-named with no plan label, and all four commits carry conventional subjects with bodies.\nFINDING imas_codex/cli/llm_cli.py:2210 the survey's fleet surface names only cli/compute.py and cli/services.py as submission sites, but this file submits an Ollama SLURM job with sbatch and stops it at :2232 with scancel -n codex-llm-local 2>/dev/null, a name selector with discarded output, which is the same destructive-selection class section 3.1's Failure describes and is left unnamed.\nFINDING imas_codex/graph/remote.py:52 the graph layer selects a SLURM job by name with squeue -n ... -u \"$USER\" | head -1 and cancels with scancel \"$JOB_ID\" 2>/dev/null || true, an unnamed submit/cancel path outside the placement ledger that section 3.1 claims to have listed.\nFINDING imas_codex/graph/temp_neo4j.py:724 a third SLURM placement site, the srun dispatch of the temporary Neo4j, is not named in section 3.1, so the three findings reported for that surface are not the whole set the census claims.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260924T123408552142-n-shared-infrastructure-coupling-is-named-with-its-refactor/manifest.md:9 the manifest's tests line attributes the gate to revision 7e981e1ad but the log's first line names 0481ce82ee5828ec83391b337f0205c38bd5d921, and the final commit modified the surveyed file, so a reader who trusts the manifest is checking a revision the gate never measured.\nFINAL: SOUND WITH FINDINGS. The survey is a faithful, well-idiomed, correctly spliced documentation deliverable whose structural measure re-derives green at head independently of the worker's log; its goal is bounded rather than met exactly as stated, because the fleet surface names three sites where at least three more exist in the same tree, and its gate's revision is misattributed in the manifest. The three unnamed sites are reported, not repaired, as they fall outside this node's fence.",
+  "review_run_id": "r-20260924T124630803249-review-of-n-shared-infrastructure-coupling-is-named-with-its-refactor",
+  "reviewed_base_sha": "69a2fb2df0f6fbaf158f327ca5d54a690254c5b8",
+  "reviewed_head_sha": "7e981e1ad6fb3b47028caa1b3f525f58fba79148",
+  "reviewed_run_id": "r-20260924T123408552142-n-shared-infrastructure-coupling-is-named-with-its-refactor",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-24T13:02:20.061663+00:00",
+  "total": 79
+}

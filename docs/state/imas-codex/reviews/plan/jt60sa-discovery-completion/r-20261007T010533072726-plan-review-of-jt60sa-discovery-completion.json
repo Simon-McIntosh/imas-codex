@@ -1,0 +1,120 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T01:14:58.397Z",
+  "dispatched_at": "2026-10-07T01:05:42Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/scoring.py:21",
+      "id": "reuse_search-1",
+      "reason": "unless the node names the shared list and says whether it shrinks or splits it, the code calibration keeps querying removed properties and path discovery loses dimensions it still writes.",
+      "text": "\u00a725's `code-score-through-jev` retires seven CodeFile `score_*` dimensions and `file_category` and adds `score_signal_processing`, `score_machine_description`, `score_imas_mapping` and `relevance_grade`, but the plan names no owner of the code score model: `CODE_SCORE_DIMENSIONS` (scoring.py:21) and `CodeScoreFields` (scoring.py:114) are that owner, `SCORE_DIMENSION_NAMES` defined as `CODE_SCORE_DIMENSIONS` at imas_codex/discovery/code/scorer.py:41, and `sample_code_dimension_calibration` (scorer.py:183) queries `CodeFile.{dimension}` once per entry (scorer.py:241) \u2014 so the seven retirements must be reconciled with that list, which path discovery also builds on (`PATH_SCORE_DIMENSIONS = CODE_SCORE_DIMENSIONS + PATH_EXTRA_DIMENSIONS`, scoring.py:40).",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/query_builder.py:283",
+      "id": "reuse_search-2",
+      "reason": "an implementer following the plan literally would add a duplicate helper and re-plan landed nodes; the plan must record the census so \u00a714's and \u00a725's node lists match the tree.",
+      "text": "\u00a714's code-claims node describes adding \"one helper beside the renderer ... that returns the clause and its parameters together\"; `build_path_prefix_filter` already exists (query_builder.py:283) with exactly that contract (empty clause and no parameters on an empty list), is already used by the path claims (imas_codex/discovery/paths/parallel.py:501,562,624,747,832) and two code claims (imas_codex/discovery/code/graph_ops.py:134,310), and is pinned by tests/graph/test_path_prefix_filter.py; the same census holds for \u00a725's `decisions-call` (call_decisions/acall_decisions already at imas_codex/discovery/base/llm.py:3435/3499, `_service_headers` at llm.py:1995, the `discovery-relevance` seat at imas_codex/settings.py:148, `CODE_RELEVANCE_EXPR` at imas_codex/discovery/code/scorer.py:63, the eight `relevance_*` fields at imas_codex/graph/models.py:16962, and a second decisions consumer at imas_codex/ids/candidates.py:297).",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/code/scorer.py:63",
+      "id": "duplicate_owner-1",
+      "reason": "two stored/computed owners of one quantity drift, and a shared dimension carrying two producers needs the plan to say whether path and code may diverge, or to give the code facet its own field.",
+      "text": "\u00a725 makes `score_composite` \"the largest of the four scope nouls, the value the ingest gate reads\", a second owner of a quantity the live tree already computes as `CODE_RELEVANCE_EXPR` (scorer.py:63), which is what the triage and ingest claims and their ordering actually compare (imas_codex/discovery/code/parallel.py:452; graph_ops.py:416,442,703); `score_composite` is separately read by the ingestion queue (imas_codex/ingestion/queue.py:179) and search (imas_codex/llm/search_tools.py:1559). The same shape appears for `score_data_access` (scoring.py:25), a shared `CODE_SCORE_DIMENSIONS` entry that path discovery already writes with the LLM-rubric meaning (imas_codex/discovery/paths/scorer.py:462,605; imas_codex/discovery/paths/models.py:321).",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3b9a903fa979d88c98740ea3f2e8e2b0a92866e1acb5fac88e5caa8d3b288cf5",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 272,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T01:21:27.507431+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-2",
+      "reason": "",
+      "when": "2026-10-07T01:21:43.654900+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T01:22:00.026349+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:22:00.026349+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:21:27.507431+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:21:43.654900+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-discovery-completion.v272.json",
+  "review_run_id": "r-20261007T010533072726-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "f881db8ba21b407903c874634c023fcd07f21846",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `call_decisions`/`acall_decisions` (imas_codex/discovery/base/llm.py:3435) hide endpoint, auth, retry, per-type validation and cost behind one `(answers, cost)` pair, and the validator is extended in place rather than wrapped.",
+    "duplicate_owner": "a finding \u2014 \u00a725 gives CodeFile's shared score properties (`score_composite`, `score_data_access`) a second producer beside the mechanism that already owns each quantity.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a725's Interface account names what it retires (eleven CodeFile fields, the `code/triage.md` LLM rubric, code's use of the `discovery-triage` seat and `get_triage_threshold()`, and ingest's reading of `--min-score`), so no section adds surface without an account.",
+    "reuse_search": "a finding \u2014 \u00a714 and \u00a725 describe as to-be-added machinery that already exists in the tree (the decisions call layer, the path-prefix clause helper, the relevance fields), and \u00a725 omits the shared owner of the code score model it is about to rewrite.",
+    "thin_wrapper": "pass \u2014 the only new layer the plan names, `_service_headers(service)`, is extracted so the chat and decisions paths share one definition, and the plan states why decisions cannot route through `call_llm_structured` (different request and response shape)."
+  },
+  "section_digests": {
+    "_document": "82eb85b4c0d98e0f4ee665732ac74eda0e47e5913e776e4392e99e9ec9c84eee",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "20a93740e623f2977823e307d39aca03cfb395d316c970795f8606ec7cc13766",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "c014d9c0b2fec663e1f07a721658d81f134c0c13da9253f2574652517102a7d1",
+    "s25": "f5cb121465cfa0a93856de407af31c18fdf6208c7818fa0019873d22dab4a8b8",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T01:20:58.162766+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T00:48:59.599Z",
+  "dispatched_at": "2026-10-06T00:45:38Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/parallel.py:483",
+      "id": "duplicate_owner-1",
+      "reason": "it moves the new renderer to a shared owner and adds the two code-domain call sites to \u00a714's scope (or forces the plan to say in its text why the code-domain copies are deliberately left forked).",
+      "text": "\u00a714 adds one root-scope renderer in the paths module and consolidates the five paths sites, but the identical predicate is already spelled twice more in imas_codex/discovery/code/graph_ops.py:140 and graph_ops.py:565 (`AND ANY(pre IN $prefixes WHERE p.path STARTS WITH pre)`), and \u00a714 re-runs that same code scan with the same three prefixes, so the two domains keep parallel implementations of one predicate that can drift \u2014 the plan's own rule (\"must not be spelled a sixth time\") is unmet and the honest home for the renderer is the shared base module that already owns the reset (imas_codex/discovery/base/reset.py), reachable by both domains",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "25751259ccc7c9ce1a001eda102d2c261015bff75d9226974d8493218181cc02",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 130,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T00:52:19.163789+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T004533593092-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "9a044dfe23b1a22402bb5b6cb2860a73cdfada12",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the change deepens rather than spreads: one module-level renderer hides the root-scope Cypher behind a single interface, replacing five inline spellings; the reset-spec edit is data (a field added to `clear_fields`), not new surface.",
+    "duplicate_owner": "a finding \u2014 the \"under these roots\" predicate is already spelled seven times (five in imas_codex/discovery/paths/parallel.py:483,539,596,714,794 and two in imas_codex/discovery/code/graph_ops.py:140,565), and \u00a714 routes only the five paths sites through a new renderer placed in the paths module, leaving the code-domain pair as a forked copy of the same predicate.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no CLI option and no MCP view (it reuses the existing `--root` and `--reset-to`), and it names the merge its one new function performs (the five inline spellings into one, \"must not be spelled a sixth time\"), so its single added definition is accounted for in its own text.",
+    "reuse_search": "pass \u2014 the plan named the mechanism it extends for each change and every citation resolves to the code it names: `reset_to_status` / `PATH_RESET_SPECS` with `extra_filter`/`extra_params` (imas_codex/discovery/base/reset.py:59-127,240-255), the signals-command precedent for a scoped reset (imas_codex/cli/discover/signals.py), the unfiltered paths call (imas_codex/cli/discover/paths.py:248), and the five inline root clauses (imas_codex/discovery/paths/parallel.py:483,539,596,714,794).",
+    "thin_wrapper": "pass \u2014 no wrapper is introduced. \u00a714 extends the existing owner `reset_to_status` through the `extra_filter`/`extra_params` parameters it already exposes (reset.py:63-64) and the claim functions through their existing `root_filter` argument, which the plan states explicitly rather than adding a parallel layer."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T00:49:19.327923+00:00"
+}

@@ -1,0 +1,48 @@
+{
+  "absent": [],
+  "backend": "clive",
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T10:14:19.350587+00:00",
+  "findings": [
+    {
+      "file": "docs/plans/sn-lifecycle-integrity.html",
+      "line": "658",
+      "text": "the landing record's five-name enumeration of the stale rows substitutes a drifted row for a stale one, naming the superseded_by scalar as stale while the audit classes that row drifted because the mechanism it describes is unchanged, and never naming the stale origin row that the table says the plan's own axis table still presents as live."
+    },
+    {
+      "file": "docs/evidence/sn-lifecycle-integrity/plan-figure-audit.md",
+      "line": "84",
+      "text": "the instrument-check sentence reports that HAS_SUCCESSOR carries only 14 edges in total, while the whole-graph count re-measured today is 48, of which 34 leave DDVersion nodes and 14 leave StandardName, so the census the worker ran covers StandardName only and the stated total overstates its scope, although the conclusion the sentence supports is unaffected."
+    },
+    {
+      "file": "manifest.md",
+      "line": "11",
+      "text": "no automated check asserts any of the seventeen values or the landing record's verdict tally, so a later drift in either is silent, and the sibling section-currency.md already disagrees with the live graph on the figures it records."
+    }
+  ],
+  "justifications": {
+    "durability": "manifest.md:11 records no armed suite and no test or CI job in tests/ or .github/ invokes audit-doc, so nothing fails if the table, the render contract, or the landing record's verdict tally regresses.",
+    "evidence": "the gate measures what the done_when asserts and its result is recorded, since audit-doc exits 0, the verdict counts 3 + 9 + 5 equal the seventeen table rows, and my re-run of the whole table returned the same figures, with the dock for one instrument sentence whose quoted count is narrower than the sentence claims.",
+    "fit": "docs/plans/sn-lifecycle-integrity.html:658 follows the file's existing comment idiom with a section id the plan already uses and the project-absolute evidence link the render contract requires, and the commits carry conventional subjects with bodies and no attribution.",
+    "goal_fidelity": "docs/evidence/sn-lifecycle-integrity/plan-figure-audit.md:30-48 re-measures all seventeen asserted quantities against the live graph and the code at the audited revision, and every query and code read in it returns the audited value on re-run, but docs/plans/sn-lifecycle-integrity.html:658 misstates which rows are current, drifted and stale.",
+    "scope_discipline": "commits 8904fd7bf, 1f4b1bcf8 and 388a2e929 touch only the three declared write paths, leave the plan-version meta lines alone, mutate no graph state, and leave the worktree clean at 388a2e929."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/sn-lifecycle-integrity/plan-figure-audit.md:30-48 re-measures all seventeen asserted quantities against the live graph and the code at the audited revision, and every query and code read in it returns the audited value on re-run, but docs/plans/sn-lifecycle-integrity.html:658 misstates which rows are current, drifted and stale.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate measures what the done_when asserts and its result is recorded, since audit-doc exits 0, the verdict counts 3 + 9 + 5 equal the seventeen table rows, and my re-run of the whole table returned the same figures, with the dock for one instrument sentence whose quoted count is narrower than the sentence claims.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: commits 8904fd7bf, 1f4b1bcf8 and 388a2e929 touch only the three declared write paths, leave the plan-version meta lines alone, mutate no graph state, and leave the worktree clean at 388a2e929.\nSCORE durability: 7\nJUSTIFICATION durability: manifest.md:11 records no armed suite and no test or CI job in tests/ or .github/ invokes audit-doc, so nothing fails if the table, the render contract, or the landing record's verdict tally regresses.\nSCORE fit: 19\nJUSTIFICATION fit: docs/plans/sn-lifecycle-integrity.html:658 follows the file's existing comment idiom with a section id the plan already uses and the project-absolute evidence link the render contract requires, and the commits carry conventional subjects with bodies and no attribution.\nFINDING docs/plans/sn-lifecycle-integrity.html:658 the landing record's five-name enumeration of the stale rows substitutes a drifted row for a stale one, naming the superseded_by scalar as stale while the audit classes that row drifted because the mechanism it describes is unchanged, and never naming the stale origin row that the table says the plan's own axis table still presents as live.\nFINDING docs/evidence/sn-lifecycle-integrity/plan-figure-audit.md:84 the instrument-check sentence reports that HAS_SUCCESSOR carries only 14 edges in total, while the whole-graph count re-measured today is 48, of which 34 leave DDVersion nodes and 14 leave StandardName, so the census the worker ran covers StandardName only and the stated total overstates its scope, although the conclusion the sentence supports is unaffected.\nFINDING manifest.md:11 no automated check asserts any of the seventeen values or the landing record's verdict tally, so a later drift in either is silent, and the sibling section-currency.md already disagrees with the live graph on the figures it records.",
+  "review_run_id": "r-20260917T101419350587-review-of-n-audit-sn-lifecycle-integrity-headline-figures-are-remeasured",
+  "reviewed_base": "3f8c06fcef82b8a769ee5ec5d81ae83b4fe3c5c5",
+  "reviewed_commit": "388a2e929a7b59e9d173759a6c9b0064725517e5",
+  "reviewed_run_id": "r-20260917T045204980885-n-audit-sn-lifecycle-integrity-headline-figures-are-remeasured",
+  "scores": {
+    "durability": 7,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T11:03:36.753600+00:00",
+  "total": 82
+}

@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:58:49.822Z",
+  "dispatched_at": "2026-10-05T15:52:13Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:3790",
+      "id": "reuse_search-1",
+      "reason": "the remedy and its done-when (`rg CODE_EXAMPLE_ID \u2026 matches only the helper`) rest on a mechanism that does not exist, so the section must instead name how a `range: CodeExample` slot stops producing the CODE_EXAMPLE_ID relationship (e.g. teach gen_schema_context to skip an inverse-named slot) or accept WIKI_PAGE_ID as the same defect it is fixing.",
+      "text": "\u00a719 says `CodeChunk.code_example_id` should be \"annotated the way the WikiChunk page slot already is (a relationship_type: HAS_CHUNK annotation naming the inverse direction)\", but no such precedent exists: `WikiChunk.wiki_page_id` has no annotation, `gen_schema_context.py:143` emits `rel.cypher_type` (annotation or `slot_name.upper()`), so the wiki slot emits the phantom `('WikiChunk','WIKI_PAGE_ID','WikiPage','one')` at schema_context_data.py:2278; and if the annotation were added as described, `create_nodes` (imas_codex/graph/client.py:682) would declare and materialise `(CodeChunk)-[:HAS_CHUNK]->(CodeExample)` \u2014 the reverse of the writer's edge \u2014 so the section would introduce a second reversed HAS_CHUNK declaration, not reconcile to the one edge the writer creates",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b3d18d972a9d008d5e33af49e94824e948963f7e03e7d1405a7988a75c474048",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 117,
+  "project": "imas-codex",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T16:04:14.941121+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T155208388371-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "154ce5150a286f78166f48cc70f0d644f22f5797",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a719 hides the chunk\u2192source join, the `HAS_CHUNK` traversal and the `source_file` coalesce behind one parameterised function in imas_codex/graph/query_builder.py, embedded by all five readers rather than re-rendered at each.",
+    "duplicate_owner": "pass \u2014 \u00a719 names the one HAS_CHUNK writer and adds no second link pass; \u00a714 extends the reprocessability owner `PATH_RESET_SPECS` (imas_codex/discovery/base/reset.py:240) rather than forking it, and its second clear site (the `--root` seed) is a distinct root-scoped entry point the section explains.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 extends the existing `discover paths --root` option (imas_codex/cli/discover/paths.py:21) with no new surface and \u00a719 states \"Interface budget: nothing added\".",
+    "reuse_search": "a finding \u2014 \u00a719 cites the \"WikiChunk page slot\" as an existing `relationship_type: HAS_CHUNK` annotation to imitate, but `WikiChunk.wiki_page_id` (imas_codex/schemas/facility.yaml:3790) carries no annotation and the generator emits WIKI_PAGE_ID (imas_codex/graph/schema_context_data.py:2278), the very same kind of phantom the section removes for CODE_EXAMPLE_ID.",
+    "thin_wrapper": "pass \u2014 the resolver replaces five divergent inline fragments and \u00a719 states why the edge's single writer (imas_codex/ingestion/pipeline.py:522, `MERGE (e)-[:HAS_CHUNK]->(c)`) keeps the write instead of a new pass."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T15:59:05.997640+00:00"
+}

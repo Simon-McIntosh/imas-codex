@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/discovery/paths/parallel.py:has_pending_work",
+    "imas_codex/discovery/paths/parallel.py:claim_paths_for_scanning",
+    "imas_codex/discovery/code/graph_ops.py:has_pending_triage_work",
+    "imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion"
+  ],
+  "completed_at": "2026-10-06T12:34:49.128Z",
+  "dispatched_at": "2026-10-06T12:29:27Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_code_pipeline.py",
+      "line": "1499",
+      "severity": "follow-on",
+      "text": "follow-on: this file is outside the node's declared write paths; the unscoped-claim assertions were relaxed from STARTS WITH not in query_text and prefixes not in kwargs to weaker substring and set forms to admit the new exclusion clause."
+    },
+    {
+      "file": "tests/discovery/test_claims_honour_exclusions.py",
+      "line": "265",
+      "severity": "follow-on",
+      "text": "follow-on: _has_top_level_or inspects only depth-0 OR, so a nested disjunction that still scoped the clause wrongly would read clean; adequate for these predicates but not a general precedence oracle."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read 126e80307..6424d0d across 10 files; commit 931e83c76 parenthesises the has_pending_work disjunction and adds the placement assertion, commit 6424d0d adds only the evidence fragment and figure.",
+    "done_when": "The gate uv run pytest tests/discovery tests/graph/test_path_prefix_filter.py ran as logs/after_gate_precedence.log against revision 931e83c76 (the code commit; the reviewed head 6424d0d adds only the landing fragment and figure), recording 1240 passed exit 0 versus baseline logs/baseline_gate.log 1188 passed exit 0; logs/negative_control_precedence.log records the required red, its single failure the placement test.",
+    "goal": "The goal is that path and code claims and their has-work predicates skip rows under a facility's exclusion prefixes. At the fixed head, has_pending_work (imas_codex/discovery/paths/parallel.py:234) wraps its five-state disjunction before appending the negated clause, so the exclusion binds the whole predicate, and a text-level placement test asserts no top-level OR precedes the clause at every claim and has-work predicate site.",
+    "manifest": "Read; it reports both gate arms, the parenthesisation fix, the placement test and the negative control, and discloses the out-of-scope edit and the scope_prefixes/prefixes naming divergence under follow_ons.",
+    "write_paths": "The node is fenced to nine paths; the diff stays inside them except tests/discovery/test_code_pipeline.py, edited to relax an unscoped-claim assertion."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_claims_honour_exclusions.py:279 renders each claim's and has-work predicate's Cypher and requires no top-level OR before the exclusion clause, the check the row-filtering stub at line 187 cannot make, and the negative control confirms it fires.",
+    "evidence": "logs/after_gate_precedence.log:1 names revision 931e83c76 and 1240 passed exit 0 against a baseline 1188; the head arm's recorded revision is the code commit rather than the reviewed docs head, whose delta is evidence-only.",
+    "fit": "imas_codex/config/discovery_config.py:541 places build_facility_exclusion_filter beside get_exclusion_config_for_facility and adds no name the naming rules forbid.",
+    "goal_fidelity": "parallel.py:234 renders (disc OR scn OR exp OR enr OR rsc) before the negated clause so the exclusion binds all five states, and every claim and predicate site passes the placement assertion.",
+    "reuse": "imas_codex/graph/query_builder.py:282 extends build_path_prefix_filter with negated and param rather than rendering a second clause, and the helper delegates to it.",
+    "scope_discipline": "tests/discovery/test_code_pipeline.py:1499 is outside the node's declared write paths and its unscoped-claim assertion was weakened, disclosed as a follow-on."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is that path and code claims and their has-work predicates skip rows under a facility's exclusion prefixes. At the fixed head, has_pending_work (imas_codex/discovery/paths/parallel.py:234) wraps its five-state disjunction before appending the negated clause, so the exclusion binds the whole predicate, and a text-level placement test asserts no top-level OR precedes the clause at every claim and has-work predicate site.\nVERDICT done_when: The gate uv run pytest tests/discovery tests/graph/test_path_prefix_filter.py ran as logs/after_gate_precedence.log against revision 931e83c76 (the code commit; the reviewed head 6424d0d adds only the landing fragment and figure), recording 1240 passed exit 0 versus baseline logs/baseline_gate.log 1188 passed exit 0; logs/negative_control_precedence.log records the required red, its single failure the placement test.\nVERDICT write_paths: The node is fenced to nine paths; the diff stays inside them except tests/discovery/test_code_pipeline.py, edited to relax an unscoped-claim assertion.\nVERDICT manifest: Read; it reports both gate arms, the parenthesisation fix, the placement test and the negative control, and discloses the out-of-scope edit and the scope_prefixes/prefixes naming divergence under follow_ons.\nVERDICT diff: Read 126e80307..6424d0d across 10 files; commit 931e83c76 parenthesises the has_pending_work disjunction and adds the placement assertion, commit 6424d0d adds only the evidence fragment and figure.\nCALL_SITES: imas_codex/discovery/paths/parallel.py:has_pending_work, imas_codex/discovery/paths/parallel.py:claim_paths_for_scanning, imas_codex/discovery/code/graph_ops.py:has_pending_triage_work, imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: parallel.py:234 renders (disc OR scn OR exp OR enr OR rsc) before the negated clause so the exclusion binds all five states, and every claim and predicate site passes the placement assertion.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/after_gate_precedence.log:1 names revision 931e83c76 and 1240 passed exit 0 against a baseline 1188; the head arm's recorded revision is the code commit rather than the reviewed docs head, whose delta is evidence-only.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: tests/discovery/test_code_pipeline.py:1499 is outside the node's declared write paths and its unscoped-claim assertion was weakened, disclosed as a follow-on.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_claims_honour_exclusions.py:279 renders each claim's and has-work predicate's Cypher and requires no top-level OR before the exclusion clause, the check the row-filtering stub at line 187 cannot make, and the negative control confirms it fires.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/config/discovery_config.py:541 places build_facility_exclusion_filter beside get_exclusion_config_for_facility and adds no name the naming rules forbid.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/graph/query_builder.py:282 extends build_path_prefix_filter with negated and param rather than rendering a second clause, and the helper delegates to it.\nFINDING tests/discovery/test_code_pipeline.py:1499 follow-on: this file is outside the node's declared write paths; the unscoped-claim assertions were relaxed from STARTS WITH not in query_text and prefixes not in kwargs to weaker substring and set forms to admit the new exclusion clause.\nFINDING tests/discovery/test_claims_honour_exclusions.py:265 follow-on: _has_top_level_or inspects only depth-0 OR, so a nested disjunction that still scoped the clause wrongly would read clean; adequate for these predicates but not a general precedence oracle.\n",
+  "review_run_id": "r-20261006T122921588357-review-of-claims-honour-exclusion-prefixes-fixed",
+  "reviewed_base_sha": "126e8030784004a1080c0244204be11a84143407",
+  "reviewed_head_sha": "6424d0d6738171565c1c462920e7fe7f766f6702",
+  "reviewed_run_id": "r-20261006T114458596931-claims-honour-exclusion-prefixes",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T12:33:42.699570+00:00",
+  "total": 109
+}

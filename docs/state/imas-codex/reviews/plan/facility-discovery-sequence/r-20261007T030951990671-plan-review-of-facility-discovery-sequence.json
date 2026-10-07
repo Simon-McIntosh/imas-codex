@@ -1,0 +1,121 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T03:16:09.383Z",
+  "dispatched_at": "2026-10-07T03:10:02Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/cli/discover/common.py:443",
+      "id": "duplicate_owner-1",
+      "reason": "the node should extend `ensure_remote_environment` (or reuse it as the check body) rather than fork the probe, and must resolve the return-shape mismatch before it can implement the check.",
+      "text": "`ensure_remote_environment` already owns the facility remote-environment need: it calls `probe_remote_environment` (remote/tools.py:550) and is invoked by the SSH stages (`imas_codex/cli/discover/signals.py:172`, `imas_codex/cli/discover/code.py:186`). \u00a72 says an uncovered need \"is added to the monitor as a check through `probe_remote_environment` \u2026 never probed beside it\", but that adds a second probe path beside this existing owner and does not name it; `probe_remote_environment` also returns a status dict, not the `(healthy: bool, detail: str)` tuple `ServiceMonitor.add_check` requires (services.py:856\u2013887), so the proposed check is not constructible as described.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/documents/pipeline.py:58,74",
+      "id": "duplicate_owner-2",
+      "reason": "the census changes the node's shape from \"promote two privates\" to \"delete one duplicate and route both call sites at base/image.py\", which is the honest change the item exists to force.",
+      "text": "\u00a72 states documents has its pending checks \"only as private helpers\" and proposes one public `has_pending_work` replacing them, but the image-score half already has a public owner: `has_pending_image_work` (imas_codex/discovery/base/image.py:354), re-exported at `imas_codex/discovery/wiki/graph_ops.py:1977`. `_has_pending_image_scores` (pipeline.py:74) duplicates that query. The plan would create a third predicate over the same `Image` state rather than consolidating onto base/image.py.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/common.py:212",
+      "id": "duplicate_owner-3",
+      "reason": "the plan should state that the runner's pre-stage re-probe is the only probe, or extend the harness's `extra_service_checks` (common.py:157, 268) so the stage and the runner share one monitor; otherwise the \"one owner\" claim is false and SSH is probed twice per stage.",
+      "text": "\u00a72 asserts \"one owner holds facility access\", but the runner's `ServiceMonitor` is a second lifecycle beside the one every stage builds when invoked: each stage command calls `run_discovery` (common.py:212), which constructs its own monitor via `create_discovery_monitor` (common.py:502). The plan re-probes \"each SSH or tunnel need again just before its stage runs\" while the invoked stage (signals.py:172, code.py:186) probes the same need again inside its own harness.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "facility-discovery-sequence.html#s3",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added option surface in its own text \u2014 retiring, merging, or stating why nothing can be \u2014 and resolve the `--cost-limit` meaning clash before the option is implemented.",
+      "text": "supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. \u00a73 adds the `discover run` command and options `--dry-run`, `--only`, `--skip`, `--time`, `--cost-limit` and `--through mapping`, and re-declares `--cost-limit` and `--time` that every per-domain command already owns (`imas_codex/cli/discover/signals.py:26,83`, `wiki.py:21,66`, `documents.py:30,65`, `map.py:47,61`, `code.py:46,93`, `paths.py:28,99`, `imas_codex/cli/map.py:120,137`). \u00a73 says only \"adds one CLI entry and retires none\"; it does not name the option family it adds or say why none of it can be merged. (`--cost-limit` at the sequence level also carries a different meaning \u2014 a shared total split proportionally \u2014 from the per-stage cap of the same name, an overload the section does not address.)",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7f674be6edd441fa65c7ba8d6c7cad4a72dd97b5fd37c8b7e114e6f28827717a",
+  "plan_slug": "facility-discovery-sequence",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T03:16:52.441174+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-07T03:16:56.283334+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-3",
+      "reason": "",
+      "when": "2026-10-07T03:17:00.706114+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-07T03:17:04.357446+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:16:52.441174+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:16:56.283334+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:17:00.706114+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:17:04.357446+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-facility-discovery-sequence.v4.json",
+  "review_run_id": "r-20261007T030951990671-plan-review-of-facility-discovery-sequence",
+  "reviewed_blob_sha": "22db45e5566d381ecd658201054db749bd4d74b7",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `sequence.py` hides stage ordering, access gating, per-stage re-probe, cost splitting and the run report behind one command; the registry is data and the runner is one loop, so the module is not a spread of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan re-implements facility-access probing and the image pending-work check beside owners that already exist (`ensure_remote_environment` common.py:443; `has_pending_image_work` base/image.py:354), and stands up a second `ServiceMonitor` lifecycle beside the one each stage already builds.",
+    "interface_budget": "a finding \u2014 supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. \u00a72's one added public definition is accounted for in its own text (\"one added public definition, which replaces two private ones\"), but \u00a73 adds the `discover run` command and the `--dry-run`/`--only`/`--skip`/`--time`/`--cost-limit`/`--through` option family, re-declaring a `--cost-limit` and `--time` that every per-domain command already owns, without naming what it retires or merges.",
+    "reuse_search": "pass \u2014 the plan cites the mechanisms it extends (`DISCOVERY_DOMAINS` common.py:30, `ServiceMonitor` services.py:830 and its `neo4j_health_check`/`ssh_health_check`/`wiki_auth_check`, `create_discovery_monitor` common.py:502, `run_discovery` common.py:212, and the six per-domain pending-work predicates), so its reuse map is demonstrably populated; the two owners it missed are carried under `duplicate_owner`.",
+    "thin_wrapper": "pass \u2014 \u00a73 states why the runner invokes each stage command whole (`ctx.invoke`) rather than refactoring the seven commands or spawning subprocesses; that is the justification the item asks for. The un-justified part is the re-declared option surface, carried under `interface_budget`."
+  },
+  "section_digests": {
+    "_document": "c3bb9efb02d3880d6d7dd862cd495fb5b00fcb9706f602659d21b862ef161b62",
+    "s1": "3992671283458b0f4b8b18b7b0aed3eeb299da5f7c62dba76e5df85f856f9819",
+    "s2": "37be0d8960bcdc37b2c4ccd3ce198c6375b908962df79f9e7f4850bf966d658e",
+    "s3": "ef96624cfe65d4ab04c57076d74dc4c3c71fa1a60cac251743b1ba3f6479de85",
+    "s4": "5de31b0a21c57f314ee8c03653c64f4203bbb25998353ff30aa84bdc4df58b1e",
+    "s5": "35854a905209a1dcd19601ea1a80cc5bb1f8dce9ff6b03379aec21d9ea74ccdd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:16:48.689113+00:00"
+}

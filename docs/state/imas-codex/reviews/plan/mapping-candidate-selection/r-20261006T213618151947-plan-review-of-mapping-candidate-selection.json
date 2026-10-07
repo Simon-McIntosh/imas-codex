@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T21:40:11.927Z",
+  "dispatched_at": "2026-10-06T21:36:25Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/tools.py:769",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a78 should drop the IMAS arm from the bridge call (or state why it stays) rather than leave a second DD retrieval owner running on every escalated source under a cap that truncates the arm it keeps.",
+      "text": "`compute_semantic_matches` searches the `imas_node_embedding` arm itself (its docstring lists \"1. imas_node_embedding (primary: target IMAS fields)\") alongside the wiki and code arms; \u00a78 calls it \"the per-source bridge\" that \"supplies only each source's own wiki and code matches\", but that narrowing is done by post-hoc filtering at imas_codex/ids/mapping.py:681\u2013694 (`[m for m in matches if m.get(\"content_type\") != \"imas\"]`), so the IMAS arm is still executed and discarded \u2014 the same DD retrieval `retrieve_candidates` owns in imas_codex/ids/candidates.py:120 \u2014 and because the call passes `k_per_source=20` across all three arms, discarded `imas` hits consume the cap and can truncate the wiki/code bridge the plan says it keeps. Every site of this one type: the IMAS arm in `compute_semantic_matches` (`imas_codex/ids/tools.py:769`, owner to extend: `retrieve_candidates`, `imas_codex/ids/candidates.py:120`) and its post-hoc filter (`imas_codex/ids/mapping.py:681\u2013694`); no other mapping-pipeline mechanism retrieves DD nodes for the map stage. `imas_codex/ids/tools.py` is already in \u00a78's `map-run-consumes-candidates` write paths",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4f64d232113eaac31d1c61d01194baab2d35234efc3203c5dd4be43722fb18bf",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 50,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T21:41:03.978893+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:41:03.978893+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v50.json",
+  "review_run_id": "r-20261006T213618151947-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "363b1219709001bb385926d0bf6d29cb1de73524",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `imas_codex/ids/graph_ops.py` becomes the one deep module for both edge families (MAPS_TO_IMAS write + delete, MAPPING_CANDIDATE write + clear + read + select + count), so \u00a78 concentrates surface rather than spreading it.",
+    "duplicate_owner": "a finding \u2014 \u00a78 relies on `compute_semantic_matches` as the per-source wiki/code bridge while that function still owns its own IMAS-node retrieval arm, duplicating the DD retrieval that `retrieve_candidates` owns.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 adds no new CLI option (the shortlist size is the existing `map-shortlist-size` setting in `imas_codex/settings.py:1104`) and names what it retires or merges (`--skip-metadata`, `--skip-errors`, `mapping_target_path`/`mapping_target_ids`, `count_sources_by_mapping_status`, `create_signal_source`), so it accounts for its surface in its own text.",
+    "reuse_search": "pass \u2014 \u00a78 cites prior art by exact file:line (the three `MERGE (sg)-[r|rel:MAPS_TO_IMAS]` writers, the single delete, `create_signal_source`'s only caller) and its two census greps reproduce exactly (`grep -rnE 'MERGE \\(sg\\)-\\[(r|rel):MAPS_TO_IMAS\\]' imas_codex/` \u2192 models.py:580, mapping.py:2008, graph_ops.py:367; the delete grep \u2192 cli/map.py:661), and it reuses `claims.py` claim routines, `compute_semantic_matches`, `fetch_cross_facility_mappings` and `retrieve_candidates` rather than rebuilding them.",
+    "thin_wrapper": "pass \u2014 the one wrapper-shaped addition, `select_candidate` beside `write_candidates`, carries an explicit justification for why the existing writer cannot be extended (`write_candidates` deletes and rewrites every edge; a pick must flag one existing edge), which is the justification the item requires."
+  },
+  "section_digests": {
+    "_document": "bfd320a268c1925095f3577ace21fcd1ba04db37665ccb02d0665e5b4b73f540",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "a7832951fb690aecebd12477a4488ec80c3fc26a5251bd8d9efad88250b7934a",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T21:41:00.996308+00:00"
+}

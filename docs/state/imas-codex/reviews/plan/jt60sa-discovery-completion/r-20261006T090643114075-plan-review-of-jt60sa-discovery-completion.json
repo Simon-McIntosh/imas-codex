@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:12:33.198Z",
+  "dispatched_at": "2026-10-06T09:06:51Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/code/parallel.py:165,169,174,177",
+      "id": "duplicate_owner-1",
+      "reason": "the node must thread `path_prefixes` through every has-work predicate (triage, enrich, score, code, link), not just `has_pending_code_work`, or a scoped run stalls against facility-wide liveness checks.",
+      "text": "\u00a714's code-claims node scopes the code claims but names only `has_pending_code_work` as the has-work predicate, while the orchestration wires FOUR facility-wide predicates into phase liveness: `has_pending_triage_work` (graph_ops.py:608, wired parallel.py:165), `has_pending_enrich_work` (graph_ops.py:623, wired parallel.py:169), `has_pending_score_work` (graph_ops.py:593, wired parallel.py:174) and `has_pending_code_work` (graph_ops.py:646, wired parallel.py:177), plus `has_pending_link_work` (graph_ops.py:670, wired parallel.py:181); the option's own help text (imas_codex/cli/discover/code.py:35\u201345) promises \"the claim and its has-work predicate cover only the named trees\", so as written the scoped `--path-prefix` run leaves that documented promise false for three phases and the phases never report done while any out-of-prefix file of theirs remains",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/reset.py:64",
+      "id": "reuse_search-1",
+      "reason": "the plan should express the bound through the existing `extra_filter` extension point (a spec default) or justify the new field, so the reset keeps one append mechanism.",
+      "text": "\u00a714's stranded-row fix adds \"a spec-level predicate that `reset_to_status` renders\", but `reset_to_status` already accepts `extra_filter: str`/`extra_params` (reset.py:64\u201365) as its predicate-append extension point and renders them into the same WHERE clause (reset.py:94\u201398); the plan does not say whether the new bound reuses that mechanism or why a spec-owned field is required, risking a second predicate-append path beside the existing one",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "886f619fce57381fc953622e352a6e1bbd855148c71db7bfe27ecdba27aa75b6",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 206,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T090643114075-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "c70dc3365b49719d452323e39725f63a34d7b050",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the \u00a714 changes extend existing owners (one clause renderer, one create-nodes writer, one reset entry point) rather than spreading new shallow modules over the same machinery.",
+    "duplicate_owner": "a finding \u2014 the plan scopes only one of the four facility-wide code has-work predicates, leaving the remaining three (and the link phase) as a parallel facility-wide owner of \"work remaining\" beside the scoped claims.",
+    "interface_budget": "pass \u2014 supplied counts are all 0; \u00a714 is the only section adding surface (one renderer function plus parameters on `reset_to_status`, `create_nodes` and the code claims) and its own text names what it retires or merges (`seed_missing_roots` retired, `create_child_paths` deleted, the paths command's inline reset block replaced by the shared renderer), so the sections adding surface account for it.",
+    "reuse_search": "a finding \u2014 the plan's \u00a714 reuse map is accurate for the mechanisms it cites, but it proposes a new spec-level reset predicate without citing the existing `extra_filter`/`extra_params` append mechanism that `reset_to_status` already owns.",
+    "thin_wrapper": "pass \u2014 no new thin layer is added over an existing mechanism; `render_path_prefix_clause` is a consolidation of eight inline copies, not a wrapper, and the seed changes extend an existing call path."
+  },
+  "section_digests": {
+    "_document": "2c01167777dff15a911759db4430e405917b0054142f449147249dc8aed64c84",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "33f4c6ae1a1084abe1b6ac0b5d15c9f6b8bac9edb317274e7db961a384a6351b",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T09:37:00.519782+00:00"
+}

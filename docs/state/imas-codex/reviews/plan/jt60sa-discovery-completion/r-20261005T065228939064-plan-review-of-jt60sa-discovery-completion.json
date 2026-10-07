@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T06:56:14.598Z",
+  "dispatched_at": "2026-10-05T06:52:32Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/remote/locations.py:266",
+      "id": "reuse_search-1",
+      "reason": "the plan's stated cause is factually wrong, so its fix names the wrong file and would not repair the compute-node failure.",
+      "text": "\u00a78 states \"the embedding client's localhost redirect in imas_codex/embeddings/readiness.py does not take the same path there\", but the encoder's URL is get_embed_remote_url() (imas_codex/settings.py:611, consumed at imas_codex/embeddings/config.py:78) which delegates to resolve_service_url(), whose Mode-2 SLURM branch already calls discover_compute_node_local(service_job_name=\"codex-embed\") (lines 266-280) \u2014 the same discovery the graph client uses",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/remote/locations.py:266",
+      "id": "duplicate_owner-1",
+      "reason": "the change belongs in the owner (drop the `local` gate there, as profiles.py did) not as a second resolution path in the encoder, which would drift from the shared resolver the graph and embed clients both call.",
+      "text": "\u00a78 points the repair at the encoder/readiness layer, but those route through the shared owner resolve_service_url; the graph client's 2026-09-18 repair dropped the `local` requirement at imas_codex/graph/profiles.py:313 (\"Discovery decides reachability here, not the hostname\"), while resolve_service_url still reads `if local and info.scheduler == \"slurm\":` \u2014 on a fleet compute node is_location_local(\"iter\") is False, so resolution falls to Mode 3 and returns http://localhost:18765, the tunnel that cannot exist",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a61cabab370a9601007d59a5419d0accada2ff95673306a930798e2776becfc3",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 25,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:59:29.740896+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:59:29.165006+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T065228939064-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "42b5c0d293b66dfecf0289be90cde1a845c89c9b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a76's resolve_remote_environment (imas_codex/remote/environment.py:62) hides the facility-block/data-system-override precedence behind one function consumed by the tools wrapper and the scanner config builder, and \u00a73 extends link_chunks_to_entities (imas_codex/discovery/wiki/pipeline.py:252) rather than adding a parallel linker; no shallow family is introduced.",
+    "duplicate_owner": "a finding \u2014 \u00a78 directs the repair to imas_codex/embeddings/readiness.py and imas_codex/embeddings/encoder.py, but the resolution policy for a SLURM-hosted service is owned by resolve_service_url in imas_codex/remote/locations.py:266, whose `local and` gate is exactly what the graph client's earlier repair dropped.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 accounts for its three FacilitySignal slots and SignalDataClass enum by retiring the prototype's class:/shots:/udpid: keyword parking; \u00a73 accounts for fronts_database (\"retires nothing, because no existing WikiPage property records the database a rendered page is backed by\"); \u00a76 retires data_access_patterns.setup_commands; \u00a77 and \u00a78 add no member of any of the four families.",
+    "reuse_search": "a finding \u2014 \u00a72/\u00a73/\u00a76/\u00a77 cite and extend their owners (schemas/facility.yaml slots, WikiChunk DOCUMENTS via link_chunks_to_entities, resolve_remote_environment/check_all_tools, seed_worker), but \u00a78 asserts the embed client \"does not take the same path\" when its URL already flows through the shared resolver's squeue branch in imas_codex/remote/locations.py.",
+    "thin_wrapper": "pass \u2014 every section that touches existing machinery extends the owner rather than wrapping it: \u00a73 adds the page's fronts_database as one more key to the existing DOCUMENTS merge (pipeline.py:319), \u00a76 extends get_python_status/check_all_tools (imas_codex/remote/python.py:146, imas_codex/remote/tools.py:550), \u00a77 reorders seed_worker (imas_codex/discovery/signals/parallel.py:2546-2598); none proposes a wrapper over machinery it could extend."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:58:42.511558+00:00"
+}

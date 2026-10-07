@@ -1,0 +1,96 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:47:07.954Z",
+  "dispatched_at": "2026-10-05T05:33:57Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/remote/executor.py:1071",
+      "id": "thin_wrapper-1",
+      "reason": "the block must be resolved in `imas_codex/remote/tools.py`, which already resolves ssh_host and nice level from facility config, and passed down as a parameter, rather than adding a facility dependency to the deliberately facility-free executor.",
+      "text": "\u00a76 says \"the executor reads it for every script\", but the executor's own contract is that it performs no facility lookup (`run_python_script` docstring and the `run`/`run_script` primitives at lines 853 and 993: \"Does NOT do facility lookup. For facility-aware execution, use ... tools.py\"); teaching the executor to resolve `remote_environment` forks facility resolution into two layers",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:3803",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should extend the existing `DOCUMENTS` relationship (or state why a distinct edge is needed) so `search_signals`/`search_docs` walk one linkage rather than two.",
+      "text": "\u00a73 introduces a `DOCUMENTED_IN`/`DOCUMENTED_IN` edge from FacilitySignal to the handbook page, but the graph already owns signal\u2194documentation linkage: `WikiChunk.documents_signals` (`relationship_type: DOCUMENTS`, range FacilitySignal, facility.yaml:3803) beside `documents_nodes` (line 3796), and the plan cites neither; a second, differently-named edge for the same job means two owners for \"which page documents this signal\" and the MCP edge-walkers must special-case both",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/remote/tools.py:471",
+      "id": "duplicate_owner-2",
+      "reason": "the interpreter-version and library-importability checks should be added to `check_all_tools`/`check_tool` (or a shared helper they call), not re-implemented as a new command.",
+      "text": "\u00a76's `discover preflight <facility>` probe duplicates `check_all_tools(facility)`, which already runs per-facility tool checks with `min_version` floors and reports `missing_required`/`version_too_old`; the plan adds a parallel probe rather than extending the existing one, so the facility-tool truth now has two code paths",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/__init__.py:1",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added CLI surface in its own text (retire/merge, or state why the preflight cannot be folded into the existing facility tool probe).",
+      "text": "\u00a76 adds a `discover preflight <facility>` CLI command to a family the brief reports at cli_options 0, and names neither a command it retires or merges nor a reason none can be",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/common.yaml:197",
+      "id": "interface_budget-2",
+      "reason": "the section must state that it extends `WikiPageStatus` (or use an existing value plus a separate `fronts_database` property) rather than assume a status value that the schema does not admit.",
+      "text": "\u00a73 has the seven handbook pages \"carry `status: dynamic`\", but `WikiPageStatus` is a closed enum (`scanned | scored | ingested | skipped | failed`, common.yaml:197) referenced by the enum-typed `status` on `WikiPage` (facility.yaml:3582, `range: WikiPageStatus`); adding `dynamic` widens a shared enum \u2014 a public-definition surface \u2014 and the section does not acknowledge the enum extension, name a value it retires, or say why none can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "96a10210dbcc027a4a850d1003049cf1b4275e0291011fcb1e0a908da0ed2ef6",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T05:51:45.811968+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T05:51:46.354976+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T05:51:47.006139+00:00"
+    },
+    "interface_budget-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T05:51:47.520491+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T05:51:45.332274+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T053354914470-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "ea2d9f56cd3aaf89dff521ca4485dc81c562c1d0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a76 hides ordered setup commands, the resolved interpreter, a minimum-version floor and a per-data-system override behind one facility-level `remote_environment` block, and \u00a72/\u00a73/\u00a74 extend existing scanners and pipelines rather than scattering new wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan adds a second signal\u2194document linkage beside the existing `DOCUMENTS` family, and a second facility probe beside `check_all_tools`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 adds the `discover preflight` CLI command and \u00a73 adds a `dynamic` value to the closed `WikiPageStatus` enum without either section naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan searched and cites the EDAS scanner, the facility schema, the wiki pipeline and the `data_systems` keys, but proposes the `DOCUMENTED_IN` edge and the `discover preflight` probe without citing the existing signal-documentation relationship (`WikiChunk.documents_signals`, `imas_codex/schemas/facility.yaml:3803`) or the existing facility probe (`check_all_tools`, `imas_codex/remote/tools.py:471`) that already do the same jobs.",
+    "thin_wrapper": "a finding \u2014 \u00a76 routes the facility block through the low-level executor, which is deliberately facility-agnostic, instead of the facility-aware layer that already exists."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T05:51:18.961791+00:00"
+}

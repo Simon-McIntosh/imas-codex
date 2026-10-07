@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log, so the added-failure count was not taken",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/paths/scorer.py:282",
+    "imas_codex/discovery/paths/parallel.py:2473",
+    "imas_codex/discovery/code/scorer.py:256",
+    "imas_codex/discovery/wiki/scoring.py:869",
+    "imas_codex/discovery/signals/parallel.py:4279",
+    "imas_codex/discovery/mdsplus/enrichment.py:58"
+  ],
+  "completed_at": "2026-10-06T06:21:50.359Z",
+  "dispatched_at": "2026-10-06T06:15:11Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_prompt_schema_coverage.py",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "EXPECTED_PROMPTS pins ten prompts while \u00a722 names twelve, so the positive control no longer fails if a call site is later added for signals/individualization or discovery/enricher; both are orphaned today and the node recorded them under follow_ons."
+    },
+    {
+      "file": "tests/discovery/test_prompt_schema_coverage.py",
+      "line": "227",
+      "severity": "follow-on",
+      "text": "the field-presence assertion reads a field name anywhere in the rendered prompt, so deleting one field from a schema partial does not redden it (the node's first negative-control attempt passed, EXIT=0); only removing the whole render fails it, so the guard is coarser than the declared negative control states."
+    },
+    {
+      "file": "imas_codex/llm/prompts/signals/individualization.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the prompt still carries a hand-written JSON example and no schema_needs although \u00a722 names it; the node left it unchanged because it has no call site, so a live use would carry no generated schema."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against ecf996bf; four commits, 19 files, all inside the declared scope; no baseline arm is recorded.",
+    "done_when": "the done_when names pytest tests/discovery tests/llm exiting 0 and a live TriageBatch check; the manifest records EXIT=0 (1425 passed, 9 skipped) and the live log records finish_reason stop and a validated TriageBatch of 40 results.",
+    "goal": "read \u00a722 and the node goal; the landed change drops response_format from the dedicated local request builder at imas_codex/discovery/base/llm.py:169 and rejects engine-aborted replies at imas_codex/discovery/base/llm.py:1540 so a local structured call validates from the schema carried in its prompt, which is the goal.",
+    "manifest": "read; it states the gate command and its result, names the gate log, and records the landing plus the two orphan prompts under follow_ons.",
+    "write_paths": "read the manifest's declared paths; every path in the four commits lies inside them and no file outside them is touched."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_llm_aborted_reply.py:98 fails when the abort branch is removed and test_llm_local_routing.py asserts the local request omits response_format, but test_prompt_schema_coverage.py only reddens when the whole schema render is removed, not on a single deleted field.",
+    "evidence": "the gate pytest tests/discovery tests/llm is recorded EXIT=0 (1425 passed, 9 skipped) and the live check records prompt_tokens 99054 finish_reason stop and a validated TriageBatch; the manifest names no baseline_suite arm, so added failures are unmeasured rather than zero.",
+    "fit": "the new _reject_unusable_reply helper at imas_codex/discovery/base/llm.py:1540 consolidates the four former ``if not content`` guards and the commits carry conventional subjects with bodies and no plan or version label.",
+    "goal_fidelity": "imas_codex/discovery/base/llm.py:169 drops response_format from _local_call_kwargs and llm.py:1540 rejects finish_reason='abort' in all four structured loops, so a local structured call validates from the prompt-carried schema; the plan names twelve call-site prompts and ten are bound, the other two proven orphaned.",
+    "reuse": "_reject_unusable_reply is the single owner of the empty/abort guard in llm.py and _provide_signal_source_unwind_schema follows the existing _SCHEMA_PROVIDERS pattern in prompt_loader.py rather than forking schema rendering.",
+    "scope_discipline": "every path changed in the four commits lies inside the declared write paths, including the evidence fragment, README and the three test files."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read \u00a722 and the node goal; the landed change drops response_format from the dedicated local request builder at imas_codex/discovery/base/llm.py:169 and rejects engine-aborted replies at imas_codex/discovery/base/llm.py:1540 so a local structured call validates from the schema carried in its prompt, which is the goal.\nVERDICT done_when: the done_when names pytest tests/discovery tests/llm exiting 0 and a live TriageBatch check; the manifest records EXIT=0 (1425 passed, 9 skipped) and the live log records finish_reason stop and a validated TriageBatch of 40 results.\nVERDICT write_paths: read the manifest's declared paths; every path in the four commits lies inside them and no file outside them is touched.\nVERDICT manifest: read; it states the gate command and its result, names the gate log, and records the landing plus the two orphan prompts under follow_ons.\nVERDICT diff: read commit by commit against ecf996bf; four commits, 19 files, all inside the declared scope; no baseline arm is recorded.\nCALL_SITES: imas_codex/discovery/paths/scorer.py:282, imas_codex/discovery/paths/parallel.py:2473, imas_codex/discovery/code/scorer.py:256, imas_codex/discovery/wiki/scoring.py:869, imas_codex/discovery/signals/parallel.py:4279, imas_codex/discovery/mdsplus/enrichment.py:58\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/base/llm.py:169 drops response_format from _local_call_kwargs and llm.py:1540 rejects finish_reason='abort' in all four structured loops, so a local structured call validates from the prompt-carried schema; the plan names twelve call-site prompts and ten are bound, the other two proven orphaned.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate pytest tests/discovery tests/llm is recorded EXIT=0 (1425 passed, 9 skipped) and the live check records prompt_tokens 99054 finish_reason stop and a validated TriageBatch; the manifest names no baseline_suite arm, so added failures are unmeasured rather than zero.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path changed in the four commits lies inside the declared write paths, including the evidence fragment, README and the three test files.\nSCORE durability: 16\nJUSTIFICATION durability: tests/discovery/test_llm_aborted_reply.py:98 fails when the abort branch is removed and test_llm_local_routing.py asserts the local request omits response_format, but test_prompt_schema_coverage.py only reddens when the whole schema render is removed, not on a single deleted field.\nSCORE fit: 19\nJUSTIFICATION fit: the new _reject_unusable_reply helper at imas_codex/discovery/base/llm.py:1540 consolidates the four former ``if not content`` guards and the commits carry conventional subjects with bodies and no plan or version label.\nSCORE reuse: 19\nJUSTIFICATION reuse: _reject_unusable_reply is the single owner of the empty/abort guard in llm.py and _provide_signal_source_unwind_schema follows the existing _SCHEMA_PROVIDERS pattern in prompt_loader.py rather than forking schema rendering.\nFINDING tests/discovery/test_prompt_schema_coverage.py:26 follow-on: EXPECTED_PROMPTS pins ten prompts while \u00a722 names twelve, so the positive control no longer fails if a call site is later added for signals/individualization or discovery/enricher; both are orphaned today and the node recorded them under follow_ons.\nFINDING tests/discovery/test_prompt_schema_coverage.py:227 follow-on: the field-presence assertion reads a field name anywhere in the rendered prompt, so deleting one field from a schema partial does not redden it (the node's first negative-control attempt passed, EXIT=0); only removing the whole render fails it, so the guard is coarser than the declared negative control states.\nFINDING imas_codex/llm/prompts/signals/individualization.md:1 follow-on: the prompt still carries a hand-written JSON example and no schema_needs although \u00a722 names it; the node left it unchanged because it has no call site, so a live use would carry no generated schema.",
+  "review_run_id": "r-20261006T061505405673-review-of-aborted-reply-schema-in-prompt",
+  "reviewed_base_sha": "ecf996bf49e460a297d38f09b24efc8c7f310bc2",
+  "reviewed_head_sha": "5ac8a0b10bf39dca594ed2f2809001f269aa86e7",
+  "reviewed_run_id": "r-20261006T053829458419-aborted-reply-schema-in-prompt",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T06:20:55.832581+00:00",
+  "total": 108
+}

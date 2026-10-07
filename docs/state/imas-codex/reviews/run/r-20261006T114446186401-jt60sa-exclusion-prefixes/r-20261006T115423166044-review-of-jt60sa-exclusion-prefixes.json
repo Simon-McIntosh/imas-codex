@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest carries no baseline_suite or after_suite arm, so its own record held no measured pair; the reviewer took both arms with `pytest tests/config`. base 126e80307 reads 29 passed EXIT=0 and head 2b55334 reads 33 passed EXIT=0, with no FAILED ids on either side (the four extra head tests are the new test_jt60sa_exclusions.py). Head-minus-base added failures = 0 with no ids.",
+  "base_log_revision": "126e8030784004a1080c0244204be11a84143407",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/paths/frontier.py:502",
+    "imas_codex/discovery/paths/scanner.py:322",
+    "imas_codex/discovery/paths/scanner.py:477"
+  ],
+  "completed_at": "2026-10-06T12:06:10.008Z",
+  "dispatched_at": "2026-10-06T11:54:29Z",
+  "findings": [
+    {
+      "file": "imas_codex/config/facilities/jt-60sa.yaml",
+      "line": "155",
+      "severity": "follow-on",
+      "text": "follow-on: /work/edas is now in excludes.path_prefixes yet remains a discovery_roots entry, so seed_facility_roots filters it out through should_exclude (imas_codex/discovery/paths/frontier.py:502) and the root entry is inert; \u00a724 names only /home for removal, so this is per-spec, but the now-dead root should be dropped once the exclusion is in place."
+    },
+    {
+      "file": "imas_codex/config/facilities/jt-60sa.yaml",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate log head-tests-config.log is headed at revision ffc7d03, the config commit, while the reviewed head is 2b55334, so the recorded 33-passed result is not keyed to the landed head; the docs commit changes no tested file so the result still holds, but the log should name the head it vouches for."
+    },
+    {
+      "file": "tests/config/test_jt60sa_exclusions.py",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite or after_suite arm, so its own record holds no measured added-failure pair and the count had to be re-derived from arms the reviewer ran (base 29 passed, head 33 passed, 0 added); recording the two arms would let the promotion audit read added failures without a second measurement."
+    }
+  ],
+  "head_log_revision": "2b55334e4e353d2b281bb93907299aec3ae6d472",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "two commits against base 126e80307 \u2014 ffc7d03 moves the three absolute excludes.directories entries to excludes.path_prefixes, prepends /home, removes the /home discovery root and adds a 41-line test; 2b55334 adds the 19-line evidence fragment.",
+    "done_when": "the done_when names the yaml move, the three should_exclude assertions, a recorded red arm and `uv run pytest tests/config` exiting 0; tests/config/test_jt60sa_exclusions.py asserts should_exclude returns true for /home/u/x and /work/edas/x and false for /analysis/src/x, the recorded gate log reads 33 passed EXIT=0, and I reproduced both the gate and the named mutation myself.",
+    "goal": "\u00a724's config node asks the facility's absolute exclusions to move into excludes.path_prefixes with /home added there and /home dropped from discovery_roots, and the landed imas_codex/config/facilities/jt-60sa.yaml does exactly that \u2014 path_prefixes at line 58 now holds /home, /tmp, /var/tmp and /work/edas and no /home entry remains under discovery_roots.",
+    "manifest": "present and self-consistent (status complete, commits ffc7d03 and 2b55334, changed_paths matching the yaml and test, head and negative-control logs named, a mutation note naming the Scratch copy); it carries no baseline_suite or after_suite arm, and its head gate log header names ffc7d03 (the config commit) rather than the reviewed head 2b55334.",
+    "write_paths": "the manifest declares four write paths (jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py, the fragment and a docs/figures directory); the two commits touch exactly the yaml, the test file and the fragment, the granted figures directory is untouched, and the reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "I reinstated the regression \u2014 head with /home removed from path_prefixes \u2014 and tests/config/test_jt60sa_exclusions.py::test_home_subtree_excluded reddens (assert False is True, EXIT=1), and test_work_edas_subtree_excluded would redden against the base basename form because a basename directory never matches /work/edas/x, so the added assertions are sensitive to the defect they guard.",
+    "evidence": "tests/config/test_jt60sa_exclusions.py exercises the exact paths the done_when names and the recorded log at ffc7d03 reads 33 passed EXIT=0; I re-ran tests/config at base 126e80307 (29 passed EXIT=0) and at head 2b55334 (33 passed EXIT=0) and reproduced the declared mutation (head with /home dropped from path_prefixes) failing test_home_subtree_excluded EXIT=1, with deduction only because the recorded green is headed at the config commit, not the landed head.",
+    "fit": "path_prefixes is the exclusion family ExclusionConfig declares for absolute subtrees (imas_codex/config/discovery_config.py:50) and should_exclude consults it first (line 155), the test follows the tests/config style, the fragment's element ids are node-prefixed, and both commit messages are conventional with no plan, ticket or AI trailer.",
+    "goal_fidelity": "imas_codex/config/facilities/jt-60sa.yaml:58-62 now lists the absolute exclusions under excludes.path_prefixes with /home first and no longer names /home among discovery_roots (line 138), which is the whole of \u00a724's config-node goal.",
+    "reuse": "the change adds only configuration and a test and two commits; it extends the existing ExclusionConfig/merge_facility_excludes mechanism (imas_codex/config/discovery_config.py:96-99) rather than forking it, and introduces no new capability to duplicate.",
+    "scope_discipline": "the two commits touch only imas_codex/config/facilities/jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py and docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-exclusion-prefixes.html, all inside the declared write paths, with the granted figures directory unused."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a724's config node asks the facility's absolute exclusions to move into excludes.path_prefixes with /home added there and /home dropped from discovery_roots, and the landed imas_codex/config/facilities/jt-60sa.yaml does exactly that \u2014 path_prefixes at line 58 now holds /home, /tmp, /var/tmp and /work/edas and no /home entry remains under discovery_roots.\nVERDICT done_when: the done_when names the yaml move, the three should_exclude assertions, a recorded red arm and `uv run pytest tests/config` exiting 0; tests/config/test_jt60sa_exclusions.py asserts should_exclude returns true for /home/u/x and /work/edas/x and false for /analysis/src/x, the recorded gate log reads 33 passed EXIT=0, and I reproduced both the gate and the named mutation myself.\nVERDICT write_paths: the manifest declares four write paths (jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py, the fragment and a docs/figures directory); the two commits touch exactly the yaml, the test file and the fragment, the granted figures directory is untouched, and the reviewed worktree is clean.\nVERDICT manifest: present and self-consistent (status complete, commits ffc7d03 and 2b55334, changed_paths matching the yaml and test, head and negative-control logs named, a mutation note naming the Scratch copy); it carries no baseline_suite or after_suite arm, and its head gate log header names ffc7d03 (the config commit) rather than the reviewed head 2b55334.\nVERDICT diff: two commits against base 126e80307 \u2014 ffc7d03 moves the three absolute excludes.directories entries to excludes.path_prefixes, prepends /home, removes the /home discovery root and adds a 41-line test; 2b55334 adds the 19-line evidence fragment.\nCALL_SITES: imas_codex/discovery/paths/frontier.py:502, imas_codex/discovery/paths/scanner.py:322, imas_codex/discovery/paths/scanner.py:477\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/config/facilities/jt-60sa.yaml:58-62 now lists the absolute exclusions under excludes.path_prefixes with /home first and no longer names /home among discovery_roots (line 138), which is the whole of \u00a724's config-node goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/config/test_jt60sa_exclusions.py exercises the exact paths the done_when names and the recorded log at ffc7d03 reads 33 passed EXIT=0; I re-ran tests/config at base 126e80307 (29 passed EXIT=0) and at head 2b55334 (33 passed EXIT=0) and reproduced the declared mutation (head with /home dropped from path_prefixes) failing test_home_subtree_excluded EXIT=1, with deduction only because the recorded green is headed at the config commit, not the landed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits touch only imas_codex/config/facilities/jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py and docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-exclusion-prefixes.html, all inside the declared write paths, with the granted figures directory unused.\nSCORE durability: 20\nJUSTIFICATION durability: I reinstated the regression \u2014 head with /home removed from path_prefixes \u2014 and tests/config/test_jt60sa_exclusions.py::test_home_subtree_excluded reddens (assert False is True, EXIT=1), and test_work_edas_subtree_excluded would redden against the base basename form because a basename directory never matches /work/edas/x, so the added assertions are sensitive to the defect they guard.\nSCORE fit: 20\nJUSTIFICATION fit: path_prefixes is the exclusion family ExclusionConfig declares for absolute subtrees (imas_codex/config/discovery_config.py:50) and should_exclude consults it first (line 155), the test follows the tests/config style, the fragment's element ids are node-prefixed, and both commit messages are conventional with no plan, ticket or AI trailer.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds only configuration and a test and two commits; it extends the existing ExclusionConfig/merge_facility_excludes mechanism (imas_codex/config/discovery_config.py:96-99) rather than forking it, and introduces no new capability to duplicate.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:155 follow-on: /work/edas is now in excludes.path_prefixes yet remains a discovery_roots entry, so seed_facility_roots filters it out through should_exclude (imas_codex/discovery/paths/frontier.py:502) and the root entry is inert; \u00a724 names only /home for removal, so this is per-spec, but the now-dead root should be dropped once the exclusion is in place.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:1 follow-on: the head gate log head-tests-config.log is headed at revision ffc7d03, the config commit, while the reviewed head is 2b55334, so the recorded 33-passed result is not keyed to the landed head; the docs commit changes no tested file so the result still holds, but the log should name the head it vouches for.\nFINDING tests/config/test_jt60sa_exclusions.py:0 follow-on: the reviewed manifest carries no baseline_suite or after_suite arm, so its own record holds no measured added-failure pair and the count had to be re-derived from arms the reviewer ran (base 29 passed, head 33 passed, 0 added); recording the two arms would let the promotion audit read added failures without a second measurement.",
+  "review_run_id": "r-20261006T115423166044-review-of-jt60sa-exclusion-prefixes",
+  "reviewed_base_sha": "126e8030784004a1080c0244204be11a84143407",
+  "reviewed_head_sha": "2b55334e4e353d2b281bb93907299aec3ae6d472",
+  "reviewed_run_id": "r-20261006T114446186401-jt60sa-exclusion-prefixes",
+  "scores": {
+    "durability": 20,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T12:04:25.880052+00:00",
+  "total": 118
+}

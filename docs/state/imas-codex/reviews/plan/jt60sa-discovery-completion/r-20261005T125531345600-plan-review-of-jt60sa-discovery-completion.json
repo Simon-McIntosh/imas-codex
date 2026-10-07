@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T12:59:21.883Z",
+  "dispatched_at": "2026-10-05T12:55:38Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/signals/scanners/wiki.py:312",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should either extend \u00a716 to this caller or state in \u00a716 why it is excluded, because as written its \"one mechanism remains\" claim is false and a jt-60sa wiki-context lookup stays empty.",
+      "text": "the wiki-context vector search runs `SEARCH node IN (VECTOR INDEX wiki_chunk_embedding ... LIMIT $k)` and then filters `WHERE p.facility_id = $facility` on the joined WikiPage, so a small facility's chunks are discarded after the global ANN cut \u2014 the exact defect \u00a716 exists to remove \u2014 yet \u00a716's enumeration of the affected searches omits this site, which is the signal scanner's own wiki-context lookup and is reached for jt-60sa",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:3563",
+      "id": "duplicate_owner-2",
+      "reason": "naming it lets the author move it onto the same in-`SEARCH` `build_vector_search` pre-filter \u00a716 lands elsewhere, or scope it out explicitly; without that, \u00a716's \"one mechanism\" claim is inaccurate and the jt-60sa code-context path silently ignores facility.",
+      "text": "the code-context vector search runs `SEARCH node IN (VECTOR INDEX code_chunk_embedding ... LIMIT 3)` and then applies `WHERE src.facility_id = $facility` after the cut, so a small facility's code context is invisible and only the global top-3 chunks are ever considered \u2014 and this is the same file \u00a79 and \u00a716 already edit",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "9f53c8c4993601bba00a0bfe8e0d0b8dec9059d09f43277b3019004b875c1514",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 94,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T13:01:11.666461+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T13:01:12.636705+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T125531345600-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "e77aae29fea87c4d604027b6a45771c9eb2b4896",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each remaining section deepens an existing module instead of spreading surface: \u00a717 puts both the fetch and the count SQL and the retry predicate in the one label-parameterised `embed_worker`, \u00a716 routes the in-`SEARCH` predicate through the existing `build_vector_search` owner (`imas_codex/graph/vector_search.py`) and the one index annotation, and \u00a79 reduces three DataAccess call sites to one `persist_data_access`.",
+    "duplicate_owner": "a finding \u2014 \u00a716 claims \"one facility-filter mechanism remains for every index that carries facility_id\" but enumerates only `imas_codex/llm/search_tools.py` and `imas_codex/graph/domain_queries.py`; two further consumers of the same two indexes still post-filter facility after the ANN cut, `imas_codex/discovery/signals/scanners/wiki.py` (wiki_chunk_embedding) and `imas_codex/discovery/signals/parallel.py` (code_chunk_embedding), while the correct in-`SEARCH` mechanism already exists in `imas_codex/graph/vector_search.py`'s `build_vector_search` (used by `imas_codex/ingestion/search.py`).",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a716 and \u00a717 each state \"Interface budget: nothing added\", \u00a714 reuses `discover paths -r`, and \u00a79 names what it retires (a duplicate remote-environment probe and a duplicate DataAccess `MERGE`) for the single function it adds.",
+    "reuse_search": "pass \u2014 every remaining section extends machinery it cites by name: \u00a717 names the `imas_codex/discovery/base/embed_worker.py` owner (`_fetch_unembedded` / `_count_unembedded`) and `imas_codex/discovery/base/reset.py`'s reset specs, \u00a716 extends \u00a712's `vector_index_filters` annotation and the `GraphClient.ensure_vector_indexes` owner, and \u00a714 reuses the existing `discover paths -r/--root` scoping option rather than adding one.",
+    "thin_wrapper": "pass \u2014 no section adds a pass-through layer; \u00a79's `persist_data_access` and the `environment=` argument on `get_python_status` each consolidate duplicates and state why the behaviour cannot be folded into the existing mechanism."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:59:43.101771+00:00"
+}

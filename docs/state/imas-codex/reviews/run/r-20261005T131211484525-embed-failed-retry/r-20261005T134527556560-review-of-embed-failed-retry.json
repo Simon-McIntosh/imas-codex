@@ -1,0 +1,46 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-05T13:52:00.556Z",
+  "dispatched_at": "2026-10-05T13:45:33Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site is affected by a data-only inventory deletion",
+    "diff": "read the 3-line deletion: the two comment lines naming the retired parallel.py occurrence and the single inventory row are removed; the neighbouring CodeChunk.related_ids runtime allowance is untouched.",
+    "done_when": "tests/graph/test_cypher_property_check.py exits 0 at the reviewed head (3 passed) and exits 1 with the exact stale-adjudication finding when the row is reinstated; both observed.",
+    "goal": "the gained commit answers the prior review's blocking finding: the CodeChunk.embed_failed_at predicate moved into the shared fragment (alias-parameterised, so its reference renders as dynamic and is unresolved-allowlisted), leaving no statically labelled occurrence for the [runtime] inventory row.",
+    "manifest": "read the reviewed run's manifest.md and manifest.md.asdelivered; the repair round's commits, gate logs (repair_repro.log, repair_after.log, repair_negative_control.log) and the [runtime] row removal reconcile with the diff.",
+    "write_paths": "read git diff fd319e2911fe0ac6a64fa7fb05eaaee19e0d56fb..6e1e223aaf439c5b44d7199d34b7c24c413e0455 --stat: one path, imas_codex/graph/cypher_property_check.py, inside the repair round's grant."
+  },
+  "justifications": {
+    "durability": "the adjudication inventory is guarded by test_repository_cypher_literals_have_declared_properties (a zero-violation run is rejected unless checked_properties > 0) and by test_inventory_allows_repairs_and_line_shifts_but_rejects_growth; removing the row cannot silently disable the audit because a stale row is itself a violation, demonstrated live here by reinstating it.",
+    "evidence": "repair_repro.log reproduces the defect at fd319e291 (EXIT=1, stale runtime adjudication at parallel.py:473); independently re-ran tests/graph/test_cypher_property_check.py at 6e1e223aa (3 passed, EXIT=0); an in-process reinstatement of the removed row over the head source reports exactly one stale_adjudication violation at parallel.py:473 while the head reports checked_properties 14376 violations 0, so the guard is auditing real content. Deducted only because the reviewed run's manifest records baseline_suite and after_suite as null, so added_failure_count is unmeasured.",
+    "fit": "the commit subject and body name the mechanism (the dynamic-alias fragment leaves no statically labelled occurrence) and carry no plan, sprint or ticket identifier; the removed comment described the retired occurrence rather than the mechanism, so its removal is the correct direction.",
+    "goal_fidelity": "the gained commit 6e1e223aa removes exactly the orphaned [runtime] row imas_codex/discovery/code/parallel.py|CodeChunk|embed_failed_at|473 and the comment that described the retired static occurrence, which is the blocking finding the prior review (fd319e291) raised; nothing else changed.",
+    "reuse": "no new checker, inventory, or predicate is introduced; the change reuses the existing adjudication list and removes a row the fragment's dynamic alias made redundant.",
+    "scope_discipline": "git diff fd319e291..6e1e223aa touches only imas_codex/graph/cypher_property_check.py, the path the repair round is granted, and is a 3-line deletion with no collateral edit."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the gained commit 6e1e223aa answers the prior review's blocking finding \u2014 the CodeChunk.embed_failed_at predicate now lives in the shared fragment whose alias is dynamic, so the statically labelled occurrence is gone and its [runtime] inventory row is orphaned.\nVERDICT done_when: tests/graph/test_cypher_property_check.py exits 0 at 6e1e223aa (3 passed) and, reinstating the removed row in-process over the head source, reports exactly one stale_adjudication violation at parallel.py:473 while the head reports checked_properties 14376 and zero violations.\nVERDICT write_paths: git diff fd319e2911fe0ac6a64fa7fb05eaaee19e0d56fb..6e1e223aaf439c5b44d7199d34b7c24c413e0455 --stat lists only imas_codex/graph/cypher_property_check.py.\nVERDICT manifest: the reviewed run's repair logs (repair_repro.log red at fd319e291, repair_after.log green at head, repair_negative_control.log red on revert) reconcile with the diff.\nVERDICT diff: 3-line deletion of the retired-occurrence comment and the CodeChunk.embed_failed_at|473 row; CodeChunk.related_ids row untouched.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: removes exactly the orphaned row and its describing comment, nothing else.\nSCORE evidence: 17\nJUSTIFICATION evidence: defect reproduced at fd319e291 (EXIT=1), head independently green (3 passed EXIT=0), and an independent in-process reinstatement of the removed row reddens exactly that row; deducted because the reviewed manifest declares baseline_suite/after_suite null so added_failure_count is unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: one path, the granted repair path, minimal deletion, no collateral edit.\nSCORE durability: 18\nJUSTIFICATION durability: the inventory is guarded by a test that rejects a zero-violation result unless properties were checked, and reinstating the stale row is itself a violation.\nSCORE fit: 20\nJUSTIFICATION fit: commit names the mechanism, removes the retired-occurrence comment, and carries no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: reuses the existing adjudication inventory and removes only the row the dynamic-alias fragment made redundant.\n",
+  "review_run_id": "r-20261005T134527556560-review-of-embed-failed-retry",
+  "reviewed_base_sha": "fd319e2911fe0ac6a64fa7fb05eaaee19e0d56fb",
+  "reviewed_head_sha": "6e1e223aaf439c5b44d7199d34b7c24c413e0455",
+  "reviewed_run_id": "r-20261005T131211484525-embed-failed-retry",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T13:55:00+00:00",
+  "total": 114
+}

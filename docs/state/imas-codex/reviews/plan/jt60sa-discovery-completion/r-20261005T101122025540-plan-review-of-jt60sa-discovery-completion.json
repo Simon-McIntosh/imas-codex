@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T10:17:24.668Z",
+  "dispatched_at": "2026-10-05T10:11:25Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/search_tools.py:454",
+      "id": "duplicate_owner-1",
+      "reason": "a section that repairs this exact defect for one index and explicitly rejects over-fetching (\"it reproduces the defect at the next size\") must state the sibling index's fate \u2014 extend the filter-property mechanism to it or show it does not starve \u2014 or the plan ships the code fix while the equally-named signal goal is left on the rejected pattern.",
+      "text": "\u00a712 fixes the facility post-filter starvation for `CodeChunk` and says in its own text only that \"the signal and wiki-chunk embeddings are left alone\", without stating why the same owner cannot carry them, while `_vector_search_signals` post-filters `s.facility_id = $facility` after the ANN cut (`where_clauses=where_parts`, over-fetch `max(k*2,50)`) and \u00a71 names `search_signals` answering for jt-60sa as a plan goal",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html \u00a715 done-when",
+      "id": "duplicate_owner-2",
+      "reason": "a done-when whose check cannot return the named result must be narrowed (e.g. `--glob '*.py'`) before the node is dispatched, or the worker cannot reach the declared measure.",
+      "text": "the named check `rg 'CREATE VECTOR INDEX' imas_codex` matches only `ensure_vector_indexes` cannot pass as written: the literal also appears in the prose of `imas_codex/graph/AGENTS.md:354` (\"never hand-write `CREATE VECTOR INDEX`\"), which survives any Java/Kotlin-free source dedup, so the section's own verification of the de-duplication is unsatisfiable",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2c5296eec7bb83881b2a53b8fce3fe08900004322b54454af301bda8968b5c88",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 64,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:19:27.681629+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:19:30.886155+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T101122025540-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "2c3a897d532426e8a06a80fa4b0394216ecd8c3f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a712 adds filter metadata to the existing schema\u2192generated-map\u2192`ensure_vector_indexes` owner chain and a pre-filter form on the existing builder rather than a new module, and \u00a79 collapses three inline `DataAccess` write sites into one `persist_data_access`; neither adds a shallow wrapper layer.",
+    "duplicate_owner": "a finding \u2014 \u00a712 applies the in-index filter mechanism to `CodeChunk.embedding` only and leaves `_vector_search_signals` (search_tools.py:454) and the document/wiki vector searches on the same facility post-filter, with no stated reason the owner cannot be extended to them.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a712 states the one schema annotation it adds and the `where_clauses` post-filter it retires, \u00a715 deletes five DDL copies, \u00a79 and \u00a711 add no CLI option, MCP view or refusal family, and \u00a72's typed slots account for the keyword field they replace.",
+    "reuse_search": "pass \u2014 every implementable section cites and extends an existing owner rather than proposing a parallel one: \u00a712 extends `build_vector_search` / `ensure_vector_indexes` / `GraphSchema.vector_indexes` through the schema\u2192generator\u2192client chain, \u00a714 uses the existing `discover paths --root` scope and `discover code --path-prefix`, \u00a711 moves the existing `NEO4J_URI` check inside `resolve_neo4j` (its single owner), \u00a79 targets the existing `probe_remote_environment` callers, and \u00a715 names the five hand-written DDL copies it deletes.",
+    "thin_wrapper": "pass \u2014 no section adds a thin layer over existing machinery; \u00a715 removes five hand-written copies in favour of the owner's `ensure_vector_indexes`, and \u00a79 makes `get_python_status` consume a resolved environment instead of re-probing the same facility."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T10:17:46.419931+00:00"
+}

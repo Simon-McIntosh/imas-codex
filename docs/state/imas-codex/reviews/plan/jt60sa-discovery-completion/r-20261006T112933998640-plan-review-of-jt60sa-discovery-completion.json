@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T11:32:56.680Z",
+  "dispatched_at": "2026-10-06T11:29:39Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/query_builder.py:268",
+      "id": "duplicate_owner-1",
+      "reason": "the section must extend the shared renderer at query_builder.py:268 (so the one owner carries the negation for both families) or migrate the five path claims to `build_path_prefix_filter`, otherwise the design names a mechanism that does not cover half the sites it mandates.",
+      "text": "\u00a724 places the exclusion negation on `build_path_prefix_filter` (:282), but the five path claims reach the prefix clause through `render_path_prefix_clause` directly, not through the builder \u2014 the census of clause entry points is: five path claims at imas_codex/discovery/paths/parallel.py:484, 540, 597, 715, 795 (each `render_path_prefix_clause(\"p\", \"root_filter\")`), the scoped reset at imas_codex/discovery/base/reset.py:108, and the ten code sites plus the ingest worker that use `build_path_prefix_filter` (imas_codex/discovery/code/graph_ops.py:132, 304, 399, 485, 580, 620, 644, 674, 707, 734 and imas_codex/discovery/code/workers.py:566) \u2014 so a `negated` flag on the builder alone leaves the path claims, which \u00a724 explicitly requires to skip excluded rows, unable to express it",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/paths/parallel.py:465",
+      "id": "deep_module-1",
+      "reason": "a single helper taking `(facility, alias)` and returning the clause plus its parameters would hide the policy behind one interface and remove the per-site drift the plan otherwise relies on a test to catch, which is the whole point of a deep module over a spread of shallow edits.",
+      "text": "\u00a724 requires every path and code claim and every phase-liveness predicate to consult the facility's exclusion prefixes, which means each of the sites in the census above (plus `has_pending_work` at paths/parallel.py:197 and its `_has_pending_scan/expand/triage/enrich/score_work` helpers at :265-338, and the code has-work predicates at code/graph_ops.py:566-734) independently resolves `get_exclusion_config_for_facility(facility)` and composes the negated clause, spreading one policy across roughly fifteen call sites with nothing that makes a site fail if it forgets",
+      "type": "deep_module",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8c37cdf91e4e1b20f63901b26e0bf6720fabfdaa7842b843bacae916eed5edf9",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 217,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T112933998640-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "05a80773f09e6bf4e81e0f1e66f6ce945e2e7d21",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a724 threads the exclusion policy through ~15 claim and liveness sites, each re-resolving the facility's `ExclusionConfig`, instead of hiding the policy behind one interface that takes the facility id.",
+    "duplicate_owner": "a finding \u2014 the shared prefix clause has two entry points and \u00a724 names only one of them, so the mechanism it cites cannot reach the path claims the section also requires to honour the exclusion.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a724 adds no new public definition (it broadens an existing builder with a flag) and the landed \u00a714 nodes retired surface (`seed_missing_roots`, `create_child_paths`) rather than adding any, so no live section enlarges an interface family.",
+    "reuse_search": "pass \u2014 the live sections name existing owners and the code confirms each: `should_exclude`'s basename matching for `directories` (imas_codex/config/discovery_config.py:165), `build_path_prefix_filter` (imas_codex/graph/query_builder.py:282), `GraphClient.create_nodes(create_only=...)` (imas_codex/graph/client.py:611), `ResetSpec.source_filter` (imas_codex/discovery/base/reset.py:45) and `seed_facility_roots` (imas_codex/discovery/paths/frontier.py:426); the plan extends these rather than rebuilding them.",
+    "thin_wrapper": "pass \u2014 \u00a724's `negated` flag extends the existing prefix builder rather than adding a parallel wrapper, and says why (one builder keeps clause and binding together)."
+  },
+  "section_digests": {
+    "_document": "09490c8adaf4c1375701ae4af3acfa5a70e2abe1b8d7dfdb44856148a560ff1a",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "ea093845012af148321609dc0ccef4ad78f3fc5209bb8e337d40245f676f6968",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "606925e43d868e47bf1e4dd172602157616443f793268cbdd18fa730f6d5aa09",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T11:44:46.632825+00:00"
+}

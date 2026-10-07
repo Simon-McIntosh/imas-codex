@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T18:48:25.623Z",
+  "dispatched_at": "2026-10-06T18:42:00Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/search/search_strategy.py:93",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should cite SearchHit and either reuse or extend it (adding arms/parent_documentation) or state why an internal record distinct from the retrieval owner's own hit type is required; as written the two types must be hand-kept in sync and the fork is invisible.",
+      "text": "\u00a74 (node candidate-retrieval) introduces Candidate with fields path, ids, unit, documentation, node_category, data_type, physics_domain and retrieval_score, all of which SearchHit already carries (SearchHit.path/documentation/units/data_type/ids_name/physics_domain and SearchBase.score at search_strategy.py:86); hybrid_dd_search returns list[SearchHit] (imported at dd_search.py:36), so the candidate record is a second, parallel definition of a hit that the retrieval owner already produces, with only arms and parent_documentation genuinely new",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-candidate-selection.html#s6",
+      "id": "interface_budget-1",
+      "reason": "with public_definitions supplied as 0 the section must say in its own text what the field and functions displace (for example \u00a78's free-text mapping_target_path / mapping_target_ids) or why no existing definition can be merged, or the added public surface grows unaccounted.",
+      "text": "\u00a76 adds one SignalSource field (candidate_route) and two public graph_ops.py functions (write_candidates, clear_candidates) and its \"Surface\" paragraph accounts only for why the new relationship type cannot merge into MAPS_TO_IMAS, naming nothing the field or the two functions retire or merge and not stating why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4532298451786414c3a5b927efa225b16bf93a1afd22d88e2b1be026e2bcdae8",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T18:49:23.647162+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-06T18:49:26.904910+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T18:49:23.647162+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T18:49:26.904910+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v16.json",
+  "review_run_id": "r-20261006T184141038303-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "093264051949413650fcf5b71b740e15b4c833e5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 imas_codex/ids/candidates.py hides the state block, the batched question set, answer parsing, the pair record and the threshold/margin/floor routing behind retrieve_candidates, judge_candidates and route; \u00a77 moves rather than multiplies the seven per-stage claim helpers into three parameterised routines in their existing owner.",
+    "duplicate_owner": "a finding \u2014 the retrieval record is a parallel copy of SearchHit, the type hybrid_dd_search already returns.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 this week; \u00a75 and \u00a77 account for their added surface in their own text, but \u00a76 adds a public field and two public graph_ops.py functions while accounting only for the relationship type's non-mergeability.",
+    "reuse_search": "pass \u2014 the plan names the maintained owners it would extend and every mechanism it proposes to delete is real: hybrid_dd_search (imas_codex/graph/dd_search.py:97, and its embedding/ids_filter/physics_domain arguments exist), cluster_search (dd_search.py:869, which does path-membership lookup for a slash-containing query, so it genuinely replaces ClusterSearcher.search_by_path at imas_codex/clusters/search.py:200), analyze_units (imas_codex/ids/tools.py:168), the claim owner imas_codex/discovery/base/claims.py, the decisions layer call_decisions/acall_decisions (imas_codex/discovery/base/llm.py:3429/3493), run_discovery_engine (imas_codex/discovery/base/engine.py:92) and the three MAPS_TO_IMAS writers (graph_owners.py:357, mapping.py:2085, models.py:580 \u2014 a census of exactly three, as \u00a78 claims).",
+    "thin_wrapper": "a finding \u2014 \u00a74's Candidate record re-derives the SearchHit the retrieval owner already returns."
+  },
+  "section_digests": {
+    "_document": "fe693026503f9013804697728088f9f292dafe5bcdcd0bedf13da88a2ec84229",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "42ebdc39e7050383e9d001e874427d9dc8fc6d9df11af0d70a40012d47580f73",
+    "s4": "eec5a72905e952edf7421759d0dcc70e4b6865f1f3113afe29a1ca4ca9e4a231",
+    "s5": "b39ebcbff71ed4d97b6edcbfe4add80ab8983164853fb355a8832cccadd3e23f",
+    "s6": "66529e5f7ab7a05752dc03d57d6b7d9dd9e9f37a91b4a135a76a0af90e6add30",
+    "s7": "9a3f3e001fe7019e026f1e6c593cd2732fae69ddf4e48653b9f86905363f31e6",
+    "s8": "7ab5c5566b6f0228cc34de4ccffa4708fb240a54bdc72bf44602d1b7bc99ec8a",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T18:49:10.197064+00:00"
+}

@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T23:13:14.884Z",
+  "dispatched_at": "2026-10-06T23:10:02Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/workers.py:298",
+      "id": "duplicate_owner-1",
+      "reason": "the first instance is a contradiction inside \u00a78 that would otherwise leave a second candidate-edge reader in `workers.py`, and the other two make the census incomplete so a later node misses a call site it must repoint.",
+      "text": "the plan rewrites the mapping claim predicate `sg.mapping_target_ids = $ids_name` to \"a selected `MAPPING_CANDIDATE` edge into `$ids_name`, and no `MAPS_TO_IMAS` binding into that IDS yet\", which is a candidate-edge query executed from `workers.py`, while the same section's `map-context-reads-candidates` bullet declares `read_candidates` in `imas_codex/ids/graph_ops.py` the single candidate reader and asserts \"No candidate query is written in `workers.py` or `mapping.py`\" \u2014 the two statements are in the same section and cannot both hold; the owner to extend is `graph_ops.py` `read_candidates` (or the plan must say the claim predicate is a claim-loop predicate, not a candidate read). Also incomplete in the same census: `count_candidates_by_route` is defined twice \u2014 `imas_codex/ids/graph_ops.py:653` and `imas_codex/ids/workers.py:419` \u2014 and the three importers of the `workers.py` copy are `imas_codex/cli/discover/__init__.py:84`, `:161`, `:280` (not the two sites \"discover status and clear\" implies), plus `imas_codex/cli/map.py:730` already imports the `graph_ops.py` copy; and the clear path has a second entry point the plan does not name, `clear_facility_candidates` at `imas_codex/cli/discover/map.py:21`, consumed at `imas_codex/cli/discover/__init__.py:288`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "d5ca2e08ba7332799b64c14594f5c0fc22a99b8de695bd41e4660c871164f7ec",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 66,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T23:14:11.130685+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T23:14:11.130685+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v66.json",
+  "review_run_id": "r-20261006T230955322661-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "8c1d39e3666d5744268e63749cf893384890b3b9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design concentrates rather than spreads: one owner for DD retrieval (`retrieve_candidates`, `imas_codex/ids/candidates.py`), one owner for the `SignalSource \u2192 IMASNode` edges (`imas_codex/ids/graph_ops.py`), one route count, and the claim loop delegated to `claims.py`. The new candidate reader/selector and the cross-IDS expansion sit behind small interfaces over substantial queries rather than as a layer of forwarders.",
+    "duplicate_owner": "a finding \u2014 the plan names one duplicate (`count_candidates_by_route`) but its census of that type is incomplete, and it leaves a second candidate-edge reader in place behind a self-contradiction (instances below).",
+    "interface_budget": "pass \u2014 with `public_definitions` 0, `cli_options` 0, `mcp_views` 0, `refusal_families` 0 supplied, \u00a78 states \"Public definitions stay level across \u00a78\" and names its adds (`read_candidates`, `select_candidates`) and its deletes (`count_sources_by_mapping_status`, the `workers.py` copy of `count_candidates_by_route`); \u00a711 books each of its two added surfaces (the `Route.selected` field and the `arms` edge property) against a named retirement (the `select_margin` field and the three `mapping_target_*` SignalSource properties); \u00a711 and \u00a78 both refuse values through the existing `CandidateWriteError`, adding no refusal family; \u00a79 adds no surface.",
+    "reuse_search": "pass \u2014 the plan cites the mechanisms it extends and each was opened and confirmed to exist: `related_dd_search(gc, path, relationship_types=\"cluster\")` (`imas_codex/graph/dd_search.py:606`, cross-IDS siblings with noise categories removed, verified at :649\u2013665), `hybrid_dd_search` (:97) as the one DD-retrieval owner, `fetch_cross_facility_mappings` (`imas_codex/ids/tools.py:733`), `claim_batch` (`imas_codex/discovery/base/claims.py`), and `SearchHit.see_also` (`imas_codex/search/search_strategy.py:165`), whose producer-less state and existing consumer (`imas_codex/llm/search_formatters.py:1212`) the plan correctly reports.",
+    "thin_wrapper": "pass \u2014 `read_candidates` and `select_candidates` are proposed in `graph_ops.py` with an explicit reason they cannot be `write_candidates` (write deletes and rewrites every edge; a pick must flag existing edges without disturbing the shortlist), and the plan books each retired option (--skip-metadata, --skip-errors) and field against the surface it removes."
+  },
+  "section_digests": {
+    "_document": "97288df4cb4c01be01f0a14a899c374f216a0d76dce137a4eaa93147f473c515",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "367850a35f3e5466adaed6727199e8454d807f2ba4f378d4ba46a91b0ed1b290",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "fdfd11260e22e984d3e727a6cf69c35ed389ab1c2cfd22bff8431c15a6527995",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T23:14:07.431583+00:00"
+}

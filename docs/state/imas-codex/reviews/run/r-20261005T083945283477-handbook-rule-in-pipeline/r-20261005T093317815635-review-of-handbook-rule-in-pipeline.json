@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/wiki/pipeline.py:WikiIngestionPipeline.ingest_page",
+    "imas_codex/discovery/wiki/pipeline.py:WikiIngestionPipeline.ingest_pages",
+    "imas_codex/discovery/wiki/pipeline.py:link_chunks_to_entities"
+  ],
+  "completed_at": "2026-10-05T09:41:06.281Z",
+  "dispatched_at": "2026-10-05T09:33:22Z",
+  "findings": [
+    {
+      "file": "tests/wiki/test_pipeline.py",
+      "line": "506",
+      "severity": "follow-on",
+      "text": "follow-on: TestDatabaseMergeGraph only EXPLAINs FRONTS_DATABASE_DOCUMENTS_MERGE, so it proves the Cypher parses but not that the $database_sources[database] map lookup resolves a database name to its scanner source at runtime; a mis-keyed or unmapped database still EXPLAINs clean and would silently link nothing."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "1565",
+      "severity": "follow-on",
+      "text": "follow-on: mark_dynamic_handbook_pages runs unconditionally at the end of every ingest_pages and calls get_embed_model() and a facility-wide _chunk_rows scan even when no dynamic page exists, while ingest_page repeats the same scan per page, so the cost is O(pages x linking chunks) per ingest."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T083945283477-handbook-rule-in-pipeline/manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's baseline_suite block is empty, so the base-arm result (103 passed at 8c60bdca9) survives only as prose in the tests: line and the fragment and no base gate log was retained; this review re-derived it, but the run's own record cannot be audited without a re-run."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base c323401f9; 76bf7bb55 wires the rule into ingest_page, replaces apply_dynamic_page_rule with mark_dynamic_handbook_pages and drops the unused facility_id argument, ee5da909f extracts FRONTS_DATABASE_DOCUMENTS_MERGE and raises marker failures, and 49304d164 and 44dbb21c1 record the evidence.",
+    "done_when": "the done-when asks that every jt-60sa handbook table topic be marked through the pipeline's own path, that the fourth DOCUMENTS merge be gated against the live graph, and that the stub chunks be re-embedded; the reviewed run's marker-rerun.log shows all three topics (CategoryInformation, DataInformation, CategoryInformation2) marked with status ingested and a non-null stub embedding, and the -m graph gate exits 0.",
+    "goal": "the node's goal is to make the wiki ingest path mark dynamic handbook tables itself and close four review findings; imas_codex/discovery/wiki/pipeline.py:1248-1272 wires detect_dynamic_page into WikiIngestionPipeline.ingest_page and pipeline.py:1565 runs mark_dynamic_handbook_pages over the stored batch, so both a fresh ingest and a bulk pass mark a page without an operator call.",
+    "manifest": "read; status complete, the revision pair is present, after_suite records the head gate's 0 failures with its log path, and the negative control names the reddened test and its log; the baseline_suite block is empty, so the base arm was re-derived by this review rather than carried by the run.",
+    "write_paths": "read the manifest's declared paths; the diff names exactly imas_codex/discovery/wiki/pipeline.py, tests/wiki/test_pipeline.py and docs/evidence/fragments/jt60sa-discovery-completion/handbook-rule-in-pipeline.html, all inside them."
+  },
+  "justifications": {
+    "durability": "the negative control in negative-control.log reddens tests/wiki/test_pipeline.py:409 when the detector call is removed from ingest_page, but the live-graph gate at tests/wiki/test_pipeline.py:509 only EXPLAINs the merge so it proves the statement parses rather than that a database resolves to its source at runtime.",
+    "evidence": "the head gate log tests/wiki/test_pipeline.py records 106 passed at 44dbb21c1 and this review re-ran the base arm at 8c60bdca9 (103 passed), giving 0 added failures, but the reviewed run's own baseline_suite block is empty so the base arm was not retained with it.",
+    "fit": "the change extends the existing helpers (extract_database_links, dynamic_page_stub, _chunk_rows) and follows the module's Cypher-in-constant idiom introduced beside imas_codex/discovery/wiki/pipeline.py:262, with conventional subjects and bodies and no plan or ticket identifiers.",
+    "goal_fidelity": "all five deliverables are present at imas_codex/discovery/wiki/pipeline.py:1248 (ingest wiring), 416 (bulk marker), 381 (facility_id dropped), 606 (named merge constant) and marker-rerun.log (re-embedded stubs); the bulk marker covers CategoryInformation2, the topic the prior node left unmarked.",
+    "reuse": "mark_dynamic_handbook_pages extends fronts_databases_for_topic, detect_dynamic_page and dynamic_page_stub rather than forking them, and it deletes the duplicate apply_dynamic_page_rule instead of keeping a parallel helper.",
+    "scope_discipline": "git diff --name-only c323401f9..44dbb21c1 names exactly imas_codex/discovery/wiki/pipeline.py, tests/wiki/test_pipeline.py and the evidence fragment, all inside the manifest's declared write paths, and the reviewed worktree is clean."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make the wiki ingest path mark dynamic handbook tables itself and close four review findings; imas_codex/discovery/wiki/pipeline.py:1248-1272 wires detect_dynamic_page into WikiIngestionPipeline.ingest_page and pipeline.py:1565 runs mark_dynamic_handbook_pages over the stored batch, so both a fresh ingest and a bulk pass mark a page without an operator call.\nVERDICT done_when: the done-when asks that every jt-60sa handbook table topic be marked through the pipeline's own path, that the fourth DOCUMENTS merge be gated against the live graph, and that the stub chunks be re-embedded; the reviewed run's marker-rerun.log shows all three topics (CategoryInformation, DataInformation, CategoryInformation2) marked with status ingested and a non-null stub embedding, and the -m graph gate exits 0.\nVERDICT write_paths: read the manifest's declared paths; the diff names exactly imas_codex/discovery/wiki/pipeline.py, tests/wiki/test_pipeline.py and docs/evidence/fragments/jt60sa-discovery-completion/handbook-rule-in-pipeline.html, all inside them.\nVERDICT manifest: read; status complete, the revision pair is present, after_suite records the head gate's 0 failures with its log path, and the negative control names the reddened test and its log; the baseline_suite block is empty, so the base arm was re-derived by this review rather than carried by the run.\nVERDICT diff: read commit by commit against base c323401f9; 76bf7bb55 wires the rule into ingest_page, replaces apply_dynamic_page_rule with mark_dynamic_handbook_pages and drops the unused facility_id argument, ee5da909f extracts FRONTS_DATABASE_DOCUMENTS_MERGE and raises marker failures, and 49304d164 and 44dbb21c1 record the evidence.\nCALL_SITES: imas_codex/discovery/wiki/pipeline.py:WikiIngestionPipeline.ingest_page, imas_codex/discovery/wiki/pipeline.py:WikiIngestionPipeline.ingest_pages, imas_codex/discovery/wiki/pipeline.py:link_chunks_to_entities\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all five deliverables are present at imas_codex/discovery/wiki/pipeline.py:1248 (ingest wiring), 416 (bulk marker), 381 (facility_id dropped), 606 (named merge constant) and marker-rerun.log (re-embedded stubs); the bulk marker covers CategoryInformation2, the topic the prior node left unmarked.\nSCORE evidence: 18\nJUSTIFICATION evidence: the head gate log tests/wiki/test_pipeline.py records 106 passed at 44dbb21c1 and this review re-ran the base arm at 8c60bdca9 (103 passed), giving 0 added failures, but the reviewed run's own baseline_suite block is empty so the base arm was not retained with it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only c323401f9..44dbb21c1 names exactly imas_codex/discovery/wiki/pipeline.py, tests/wiki/test_pipeline.py and the evidence fragment, all inside the manifest's declared write paths, and the reviewed worktree is clean.\nSCORE durability: 17\nJUSTIFICATION durability: the negative control in negative-control.log reddens tests/wiki/test_pipeline.py:409 when the detector call is removed from ingest_page, but the live-graph gate at tests/wiki/test_pipeline.py:509 only EXPLAINs the merge so it proves the statement parses rather than that a database resolves to its source at runtime.\nSCORE fit: 18\nJUSTIFICATION fit: the change extends the existing helpers (extract_database_links, dynamic_page_stub, _chunk_rows) and follows the module's Cypher-in-constant idiom introduced beside imas_codex/discovery/wiki/pipeline.py:262, with conventional subjects and bodies and no plan or ticket identifiers.\nSCORE reuse: 19\nJUSTIFICATION reuse: mark_dynamic_handbook_pages extends fronts_databases_for_topic, detect_dynamic_page and dynamic_page_stub rather than forking them, and it deletes the duplicate apply_dynamic_page_rule instead of keeping a parallel helper.\nFINDING tests/wiki/test_pipeline.py:506 follow-on: TestDatabaseMergeGraph only EXPLAINs FRONTS_DATABASE_DOCUMENTS_MERGE, so it proves the Cypher parses but not that the $database_sources[database] map lookup resolves a database name to its scanner source at runtime; a mis-keyed or unmapped database still EXPLAINs clean and would silently link nothing.\nFINDING imas_codex/discovery/wiki/pipeline.py:1565 follow-on: mark_dynamic_handbook_pages runs unconditionally at the end of every ingest_pages and calls get_embed_model() and a facility-wide _chunk_rows scan even when no dynamic page exists, while ingest_page repeats the same scan per page, so the cost is O(pages x linking chunks) per ingest.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T083945283477-handbook-rule-in-pipeline/manifest.md:19 follow-on: the manifest's baseline_suite block is empty, so the base-arm result (103 passed at 8c60bdca9) survives only as prose in the tests: line and the fragment and no base gate log was retained; this review re-derived it, but the run's own record cannot be audited without a re-run.\n",
+  "review_run_id": "r-20261005T093317815635-review-of-handbook-rule-in-pipeline",
+  "reviewed_base_sha": "c323401f933fc08cf81dfe30899a23825227dce1",
+  "reviewed_head_sha": "44dbb21c11a7abad66921aad466e51cc041fdc14",
+  "reviewed_run_id": "r-20261005T083945283477-handbook-rule-in-pipeline",
+  "reviewer_run_id": "r-20261005T093317815635-review-of-handbook-rule-in-pipeline",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T09:40:25.837098+00:00",
+  "total": 111
+}

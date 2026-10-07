@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T10:09:39.552Z",
+  "dispatched_at": "2026-10-05T10:05:26Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/client.py:356",
+      "id": "duplicate_owner-1",
+      "reason": "the author must either extend \u00a715 to route all five sites (adding dd_ids_enrichment.py and discovery/wiki/pipeline.py) or narrow its done-when to the three it names, otherwise the node's own gate cannot pass and two duplicate DDL statements survive the section that retires them.",
+      "text": "\u00a715 claims only three hand-written `CREATE VECTOR INDEX` statements duplicate the owner (build_dd.py:4694 `cluster_description_embedding`, dd_identifier_enrichment.py:356 `identifier_schema_embedding`, dd_identifier_enrichment.py:707 `imas_node_embedding`), but `rg 'CREATE VECTOR INDEX' imas_codex --include=*.py` finds five outside the owner: it also misses dd_ids_enrichment.py:457 (`ids_embedding`, schema-derived via the `vector_index_name` annotation at imas_dd.yaml:576) and discovery/wiki/pipeline.py:1667 (`wiki_chunk_embedding`, schema-derived by the `{label}_embedding` convention for WikiChunk) \u2014 both already produced by the same `schema.vector_indexes` chain and so already in EXPECTED_VECTOR_INDEXES; the section's done-when (`rg 'CREATE VECTOR INDEX' imas_codex` matches only `ensure_vector_indexes`) is therefore unsatisfiable by the change it describes, and once \u00a712 teaches the owner about filter properties those two untouched copies also carry the stale option set the section exists to remove",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7400653b3ab02b8c6741d15eb08802634e06ce6623b20ad0d4366be1b1e64e0f",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 62,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:10:12.985038+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T100523120654-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "8954a2913c47279ae45097fb08eb90fb1c282242",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a712 registers in-index filter properties through one schema annotation and one owner (`GraphSchema.vector_index_filters` + `ensure_vector_indexes`), and \u00a79 collapses the DataAccess write to one `persist_data_access` behind `seed_worker`; substantial behaviour sits behind a small interface rather than spread across wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a715 under-counts the hand-written `CREATE VECTOR INDEX` statements that duplicate GraphClient.ensure_vector_indexes, naming three of the five present in imas_codex.",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the implementable sections each account for their surface in their own text (\u00a712 names the annotation key as its new surface and retires the `_search_code` facility post-filter entry in favour of the in-index predicate; \u00a79 names the three inline DataAccess writes and the second probe it merges; \u00a715 adds no new surface; \u00a713/\u00a714 add none).",
+    "reuse_search": "pass \u2014 the plan cites the mechanism it extends for each of \u00a712 (the schema\u2192gen_schema_context\u2192ensure_vector_indexes index chain), \u00a715 (the ensure_vector_indexes owner), \u00a79 (probe_remote_environment and the existing \u00a77 ordering fix) and \u00a73's handbook linkage (the existing WikiChunk DOCUMENTS edge, acted on in the 2026-10-05 design review comment)); no subsystem is proposed without naming what it searched.",
+    "thin_wrapper": "pass \u2014 the sections extend existing owners rather than layering over them: \u00a712 extends `build_vector_search` (the existing SEARCH-clause builder in imas_codex/graph/vector_search.py) and the index-mismatch check in `ensure_vector_indexes`; \u00a711 is a reorder inside `resolve_neo4j`; \u00a715 replaces hand-written DDL with the owner."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T10:09:52.632411+00:00"
+}

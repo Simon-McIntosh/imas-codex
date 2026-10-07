@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T09:54:03.994Z",
+  "dispatched_at": "2026-10-05T09:50:28Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/client.py:403",
+      "id": "duplicate_owner-1",
+      "reason": "naming `ensure_vector_indexes` (and the generated `schema_context_data.py`, which is never staged) as the owner changes which files the node edits and prevents a second DDL path for the same index.",
+      "text": "\u00a712 says \"vector_indexes carries those properties into the index creation statement\", but `vector_indexes` is a `GraphSchema` property in `imas_codex/graph/schema.py:211` while the DDL that creates the index is `CREATE VECTOR INDEX ... FOR (n:{label}) ON n.{prop}` inside `GraphClient.ensure_vector_indexes` (client.py:403), fed by `EXPECTED_VECTOR_INDEXES` (client.py:59) which is built from the GENERATED `imas_codex/graph/schema_context_data.py` (`VECTOR_INDEXES: dict[str, tuple[str, str]]`) produced by `scripts/gen_schema_context.py`; a fourth (filter-property) element changes the generated 2-tuple the client consumes, so the plan must extend the DDL owner and its generated feed, not only the schema property \u2014 as written it points the author at schema.py and `build_vector_search` and leaves the index-creation layer unnamed and un-accounted",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s12",
+      "id": "interface_budget-1",
+      "reason": "the section must name in its own text what it retires or merges, or state why nothing can be; \u00a712 asserts the added surface without either half of the accounting.",
+      "text": "\u00a712 states \"Interface budget: one schema annotation key, no tool, option or parameter\", which names what it adds but not what it retires or merges; the annotation key is new surface in a week whose public_definitions figure is 0, and the section gives no retirement and no statement that nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0932f454a54696aa1470b38a3e2a331960b1e5d9d798af1943da4e7b22e2bb74",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 59,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T09:54:53.681396+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T09:54:54.429696+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T095023375284-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "8c7212d0b2a0dc9fcbccb90bbfe05d92cd39566b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no section adds surface without depth; \u00a79(a) removes a duplicate probe call and \u00a79(b) collapses three DataAccess writers into one `persist_data_access(data_access)`.",
+    "duplicate_owner": "a finding \u2014 \u00a712 threads filter properties into \"the index creation statement\" but names only `schema.py::vector_indexes`; the statement that actually creates the index is owned by `GraphClient.ensure_vector_indexes` in `imas_codex/graph/client.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a712 adds \"one schema annotation key\" to a budget-of-zero family and names nothing it retires or merges, and does not state why nothing can be.",
+    "reuse_search": "pass \u2014 every implementable section names the mechanism it extends and the file that owns it (\u00a711 `imas_codex/graph/profiles.py::resolve_neo4j`; \u00a79 `imas_codex/remote/tools.py::probe_remote_environment` and `imas_codex/discovery/signals/parallel.py`; \u00a713 the \u00a73 collision repair in the same `search_tools.py`; \u00a712 `imas_codex/graph/vector_search.py::build_vector_search` and `imas_codex/graph/schema.py::vector_indexes`).",
+    "thin_wrapper": "pass \u2014 the only interface-growth proposals are extensions of an existing owner (`build_vector_search` gains a pre-filter form; `resolve_neo4j` reorders an existing branch; `get_python_status` takes an already-resolved argument), each justified in its section."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T09:54:17.765429+00:00"
+}

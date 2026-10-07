@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T12:12:29.388Z",
+  "dispatched_at": "2026-10-05T12:09:52Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/embed_worker.py:159",
+      "id": "duplicate_owner-1",
+      "reason": "the plan would dispatch two nodes against one function and misname the file a worker must edit, and the honest change is a single edit to the shared worker plus its `embed_failed_at IS NULL` clause at embed_worker.py:209.",
+      "text": "\u00a717 states `_fetch_unembedded` is in `imas_codex/discovery/signals/parallel.py` and proposes \"the same shape is applied to the code-chunk embed phase\" as a second work item, but `_fetch_unembedded` and `_mark_embed_failed` are one shared, label-parameterised owner in `base/embed_worker.py` used by both `signals/parallel.py` (embed_description_worker) and `code/parallel.py`; a change there fixes both phases at once and the plan's second site is the same function",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s17",
+      "id": "reuse_search-1",
+      "reason": "had the plan opened the owner it names, it would have found a single shared function to extend and the retry shape would have been scoped to one module instead of two.",
+      "text": "\u00a717 proposes a fresh retry mechanism (claimed_at cutoff plus a reset) without citing the shared embedding worker or reading it: the existing owner already excludes failures with `AND n.embed_failed_at IS NULL` and `_mark_embed_failed` already documents \"To retry, clear the property manually\", so the plan rebuilds rather than extends the mechanism it means to fix",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html#s17",
+      "id": "interface_budget-1",
+      "reason": "the section must either say the reset is a `clear_fields` edit to an existing ResetSpec (no new surface) or account for the new CLI/refusal value it introduces, and it currently does neither.",
+      "text": "the section adds \"a documented reset that clears embed_failed_at alone\" without naming what it retires or merges or why nothing can be, and with no interface-budget sentence at all, while the reset surface is already `imas_codex/discovery/base/reset.py`'s `ResetSpec`/`--reset-to` family and a new target is a new CLI value",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/reset.py:139",
+      "id": "duplicate_owner-2",
+      "reason": "naming the owner turns a hand-written reset into a one-line spec change and keeps the single reset executor that `reset_to_status` already is.",
+      "text": "\u00a717's \"documented reset that clears embed_failed_at alone\" duplicates the existing reset owner: `SIGNAL_RESET_SPECS[\"discovered\"].clear_fields` already clears `embedding`/`embedded_at` but not `embed_failed_at`, so the fix is one field in the spec map (or a bare ResetSpec entry), not a new reset path beside `reset_to_status`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "eff835b102c9b1ea96ec8be354397ce3c830696e61d95e635087af1a30cd60c2",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 83,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:13:45.635177+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:13:47.544528+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:13:47.008069+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:13:46.449151+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T120947955703-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "71657e632fcf5c926b78c3fa1c20df1cf2dff9c7",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a716 extends imas_codex/graph/vector_search.py rather than adding per-search module surface, \u00a79 consolidates the three DataAccess writes in signals/parallel.py into one writer, and \u00a714 adds no module at all; none spreads complexity across new shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a717 treats the embed fetch as two sites (signals and code) when one shared owner, imas_codex/discovery/base/embed_worker.py, serves both labels, and \u00a717's new reset duplicates imas_codex/discovery/base/reset.py's ResetSpec machinery.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a717 adds \"a documented reset that clears embed_failed_at alone\" (a new --reset-to target and, with it, a new CLI value or refusal surface) without naming what it retires or merges, or why nothing can be, while \u00a716 states this accounting in its own text.",
+    "reuse_search": "a finding \u2014 \u00a716 correctly cites the \u00a712 owner (build_vector_search prefilter_clauses, imas_codex/graph/vector_search.py) and \u00a714 reuses discover paths --root and discover code --path-prefix, but \u00a717 proposes a new embed-retry path without opening the module that already owns it.",
+    "thin_wrapper": "pass \u2014 no section adds a thin layer over existing machinery: \u00a716 renders a predicate through the existing owner, \u00a79 removes a duplicate write and a duplicate probe, and \u00a714 and \u00a717 change no interface."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:12:56.456727+00:00"
+}

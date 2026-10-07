@@ -1,0 +1,47 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "backend": "deepseek",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/client.py:509",
+    "imas_codex/graph/client.py:520",
+    "imas_codex/standard_names/dd_resolutions.py:706"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-21T15:22:20.179551+00:00",
+  "findings": [],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits against the base commit by commit \u2014 658df1631 adds the result class and the new case (55 insertions), 7e3736c30 appends 127 lines of landing record and evidence anchor and changes no code.",
+    "done_when": "the done_when asks for a case asserting that a suppressed statement's result has single() None, consume() non-raising and empty iteration, mirroring dd_resolutions.py:706 and client.py:509, with the whole file passing; tests/standard_names/test_review_write_suppression.py:233 does exactly that on both a session statement and a transaction statement, and the case passes here.",
+    "goal": "the goal \u2014 a report-only guard whose suppressed write returns something a caller can consume rather than a bare list \u2014 is met by imas_codex/cli/sn.py:61 (_SuppressedWriteResult) and sn.py:97, which returns it from _WriteSuppressingRun.run, the single run() both the session proxy and its transaction proxy inherit.",
+    "manifest": "read at the delivered path; it carries status complete, commits 658df1631 and 7e3736c30, the focused command with its exit status and log, the sibling-suite run, and the negative-control log path.",
+    "write_paths": "the manifest declares imas_codex/cli/sn.py, tests/standard_names/test_review_write_suppression.py and the two docs paths, and `git diff --name-status` of 7895400ae..7e3736c30 lists exactly those four files and no fifth."
+  },
+  "justifications": {
+    "durability": "test_review_write_suppression.py:233 fails when the bare-list return is restored, both in the worker's control and in my own (consumer-negative-control.log), and its paired assertions that single() is None while iteration is empty refuse a non-empty stub.",
+    "evidence": "the gate's own result is recorded (focused-suite.log 26 passed, after-suite.log 38 passed) and coordinator-negative-control.log:2 opens with the declared mutation verbatim and fails at test line 258 with the quoted AttributeError, but the consumer-level reproduction printed in the landing record is not on disk \u2014 I re-derived it, and both directions are now in consumer-negative-control.log.",
+    "fit": "the class sits with the guard it serves and states its mechanism in the module's existing docstring idiom with no plan or ticket identifier, and its three-method surface matches the measured consumer usage \u2014 single() and consume() are the only receipt methods imas_codex calls anywhere, with no .data(), .values(), .peek() or .to_eager_result() site left unserved.",
+    "goal_fidelity": "sn.py:97 hands back the new object, and driving both named consumers through the guard here shows the repair holds \u2014 drop_all returns 0 instead of raising, the port write consumes cleanly, and a read still returns the driver's own record (evidence/consumer-probe.log).",
+    "scope_discipline": "the whole landed change is 182 insertions over exactly the four declared paths, and every hunk serves the return shape or its record, with no unrelated edit and a clean worktree at the reviewed head."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal \u2014 a report-only guard whose suppressed write returns something a caller can consume rather than a bare list \u2014 is met by imas_codex/cli/sn.py:61 (_SuppressedWriteResult) and sn.py:97, which returns it from _WriteSuppressingRun.run, the single run() both the session proxy and its transaction proxy inherit.\nVERDICT done_when: the done_when asks for a case asserting that a suppressed statement's result has single() None, consume() non-raising and empty iteration, mirroring dd_resolutions.py:706 and client.py:509, with the whole file passing; tests/standard_names/test_review_write_suppression.py:233 does exactly that on both a session statement and a transaction statement, and the case passes here.\nVERDICT write_paths: the manifest declares imas_codex/cli/sn.py, tests/standard_names/test_review_write_suppression.py and the two docs paths, and `git diff --name-status` of 7895400ae..7e3736c30 lists exactly those four files and no fifth.\nVERDICT manifest: read at the delivered path; it carries status complete, commits 658df1631 and 7e3736c30, the focused command with its exit status and log, the sibling-suite run, and the negative-control log path.\nVERDICT diff: read both commits against the base commit by commit \u2014 658df1631 adds the result class and the new case (55 insertions), 7e3736c30 appends 127 lines of landing record and evidence anchor and changes no code.\nCALL_SITES: imas_codex/graph/client.py:509, imas_codex/graph/client.py:520, imas_codex/standard_names/dd_resolutions.py:706\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: sn.py:97 hands back the new object, and driving both named consumers through the guard here shows the repair holds \u2014 drop_all returns 0 instead of raising, the port write consumes cleanly, and a read still returns the driver's own record (evidence/consumer-probe.log).\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate's own result is recorded (focused-suite.log 26 passed, after-suite.log 38 passed) and coordinator-negative-control.log:2 opens with the declared mutation verbatim and fails at test line 258 with the quoted AttributeError, but the consumer-level reproduction printed in the landing record is not on disk \u2014 I re-derived it, and both directions are now in consumer-negative-control.log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the whole landed change is 182 insertions over exactly the four declared paths, and every hunk serves the return shape or its record, with no unrelated edit and a clean worktree at the reviewed head.\nSCORE durability: 18\nJUSTIFICATION durability: test_review_write_suppression.py:233 fails when the bare-list return is restored, both in the worker's control and in my own (consumer-negative-control.log), and its paired assertions that single() is None while iteration is empty refuse a non-empty stub.\nSCORE fit: 18\nJUSTIFICATION fit: the class sits with the guard it serves and states its mechanism in the module's existing docstring idiom with no plan or ticket identifier, and its three-method surface matches the measured consumer usage \u2014 single() and consume() are the only receipt methods imas_codex calls anywhere, with no .data(), .values(), .peek() or .to_eager_result() site left unserved.",
+  "review_run_id": "r-20260921T152220179551-review-of-n-a-suppressed-write-returns-a-consumable-result",
+  "reviewed_base": "7895400aec540633b81ebfcd0f9ecd4416eef2ae",
+  "reviewed_commit": "7e3736c30ceb3d221399d40cc0513d5f6b0b0766",
+  "reviewed_run_id": "r-20260921T135940164504-n-a-suppressed-write-returns-a-consumable-result",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-21T15:56:28.597740+00:00",
+  "total": 91
+}

@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T07:18:27.597Z",
+  "dispatched_at": "2026-10-05T07:15:01Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:2546",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a77 node should have the ingest own both the node write and the edge merge (making the ordering a property of one owner) rather than adding a second inline write that a future edit can desynchronise.",
+      "text": "\u00a77's fix writes the DataAccess node with a fresh inline Cypher `MERGE` in `seed_worker` instead of extending `ingest_discovered_signals` (same file, line 2280), which already owns the phase-2 `DATA_ACCESS` edge merge that the write must precede; the node write now sits in three places in one file (MDSplus branch, non-MDSplus branch, edge phase) and the ordering invariant is held by placement rather than by one owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "214ce13f725e89d2ca9758d40f50b39dce695c8e001fab092ae5f73eca888e12",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 30,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:20:39.058325+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T071458712403-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "319e4fad5d77b2b14c85581782ef734caa99202b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each new mechanism hides its behaviour behind one small interface: `resolve_remote_environment` (`imas_codex/remote/environment.py:63`) hides the facility-block/data-system override precedence behind one call; \u00a78 makes `resolve_service_url` (`imas_codex/remote/locations.py:206`) the one owner of SLURM service discovery behind one function; \u00a73 adds one `fronts_database` property and reuses the existing edge writer rather than spreading new wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a77 leaves two owners of the DataAccess node write inside the signal pipeline: `seed_worker` adds a second inline `MERGE (da:DataAccess {id: $id})` beside the MDSplus one it already carries, while `ingest_discovered_signals` (`imas_codex/discovery/signals/parallel.py:2280`) owns the phase-2 `DATA_ACCESS` edge merge the write exists to satisfy.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 accounts for its three typed slots and `SignalDataClass` enum by retiring the prototype's `class:`/`shots:`/`udpid:` keyword parking, \u00a73 states `fronts_database` \"retires nothing, because no existing WikiPage property records the database a rendered page is backed by\", \u00a76 retires `data_access_patterns.setup_commands` and states \"no new CLI command is added\" and \"no refusal family is added\", and \u00a78 adds \"no public definition ... two private discovery copies plus one rewrite are removed\".",
+    "reuse_search": "pass \u2014 the plan searched the two codebases it names and cites the mechanisms it extends or retires: the TDI/PPF/JPF/MDSplus scanners in `imas_codex/discovery/signals/`, the existing `WikiChunk-[:DOCUMENTS]->FacilitySignal` writer `link_chunks_to_entities` in `imas_codex/discovery/wiki/pipeline.py:252`, `DataSystemBase` plus `data_access_patterns.setup_commands` in `imas_codex/schemas/facility_config.yaml`, `get_python_status`/`check_all_tools` in `imas_codex/remote/python.py` and `imas_codex/remote/tools.py`, `seed_worker` in `imas_codex/discovery/signals/parallel.py:2360`, and the four `resolve_service_url`-family copies in \u00a78.",
+    "thin_wrapper": "pass \u2014 every section that layers over existing machinery states why the machinery is extended rather than wrapped: \u00a73 gains `fronts_database` as one more key on `link_chunks_to_entities` and keeps `WikiPageStatus` a closed enum; \u00a76 extends `get_python_status`/`check_all_tools` and adds no CLI command (\"its `missing_required`/`version_too_old` verdict raised at the start of a scan\"); \u00a78 retires copies rather than wrapping them."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:19:46.640432+00:00"
+}

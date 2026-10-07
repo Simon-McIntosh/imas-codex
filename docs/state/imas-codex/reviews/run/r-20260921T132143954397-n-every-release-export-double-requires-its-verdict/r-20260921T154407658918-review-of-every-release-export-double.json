@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "backend": "claude",
+  "call_site_count": 5,
+  "call_sites": [
+    "tests/standard_names/test_review_release_checkout.py:86 _exporter(all_gates_passed=True, gate_results=[])",
+    "tests/standard_names/test_review_body_authored.py:155 and :178 _release(..., all_gates_passed=True, gate_results=[])",
+    "tests/standard_names/test_review_release_preview_link.py:131 and :145 _release(..., all_gates_passed=True, gate_results=[])",
+    "tests/standard_names/test_release_rehearsal_accounting.py:195,248,271,296,338 _export_report(all_gates_passed=True, gate_results=[])",
+    "base 497462fec values at the same sites: checkout/body_authored/preview_link doubles hardcoded True and [] internally; rehearsal _export_report carried neither attribute"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-21T15:44:07.658918+00:00",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_cli_export.py",
+      "line": "24",
+      "text": "the closure claim is stated without its boundary and the instrument is narrower than the claim: _success_report() at :24 hardcodes all_gates_passed=True with four passing GateResults and _failing_report() at :46 hardcodes False, neither takes a verdict parameter, and both are module-level with 16 call sites (:72, :84, :94 ... :268). A test added there tomorrow writing mock_export.return_value = _success_report() inherits a passing export verdict without stating one, which is the defect this node closed elsewhere. The node's classifier cannot see it: builds_export_report at /dev/shm/exp-family-scan-2.py keys on a SimpleNamespace( call, and these build real ExportReport objects. My constructor-agnostic scan over every *.py under tests/ finds no other instance, so the release-flow family is genuinely closed, but 'the family is closed' unqualified is the third statement of the sentence that was already wrong twice."
+    },
+    {
+      "file": "tests/standard_names/test_release_rehearsal_writes_nothing.py",
+      "line": "92",
+      "text": "the follow_ons characterisation is wrong for one of the three: the manifest says all three factories 'hardcode gate_results=[] internally', but _stub_exporter here returns SimpleNamespace(exported_count=len(review_batch), all_gates_passed=all_gates_passed) at :99 with no gate_results attribute at all. Whoever picks up the follow-on and greps that file for gate_results=[] finds nothing and concludes the site is already repaired. The consequence at the consumer is the same because catalog_release.py:2017-2020 wraps the read in try/except AttributeError -> (), but the report a reader acts on is inaccurate."
+    },
+    {
+      "file": "docs/evidence/archive/unbound-source-backlog-landed.html",
+      "line": "1",
+      "text": "two proofs the brief made explicit are not in the manifest. The detector output before and after is absent (grep -ci scaffolding over the manifest returns 0; I re-ran it and it is 5 sites in 4 files at 497462fec, 2 sites in 1 file at head), and the search itself is recorded only as the path /dev/shm/exp-family-scan-2.py, which is volatile tmpfs, node-local, unreadable from another host and gone on reboot. A later node reopening the aperture question after this worktree's /dev/shm is cleared has no command to re-run and must re-derive the search, which the brief names as the documented cause of the two prior false closures."
+    },
+    {
+      "file": "tests/standard_names/test_release_rehearsal_accounting.py",
+      "line": "90",
+      "text": "the docstring says the report is 'shaped exactly as _record_export_accounting reads it', but that consumer at catalog_release.py:1696-1709 reads only total_candidates, exported_count, exclusion_counts and exclusion_records; neither new parameter is read on this path, because run_review_release returns at :1990 inside the if dry_run: at :1964, before the verdict read at :2008. A reader adding a case here who trusts the docstring will write all_gates_passed=False expecting the rehearsal outcome to change, and it cannot. The uniform discipline is defensible; the sentence claiming the consumer reads these fields is not."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits at the integrated head 89d65fddd. 3496ccaf7 touches only the four test files, adds no default to either parameter, adds no shared fixture or conftest patch, and changes no assertion; 33ab99c77 adds only the plan landing record and the evidence anchor. Neither message carries an attribution trailer (grep -Eci returns 0 on both).",
+    "done_when": "re-measured independently. Head per file: 2, 2, 3, 5, exit 0 each; combined 12 passed exit 0. Base 497462fec tests extracted with git archive and run against the same source: 2, 2, 3, 5, exit 0 each. imas_codex differs from base only in cli/sn.py, not catalog_release.py, so there is no confound. The negative control log's first line is the declared sentence verbatim at exit 1 with exactly one FAILED test.",
+    "goal": "all four named factories now take all_gates_passed and gate_results as keyword-only parameters with no default and every call site in those files states both. The value check the equal counts require also holds: no site's value moved except the rehearsal double, and that one cannot convert a refusal because the dry-run branch returns before the verdict is read.",
+    "manifest": "read; commits, paths, per-file counts and the negative control are all present and all reproduce. Two required proofs are missing: the detector output before and after is not quoted, and the independent search is recorded only as a volatile /dev/shm path rather than as a command.",
+    "write_paths": "git show --name-only over both commits lists exactly six paths, all inside the declared fence, and the fifth fenced file tests/standard_names/test_review_release.py is correctly untouched. The worktree is clean."
+  },
+  "justifications": {
+    "durability": "the required keyword-only parameters are enforced by the interpreter, so the four closed sites cannot silently regress. Nothing holds the family shut: no test asserts the property, and the one-line detector the prior review left behind is down to 2 sites in 1 file, both of them the declined closures, so the next factory of this shape arrives unseen by both instruments.",
+    "evidence": "counts, values and the negative control all reproduce independently, and the four-file equality is real rather than a masked conversion. But the aperture claim is the deliverable and two of its proofs are absent: the before and after detector output is not in the manifest, and the classifier exists only at a volatile /dev/shm path, so the search cannot be re-run by anyone else.",
+    "fit": "matches the sibling files' landed form, uses repository pytest and closure-factory idiom, carries no plan label and no attribution. The rehearsal docstring overstates what its consumer reads.",
+    "goal_fidelity": "each of the four factories requires both parameters with no default, every call site states both, no assertion moved, and the declined fifth file was declined on a correctly evaluated condition rather than skipped.",
+    "scope_discipline": "six paths, all declared, nothing else touched, and the one in-fence edit whose stated condition was unmet was correctly left alone rather than performed to satisfy the letter of the brief."
+  },
+  "model": "claude-opus-5",
+  "project": "imas-codex",
+  "raw_text": "ANSWER ONE - is the search right. Re-derived independently rather than read. My instrument: an AST scan over every *.py under tests/ (not only test_*.py, so conftest factories are in aperture), constructor-agnostic (any call carrying an exported_count keyword, so ExportReport, Mock and SimpleNamespace alike), covering module-level functions and fixtures, classifying all_gates_passed and gate_results as from-param, LITERAL or ABSENT, plus every exporter= keyword argument and every export-related monkeypatch.setattr in the tree. Run at 497462fec and at the integrated head. The diff is exactly the four named factories moving from LITERAL or ABSENT to from-param on both fields, and nothing else moves. So for the release flow the node's result is RIGHT and I confirm it with a wider instrument. The claim as worded is over-broad: tests/standard_names/test_cli_export.py:24 and :46 are module-level factories with hardcoded verdicts and no verdict parameter, 16 call sites, and the node's classifier is structurally unable to see them because it keys on SimpleNamespace( while these build real ExportReport objects. They feed run_export for CLI-output tests and never reach run_review_release, so they are the same shape outside the family, not a fifth member of it. What is missing is the boundary, and an unstated boundary is what produced the two prior false closures.\nANSWER TWO - the three residual factories. Verified, with one correction. test_review_release.py:55 and test_exclusion_report_is_reachable.py:92 do take the verdict and do hardcode gate_results=[]. test_release_rehearsal_writes_nothing.py:92 does NOT hardcode []; it omits gate_results entirely (:99). Same defect in kind, one level down: a value the double supplies on the test's behalf. Different in consequence: catalog_release.py:2016 reads gate_results only when the verdict is False and :2017-2020 falls back to () on AttributeError, so both [] and absent land on the :2028 refusal 'names no failed export gates' rather than the :2033 named-gate refusal. The original defect let a test inherit an unstated outcome; this one lets a test state a refusal it cannot substantiate. LATENT, not reachable: every call site of all three passes all_gates_passed=True (22 sites in test_review_release.py, 2 via _run_cut at :188 and :260, 1 at :148), so the is False branch never runs and gate_results is never read; the writes_nothing site additionally runs dry_run=True and asserts at :158 that the leg never ran at all.\nANSWER THREE - the declined sites. CONFIRMED. The coordinator's instruction was conditional - remove them if they are stale comments describing a double that now requires its verdict. At test_review_release.py:478 and :655 each comment sits above a closure defined inside a single test function, and each closure still returns all_gates_passed=True, gate_results=[] hardcoded, so the comment accurately describes its double and the condition is unmet. Removing it would leave an undescribed hardcoded double, which is worse than leaving it. The node's reading and its refusal are both right. One wording slip: the manifest cites lines 471 and 640, which are the closure headers; the comments are at 478 and 655.\nANSWER FOUR - the equality and the value. Equality holds at the integrated head: 2, 2, 3, 5 per file, exit 0 each, 12 passed combined; base 497462fec extracted and run gives the same 2, 2, 3, 5. The value check the fence asks for: checkout, body_authored and preview_link hardcoded True and [] at base and every head call site passes exactly True and [], so no site's value moved. One value did move - the rehearsal _export_report carried NEITHER attribute at base and returns True and [] at head - and it cannot be a converted refusal, because run_review_release returns at catalog_release.py:1990 inside the if dry_run: at :1964, before the verdict read at :2008, and the rehearsal's only consumer _record_export_accounting reads solely total_candidates, exported_count, exclusion_counts and exclusion_records. The base suite passing with the verdict absent is itself the proof that path is unreached, since :2008-2014 refuses a missing verdict and test_release_gate_verdict_is_read.py:89 shows that refusal firing. No site previously exercised a refusal and now reads True.\nDETECTOR - the figure the manifest omits: grep -rn 'Export gates are scaffolding' tests/ returns 5 sites in 4 files at 497462fec and 2 sites in 1 file at head, both survivors being the declined closures at test_review_release.py:478 and :655.\nSCORE goal_fidelity: 19\nSCORE evidence: 12\nSCORE scope_discipline: 20\nSCORE durability: 13\nSCORE fit: 18",
+  "review_run_id": "r-20260921T154407658918-review-of-every-release-export-double",
+  "reviewed_base": "497462fec0a27f308ad60d4aa4347f11415c6a92",
+  "reviewed_commit": "33ab99c7778f569855ac64330f17b7c70b151ac7",
+  "reviewed_run_id": "r-20260921T132143954397-n-every-release-export-double-requires-its-verdict",
+  "scores": {
+    "durability": 13,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-21T16:10:00.000000+00:00",
+  "total": 82,
+  "verdict": "MUST-FIX"
+}

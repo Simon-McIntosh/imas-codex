@@ -1,0 +1,104 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T16:52:01.163Z",
+  "dispatched_at": "2026-10-06T16:45:53Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/ids/workers.py:198",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is a new phase in the existing engine, and \u00a77's own text already leans on workers.py's pattern, so it should use the owner rather than copy it.",
+      "text": "\u00a77 places the candidate claim loop in a new imas_codex/ids/candidate_workers.py, but the SignalSource claim machinery is already owned by imas_codex/ids/workers.py: claim_sources_for_mapping at :198, release_mapping_claim at :274, has_pending_mapping_work at :329, and the phase/orphan-recovery wiring in run_mapping_engine at :903 with orphan_specs at :972 \u2014 all keyed on SignalSource.mapping_claim_token. A second claim loop over the same node type, the same @retry_on_deadlock + ORDER BY rand() + claim-token pattern and the same orphan recovery path will drift from this, and \u00a76 already adds candidate_claim_token/candidate_status to the same SignalSource the workers.py claim queries read \u2014 the plan should extend workers.py (add a claim function and a phase there) rather than fork the loop",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/tools/graph_search.py:340",
+      "id": "duplicate_owner-2",
+      "reason": "naming the owner (tools/graph_search.py) redirects \u00a74's fix and forces a decision about the two superseded entry points; \u00a74 already claims to add no parallel owner.",
+      "text": "\u00a74 moves cluster expansion out of gather_ids_context and fixes the K-hits defect in compute_semantic_matches (imas_codex/ids/tools.py:769), and each is the legacy path: the module docstring at imas_codex/tools/graph_search.py:1 declares GraphSearchTool \"replaces DocumentStore, SemanticSearch, and ClusterSearcher\", search_imas_semantic (imas_codex/ids/tools.py:114) already delegates to GraphSearchTool.search_dd_paths, and imas_codex/graph/dd_search.py:869 exposes cluster_search \u2014 yet \u00a74 names only ClusterSearcher (imas_codex/clusters/search.py:92) and compute_semantic_matches, measured as the \"today\" arm in \u00a73. Fixing K-hits after the category filter (the LIMIT-in-SEARCH / WHERE-category pattern \u00a73 describes) in the legacy function leaves the defect in the maintained owner; the plan should extend GraphSearchTool.search_dd_paths, and say whether compute_semantic_matches is retired once \u00a74 lands",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/mapping-candidate-selection.html#s7",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the surface it adds under the interface-budget rule, naming what it retires or why nothing can be, before the CLI is built.",
+      "text": "\u00a77 adds `imas-codex discover map` with seven options (--physics-domain/-d, --ids/-i, --cost-limit/-c, --time, --limit, --rejudge, --dry-run) to the cli_options family, whose supplied count is 0, and neither \u00a77 nor \u00a78 states whether any existing `imas map` sub-option is retired or merged, or why the option set cannot reuse discover signals' existing flags verbatim",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3674460973a7f215b8c18199c77e55ef67c840f1df507d52f8096859dbb02e47",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T16:54:25.220505+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-06T16:54:27.304283+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-06T16:54:29.415465+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T16:54:25.220505+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T16:54:27.304283+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T16:54:29.415465+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v1.json",
+  "review_run_id": "r-20261006T164547618745-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "e7f093977532c6045041afb14bbef606e6f1178c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 imas_codex/ids/candidates.py hides vector retrieval, cluster expansion, the unit filter, deduplication and candidate metadata assembly behind one function returning dict[str, list[Candidate]]; that is depth behind a small interface, not a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a77 adds a new candidate_workers.py claim loop beside the module that already owns SignalSource claiming and orphan recovery.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a77 adds a new subcommand with seven CLI options and names nothing it retires or merges, nor why nothing can be.",
+    "reuse_search": "pass \u2014 the plan searched and cites real mechanisms: compute_semantic_matches (imas_codex/ids/tools.py:769), analyze_units (imas_codex/ids/tools.py:168, whose dimensionality check \u00a74 correctly reuses), ClusterSearcher (imas_codex/clusters/search.py:92), fetch_cross_facility_mappings (imas_codex/ids/tools.py:733), the jt60sa \u00a725 call_decisions layer it defers to, run_jev_v3.py's facility block, get_triage_threshold (imas_codex/settings.py:1009) and the shared DiscoveryConfig/run_discovery harness (imas_codex/cli/discover/common.py); I opened each and found it.",
+    "thin_wrapper": "pass \u2014 no proposed module merely forwards to existing machinery without adding behaviour: candidates.py composes three arms with dedup and scoring, judgment.py builds the decisions state and adds route(), write_candidates adds a count-check that raises, and \u00a75 explicitly states it calls the shared decisions layer and builds no second client."
+  },
+  "section_digests": {
+    "_document": "fe693026503f9013804697728088f9f292dafe5bcdcd0bedf13da88a2ec84229",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "ec13a0282b939de0be8d24d37a9ff728acf742492fae13fd7ee25a9cb1420f62",
+    "s3": "4c13617153d37ed869790123c64cde54c49d0fc8b49098ea0df4219e7cba5ff4",
+    "s4": "53eb2735e02f52b84a5fbeee72ff8f2cab29f138047ee630eadf4984c86152ff",
+    "s5": "7b143fad77c322cfe1d195e717b8e400d1d5eb04411eff9d1e28d3c0a12ed578",
+    "s6": "e0a61a0534ab1a165b4a16c6fb91676a5e7a57a89c8af236a06f8a20794d2ca0",
+    "s7": "c1cbd59a8c5a34f33346985703d15814796944dacb0d14ee5b4e9791c64d8136",
+    "s8": "ee54a05d7ff030921917e13022d53e4aab44b086a1e87013a69849239f8d41ed",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T16:53:20.633705+00:00"
+}

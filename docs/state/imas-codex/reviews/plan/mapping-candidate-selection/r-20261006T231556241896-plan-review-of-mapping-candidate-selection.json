@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T23:20:18.857Z",
+  "dispatched_at": "2026-10-06T23:16:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/mapping-candidate-selection.html#s11",
+      "id": "interface_budget-1",
+      "reason": "by the item's own rule a section adding surface must name what it retires or merges, and \u00a711 must either book the helper against a retirement or state why it is not counted\u2014the supplied counts are all zero, so the bookkeeping is the only place the addition is visible.",
+      "text": "\u00a711 states \"\u00a711 adds two pieces of surface, and each is booked against a retirement\" and lists only `Route.selected` (offset by the retired `RouteThresholds.select_margin`) and the `arms` edge property (offset by the three retired SignalSource properties); the new cross-IDS cluster-expansion function in imas_codex/ids/candidates.py is a further public definition that neither appears in that accounting nor in the supplied counts (all zero), so the section violates the rule it applies to its other additions",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-candidate-selection.html#s8",
+      "id": "duplicate_owner-1",
+      "reason": "the plan already names graph_ops.py as the owner and schedules the workers.py deletion and the three importer repoints, so the duplication is the plan's declared target rather than a missed one.",
+      "text": "the \u00a78 text says `edge-ownership` \"adds it [`count_candidates_by_route`] to graph_ops.py\", but the function is already at imas_codex/ids/graph_ops.py:653 while a second definition remains at imas_codex/ids/workers.py:419, so until `map-context-reads-candidates` lands, `imas map status` reads the graph_ops.py count and `discover status`/`discover clear` read the workers.py count, and the two surfaces can disagree on route counts",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "3bb39dd391c8376aee5f220941aa6d287ac076b885b1d7ea8054a80d89b856ea",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 68,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-06T23:20:53.575028+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "The duplicate is the plan's declared target: edge-ownership added count_candidates_by_route to graph_ops.py, and map-context-reads-candidates deletes the workers.py copy and repoints its three importers, so the transient disagreement ends at that node and no plan text needs to change.",
+      "when": "2026-10-06T23:20:55.040163+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "reason": "The duplicate is the plan's declared target: edge-ownership added count_candidates_by_route to graph_ops.py, and map-context-reads-candidates deletes the workers.py copy and repoints its three importers, so the transient disagreement ends at that node and no plan text needs to change.",
+      "when": "2026-10-06T23:20:55.040163+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T23:20:53.575028+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v68.json",
+  "review_run_id": "r-20261006T231556241896-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "34bd059cb1ee550fa2d3122231a7281560cdf84c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 candidate graph access is concentrated in imas_codex/ids/graph_ops.py behind `read_candidates`/`select_candidates`/`write_candidates`/`clear_candidates`/`count_candidates_by_route`, each a one-query operation hiding the edge schema, the section/data_type derivation and the route bookkeeping; DD retrieval stays owned by `retrieve_candidates` in imas_codex/ids/candidates.py, and \u00a78 states \"DD retrieval has one owner\".",
+    "duplicate_owner": "pass \u2014 the plan is a consolidation exercise that names the owner to extend in each case: the two live `count_candidates_by_route` definitions (imas_codex/ids/graph_ops.py:653 added by edge-ownership; imas_codex/ids/workers.py:419 still present) are collapsed onto graph_ops.py with the three importers in imas_codex/cli/discover/__init__.py:84,:161,:280 repointed, and every SignalSource\u2192IMASNode create/delete is moved into graph_ops.py (`write_mapping_binding`, `clear_mapping_bindings`).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a711 adds a third, uncounted public definition in imas_codex/ids/candidates.py (the cluster-expansion entry point `candidate_worker` calls between `judge_candidates` and `route`) while its own accounting names only two.",
+    "reuse_search": "pass \u2014 the plan names and reuses the machinery it builds on: `hybrid_dd_search` (imas_codex/graph/dd_search.py:97) and `related_dd_search` (:606) for \u00a74/\u00a711 retrieval, the unfilled `SearchHit.see_also` (imas_codex/search/search_strategy.py:165, consumed only at imas_codex/llm/search_formatters.py:1212), `call_decisions`/`acall_decisions`, `PipelineCost` (\u00a710), and the generalised claim routines in imas_codex/discovery/base/claims.py; \u00a711 calls `related_dd_search(..., relationship_types=\"cluster\")` rather than rebuilding cross-IDS cluster expansion.",
+    "thin_wrapper": "pass \u2014 no section adds a forwarding layer over existing machinery without justification; \u00a711's expansion orchestrates retrieval and a second judgment call (it cannot be folded into `retrieve_candidates`, which runs before any ranking exists) and reuses the `same_quantity` noul and `CandidateWriteError` rather than adding a parallel path."
+  },
+  "section_digests": {
+    "_document": "97288df4cb4c01be01f0a14a899c374f216a0d76dce137a4eaa93147f473c515",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "367850a35f3e5466adaed6727199e8454d807f2ba4f378d4ba46a91b0ed1b290",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "bce41abf2f8b6c47e961bd7fd38a16ff44a89f1ae0fe5fba44e2dc840ea0db27",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T23:20:51.941184+00:00"
+}

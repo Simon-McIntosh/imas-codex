@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T12:23:34.609Z",
+  "dispatched_at": "2026-10-05T12:20:29Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:458",
+      "id": "duplicate_owner-1",
+      "reason": "the section's stated goal \"keeping one facility-filter mechanism rather than two\" is not met while a third domain_queries search keeps the join post-filter on an already-annotated index, so the plan must either include `find_code` or state why it is out of scope.",
+      "text": "\u00a716 states the two indexes it unifies are \"the same two\" queried by domain_queries.py, but `find_code` queries `code_chunk_embedding` \u2014 the index \u00a712 just registered `facility_id` on \u2014 and still post-filters facility via a `MATCH (cf:CodeFile) WHERE cf.id = ce.source_file` join (lines 465-476) instead of the property pre-filter \u00a716 applies elsewhere",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/embed_worker.py:159",
+      "id": "deep_module-1",
+      "reason": "`_count_unembedded` has no caller anywhere in the tree today, so the divergence is latent and does not alter the retry behaviour the section delivers.",
+      "text": "\u00a717 says `_fetch_unembedded` excludes `embed_failed_at IS NULL` \"at both of its query sites\", but the function has one such site (line 209); the second is in `_count_unembedded` (line 254), which the section does not change, so the fetch predicate and the count predicate would diverge",
+      "type": "deep_module",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "15a10b211efa0ded53036519a7183bc71bb695e554f58d026d01b4ca84833177",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 85,
+  "project": "imas-codex",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:24:24.021555+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:24:23.521251+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T122024107889-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "4c284fd1bad1d42ee2759f923a2acd329db2102e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a717 adds a cutoff predicate inside the one shared label-parameterised embed worker rather than a parallel retry path, and \u00a716 changes the facility predicate inside the one shared `build_vector_search` caller set, so complexity stays behind the existing interface.",
+    "duplicate_owner": "a finding \u2014 \u00a716's inventory of `domain_queries.py` searches is incomplete: `find_code` (imas_codex/graph/domain_queries.py:458) queries the `code_chunk_embedding` index \u00a712 just annotated, but retains a CodeFile-join post-filter rather than the `facility_id` pre-filter \u00a716 unifies.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a716 and \u00a717 each state \"Interface budget: nothing added\" and name what they retire (the over-fetch and the manual-clear docstring), and \u00a79/\u00a714 touch none of the four families (\u00a714 reuses `discover paths --root`, which already exists at imas_codex/cli/discover/paths.py:20).",
+    "reuse_search": "pass \u2014 every implementable section extends a named existing owner (\u00a717 `imas_codex/discovery/base/embed_worker.py` and `reset.py`, \u00a716 the \u00a712 in-index facility annotation over `build_vector_search`, \u00a79 the existing `probe_remote_environment` and DataAccess writers, \u00a714 the existing `discover paths --root` scope), and I confirmed each exists on disk.",
+    "thin_wrapper": "pass \u2014 no section introduces a layer over existing machinery without justifying extension; \u00a79 extracts one `MERGE ... DataAccess` statement into `persist_data_access` with two callers, which removes duplication rather than adding surface."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:23:50.154263+00:00"
+}

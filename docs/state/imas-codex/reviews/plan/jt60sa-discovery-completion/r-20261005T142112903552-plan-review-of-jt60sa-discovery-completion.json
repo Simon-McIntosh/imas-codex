@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T14:25:52.095Z",
+  "dispatched_at": "2026-10-05T14:21:16Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/parallel.py:483",
+      "id": "reuse_search-1",
+      "reason": "\u00a714's done-when (\"scored FacilityPath rows under each of the three trees\") rests on this mechanism, so the section must name the re-seed/re-expansion path (or a reset scope) that actually creates rows for trees with none, or be re-scoped to a mechanism that does.",
+      "text": "\u00a714 is built on a mechanism that does not do what the section claims: it runs `discover paths jt-60sa` \"scoped to /analysis/src with the existing scoping option\" to create FacilityPath rows for `/analysis/src/client_eqdbms.EQ32.Rev1`, `/analysis/src/SAeqfame` and `/analysis/src/SAeqread`, but the only scoping option on that command is `--root` (imas_codex/cli/discover/paths.py:20), whose value becomes `root_filter` and is applied solely as `AND any(root IN $root_filter WHERE p.path STARTS WITH root)` when claiming paths (parallel.py:483, :539, :596) \u2014 a filter over already-existing FacilityPath rows. `/analysis/src` is already a configured discovery root (imas_codex/config/facilities/jt-60sa.yaml:139), so the walk that would create those rows has already run; with the frontier at 0 and no `--reset-to`/re-expansion named, re-running the command rescans nothing and creates no rows, and a parent at a terminal status is not re-enumerated by `claim_paths_for_expanding` (parallel.py:523, which claims only `status = triaged`). The plan therefore states a discovery mechanism that may produce zero new rows for the trees the section exists to reach.",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0d3413a2027ccfc4d39464658caba2c2d3640400325ccf3afeacf22f38a8778e",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 107,
+  "project": "imas-codex",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:27:44.271942+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T142112903552-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "f8326cf50b6c080d6068f0ba9243715edad3935e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; the landed sections consolidate many query sites onto single owners (`build_vector_search` in imas_codex/graph/vector_search.py, `GraphClient.ensure_vector_indexes`, `pending_embed_predicate` in imas_codex/discovery/base/embed_worker.py) and \u00a719 adds one small fragment helper rather than a spread of wrappers.",
+    "duplicate_owner": "pass \u2014 \u00a719 names the owner to extend, `ingest_files` in imas_codex/ingestion/pipeline.py (its `MERGE (e)-[:HAS_CHUNK]->(c)` at line 522, called from imas_codex/discovery/code/workers.py:836), and explicitly adds no second link pass.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a719 states \"Interface budget: nothing added\" and \u00a714 reuses the existing `--root` and `--path-prefix` options rather than adding surface.",
+    "reuse_search": "a finding \u2014 \u00a714 proposes to discover three trees that have no FacilityPath rows by running `discover paths jt-60sa` scoped with `--root`, but `--root` is only a claim filter over existing rows (imas_codex/discovery/paths/parallel.py:483) and no re-seed or reset is named, so a completed walk will not create the missing rows.",
+    "thin_wrapper": "pass \u2014 \u00a719's fragment helper extends the two existing inline `coalesce(ce.source_file, cc.source_file)` sites (imas_codex/graph/domain_queries.py:483 and imas_codex/llm/search_tools.py:1659) and repairs the buggy third, so it replaces copies rather than paralleling machinery."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:26:08.350351+00:00"
+}

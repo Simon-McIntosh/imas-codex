@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T10:43:18.808Z",
+  "dispatched_at": "2026-10-06T10:38:36Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/query_builder.py:282",
+      "id": "thin_wrapper-1",
+      "reason": "give the renderer the pair-returning signature, delete the wrapper, and migrate the five hand-bound path sites so one entry owns both the clause and its parameter.",
+      "text": "`build_path_prefix_filter` renders no Cypher of its own; it only pairs the clause `render_path_prefix_clause` produces with the parameter that clause names, and the plan keeps both entries over the one predicate, so five path-claim sites (`imas_codex/discovery/paths/parallel.py:484,540,597,715,795`) still call the raw renderer and hand-bind `root_filter` \u2014 exactly the clause/parameter detach the helper exists to prevent; the stated reason for keeping both (\"each binds once and is pinned by its own tests\") is about test churn, not about the renderer being unextendable",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/query_builder.py:268",
+      "id": "duplicate_owner-1",
+      "reason": "these are SignalNode/standard-name search paths outside \u00a714's discovery scoping and the renderer's multi-prefix form does not fit their single-prefix call, so the plan's work would not change, though the owner's docstring overclaims.",
+      "text": "the renderer's own docstring declares it \"the single renderer for the prefix predicate; do not spell the clause inline\", but three sites still spell a path-prefix clause inline over the same `path` property: `imas_codex/graph/domain_queries.py:545` and `imas_codex/graph/domain_queries.py:591` (`n.path STARTS WITH $path_prefix` on `SignalNode`) and `imas_codex/llm/server.py:1034` (`WHERE n.path STARTS WITH $prefix`, also `SignalNode`; `imas_codex/standard_names/graph_ops.py:8455` and `imas_codex/standard_names/context.py:711` are the same shape over `source_paths`, a distinct property); the plan should either route these through the owner or scope the \"single renderer\" claim to the FacilityPath/CodeFile claims and the reset it actually covers",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "075af462badea003649bf90eee94a22ff9a200148dbfab4a9e2135c14fef7734",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 214,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "Those are single-prefix SignalNode and standard-name searches outside \u00a714's discovery scoping, as the finding itself says; the plan's work does not change.",
+      "when": "2026-10-06T10:43:52.986580+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "Migrating the five path-claim sites onto a pair-returning renderer is a refactor of the path claims that does not change the scoped code run's correctness or scope; each of those sites binds once and is pinned by its own tests. Deferred, not part of this run.",
+      "when": "2026-10-06T10:43:50.877329+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T103828592188-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "33d26f061c2aa4646f466971a3f61273b3ade095",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is introduced; the prefix helpers live beside `render_chunk_source` in the existing graph query builder (`imas_codex/graph/query_builder.py:68,268,282`), and the create-only write and the OR-ed reset filter extend existing owners (`GraphClient.create_nodes`, `ResetSpec`) instead of spreading a family of wrappers over the same machinery.",
+    "duplicate_owner": "a finding \u2014 the renderer the plan declares the single owner of the path-prefix predicate has three inline siblings the census must name.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no CLI option, MCP view or refusal family, and in its own text it names its retirements (`seed_missing_roots` retired, `create_child_paths` deleted) and its merge (nine hand-wired prefix blocks and the two existing scan sites collapsed into one helper), so the two new module-level helpers are accounted as a net consolidation.",
+    "reuse_search": "pass \u2014 \u00a714 names and extends the owners it found rather than adding parallel machinery: `render_path_prefix_clause` and the new `build_path_prefix_filter` in `imas_codex/graph/query_builder.py`, `GraphClient.create_nodes` in `imas_codex/graph/client.py`, `seed_facility_roots` in `imas_codex/discovery/paths/frontier.py`, `get_facility` in `imas_codex/discovery/base/facility.py`, and `resolve_remote_environment` in `imas_codex/remote/environment.py`; \u00a714 also states why `extra_filter` cannot carry the status-widening and why a new `source_filter` is required, so the added filter is a justified extension, not a rebuild.",
+    "thin_wrapper": "a finding \u2014 `build_path_prefix_filter` is a thin wrapper over `render_path_prefix_clause`, and the plan consciously keeps both entries over one predicate, leaving five path-claim call sites on the un-paired form."
+  },
+  "section_digests": {
+    "_document": "51fcb438816ffbfe6a4822742d47de8e056e0c8e68511632301b313545fc1361",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "29d9b089079e8a479a2c4345afce23a54bb8146946c6dca02c20b050944ecd02",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T10:43:49.769489+00:00"
+}

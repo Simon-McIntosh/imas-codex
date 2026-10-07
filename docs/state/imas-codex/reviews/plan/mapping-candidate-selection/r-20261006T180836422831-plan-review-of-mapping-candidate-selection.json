@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T18:14:22.353Z",
+  "dispatched_at": "2026-10-06T18:08:42Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/mapping.py:2085",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's central \u00a78 invariant (\"one module owns every SignalSource \u2192 IMASNode edge write\") is contradicted by an uncounted existing writer; the author must either bring it into the owner or drop the invariant, and missing it re-creates the silent-vanishing-edge defect \u00a72 identified.",
+      "text": "\u00a78 asserts \"MAPS_TO_IMAS has two MATCH-gated writers today\" (persist_mapping_result imas_codex/ids/models.py:580 and create_signal_source imas_codex/ids/graph_ops.py:357) and concludes \"One module then owns every SignalSource \u2192 IMASNode edge write\", but a third writer exists at imas_codex/ids/mapping.py:2085 inside run_error_derivation_only: `MATCH (ip:IMASNode {id: $target_id}) MERGE (sg)-[r:MAPS_TO_IMAS]->(ip)`, gated on the same MATCH and with no returned-count check, i.e. the exact silent-no-op shape \u00a72 found. It is not routed into \u00a78's consolidated edge-writer function, so \u00a78's stated invariant is false and the error-derivation path would keep writing edges the owner does not see. The three writers are the complete census: graph_ops.py:357, models.py:580, mapping.py:2085 (grep `MERGE (sg)-[r:MAPS_TO_IMAS]` across imas_codex/ returns exactly these three; all other MAPS_TO_IMAS sites are reads or matching, imas_codex/ids/mapping.py:2041/2083-2085 aside). Note mapping.py is already in \u00a78's write paths, so the repair is to name the third call site and route it through the new function, not to widen scope.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/__init__.py:114 (status) and :180 (clear)",
+      "id": "reuse_search-1",
+      "reason": "the write path and Done-when already force the branch edits, so the plan lands the same work; only its account of the mechanism is wrong, and correcting a rationale need not change the plan.",
+      "text": "\u00a77 justifies adding one DISCOVERY_DOMAINS value \"which is how discover clear and discover status reach it\" (plan \u00a77 Surface), but there is no such dispatch: discover_status and discover_clear in imas_codex/cli/discover/__init__.py walk hardcoded per-domain branches (`if domain is None or domain == \"paths\": \u2026 \"wiki\": \u2026 \"signals\": \u2026 \"code\": \u2026 \"documents\": \u2026`), so a new enum value in imas_codex/cli/discover/common.py:30 does not reach either command. The claim reads the enum as the extension point when the extension point is the per-domain branch lists. The work is already covered \u2014 __init__.py is in \u00a77's write paths and \u00a77's Done-when requires status/clear to work, and 24 modules importing claims.py is separately guarded \u2014 so this is a rationale defect, not a scope gap.",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "d1e2db669a9d0a7d57885d79604854ef876abb2241804da55d90a5d32f024798",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 12,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T18:15:14.511369+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-06T18:15:16.862849+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T18:15:14.511369+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T18:15:16.862849+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v12.json",
+  "review_run_id": "r-20261006T180836422831-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "6a0d96e2ba430ba268b5817643d8df3aa7e6eb35",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 imas_codex/ids/candidates.py hides retrieval (\u00a74), pair judgment and routing (\u00a75) behind retrieve_candidates, judge_candidates and route, so one module owns the whole candidate stage behind three entry points rather than spreading wrappers over the same machinery.",
+    "duplicate_owner": "a finding \u2014 the plan's census of MAPS_TO_IMAS writers is short by one and its \"one module owns every SignalSource \u2192 IMASNode edge write\" claim is therefore false; details below.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75, \u00a76, \u00a77 and \u00a78 each carry a Surface/Retired paragraph naming what they merge or retire or stating why nothing can be (\u00a75 retires nothing, two reasons; \u00a76 explains why the relationship cannot merge into MAPS_TO_IMAS; \u00a77 merges seven claim helpers to three and defers two option retirements to \u00a78; \u00a78 retires --skip-metadata and --skip-errors and consolidates the edge writer, \u00a75 and \u00a76 do not touch the four families beyond the accounted seats/accessor). The one section adding a public definition without its own Surface sentence, \u00a74, does name its retirement in-text (\"the old construction and the ClusterSearcher load \u2026 are deleted here), so no section adds surface unaccounted.",
+    "reuse_search": "pass \u2014 the plan searched imas-codex and re-points at the maintained owners it will extend (hybrid_dd_search imas_codex/graph/dd_search.py:97, cluster_search dd_search.py:869, analyze_units imas_codex/ids/tools.py:168, the claims owner imas_codex/discovery/base/claims.py, and \u00a725's call_decisions) rather than rebuilding them; the only prior-art claim it gets wrong is a wording defect, below.",
+    "thin_wrapper": "pass \u2014 \u00a75 explicitly calls the \u00a725 decisions layer and \"builds no second client\"; \u00a74 composes three existing owners (vector, cluster, unit) into a Candidate shape and deletes the old construction in gather_ids_context rather than layering beside it; \u00a77 extends the existing claims.py owner instead of wrapping it."
+  },
+  "section_digests": {
+    "_document": "fe693026503f9013804697728088f9f292dafe5bcdcd0bedf13da88a2ec84229",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "993941d6f1d7107c46c8ecb5e7278987cde8c538c376c9181869ef7e2af9440c",
+    "s4": "eec5a72905e952edf7421759d0dcc70e4b6865f1f3113afe29a1ca4ca9e4a231",
+    "s5": "b39ebcbff71ed4d97b6edcbfe4add80ab8983164853fb355a8832cccadd3e23f",
+    "s6": "66529e5f7ab7a05752dc03d57d6b7d9dd9e9f37a91b4a135a76a0af90e6add30",
+    "s7": "ca13290c5cef84cc8020510a9a70707bb22a3af9007aed2e17383ae24fb210b1",
+    "s8": "c33ef07b965c4d798bbb4ea2979a56b25c02014cd7a0aa744e4c7bc54d14781a",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T18:14:47.955817+00:00"
+}

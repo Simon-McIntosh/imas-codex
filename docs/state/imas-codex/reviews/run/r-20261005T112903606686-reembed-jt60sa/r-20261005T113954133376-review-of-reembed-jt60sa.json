@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-05T11:49:47.250Z",
+  "dispatched_at": "2026-10-05T11:39:59Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "follow-on: the brief's Measure-after asks for per-category jt-60sa signal embedding coverage (count(embedding IS NOT NULL) over enriched rows) but the fragment records only global counts, so a reader cannot see the MAG/MDAC/PSRC/FAME/MMSYS breakdown the brief named."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "follow-on: the facility-scoped predicate embedded all 6298 jt-60sa signals including 5534 that were never enriched and carry only the raw EDDB catalogue description, wider than the brief's embed-failed row set; it is disclosed here and non-destructive, but the extra embeddings are not recorded as a scope decision against the brief."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112903606686-reembed-jt60sa/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest carries no baseline_suite/after_suite gate arm, so the review's added-failure count is unmeasured (None) rather than a measured zero; expected for an operational no-code node, but it leaves the node's only regression evidence as the fragment's counts."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the single commit a8a1da340 against base 8736d628d; it adds only the 65-line evidence fragment, and the graph mutation the node describes (a scoped REMOVE n.embed_failed_at over 697 signals + 157 chunks, then embed_batch_sync) is consistent with the run's own logs and with the live after-state, with no source path touched.",
+    "done_when": "the brief's measure is the before/after counts plus a vector search that returns a jt-60sa row; the fragment records the before/after table (697->0 failed signals, 764->0 enriched-unembedded, 157->0 failed chunks) and the search output, run_reembed.py logs BEFORE/REPRODUCE/RECLAIM/AFTER to logs/reembed.log:1-79, and my own re-measure reproduced every after-count (sig_embed_failed 0, sig_no_embed_but_enriched 0, chunk_analysis_src_null_or_failed 0) and the search top hit jt-60sa:general/psrc_calip at 7.94.",
+    "goal": "the node goal is to re-embed the jt-60sa FacilitySignal and CodeChunk rows left embed_failed_at by compute-node runs whose embed step addressed a loopback tunnel, through the \u00a78-repaired server resolution and with no source change; the delivered state meets it \u2014 the live graph at head carries 0 rows with embed_failed_at set, 6298/6298 signals and 201/201 /analysis/src chunks embedded, verified independently from this review's own GraphClient session, and the only landed artifact is the evidence fragment at docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html.",
+    "manifest": "read; it records status complete, the single fragment commit, the before/after counts, the positive-control and reembed logs, a checkpoint and an evidence_inputs note on the reclaim path, and it carries no baseline_suite/after_suite gate arm (an operational no-code node), so the added-failure count it can support is unmeasured rather than zero.",
+    "write_paths": "the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html and the figures directory; git show --stat a8a1da340ac321936232a536d0d42a748e87deba lists exactly one path \u2014 that fragment, 65 insertions \u2014 with no generated model and no file outside the fence."
+  },
+  "justifications": {
+    "durability": "no code changed so there is no test that reddens if this state regresses, and nothing in the suite asserts the embeddings persist \u2014 the only guard is the recorded counts in logs/after.json, which a later embedding drop would not fail.",
+    "evidence": "every after-count in docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html:37-40 reproduces live and the positive control (logs/positive_control.log) re-runs identically, but the fragment omits the per-category embedding coverage the brief's Measure-after names and the before-state rests only on the run's own logs/reembed.log:1.",
+    "fit": "the fragment uses the bare-<section> evidence idiom of its siblings (e.g. edas-scan.html), the commit a8a1da340 carries a conventional subject and a body, and neither the fragment nor the commit message carries a plan label, ticket id or author attribution.",
+    "goal_fidelity": "the deliverable \u2014 the 697 jt-60sa signals and 157 /analysis/src chunks left embed_failed_at now embedded against 98dci4-gpu-0002:18765 \u2014 is present in the live graph (0 failed, 6298 embedded, 201 chunks embedded), reproduced from logs/measure_embed_state.py's own queries (logs/after.json).",
+    "reuse": "no mechanism is forked \u2014 the node reuses the pipeline's own writer embed_batch_sync and the module's documented manual-clear remedy at imas_codex/discovery/base/embed_worker.py:141 rather than hand-writing embeddings.",
+    "scope_discipline": "git show --stat a8a1da340ac321936232a536d0d42a748e87deba touches only the declared fragment path, but the facility-scoped predicate embedded all 6298 signals \u2014 5534 that were never enriched (docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html:45) \u2014 beyond the brief's stated embed-failed row set."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 8736d628d3c96302aec7bce0c916c62d0365e774\nreviewed_head_sha: a8a1da340ac321936232a536d0d42a748e87deba\nVERDICT goal: the node goal is to re-embed the jt-60sa FacilitySignal and CodeChunk rows left embed_failed_at by compute-node runs whose embed step addressed a loopback tunnel, through the \u00a78-repaired server resolution and with no source change; the delivered state meets it \u2014 the live graph at head carries 0 rows with embed_failed_at set, 6298/6298 signals and 201/201 /analysis/src chunks embedded, verified independently from this review's own GraphClient session, and the only landed artifact is the evidence fragment at docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html.\nVERDICT done_when: the brief's measure is the before/after counts plus a vector search that returns a jt-60sa row; the fragment records the before/after table (697->0 failed signals, 764->0 enriched-unembedded, 157->0 failed chunks) and the search output, run_reembed.py logs BEFORE/REPRODUCE/RECLAIM/AFTER to logs/reembed.log:1-79, and my own re-measure reproduced every after-count (sig_embed_failed 0, sig_no_embed_but_enriched 0, chunk_analysis_src_null_or_failed 0) and the search top hit jt-60sa:general/psrc_calip at 7.94.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html and the figures directory; git show --stat a8a1da340ac321936232a536d0d42a748e87deba lists exactly one path \u2014 that fragment, 65 insertions \u2014 with no generated model and no file outside the fence.\nVERDICT manifest: read; it records status complete, the single fragment commit, the before/after counts, the positive-control and reembed logs, a checkpoint and an evidence_inputs note on the reclaim path, and it carries no baseline_suite/after_suite gate arm (an operational no-code node), so the added-failure count it can support is unmeasured rather than zero.\nVERDICT diff: read the single commit a8a1da340 against base 8736d628d; it adds only the 65-line evidence fragment, and the graph mutation the node describes (a scoped REMOVE n.embed_failed_at over 697 signals + 157 chunks, then embed_batch_sync) is consistent with the run's own logs and with the live after-state, with no source path touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the deliverable \u2014 the 697 jt-60sa signals and 157 /analysis/src chunks left embed_failed_at now embedded against 98dci4-gpu-0002:18765 \u2014 is present in the live graph (0 failed, 6298 embedded, 201 chunks embedded), reproduced from logs/measure_embed_state.py's own queries (logs/after.json).\nSCORE evidence: 17\nJUSTIFICATION evidence: every after-count in docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html:37-40 reproduces live and the positive control (logs/positive_control.log) re-runs identically, but the fragment omits the per-category embedding coverage the brief's Measure-after names and the before-state rests only on the run's own logs/reembed.log:1.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git show --stat a8a1da340ac321936232a536d0d42a748e87deba touches only the declared fragment path, but the facility-scoped predicate embedded all 6298 signals \u2014 5534 that were never enriched (docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html:45) \u2014 beyond the brief's stated embed-failed row set.\nSCORE durability: 15\nJUSTIFICATION durability: no code changed so there is no test that reddens if this state regresses, and nothing in the suite asserts the embeddings persist \u2014 the only guard is the recorded counts in logs/after.json, which a later embedding drop would not fail.\nSCORE fit: 19\nJUSTIFICATION fit: the fragment uses the bare-<section> evidence idiom of its siblings (e.g. edas-scan.html), the commit a8a1da340 carries a conventional subject and a body, and neither the fragment nor the commit message carries a plan label, ticket id or author attribution.\nSCORE reuse: 19\nJUSTIFICATION reuse: no mechanism is forked \u2014 the node reuses the pipeline's own writer embed_batch_sync and the module's documented manual-clear remedy at imas_codex/discovery/base/embed_worker.py:141 rather than hand-writing embeddings.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html:33 follow-on: the brief's Measure-after asks for per-category jt-60sa signal embedding coverage (count(embedding IS NOT NULL) over enriched rows) but the fragment records only global counts, so a reader cannot see the MAG/MDAC/PSRC/FAME/MMSYS breakdown the brief named.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/reembed-jt60sa.html:45 follow-on: the facility-scoped predicate embedded all 6298 jt-60sa signals including 5534 that were never enriched and carry only the raw EDDB catalogue description, wider than the brief's embed-failed row set; it is disclosed here and non-destructive, but the extra embeddings are not recorded as a scope decision against the brief.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112903606686-reembed-jt60sa/manifest.md:15 follow-on: the manifest carries no baseline_suite/after_suite gate arm, so the review's added-failure count is unmeasured (None) rather than a measured zero; expected for an operational no-code node, but it leaves the node's only regression evidence as the fragment's counts.\nFINAL: SOUND WITH FINDINGS. The node's claim is fully reproduced: the 697 FacilitySignal and 157 CodeChunk rows that had failed to embed against a loopback tunnel are embedded against the \u00a78-resolved server, the live graph at head carries 0 failed rows and 6298 embedded signals with 201 embedded /analysis/src chunks, the encoder positive control resolves to http://98dci4-gpu-0002:18765 (dim 256, not localhost), and search('plasma current','jt-60sa') returns jt-60sa rows. The single landed artifact is the declared evidence fragment; no source path changed and no embedding was hand-written \u2014 reclaim used the module's own documented manual-clear remedy and embeddings were written only by the pipeline's embed_batch_sync. Three follow-on documentation findings: the brief's per-category coverage is absent from the fragment, the run embedded 5534 never-enriched signals beyond the brief's row set (disclosed), and the manifest names no gate arm so the added-failure count is unmeasured. None blocks landing.",
+  "review_run_id": "r-20261005T113954133376-review-of-reembed-jt60sa",
+  "reviewed_base_sha": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "reviewed_head_sha": "a8a1da340ac321936232a536d0d42a748e87deba",
+  "reviewed_run_id": "r-20261005T112903606686-reembed-jt60sa",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T11:47:50.572754+00:00",
+  "total": 107,
+  "verdict": "SOUND WITH FINDINGS"
+}

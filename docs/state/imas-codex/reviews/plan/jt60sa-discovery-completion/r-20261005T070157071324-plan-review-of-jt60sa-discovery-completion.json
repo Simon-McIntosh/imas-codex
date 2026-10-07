@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T07:06:09.709Z",
+  "dispatched_at": "2026-10-05T07:02:00Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/settings.py:670",
+      "id": "reuse_search-1",
+      "reason": "the plan should reuse or unify on the existing resolver instead of adding a second discovery path, which is the reuse map \u00a78 skips.",
+      "text": "\u00a78 makes resolve_service_url discover the SLURM node via `discover_compute_node_local`, but `get_embed_host()` \u2192 `_embed_host_from_facility()` (settings.py:670/686) already performs that exact discovery with no `local` gate, and the plan does not cite it",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/embeddings/readiness.py:69",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must name which resolver owns the embed host and whether readiness's rewrite is retired, or the two diverge and readiness keeps masking a resolve_service_url failure.",
+      "text": "`_resolve_url_for_compute` already rewrites a localhost embed URL to the compute host via `_get_embed_host`, so the embed host has two owners and \u00a78 repairs only resolve_service_url while asserting \"not in readiness.py\" without reconciling the rewrite",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/profiles.py:313",
+      "id": "duplicate_owner-2",
+      "reason": "fixing one of two copies leaves the graph path on the old divergent logic and the false delegation stands; the plan should route profiles.py through the shared resolver in the same repair.",
+      "text": "profiles.py re-implements the SLURM discovery branch that locations.py:266 owns (its docstring claims it delegates to resolve_service_url, but it does not), and \u00a78 patches only the locations.py copy",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "66d12ae77ee266504c7ed837c26362d4bcd8b858db226d22ee4f6ac97e108d89",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 26,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:07:46.032038+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:07:47.412166+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:07:44.585764+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T070157071324-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "4b27c2f260e30f064bf5b6217eb6f876969fda95",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `resolve_remote_environment` (imas_codex/remote/environment.py:62) hides the block+data-system-override merge and module normalisation behind one function and is the single resolver its callers use, so \u00a76 lands depth rather than spread; \u00a73 extends the existing `link_chunks_to_entities` rather than adding a wrapper module.",
+    "duplicate_owner": "a finding \u2014 \u00a78 repairs only resolve_service_url while the embed host keeps a second owner (readiness.py:69 rewrites localhost from `get_embed_host`) and the graph client keeps a third copy of the same SLURM branch in profiles.py:313.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 names what the three FacilitySignal slots retire (prototype keyword parking), \u00a73 names why `fronts_database` retires nothing, and \u00a76 names what `remote_environment` retires (`data_access_patterns.setup_commands`) and adds no CLI command or refusal family.",
+    "reuse_search": "a finding \u2014 the plan cites the mechanisms it extends (\u00a73's link_chunks_to_entities/DOCUMENTS edge, \u00a76's check_all_tools/get_python_status), but \u00a78 proposes a new SLURM-discovery path in resolve_service_url without citing the working one that already exists at imas_codex/settings.py:670 (`get_embed_host` \u2192 `_embed_host_from_facility`).",
+    "thin_wrapper": "pass \u2014 the \u00a76 `remote_environment` block consolidates two surfaces into one default plus one declared override, adds no CLI command, and \u00a78's repair is stated in the owner function rather than a wrapper around it; the plan says this in its own text."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:07:11.219423+00:00"
+}

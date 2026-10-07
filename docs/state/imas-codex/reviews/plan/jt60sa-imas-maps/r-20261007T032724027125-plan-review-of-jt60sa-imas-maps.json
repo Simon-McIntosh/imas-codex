@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T03:40:29.215Z",
+  "dispatched_at": "2026-10-07T03:27:35Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/discovery/base/grouping.py:26",
+      "id": "duplicate_owner-1",
+      "reason": "the deletion is verified safe (create_signal_source has no caller in imas_codex/ or tests/) and the two MDSplus creators build SignalSource for SignalNode, not FacilitySignal, so consolidating them is a separate change the author may reasonably defer.",
+      "text": "the plan deletes the module whose docstring declares it the \"Common signal sourcing layer\" and keeps three inline SignalSource creators (imas_codex/discovery/signals/parallel.py:1617, imas_codex/discovery/mdsplus/graph_ops.py:517, imas_codex/discovery/mdsplus/graph_ops.py:589), so its own write path already grants edit access to the shared owner but the singleton pass uses the inline MERGE instead, leaving creation logic in three places",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/ids/candidates.py:404",
+      "id": "reuse_search-1",
+      "reason": "\u00a78 states its rationale (the \u00a79 owner is a retrieval-time relevance rerank, the plan's own \u00a78 names only the module at dispatch) and the author has already considered and set this aside.",
+      "text": "\u00a78 gates on gate g-jim-2 for its \"search-time Jev rerank owner\" from discovery-judgments-through-jev#s9 while the repo already owns a Jev DD-path judge in imas_codex/ids/candidates.py (judge_candidates, same_quantity at :420) that the plan's own \u00a78 text acknowledges, and the plan never says why that existing judge cannot be extended for the tool",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "fb3eff5c3143a54c68b528d58d8c508585dad2975429f25c38c515427e7606b5",
+  "plan_slug": "jt60sa-imas-maps",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "the two MDSplus creators build SignalSource for SignalNode, not FacilitySignal, so consolidating them is a separate change; grouping.py's create_signal_source has no caller, and the singleton pass extends the live FacilitySignal owner detect_signal_sources through its own MERGE rather than reviving dead code",
+      "when": "2026-10-07T03:41:18.938728+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "judge_candidates answers a per-pair same_quantity question for one source's shortlist; the search_dd_paths tool needs a retrieval-time relevance rerank of a free-text query, which discovery-judgments-through-jev section 9 owns, so section 8 reuses that owner rather than bending the pair judge into a query reranker",
+      "when": "2026-10-07T03:41:27.588763+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the two MDSplus creators build SignalSource for SignalNode, not FacilitySignal, so consolidating them is a separate change; grouping.py's create_signal_source has no caller, and the singleton pass extends the live FacilitySignal owner detect_signal_sources through its own MERGE rather than reviving dead code",
+      "when": "2026-10-07T03:41:18.938728+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "judge_candidates answers a per-pair same_quantity question for one source's shortlist; the search_dd_paths tool needs a retrieval-time relevance rerank of a free-text query, which discovery-judgments-through-jev section 9 owns, so section 8 reuses that owner rather than bending the pair judge into a query reranker",
+      "when": "2026-10-07T03:41:27.588763+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-imas-maps.v5.json",
+  "review_run_id": "r-20261007T032724027125-plan-review-of-jt60sa-imas-maps",
+  "reviewed_blob_sha": "ac54f0461ab7a5a868419300e3807294505382a6",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; \u00a73 widens the existing detect_signal_sources with one final pass and \u00a78 adds one call into an existing rerank owner, so behaviour grows behind interfaces that already exist rather than across a spread of new wrappers.",
+    "duplicate_owner": "a finding \u2014 SignalSource creation is duplicated across three inline MERGEs (parallel.py:1617, mdsplus/graph_ops.py:517, mdsplus/graph_ops.py:589) while the plan deletes the one file that declares itself the shared owner (grouping.py:26) instead of routing the new singleton pass through it.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds to any of the four families, and the one definition the plan removes (create_signal_source) is named as retired surface in \u00a73's own text.",
+    "reuse_search": "pass \u2014 before adding anything the plan cites the existing mechanisms it extends with line references (build_enrich_claimable_predicate parallel.py:317, detect_signal_sources parallel.py:1553, normalize_unit_symbol units/__init__.py:96, analyze_units ids/tools.py:167, hybrid_dd_search graph/dd_search.py:97) and reuses a gated rerank owner rather than building a second one.",
+    "thin_wrapper": "pass \u2014 the plan proposes no wrapper layer; the one surface it removes, create_signal_source (imas_codex/discovery/base/grouping.py:26), is verified to have no caller in imas_codex/ or tests/, so there is no extension it could have been folded into."
+  },
+  "section_digests": {
+    "_document": "34a6f4e9e5a87ab03c928a4c6f398704dfdca02e94f03b178043a9eaf675ff20",
+    "s1": "226d78d808808a04d5f33b9c8b9a67053eb401abb1e885cc65a939290365e2d5",
+    "s2": "28db27653f73cf6fae3826dc916f2b43cc4fdfdba2c2a295d334c0e82d5730c0",
+    "s3": "b2261daf274216f0242069156d80ccc2897d34c20494aaba52db43792ddfdfa2",
+    "s4": "59f66b3e7a8371e080e56ed3b275fb0629cf90f95884509447a9d52948243e57",
+    "s5": "65f58745c4a17441faf6c0957f35bed795691900c1a6c77cd137c57cd4c42e29",
+    "s6": "c8d788838af5f57d060c70a9a1c105fa692a0f4daf01d4b374564068bb4aa11b",
+    "s7": "97fe9c5fca60eacb3cab1a67839b4b5bf6ebeac4dc8b11ba9ef022ff6e064a2a",
+    "s8": "178803b16cc3cdb46dc10052784658b5750a08601b12efaceee738c09a14a451"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:41:17.492929+00:00"
+}

@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T19:30:13.077Z",
+  "dispatched_at": "2026-10-06T19:25:38Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/workers.py:136",
+      "id": "duplicate_owner-1",
+      "reason": "the section must extend imas_codex/discovery/base/grouping.py (or fold its three routines into the generalisation) and its census must name all three claim families, otherwise the generalisation is a parallel copy that drifts from the live `discovery/static` caller.",
+      "text": "\u00a77 generalises the mapping claim helpers into imas_codex/discovery/base/claims.py and states \"the module \u2026 already holds the claim pattern twice \u2026 does not add a third copy\", but that is a partial census and a duplicate owner: the SignalSource claim family already lives in the same package at imas_codex/discovery/base/grouping.py:92 (`claim_signal_sources`), :246 (`release_source_claims`) and :273 (`has_pending_sources`), self-described as \"the shared signal sourcing layer\" and called live by imas_codex/discovery/static/workers.py:348,415, with a third copy at imas_codex/discovery/mdsplus/graph_ops.py:703 (`claim_signal_sources`), :838 (`release_signal_source_claims`) and :855 (`has_pending_signal_source_work`) \u2014 all three use the same `ORDER BY rand()` two-step token pattern over `SignalSource`, so the section adds a fourth home rather than extending the existing owner, and the replacement targets the wrong file (workers.py does not own SignalSource claiming; grouping.py does)",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a26e7bf97616613e1b26184affaf31f458076cadc9b96ca9b4d68901a0ebc4d3",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 23,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "Partly acted: \u00a77 now names all three SignalSource claim families. The two in grouping.py and mdsplus/graph_ops.py serve the enrichment stage on claimed_at, with live callers in discovery/static; converging them is a separate change, not this plan's product. The generic routine lives in claims.py, the label-agnostic owner used by 24 modules, and is parameterised so they can adopt it.",
+      "when": "2026-10-06T19:31:01.864472+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "reason": "Partly acted: \u00a77 now names all three SignalSource claim families. The two in grouping.py and mdsplus/graph_ops.py serve the enrichment stage on claimed_at, with live callers in discovery/static; converging them is a separate change, not this plan's product. The generic routine lives in claims.py, the label-agnostic owner used by 24 modules, and is parameterised so they can adopt it.",
+      "when": "2026-10-06T19:31:01.864472+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v23.json",
+  "review_run_id": "r-20261006T192531808229-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "cc28b25f5bd27f63936ac3074a15b757ab5c5f0b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 imas_codex/ids/candidates.py hides retrieval, Jev judgment and threshold routing behind `retrieve_candidates`/`route_ids`/`judge_candidates`/`route`, one module owning the candidate stage; \u00a77 routes that stage through the shared `run_discovery_engine` rather than a parallel engine.",
+    "duplicate_owner": "a finding \u2014 \u00a77 adds the generalised claim/release/pending routines to imas_codex/discovery/base/claims.py and records the SignalSource claim pattern as held \"twice\", but a SignalSource claim family already has a shared home in the same package, and the census is incomplete.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each surface-adding section accounts for itself in its own text: \u00a74 moves the hit build and deletes the `ClusterSearcher` load, \u00a75 states why nothing in these families can retire, \u00a76 names the `mapping_target_*` fields the edge displaces, \u00a77 names the 7\u21923 helper merge and the two `imas map run` option retirements, \u00a78 names the retired options and fields.",
+    "reuse_search": "pass \u2014 the plan searched the modules it would extend and cites the mechanism each section reuses (`hybrid_dd_search` imas_codex/graph/dd_search.py:97 confirmed as the sync vector owner taking `ids_filter` and `embedding`; `SearchHit` imas_codex/search/search_strategy.py:93 confirmed to carry path/ids_name/documentation/units/data_type/physics_domain/score; `call_decisions`/`acall_decisions` imas_codex/discovery/base/llm.py:3429,3493 confirmed to exist; `run_discovery_engine` imas_codex/discovery/base/engine.py:92 and `OrphanRecoverySpec` imas_codex/discovery/base/supervision.py:875 confirmed; `fetch_cross_facility_mappings`, `DISCOVERY_DOMAINS` imas_codex/cli/discover/common.py:30, `MODEL_SECTIONS` imas_codex/settings.py:141 all confirmed). The one mechanism it proposes to extend but does not cite is the existing SignalSource claim family, reported under duplicate_owner.",
+    "thin_wrapper": "pass \u2014 both new layers are justified in their own text: \u00a74's `retrieve_candidates` adds batch embedding, cross-IDS score merge, path dedup and a `Candidate` wrapper over `hybrid_dd_search` (the raw hit carries none of those), and \u00a75's judgment calls the shared `call_decisions` layer and states it \"builds no second client\"."
+  },
+  "section_digests": {
+    "_document": "565d1ef77fac0b09b09b253045583f0cd3793602d375e00e69587a95d561648e",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "7e48c769879bd07ee017e06eef98006d78eca71736a886d65e89cf7aca6382e5",
+    "s5": "d751ea219a201127dfebaa7ca93952db05d756d86dd1cb87882c0f58d131ac99",
+    "s6": "3b75b577d3ee54c7c47f224cd0d829433962b1a86d49f9d9b17c7797d3aa95a4",
+    "s7": "7bb6df4547febc26351735c1c71143b76b47e61482ba1765b3e7d0e0c39a3944",
+    "s8": "7a67f806ab1a807b4014b41b0ace12686e2ccc3e00603749dec82749ac2ce78c",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T19:30:59.008830+00:00"
+}

@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: the reviewed manifest names only after_suite-equivalent evidence, pytest_search_llm.log at 8736d628d (EXIT=0, completed, 634 passed, 10 skipped, 0 FAILED/ERROR lines). The reviewed node is implement-role, so its manifest carries no baseline_suite arm; against that single readable head arm the added-failure count is 0 with no ids.",
+  "backend": "local",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:727 (_search_docs calls _text_search_wiki_chunks)"
+  ],
+  "completed_at": "2026-10-05T11:44:31.508Z",
+  "dispatched_at": "2026-10-05T11:38:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/wiki-chunk-fulltext-parameter.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the \u00a713 live proof's EDDB half is unmet -- live_proof.log and live_proof_base.log both print HAS_EDDB: False, so search_docs(\"flux loop\",\"jt-60sa\") returns the PSRC flux-loop signals and the BM25 wiki documentation but no EDDB manual chunks; because the marker is identical in the base and head arms this is a graph-state/ranking fact predating this node's change and outside its scope, not a regression the parameter fix introduced."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read 8736d628d..6eb8cc0e1 commit by commit (single commit 6eb8cc0e1); it renames the fulltext parameter to $search_query, narrows the bare except to (ClientError, DatabaseError), adds three wiki-chunk tests and a 46-line evidence fragment.",
+    "done_when": "the done_when is a regression test driving the wiki-chunk branch through a stub with the real query(query, **params) signature, the live proof still returning PSRC flux-loop signals, and pytest tests/search tests/llm exiting 0; tests/llm/test_search_tools.py:1972 adds the stub-driven test and the manifest records pytest tests/search tests/llm 634 passed EXIT=0 in pytest_search_llm.log, while the live proof holds for the PSRC half and the EDDB half is absent identically in both arms.",
+    "goal": "the node goal is that _text_search_wiki_chunks binds its fulltext query text to a Cypher parameter that does not collide with GraphClient.query(query, **params), narrows its swallow to the Neo4j client errors, pins the branch, and re-runs the live proof; imas_codex/llm/search_tools.py:905 now binds $search_query and imas_codex/llm/search_tools.py:914 swallows only (ClientError, DatabaseError).",
+    "manifest": "read; status complete, negative_control_log names a red run (EXIT=1, 2 failing ids), test_logs name pytest_search_llm.log and the base and head live proofs, and baseline_suite/after_suite are empty because this implement-role node ran no armed test-role arm.",
+    "write_paths": "the manifest declares imas_codex/llm/search_tools.py, tests/llm, tests/search and two docs/evidence and docs/figures paths under the plan; the diff touches imas_codex/llm/search_tools.py, tests/llm/test_search_tools.py and the evidence fragment, all inside the declared set."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_search_tools.py:1972 is driven through _FulltextSignatureClient whose query(self, query, **params) mirrors Session.run, so binding the text to query again raises TypeError and the assertion at :1976 reddens; negative_control.log confirms this by rebinding and failing 2 tests, and :2031 pins the TypeError propagation of the narrowed swallow.",
+    "evidence": "pytest_search_llm.log records 634 passed, 10 skipped, EXIT=0 at 8736d628d with rev/tree/command and module.__file__ header lines, and negative_control.log records EXIT=1 with two failing ids; docked because the reviewed manifest carries no baseline_suite/after_suite arm pair, so added-failure derivation rests on a single after gate.",
+    "fit": "imas_codex/llm/search_tools.py:905-918 reproduces the signal (:508-520) and code-chunk (:1655-1677) branches verbatim in shape, reuses the module's existing ClientError/DatabaseError import at :18, and commit 6eb8cc0e1 carries a conventional subject and a body.",
+    "goal_fidelity": "imas_codex/llm/search_tools.py:905 and :911 bind the wiki-chunk fulltext text to $search_query exactly as the signal branch at :508 and the code-chunk branch at :1655 do, so the parameter collision the goal names is removed; docked one because the done_when's EDDB half of the live proof is unmet (HAS_EDDB: False in both arms).",
+    "reuse": "the change extends the existing three-branch fulltext pattern rather than introducing a new mechanism, adding no new definition and reusing the Neo4j exception classes already imported at imas_codex/llm/search_tools.py:18.",
+    "scope_discipline": "git show --stat 6eb8cc0e1 touches exactly imas_codex/llm/search_tools.py, tests/llm/test_search_tools.py and docs/evidence/fragments/jt60sa-discovery-completion/wiki-chunk-fulltext-parameter.html, all inside the manifest's declared paths; no path outside the set."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 8736d628d3c96302aec7bce0c916c62d0365e774\nreviewed_head_sha: 6eb8cc0e139d7956bd9b60d1600fd81d524c4dd0\nVERDICT goal: the node goal is that _text_search_wiki_chunks binds its fulltext query text to a Cypher parameter that does not collide with GraphClient.query(query, **params), narrows its swallow to the Neo4j client errors, pins the branch, and re-runs the live proof; imas_codex/llm/search_tools.py:905 now binds $search_query and imas_codex/llm/search_tools.py:914 swallows only (ClientError, DatabaseError).\nVERDICT done_when: the done_when is a regression test driving the wiki-chunk branch through a stub with the real query(query, **params) signature, the live proof still returning PSRC flux-loop signals, and pytest tests/search tests/llm exiting 0; tests/llm/test_search_tools.py:1972 adds the stub-driven test and the manifest records pytest tests/search tests/llm 634 passed EXIT=0 in pytest_search_llm.log, while the live proof holds for the PSRC half and the EDDB half is absent identically in both arms.\nVERDICT write_paths: the manifest declares imas_codex/llm/search_tools.py, tests/llm, tests/search and two docs/evidence and docs/figures paths under the plan; the diff touches imas_codex/llm/search_tools.py, tests/llm/test_search_tools.py and the evidence fragment, all inside the declared set.\nVERDICT manifest: read; status complete, negative_control_log names a red run (EXIT=1, 2 failing ids), test_logs name pytest_search_llm.log and the base and head live proofs, and baseline_suite/after_suite are empty because this implement-role node ran no armed test-role arm.\nVERDICT diff: read 8736d628d..6eb8cc0e1 commit by commit (single commit 6eb8cc0e1); it renames the fulltext parameter to $search_query, narrows the bare except to (ClientError, DatabaseError), adds three wiki-chunk tests and a 46-line evidence fragment.\nCALL_SITES: imas_codex/llm/search_tools.py:727 (_search_docs calls _text_search_wiki_chunks)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/llm/search_tools.py:905 and :911 bind the wiki-chunk fulltext text to $search_query exactly as the signal branch at :508 and the code-chunk branch at :1655 do, so the parameter collision the goal names is removed; docked one because the done_when's EDDB half of the live proof is unmet (HAS_EDDB: False in both arms).\nSCORE evidence: 18\nJUSTIFICATION evidence: pytest_search_llm.log records 634 passed, 10 skipped, EXIT=0 at 8736d628d with rev/tree/command and module.__file__ header lines, and negative_control.log records EXIT=1 with two failing ids; docked because the reviewed manifest carries no baseline_suite/after_suite arm pair, so added-failure derivation rests on a single after gate.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 6eb8cc0e1 touches exactly imas_codex/llm/search_tools.py, tests/llm/test_search_tools.py and docs/evidence/fragments/jt60sa-discovery-completion/wiki-chunk-fulltext-parameter.html, all inside the manifest's declared paths; no path outside the set.\nSCORE durability: 19\nJUSTIFICATION durability: tests/llm/test_search_tools.py:1972 is driven through _FulltextSignatureClient whose query(self, query, **params) mirrors Session.run, so binding the text to query again raises TypeError and the assertion at :1976 reddens; negative_control.log confirms this by rebinding and failing 2 tests, and :2031 pins the TypeError propagation of the narrowed swallow.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/llm/search_tools.py:905-918 reproduces the signal (:508-520) and code-chunk (:1655-1677) branches verbatim in shape, reuses the module's existing ClientError/DatabaseError import at :18, and commit 6eb8cc0e1 carries a conventional subject and a body.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing three-branch fulltext pattern rather than introducing a new mechanism, adding no new definition and reusing the Neo4j exception classes already imported at imas_codex/llm/search_tools.py:18.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/wiki-chunk-fulltext-parameter.html:1 follow-on: the \u00a713 live proof's EDDB half is unmet -- live_proof.log and live_proof_base.log both print HAS_EDDB: False, so search_docs(\"flux loop\",\"jt-60sa\") returns the PSRC flux-loop signals and the BM25 wiki documentation but no EDDB manual chunks; because the marker is identical in the base and head arms this is a graph-state/ranking fact predating this node's change and outside its scope, not a regression the parameter fix introduced.\n",
+  "review_run_id": "r-20261005T113807252340-review-of-wiki-chunk-fulltext-parameter",
+  "reviewed_base_sha": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "reviewed_head_sha": "6eb8cc0e139d7956bd9b60d1600fd81d524c4dd0",
+  "reviewed_run_id": "r-20261005T112815702223-wiki-chunk-fulltext-parameter",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T11:42:54.560756+00:00",
+  "total": 115,
+  "verdict": "SOUND WITH FINDINGS"
+}
