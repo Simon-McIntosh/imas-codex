@@ -17,13 +17,13 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="jt-60sa,signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-imas-maps#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-imas-maps#s3&quot;, &quot;jt60sa-imas-maps#s9&quot;, &quot;jt60sa-discovery-completion#s26&quot;], &quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -78,16 +78,17 @@
         CodeFiles were ingested (673 chunks), 218 scored but not ingested, 761 triaged but not scored,
         and 1,170 skipped. No <code>DataReference</code> exists, so the code context is semantic only.
         The scan-worker crash on an unscored path is fixed on main (<code>5401e28d7</code>). Since the
-        relevance rework, only trial runs have run, and each was stopped deliberately. The section runs
-        once no JT-60SA CodeFile waits at <code>triaged</code> or <code>scored</code> for a decision.</li>
+        relevance rework, only trial runs have run, and each was stopped deliberately. The full pass is
+        owned by <code>jt60sa-discovery-completion</code> §26, as node <code>jt60sa-code-pass</code>,
+        which runs after the facet re-judge. This section runs once no JT-60SA CodeFile waits at
+        <code>triaged</code> or <code>scored</code> for a decision.</li>
       <li><strong>Enrichment's context is reranked by Jev.</strong> <code>_fetch_code_chunks</code>
         (<code>imas_codex/discovery/signals/parallel.py:216</code>, vector top 3 at a 0.45 floor) and
         <code>fetch_semantic_wiki_context</code>
         (<code>imas_codex/discovery/signals/scanners/wiki.py:266</code>, top 3 to 5 at a 0.35 to 0.4
         floor) take embedding order as relevance. <code>discovery-judgments-through-jev</code> §9
         measured that order at nDCG@10 0.246 against 0.509 after a Jev rerank, but §9 covers only the
-        search tools. The enrichment fetches retrieve wide and keep the Jev-ranked top, through §9's
-        rerank owner. Which plan carries that wiring is being settled with the S16 session.</li>
+        search tools. §9 of this plan wires both enrichment fetches through that rerank owner.</li>
     </ul>
     <p>
       <strong>Node</strong> <code>jt60sa-signal-enrichment</code>, role implement, 1 h. Write path:
@@ -220,6 +221,10 @@
       owner.
     </p>
 
+    <h2 id="s9">§9 — Enrichment context through the Jev rerank</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Signal enrichment grounds each description on code and wiki context fetched by embedding order alone. <code>_fetch_code_chunks</code> (<code>imas_codex/discovery/signals/parallel.py:216</code>) keeps the vector top 3 above a 0.45 floor. <code>fetch_semantic_wiki_context</code> (<code>imas_codex/discovery/signals/scanners/wiki.py:266</code>) keeps the top 3 to 5 above a 0.35 to 0.4 floor. <code>discovery-judgments-through-jev</code> §9 measured embedding order at nDCG@10 0.246 against 0.509 after a Jev relevance rerank on JT-60SA code and wiki questions, and its node <code>search-rerank</code> builds the rerank owner. This section is that owner's consumer for enrichment, as §8 is for DD-path search. It adds no second rerank.</p><p>Each fetch retrieves wide: the 30 nearest chunks above its existing floor. It passes them, with the enrichment query text it already builds (the source's group key and member names), to the generic retrieve-wide-then-rerank core in <code>imas_codex/discovery/base/judgment.py</code>. It keeps the Jev-ranked top 3 for code and the existing count for wiki. When the rerank returns no ordering, through a failed call, a spent budget or an unreachable decision service, the fetch keeps embedding order and logs why. That is the owner's own fallback, so enrichment never stops for want of a ranking. The decision spend is added to the enrichment run's cost total, so the §2 cap covers it.</p><p><strong>Node</strong> <code>enrichment-context-rerank</code>, role implement, 2 h. Write paths: <code>imas_codex/discovery/signals/parallel.py</code>, <code>imas_codex/discovery/signals/scanners/wiki.py</code> and <code>tests/discovery/test_enrichment_context_rerank.py</code>. <strong>Done when</strong> <code>uv run --no-sync pytest tests/discovery -p no:cacheprovider</code> passes, with tests showing:</p><ul><li>each fetch requests 30 candidates and calls the rerank owner with the enrichment query and each candidate's text;</li><li>it keeps the reranked top k in Jev order;</li><li>it falls back to embedding order when the owner returns no ordering;</li><li>the decision spend reaches the run's cost total.</li></ul><p>The fragment records, for 15 JT-60SA signal sources, the code and wiki chunks chosen before and after the rerank. Each chunk is labelled relevant or not to the source, with precision at the kept count for each order and the decision spend per source. Negative control: bypass the rerank, so the fetch keeps embedding order; the test that asserts Jev order must fail.</p>
+
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
 <div class="r-gate" data-id="g-jim-1" data-section="s7" data-gated-sections="s7" data-status="open" data-verdict="">
@@ -228,6 +233,10 @@
     </div>
 <div class="r-gate" data-id="g-jim-2" data-section="s8" data-gated-sections="s8" data-status="open" data-verdict="">
     <h4 class="r-gate-measure">a shared search-time Jev rerank owner exists for the code and wiki search tools</h4>
+    <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
+    </div>
+<div class="r-gate" data-id="g-jim-3" data-section="s9" data-gated-sections="s9" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the generic retrieve-wide-then-rerank core exists in imas_codex/discovery/base/judgment.py, callable without importing from imas_codex/llm/</h4>
     <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
     </div>
 </section>
