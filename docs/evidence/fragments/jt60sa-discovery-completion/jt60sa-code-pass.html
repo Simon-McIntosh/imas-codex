@@ -68,8 +68,22 @@ intr26-2                                       # exit 0</pre>
     already reset (0 files to reset) and reported <em>482 scanned, 550 scored,
     353 code ingested</em>, Cost <strong>$0.13</strong>, Time 408.2s. Both drain
     passes reported <em>0 scanned, 0 scored, 0 code ingested</em>, Cost $0.00,
-    Time 479.6s: the drain condition was reached. Total decision spend across
-    both executions: <strong>$0.24</strong>.
+    Time 479.6s: no triaged file remains. Total decision spend across
+    both executions: <strong>$0.24</strong>. The node's second completion
+    clause, that no admitted file waits for ingest, is not met. Two content-stage
+    files sit at <code>scored</code> with composites 0.81 and 0.72:
+    <code>edas_eslice2/eslice_data_area/eslice_set_fitting_func_area.py</code> in
+    v2.1.14 and in v2.1.15. Both are enriched and chunk-less, and the ingest claim
+    never takes them. A further 29 files ended at <code>failed</code>. Three ingest
+    batches, of 10, 10 and 9 files, each failed on a CodeExample uniqueness
+    violation (<em>Node already exists with label CodeExample</em>), for
+    <code>jt-60sa:eqdb_io:e548f073</code>, <code>jt-60sa:mdbget:128ebdc3</code>
+    and <code>jt-60sa:setvtcx:be55b2c6</code>. Each colliding CodeExample hangs
+    from its own file with its chunks, consistent with the two executions
+    ingesting the same file. <code>imas_codex/ingestion/pipeline.py</code> writes
+    CodeExample nodes with a plain create, so a second write of one example fails
+    its whole batch. (Coordinator addition at merge, from graph reads at
+    2026-10-07T10:45Z.)
   </p>
 
   <p id="jt60sa-code-pass-concurrency">
@@ -92,13 +106,15 @@ intr26-2                                       # exit 0</pre>
     (<code>code-ingest-threshold</code>) or its strongest facet reaches 0.85
     (<code>code-facet-admission-threshold</code>). Across the 1348 jt-60sa content
     files the facility-wide facet maxima are data_access 0.75, signal_processing
-    0.0, machine_description 0.0, imas_mapping 0.0 — every facet sits below 0.85,
-    and only data_access is ever populated. That is not a JT-60SA-local effect:
-    over all 265,515 CodeFile nodes in the four facilities the per-facet maxima
-    are data_access 1.0, signal_processing 0.0, machine_description 0.0,
-    imas_mapping 0.0. Only the data_access facet is ever scored non-zero, so the
-    0.85 branch can fire at most on the data_access facet, and the 162 jt-60sa
-    files that carry any data_access land at 0.85 or below.
+    0.0, machine_description 0.0, imas_mapping 0.0. The zero is not evidence
+    about the rule. The content stage never asked its Score questions
+    (<code>score_worker</code> built the names-arm question set; section 30), so no
+    content-stage facet carries a confidence above zero. The 162 non-zero
+    data_access values sit on files ingested before this pass. They carry no
+    distribution and were written by the earlier scorer between 00:00Z and
+    00:14Z. The branch itself is exercised by the facet-admission node's tests.
+    Its live effect waits for the content re-judge after section 30.
+    (Coordinator correction at merge; graph reads at 2026-10-07T10:30Z.)
   </p>
   <table id="jt60sa-code-pass-facet-table">
     <thead>
