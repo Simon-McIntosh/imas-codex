@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's two gate logs on disk; base arm gate.log names 1 FAILED id, head arm after.log names 0, so the added set is empty",
+  "backend": "clive",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion",
+    "imas_codex/discovery/code/workers.py:score_worker",
+    "imas_codex/discovery/code/parallel.py:get_code_discovery_stats pending_ingest",
+    "imas_codex/discovery/code/parallel.py:get_code_discovery_stats pending_embed",
+    "imas_codex/discovery/code/graph_ops.py:has_pending_code_work"
+  ],
+  "completed_at": "2026-10-07T08:44:07.395Z",
+  "dispatched_at": "2026-10-07T08:24:47Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/facet-admission.html",
+      "line": "38",
+      "severity": "follow-on",
+      "text": "follow-on: the newly-admitted column of the threshold table names files the run's own measure log does not - the 0.8 row reads 'G mgset0.f, S walldt.f' but measure_facet_admission.log and the sample's labels.json give {lmdif.f O 0.837, walldt.f O 0.810, mgset0.f G 0.880}, and rows 0.6/0.7/0.75 likewise omit lmdif.f and label the out-of-scope files as S; the new S/O counts and the 0.85 choice stay correct, so this is a transcription defect in a delivered table, not a wrong conclusion."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/facet-admission.html",
+      "line": "69",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence paragraph states every changed Cypher statement was EXPLAINed, five statements five OK, and the manifest names /home/ITER/mcintos/.cache/imas-codex-facet-admission/facet_explain.log in test_logs, but that file is absent from the cache directory, so the EXPLAIN evidence the done_when required is not recoverable."
+    },
+    {
+      "file": "tests/discovery/test_reset.py",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "follow-on: the content reset target added by this node required one more entry in the code-target enumeration test, and this file is not in the node's granted write scope, so the diff lands one line outside its fence."
+    }
+  ],
+  "gate_after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery tests/llm tests/ingestion tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.cache/imas-codex-facet-admission/after.log",
+    "revision": "55c8084de948a337971ad7ecb310c70848a2ae2c"
+  },
+  "gate_baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery tests/llm tests/ingestion tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/discovery/test_reset.py::TestResetSpec::test_get_valid_targets_code"
+    ],
+    "log_path": "/home/ITER/mcintos/.cache/imas-codex-facet-admission/gate.log",
+    "revision": "beb620e1b976788e92f9d49a2ee9ed779818e89e"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "I read the production and test commits against base beb620e1b: 499 insertions and 31 deletions across eleven files; the code change is one optional clause in the existing predicate, a Python mirror that divides each facet Score by its top level, a content reset target, and the tests that drive them, with no second predicate and no graph write.",
+    "done_when": "The done_when requires a measured threshold from the 128-file sample, a pyproject default with its accessor, the extended predicate wired through the four sites, a Python mirror from FACET_QUESTION_FIELDS and _content_top_levels, a content reset target, tests, an EXPLAIN of every changed Cypher statement, and a green gate. I read the sample measurement (measure_facet_admission.log), the green gate (after.log, 1651 passed, exit 0) and the red negative control; the EXPLAIN receipt the manifest names for the changed Cypher is not on disk (finding 2).",
+    "goal": "The node goal is that code ingest admit a content-stage file whose strongest facet clears a measured threshold; the diff delivers it - relevance_predicate in imas_codex/discovery/code/scorer.py:113 renders the optional facet OR-clause over ADMISSION_FACET_FIELDS, and every content-stage call site passes the facet parameter (imas_codex/discovery/code/workers.py:715, imas_codex/discovery/code/graph_ops.py:753, imas_codex/discovery/code/parallel.py:472 and :524).",
+    "manifest": "I read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T073217879741-facet-admission/manifest.md; it states base beb620e1b, head 55c8084de, four commits, the changed paths, the gate result and the negative control, but its baseline_suite and after_suite fields are prose rather than the JSON shape, and it names facet_explain.log, which does not exist.",
+    "write_paths": "The declared fence scope is ten source/doc paths plus docs/figures/jt60sa-discovery-completion/facet-admission; the diff base..head touches eleven files, ten of them inside the fence, plus tests/discovery/test_reset.py which is outside it (finding 3)."
+  },
+  "justifications": {
+    "durability": "the negative control reddens test_strong_facet_admits_where_composite_does_not and two sibling tests in tests/discovery/test_code_facet_admission.py when the facet branch is dropped, but test_ingest_claim_admits_a_facet_only_file relies on a stub that applies the facet rule itself rather than reading the rendered clause.",
+    "evidence": "the gate result is recorded at /home/ITER/mcintos/.cache/imas-codex-facet-admission/after.log (1651 passed, exit 0) and the negative control is red at /home/ITER/mcintos/.cache/imas-codex-facet-admission/negative_control.log, but the EXPLAIN receipt is absent and the fragment table names files the run's own measure log does not.",
+    "fit": "four conventional commits with substantive bodies, zero AI attribution lines, and mechanism names (content_admits, ADMISSION_FACET_FIELDS, get_code_facet_admission_threshold) carrying no plan or ticket identifier.",
+    "goal_fidelity": "relevance_predicate at imas_codex/discovery/code/scorer.py:113 renders the facet OR-clause and all three content-stage sites pass the parameter, so a facet-only file is claimed, counted and described; the delivered default 0.85 is outside the four named grid values but is the rule-faithful lowest threshold and is documented in the fragment.",
+    "reuse": "the change extends the existing owner relevance_predicate and derives ADMISSION_FACET_FIELDS from the existing FACET_QUESTION_FIELDS at imas_codex/discovery/code/scorer.py:126, so no capability is forked.",
+    "scope_discipline": "every changed file except tests/discovery/test_reset.py:59 is inside the granted fence; that one-line fixture edit is outside the declared write paths and was disclosed in the manifest follow_ons."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: beb620e1b976788e92f9d49a2ee9ed779818e89e\nreviewed_head_sha: 55c8084de948a337971ad7ecb310c70848a2ae2c\nVERDICT goal: The node goal is that code ingest admit a content-stage file whose strongest facet clears a measured threshold; the diff delivers it - relevance_predicate in imas_codex/discovery/code/scorer.py:113 renders the optional facet OR-clause over ADMISSION_FACET_FIELDS, and every content-stage call site passes the facet parameter (imas_codex/discovery/code/workers.py:715, imas_codex/discovery/code/graph_ops.py:753, imas_codex/discovery/code/parallel.py:472 and :524).\nVERDICT done_when: The done_when requires a measured threshold from the 128-file sample, a pyproject default with its accessor, the extended predicate wired through the four sites, a Python mirror from FACET_QUESTION_FIELDS and _content_top_levels, a content reset target, tests, an EXPLAIN of every changed Cypher statement, and a green gate. I read the sample measurement (measure_facet_admission.log), the green gate (after.log, 1651 passed, exit 0) and the red negative control; the EXPLAIN receipt the manifest names for the changed Cypher is not on disk (finding 2).\nVERDICT write_paths: The declared fence scope is ten source/doc paths plus docs/figures/jt60sa-discovery-completion/facet-admission; the diff base..head touches eleven files, ten of them inside the fence, plus tests/discovery/test_reset.py which is outside it (finding 3).\nVERDICT manifest: I read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T073217879741-facet-admission/manifest.md; it states base beb620e1b, head 55c8084de, four commits, the changed paths, the gate result and the negative control, but its baseline_suite and after_suite fields are prose rather than the JSON shape, and it names facet_explain.log, which does not exist.\nVERDICT diff: I read the production and test commits against base beb620e1b: 499 insertions and 31 deletions across eleven files; the code change is one optional clause in the existing predicate, a Python mirror that divides each facet Score by its top level, a content reset target, and the tests that drive them, with no second predicate and no graph write.\nCALL_SITES: imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion, imas_codex/discovery/code/workers.py:score_worker, imas_codex/discovery/code/parallel.py:get_code_discovery_stats pending_ingest, imas_codex/discovery/code/parallel.py:get_code_discovery_stats pending_embed, imas_codex/discovery/code/graph_ops.py:has_pending_code_work\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: relevance_predicate at imas_codex/discovery/code/scorer.py:113 renders the facet OR-clause and all three content-stage sites pass the parameter, so a facet-only file is claimed, counted and described; the delivered default 0.85 is outside the four named grid values but is the rule-faithful lowest threshold and is documented in the fragment.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate result is recorded at /home/ITER/mcintos/.cache/imas-codex-facet-admission/after.log (1651 passed, exit 0) and the negative control is red at /home/ITER/mcintos/.cache/imas-codex-facet-admission/negative_control.log, but the EXPLAIN receipt is absent and the fragment table names files the run's own measure log does not.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every changed file except tests/discovery/test_reset.py:59 is inside the granted fence; that one-line fixture edit is outside the declared write paths and was disclosed in the manifest follow_ons.\nSCORE durability: 18\nJUSTIFICATION durability: the negative control reddens test_strong_facet_admits_where_composite_does_not and two sibling tests in tests/discovery/test_code_facet_admission.py when the facet branch is dropped, but test_ingest_claim_admits_a_facet_only_file relies on a stub that applies the facet rule itself rather than reading the rendered clause.\nSCORE fit: 19\nJUSTIFICATION fit: four conventional commits with substantive bodies, zero AI attribution lines, and mechanism names (content_admits, ADMISSION_FACET_FIELDS, get_code_facet_admission_threshold) carrying no plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing owner relevance_predicate and derives ADMISSION_FACET_FIELDS from the existing FACET_QUESTION_FIELDS at imas_codex/discovery/code/scorer.py:126, so no capability is forked.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/facet-admission.html:38 follow-on: the newly-admitted column of the threshold table names files the run's own measure log does not - the 0.8 row reads 'G mgset0.f, S walldt.f' but measure_facet_admission.log and the sample's labels.json give {lmdif.f O 0.837, walldt.f O 0.810, mgset0.f G 0.880}, and rows 0.6/0.7/0.75 likewise omit lmdif.f and label the out-of-scope files as S; the new S/O counts and the 0.85 choice stay correct, so this is a transcription defect in a delivered table, not a wrong conclusion.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/facet-admission.html:69 follow-on: the evidence paragraph states every changed Cypher statement was EXPLAINed, five statements five OK, and the manifest names /home/ITER/mcintos/.cache/imas-codex-facet-admission/facet_explain.log in test_logs, but that file is absent from the cache directory, so the EXPLAIN evidence the done_when required is not recoverable.\nFINDING tests/discovery/test_reset.py:59 follow-on: the content reset target added by this node required one more entry in the code-target enumeration test, and this file is not in the node's granted write scope, so the diff lands one line outside its fence.\nFINAL: SOUND. The facet-admission change does what its goal states: a single optional clause on the existing relevance_predicate owner admits a content-stage file whose strongest facet clears the new 0.85 gate, wired through the ingest claim, both pending counts, the has-work check and the description choice, with a Python mirror that divides each facet Score by its top level exactly as the stored field is written. The gate is recorded green (1651 passed, exit 0) and the negative control genuinely reddens the facet-only admission test, so the guard fires. Three follow-on findings hold the total below the 108 acceptance floor and return the node to the coordinator: the evidence fragment's newly-admitted column names files the run's own measure log does not, the EXPLAIN receipt is named but not on disk, and a one-line test fixture edit lands outside the granted fence. None of them changes the delivered verdict that 0.85 admits mgset0.f and no out-of-scope file.\n",
+  "review_run_id": "r-20261007T082437098502-review-of-facet-admission",
+  "reviewed_base": "beb620e1b976788e92f9d49a2ee9ed779818e89e",
+  "reviewed_base_sha": "beb620e1b976788e92f9d49a2ee9ed779818e89e",
+  "reviewed_commit": "55c8084de948a337971ad7ecb310c70848a2ae2c",
+  "reviewed_head_sha": "55c8084de948a337971ad7ecb310c70848a2ae2c",
+  "reviewed_run_id": "r-20261007T073217879741-facet-admission",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T08:39:12.205022+00:00",
+  "total": 104,
+  "verdict": "SOUND"
+}
