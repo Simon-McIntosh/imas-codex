@@ -300,3 +300,81 @@ def test_live_decisions_request_is_refused():
     """
     with pytest.raises(RuntimeError, match="refusing live request"):
         llm._post_decisions({"Authorization": "Bearer x"}, {"model": MODEL}, 5.0)
+
+
+# ---------------------------------------------------------------------------
+# Score answers
+# ---------------------------------------------------------------------------
+
+SCORE_LEVELS = ["l0", "l1", "l2", "l3", "l4"]  # top level 4
+SCORE_QUESTION = {"relevance_grade": {"type": "score", "criteria": SCORE_LEVELS}}
+
+
+def _score_answer(score: float, probabilities: dict, confidence: float = 0.8) -> dict:
+    return {
+        "relevance_grade": {
+            "type": "score",
+            "score": score,
+            "probabilities": probabilities,
+            "confidence": confidence,
+        }
+    }
+
+
+def _validate_score(answers: dict) -> None:
+    llm._validate_decisions_answers(SCORE_QUESTION, answers)
+
+
+def test_score_within_top_level_is_accepted():
+    """A score at its top level with a normalised distribution is accepted."""
+    _validate_score(
+        _score_answer(4.0, dict(enumerate([0.1, 0.1, 0.2, 0.3, 0.3])))
+    )
+
+
+def test_score_above_top_level_is_refused():
+    """A score above len(criteria) - 1 is refused."""
+    with pytest.raises(llm.DecisionsValidationError, match="outside"):
+        _validate_score(_score_answer(4.5, {0: 1.0}))
+
+
+def test_score_below_zero_is_refused():
+    """A negative score is refused."""
+    with pytest.raises(llm.DecisionsValidationError, match="outside"):
+        _validate_score(_score_answer(-0.1, {0: 1.0}))
+
+
+def test_score_probabilities_spanning_all_levels_use_full_tolerance():
+    """Five nonzero probabilities summing to 0.99 are accepted.
+
+    The tolerance is 0.005 per nonzero probability, so five levels tolerate a
+    whole hundredth of rounding loss.
+    """
+    probabilities = dict.fromkeys(range(4), 0.2)
+    probabilities[4] = 0.19
+    assert sum(probabilities.values()) == pytest.approx(0.99)
+    _validate_score(_score_answer(3.0, probabilities))
+
+
+def test_score_probabilities_with_few_nonzero_reject_a_large_gap():
+    """Two nonzero probabilities summing to 0.90 are refused.
+
+    With only two nonzero probabilities the tolerance is 0.01, so a tenth
+    missing exceeds it — the tolerance scales with the number of levels that
+    carry a probability, not with the question's length.
+    """
+    probabilities = {0: 0.5, 1: 0.4}
+    with pytest.raises(llm.DecisionsValidationError, match="sum to"):
+        _validate_score(_score_answer(1.0, probabilities))
+
+
+def test_score_unknown_level_probability_is_refused():
+    """A probability assigned to a level the question never offered is refused."""
+    with pytest.raises(llm.DecisionsValidationError, match="unknown level"):
+        _validate_score(_score_answer(2.0, {0: 0.5, 5: 0.5}))
+
+
+def test_score_confidence_outside_unit_interval_is_refused():
+    """A score confidence outside [0, 1] is refused."""
+    with pytest.raises(llm.DecisionsValidationError, match="confidence"):
+        _validate_score(_score_answer(2.0, {0: 1.0}, confidence=1.5))

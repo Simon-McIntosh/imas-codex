@@ -3286,6 +3286,64 @@ def _decisions_retryable(error: BaseException) -> bool:
     return _is_retryable(str(error))
 
 
+def _validate_distribution(
+    name: str,
+    probabilities: Any,
+    offered: frozenset[str],
+    unknown_label: str,
+) -> None:
+    """Validate one probability distribution over a fixed set of levels.
+
+    Every key must name an offered level and every probability must lie in
+    [0, 1]. The total must be 1 within the model's rounding slack. The model
+    rounds each probability to two decimals, so only the levels that carry a
+    nonzero probability can lose rounding error: a probability of exactly zero
+    is exact, and charging it slack would inflate the bound without cause. The
+    tolerance is therefore 0.005 per nonzero probability, plus 1e-9 for float
+    accumulation error.
+    """
+    if not isinstance(probabilities, Mapping):
+        raise DecisionsValidationError(f"decision {name!r} carried no probabilities")
+    total = 0.0
+    nonzero = 0
+    for level, probability in probabilities.items():
+        if str(level) not in offered:
+            raise DecisionsValidationError(
+                f"decision {name!r} carried a probability for unknown "
+                f"{unknown_label} {level!r}"
+            )
+        if (
+            isinstance(probability, bool)
+            or not isinstance(probability, int | float)
+            or not 0.0 <= float(probability) <= 1.0
+        ):
+            raise DecisionsValidationError(
+                f"decision {name!r} probability {probability!r} lies outside [0, 1]"
+            )
+        value = float(probability)
+        total += value
+        if value != 0.0:
+            nonzero += 1
+    tolerance = 0.005 * nonzero + 1e-9
+    if abs(total - 1.0) > tolerance:
+        raise DecisionsValidationError(
+            f"decision {name!r} probabilities sum to {total:.4f}, not 1"
+        )
+
+
+def _validate_confidence(name: str, answer: Mapping[str, Any]) -> None:
+    """Refuse a confidence that lies outside [0, 1]."""
+    confidence = answer.get("confidence")
+    if (
+        isinstance(confidence, bool)
+        or not isinstance(confidence, int | float)
+        or not 0.0 <= float(confidence) <= 1.0
+    ):
+        raise DecisionsValidationError(
+            f"decision {name!r} confidence {confidence!r} lies outside [0, 1]"
+        )
+
+
 def _validate_decisions_answers(
     questions: Mapping[str, Any], answers: Mapping[str, Any]
 ) -> None:
@@ -3293,10 +3351,13 @@ def _validate_decisions_answers(
 
     ``noul`` probabilities must lie in [0, 1]; a ``choice`` selection must be
     one of the offered criteria, its probability distribution must cover only
-    those criteria and sum to 1 within the rounding slack of its offered
-    criteria (0.005 per criterion, since the model rounds each probability to
-    two decimals, plus 1e-9 for float error), and any confidence must lie in
-    [0, 1]. Any violation raises :class:`DecisionsValidationError`.
+    those criteria and sum to 1 within the rounding slack of its nonzero
+    criteria (0.005 per nonzero probability, since the model rounds each
+    probability to two decimals, plus 1e-9 for float error); a ``score``
+    selection must name a level the question offered, its own value must lie
+    within the level range and its distribution must satisfy the same rule;
+    and any confidence must lie in [0, 1]. Any violation raises
+    :class:`DecisionsValidationError`.
     """
     for name, question in questions.items():
         answer = answers.get(name)
@@ -3321,47 +3382,34 @@ def _validate_decisions_answers(
                     f"decision {name!r} choice {choice!r} is not one of the "
                     f"offered criteria {sorted(criteria)}"
                 )
-            probabilities = answer.get("probabilities")
-            if not isinstance(probabilities, Mapping):
-                raise DecisionsValidationError(
-                    f"decision {name!r} choice carried no probabilities"
-                )
-            total = 0.0
-            for criterion, probability in probabilities.items():
-                if criterion not in criteria:
-                    raise DecisionsValidationError(
-                        f"decision {name!r} carried a probability for unknown "
-                        f"criterion {criterion!r}"
-                    )
-                if (
-                    isinstance(probability, bool)
-                    or not isinstance(probability, int | float)
-                    or not 0.0 <= float(probability) <= 1.0
-                ):
-                    raise DecisionsValidationError(
-                        f"decision {name!r} probability {probability!r} lies "
-                        "outside [0, 1]"
-                    )
-                total += float(probability)
-            # The model rounds each offered probability to two decimals, so a
-            # distribution over N criteria may legitimately sum to 1 +/- N/200;
-            # the 1e-9 absorbs float accumulation error.
-            tolerance = 0.005 * len(criteria) + 1e-9
-            if abs(total - 1.0) > tolerance:
-                raise DecisionsValidationError(
-                    f"decision {name!r} probabilities sum to {total:.4f}, not 1"
-                )
+            _validate_distribution(
+                name,
+                answer.get("probabilities"),
+                frozenset(str(c) for c in criteria),
+                "criterion",
+            )
             if "confidence" in answer:
-                confidence = answer["confidence"]
-                if (
-                    isinstance(confidence, bool)
-                    or not isinstance(confidence, int | float)
-                    or not 0.0 <= float(confidence) <= 1.0
-                ):
-                    raise DecisionsValidationError(
-                        f"decision {name!r} confidence {confidence!r} lies "
-                        "outside [0, 1]"
-                    )
+                _validate_confidence(name, answer)
+        elif question_type == "score":
+            levels = question.get("criteria") or []
+            top_level = len(levels) - 1
+            score = answer.get("score")
+            if (
+                isinstance(score, bool)
+                or not isinstance(score, int | float)
+                or not 0.0 <= float(score) <= float(top_level)
+            ):
+                raise DecisionsValidationError(
+                    f"decision {name!r} score {score!r} lies outside [0, {top_level}]"
+                )
+            _validate_distribution(
+                name,
+                answer.get("probabilities"),
+                frozenset(str(i) for i in range(len(levels))),
+                "level",
+            )
+            if "confidence" in answer:
+                _validate_confidence(name, answer)
         else:
             raise DecisionsValidationError(
                 f"decision {name!r} declares unknown type {question_type!r}"
@@ -3539,4 +3587,3 @@ async def acall_decisions(
             raise
     assert last_error is not None  # unreachable: max_retries >= 1
     raise last_error
-
