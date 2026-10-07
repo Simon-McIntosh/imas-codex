@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest supplied no baseline_suite/after_suite arms (both empty), so the base/head pair is derived from the reviewed run's own gate logs. Base arm counts-before.log (revision 81c602aaf): FacilitySignal discovered 3,439 / checked 2,859 / failed 0, SignalSource not_enriched 1,296. Head arm counts-after8.log (revision 91020cd5b): discovered 0 / checked 6,295 / failed 0, not_enriched 0. Both arms report failed 0 and neither carries a failure id, so head-minus-base is empty: added_failure_count 0, added_failure_ids []. The deltas (discovered 3,439->0, not_enriched 1,296->0) are progress toward the done-when, not failures. The node changed no source or test path (the diff is one evidence fragment), so it cannot introduce a test failure.",
+  "after_suite": {
+    "command": "census read of JT-60SA SignalSource/FacilitySignal state, recorded as counts-after8.log (the reviewed node's gate is the enrich-only discover command and the census read, not a pytest suite; the reviewed manifest declares after_suite empty)",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T122816180096-jt60sa-signal-enrichment-remainder/counts-after8.log",
+    "revision": "91020cd5b77baea2599269d4ec102f11c5e19e4b"
+  },
+  "baseline_suite": {
+    "command": "census read of JT-60SA SignalSource/FacilitySignal state, recorded as counts-before.log (the reviewed node's gate is the enrich-only discover command and the census read, not a pytest suite; the reviewed manifest declares baseline_suite empty)",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T122816180096-jt60sa-signal-enrichment-remainder/counts-before.log",
+    "revision": "81c602aafdd2d3b6f788eda6942cd03ad3eec0fa"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T13:36:55.602Z",
+  "dispatched_at": "2026-10-07T13:24:18Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html",
+      "line": "56",
+      "severity": "follow-on",
+      "text": "follow-on (record completeness): the fragment's per-pass Jev rerank cost column does not sum to its own total. The eight cost cells read 0.08, 0.08, 0.08, 0.08, 0.07, 0.00, 0.00, 0.04 (reproduced from the run's own pass logs, identical to those the fragment tabulates), which sum to 0.43, while the total row and the cost prose state USD 0.51 against the cap \u2014 a 0.08 discrepancy. The manifest's artifacts field repeats the same inconsistency: 'USD 0.51 (passes: .08/.08/.08/.08/.07/.00/.00/.04)'. By contrast the companion fragment's four rows (0.07/0.09/0.08/0.07) sum exactly to its stated 0.31, so a rows-to-total sum is the established convention. Consequently the cross-run figure 'USD 0.82 both runs' (0.31 prior + 0.51 remainder) inherits the same 0.08; a correct sum would read 0.74. No pass was omitted from the table (exactly eight pass logs exist) and the only extra run named \u2014 the final confirmation pass \u2014 cost 0.00, so the 0.08 is not an unlisted pass. The done-when is unaffected (the spend stays far under both caps); what fails is the fragment's internal reconcilability."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "follow-on (evidence record): the fragment and manifest both cite a source-level context-quality distribution \u2014 'sources (via representative) high 1,910 / medium 339' \u2014 that no retained log supports. context-quality.log holds only context_quality.py's output, whose sources field reads cq '<none>' for all 2,249 enriched sources (the Graph property sg.context_quality is null); the figure is produced by the separate source_cq.py, whose output was never captured to a log. I reproduced the figure independently against the live graph (high 1,910 / medium 339; sum 2,249 = the SignalSource total, the positive control), so the claim is correct \u2014 the defect is that the run's own retained evidence does not carry it, and a re-reader of the run directory alone cannot verify it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "not applicable \u2014 the node changes no source. It exercised imas_codex/discovery/signals/parallel.py build_enrich_claimable_predicate and propagate_source_enrichment, both unchanged by this node, so there is no call site the delta added.",
+    "diff": "read the single gained commit 91020cd5b against base 81c602aaf: it adds docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html (+89), the before/after counts table, the per-pass table, and the cost/context/completion prose. No other path (source, test, plan) is touched.",
+    "done_when": "The operational done-when is met: all 2,249 SignalSources enriched, discovered 0, failed 0, claimable 0. The fragment records the spend against the cap and the no-context count. Per-pass the CLI reported '0 scanned, N enriched, M checked / Cost: $X / Time: Ts' for all eight passes, and the run stopped only when passes 6-7 found nothing claimable and pass 8 released the 300s-TTL stale claims its predecessor left. Residual: the recorded per-pass cost column sums to 0.43 against a stated 0.51.",
+    "goal": "\u00a72 asks that no standalone or representative JT-60SA signal remain discovered (except failures listed with their error), every SignalSource read enriched, and the fragment give the counts before and after, the spend against the cap, and the count enriched with no retrieved context. Both state targets are met on the arms the node itself recorded: counts-before.log {sources enriched 953/2249, not_enriched 1296; signals discovered 3439, checked 2859, failed 0; claimable 1256} to counts-after8.log {sources enriched 2249/2249, not_enriched 0; signals discovered 0, checked 6295, failed 0; claimable 0}. There is no failure to list, and passes 6-7 finding nothing claimable plus pass 8 draining the stale-claim remainder show the run reached the fixed point.",
+    "manifest": "read; status complete; commits 91020cd5b; changed_paths matches the diff. baseline_suite and after_suite are empty (the node records no pytest arms, consistent with an operational node whose gate is the discover command and the census read); the gate is recorded in tests (the literal discover command plus a census verify) and in the census arms on disk. negative_control_log is 'none: no test file in this node's write scope'. retry_failures lists three, each attributed scaffolding (bare ssh, a facility-name typo) or transient (LLM heartbeat), none reaching code under test. No unsubstituted placeholder in the tests field.",
+    "write_paths": "git diff 81c602aaf..91020cd5b touches exactly docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html (1 file, 89 insertions). No plan edit, no source or test change, no graph write beyond the enrichment status the done-when required."
+  },
+  "justifications": {
+    "durability": "The deliverable is a committed evidence fragment (single commit 91020cd5b, conventional subject, non-empty body, no AI trailer), and the raw census arms, eight pass logs and context-quality.log are retained on disk under the run directory, so the run is re-readable. Weakness: 91020cd5b is not yet an ancestor of origin/main (the reviewed worktree is detached; the merge is outstanding), so the fragment is not yet on the primary branch.",
+    "evidence": "Full reproduction from the run's own arms. Every pass log matches the fragment table on enriched/checked/cost/time (pass1 805/507/$0.08/507.2s through pass8 109/80/$0.04/99.0s). context-quality.log reproduces the signal-level distribution high 5,305 / medium 993. I independently reran the source-level representative-signal context_quality query against the live graph: high 1,910 / medium 339, summing to 2,249 = the source total (the positive control), so the fragment's figure is correct even though no run log retained it. Weaknesses: (a) that 1,910/339 figure has no retained arm \u2014 source_cq.py's output was never captured, and context-quality.log holds only context_quality.py's output, whose sources field reads cq '<none>' for all 2,249; (b) the per-pass cost total disagrees with its own rows by 0.08; (c) the fragment's 'every enriched signal carries high (5,305)/medium (993)' actually describes the enriched+checked population of 6,298 signals, not the 3 enriched signals; (d) the reviewed manifest records no baseline_suite or after_suite, so added-failure is derived from the census arms rather than a declared pair.",
+    "fit": "The run introduces no source symbols or filenames. Its one artifact is an evidence fragment under the plan's own docs/evidence/fragments/jt60sa-imas-maps/ directory, where the \u00a72 reference is the document's legitimate subject rather than a label, and the prose names the mechanism (the claim TTL, the preflight release, propagate_source_enrichment) rather than a ticket. The filename jt60sa-signal-enrichment-remainder.html carries no plan or version label.",
+    "goal_fidelity": "\u00a72's done-when is met on the run's own census arms. counts-before.log reads SignalSource enriched 953 of 2,249 (not_enriched 1,296), FacilitySignal discovered 3,439 / checked 2,859 / failed 0, claimable 1,256; counts-after8.log reads SignalSource enriched 2,249 of 2,249 (not_enriched 0), FacilitySignal discovered 0 / checked 6,295 / failed 0, claimable 0. So no standalone or representative JT-60SA signal remains discovered (with no failure to list with an error), and every SignalSource reads enriched \u2014 both done-when targets. The fragment gives the counts before and after, records the spend against the cap and states the count enriched with no retrieved context. Residual: the fragment's per-pass Jev rerank column sums to 0.43 while its stated total is 0.51.",
+    "reuse": "The eight passes reuse the existing `imas-codex discover signals jt-60sa --enrich-only --time 8 --cost-limit 10` path end to end; the node added no command, no pipeline and no source code. The run-directory helper scripts (counts.py, context_quality.py, source_cq.py, residual.py) are throwaway evidence tooling, not committed source, and the fragment reuses the established census/run-log evidence shape.",
+    "scope_discipline": "git diff 81c602aaf..91020cd5b touches exactly one path, docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html (89 insertions, 0 deletions), inside the node's declared write path docs/evidence/fragments/jt60sa-imas-maps/. No source, test, plan, sprint or graph state is edited by the commit; the operational run wrote only graph status, which the done-when required. The reviewed worktree is clean at 91020cd5b."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a72 done-when is met on the run's own census arms. counts-before.log: SignalSource enriched 953/2,249 (not_enriched 1,296); FacilitySignal discovered 3,439, checked 2,859, failed 0; claimable 1,256. counts-after8.log: SignalSource enriched 2,249/2,249 (not_enriched 0); discovered 0, checked 6,295, failed 0; claimable 0. No representative signal remains discovered and every SignalSource reads enriched; no failure to list. Residual: the fragment's per-pass Jev rerank column sums to 0.43 while its stated total is 0.51.\nVERDICT evidence: full reproduction. All eight pass logs match the fragment table on enriched/checked/cost/time (pass1 805/507/$0.08/507.2s ... pass8 109/80/$0.04/99.0s). context-quality.log reproduces signals high 5,305 / medium 993. I independently reran the representative-signal context_quality query against the live graph: high 1,910 / medium 339, sum 2,249 = source total (positive control) \u2014 the fragment's figure is correct though no run log retained it. Weaknesses: (a) source-level 1,910/339 has no retained arm (source_cq.py output uncaptured); (b) per-pass cost total off by 0.08; (c) 'every enriched signal carries high (5,305)/medium (993)' describes the enriched+checked population (6,298), not the 3 enriched signals; (d) manifest baseline_suite/after_suite empty.\nVERDICT scope_discipline: diff 81c602aaf..91020cd5b is exactly docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html (+89/0); no source, test, plan or sprint edit; reviewed worktree clean at 91020cd5b.\nVERDICT durability: deliverable committed 91020cd5b with a conventional subject and non-empty body and no AI trailer; raw census, the eight pass logs and the context-quality logs are retained on disk under the run dir; head is not yet an ancestor of origin/main (merge outstanding).\nVERDICT fit: one evidence fragment under the plan's own fragments directory; the \u00a72 reference is the document's legitimate subject; no new source symbols or filenames; the filename carries no plan or version label.\nVERDICT reuse: the eight passes reuse the existing `imas-codex discover signals jt-60sa --enrich-only` path; no new command, pipeline or source code is added; the run-dir helper scripts are evidence tooling, not committed source.\nVERDICT diff: read the single gained commit 91020cd5b against base 81c602aaf: docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html +89/-0, inside the declared write path.\nVERDICT manifest: read; status complete; base 81c602aaf, head 91020cd5b; changed_paths matches the diff; baseline_suite and after_suite empty (operational node); negative_control_log 'none: no test file in this node's write scope'; tests records the literal discover command and a census verify; retry_failures three, all attributed scaffolding/transient.\nCALL_SITES: not applicable \u2014 the node changes no source; it exercised build_enrich_claimable_predicate and propagate_source_enrichment, both unchanged.\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 19\nSCORE reuse: 19",
+  "review_run_id": "r-20261007T132409054748-review-of-jt60sa-signal-enrichment-remainder",
+  "reviewed_base": "81c602aafdd2d3b6f788eda6942cd03ad3eec0fa",
+  "reviewed_base_sha": "81c602aafdd2d3b6f788eda6942cd03ad3eec0fa",
+  "reviewed_commit": "91020cd5b77baea2599269d4ec102f11c5e19e4b",
+  "reviewed_head_sha": "91020cd5b77baea2599269d4ec102f11c5e19e4b",
+  "reviewed_run_id": "r-20261007T122816180096-jt60sa-signal-enrichment-remainder",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T13:32:50+00:00",
+  "total": 109
+}
