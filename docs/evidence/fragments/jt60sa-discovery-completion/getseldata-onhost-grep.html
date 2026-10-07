@@ -1,0 +1,81 @@
+<section>
+  <h2 id="getseldata-onhost-grep">No getseldata file, graph-held or missed, names JLOOP JTPRB or JNPRB</h2>
+  <p id="getseldata-onhost-grep-question">
+    §14 seeds <code>/analysis/src/getseldata_v4.2</code> on the premise that its
+    routines read EDDB channels by name or PID into SELENE's magnetics common
+    blocks, including the flux-loop index <code>JLOOP</code> and the tangential
+    and normal probe indices <code>JTPRB</code> and <code>JNPRB</code>. Read on
+    the host <code>nakasvr26</code> (via the <code>jt-60sa</code> hop) on
+    2026-10-07: every file under that tree was enumerated and grepped
+    case-insensitively for the three tokens. <strong>No file under
+    <code>getseldata_v4.2</code> mentions any of the three arrays</strong>, so
+    the premise that this tree carries the flux-loop / pickup-coil channel
+    mapping is not supported by its source.
+  </p>
+  <table id="getseldata-onhost-grep-counts">
+    <caption>Host files under <code>/analysis/src/getseldata_v4.2</code> against graph CodeFile rows at jt-60sa</caption>
+    <thead>
+      <tr><th>measure</th><th>value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>files on the host (<code>find -type f</code>, all extensions)</td><td>93</td></tr>
+      <tr><td><code>CodeFile</code> rows at jt-60sa under the prefix</td><td>15</td></tr>
+      <tr><td>files on the host the graph does not hold</td><td>78</td></tr>
+      <tr><td>graph rows with no host file</td><td>0</td></tr>
+      <tr><td>host files mentioning <code>JLOOP</code>, <code>JTPRB</code> or <code>JNPRB</code></td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="getseldata-onhost-grep-hostonly">
+    The 78 files only on the host are build products and test fixtures: object
+    files and archives (<code>geteddb.o</code>, <code>libeddbaccess.a</code>,
+    six <code>fort.96.*</code> groups), the executables
+    (<code>eddbaccess.ex</code>, <code>getseldata.ex</code>), the <code>*.i</code>
+    interface stubs, test inputs and fixtures (<code>geo.in</code>,
+    <code>inpfile</code>, <code>PRIPDREV.txt</code>, <code>CHK.FBI</code>), the
+    <code>Makefile</code>s, and one dated source backup
+    <code>outeddb.c.20230607_0</code>. None of them mentions any of the three
+    arrays. The graph-held 15 include the C sources and the <code>eddbaccess.h</code>
+    header that carries the EDDB API (<code>eddbreadTime</code> and the other
+    <code>eddb*</code> entry points); the three arrays do not appear there either.
+  </p>
+  <p id="getseldata-onhost-grep-negative-control">
+    Negative control: the same host grep, run unchanged for the token
+    <code>eddbreadTime</code> which ten graph chunks under getseldata carry, finds
+    it in <code>geteddb.c</code> (lines 127, 132, 188, 192, 213, 217, 269, 273,
+    325, 329, 381, 385, 437, 441, 494, 498) and <code>geteddbt.c</code> and the
+    declaration <code>extern int eddbreadTime(...)</code> at
+    <code>eddbaccess.h:120</code>. A known-present token is therefore found by the
+    procedure, so the zero for the three arrays is a real absence and not a broken
+    grep.
+  </p>
+  <p id="getseldata-onhost-grep-where">
+    Where the arrays are actually mentioned. A read of the graph shows 13 chunks
+    at jt-60sa whose text carries the arrays, none of them under
+    <code>getseldata_v4.2</code>: they are in SELENE's own routines under
+    <code>/analysis/src/SAselene_v2.0_forPSRC</code> (<code>eqadj.f</code>,
+    <code>eqouta.f</code>, <code>mgfild.f</code>, <code>fercor.f</code>,
+    <code>eqvacu.f</code>, <code>nllsqf.f</code>, <code>eqvacu3.f</code>), in
+    <code>/analysis/src/SAeqread/eqvacu.f</code>, and in the EDAS reader
+    <code>/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/default/Eqread.py</code>.
+    The filler lines are the index assignments in <code>eqvacu.f</code>
+    (<code>76   JLOOP(I)=K</code>) and the probe assignments in
+    <code>mgfild.f</code> (<code>I=JTPRB(K)</code>, <code>I=JNPRB(K)</code>), with
+    <code>edas2</code>'s <code>Eqread.py</code> initialising <code>f_vars.JLOOP</code>,
+    <code>f_vars.JTPRB</code> and <code>f_vars.JNPRB</code> to zero. So the
+    flux-loop and probe indices are filled by SELENE and read by EDAS, both of
+    which the graph already holds; <strong>no file outside the graph fills the
+    arrays</strong>.
+  </p>
+  <p id="getseldata-onhost-grep-method">
+    Positive control: <code>ssh -o BatchMode=yes jt-60sa hostname</code> returned
+    <code>intr26-2</code> through the <code>/tmp/sshwrap/ssh</code> wrapper
+    <code>exec /usr/bin/ssh -F "$HOME/.ssh/config" "$@"</code> before any remote
+    call. The host read is read-only (<code>ls -ld</code>, <code>find</code>,
+    <code>grep</code>); no graph write, no code change, no discover run. Raw
+    output, the wrapper, the listing/grep scripts and the graph read scripts are
+    under <code>~/.config/reckon/crew/reports/imas-codex/getseldata-onhost-grep/</code>
+    (<code>host_listing.txt</code>, <code>host_grep.txt</code>,
+    <code>host_grep_control.txt</code>, <code>graph_query.txt</code>,
+    <code>graph_chunk_tokens.txt</code>).
+  </p>
+</section>
