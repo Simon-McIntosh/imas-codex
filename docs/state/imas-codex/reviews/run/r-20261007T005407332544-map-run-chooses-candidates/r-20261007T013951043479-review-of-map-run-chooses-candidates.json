@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records baseline_suite: null and after_suite: null, so no reviewed arm pair was available; its own gate logs (baseline.log 1794 passed, gate.log 1804 passed) are the reviewed run's baseline and after arms. This review reproduced both arms itself in scratch trees: base 7f1cab2257855be52dab947583a35a7be850f9df -> 1794 passed, 5 skipped, 2 deselected, exit 0 (review_base_arm.log); head ddd9571c7f6659f43ab642fedd836367830942a0 -> 1804 passed, 5 skipped, 2 deselected, exit 0 (review_head_arm.log). Neither arm reports a failing id, so added_failure_count is 0 with no ids.",
+  "backend": "clive",
+  "base_log_revision": "7f1cab2257855be52dab947583a35a7be850f9df",
+  "call_site_count": 4,
+  "call_sites": [
+    "choose_targets/achoose_targets are called only from assign_worker (workers.py:646).",
+    "escalated_shortlist is called from workers.py:633 and the new test file.",
+    "read_candidates and select_candidates, from graph_ops, are called from workers.py:106 and workers.py:664.",
+    "assign_targets/aassign_targets have zero remaining callers after this change."
+  ],
+  "completed_at": "2026-10-07T02:07:23.887Z",
+  "dispatched_at": "2026-10-07T01:40:02Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/progress.py",
+      "line": "256",
+      "severity": "follow-on",
+      "text": "(follow-on) the SECTIONS row reads its cost from PipelineCost.steps under the key \"assign_targets\", but the renamed step records under \"choose_targets\" (choose_targets/achoose_targets use step_name=\"choose_targets\"; PipelineCost.add keys steps by step name, mapping.py:88). The mapping-run progress display therefore shows an empty cost for the assign stage after this change. progress.py is outside this node's declared write paths, so the repair belongs to a follow-on."
+    },
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "2109",
+      "severity": "follow-on",
+      "text": "(nit) MappingResult is now dead: its only constructor generate_mapping was deleted in this change and no module imports it (searching imas_codex/ and tests/ returns nothing beyond ValidatedMappingResult). imas_codex/ids/models.py:4 still names the removed step ('assign_targets - TargetAssignmentBatch: assign signal sources to IDS target paths'). Both are in-scope files, so the class and the docstring line are the node's to clear."
+    },
+    {
+      "file": "tests/ids/test_escalated_target_choice.py",
+      "line": "230",
+      "severity": "follow-on",
+      "text": "(evidence) TestNoCandidateLogged::test_no_candidate_source_is_skipped_with_evidence does not exercise candidate_worker: it calls logging.getLogger(...).info(...) with the production format string and asserts the message it just logged (lines 250-258). The plan done-when item 'a no_candidate source is skipped and its best path and probability are logged' is therefore unproven by the gate, though the production block at workers.py:1198-1212 is correct by inspection."
+    },
+    {
+      "file": "imas_codex/ids/workers.py",
+      "line": "745",
+      "severity": "follow-on",
+      "text": "(sequencing) assign_worker no longer writes state.assignments, but the map stage still reads it (workers.py:745 and :868 -> state.assignments.get(ids_name)), now always None. Merged alone this node leaves imas map run claiming sources and mapping nothing. The plan anticipates this: the fourth node, map-run-maps-each-home, is dispatched on this node's unmerged head and builds each TargetAssignment from the selected edges. It is a merge-ordering constraint, not a defect - map-run-chooses-candidates must not be promoted without map-run-maps-each-home."
+    },
+    {
+      "file": "imas_codex/ids/models.py",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "(nit) TargetChoice.disposition is documented 'set only when paths is empty', and _validate_choice enforces the converse (empty paths with no disposition is refused), but a non-empty paths list carrying a disposition is accepted and persisted. The schema is looser than the docstring; harmless but worth tightening if the field is ever read."
+    }
+  ],
+  "head_log_revision": "ddd9571c7f6659f43ab642fedd836367830942a0",
+  "item_aggregate": 8,
+  "item_verdicts": {
+    "bridge_escalated_only": "TestSemanticBridgeNarrowed asserts compute_semantic_matches runs only for escalated sources.",
+    "escalated_claim_and_select": "claim_sources_for_escalated claims candidate_route='escalated' AND mapping_disposition IS NULL; TestDecidedSourceNotReclaimed asserts the predicate; TestAssignWorkerSelects asserts the pick reaches select_candidates with source id and paths.",
+    "gate": "reproduced by this review: base 7f1cab2257855be52dab947583a35a7be850f9df 1794 passed exit 0; head ddd9571c7f6659f43ab642fedd836367830942a0 1804 passed exit 0; zero added failures.",
+    "no_candidate_logged": "production block present at workers.py:1198-1212; the accompanying test is tautological (see finding 3), so this item is unproven by the gate.",
+    "outside_path_refused": "TestChoiceRefusal::test_choice_refuses_path_outside_shortlist raises CandidateWriteError; the refusal was reproduced first-hand by this review: in a scratch copy of the head tree the outside-refusal raise in _validate_choice was replaced by pass and the test then fails (1 failed, 2 passed, EXIT=1) while the unmutated head passes (review_negative_control.log). The reviewed run declared the same negative control.",
+    "shortlist_prompt": "TestShortlistPrompt + TestEscalatedShortlist: prompt carries only shortlist paths, marks cross-IDS siblings, carries every sibling regardless of rank.",
+    "two_paths_two_idss": "TestAssignWorkerSelects::test_two_paths_in_two_idss_marked_both passes both listed paths to select_candidates.",
+    "write_paths": "all nine touched files are inside the node's declared write paths; test_prompt_rendering.py was declared but not needed and left untouched."
+  },
+  "justifications": {
+    "durability": "The change is committed across three conventional commits with mechanism bodies and no AI attribution or plan identifier. The outside-shortlist guard lives once in _validate_choice and fires before persist. Held below full because the rename introduces an out-of-scope stale cost key (finding 1) and because the 'none' verdict is written into mapping_status, a field whose value range excludes a disposition; that inconsistency is knowingly deferred to node map-run-maps-each-home, so it only holds once that node lands.",
+    "evidence": "The gate and the negative control hold at the reviewed head and were reproduced independently here (1794 then 1804, both exit 0, zero added failures). The core behaviours have targeted tests, including a genuinely behavioural refusal test. Held below full because the no_candidate done-when test is tautological (finding 3), and the 'route becomes selected' assertion runs against a mocked select_candidates, so the graph-level effect is only exercised by graph-marked tests outside the default gate.",
+    "fit": "The change composes cleanly with the closed section 6/7 work: it reuses read_candidates/select_candidates, PipelineCost, PipelinePhase, claim_batch and the MappingDisposition vocabulary, and introduces only the TargetChoice response model and a small set of private helpers. The prompt rewrite stays in place and its rendering tests were updated in step.",
+    "goal_fidelity": "Every done-when sub-item and every section-8 bullet owned by this node is implemented: escalated claim, shortlist from the source's own candidates with cross-IDS siblings, the reasoning seat constrained to the list, refusal of an outside path before persist, the 'none' verdict persisted so the seat is not paid twice, no_candidate logging, and the semantic bridge narrowed to escalated sources. Behaviours the plan explicitly assigns to the neighbouring nodes (retired fields, target-type-from-DD, rebuilding state.assignments) are correctly left to them.",
+    "reuse": "Strong reuse of existing infrastructure with no duplicated reader or writer: the candidate read and the selected-mark both go through graph_ops, the claim predicate stays in workers.py beside its peers, and the shortlist helpers are private to mapping.py. The only drift is the progress-display cost key, which is a reuse miss rather than new duplication.",
+    "scope_discipline": "All nine changed files are inside the declared write paths and no declared path was edited out of turn; test_prompt_rendering.py was declared but not needed and left alone, which is correct. Held slightly below full because deleting generate_mapping left the in-scope MappingResult class and the models.py module docstring naming a deleted step (finding 2)."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of run r-20261007T005407332544-map-run-chooses-candidates\n(plan imas-codex:mapping-candidate-selection, section 8, node map-run-chooses-candidates).\n\nWHAT WAS REVIEWED\nThe reviewed worktree HEAD is ddd9571c7f6659f43ab642fedd836367830942a0 (three commits over base 7f1cab2257855be52dab947583a35a7be850f9df):\ne3cbc5959 feat(mapping): the assign stage chooses from an escalated source's shortlist;\na22b5486d fix(mapping): persist a no-path choice so the seat is not paid twice;\nddd9571c7 docs(mapping): record the escalated-choice evidence anchor.\nNine files changed (+853 -680): mapping.py, models.py, workers.py, the two\ntarget_assignment prompts, three tests/ids files and the evidence fragment. Every\ntouched path is inside the node's declared write paths.\n\nWHAT THE CHANGE DOES\nThe assign stage no longer makes one all-sources reasoning call per IDS. A selected\nsource already carries its marked MAPPING_CANDIDATE edges; an escalated source is\nclaimed by assign_worker through claim_sources_for_escalated (predicate\ncandidate_route='escalated' AND mapping_disposition IS NULL plus an EXISTS candidate\nin a target IDS), its shortlist is built by escalated_shortlist (top map-shortlist-size\nby ascending rank plus every CLUSTER_ARM cross-IDS sibling regardless of rank), the\nreasoning seat answers from only that list, and select_candidates marks every picked\nedge. A path outside the list is refused by _validate_choice before anything is\npersisted. A 'none' choice has its disposition and reasoning persisted through\nset_mapping_status (disposition + evidence) so the source is not re-claimed and the\nreasoning seat not paid again; the mapping-state clear nulls both fields. A\nno_candidate source is skipped with its best path and probability logged. The semantic\nbridge in gather_shared_context is narrowed to escalated sources via\n_escalated_source_ids.\n\nGATE (reproduced by this review, not trusted from the manifest)\nThe reviewed manifest records baseline_suite: null and after_suite: null, so no\nreviewed arm pair was available; its own gate logs (baseline.log 1794 passed, gate.log\n1804 passed) are the reviewed run's baseline and after arms. This review reproduced\nboth arms independently in scratch trees:\n  base 7f1cab2257855be52dab947583a35a7be850f9df -> 1794 passed, 5 skipped, 2 deselected, exit 0 (review_base_arm.log)\n  head ddd9571c7f6659f43ab642fedd836367830942a0 -> 1804 passed, 5 skipped, 2 deselected, exit 0 (review_head_arm.log)\nThe head arm's module under test resolved to the reviewed worktree's\nimas_codex/__init__.py; the base arm is an extracted scratch tree under TMPDIR whose\nmodule under test resolved to that tree (both verified and recorded on each log\nheader). Neither arm reports a failing id: added_failure_count = 0, added_failure_ids\n= [].\n\nDONE-WHEN COVERAGE\nAll six done-when sub-items are implemented and covered. Escalated claim + selection:\nTestAssignWorkerSelects (mark selected; two paths in two IDSs mark both). Shortlist\nprompt: TestShortlistPrompt + TestEscalatedShortlist. Outside path refused:\nTestChoiceRefusal::test_choice_refuses_path_outside_shortlist, a behavioural test that\nmocks _call_llm to return an outside path and asserts CandidateWriteError; the negative\ncontrol (refusal removed) is 1 failed, exit 1. Bridge escalated-only:\nTestSemanticBridgeNarrowed. The 'none' verdict persistence, non-reclaim and state clear\nare each covered by a test.\n\nFINDINGS\n1. progress.py:256 (out of scope, follow-on) reads the SECTIONS cost from\n   PipelineCost.steps under the key assign_targets, but the renamed step records under\n   choose_targets (step_name=choose_targets; PipelineCost.add keys steps by step name,\n   mapping.py:88). The mapping-run progress display now shows an empty cost for the\n   assign stage.\n2. mapping.py:2109 MappingResult is dead after generate_mapping was deleted (no\n   importer remains); models.py:4 docstring still names the removed\n   assign_targets/TargetAssignmentBatch step. Both files are in scope.\n3. TestNoCandidateLogged::test_no_candidate_source_is_skipped_with_evidence is\n   tautological: it re-emits the production log string and asserts on it, never driving\n   candidate_worker. The done-when item is unproven by the gate, though the production\n   block (workers.py:1198-1212) is correct by inspection.\n4. assign_worker no longer fills state.assignments (workers.py:745 and :868 still read\n   it, now always None). Merged alone the node breaks imas map run; the plan anticipates\n   this (node map-run-maps-each-home is dispatched on this node's unmerged head).\n   Merge-ordering constraint, not a defect.\n\nVERDICT\nThe core mechanism is present, targeted and reproducible; the gate and negative control\nhold at the reviewed head. The open items are one out-of-scope stale cost key, two small\nin-scope hygiene misses, one evidence gap (tautological no-candidate test) and a\ndocumented cross-node merge-ordering dependency.\n\nNEGATIVE CONTROL (reproduced by this review)\nScratch copy of head ddd9571c7f6659f43ab642fedd836367830942a0: the outside-refusal raise in _validate_choice replaced by pass -> 1 failed, 2 passed, EXIT=1 (TestChoiceRefusal::test_choice_refuses_path_outside_shortlist); the unmutated head passes both this and the two sibling refusal tests. Log: review_negative_control.log. The reviewed run declared the same mutation and its negative_control.log records the same 1 failed / EXIT=1.\n",
+  "review_run_id": "r-20261007T013951043479-review-of-map-run-chooses-candidates",
+  "reviewed_base": "7f1cab2257855be52dab947583a35a7be850f9df",
+  "reviewed_base_sha": "7f1cab2257855be52dab947583a35a7be850f9df",
+  "reviewed_commit": "ddd9571c7f6659f43ab642fedd836367830942a0",
+  "reviewed_head_sha": "ddd9571c7f6659f43ab642fedd836367830942a0",
+  "reviewed_run_id": "r-20261007T005407332544-map-run-chooses-candidates",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-07T02:02:29+00:00",
+  "total": 100
+}

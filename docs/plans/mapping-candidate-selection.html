@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="mapping-candidate-selection">
   <meta name="plan-title" content="Mapping Candidate Selection">
   <meta name="plan-summary" content="Choose each signal source&#x27;s IMAS target from retrieved DD nodes with Jev pair judgments; only ambiguous sources reach the reasoning model">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="21.0">
   <meta name="plan-capability-version" content="1.0">
@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -763,6 +763,16 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-20261007T0205-s8-choice-audit" data-who="reckon-build" data-when="2026-10-07T02:05:00Z">
     <div class="r-comment-body"><p>Node <code>map-run-chooses-candidates</code> (commits <code>e3cbc5959</code>, <code>a22b5486d</code>, <code>ddd9571c7</code>) merges only together with <code>map-run-maps-each-home</code>, which is dispatched on its head. Merged alone, it would leave the map stage reading assignments nothing fills. The audit sent it back once: the manifest carried the unrecognised status <code>waiting</code>, and a <code>none</code> verdict was logged but not stored, so the source would be re-claimed and re-paid every run. Gate 1804 passed. The independent review scored 100 of 120 with no added failures. Reckon opened a repair round on this run for three of its findings: dead <code>MappingResult</code> and a stale <code>models.py</code> header; a no-candidate logging test that asserts its own message instead of driving <code>candidate_worker</code>; and <code>TargetChoice</code> accepting a disposition beside chosen paths. It also asked about the merge-ordering finding, which is a sequencing constraint. The fourth finding, <code>imas_codex/ids/progress.py:256</code> reading the assign stage's cost under <code>assign_targets</code> while the renamed call records <code>choose_targets</code>, is outside this node's scope. It is carried into <code>map-run-maps-each-home</code>, alongside the <code>mapping_status</code> correction already in its text.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T013951043479-review-of-map-run-chooses-candidates" data-who="reckon-build" data-when="2026-10-07T02:07:23.887Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261007T005407332544-map-run-chooses-candidates (plan
+imas-codex:mapping-candidate-selection, section 8, node map-run-chooses-candidates), covering its
+three commits over base 7f1cab22 — e3cbc5959 (the assign stage chooses from an escalated source&#x27;s
+shortlist), a22b5486d (persist a no-path choice so the seat is not paid twice), ddd9571c7 (evidence
+anchor). Six dimensions scored over 0..20 — goal_fidelity 18, evidence 15, scope_discipline 17,
+durability 15, fit 18, reuse 17; total 100. The change is implemented and its gate holds; it
+carries one out-of-scope stale cost key, two small in-scope hygiene misses, one evidence gap and a
+documented cross-node merge-ordering dependency. added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261006T2316-s11-dispatch" data-who="reckon-build" data-when="2026-10-06T23:16:00Z">
     <div class="r-comment-body"><p>Dispatched <code>cross-ids-siblings</code> (run <code>r-20261006T231514344990-cross-ids-siblings</code>) with the unreviewed-plan waiver. The stored review at version 66 covers §11 as dispatched, and its one finding was answered as acted. The only uncovered unit was §8, whose version-67 edit is that finding's fix: the claim-predicate exception and the full route-count census. A review of the current content runs before §8's next node is dispatched.</p></div>
