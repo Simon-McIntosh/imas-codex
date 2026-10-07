@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:47:16.944Z",
+  "dispatched_at": "2026-10-05T05:34:13Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/signed_manifest.py:2227",
+      "id": "reuse_search-1",
+      "reason": "extending the existing fingerprint to the collateral query is the honest fix and turns \"digest server-side\" from an unmeasured proposal into a reuse of proven machinery, changing the design text and its \"what has to be shown\".",
+      "text": "the \"digest server-side\" option proposes computing the collateral hash in Cypher so property maps never cross the wire, but `_participant_snapshot` already computes a canonical in-Cypher `property_fingerprint` (property-key ordering, valueType, zoned-datetime and list normalisation) and it is already used as a live before/after guard at signed_manifest.py:4701-4709; the plan neither cites it nor says why the collateral case cannot reuse it",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/signed_manifest.py:1880",
+      "id": "duplicate_owner-1",
+      "reason": "naming `_out_of_allowlist_source_hash` as the owner to generalise gives the plan the mechanism it needs for \"owned dimensions derived from the operation rather than hand-declared per repair\", replacing an open design question, rather than inventing a parallel one.",
+      "text": "the \"narrow the snapshot\" option duplicates the narrowed, dimension-scoped collateral proof that already exists as `_out_of_allowlist_source_hash` (StandardNameSource nodes outside the allowlist plus their bindings and backings) and its per-adapter dispatch in `_build_stale_source_preview` (signed_manifest.py:3464); a second narrowing path beside that owner drifts from it and re-decides which dimensions can be blinded",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2dd6cd097d26b32464d3912faeec57def0c2b01da0da302e8dd895eb7e88b68c",
+  "plan_slug": "signed-repair-snapshot-cost",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053411019413-plan-review-of-signed-repair-snapshot-cost",
+  "reviewed_blob_sha": "2f4fa01ce78cbf3930c389e565600b6a8afe1564",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the change lands inside the single existing function `_collateral_snapshot` (signed_manifest.py:2288); the plan proposes no new module family and no spread of internal wrappers.",
+    "duplicate_owner": "a finding \u2014 the \"narrow the snapshot\" option re-proposes a shape the file already carries per adapter in `_out_of_allowlist_source_hash` (signed_manifest.py:1880), rather than extending it to the dimension the operation owns.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; both candidate fixes are internal to signed_manifest.py and the plan adds no public definition, CLI option, MCP view or refusal family.",
+    "reuse_search": "a finding \u2014 the plan's \"digest server-side\" option re-proposes a mechanism `_participant_snapshot` already implements in Cypher (signed_manifest.py:2227, live guard at :4701-4709), and it cites that machinery nowhere.",
+    "thin_wrapper": "pass \u2014 neither option adds a layer over existing machinery; both edit the existing snapshot in place and the plan requires the existing guard tests to pass unchanged."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.059781+00:00"
+}

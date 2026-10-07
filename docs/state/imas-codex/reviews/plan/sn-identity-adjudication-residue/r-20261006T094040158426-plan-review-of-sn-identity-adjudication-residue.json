@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:55:35.616Z",
+  "dispatched_at": "2026-10-06T09:40:51Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-identity-adjudication-residue.html:43",
+      "id": "reuse_search-1",
+      "reason": "\u00a72 becomes a reconciliation of two conflicting recorded adjudications with a named missing fact (the DD state-kind convention), not a fresh physics decision, and \u00a73 must cite the refusal it discharges.",
+      "text": "\u00a72 presents \"which identity does the source realize \u2014 whether `internal_state` carries meaning the shorter spelling drops, or is a redundant peel\" as an open question, but it is already adjudicated in-tree, twice and in opposite directions, and the plan cites neither: `docs/evidence/sn-graph-wide-integrity/dual-bound-residue-adjudication.md:82` selected survivor `radial_neutral_state_momentum_flux` (\"the DD adds no semantic distinction beyond neutral state, momentum flux, and radial component\"), while `docs/evidence/scalar-edge-authority/produced-name-adjudication.md:149` left it open (\"the DD field's state-kind convention is required to distinguish `internal_state` from `state`\"); the same file decides the sibling rows `docs/evidence/sn-graph-wide-integrity/dual-bound-residue-adjudication.md:81` and :83 (the poloidal members), and \u00a73's identity split is the literal follow-through of the named refusal `REFUSE_REFLECTOR_CENTRE_COLLAPSE` recorded at `docs/evidence/sn-graph-wide-integrity/owner-geometry-residue-adjudication.md:41` (\"Require an ordinary-reviewed identity split before either binding moves\") \u2014 a plan written against this codebase must reconcile the two recorded momentum verdicts and cite the reflector refusal rather than re-derive the questions.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:21607",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owning operator (and its guard) turns \u00a72's bespoke \"sn edit\" process into the existing signed-disposition path, which is the difference between extending the owner and forking it.",
+      "text": "\u00a72 says the winning disposition is \"adjudicate the loser's disposition explicitly\" and \u00a74 says `sn edit` \"is the only sanctioned path\", but the mechanism that releases one source's binding while retaining the survivor already exists and is measured: `_catalog_source_disposition_apply` (adapter `catalog-disposition`, mutation `select-survivor-and-release-bindings`, guard set including `last-producing-source`) exposed as `apply_adjudicated_source_dispositions` at `imas_codex/standard_names/graph_ops.py:21607-21647`, with its guard constant `_LAST_PRODUCER = \"last-producing-source\"` at `imas_codex/standard_names/signed_manifest.py:72` and the guard enforcement at `imas_codex/standard_names/signed_manifest.py:3584`; that operator is exactly what produced the recorded refusals the plan describes (\"target would lose its last producing source\") in `docs/evidence/sn-graph-wide-integrity/dual-bound-residue-apply.md` (19 admitted / 4 refused), so \u00a72 should extend or invoke it rather than route a source-binding release through the name/docs edit engine `imas_codex/standard_names/edit.py:887`, and the plan's \"single-valued `PRODUCED_NAME` invariant\" should name the `last-producing-source` guard it actually means.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5987d736495ce6b11a02ea7c3443b24579e73719843b19d6a68e0235ac8b1d24",
+  "plan_slug": "sn-identity-adjudication-residue",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T094040158426-plan-review-of-sn-identity-adjudication-residue",
+  "reviewed_blob_sha": "095a7b09c6a555215892ed7ca12885cd8ffeffd6",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no module; it is a decision plan that reuses `sn edit` (`imas_codex/standard_names/edit.py:887`) and the ordinary quorum.",
+    "duplicate_owner": "a finding \u2014 \u00a72's \"adjudicate the loser's disposition explicitly\" re-implements a source-binding release that `apply_adjudicated_source_dispositions` already owns at `imas_codex/standard_names/graph_ops.py:21607`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds no code interface, and \u00a72 removes a binding while \u00a73 splits one identity into two.",
+    "reuse_search": "a finding \u2014 the plan re-poses two decisions already adjudicated in-tree and cites neither the prior adjudications nor the source-disposition operator that owns \u00a72's outcome (`docs/evidence/sn-graph-wide-integrity/dual-bound-residue-adjudication.md`, `docs/evidence/scalar-edge-authority/produced-name-adjudication.md`, `docs/evidence/sn-graph-wide-integrity/owner-geometry-residue-adjudication.md`, `imas_codex/standard_names/graph_ops.py:21607`).",
+    "thin_wrapper": "pass \u2014 for the name-identity work of \u00a73, `sn edit` is the owning mechanism and no layer is added over it; the defect is that \u00a72 is routed through the wrong owner, reported under duplicate_owner rather than as a new wrapper."
+  },
+  "section_digests": {
+    "_document": "afe5f892c67569bb2812a85c1c94bd46c0dc91e2c1cf4c243731d065374daa29",
+    "s1": "e5d0865c05ec3e4462078ee3899496c6da6fa427b98a14826c38ca27d7196ca6",
+    "s2": "a89f49104ed971637402005666e7c9d44add077dfa313c9fb93c2b4f5621907d",
+    "s3": "6ac26422ac3b79500c6c28052a901e0927baafba55b9760a4a65c7af9e1322d8",
+    "s4": "70cda5d8f6831e162605ce2439a764d02f2408af0b3da8f7821a0f2f5fbb5a77"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.080606+00:00"
+}

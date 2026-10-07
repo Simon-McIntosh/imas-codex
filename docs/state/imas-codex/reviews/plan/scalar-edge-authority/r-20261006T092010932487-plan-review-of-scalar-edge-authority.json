@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:36:22.412Z",
+  "dispatched_at": "2026-10-06T09:20:22Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/standard_name.yaml:820",
+      "id": "reuse_search-1",
+      "reason": "the plan's whole \u00a73 migration route is chosen on a negative search result that the repo contradicts, and a corrected search changes materialise and derive from an ad-hoc REPL procedure to an extension of an existing mutation vocabulary.",
+      "text": "the plan's reuse map (comment c-20260917T151500-reuse-map-references) concludes \"NO COMMITTED PYTHON SYMBOL WRITES THE REFERENCES EDGE\" and from that plans per-pair inline Cypher through the REPL, but it missed RepairMutationKind, which already declares recompute_projection (\"Recompute a scalar or relationship projection from live authority\", standard_name.yaml:820) and add_relationship (\"Materialize a relationship and its canonical properties\", standard_name.yaml:816) \u2014 the plan's derive and materialise beats under another name \u2014 so the search was not exhausted before the plan declared the machinery absent",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:12309",
+      "id": "reuse_search-2",
+      "reason": "the derive-timing decision is argued from those per-reader effects, and if the cited lines no longer name those readers the decision's cost model is unverified and must be re-derived from the current symbols.",
+      "text": "the Decisions section asserts per-reader consequences from specific line citations that do not resolve to the described mechanism at HEAD: export.py:984 reads as a gate test-suite-failure append, not a reader that \"would return only committed REFERENCES targets\"; graph_ops.py:17122 (edit_status_before) does not undercount docs revisions; graph_ops.py:16477 (WITH sns2 AS sns) does not undercount refinement depth; graph_ops.py:12309 resolves only to a bare gc.query( call, not a PRODUCED_NAME reader; only doc_links.py:49 (find_name_references) and graph_ops.py:515 (inside _extract_links_from_docs' regex) match their stated roles \u2014 so five of seven prior-art citations are unchecked or stale, and the reader inventory behind the derive-timing decision rests on them",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:21659",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should extend _apply_semantic_mirror_repair and the RepairMutationKind vocabulary rather than build a parallel per-pair route, or state why that owner cannot serve these pairs, otherwise two reconciliation paths drift under the fleet the \u00a74 measure exists to keep consistent.",
+      "text": "_semantic_mirror_repair_authority (with _lock_semantic_mirror_repair_authority:21831, _semantic_mirror_repair_counts:21913, and _apply_semantic_mirror_repair at signed_manifest.py:6335) already owns exactly this plan's mechanism: it reconciles a semantic-source scalar mirror (a projected source_types/origin value) against its backing FROM_DD_PATH|FROM_SIGNAL to HAS_STANDARD_NAME projection closure, under a signed manifest, guards and receipts (SEMANTIC_MIRROR_REPAIR_MANIFEST_SCHEMA:21651) \u2014 the plan re-implements that reconciliation per pair in \u00a73 instead of extending this owner, and the same owner covers \u00a71's source_types, source_domains and origin mirrors",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/signed_manifest.py:234",
+      "id": "duplicate_owner-2",
+      "reason": "the plan cannot both add a second write path and claim \u00a74's guarantee that a later census returns the same numbers, so the beats must land through the existing signed writer or explain the exception.",
+      "text": "the plan proposes materialising and removing REFERENCES edges and rewriting derived scalars without routing through the signed-manifest writer that owns every governed StandardName mutation (its edge allowlist already carries REFERENCES at signed_manifest.py:234, and apply_signed_manifest is the single mutation entry point graph_ops.py uses), so the materialise-adjudicate-derive beats fork the commit and receipt path the graph already treats as authoritative",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:21659",
+      "id": "deep_module-1",
+      "reason": "a single module over the existing repair primitives removes the per-node beat-restatement and is the shape the twelve-pair surface actually wants; leaving it spread is the shallow-wrapper explosion this rubric item exists to catch.",
+      "text": "the plan scatters one operation \u2014 recompute a mirrored scalar from its authoritative relationship \u2014 across twelve pairs, each its own node with its own beat accounting (\u00a73 \"One pair per node\"), and mentions \"one shared authority predicate\" only for the review-timestamp pair (scalar-retention rationale) without generalising it, so the same three beats and the same parity digests are re-specified per pair instead of hidden behind one interface that takes (scalar, relationship, derivation) and performs materialise, adjudicate and derive once",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:515",
+      "id": "thin_wrapper-1",
+      "reason": "if the producer owns reference discovery it should own the edge write it implies, which turns the materialise beat from a separate migration into a producer extension and removes the 83-fossil class the parity refresh had to adjudicate by hand.",
+      "text": "the materialise beat uses _extract_links_from_docs (the committed scalar producer) only to regenerate the scalar for a parity comparison, and the plan does not say why that producer cannot be extended to emit the REFERENCES edge it derives from the same parsed documentation, so the plan adds a one-off comparison wrapper over machinery that already parses the source rather than extending the parse site",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3bbf7def511e951435d1366874f837be1b7ab7b8af6756e7a6d0db869851aae5",
+  "plan_slug": "scalar-edge-authority",
+  "plan_version": 18,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T092010932487-plan-review-of-scalar-edge-authority",
+  "reviewed_blob_sha": "d4ebc083926571e05985efe0e795474bf5a67076",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the plan spreads one mechanism (materialise, adjudicate, derive a mirrored scalar) across twelve pairs and many nodes rather than behind one module, and names a \"shared authority predicate\" for one pair without generalising it.",
+    "duplicate_owner": "a finding \u2014 the plan re-implements scalar-mirror reconciliation that imas_codex/standard_names/graph_ops.py and signed_manifest.py already own as a signed, guarded, receipted repair.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every section retires scalar properties and re-points readers at relationships, adds no member of any of the four families, and needs no retirement statement.",
+    "reuse_search": "a finding \u2014 the plan searched for a writer of the REFERENCES edge but never found the governed repair framework, whose RepairMutationKind already declares recompute_projection and add_relationship, and several prior-art claims in its Decisions do not resolve to the cited code at HEAD.",
+    "thin_wrapper": "a finding \u2014 the materialise beat re-runs the existing scalar producer to compute a comparison value rather than saying why that producer cannot own the edge write."
+  },
+  "section_digests": {
+    "_document": "f14f0a3f8e3ad0a31ff576f8e4dabb6555594873832b6f2f01bbe0afcda8db84",
+    "s1": "5cd1d708cbff23d0ba44c0828c9778b5af10206714ca0c618e64d635ba660551",
+    "s2": "7be85cd8b0b9cd53d18b125315e5df33e0d0adf62c28a82043f4a428a4b6b9b7",
+    "s2a": "33597dd70caf9e4df014e323dbdf4f0c7bd064138cf9b5d1f544d8d8f33c8f4d",
+    "s3": "9fa7b52581237d5c18ec3ca16f0042eb7a50ebfa0e2515f67af47666234b5f2e",
+    "s4": "30da39c26a2a949191800f9de8c315cfeaf9cc2ad1f747e4eab21ec6494b1cd6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.047319+00:00"
+}

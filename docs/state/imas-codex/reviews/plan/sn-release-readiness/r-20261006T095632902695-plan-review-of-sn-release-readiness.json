@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T10:14:54.173Z",
+  "dispatched_at": "2026-10-06T09:56:43Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/export.py:1695",
+      "id": "thin_wrapper-1",
+      "reason": "an unexplained thin wrapper over scoping machinery reproduces exactly the zero-effect repair the probe recorded, and the fix belongs in the operator it wraps, not in a new verb \u2014 the plan must either extend the drain caller or name why it cannot.",
+      "text": "the `sn restage-accepted` operator is a thin wrapper over the sanctioned drain-batch machinery, and the plan's own restage-arm probe (evidence `restage-arm-scope-probe.md`) measures the wrapper moving 0 of 10 rows because it does not pass a drain scope, while the same call over the same rows moves 9 of 10 the moment the scope shape changes; the plan does not say why the drain operator or its caller cannot be extended to accept this cohort. A second instance of the same shape is `_fetch_deprecation_stubs` (`imas_codex/standard_names/export.py:1695`), a wrapper whose sibling `_build_stub_entry` no longer exists, so the plan's deprecation handling now routes through a lone stub fetcher with no wrapper",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:1313",
+      "id": "reuse_search-1",
+      "reason": "a prior-art citation a reader cannot resolve is indistinguishable from machinery that was never searched, so the citations must be re-pointed before the first node is released.",
+      "text": "the plan's prior-art citations carry line numbers that have drifted from current main, so a reader verifying the reused machinery is sent to the wrong line: the exclusion gate is cited at `export.py:1128` against a live `_run_exclusion_accounting_gate` at `:1313`, `record_exclusions` at `:367-395` against `:385`, and `_fetch_export_population` at `:546-570` against `:610`; the search itself is sound but cannot be re-verified from the plan",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:1695",
+      "id": "duplicate_owner-1",
+      "reason": "recorded so the census is complete; the plan needs only its removed-name citation struck.",
+      "text": "no duplicate owner found in the plan's key: this FINDING records a negative census result, not a defect \u2014 `_build_stub_entry` no longer exists at its cited location and no plan section re-introduces a stub writer beside the surviving `_fetch_deprecation_stubs`",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "0879b3071e075dac26ba4b14287959bbede2163a5adbbfe736d0ddcf6e43c739",
+  "plan_slug": "sn-release-readiness",
+  "plan_version": 176,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T095632902695-plan-review-of-sn-release-readiness",
+  "reviewed_blob_sha": "64fae59f18c3400dbb749a94b1c6649c458074b1",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan's new behaviour is the exclusion ledger, and it hides behind one accounting gate, `_run_exclusion_accounting_gate` (`imas_codex/standard_names/export.py:1313`), over one data structure, `ExportReport.record_exclusion` (`imas_codex/standard_names/export.py:385`); the ledger identity `emitted + sum(exclusions by reason) = N` is a single invariant over a single record, and the population it accounts over is a single query (`_fetch_export_population`, `imas_codex/standard_names/export.py:610`), not a family of small wrappers.",
+    "duplicate_owner": "pass \u2014 no new duplicate of a shared owner. The plan de-duplicates rather than forks: the two drifted bracket regexes are replaced by the existing shared owner `imas_codex/standard_names/doc_links.py:49`, and the graph client's address resolution is repaired in place rather than wrapped.",
+    "interface_budget": "pass \u2014 the tracked budget is zero on all four families this week (`public_definitions 0`, `cli_options 0`, `mcp_views 0`, `refusal_families 0`), so no section adds to a tracked family and none owes a retirement or merge note.",
+    "reuse_search": "pass \u2014 the plan extends the existing export gate chain (`imas_codex/standard_names/export.py:945` gate A, `:1016` gate B, `:1127` gate C) for its exclusion ledger, extends `protection.PROTECTED_FIELDS` (`imas_codex/standard_names/protection.py:26`) for the symmetric import guard, and consolidates two drifted bracket regexes into the neutral `imas_codex/standard_names/doc_links.py:49` rather than adding a fourth parser; each of these was opened and confirmed present, and the plan states what it searched and refused (it explicitly declines to use `_fetch_candidates` as the accounting universe because selection erases rejections).",
+    "thin_wrapper": "finding \u2014 `sn restage-accepted` (below). The deprecation-stub path is the counter-example and is another instance of the wrapper question; see the FINDING."
+  },
+  "section_digests": {
+    "_document": "8001abfe5537c9a51d6aa0e775c8033d6e5012c2de1d9d99d5b99d8075c293d5",
+    "s1": "f35c1e4594d95632f03e02de2cb91f558e5665fdb12403e037e44b6d3e99a199",
+    "s10": "eaf7ebb1c827d88a404cea00e6f6b6e11791aa9c535cbb2c32f073a10fc268ca",
+    "s11": "150e6e998806dba01756d8e9cd866fc1351a2154138c478e272c89ebf3af6ab1",
+    "s12": "42c283d3393b4f6f0149c3c24e0e2dd03daf5c85115536ddc4552f378beab16a",
+    "s12-graph-write-review": "a68f08870be708883a1b80e92bd9440e70b6e102ad37ff0da49b587f87e8cb30",
+    "s12a": "ca4c56d80225503a7955a0a35b9e8c692c2a36b9fa8d6b5d5e33ed9bb261ef7b",
+    "s12b": "e26fca488981f798f15264e7180be30f37bf23bfdce9b22ad54dbe5b3f877d84",
+    "s12c": "df2890a4d0e709cb843dd26fb93cd797286b8438512a93d78a520f1a537b4dd9",
+    "s2": "b18206110b0751cfca7a0bdd60467a9955c537a138c688a943dbd5bf7f8f2d2c",
+    "s2a": "6cdbd5929ed9bf70803a0ab0102dac780c95ece7f763e1c6a00fb62c80e5b567",
+    "s3": "fa23b89c3773aa8eb139dcf74d9267d1608532480be9b312f6268eb51fab3dcb",
+    "s4": "060df99e4769602f5464eb7fb5299659fe16b9687148bfff4012192578f02bdf",
+    "s4a": "fd22d5ca7c2d8fdcc0ee8a11122062989c63cd4b673f235290d508e99c985728",
+    "s5": "ea43bac5b5a367b8f7b5544ed9caf0cae97af86a62156ab5f270e4754ac25794",
+    "s6": "8a5001000e360fd169be1d2a7580e374bc28a2bda8c50576010739a28a75747b",
+    "s7": "d538b5995a51ce7265542d9411721c22e73b8283c72ce11c7472a636d8296b7f",
+    "s7a": "c8bdb1fd1f5c6f55e068e8160120338bcd3e783d833113c36b879f0bee2e8c2d",
+    "s8": "e5225c46896598385236ab0fedd5a1be7c868e85ca773d7e91433915afb86503",
+    "s9": "d89f155f7a321dfb6a8bee03e9c96967e15620d63c268d49adc957aa59d319d1"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.114009+00:00"
+}

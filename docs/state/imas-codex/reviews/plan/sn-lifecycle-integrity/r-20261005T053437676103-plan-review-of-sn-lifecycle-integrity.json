@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:51:58.537Z",
+  "dispatched_at": "2026-10-05T05:34:41Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:11405",
+      "id": "deep_module-1",
+      "reason": "the design should place these lifecycle helpers behind one module boundary (the plan already concedes graph_ops.py cannot be a declared write path), so the beat is a placement decision the plan can still make before its first node.",
+      "text": "the parked-disposition design lands six helpers over one cohort query in a single already-unbounded module: CAP_PARKED_DISPOSITIONS:11405, classify_parked_source:11431, record_parked_dispositions:11519, disposition_parked_sources:11556, record_dispositions_for_undisposed_parks:11599, census_parked_dispositions:11641, all over _CAP_PARKED_QUERY:11507 \u2014 and the plan's own text records that graph_ops.py is 27,296 lines / 1,139,822 bytes and carries a 326,217-token dispatch estimate that cannot fit the local-lane window. Complexity is being added to a module that is already too large to hand to a worker, rather than hidden behind one smaller interface.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:11599",
+      "id": "thin_wrapper-1",
+      "reason": "the section must either justify why the second and third wrappers cannot be folded into record_parked_dispositions or drop them, because the claim it makes about a single step is false at the revision reviewed.",
+      "text": "the plan states \"the classify-and-write step is one function, record_parked_dispositions, called by both the reconcile pass and the sweep tick\", but HEAD carries three entry points over the same parked cohort \u2014 record_parked_dispositions:11519, disposition_parked_sources:11556 and record_dispositions_for_undisposed_parks:11599 \u2014 each wrapping _CAP_PARKED_QUERY:11507; disposition_parked_sources and census_parked_dispositions:11641 additionally have zero production callers. A parallel writer beside the one the section names adds surface without adding depth.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:1575",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a72's closure is unproven while a projection fallback can still emit `active`, so the plan should name export.py:1575 as the second writer to delete, the way it names promote.py:885 as the sole writer of draft\u2192active.",
+      "text": "two mechanisms own the published catalog status. The export gate (_classify_export_population:808, GATE_CATALOG_STATUS:184, missing_status_ids:2910) refuses a null status, while the catalog-entry projection at :1575 still substitutes `node[\"status\"] if \"status\" in node else \"active\"` \u2014 the literal `else \"active\"` remains, reproducing the exact defect \u00a72 names, against the section's own recorded receipt \"the literal active mapping is gone (grep 0)\". The plan puts the gate and the fallback in the same file without naming one as the owner to remove.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:11641",
+      "id": "duplicate_owner-2",
+      "reason": "the design should resolve the two cohorts into one owner (or state why the gate must read the wider one) instead of leaving a gate whose normal-operation red is a declared tolerance.",
+      "text": "two census instruments answer \"what is parked\": census_parked_dispositions:11641 counts attempt_count >= $cap over any status while disposition_parked_sources:11556 keys on status='failed' carrying the cap reason, so the two disagree on cohort width \u2014 the plan's own f-sli-011 records a not-yet-parked cap-hit source reading as unclassified (false red) and chooses tolerance over reconciliation. The owning file is graph_ops.py; the fix is to extend one census rather than gate on a second instrument with a stated tolerance.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/audits.py",
+      "id": "duplicate_owner-3",
+      "reason": "the disposition is honest and already adjudicated, the plan names the authority explicitly, and the remaining work is a followup node rather than a change to the design.",
+      "text": "the plan adds a second quarantine-verdict surface. \u00a7Decisions records settling the two instruments by making the audit walk declare its question in AUDIT_WALK_QUESTION and raise QuarantineVerdictNotAnswered, naming validate_name_candidate as the authority; the owner to extend is that validation worker and the audit walk should route to it, not grow a parallel refusal family.",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "f7041ae544a48975457024d85c22fb678d7bade04e26272c0af5e03dd2772db5",
+  "plan_slug": "sn-lifecycle-integrity",
+  "plan_version": 161,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053437676103-plan-review-of-sn-lifecycle-integrity",
+  "reviewed_blob_sha": "2e00751484bcf208746e69be265b14064c233851",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the parked-disposition beat spreads six sibling helpers over one cohort. WOULD_CHANGE_THE_PLAN: yes \u2014 see FINDING below.",
+    "duplicate_owner": "a finding \u2014 two owners decide the published catalog status, and the export fallback still writes the literal the plan says is gone; the parking cohort is read by two census instruments whose widths disagree. WOULD_CHANGE_THE_PLAN: yes \u2014 see FINDING below.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the sections that touch surface name what they retire rather than silently adding it (origin retired, superseded_by retired, the literal export \"active\" retired, the status/name_stage redundancy framing withdrawn), and the status axis is wired into the existing reconcile family (reconcile_catalog_status) rather than a new interface.",
+    "reuse_search": "pass \u2014 every beat carries a reuse map that names the existing symbol or records its absence (mark_sources_failed graph_ops.py:11460, retry_failed_sources:11678, classify_parked_source:11431, reconcile_catalog_status:14266, and the two named absences: no committed REFERENCES writer, no re-qualification entry point for parked sources).",
+    "thin_wrapper": "a finding \u2014 two parallel classify-and-write wrappers over the same cohort query, contradicting the section's own \"one function\" claim. WOULD_CHANGE_THE_PLAN: yes \u2014 see FINDING below."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.093351+00:00"
+}

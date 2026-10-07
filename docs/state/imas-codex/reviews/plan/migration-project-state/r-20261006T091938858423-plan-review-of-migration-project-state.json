@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:36:54.134Z",
+  "dispatched_at": "2026-10-06T09:19:47Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/catalog_release.py:2068",
+      "id": "reuse_search-1",
+      "reason": "citing that helper turns the followup into a one-line reuse of a tested resolver and stops the repair from re-deriving path resolution.",
+      "text": "the followup \"Store minted_from repo-relative and repair the twelve dangling values\" instructs minting `minted_from` repo-relative but names no existing helper, while `_ledger_relative_path` (imas_codex/standard_names/catalog_release.py:205) already returns `root, ledger.relative_to(root).as_posix()` for exactly this purpose in the same module it modifies",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/catalog_release.py:205",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner keeps \u00a73 from adding a fourth-plus duplicate of a mechanism it is chartered to consolidate.",
+      "text": "\"resolve a path to its git root and relativise it\" is already implemented four times, each re-running `rev-parse --show-toplevel` against a different cwd: `_ledger_relative_path` (imas_codex/standard_names/catalog_release.py:208), `loaded_grammar_checkout` (imas_codex/standard_names/export.py:106), `reviewing_guide_url` (imas_codex/standard_names/release_notes.py:410) and `LabelCache.commit_labels` (imas_codex/clusters/label_cache.py:406); the `minted_from` repair should name and extend one owner (catalog_release.py:205 is the most complete \u2014 it returns root plus the posix-relative path and raises on a non-git tree) rather than mint through the site that produced the twelve dangling values and add a fifth resolution point under \u00a73, the one section whose stated job is to reduce coupling to shared machinery",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c32e390ae1a1d4fafa5b5451ae1753fb737f377a184cae19bb1ad6a54843f0ac",
+  "plan_slug": "migration-project-state",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T091938858423-plan-review-of-migration-project-state",
+  "reviewed_blob_sha": "ce0ca58d47d73c95710db061e170cff49ab65270",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan introduces no module; its sections are measurement intents and its two followups are a localized repair and a session schedule, so there is no interface to judge.",
+    "duplicate_owner": "a finding \u2014 root-to-relative path resolution is already implemented four times across the tree, and the `minted_from` repair would mint through one of those sites without naming an owner to extend.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds to none of these families (its followups add a test and a rewrite of committed manifest values, neither of which is one of the four), so no section is required to name a retirement or a merge.",
+    "reuse_search": "a finding \u2014 the plan's one concrete code change (mint `minted_from` repo-relative) names no existing resolver, while `_ledger_relative_path` already performs exactly that root-relative resolution in the same file the change targets.",
+    "thin_wrapper": "pass \u2014 \u00a73 moves in the extension direction (reduce this repo's coupling to machinery it does not own \u2014 reckon crew/plan, local lane and router, fleet/SLURM placement, imas-python, GPFS paths \u2014 to a thin interface over the owner), and no wrapper over repo-owned machinery is proposed."
+  },
+  "section_digests": {
+    "_document": "48bcd3035f9ae84536faf61b342698e724ed5e62c12b29102e6929635aa398d1",
+    "s1": "a9e0283555e63672c55e9f3cda4b71b31d19cda6c4a2dd841a107e3f38961ea5",
+    "s2": "212a4757e61d9c6e7cb4178a2c4d1cfb5a37583b4bfd0ba0518bd880b879d60a",
+    "s3": "afe90aee3c71e1689cca63832e449041ca4051aad9bdfacd4d6980f5baf2b2f9",
+    "s4": "826be9e9256e5658365053abd4efab0dc5269e896c0e392c084bb2c6db7a57dd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.030389+00:00"
+}

@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T10:07:39.834Z",
+  "dispatched_at": "2026-10-06T09:58:31Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/cli/sn.py:1447",
+      "id": "reuse_search-1",
+      "reason": "naming the existing regen path and `llm_cost_*`/`cost_model` instrumentation replaces \"measure from scratch\" with \"read the owners\", which changes the node's brief from building a census to querying existing machinery.",
+      "text": "the plan's deliverable is a measurement phase (f-srd-001, \"measure the regenerable and protected populations, the measured cost per identity, what a regenerate clears, and what it would reintroduce\") but it never names the machinery that already performs regeneration \u2014 `sn run --force` (sn.py:1447), `--from-model` (sn.py:1560), `--min-score` regen mode (sn.py:1641, gate at sn.py:3133) \u2014 nor the cost/audit owners (`imas_codex/standard_names/cost_model.py`, `audits.py`); a plan whose one action is to measure five quantities must say which existing instruments measure them",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/standard_name.yaml:89",
+      "id": "reuse_search-2",
+      "reason": "if `origin` is being retired and the backfill that would make it trustworthy has already been refused twice, the plan must state which field replaces it as the regenerable/protected discriminator before it can be released.",
+      "text": "the plan is keyed throughout on the `origin` axis (\u00a71 lines 37-43 \"1,099 identities with no `origin`\"; \u00a73 lines 84-89 \"origin=pipeline after backfill\" and \"origin=catalog_edit ... 2,096 and 2,031\"; the scope options at decisions lines 111-114 all branch on it; meta depends-on `sn-origin-provenance-backfill`): but `sn-lifecycle-integrity` records a lead ruling (2026-09-04, `origin-axis-disposition = retire-origin-entirely`) to drop the field, and the plan's own declared prerequisite `sn-origin-provenance-backfill` records TWO refusals on positive control (generation-evidence rule misclassified 1372 of 1798 controls; ledger-derived origin failed 1693 of 1798 controls)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/protection.py:5",
+      "id": "duplicate_owner-1",
+      "reason": "naming `filter_protected` as the owner of the protected-population read turns the plan's measurement into a call to the existing guard instead of a parallel census.",
+      "text": "\u00a73's \"Protected population \u2014 origin=catalog_edit and the accepted documentation they carry ... which a regenerate must exclude rather than rebuild\" is the exact responsibility of `filter_protected()` in `imas_codex/standard_names/protection.py:5` (the single guard every protected-field writer calls), and \u00a72's table \"Dual-bound source with a single-producer loser ... Regeneration re-derives the same two candidate spellings\" is the composer's job owned by `imas_codex/standard_names/workers.py`; the plan should extend these owners rather than re-derive their outputs",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/cost_model.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "citing the existing estimator and cost fields tells the author the \"measured cost per identity\" figure is already collected and only needs reading, which is a smaller and cheaper node than measuring it afresh.",
+      "text": "\u00a73's \"Cost per identity \u2014 measured, not estimated: compose is free on the local seat and review is the paid axis, so the figure is dominated by quorum draws\" duplicates the pipeline-aware cost estimator already in `imas_codex/standard_names/cost_model.py:1` and the per-name graph instrumentation (`llm_cost_generate_name`, `llm_cost_refine_name`, `llm_cost_refine_docs`, `StandardName.regen_count`, `SNRun.names_regenerated`, schema lines 1834-1915)",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b6fdd3465703978113b5fd4f430954d6f94e8e0392ae6bc42a4d97d02c924756",
+  "plan_slug": "sn-regeneration-decision",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T095823874648-plan-review-of-sn-regeneration-decision",
+  "reviewed_blob_sha": "2a57d0791b1b94c9dfe695cdcaaf1a8890594a75",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no module and no code surface; it emits a written threshold and one scope decision, so there is no interface behind which behaviour could be hidden or shallowly spread.",
+    "duplicate_owner": "a finding \u2014 the plan's \"protected population\" and \"cost per identity\" reproduce quantities whose owners already exist (`filter_protected()` and the cost estimator) rather than extending them.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan's only deliverables are a written threshold and a scope decision, adding nothing to any counted family, so there is no surface to retire or merge.",
+    "reuse_search": "a finding \u2014 the plan proposes a fresh measurement phase (followup f-srd-001) without citing the regeneration path (`sn run --force/--from-model/--min-score`), the cost instrumentation (`imas_codex/standard_names/cost_model.py`, `llm_cost_*`), or the audit machinery (`imas_codex/standard_names/audits.py`) that already produce the five quantities; and it keys its whole premise on `origin`, whose fate a sibling plan has already decided.",
+    "thin_wrapper": "pass \u2014 the plan proposes no wrapper over existing machinery, so the thin-layer question does not arise."
+  },
+  "section_digests": {
+    "_document": "20da7507e0771c014eead649af3fdaba56cf1305b25518ea1d663fabf5da18c4",
+    "s1": "42022dbbbbabc9ff54ee6c26504c988964087017cd34aa10ef8d928cca93c6ea",
+    "s2": "dcd85e886552e657f4a60e4a9f18a25e34318dc62c033c679cb63ee5796a6dcd",
+    "s3": "6f582e9713dbecd94a10c690b16a7e76bfb4ed37fb5725dde43620e48cf85948"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.106566+00:00"
+}

@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:52:15.367Z",
+  "dispatched_at": "2026-10-06T09:40:34Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-grammar-refinement.html#s4",
+      "id": "reuse_search-1",
+      "reason": "the author should derive the axis from the existing `component` segment class (or extend the existing HAS_PARENT edge-kind vocabulary) rather than mint a parallel one.",
+      "text": "\u00a74 asserts \"Nothing marks one as a member of a component set\", but the grammar the consumer already pins declares `component` as its own segment class with its own vocabulary (`imas_standard_names/grammar/specification.yml` segment map \u2192 `grammar/vocabularies/components.yml`, as recorded by the plan's own reuse map), and imas-codex already models this: `Component.POLOIDAL`/`Component.TOROIDAL` with `physical_base`+`component` decompositions at imas_codex/standard_names/benchmark_reference.py:108-233 \u2014 the design proposes a new graph dimension without citing that the distinction exists one layer down",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-grammar-refinement.html#s5",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should drop the catalog.yml carriage and rely on the pin plus the already-exported `arguments`/HAS_PARENT relation, which its own decision already requires.",
+      "text": "\u00a75 item 5 proposes carrying the family grouping \"into catalog.yml so the published sidecar exposes the family grouping the site needs\", but the plan's own locked decision `the-name-is-the-decomposition` (2026-09-04) supersedes exactly that half and the reuse map cites plan:222-224 (\"the catalog must consume the grammar by package pin rather than publishing a duplicate segment decomposition\"); the sidecar owner already emits the family relation \u2014 `arguments` is built from HAS_PARENT edges (imas_codex/standard_names/export.py:1783-1788, doc \"Exported as `arguments` in the ISN catalog format\" at imas_codex/graph/models.py:5082) and the manifest writer at imas_codex/standard_names/export.py:2347 would gain a second copy of a derivable fact beside it",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-grammar-refinement.html#s5",
+      "id": "interface_budget-1",
+      "reason": "like any added public surface the section must account for what it replaces or why the existing `arguments` field cannot serve.",
+      "text": "\u00a75 item 5 adds a field to the published `catalog.yml` sidecar (a public definition of the catalog schema, whose manifest model is `StandardNameCatalogManifest`) without naming what it retires or merges, or why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "82a25b7e705b94a0d3da9b79beb44b5c185c41053a14c7b83f4b04da97e02beb",
+  "plan_slug": "sn-grammar-refinement",
+  "plan_version": 89,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T094022686394-plan-review-of-sn-grammar-refinement",
+  "reviewed_blob_sha": "e5a4ab2b560b09b1150791e4a80d2031779206bc",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the substantive behaviour lands inside the ISN renderer (one rule) and the existing `sn` rename/supersede path; no proposal spreads complexity across parallel shallow spreads.",
+    "duplicate_owner": "a finding \u2014 \u00a75 item 5 re-emits a derivable family grouping into the published sidecar whose owner already exports the same relation, and the component distinction already exists in the grammar the consumer pins.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 item 5 adds a field to the published catalog sidecar (a public definition of the catalog schema) without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan ran a reuse map (docs/evidence/sn-grammar-refinement/reuse-map.md, 18 candidates, 18 verdicts) and its migration path extends existing verbs, but the design sections \u00a74/\u00a75 never cite the machinery that already carries what the \"component axis\" is meant to add, and \u00a75 still carries a catalog.yml field its own locked decision retired.",
+    "thin_wrapper": "pass \u2014 the proposed shadow diff, parse/re-render and catalogue carriage route through the existing parser/composer and `persist_refined_name`; no wrapper over an existing mechanism without behaviour is proposed."
+  },
+  "section_digests": {
+    "_document": "13b77b197a5bc7ead0ff206816eb5faffe08aed979a4ebc9348900306db001fa",
+    "s1": "7bef784a6c019a0aa297f4b4ca57498389c2d6d873e48de03b17092b1b86e0fd",
+    "s2": "873ae2cc70e22a8011c31391a50fdd89e260532832ce2e1f2a1e08e1d56fec1c",
+    "s3": "72fc72f2f973eab6e8a52037a916dfed21e687a5df90a757f93c1ab71c8e3151",
+    "s4": "564d41160ff909a16ded7b4bfdb5273fba159d2e4450b6a18f6cd2a0134f7208",
+    "s5": "a40d5b58829213c1d18de96d5ce4cb5a1773e9ce6f290e2fcafd8b1fbdd9d86c",
+    "s6": "c6788be23899fba3346a45e779700a4a413eac7bc4c3d3ed10254de37519b392",
+    "s7": "66eb9799d204de9063f8bfa0876f8478daea8127241403d57004c4f8be0a9205",
+    "s8": "2c0ff854680297e6f78f6741f4a4a282a6b86a5086099ec87395218218ec353d",
+    "s9": "86b5b7e7c52a40b5185300f4bd13f1fc0cc57f90d713d13dc481f08168589a3c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.071835+00:00"
+}

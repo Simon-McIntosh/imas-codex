@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:53:36.784Z",
+  "dispatched_at": "2026-10-06T09:41:24Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:13875",
+      "id": "reuse_search-1",
+      "reason": "the first implementation node should extend these two reconcilers rather than author a parallel recovery rule, and citing them changes the node's file scope and its reuse story.",
+      "text": "the plan's \u00a73 \"recover origin from surviving generation evidence\" rule already exists as `reconcile_catalog_edit_origins`, which re-derives `StandardName.origin` from surviving `StandardNameSource`/`PRODUCED_NAME` evidence (derived wins over dd/signals, else unset) for exactly the `catalog_edit` cohort the plan names, and \u00a73's paired \"status ... recovered in the same pass\" already exists as `reconcile_catalog_status` at graph_ops.py:14266 (null `status` \u2192 `draft`); the plan cites neither, so an implementer would rebuild both",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/provenance_rebuild.py:567",
+      "id": "reuse_search-2",
+      "reason": "naming it forces the author to state which of the existing anchors the new evidence (LLMCost, DocsRevision, REFINED_FROM) slots into, instead of a parallel recoverer.",
+      "text": "the plan's recovery pass does not cite `rebuild_provenance`, the 187-line entry point (with `catalog_reconcile.reconcile_catalog` documented in-module at catalog_reconcile.py:1-18 as \"the only path that rebuilds provenance from a published catalog\"), which already carries a descending-authority recovery map (`load_recovery_map`, `DEFAULT_RECOVERY_REF = a2f8831`, scalar-anchor and change-history fallbacks) and an idempotent dry-run; the plan's \"generation evidence, not import markers\" decision is the same shape; it must say whether it extends this tree or starts a second",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/catalog_import.py:109",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to install the existing boundary on the live path, not to add a second guard, and the plan should name the boundary it installs.",
+      "text": "\u00a74's guard is a thin policy layer over machinery that already refuses catalog payloads: `guard_catalog_write_payloads` \u2192 `protection.refuse_pipeline_authority_loss` at protection.py:183 refuses a whole batch that would clear or replace pipeline authority, and `record_catalog_import_provenance` at catalog_import.py:51 already reduces any caller payload to exactly `{id, catalog_commit_sha}` with `MATCH` (no `MERGE`) so `origin` and `status` are structurally unreachable; the plan does not say why these cannot be extended",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/catalog_import.py:51",
+      "id": "duplicate_owner-1",
+      "reason": "a forked guard drifts from the shared owner (`origin` is currently absent from `PROTECTED_FIELDS` and `PIPELINE_AUTHORITY_FIELDS`, so the owner is the one place that needs the fix), and the plan's own \u00a74 argument is prevention, which only holds if the live owner is guarded.",
+      "text": "\u00a74 forks a guard whose owner is `catalog_import.record_catalog_import_provenance`; the census of the same mechanism across the tree is: catalog_import.py:51 (allow-list receipt writer), catalog_import.py:109 `guard_catalog_write_payloads` (catalog-shape adapter), protection.py:183 `refuse_pipeline_authority_loss` (shared owner; `PIPELINE_AUTHORITY_FIELDS`/`PIPELINE_AUTHORITY_RELATIONSHIPS`), catalog_reconcile.py:201 (the one installed call site), and tests/standard_names/test_import_write_authority.py:14 and tests/standard_names/test_pipeline_authority_guard.py:11 (existing guard tests); the plan should extend `refuse_pipeline_authority_loss`'s authority field set to cover `origin` where the catalog is the caller, rather than fork a parallel import guard",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:14266",
+      "id": "duplicate_owner-2",
+      "reason": "the author must reconcile the two rules (does a pipeline-generated null recover to `active` or `draft`?) before any node writes status, or recovery will fight the standing reconciler.",
+      "text": "\u00a73's paired claim that \"status, cleared by the same import and null on 978 identities, is recovered in the same pass\" duplicates `reconcile_catalog_status`, which already sets every null `status` to `draft` (and handles superseded/exhausted); the plan proposes to recover status from generation evidence, which contradicts the existing owner's rule (approval is the sole writer of `active`; null is a draft), so a second status writer would disagree with the installed one",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/catalog_import.py:51",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added refusal surface in its own text, either by naming the existing refusal it installs or by stating why a new one is required.",
+      "text": "\u00a74 adds a refusal family (\"A catalog round-trip ... [is] entitled to nothing else on the editorial axis\") and names no existing refusal it retires, merges, or extends, nor why nothing can be, against a supplied `refusal_families` count of 0; the same refusal is already raised by `record_catalog_import_provenance`'s `ValueError` on an empty id and by `refuse_pipeline_authority_loss`'s `PipelineAuthorityError`",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "332bac85e08593b89f983c7a0ba4a9dd62d339131e862395b5558c68f4f2ebf8",
+  "plan_slug": "sn-origin-provenance-backfill",
+  "plan_version": 7,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T094115080349-plan-review-of-sn-origin-provenance-backfill",
+  "reviewed_blob_sha": "5622031e46f770e34b3e817216e6af36c2d62fcc",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan proposes no new module; the recovery rule it specifies fits the decision tree `provenance_rebuild.rebuild_provenance` already hides (descending anchor authority: recovery map \u2192 surviving scalar \u2192 change history), so nothing new spreads complexity over the same machinery.",
+    "duplicate_owner": "a finding \u2014 \u00a74 re-implements the origin/status write guard whose owner is `imas_codex/standard_names/catalog_import.py:51` (with `protection.py:183` as the shared guard and `catalog_reconcile.py:201` as the installed call site), and \u00a73 re-implements origin/status recovery owned by `graph_ops.reconcile_catalog_edit_origins` and `graph_ops.reconcile_catalog_status`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds a refusal condition (\"import may not touch the editorial axis\") without naming what it retires or merges, or why nothing can be, even though the same refusal already exists in code.",
+    "reuse_search": "a finding \u2014 the design adds an origin/status recovery rule and an import write guard without citing the existing `reconcile_catalog_edit_origins`, `reconcile_catalog_status`, `rebuild_provenance`, or `refuse_pipeline_authority_loss` in imas_codex/standard_names/, all of which already do the named jobs.",
+    "thin_wrapper": "a finding \u2014 \u00a74 adds a guard over catalog writes and does not say why `catalog_import.record_catalog_import_provenance` (the existing allow-list boundary) or `protection.refuse_pipeline_authority_loss` cannot be extended to carry it."
+  },
+  "section_digests": {
+    "_document": "5c867e67a262e5b8bf3e87d98f8c8af426a535aebc1b3bcd5e796dfc7838052c",
+    "s1": "76e3c407a84d4c2ef1fe6d05d500cab51290f9b1c601520005ce52e131fafe83",
+    "s2": "fcd769b8913819a26c4f855eef175daf3b44fc8aa0b6490f380c6d67ef3fb25a",
+    "s3": "f88f4f8a9f9a74b72bf659f0db983836c16f16d7af51ccd381a6858ae9b5bfc5",
+    "s4": "3539356d463c6a86f8c5bad96e4160143cb815a4de566c5dab2a5899a91430ec"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.097546+00:00"
+}

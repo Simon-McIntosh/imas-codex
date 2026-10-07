@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T10:13:42.269Z",
+  "dispatched_at": "2026-10-06T09:58:52Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/export.py:2450 (`_MANIFEST_GENERABILITY_MECHANISMS`), :2465 (`_manifest_source_mechanism`), :2783 (`_source_disposition`), :788 (`_has_producing_source`), :808 (`_classify_export_population`); and the \u00a72 eligibility census docs/evidence/unbound-source-backlog/eligibility-census.md:41",
+      "id": "duplicate_owner-1",
+      "reason": "the author should extend the owner (`classify_parked_source` / one shared source-disposition module) with the manifest-facing members and make `_manifest_source_mechanism` and `_classify_export_population` call it, rather than maintain a parallel vocabulary whose divergence the plan is already repairing by hand.",
+      "text": "the plan builds a per-source disposition vocabulary and classifier in `export.py` (recorded_refusal, refusal_cause_not_recorded, attempt_budget_exhausted, terminal_identity_unusable, identity_not_carried, composition_not_scheduled, waived) while the graph already owns a total, closed per-source disposition classifier with near-identical members at imas_codex/standard_names/graph_ops.py:11405 (`CAP_PARKED_DISPOSITIONS`: name_produced, upstream_quantity_removed, vocabulary_gap, attempt_budget_exhausted, compose_not_applicable, cause_not_recorded) and :11431 (`classify_parked_source`) with its writer :11519 (`record_parked_dispositions`) \u2014 the two vocabularies map onto each other (cause_not_recorded\u2194refusal_cause_not_recorded, attempt_budget_exhausted identical, compose_not_applicable\u2194composition_not_scheduled, vocabulary_gap\u2194recorded_refusal) and the plan's \u00a76 defect 4 \u2014 the lost-cause sentinel mapped to `composition_not_scheduled`, \"its opposite\" \u2014 is exactly the drift two owners produce; `_has_producing_source` is a second copy of the graph's \"name is entailed\" predicate (producer edge or live structural child) that `_structural_accept_route` (graph_ops.py:26752) already defines, which the plan verified \"against four independent sites\" rather than calling one; and the \u00a72 census re-implements the pipeline admission gates by its own admission (eligibility-census.md:41) and reports 140 rows where its vocabulary disagrees with the recorded reason",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "927e05edd42fc39b4ee2790b67a2b3d50f10de0c0959c4a02fe10e75cbf2b2a3",
+  "plan_slug": "unbound-source-backlog",
+  "plan_version": 36,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T095843049424-plan-review-of-unbound-source-backlog",
+  "reviewed_blob_sha": "1d6d993ee6116f436645a42fa52013605d39abf1",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module was created; the added behaviour is folded into the export owner behind one interface, `describe_manifest_generability` (imas_codex/standard_names/export.py:2496), which hides the mechanism ladder, the disposition derivation and the carried/uncarried partition. The supporting functions build a ladder (record \u2192 `_source_disposition` \u2192 `_manifest_source_mechanism` \u2192 aggregate), not a spread of parallel wrappers over the same call.",
+    "duplicate_owner": "a finding \u2014 the plan adds a second per-source disposition classifier and a second closed disposition vocabulary inside `export.py`, beside the classifier the graph already owns, and the plan's own \u00a76 defect 4 is the divergence between the two vocabularies.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every addition in the design is an underscore-private function, an internal reason string, or a data declaration (waived_sources.yaml), none of which adds to the four counted families.",
+    "reuse_search": "pass \u2014 the plan searched the two repositories it names: the export-surface reuse map (docs/evidence/unbound-source-backlog/export-surface-reuse-map.md) and the figure audit record the per-symbol reuse map, and the \u00a76 repairs cite exact file:line reads (export.py:617-640 producer-flag projection; graph_ops.py:26690 structural source_free at :26752 `_structural_accept_route`; graph_ops.py:12893 `fetch_manifest_source_release_rows`), so the producer predicate reuses flags the population query already fetched rather than adding a query.",
+    "thin_wrapper": "pass \u2014 the `manifest_generability` gate (export.py:3517) is not a thin layer over `manifest_source_accounting` (export.py:3488): the plan states in its own text that the accounting gate closes on record count and passes an excluded source, and the new gate carries the per-source mechanism verdict, so it adds a refusal the existing gate cannot express. The waiver declaration is a data file, not a wrapper."
+  },
+  "section_digests": {
+    "_document": "60011e45c7d91a3d01b4b2d9f24c823775d74528574ee11ba8d2c3ee3098c767",
+    "s1": "f2683ed5daa6ee8482f6d9c9549b25bf95354db337497149c518fe46c03c179e",
+    "s2": "c3fd17b967793ec6429387ed666764720f75cdf9ab09902f706967c2fb84d709",
+    "s3": "865404cb2636ed3907b168eecedc6d99953b2d940e1ab70991d7ec52ffe0403d",
+    "s4": "73b91ff2cefbc80b4266c006b5257126ecd25737aec4365ff4b6018bf14afd4d",
+    "s5": "2af53f7c4c6fc8e5cece244f8eae1e71599216695495bfea5ab9c6584090c9dd",
+    "s6": "da9980e648716fd58ac2959dd05b991bfded713a00b3f2909a4cea0cd829f309"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.147005+00:00"
+}

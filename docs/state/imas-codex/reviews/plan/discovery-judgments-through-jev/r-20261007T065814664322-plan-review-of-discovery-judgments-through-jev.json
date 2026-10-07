@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T07:11:52.582Z",
+  "dispatched_at": "2026-10-07T06:58:24Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/search_tools.py:1429",
+      "id": "duplicate_owner-1",
+      "reason": "the section should name `_search_code` as the code-search owner and either route `find_code` through `rerank_candidates` or state why the two code paths may return different orders.",
+      "text": "\u00a79 (\"`_search_code` and `_search_docs` rerank their top candidates through `rerank_candidates`\") extends `_search_code` (with `_vector_search_code_chunks` at `imas_codex/llm/search_tools.py:1531`) while leaving the second agent-facing code search, `find_code` at `imas_codex/graph/domain_queries.py:439` \u2014 registered for agents in the REPL registry at `imas_codex/llm/server.py:1586` \u2014 un-reranked, though it runs its own vector search over the same `code_chunk_embedding` index and returns candidates `ORDER BY score DESC`; the third ranked entry point, `_search_signals` at `imas_codex/llm/search_tools.py:75` (tool at `imas_codex/llm/server.py:2385`), is likewise left out, though its different modality may be a deliberate exclusion. After \u00a79 the same code query is answered by two owners (`_search_code` and `find_code`), only one of which reranks, so they will disagree on ordering",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "baea38269d25d4ac91633c6d4bba1c978109521459ed611e0a1d96e0321dcb07",
+  "plan_slug": "discovery-judgments-through-jev",
+  "plan_version": 30,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T07:13:09.460417+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T07:13:09.460417+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-discovery-judgments-through-jev.v30.json",
+  "review_run_id": "r-20261007T065814664322-plan-review-of-discovery-judgments-through-jev",
+  "reviewed_blob_sha": "56b16984e59532369b3f8ca78d5f33d1865d0570",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one function, `rerank_candidates`, hides pool sizing, per-candidate state construction, the concurrency and wall-time bound, the cost total and the position-preserving failure merge behind a single call both tools make, over `decide_batch`.",
+    "duplicate_owner": "a finding \u2014 \u00a79 reranks one of two agent-facing code searches over the same `code_chunk_embedding` index and leaves the other, `find_code`, un-reranked, so the same code query will return differently-ordered results through the two paths.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a79 states it adds one module and one function, that the plan has one decision loop (the merge of the per-pipeline decision loops) and that the rerank adds no seat by reusing `discovery-relevance`, so it accounts for its added surface and the earlier seat finding is answered by removal.",
+    "reuse_search": "pass \u2014 \u00a79 cites both call sites by file:line (`imas_codex/llm/search_tools.py:683` and `:1429`), the existing seat (`discovery-relevance`, `imas_codex/settings.py:181`) and `score_composite`, and no rerank mechanism pre-exists (a grep for rerank finds only `sorted()` comments at `imas_codex/search/engines/hybrid_engine.py:87` and `imas_codex/search/search_strategy.py:454`), so `rerank_candidates` is not a rebuild of existing machinery.",
+    "thin_wrapper": "pass \u2014 `rerank_candidates` is not a bare forward to `decide_batch`; it adds query-plus-candidate state building, a pool larger than the returned window, and a failure path that returns the embedding order unchanged, none of which `decide_batch` (concurrency, budget, cost, None-on-failure) provides."
+  },
+  "section_digests": {
+    "_document": "0f95ea8f1eb298f9bf106cfadcf390c9b11200fd75efb6b4726cd67c616e7a51",
+    "s1": "e6ed0dfe853f3f242923d7b9bca83fb125586f4f1620d4a6becb8392c02c5fe7",
+    "s10": "90c0038b2e3ee1f52a792eaf54834086ddeceb46b160ae70554db5fdb5bf8de1",
+    "s11": "64c3adbcbcb984ce3247ada0491a64d7ffee9b6d6a6a09b35e47fe9925d4090e",
+    "s12": "23574d65acadb53959590a337a85547278ce3be1d3defd4fb37757608100ef48",
+    "s2": "3954043ce6681dd06ada6f055e557149c56b5a63b9ce7d9598401861d4607af1",
+    "s3": "881cf9644b756f7a1e700bae5301fba483a145a347f2b4e0ff01e65b055955fc",
+    "s4": "ec02f698f7539ba44cea1235ecc63eafc4f6401062cff4d0eaf6781b80bf4485",
+    "s5": "30921946c9fad0b75ae7d952e90b33b69f003a24aeff996838a5667f54877b2e",
+    "s6": "597594c4c02e7635ea02376655d175f85a55bc27850abada9847438b56c7faf3",
+    "s7": "65815dcec23706975640bf842758839232a604a86ca763c940b639b3af0dae0e",
+    "s8": "2995253050e0a467fb6eff3f70e71e0d3abf78c06d05b28020695df8f311e85a",
+    "s9": "57558d8283ada7f4cdb14c925a3a9ecea08ae0a20b5973d9ab178c4d5b45e3d8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T07:13:03.920335+00:00"
+}

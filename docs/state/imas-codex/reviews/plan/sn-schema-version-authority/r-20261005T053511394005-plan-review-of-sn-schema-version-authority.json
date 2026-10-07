@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:45:15.728Z",
+  "dispatched_at": "2026-10-05T05:35:14Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/grammar_sync.py:144",
+      "id": "reuse_search-1",
+      "reason": "the plan's \"missing third member\" framing is wrong; it is a generalisation of a mechanism that exists, and the plan should say so and reuse it.",
+      "text": "the existing `grammar_content_digest()` already digests authority source canonically with an mtime-signature cache, and `imas_codex/cli/sn.py:1315` `_auto_sync_grammar()` already compares the installed digest against a stored `ISNGrammarVersion.content_digest` at startup; the plan proposes the same mechanism and cites neither.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/grammar_sync.py:144",
+      "id": "duplicate_owner-1",
+      "reason": "two parallel authority-digest implementations drift; the honest change is to factor `grammar_sync.py`'s hasher into a shared helper and register the schema alongside DD/grammar.",
+      "text": "the plan adds a second digest/store/compare/refuse path beside the owner (`grammar_content_digest` + `_finalise_active_version` + `_auto_sync_grammar` at `imas_codex/cli/sn.py:1315`) instead of extracting the shared helper and extending it to the LinkML schema authority.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/schema.py:7",
+      "id": "thin_wrapper-1",
+      "reason": "naming the extension point converts a new subsystem into a small addition to an existing owner.",
+      "text": "the design's digest function and connect-time comparison are a thin layer over the existing synchronizer, and the plan does not justify why `GraphSchema` (the declared \"single source of truth for the graph structure\") and the `gen_schema_context.py` source list cannot be extended to emit the digest.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/gen_schema_context.py:47",
+      "id": "deep_module-1",
+      "reason": "the plan should name one owner (e.g. a shared authority-digest helper under `imas_codex/graph/`) that all three call, rather than leaving the surface undefined.",
+      "text": "no module is named to own the digest; it must be emitted by the generator that already enumerates the schema sources, stored via the grammar-sync finalise path, and read by `AgentsServer.__post_init__` (`imas_codex/llm/server.py:1830`), so the one concept is split across three call sites.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/models.py:3947",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the interface surface it adds, and here the surface is reducible to a field/registration on an existing authority node.",
+      "text": "\u00a75 adds a new node type and a new refusal family without stating what they merge with or retire; the node shape it describes is already `ISNGrammarVersion.content_digest` (same field semantics) and the refusal extends the existing fail-closed synchronizer behaviour.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b8eae4f2c81339a2f51a24e9f0fd58a4e58affbd5bde8e248fc88a460a896e88",
+  "plan_slug": "sn-schema-version-authority",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053511394005-plan-review-of-sn-schema-version-authority",
+  "reviewed_blob_sha": "b7112d623460060d8581f6892e7dd3f3449674e9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the design distributes one concept (canonicalise\u2192hash\u2192store\u2192compare\u2192refuse) across schema generation, a node write, and a server connect check with no named owner, while the schema owner `imas_codex/graph/schema.py` (`GraphSchema`, \"single source of truth for the graph structure\") is never cited.",
+    "duplicate_owner": "a finding \u2014 the digest-and-reconcile-at-startup mechanism already has an owner to extend, `imas_codex/standard_names/grammar_sync.py:144`, with its startup driver in `imas_codex/cli/sn.py:1315`; the plan proposes a second mechanism beside it.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 adds a new graph node type and a new refusal family (server refuses to serve on mismatch) without naming what either merges with or retires, or stating why nothing can be \u2014 the node shape it describes already exists as `ISNGrammarVersion.content_digest` and the refusal could extend that family.",
+    "reuse_search": "a finding \u2014 the plan asserts the LinkML schema has \"no such node and no digest anywhere\" and cites only the passive `DDVersion`, missing the existing digest-source-and-compare-at-startup mechanism in `imas_codex/standard_names/grammar_sync.py:144` (`grammar_content_digest`) + `imas_codex/cli/sn.py:1315` (`_auto_sync_grammar`) and the source enumeration already in `scripts/gen_schema_context.py:47`.",
+    "thin_wrapper": "a finding \u2014 the proposed schema digest function and startup comparison are a parallel thin re-implementation of `grammar_content_digest()` and the `_auto_sync_grammar()` synchronizer; the plan does not say why those cannot be generalised."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.136031+00:00"
+}

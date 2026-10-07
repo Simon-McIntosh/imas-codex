@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:36:43.253Z",
+  "dispatched_at": "2026-10-06T09:20:05Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/protection.py:309",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should name one predicate as the owner of \"protected name\" and derive the other from it, instead of shipping two predicates a future reader must reconcile.",
+      "text": "the plan's \u00a73 requirement 2 routes publication-state refusal through `filter_protected` \"if that function can express it\" but the guard it actually adds, `automatic_deletion_protections` (protection.py:86), defines its own eight-clause protected predicate (name_stage=approved, catalog_pr_number, catalog_merge_commit_sha, catalog_commit_sha, exported_at, unchanged_ratification, content_edit, recorded_spend) while `_fetch_catalog_edit_names` (protection.py:309, reached only via `filter_protected` at :238) already owns the same concept as a single `name_stage='approved'` test \u2014 two definitions of \"catalog-protected name\" now live in one file and disagree on every input; the plan's own \u00a78 records the disagreement (\"filter_protected ... returns the empty set for every input\") yet the design names no single owner to extend",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/paid-identity-deletion-protection.html#s4",
+      "id": "interface_budget-1",
+      "reason": "",
+      "text": "\u2014 \u00a74 adds a new CLI surface (`sn restore compose` with `--origin`, `--identity`, `--rename-counterpart`, `--output`; `sn restore apply` with a digest pin and a required reason, per imas_codex/cli/sn.py:8546) and a new refusal family (`ProtectedDeletionError`, `SignedManifestConflict`, `SignedManifestAuthorityError`) without naming anywhere in its own text what it retires, merges, or consumes from an existing family, or why nothing can be \u2014 the two subcommands merely split a two-subcommand group over the same `apply_signed_manifest` call; WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: the section must account for the interface surface it adds, and here the honest accounting is either that the two subcommands merge or that the refusal family is the existing signed-manifest boundary rather than a new one.",
+      "type": "interface_budget",
+      "would_change": null
+    }
+  ],
+  "plan_fingerprint": "1cc7311cbdf1748865e0e500dd6fda761386f21177c5858c63eaadd3acb0bd6f",
+  "plan_slug": "paid-identity-deletion-protection",
+  "plan_version": 76,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T091952134432-plan-review-of-paid-identity-deletion-protection",
+  "reviewed_blob_sha": "ee844e04be1fb594ba4830de55964f00fa5c1b2d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the restore hides the create-identity, per-type-recreate and parity-refusal behaviour behind one transaction (`_apply_archive_reconstruction`, reached through `apply_signed_manifest`), and the guard hides spend/publication/ceiling behind `automatic_deletion_protections` at protection.py:86.",
+    "duplicate_owner": "a finding \u2014 the plan's guard adds `automatic_deletion_protections` (protection.py:86) as a second, independent definition of \"catalog-protected name\" beside the existing owner `_fetch_catalog_edit_names` (protection.py:309), and the two disagree.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds a `sn restore` CLI group and a refusal family without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the design sections cite the machinery they extend (protection.py's `filter_protected`/`refuse_protected_automatic_deletion`, `deletion_change_cypher` in provenance_lifecycle.py, `_apply_archive_reconstruction`, `start_temp_neo4j` at temp_neo4j.py:207, and `sn run --focus`), and \u00a74 carries explicit reuse maps (6 boundaries, 43 file:line anchors; restore-reuse-map.md) rather than proposing parallel machinery.",
+    "thin_wrapper": "pass \u2014 the restore CLI is a wrapper over `apply_signed_manifest`, and the plan states why the existing machinery could not be extended (the adapter was reachable only programmatically, its sole committed caller the test module), which is the justification the item requires."
+  },
+  "section_digests": {
+    "_document": "abd96668c888157451195ca92caf673255c08cb19977f353aa4ecd69217fe04d",
+    "s1": "1323752da9edc2d1df9a2fe431ef341d46833967d490882f20ae518deab7ad1c",
+    "s2": "9d62c76b8d290e0a2ddd28197270638d09c5ce548c7235188d3a174797a6461a",
+    "s2b": "b523068dd1499d8bb718a73e10b5b6e5058ed72121e94f47cefd73c5eb9b5ee9",
+    "s3": "727ac207b6b3a339849dfa5d70c02cda98e36f687c40f821ff7473cf21590071",
+    "s4": "f29dc82e54d3125d0863aeb5f9abdd444eab05ae44a02a8489ae37d8e709de2a",
+    "s5": "d9c5e265e24d2c1a3719856cd6be5c10b7b233c004be59c5537d63f875fa66f8",
+    "s6": "fd3b72f47dbe17832531cc078f7bbd0253a3f24640cced1f2298aa730a7fea38",
+    "s7": "679e1cf90168b86a1dfc4a759518decace4e4a24bbef6bb48444f27edf05c254",
+    "s8": "dfc03e249b1aa972517034dc765c103e6dbc510fbb560e6daedcefc903b56674"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.038607+00:00"
+}
