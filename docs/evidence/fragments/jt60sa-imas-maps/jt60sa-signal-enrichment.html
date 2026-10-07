@@ -1,0 +1,90 @@
+<!-- JT-60SA signal enrichment: four foreground passes of
+     `imas-codex discover signals jt-60sa --enrich-only --time 8 --cost-limit 10`
+     against the live graph, run in the mapping-20261006 worktree at base
+     0831f86. Pass 1's preflight created the 1,969 one-member SignalSources
+     (280 -> 2,249). Enriched SignalSources rose 13 -> 953; watched the node's
+     50-minute stop, so 1,296 sources remain. Counts and logs:
+     ~/.config/reckon/crew/runs/r-20261007T114010863641-jt60sa-signal-enrichment/{counts.py,counts-before.log,counts-after1.log,counts-after2.log,counts-after3.log,counts-after4.log,pass1.log,pass2.log,pass3.log,pass4.log,context-quality.log} -->
+<section id="jt60sa-signal-enrichment" data-reckon="evidence">
+  <h2 id="jt60sa-signal-enrichment-heading">JT-60SA signal enrichment — four passes of enrich-only</h2>
+
+  <p id="jt60sa-signal-enrichment-intro">
+    Each pass ran
+    <code>imas-codex discover signals jt-60sa --enrich-only --time 8 --cost-limit 10</code>
+    in the foreground against the live graph. The pass's preflight created the
+    one-member SignalSources for the 1,969 ungrouped signals, so the source
+    total rose from 280 to 2,249 before any enrichment work. Enrichment
+    language calls run on the local <code>discovery-describe</code> seat
+    (<code>local/deepseek-v4.1-flash</code> via the ambix-local router) at
+    <code>$0.0000</code>. The cost each pass reports is the Jev rerank of the
+    retrieved code and wiki context.
+  </p>
+
+  <table id="jt60sa-signal-enrichment-counts">
+    <caption>SignalSource and FacilitySignal state before and after four passes</caption>
+    <thead>
+      <tr><th>measure</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>SignalSource total</td><td>280</td><td>2,249</td></tr>
+      <tr><td>SignalSource enriched</td><td>13</td><td>953</td></tr>
+      <tr><td>SignalSource not enriched</td><td>267</td><td>1,296</td></tr>
+      <tr><td>FacilitySignal total</td><td>6,298</td><td>6,298</td></tr>
+      <tr><td>FacilitySignal discovered</td><td>5,534</td><td>3,439</td></tr>
+      <tr><td>FacilitySignal checked</td><td>763</td><td>2,859</td></tr>
+      <tr><td>FacilitySignal failed</td><td>0</td><td>0</td></tr>
+      <tr><td>claimable signals (standalone / representative, unclaimed)</td><td>2,236</td><td>1,256</td></tr>
+    </tbody>
+  </table>
+
+  <table id="jt60sa-signal-enrichment-passes">
+    <caption>Per pass: enriched signals, checked signals, Jev rerank cost, wall time</caption>
+    <thead>
+      <tr><th>pass</th><th>enriched</th><th>checked</th><th>cost (USD)</th><th>time (s)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>978</td><td>761</td><td>0.07</td><td>563.5</td></tr>
+      <tr><td>2</td><td>965</td><td>665</td><td>0.09</td><td>506.1</td></tr>
+      <tr><td>3</td><td>487</td><td>435</td><td>0.08</td><td>499.8</td></tr>
+      <tr><td>4</td><td>930</td><td>690</td><td>0.07</td><td>510.2</td></tr>
+      <tr><td><strong>total</strong></td><td><strong>3,360</strong></td><td><strong>2,551</strong></td><td><strong>0.31</strong></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p id="jt60sa-signal-enrichment-cost">
+    Jev rerank decision spend for the four passes totals <strong>USD 0.31</strong>,
+    against the plan's <strong>USD 50</strong> cap and the USD 10 per-pass cap.
+    Local enrichment calls were free. No pass reached either cap; each stopped
+    on its 8-minute time limit with work still claimable.
+  </p>
+
+  <p id="jt60sa-signal-enrichment-context">
+    No source was enriched with no retrieved context. Every enriched signal
+    carries <code>context_quality</code> <code>high</code> (2,641 signals) or
+    <code>medium</code> (218); the enriched-source distribution is
+    <code>high</code> 836 / <code>medium</code> 117, with no empty tier. Each
+    pass retrieved 5 facility wiki chunks (conventions, coordinates). Two
+    context reranks were partial — the facility-shape query kept 1 of 27
+    candidates and the CAM-diagnostic query kept 9 of 23 in embedding position
+    because the 5.0 s rerank budget expired, so those unscored candidates
+    still used embedding order.
+  </p>
+
+  <p id="jt60sa-signal-enrichment-failures">
+    No FacilitySignal and no SignalSource is left in a failed state
+    (<code>failed</code> = 0 before and after). Three transient per-call errors
+    were retried to success within their pass and left nothing behind: one
+    <code>decisions endpoint returned HTTP 529</code> (pass 1), and LLM
+    responses that failed Pydantic parsing for <code>SignalEnrichmentBatch</code>
+    and <code>SignalSourceCodeUnwindBatch</code> (control character in JSON).
+    The 1,296 sources still not enriched are unstarted work bounded by the time
+    limit, not failures.
+  </p>
+
+  <p id="jt60sa-signal-enrichment-incomplete">
+    The node stopped at its 50-minute mark, so enrichment is <strong>not
+    complete</strong>: 953 of 2,249 sources read enriched and 1,256 signals
+    remain claimable. Continuing needs more passes of the same command; the
+    cost to finish at the observed ~USD 0.08 per pass is well inside the cap.
+  </p>
+</section>
