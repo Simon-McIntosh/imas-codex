@@ -1,0 +1,154 @@
+<section id="reconstruction-db-scope">
+  <h2 id="reconstruction-db-scope-title">Code triage asks whether a file reads or writes a reconstruction database</h2>
+  <p id="reconstruction-db-scope-question">
+    Code discovery's triage question set gains a fifth scope question,
+    <code>reads_or_writes_reconstruction_db</code>, in
+    <code>imas_codex/llm/prompts/code/triage.md</code>. The nouls sit outside
+    the template's <code>with_content</code> guard, so one addition reaches both
+    arms: the names arm and the content arm ask the identical set. The wording
+    separates the reader, writer or interface that loads or stores
+    reconstruction-result records — the EQDBMS <code>EQDBGET</code> interface,
+    the <code>eqrdNN</code> readers, the <code>eqwtNN</code> writers and the
+    <code>_BF</code> field-list includes that name the stored fields — from
+    computing the reconstruction itself, which the simulation question already
+    marks. Reading a stored equilibrium or q-profile as an input to analysis or
+    mapping is in scope and is explicitly not the same as computing it.
+  </p>
+  <p id="reconstruction-db-scope-wire">
+    <code>SCOPE_NOULS</code> in <code>imas_codex/discovery/code/scorer.py</code>
+    now carries five names, so <code>score_composite</code> (<code>triage_relevance</code>
+    / <code>scope_relevance</code>) is the largest of five. The answer is
+    recorded through <code>_RELEVANCE_FIELDS</code> as
+    <code>relevance_reconstruction_db</code>, declared in
+    <code>imas_codex/schemas/facility.yaml</code> and listed in
+    <code>RELEVANCE_FIELDS</code> in <code>imas_codex/discovery/base/reset.py</code>;
+    the name-stage reset clears it beside the other four noul fields. The role
+    choice and its fixed probability order are untouched. A new
+    <code>CODE_RESET_SPECS</code> target returns name-stage skipped
+    non-duplicate files to the state the names claim takes
+    (<code>status='discovered'</code> with the relevance fields cleared). Its
+    <code>extra_filter</code> AND-narrows the skipped set with
+    <code>n.relevance_stage = 'name'</code> and
+    <code>NOT coalesce(n.skip_reason, '') STARTS WITH 'duplicate'</code>: no
+    <code>source_filter</code>, so the status match is not OR-widened, and no
+    <code>post_cypher</code>, so no cascade. The CLI needs no change — it
+    resolves <code>--reset-to</code> through <code>CODE_RESET_SPECS</code>.
+  </p>
+  <p id="reconstruction-db-scope-evidence">
+    Gate (exit <strong>0</strong>, 83 passed, on this node's compute allocation):
+    <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+    PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider
+    tests/discovery/test_code_relevance.py tests/discovery/test_reset.py
+    tests/llm/test_prompt_schema_coverage.py
+    tests/discovery/test_code_facet_admission.py
+    tests/discovery/test_code_ingested_rejudge.py</code>.
+    <code>tests/discovery/test_code_relevance.py</code> pins the five-question
+    set in both arms, the composite as the largest of five (0.85 from a
+    reconstruction answer of 0.85 with the other four low), and the field
+    written by the names arm; <code>tests/discovery/test_reset.py</code> pins
+    the name target's <code>discovered</code>/<code>skipped</code> pair, its
+    AND-narrowed rendered query, its cleared fields and its absent
+    <code>source_filter</code> and <code>post_cypher</code>;
+    <code>tests/llm/test_prompt_schema_coverage.py</code> renders the template
+    in both arms and asserts every scope question is asked.
+    <code>build-models --force</code> regenerated the derived models with
+    <code>relevance_reconstruction_db</code> present (never staged). Each
+    changed statement was <code>EXPLAIN</code>ed against the live graph — the
+    name reset, the names-arm write and the content-arm write all returned ok.
+    Negative control (log recorded): a scratch copy of the package with the
+    noul removed from <code>SCOPE_NOULS</code> runs the composite test and exits
+    <strong>1</strong>, first failure
+    <code>test_composite_is_the_largest_of_five_nouls</code> — the composite
+    falls to the largest of four, <code>0.2 != 0.85</code> — which the
+    unmodified head does not fail.
+  </p>
+  <p id="reconstruction-db-scope-live">
+    Live check, no graph write, through the same <code>discovery-relevance</code>
+    seat and the names arm's question set: the 31 JT-60SA
+    <code>CodeFile</code>s under
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/</code> and 20 files
+    previously judged <code>simulation_or_solver</code> (of 721 at that role).
+    The EQDB interface set scores <strong>0.67 to 0.96</strong> on the new noul
+    and every file crosses the 0.40 triage gate — <strong>31 of 31</strong>,
+    against <strong>18 of 31</strong> under the pre-change four-noul composite,
+    so these interface files were partly below the gate before this question
+    existed. The 20 solver files score <strong>0.19 to 0.34</strong> on the new
+    noul, every one below the gate: the question separates the interface from
+    the solver with no overlap. Their composite stays above 0.40 because the
+    other scope nouls already fire for a solver that reads the equilibrium and
+    maps it to IMAS, so on this set the composite is not the discriminating
+    signal the new noul is; the change preserves that existing admission while
+    adding a field that names the reconstruction-database readers.
+  </p>
+  <figure>
+    <img src="/jt60sa-discovery-completion/figures/reconstruction-db-scope/reconstruction-db-separation.svg"
+         alt="A strip plot of the reads_or_writes_reconstruction_db probability for the 31 EQDB interface files, from 0.67 to 0.96, and the 20 plasma-reconstruction solver files, from 0.19 to 0.34, with the 0.40 triage gate drawn between the two bands"/>
+    <figcaption>The new scope noul on live JT-60SA code files, one mark per file.
+      The EQDB interface files sit above the 0.40 triage gate and the
+      plasma-reconstruction solvers below it, so the question separates the
+      reader or writer of reconstruction-result records from the code that
+      computes the reconstruction.</figcaption>
+  </figure>
+  <p id="reconstruction-db-scope-table">Per-file results. Composite (4) is the same request scored by the pre-change four-noul set.</p>
+  <table id="reconstruction-db-scope-eqdb">
+    <thead><tr><th>file</th><th>reconstruction-db noul</th><th>composite (5)</th><th>composite (4, pre-change)</th><th>role</th></tr></thead>
+    <tbody>
+      <tr><td><code>eqdb_get.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.39</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdb_get_rev.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.42</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdb_io.f</code></td><td>0.96</td><td><strong>0.96</strong></td><td>0.41</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdb_set.f</code></td><td>0.92</td><td><strong>0.92</strong></td><td>0.38</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdbconv.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.34</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdbio.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.36</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdbio_rev.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.44</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdblist.f</code></td><td>0.90</td><td><strong>0.90</strong></td><td>0.41</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqdblist_rev.f</code></td><td>0.91</td><td><strong>0.91</strong></td><td>0.40</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd10.f</code></td><td>0.96</td><td><strong>0.96</strong></td><td>0.36</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd11.f</code></td><td>0.96</td><td><strong>0.96</strong></td><td>0.38</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd13.f</code></td><td>0.96</td><td><strong>0.96</strong></td><td>0.44</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd15.f</code></td><td>0.92</td><td><strong>0.92</strong></td><td>0.41</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd2.f</code></td><td>0.94</td><td><strong>0.94</strong></td><td>0.43</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd20.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.33</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd21.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.40</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd22.f</code></td><td>0.93</td><td><strong>0.93</strong></td><td>0.43</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd31.f</code></td><td>0.96</td><td><strong>0.96</strong></td><td>0.43</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd32.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.40</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqrd4.f</code></td><td>0.94</td><td><strong>0.94</strong></td><td>0.38</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt10.f</code></td><td>0.96</td><td><strong>0.96</strong></td><td>0.38</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt11.f</code></td><td>0.94</td><td><strong>0.94</strong></td><td>0.41</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt13.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.42</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt15.f</code></td><td>0.93</td><td><strong>0.93</strong></td><td>0.44</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt2.f</code></td><td>0.94</td><td><strong>0.94</strong></td><td>0.41</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt20.f</code></td><td>0.92</td><td><strong>0.92</strong></td><td>0.33</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt21.f</code></td><td>0.94</td><td><strong>0.94</strong></td><td>0.37</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt31.f</code></td><td>0.93</td><td><strong>0.93</strong></td><td>0.40</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt32.f</code></td><td>0.95</td><td><strong>0.95</strong></td><td>0.35</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>eqwt4.f</code></td><td>0.94</td><td><strong>0.94</strong></td><td>0.41</td><td>infrastructure_or_utility</td></tr>
+      <tr><td><code>ftplistget.f</code></td><td>0.67</td><td><strong>0.67</strong></td><td>0.28</td><td>infrastructure_or_utility</td></tr>
+    </tbody>
+  </table>
+  <table id="reconstruction-db-scope-sims">
+    <thead><tr><th>file</th><th>reconstruction-db noul</th><th>composite (5)</th><th>composite (4, pre-change)</th><th>role</th></tr></thead>
+    <tbody>
+      <tr><td><code>trano2.f</code></td><td>0.22</td><td><strong>0.51</strong></td><td>0.53</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trano_10.f</code></td><td>0.22</td><td><strong>0.52</strong></td><td>0.52</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>traux0.f</code></td><td>0.23</td><td><strong>0.50</strong></td><td>0.49</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trbcsol2z.f</code></td><td>0.23</td><td><strong>0.52</strong></td><td>0.50</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trcoe.f</code></td><td>0.25</td><td><strong>0.56</strong></td><td>0.55</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trerr.f</code></td><td>0.20</td><td><strong>0.42</strong></td><td>0.43</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trgflx.f</code></td><td>0.20</td><td><strong>0.49</strong></td><td>0.49</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trinchk_acm.f</code></td><td>0.20</td><td><strong>0.51</strong></td><td>0.51</td><td>imas_mapping</td></tr>
+      <tr><td><code>trinphe.f</code></td><td>0.26</td><td><strong>0.54</strong></td><td>0.52</td><td>imas_mapping</td></tr>
+      <tr><td><code>trn2eq.f</code></td><td>0.34</td><td><strong>0.48</strong></td><td>0.53</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trn2fp.f</code></td><td>0.23</td><td><strong>0.50</strong></td><td>0.46</td><td>imas_mapping</td></tr>
+      <tr><td><code>trpar.f</code></td><td>0.24</td><td><strong>0.50</strong></td><td>0.55</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trprof.f</code></td><td>0.20</td><td><strong>0.51</strong></td><td>0.53</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trset.f</code></td><td>0.20</td><td><strong>0.50</strong></td><td>0.56</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trsetdt.f</code></td><td>0.24</td><td><strong>0.50</strong></td><td>0.48</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trsvd.f</code></td><td>0.19</td><td><strong>0.47</strong></td><td>0.44</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trsvm.f</code></td><td>0.22</td><td><strong>0.48</strong></td><td>0.45</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trsvq.f</code></td><td>0.20</td><td><strong>0.51</strong></td><td>0.51</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>trswt.f</code></td><td>0.22</td><td><strong>0.50</strong></td><td>0.50</td><td>simulation_or_solver</td></tr>
+      <tr><td><code>xckai_read.f</code></td><td>0.24</td><td><strong>0.43</strong></td><td>0.47</td><td>diagnostic_data_access</td></tr>
+    </tbody>
+  </table>
+</section>
