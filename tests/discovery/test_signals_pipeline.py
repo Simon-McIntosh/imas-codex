@@ -1813,13 +1813,15 @@ class TestSignalPatternDetection:
         ):
             patterns, followers = detect_signal_sources("tcv", min_instances=3)
 
-        # Should detect 1 pattern (GAS_NNN:PARAM:A) with 10 signals
-        assert patterns == 1
-        assert followers == 10  # All 10 signals linked as members
+        # One shared pattern (10 signals) plus the lone signal, which the final
+        # pass gives its own one-member source.
+        assert patterns == 2
+        assert followers == 11  # 10 pattern members + 1 singleton
 
-        # First query: fetch signals, second: ensure_facility, third: create group+members
+        # First query: fetch signals, second: the shared pattern group, third:
+        # the one-member source.
         assert mock_gc.query.call_count >= 2
-        # Verify member_ids were passed (all 10)
+        # Verify member_ids were passed (all 10 of the shared pattern)
         group_call_kwargs = mock_gc.query.call_args_list[1]
         member_ids = group_call_kwargs.kwargs.get("member_ids") or group_call_kwargs[
             1
@@ -1827,7 +1829,7 @@ class TestSignalPatternDetection:
         assert len(member_ids) == 10
 
     def test_detect_groups_below_threshold(self):
-        """Groups below min_instances threshold are not detected."""
+        """Members below the pattern threshold each get a one-member source."""
         from imas_codex.discovery.signals.parallel import detect_signal_sources
 
         # Only 2 signals in the group (below default min_instances=3)
@@ -1848,8 +1850,9 @@ class TestSignalPatternDetection:
         ):
             patterns, followers = detect_signal_sources("tcv", min_instances=3)
 
-        assert patterns == 0
-        assert followers == 0
+        # No shared pattern forms, so every signal becomes a one-member source.
+        assert patterns == 3
+        assert followers == 3
 
     def test_propagate_source_enrichment(self):
         """Enrichment is propagated from representative to group members."""

@@ -1562,6 +1562,12 @@ def detect_signal_sources(
     all member signals via MEMBER_OF relationships. One signal per group
     is designated as the representative (stored on SignalSource.representative_id).
 
+    A final pass gives every signal the threshold left ungrouped a
+    one-member source keyed by the signal itself, with the signal as its
+    Representative. A pattern with fewer than min_instances members still
+    forms no shared group — each of its signals gets its own source — so
+    every discovered signal carries a source for the mapping stages.
+
     Status stays ``discovered`` — no transient status is introduced.
     ``claim_signals_for_enrichment`` skips signals that are MEMBER_OF
     a SignalSource (unless they are the representative) so only
@@ -1612,19 +1618,34 @@ def detect_signal_sources(
         p: sigs for p, sigs in pattern_groups.items() if len(sigs) >= min_instances
     }
 
-    if not multi_groups:
-        return 0, 0
+    # Final pass: every signal the threshold left ungrouped becomes a
+    # one-member source keyed by the signal itself, so each discovered signal
+    # carries a source for the mapping stages to key on. A pattern below
+    # min_instances forms no shared group — each of its signals gets a source
+    # of its own. The key is the accessor, which is unique per facility, so two
+    # signals that share a sub-threshold pattern still get distinct sources.
+    grouped_ids = {s["id"] for sigs in multi_groups.values() for s in sigs}
+    groups: list[tuple[str, str, list[dict]]] = [
+        (f"{facility}:{pattern}", pattern, sigs)
+        for pattern, sigs in multi_groups.items()
+    ]
+    for r in results:
+        if r["id"] in grouped_ids:
+            continue
+        key = r["accessor"] if r["accessor"] is not None else r["id"]
+        groups.append(
+            (f"{facility}:{key}", key, [{"id": r["id"], "accessor": r["accessor"]}])
+        )
 
-    # For each pattern group, create a SignalSource and link all members via MEMBER_OF.
+    # For each group, create a SignalSource and link all members via MEMBER_OF.
     total_members = 0
     with GraphClient() as gc:
         gc.ensure_facility(facility)
-        for pattern, sigs in multi_groups.items():
+        for group_id, group_key, sigs in groups:
             # Representative = first signal alphabetically (deterministic)
-            sigs.sort(key=lambda s: s["accessor"])
+            sigs.sort(key=lambda s: s["accessor"] or "")
             representative = sigs[0]
 
-            group_id = f"{facility}:{pattern}"
             member_ids = [s["id"] for s in sigs]
 
             # Create SignalSource and link all members
@@ -1633,7 +1654,7 @@ def detect_signal_sources(
                 MERGE (sg:SignalSource {id: $group_id})
                 ON CREATE SET
                     sg.facility_id = $facility,
-                    sg.group_key = $pattern,
+                    sg.group_key = $group_key,
                     sg.member_count = $member_count,
                     sg.representative_id = $rep_id,
                     sg.status = 'discovered'
@@ -1647,14 +1668,14 @@ def detect_signal_sources(
                 """,
                 group_id=group_id,
                 facility=facility,
-                pattern=pattern,
+                group_key=group_key,
                 member_count=len(sigs),
                 rep_id=representative["id"],
                 member_ids=member_ids,
             )
             total_members += len(sigs)
 
-    groups_detected = len(multi_groups)
+    groups_detected = len(groups)
     logger.info(
         "Detected %d signal sources for %s: %d members",
         groups_detected,
