@@ -293,26 +293,41 @@ def embed_health_check() -> tuple[bool, str]:
 
 
 def llm_health_check(section: str) -> tuple[bool, str]:
-    """Check LLM proxy health via ``/health/readiness`` (no LLM API calls).
+    """Check the health of the endpoint that a seat's model calls.
 
-    When a LiteLLM proxy is configured (``[llm].location`` is set),
-    probes ``GET /health/readiness`` which checks proxy process health
-    and DB connection only — no upstream LLM API calls are made.
+    When the seat's model is served on an explicitly free local endpoint
+    (``endpoint-class = "local-free"``), the model call goes direct to that
+    endpoint's router rather than through the LiteLLM proxy, so the proxy's
+    readiness says nothing about it: probe the endpoint's own models listing
+    with a ``GET`` instead.
 
-    Falls back to a minimal ``litellm.completion()`` call when no
-    proxy is configured (``location=local``).
+    Otherwise, when a LiteLLM proxy is configured (``[llm].location`` is set),
+    probes ``GET /health/readiness`` which checks proxy process health and DB
+    connection only — no upstream LLM API calls are made. Falls back to a
+    minimal ``litellm.completion()`` call when no proxy is configured
+    (``location=local``).
 
     Args:
         section: Model section to check (a function seat, e.g. discovery-score).
 
     Returns:
-        (healthy, detail) tuple where detail is the proxy location
+        (healthy, detail) tuple where detail is the proxy location or the
+        local endpoint host
     """
     import os
 
-    from imas_codex.settings import get_llm_location
+    from imas_codex.settings import (
+        get_llm_location,
+        is_explicit_free_local_endpoint,
+    )
 
     llm_location = get_llm_location()
+
+    # --- Local-free seat: probe the endpoint the model actually calls ---
+    from imas_codex.settings import get_model
+
+    if is_explicit_free_local_endpoint(get_model(section)):
+        return _probe_local_endpoint_models(section)
 
     # --- Proxy mode: lightweight readiness probe (no LLM API calls) ---
     if llm_location != "local" or os.getenv("LITELLM_PROXY_URL"):
@@ -320,6 +335,48 @@ def llm_health_check(section: str) -> tuple[bool, str]:
 
     # --- Local mode: minimal completion call ---
     return _probe_litellm_local(section)
+
+
+def _probe_local_endpoint_models(section: str) -> tuple[bool, str]:
+    """Probe a seat's local endpoint via its OpenAI-compatible models listing.
+
+    The api-base is read from the seat's resolved model config (the named
+    route in ``[tool.imas-codex.model-routes]``), never a literal, so a serve
+    rotation that moves the route is followed by the check.
+    """
+    import json
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    from imas_codex.settings import get_model_config
+
+    api_base = get_model_config(section).get("api_base")
+    if not api_base:
+        return False, "no local api-base for seat"
+    api_base = api_base.rstrip("/")
+    models_url = f"{api_base}/models"
+    label = urllib.parse.urlparse(api_base).netloc or api_base
+
+    try:
+        req = urllib.request.Request(models_url)
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+            models = data.get("data") if isinstance(data, dict) else None
+            if not models:
+                return False, "local endpoint returned no models"
+            return True, _format_load_detail(label)
+    except urllib.error.HTTPError as e:
+        return False, f"HTTP {e.code}"
+    except urllib.error.URLError as e:
+        reason = str(e.reason).lower()
+        if "refused" in reason:
+            return False, "endpoint refused"
+        if "timed out" in reason or "timeout" in reason:
+            return False, "endpoint timeout"
+        return False, str(e.reason)[:60]
+    except Exception as e:
+        return False, str(e)[:80]
 
 
 def llm_deep_health_check(section: str) -> tuple[bool, str, dict]:
