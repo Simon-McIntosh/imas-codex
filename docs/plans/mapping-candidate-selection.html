@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="92">
+<meta name="plan-version" content="94">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;deferred&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-blocks" content="jt60sa-imas-maps,facility-discovery-sequence">
@@ -556,9 +556,20 @@
                 recording <code>mapping_disposition</code> and <code>mapping_evidence</code>;</li>
               <li>a source with selected edges in <code>magnetics</code> and
                 <code>summary</code> is claimed by each IDS's pass and bound in both, and a
-                second <code>magnetics</code> pass skips it;</li>
-              <li><code>mapping_status</code> reads <code>mapped</code> only after every IDS of
-                the source's selected edges is bound;</li>
+                second <code>magnetics</code> pass skips it. This is driven through
+                <code>map_worker</code> over both IDSs in one run, not through the assignment
+                builder alone: the run's record of handled sources is keyed by IDS and source,
+                and a pass releases its claim when it finishes a source, so the other IDS's pass
+                can claim it;</li>
+              <li><code>mapping_status</code> follows the pipeline's own vocabulary, because
+                <code>MAPS_TO_IMAS</code> bindings are written only when an IDS validates. The map
+                stage sets <code>mapped</code> after generating a section's field mappings, which
+                is what <code>has_pending_validation_work</code> selects. The validate stage sets
+                <code>validated</code> only once every IDS of the source's selected edges is bound,
+                and <code>assigned</code> while one is not. One function owns that rule. Its Cypher
+                is proven by a <code>graph</code>-marked test: a source with selected homes in
+                <code>magnetics</code> and <code>summary</code> reads <code>assigned</code> with one
+                bound and <code>validated</code> with both bound;</li>
               <li>a <code>target_id</code> outside every selected section of that IDS is
                 escalated, and one inside a selected section but outside the selected nodes is
                 kept;</li>
