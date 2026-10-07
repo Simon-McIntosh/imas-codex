@@ -1,0 +1,42 @@
+<section>
+  <h2 id="ingest-retry-code-ingest-reingests-the-failed-files">JT-60SA code re-ingest clears the 29 failed files and settles the two unclaimable ones</h2>
+  <p id="ingest-retry-scope">
+    Operational node. No source or test change. Run single-writer from
+    <code>98dci4-clu-2018</code> (job <code>1277272</code>, in place, no
+    <code>srun</code>) against the JT-60SA hop, after confirming no other
+    <code>discover code jt-60sa</code> process was live. Two commands: a scoped
+    <code>--reset-to scored</code> pass carrying one <code>--path-prefix</code>
+    per failed file's full path, then a second unscoped pass.
+  </p>
+  <p id="ingest-retry-before">
+    <strong>Before.</strong> A bounded read at 2026-10-07T12:06Z returned the
+    JT-60SA CodeFile census below: <strong>29</strong> files at
+    <code>failed</code>, every one carrying the CodeExample duplicate-key
+    refusal on <code>jt-60sa:eqdb_io:e548f073</code> (node 1358),
+    <code>jt-60sa:mdbget:128ebdc3</code> (node 7242) or
+    <code>jt-60sa:setvtcx:be55b2c6</code> (node 10219). Two content-stage files
+    sat at <code>scored</code> with composites 0.80 and 0.75 and
+    <code>line_count</code> 10374 and 10467.
+  </p>
+  <table id="ingest-retry-before-table">
+    <caption>JT-60SA CodeFile status before the run (2026-10-07T12:06Z)</caption>
+    <thead><tr><th>status</th><th>files</th></tr></thead>
+    <tbody>
+      <tr><td>skipped</td><td>1904</td></tr>
+      <tr><td>scored</td><td>723</td></tr>
+      <tr><td>ingested</td><td>552</td></tr>
+      <tr><td>failed</td><td>29</td></tr>
+    </tbody>
+  </table>
+  <p id="ingest-retry-after">
+    <strong>After — in flight.</strong> The scoped reset pass reset exactly 29
+    files (<code>Reset 29 CodeFile nodes to 'scored'</code>). The same command's
+    ingest stage then found a <code>CodeExample</code> already present for each
+    reset file (<code>_check_already_ingested</code>, keyed on
+    <code>facility_id</code> + <code>source_file</code>) and marked all 29
+    <code>ingested</code> without a re-fetch: three batches of 10/10/9, each
+    <code>All files already ingested</code>, 0 chunks. The unscoped second pass
+    that settles the two oversize eslice files as <code>skipped</code> follows.
+    Final counts, chunk coverage and spend are recorded once both passes exit.
+  </p>
+</section>
