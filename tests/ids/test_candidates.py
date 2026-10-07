@@ -236,6 +236,70 @@ def test_gather_ids_context_reads_candidates_from_edges(monkeypatch):
     assert captured["source_ids"] == ["src-1"]
 
 
+def test_section_prompt_lists_candidate_edge_dicts(monkeypatch):
+    """The section prompt reads candidate edge dicts from ``read_candidates``.
+
+    ``gather_ids_context`` stores the edge dicts returned by
+    ``read_candidates`` (``path`` / ``retrieval_score`` / ``documentation``),
+    so ``_prepare_section_context`` must read them as mappings rather than the
+    retrieved ``Candidate`` objects it used to receive.
+    """
+    import imas_codex.ids.mapping as mapping
+    from imas_codex.ids.mapping import _prepare_section_context
+    from imas_codex.ids.models import TargetAssignment, TargetType
+
+    monkeypatch.setattr(mapping, "fetch_imas_fields", lambda *a, **k: [])
+    monkeypatch.setattr(mapping, "fetch_imas_subtree", lambda *a, **k: [])
+    monkeypatch.setattr(mapping, "fetch_source_code_refs", lambda *a, **k: [])
+
+    class _NoVersionTool:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    monkeypatch.setattr("imas_codex.tools.version_tool.VersionTool", _NoVersionTool)
+
+    assignment = TargetAssignment(
+        source_id="src-1",
+        imas_target_path="pf_active/coil",
+        target_type=TargetType.STRUCT_ARRAY,
+        confidence=0.9,
+        reasoning="coil geometry",
+    )
+    context = {
+        "groups": [{"id": "src-1"}],
+        "cocos_paths": [],
+        "existing": {},
+        "dd_cocos": None,
+        "source_candidates": {
+            "src-1": [
+                {
+                    "path": "pf_active/coil/r",
+                    "retrieval_score": 0.83,
+                    "documentation": "Coil R position",
+                },
+                {
+                    "path": "pf_active/coil/z",
+                    "retrieval_score": None,
+                    "documentation": None,
+                },
+            ]
+        },
+        "wiki_context": [],
+        "code_context": [],
+        "semantic_match_matrix": {},
+    }
+
+    result = _prepare_section_context(
+        "jet", "pf_active", assignment, context, gc=object()
+    )
+
+    prompt = result["prompt"]
+    assert "pf_active/coil/r" in prompt
+    assert "pf_active/coil/z" in prompt
+    assert "0.83" in prompt
+    assert "Coil R position" in prompt
+
+
 def test_mapping_module_no_longer_imports_cluster_searcher():
     import imas_codex.ids.mapping as mapping
 

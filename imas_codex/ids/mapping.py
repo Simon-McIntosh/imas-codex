@@ -680,12 +680,10 @@ def gather_shared_context(
         try:
             semantic_match_matrix = compute_semantic_matches(
                 source_descs,
-                "",  # No IDS filter — get matches across ALL IDS
                 gc=gc,
                 k_per_source=20,
                 include_wiki=True,
                 include_code=True,
-                dd_version=dd_version,
                 on_progress=on_progress,
                 precomputed_embeddings=embeddings,
             )
@@ -1227,8 +1225,8 @@ def _prepare_section_context(
     cluster_context = ""
     if source_semantic:
         semantic_context = "Semantic search candidates:\n" + "\n".join(
-            f"  - {cand.hit.path} (score={cand.hit.score:.2f}): "
-            f"{cand.hit.documentation}"
+            f"  - {cand['path']} (score={cand.get('retrieval_score') or 0.0:.2f}): "
+            f"{cand.get('documentation') or ''}"
             for cand in source_semantic
         )
 

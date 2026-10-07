@@ -300,8 +300,14 @@ class TestSelectCandidates:
 
         assert marked == 2
         statement = _normalised(gc)
-        assert "FOREACH (rel IN found | SET rel.route = true)" in statement
-        assert "WHEN matched = $expected THEN 'selected'" in statement
+        assert (
+            "FOREACH (rel IN [x IN found WHERE matched = $expected] "
+            "| SET rel.route = true)" in statement
+        )
+        assert (
+            "FOREACH (rel IN [x IN found WHERE matched = $expected] "
+            "| SET sg.candidate_route = 'selected')" in statement
+        )
         kwargs = gc.query.call_args.kwargs
         assert kwargs["source_id"] == "jet:PF:r"
         assert kwargs["paths"] == [
@@ -319,6 +325,49 @@ class TestSelectCandidates:
                 ["equilibrium/time_slice/profiles_1d/psi", "summary/missing"],
                 gc,
             )
+
+    def test_a_partial_pick_flags_no_edge_and_leaves_the_route(self):
+        """Every write in the statement is guarded by the full match."""
+        gc = _gc_returning([{"matched": 1}])
+
+        with pytest.raises(CandidateWriteError):
+            select_candidates(
+                "jet:PF:r",
+                ["equilibrium/time_slice/profiles_1d/psi", "summary/missing"],
+                gc,
+            )
+
+        statement = _normalised(gc)
+        # No unguarded FOREACH: a partial match writes neither edge nor route.
+        assert statement.count("FOREACH (") == statement.count(
+            "FOREACH (rel IN [x IN found WHERE matched = $expected] |"
+        )
+        assert "SET sg.candidate_route = null" not in statement
+
+    def test_an_empty_pick_is_refused_with_no_query(self):
+        gc = _gc_returning([{"matched": 0}])
+
+        with pytest.raises(CandidateWriteError):
+            select_candidates("jet:PF:r", [], gc)
+
+        assert gc.query.call_count == 0
+
+    def test_a_duplicate_path_marks_one_edge(self):
+        gc = _gc_returning([{"matched": 1}])
+
+        marked = select_candidates(
+            "jet:PF:r",
+            [
+                "equilibrium/time_slice/profiles_1d/psi",
+                "equilibrium/time_slice/profiles_1d/psi",
+            ],
+            gc,
+        )
+
+        assert marked == 1
+        kwargs = gc.query.call_args.kwargs
+        assert kwargs["paths"] == ["equilibrium/time_slice/profiles_1d/psi"]
+        assert kwargs["expected"] == 1
 
 
 class TestCandidateRecordsStrict:

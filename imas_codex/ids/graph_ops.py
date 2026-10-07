@@ -636,25 +636,34 @@ def read_candidates(
 def select_candidates(source_id: str, paths: Iterable[str], gc: GraphClient) -> int:
     """Mark the listed candidate edges selected and set the source's route.
 
-    Flags exactly the edges whose target path is listed — a source's picks may
-    span two IDSs — and sets ``candidate_route`` to ``selected`` in the same
-    statement. The rest of the shortlist is left unchanged, unlike
-    :func:`write_candidates`, which deletes and rewrites every edge. A listed
-    path with no edge is refused with :class:`CandidateWriteError`, and the
-    route is left null so the source is re-judged.
+    All-or-nothing: the listed edges are flagged and ``candidate_route`` is set
+    to ``selected`` in one statement only when every distinct listed path has a
+    MAPPING_CANDIDATE edge. A pick that names a path with no edge, or an empty
+    list, is refused with :class:`CandidateWriteError` and writes nothing at
+    all — no edge flag and no route change — so a refused pick leaves the
+    shortlist exactly as it was. The rest of the shortlist is always left
+    unchanged, unlike :func:`write_candidates`, which deletes and rewrites
+    every edge.
 
     Args:
         source_id: SignalSource ID whose picked edges are marked.
-        paths: IMASNode IDs the reasoning model chose.
+        paths: IMASNode IDs the reasoning model chose. Duplicates are
+            collapsed, preserving order.
         gc: Graph client instance.
 
     Returns:
         The number of edges marked.
 
     Raises:
-        CandidateWriteError: If any listed path has no MAPPING_CANDIDATE edge.
+        CandidateWriteError: If ``paths`` is empty, or if any listed path has
+            no MAPPING_CANDIDATE edge.
     """
-    chosen = list(paths)
+    seen: set[str] = set()
+    chosen = [p for p in paths if not (p in seen or seen.add(p))]
+    if not chosen:
+        raise CandidateWriteError(
+            f"select_candidates needs at least one path for {source_id}"
+        )
     rows = gc.query(
         """
         MATCH (sg:SignalSource {id: $source_id})
@@ -663,9 +672,10 @@ def select_candidates(source_id: str, paths: Iterable[str], gc: GraphClient) -> 
         WITH sg, collect(r) AS rels
         WITH sg, [x IN rels WHERE x IS NOT NULL] AS found
         WITH sg, found, size(found) AS matched
-        FOREACH (rel IN found | SET rel.route = true)
-        SET sg.candidate_route = CASE
-                WHEN matched = $expected THEN 'selected' ELSE null END
+        FOREACH (rel IN [x IN found WHERE matched = $expected] |
+            SET rel.route = true)
+        FOREACH (rel IN [x IN found WHERE matched = $expected] |
+            SET sg.candidate_route = 'selected')
         RETURN matched AS matched
         """,
         source_id=source_id,
@@ -673,14 +683,12 @@ def select_candidates(source_id: str, paths: Iterable[str], gc: GraphClient) -> 
         expected=len(chosen),
     )
     matched = rows[0]["matched"] if rows else 0
-    if matched < len(chosen):
+    if matched != len(chosen):
         raise CandidateWriteError(
             f"selected {matched} of {len(chosen)} MAPPING_CANDIDATE edges for "
             f"{source_id}; a chosen path may have no candidate edge"
         )
-    logger.info(
-        "Marked %d MAPPING_CANDIDATE edges selected for %s", matched, source_id
-    )
+    logger.info("Marked %d MAPPING_CANDIDATE edges selected for %s", matched, source_id)
     return matched
 
 

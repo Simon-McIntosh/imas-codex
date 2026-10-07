@@ -767,13 +767,11 @@ def fetch_cross_facility_mappings(
 
 def compute_semantic_matches(
     source_descriptions: list[tuple[str, str]],
-    target_ids_name: str,
     *,
     gc: GraphClient | None = None,
     k_per_source: int = 5,
     include_wiki: bool = True,
     include_code: bool = True,
-    dd_version: str | int | None = None,
     on_progress: Callable[[str], None] | None = None,
     max_workers: int = 8,
     precomputed_embeddings: Any | None = None,
