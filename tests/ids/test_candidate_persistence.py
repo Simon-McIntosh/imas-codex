@@ -647,6 +647,24 @@ def test_read_and_select_candidates_round_trip():
             ]
             assert write_candidates(source_id, judgments, "escalated", gc) == 3
 
+            # A refused partial pick writes nothing: one listed path has no
+            # edge, so neither the found edge nor the source route may change.
+            # Run before any successful pick so a flag left by an earlier pick
+            # cannot mask a partial write.
+            with pytest.raises(CandidateWriteError):
+                select_candidates(source_id, [third, "no/such/candidate"], gc)
+            refused = {
+                e["path"]: e["route"]
+                for e in read_candidates([source_id], gc)[source_id]
+            }
+            assert refused == {first: False, second: False, third: False}
+            route = gc.query(
+                "MATCH (sg:SignalSource {id: $source_id}) "
+                "RETURN sg.candidate_route AS route",
+                source_id=source_id,
+            )
+            assert route[0]["route"] == "escalated"
+
             edges = read_candidates([source_id], gc)[source_id]
             assert [e["path"] for e in edges] == [first, second, third]
             assert edges[0]["section"] == "/".join(first.split("/")[:2])
@@ -665,9 +683,6 @@ def test_read_and_select_candidates_round_trip():
                 source_id=source_id,
             )
             assert route[0]["route"] == "selected"
-
-            with pytest.raises(CandidateWriteError):
-                select_candidates(source_id, [first, "no/such/candidate"], gc)
         finally:
             gc.query(
                 "MATCH (sg:SignalSource {id: $source_id}) DETACH DELETE sg",
