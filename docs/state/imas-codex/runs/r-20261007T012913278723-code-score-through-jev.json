@@ -1,0 +1,3986 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8858477,
+      "input_tokens_cumulative": 8858477,
+      "output_tokens": 21593,
+      "output_tokens_cumulative": 21593,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1101,
+    "files": 15,
+    "removed": 493
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "__init__",
+        "path": "tests/standard_names/test_dup_guard_integration.py"
+      },
+      "run_function": {
+        "line": 227,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 230
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_graph_start_does_not_read_embedding_compute_config",
+        "path": "tests/cli/test_graph_start_config.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_multiletter_si_units_round_trip",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_leading_named_unit_is_preserved",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "categorizer",
+        "path": "tests/core/test_physics_categorization.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 767,
+        "name": "test_python_tcvpy_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 786,
+        "name": "test_matlab_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_fortran_mds_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_idl_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 838,
+        "name": "test_python_mdsplus_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 856,
+        "name": "test_tdi_function_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_scan_unknown_data_class_leaves_slot_unset",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_enriches_nodes_with_llm",
+        "path": "tests/graph/test_dd_identifier_enrichment.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_enriches_ids_with_llm",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_returns_page_context",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "test_public_name_claims_are_exactly_scope_owned",
+        "path": "tests/graph/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "_rebuild",
+        "path": "tests/graph/test_rebuild_honours_resolution.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 844,
+        "name": "test_run_error_derivation_only_derives_from_graph",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 459,
+        "name": "test_legacy_flat_format_backward_compat",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1022,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1063,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1091,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1467,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1504,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1527,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1577,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1598,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1617,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1653,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1688,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_plan",
+        "path": "tests/llm/test_sn_edit_cascade_reporting.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "_persist",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 304,
+        "name": "test_open_edit_propagation_uses_only_the_atomic_transaction",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1093,
+        "name": "_terminal_recovery_client",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 2845,
+        "name": "test_terminal_recovery_relationship_lock_plan_is_participant_anchored",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1680,
+        "name": "test_user_prompt_renders_fixture_item",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_stub_item",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 497,
+        "name": "test_adjudicator_not_called_when_nothing_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "test_description_from_dict",
+        "path": "tests/standard_names/test_candidate_description.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_no_sources_block_binds_nothing",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_matches_by_id_and_never_creates_a_node",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_missing_name_is_reported_not_recreated",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 617,
+        "name": "test_compose_commit_once",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_both_hybrid_and_related_render",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "query",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_unit_injection_reports_only_physical_scalar_edge_conflicts",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "_review_item",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_reviewer_report",
+        "path": "tests/standard_names/test_dd_gap_evidence_rule.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_transition_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1708,
+        "name": "test_reconcile_fails_closed_when_evidence_changes_after_preflight",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 1719,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 698,
+        "name": "test_from_dd_row_basic",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 721,
+        "name": "test_from_signal_row",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 288,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 223,
+        "name": "_add_peer_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_make_name",
+        "path": "tests/standard_names/test_docs_review_content_gate.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_rename_plan",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "_accepted_docs_node",
+        "path": "tests/standard_names/test_edit_parity.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_generate_name_dd_item",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_refine_name_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "_review_names_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_review_docs_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "_review_docs_parent_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 309,
+        "name": "test_steering_block_contains_hint_and_reason_text",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 456,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 938,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_header_omits_catalog_sha",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 739,
+        "name": "test_manifest_sources_reconcile_emitted_excluded_and_non_nameable",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 801,
+        "name": "test_manifest_source_projection_follows_superseded_identity",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_hint_fields_reach_the_caller",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 858,
+        "name": "test_write_dd_skipped_source",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_mock_extraction_returns_gyrokinetics",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 95,
+        "name": "test_embedding_field_not_in_write_batch",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_phase_to_stats_mapping",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_scoped_review_restage_is_atomic_in_seed_expand_and_readback",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_scoped_terminal_residue_reports_transient_claims",
+        "path": "tests/standard_names/test_pool_idle_exhaustion.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "test_claim_review_docs_returns_scalar_physics_domain",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_sn_side_pools_use_sn_ids",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "test_rename_successor_uses_unanimous_dd_source_unit",
+        "path": "tests/standard_names/test_rename_unit_derivation.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_item",
+        "path": "tests/standard_names/test_review_feedback_render.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_review_single_batch_no_explicit_temperature",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 470,
+        "name": "_docs_item",
+        "path": "tests/standard_names/test_review_quorum_pool.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_semantic_cluster_neighbors_never_expand_source_authority",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 545,
+        "name": "test_compose_two_step",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_kind_reclassification_defaults_to_an_exact_zero_write_preview",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_pooled_compose_delivers_source_and_name_steering_to_prompt",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 217,
+        "name": "test_signals_source_without_dd_path_not_filtered",
+        "path": "tests/standard_names/test_source_invariants.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_public_refresh_restamps_raw_convergence_without_steering",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_accepts_signals_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_group",
+        "path": "tests/standard_names/test_stranded_identity_census.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 634,
+        "name": "_label",
+        "path": "tests/standard_names/test_tombstone_supersede.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "test_validate_via_isn_description_quality",
+        "path": "tests/standard_names/test_validate_isn.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_invalid_editorial_rows_are_rejected",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_duplicate_gap_identity_is_rejected",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 639,
+        "name": "test_observation_write_preserves_editorial_and_dedup_state",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_shared_fetch_dd_error_fields_returns_structured_results",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 630
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 603,
+        "name": "__init__",
+        "path": "imas_codex/discovery/base/llm.py"
+      },
+      "window_line": 627
+    },
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 345,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 358,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "get_code_discovery_stats",
+        "path": "imas_codex/discovery/code/parallel.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_ingest_claim_ignores_files_outside_the_prefix",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "test_enrich_claim_ignores_files_outside_the_prefix",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 136,
+        "name": "test_enrich_claim_ignores_files_outside_the_prefix",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "run_function": {
+        "line": 165,
+        "name": "test_ingest_claim_ignores_files_outside_the_prefix",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "test_code_predicate_ignores_outside_work",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_enrich_predicate_ignores_outside_work",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "window_line": 201
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_enrich_predicate_ignores_outside_work",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "run_function": {
+        "line": 222,
+        "name": "test_code_predicate_ignores_outside_work",
+        "path": "tests/discovery/test_code_claims_prefix_scope.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_runner_has_no_graph_write_or_persistence_dependency",
+        "path": "tests/standard_names/test_advisory_benchmark.py"
+      },
+      "run_function": {
+        "line": 38,
+        "name": "_relevance",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 568,
+        "name": "test_ingest_claim_refuses_name_stage_relevance",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 504,
+        "name": "test_ingest_claims_highest_relevance_first_and_refuses_below_threshold",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 507
+    },
+    {
+      "existing_function": {
+        "line": 504,
+        "name": "test_ingest_claims_highest_relevance_first_and_refuses_below_threshold",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 568,
+        "name": "test_ingest_claim_refuses_name_stage_relevance",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 570
+    },
+    {
+      "existing_function": {
+        "line": 154,
+        "name": "test_choice_outside_criteria_is_refused",
+        "path": "tests/discovery/test_llm_decisions.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_unknown_criterion_probability_is_refused",
+        "path": "tests/discovery/test_llm_decisions.py"
+      },
+      "window_line": 302
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "test_probabilities_not_summing_to_one_is_refused",
+        "path": "tests/discovery/test_llm_decisions.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_unknown_criterion_probability_is_refused",
+        "path": "tests/discovery/test_llm_decisions.py"
+      },
+      "window_line": 303
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "f9798ad7ce09b5a994f5286ec232070c3501416b",
+    "3ef3f896b605e1168b670e0ea542cf789e7922d5",
+    "c0c8cc099b08e66f2a669d1f016d04dde1eaf587",
+    "12e9b5d0d313dd011c437f46744c57dd9a830ac6",
+    "67d026f0d848b857f71ea7502923275e4a64c833",
+    "ee7d34f5c9ab2b1aada7e8dc02de9bd1e6f5cc91",
+    "86fc919d584276369a1fa9789fea1400e5dcc8c7",
+    "167aeefa53936e1bde11c61fe29536474c2883d2",
+    "d2e828c9b352bdcacef47f264d99ad2ea4bc1a94",
+    "5dbcb5f55120a81cf36c737ff3b706d98b3267ea"
+  ],
+  "completed_at": "2026-10-07T02:58:04.188Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-07T01:29:25Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery tests/core tests/llm tests/ingestion tests/graph/test_cypher_property_check.py tests/graph/test_generated_model_currency.py tests/graph/test_schema_context.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012913278723-code-score-through-jev/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.96,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T02:29:13.967678+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-07T01:29:13Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 12,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 12,
+    "mean_context": 160000,
+    "observed_at": "2026-10-07T01:29:01Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 12,
+      "aggregate_tokens_per_second": 213.083,
+      "detail": "",
+      "mean_tokens_per_second": 88.785,
+      "observed_at": "2026-10-07T01:29:01Z",
+      "runs": 2.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-07T02:58:04.188Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012913278723-code-score-through-jev/manifest.md",
+  "member": "disposable-r-20261007T012913278723-code-score-through-jev",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_llm_decisions.py::test_score_above_top_level_is_refused",
+      "tests/discovery/test_llm_decisions.py::test_score_below_zero_is_refused"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_llm_decisions.py::test_score_above_top_level_is_refused",
+      "tests/discovery/test_llm_decisions.py::test_score_below_zero_is_refused"
+    ],
+    "declaration": "the score validation test run against a copy whose score-range check is removed exits non-zero with an out-of-range score accepted as its first failure",
+    "log": "negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012913278723-code-score-through-jev/negative_control.log",
+    "test_paths": [
+      "tests/discovery/test_code_claims_prefix_scope.py",
+      "tests/discovery/test_code_relevance.py",
+      "tests/discovery/test_llm_decisions.py",
+      "tests/graph/test_cypher_property_check.py",
+      "tests/llm/test_prompt_schema_coverage.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "code-score-through-jev",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1571,
+          "cached_input_tokens": 236422,
+          "input_tokens": 237995,
+          "output_tokens": 234,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 238229,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "per §25's 'Score stage through Jev' item and its field plan, committing in this order: (1) _validate_decisions_answers in imas_codex/discovery/base/llm.py validates score-type answers (score within 0..top level, probabilities over the offered level indices summing to 1 within tolerance, confidence in [0,1]) and its choice and score tolerance becomes 0.005 per nonzero probability plus 1e-9, tested in tests/discovery/test_llm_decisions.py; (2) the content-arm questions in imas_codex/llm/prompts/code/triage.md add the relevance_grade Score and the four facet Scores with the instructions and level wording copied verbatim from LEVELS in /home/ITER/mcintos/.cache/imas-codex-jev/run_jev_score.py, the content state also carries the file's pattern evidence (pattern_categories, total_pattern_matches, line_count), and score_composite becomes the one stored owner of a file's relevance: both arms write it as the largest of the four scope nouls of that decision, the names arm with relevance_stage name and the content arm with relevance_stage content, and CODE_RELEVANCE_EXPR retires, its nine readers in code/graph_ops.py, code/workers.py and code/parallel.py comparing sf.score_composite instead; the content-arm write also stores score_data_access, score_signal_processing, score_machine_description and score_imas_mapping as each Score divided by its top level, and relevance_grade on its 0..4 scale, and beside each Score field X stores X_probs (a list of floats ordered by level index) and X_confidence, and beside relevance_role stores relevance_role_probs aligned to the fixed order of the role enum in the schema and relevance_role_confidence; (3) imas_codex/schemas/facility.yaml retires CodeFile's score_modeling_code, score_analysis_code, score_operations_code, score_workflow, score_visualization, score_documentation, score_convention, score_imas and file_category; adds score_signal_processing, score_machine_description, score_imas_mapping and relevance_grade (range float), each Score field's X_probs (range float, multivalued) and X_confidence (range float) for relevance_grade and the four facets, and relevance_role_probs (float, multivalued) and relevance_role_confidence (float); adds an enum CodeRelevanceRole whose permissible values are, in this fixed order, diagnostic_data_access, signal_processing, machine_description, imas_mapping, simulation_or_solver, visualization, control_or_operations and infrastructure_or_utility, used as the range of relevance_role and as the order relevance_role_probs follows; adds an enum CodeRelevanceStage (name, content) as the range of relevance_stage; and rewrites score_composite's and score_data_access's descriptions to say they are the Jev content relevance (the largest of the four scope nouls) and the Jev data-access facet, build-models is run in this worktree, and every reader of a retired name in imas_codex moves, including the allowed dimensions in imas_codex/llm/search_tools.py; imas_codex/discovery/base/scoring.py is not changed, because CODE_SCORE_DIMENSIONS and CodeScoreFields still carry the path pipeline: code stops importing them, SCORE_DIMENSION_NAMES in code/scorer.py becomes the four code facets, FileScoreResult and FileScoreBatch keep their names and become a description-only response model, so the file_scoring_schema provider in imas_codex/llm/prompt_loader.py keeps working unchanged (_provide_file_score_dimensions there is left for the later relevance-cleanup node), and sample_code_dimension_calibration, which has no caller, retires; (4) imas_codex/llm/prompts/code/scorer.md becomes a description-only prompt, and the score stage calls the local model for a description only for a file whose content relevance passes code-ingest-threshold, with the description written after the content decision; (5) routine progress lines in imas_codex/discovery/code/workers.py (code_worker idle polls, claimed-files lines, batch summaries, started and stopped) log at INFO or DEBUG instead of WARNING, and a batch's per-file decision failures are reported once per batch with a count and the first reason; tests drive the score validation, the content-arm write of every new field, the description call made only for a passing file, and the once-per-batch failure line, through the fake decisions seam; the decisions health probe is a separate node and this one does not touch imas_codex/discovery/base/services.py; a run with the score-range check removed in a scratch copy reddens its test and the log is recorded; the evidence fragment reports, from the prototype results in /home/ITER/mcintos/.cache/imas-codex-jev/jev_score_results.json, whether any facet would carry mgset0.f (machine description 2.6 of 3 with content relevance 0.39) without changing the gate; the gate exits 0 run on this allocation as: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery tests/core tests/llm tests/ingestion tests/graph/test_cypher_property_check.py tests/graph/test_generated_model_currency.py tests/graph/test_schema_context.py, with any failure attributed against the base revision; each change is committed with a conventional subject and body; one graph write only: after the gate passes, a function beside the arms' writer recomputes score_composite from the stored nouls, through the same function the arms call, for every CodeFile carrying a relevance_stage (2,311 JT-60SA rows on 2026-10-07: 397 content, 1,914 name), run once against the live graph with the before and after counts and the count of rows whose composite differs from the max of their nouls (0 after) recorded in the fragment; no live decisions request, no discover run, and no write to imas_codex/ids/mapping.py or imas_codex/ids/workers.py",
+    "estimated_hours": null,
+    "goal": "Make every code score number a Jev judgment and retire the LLM scorer",
+    "id": "code-score-through-jev",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-07T01:29:13Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 12,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 12,
+      "mean_context": 160000,
+      "observed_at": "2026-10-07T01:29:01Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 12,
+        "aggregate_tokens_per_second": 213.083,
+        "detail": "",
+        "mean_tokens_per_second": 88.785,
+        "observed_at": "2026-10-07T01:29:01Z",
+        "runs": 2.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012913278723-code-score-through-jev/manifest.md",
+    "negative_control": "the score validation test run against a copy whose score-range check is removed exits non-zero with an out-of-range score accepted as its first failure",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§25",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/base/llm.py",
+      "imas_codex/discovery/code/scorer.py",
+      "imas_codex/discovery/code/workers.py",
+      "imas_codex/discovery/code/graph_ops.py",
+      "imas_codex/discovery/code/parallel.py",
+      "imas_codex/discovery/code/__init__.py",
+      "imas_codex/discovery/base/reset.py",
+      "imas_codex/schemas/facility.yaml",
+      "imas_codex/llm/prompts/code/triage.md",
+      "imas_codex/llm/prompts/code/scorer.md",
+      "imas_codex/llm/search_tools.py",
+      "tests/discovery/test_llm_decisions.py",
+      "tests/discovery/test_code_relevance.py",
+      "tests/discovery/test_code_claims_prefix_scope.py",
+      "tests/llm/test_prompt_schema_coverage.py",
+      "tests/graph/test_cypher_property_check.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/code-score-through-jev.html",
+      "docs/figures/jt60sa-discovery-completion/code-score-through-jev"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3161552.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "code-score-through-jev",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-07T01:29:18.598271+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.65,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 563.196,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 724.5,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 44,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 36
+      },
+      {
+        "availability": "served",
+        "backend": "codex",
+        "budget_reason": null,
+        "burn_multiple": 1.4242092173025105,
+        "congestion": null,
+        "days_to_reset": 2.8222413866203704,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.6565046684439485,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 85.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "codex-astra",
+        "budget_reason": null,
+        "burn_multiple": 1.4242092173025105,
+        "congestion": null,
+        "days_to_reset": 2.8222413866203704,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.6565046684439485,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 85.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "codex-luna",
+        "budget_reason": null,
+        "burn_multiple": 1.4242092173025105,
+        "congestion": null,
+        "days_to_reset": 2.8222413866203704,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.6565046684439485,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 85.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0.03,
+      "clive": 0.7,
+      "codex": 0.16,
+      "codex-astra": 0.01,
+      "codex-luna": 0.02,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 2364,
+    "usage": {
+      "cost": 0.000187488,
+      "input_tokens": 4464,
+      "output_tokens": 89
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.96,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "5dbcb5f55120a81cf36c737ff3b706d98b3267ea",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "7a6371996ac1e679e3c70bbfabd803866697d764",
+    "reviewed_head_sha": "5dbcb5f55120a81cf36c737ff3b706d98b3267ea",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 19,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 106
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261007T012913278723-code-score-through-jev",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§25",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "4c9746c1-f497-46ec-8967-77cda9c5e5f4",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 18,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 40147573,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 639.296,
+    "generated_tokens": 171995,
+    "generation_seconds": 286.411,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 73.7,
+    "machine_seconds": 352.885,
+    "peak_input_tokens": 169655,
+    "tokens_per_second": 600.52,
+    "wall_tokens_per_second": 269.04
+  },
+  "time_budget": "60m",
+  "tool_steps": 265.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 5319,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-07T02:58:09Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-07T02:47:20Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261007T012913278723-code-score-through-jev",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 21238,
+    "worker_pid": 1681652
+  },
+  "worker_seconds": 5294,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
