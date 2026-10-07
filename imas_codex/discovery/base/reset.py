@@ -45,9 +45,17 @@ class ResetSpec:
     source_filter: str | None = None
     """Optional Cypher predicate (alias ``n``) that admits rows whose status is
     *not* in ``source_statuses``.  It is combined as
-    ``n.status IN $source_statuses OR (<source_filter>)``, so it can widen the
-    reset to a specific subset of one extra status without matching every row
-    of that status."""
+    ``n.status IN $source_statuses OR (<source_filter>)``, so it can
+    widen the reset to a specific subset of one extra status without matching
+    every row of that status."""
+
+    extra_filter: str | None = None
+    """Optional Cypher predicate (alias ``n``) AND-combined with the status
+    match, so the reset is narrowed to a subset of the eligible statuses.  Unlike
+    :attr:`source_filter`, which *widens* the match with an OR, this narrows it:
+    the status predicate must hold *and* this must hold, so a caller cannot be
+    surprised by rows of another status entering the reset.  Must start with
+    ``AND``."""
 
     facility_key: str = "facility_id"
     """Property on the node that holds the facility identifier.  Most domains
@@ -102,6 +110,8 @@ def reset_to_status(
     if spec.source_filter:
         status_predicate = f"({status_predicate} OR ({spec.source_filter}))"
     where_parts = [f"WHERE {status_predicate}"]
+    if spec.extra_filter:
+        where_parts.append(spec.extra_filter)
     if extra_filter:
         where_parts.append(extra_filter)
     if path_prefixes:
@@ -404,6 +414,18 @@ WITH n, collect(ce) + collect(cc) AS doomed
 FOREACH (d IN doomed | DETACH DELETE d)
 WITH DISTINCT n"""
 
+# The content-arm judgment fields a re-judge rewrites, in place on a file that
+# stays ``ingested``.  ``score_reason`` is left out — it is the local model's
+# one-sentence description, not a content judgment, and the re-judge writes no
+# description, so clearing it would drop a description the file keeps.
+# ``scored_at`` and ``score_cost`` are left out too: they are bookkeeping the
+# re-judge does not replace, so the original scoring time and spend survive.
+_CODE_REJUDGE_FIELDS = [
+    field
+    for field in _CODE_SCORE_FIELDS
+    if field not in ("score_reason", "scored_at", "score_cost")
+]
+
 
 CODE_RESET_SPECS: dict[str, ResetSpec] = {
     "discovered": ResetSpec(
@@ -441,6 +463,24 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
         source_statuses=["scored"],
         clear_fields=_CODE_SCORE_FIELDS + ["skip_reason"],
         source_filter="n.relevance_stage = 'content' AND n.status = 'skipped'",
+    ),
+    # Clear an ingested content-stage file's judgment fields without moving its
+    # status, its example or its chunks: the text the re-judge needs already
+    # lives in the graph as CodeChunks, so the file is put back in front of the
+    # content arm in place rather than sent through scoring's own reset, which
+    # would re-fetch and re-ingest it over the facility hop.
+    #
+    # The content-stage scope is ANDed, not ORed: ``source_filter`` would widen
+    # the match to every content-stage file whatever its status, demoting and
+    # clearing the whole facility's scored, skipped and triaged content-stage
+    # corpus in one run.  ``extra_filter`` narrows the eligible statuses to
+    # ingested content-stage files, which is the set the re-judge takes.
+    "ingested": ResetSpec(
+        label="CodeFile",
+        target_status="ingested",
+        source_statuses=["ingested"],
+        clear_fields=_CODE_REJUDGE_FIELDS,
+        extra_filter="AND n.relevance_stage = 'content'",
     ),
 }
 

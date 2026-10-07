@@ -474,12 +474,20 @@ def claim_files_for_scoring(
     facility: str,
     limit: int = 100,
     path_prefixes: list[str] | None = None,
+    *,
+    ingested_rejudge: bool = False,
 ) -> list[dict[str, Any]]:
-    """Atomically claim enriched CodeFiles for full LLM scoring.
+    """Atomically claim CodeFiles for a content-arm judgment.
 
-    Claims files with ``status='triaged'`` that have been enriched
-    (``is_enriched=true``).  Returns the file's preview text plus enrichment
+    By default claims files with ``status='triaged'`` that have been enriched
+    (``is_enriched=true``) and returns the file's preview text plus enrichment
     evidence (pattern categories, line count) and parent directory context.
+
+    When *ingested_rejudge* is true, the same claim takes content-stage files
+    at ``status='ingested'`` instead — the files whose text already lives in the
+    graph as CodeChunks — so the re-judge reaches them through the score claim
+    rather than a second claim path.  Those files need no enrichment context:
+    the re-judge rebuilds each one's content state from its stored chunk text.
 
     Uses claim_token pattern with ORDER BY rand() to prevent deadlocks
     when multiple workers claim concurrently.
@@ -489,6 +497,8 @@ def claim_files_for_scoring(
         limit: Maximum files to claim
         path_prefixes: When given, restrict the claim to CodeFiles whose
             ``path`` starts with any of these prefixes.
+        ingested_rejudge: Claim ingested content-stage files (re-judge) rather
+            than triaged enriched files (first scoring).
 
     Returns:
         List of dicts with file info + enrichment data + parent context
@@ -499,13 +509,21 @@ def claim_files_for_scoring(
     claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
+    selection = (
+        # A re-judged file keeps its status and stage, so the only key that
+        # drains the claim is the recorded answer itself: a file whose facet
+        # confidence is still absent or zero has no content-arm judgment yet.
+        f"sf.status = 'ingested' AND sf.relevance_stage = {RELEVANCE_STAGE_CONTENT!r} "
+        "AND coalesce(sf.score_data_access_confidence, 0.0) = 0.0"
+        if ingested_rejudge
+        else "sf.status = 'triaged' AND sf.is_enriched = true"
+    )
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE sf.status = 'triaged'
-              AND sf.is_enriched = true
+            WHERE {selection}
               {prefix_clause}
               {excluded_clause}
               AND (sf.claimed_at IS NULL
@@ -530,6 +548,7 @@ def claim_files_for_scoring(
             OPTIONAL MATCH (sf)-[:IN_DIRECTORY]->(p:FacilityPath)
             RETURN sf.id AS id, sf.path AS path,
                    sf.language AS language,
+                   sf.status AS status,
                    sf.pattern_categories AS pattern_categories_json,
                    sf.total_pattern_matches AS total_pattern_matches,
                    sf.line_count AS line_count,
@@ -573,6 +592,40 @@ def release_file_score_claim(file_id: str) -> None:
 def release_file_score_claims(file_ids: list[str]) -> None:
     """Release scoring claims on multiple CodeFiles."""
     release_claims_batch("CodeFile", file_ids)
+
+
+def fetch_file_chunk_text(file_ids: list[str]) -> dict[str, list[dict[str, Any]]]:
+    """The stored chunks of each named CodeFile, in reading order.
+
+    Walks ``CodeFile <-FROM_FILE- CodeExample -HAS_CHUNK-> CodeChunk`` — the
+    traversal a reset's chunk cascade uses — and returns a mapping from file id
+    to its ``{start_line, text}`` rows ordered by ``start_line``.  A re-judge
+    rebuilds each file's content state from these chunks in place of a remote
+    fetch, so this read is the only text the path needs and no file crosses the
+    facility hop.
+
+    A named file with no chunks maps to an empty list, so a caller sees the
+    same shape whether the file is absent or chunkless.
+    """
+    if not file_ids:
+        return {}
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS fid
+            MATCH (cf:CodeFile {id: fid})<-[:FROM_FILE]-(ce:CodeExample)
+                  -[:HAS_CHUNK]->(c:CodeChunk)
+            RETURN fid AS file_id, c.start_line AS start_line, c.text AS text
+            ORDER BY fid, start_line
+            """,
+            ids=file_ids,
+        )
+    chunks: dict[str, list[dict[str, Any]]] = {file_id: [] for file_id in file_ids}
+    for row in rows:
+        chunks[row["file_id"]].append(
+            {"start_line": row["start_line"], "text": row["text"]}
+        )
+    return chunks
 
 
 # ---------------------------------------------------------------------------

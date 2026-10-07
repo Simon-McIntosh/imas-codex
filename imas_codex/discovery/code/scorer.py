@@ -208,19 +208,53 @@ def facility_relevance_block(facility_id: str, facility_config: dict) -> dict[st
     }
 
 
+# The fetched path presents the content arm with the first
+# ``CONTENT_HEAD_CHARS`` characters of the file preview.  A re-judge of an
+# already-ingested file rebuilds that same state from the file's own stored
+# chunk text, cut to the same length, so the two paths hand the content arm an
+# identically-shaped state and the same question set judges the same span.
+CONTENT_HEAD_CHARS = 1500
+
+
+def chunk_content_head(chunks: list[dict[str, Any]]) -> str:
+    """The content head a re-judged file presents, rebuilt from its chunks.
+
+    ``chunks`` are the file's stored CodeChunks, each carrying ``text`` and the
+    reading-order key ``start_line`` (the CodeChunk analogue of a chunk index;
+    ingestion writes it for every chunk and nothing else orders them).  They are
+    ordered by that key and their text concatenated, then cut to
+    :data:`CONTENT_HEAD_CHARS` — the same cut the fetched path applies to the
+    file preview — so a re-judge asks the content arm about the same span of
+    text a first ingest would have fetched.
+    """
+    ordered = sorted(
+        chunks,
+        key=lambda chunk: (
+            chunk.get("start_line") is None,
+            chunk.get("start_line") or 0,
+        ),
+    )
+    return "".join(str(chunk.get("text") or "") for chunk in ordered)[
+        :CONTENT_HEAD_CHARS
+    ]
+
+
 def build_triage_state(
     file_row: dict,
     facility_id: str,
     facility_config: dict,
     *,
     with_content: bool = False,
+    content_head: str | None = None,
 ) -> dict[str, Any]:
     """Build the state a code decision judges.
 
     Carries the facility block plus the file's path, language, directory,
     directory description and sibling names.  The content arm additionally
-    carries ``content_head`` — the first 1500 characters of the file preview —
-    and the file's pattern evidence.
+    carries ``content_head`` — by default the first :data:`CONTENT_HEAD_CHARS`
+    characters of the file preview, but *content_head* overrides that source so
+    a re-judge of an ingested file presents its stored chunk text in place of a
+    preview it no longer needs — and the file's pattern evidence.
     """
     state: dict[str, Any] = {
         "facility": facility_relevance_block(facility_id, facility_config),
@@ -233,7 +267,12 @@ def build_triage_state(
         },
     }
     if with_content:
-        state["file"]["content_head"] = (file_row.get("preview_text") or "")[:1500]
+        head = (
+            content_head
+            if content_head is not None
+            else (file_row.get("preview_text") or "")
+        )
+        state["file"]["content_head"] = head[:CONTENT_HEAD_CHARS]
         state["file"]["pattern_evidence"] = {
             "categories": file_row.get("pattern_categories"),
             "total_matches": file_row.get("total_pattern_matches"),
@@ -798,3 +837,68 @@ def apply_file_scores(
         "scored": len(scored_items),
         "deferred": len(content_decisions) - len(scored_items),
     }
+
+
+def apply_ingested_rejudge(
+    content_decisions: list[dict[str, Any]],
+    file_id_map: dict[str, str],
+    cost_total: float = 0.0,
+) -> dict[str, Any]:
+    """Rewrite an ingested file's relevance from a fresh content decision.
+
+    The judgment fields are written through :func:`_relevance_item` exactly as
+    the score arm writes them, so the composite, the four facets, the graded
+    relevance and every distribution and confidence land in one write.  The
+    write deliberately omits ``status``: a re-judged file stays ``ingested``
+    with its CodeExample and chunks untouched, because the text being judged is
+    already in the graph.  Admission is not re-decided — a file whose new
+    composite and facets both fall below their gates stays ``ingested`` and is
+    returned in ``below_gate`` so the run can report it.
+
+    Args:
+        content_decisions: One dict per file whose content decision succeeded,
+            with ``path``, ``answers``, ``model`` and ``cost`` keys.
+        file_id_map: Mapping from path to CodeFile ID.
+        cost_total: Total content-decision cost, distributed across the files
+            actually re-judged so the decision spend is recorded per file.
+
+    Returns:
+        Dict with ``rejudged`` count and the ``below_gate`` paths.
+    """
+    from imas_codex.settings import (
+        get_code_facet_admission_threshold,
+        get_code_ingest_threshold,
+    )
+
+    matched = [d for d in content_decisions if file_id_map.get(d["path"])]
+    cost_per_file = cost_total / len(matched) if matched else 0.0
+    ingest_threshold = get_code_ingest_threshold()
+    facet_threshold = get_code_facet_admission_threshold()
+
+    items = []
+    below_gate: list[str] = []
+    for decision in matched:
+        item = _relevance_item(
+            file_id_map[decision["path"]],
+            decision["answers"],
+            stage=RELEVANCE_STAGE_CONTENT,
+            model=decision.get("model"),
+            cost=decision.get("cost", cost_per_file),
+        )
+        if not content_admits(decision["answers"], ingest_threshold, facet_threshold):
+            below_gate.append(decision["path"])
+        items.append(item)
+
+    if items:
+        set_clause = _relevance_set_clause(include_content=True)
+        with GraphClient() as gc:
+            gc.query(
+                f"""
+                UNWIND $items AS item
+                MATCH (sf:CodeFile {{id: item.id}})
+                SET sf.score_cost = coalesce(sf.score_cost, 0) + item.score_cost{set_clause}
+                """,
+                items=items,
+            )
+
+    return {"rejudged": len(items), "below_gate": below_gate}
