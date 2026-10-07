@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names neither baseline_suite nor after_suite (this node runs no test gate), so the added-failure count could not be taken; probe_graph4.log is the instrument control, not a suite arm.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T06:21:07.422Z",
+  "dispatched_at": "2026-10-07T06:13:00Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: the opening sentence and the landing line assert \"No file under /analysis/src/getseldata_v4.2 mentions the arrays\" over the whole tree, but the measurement covers only the 15 graph-visible CodeFile rows because the hop was down and the tree was never greppable, so the never-discovered class the plan's follow-on named (\"including files below the ingest gate\") is not excluded; the fragment's own bound at line 28 states the narrower claim, so the headline is an absence stronger than the instrument supports."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: the probe scripts that produced every figure in the fragment are not committed to the repository (they sit under the run reports directory), so a later reader cannot re-derive the measure from the fragment alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found (docs/evidence fragment only; no product code changed)",
+    "diff": "read commit e10345013 against base 3c1c0ce8f; one file, +31/-0, the evidence fragment only \u2014 no product source, test, schema or graph write.",
+    "done_when": "the plan's criterion is \"a chunk under getseldata_v4.2 mentions JLOOP, JTPRB or JNPRB (or the run records that the source fills them elsewhere)\"; the fragment takes the fallback branch and the probe logs record the measurement (probe_graph4.log: eddbreadTime 10, JLOOP/JTPRB/JNPRB 0) against a live control.",
+    "goal": "read the node goal (find which getseldata sources fill JLOOP/JTPRB/JNPRB and why no chunk names them) against docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html; the fragment answers both halves \u2014 none do, and they are filled in the equilibrium tree (SAselene_v2.0_forPSRC/eqvacu.f JLOOP(I)=K after MGPOS, mgfild.f for JTPRB/JNPRB) \u2014 which is the plan's \"or the run records that the source fills them elsewhere\" branch, but its headline absence is stated over the whole tree while only the 15 graph-visible rows were measured.",
+    "manifest": "read the reviewed run's manifest.md; status complete, commits e10345013, tests record \"no test gate\" and the four probe logs, retry_failures names three hop attempts, negative_control_log is probe_graph4.log.",
+    "write_paths": "read the three declared write paths (reports dir, the fragment, the figures dir); the only commit in the diff touches docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html, inside them."
+  },
+  "justifications": {
+    "durability": "the node changes no product code so there is no regression surface, but the measure's probe scripts (probe_graph.py..probe_graph4.py) live only under the run reports directory and are not committed, so nothing in the repository would redden if the fragment's claim were later contradicted.",
+    "evidence": "the gate is an instrument-controlled graph probe whose logs (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/getseldata-index-probe/probe_graph4.log) I read and reconciled with the fragment table; eddbreadTime=10 is the positive control that shows the search sees getseldata text before reporting the three zeros.",
+    "fit": "the fragment follows the sibling-fragment idiom under docs/evidence/fragments/jt60sa-discovery-completion/ (a section whose element ids all begin with the node id, with table and list), and the commit subject is conventional with a body and no plan or ticket identifiers.",
+    "goal_fidelity": "the node's question is answered in docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html:3 \u2014 none of the tree fills the arrays and the equilibrium fill sites (eqvacu.f JLOOP(I)=K, mgfild.f JTPRB/JNPRB) are named \u2014 satisfying the plan's fallback clause.",
+    "reuse": "the diff adds no function, class or module \u2014 it is a data/evidence fragment \u2014 so nothing forks a capability the repository already owns.",
+    "scope_discipline": "git diff --stat 3c1c0ce8f e10345013 shows one file, +31/-0, docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html, inside the declared write paths; no code, plan, index or graph write was made."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal (find which getseldata sources fill JLOOP/JTPRB/JNPRB and why no chunk names them) against docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html; the fragment answers both halves \u2014 none do, and they are filled in the equilibrium tree (SAselene_v2.0_forPSRC/eqvacu.f JLOOP(I)=K after MGPOS, mgfild.f for JTPRB/JNPRB) \u2014 which is the plan's \"or the run records that the source fills them elsewhere\" branch, but its headline absence is stated over the whole tree while only the 15 graph-visible rows were measured.\nVERDICT done_when: the plan's criterion is \"a chunk under getseldata_v4.2 mentions JLOOP, JTPRB or JNPRB (or the run records that the source fills them elsewhere)\"; the fragment takes the fallback branch and the probe logs record the measurement (probe_graph4.log: eddbreadTime 10, JLOOP/JTPRB/JNPRB 0) against a live control.\nVERDICT write_paths: read the three declared write paths (reports dir, the fragment, the figures dir); the only commit in the diff touches docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html, inside them.\nVERDICT manifest: read the reviewed run's manifest.md; status complete, commits e10345013, tests record \"no test gate\" and the four probe logs, retry_failures names three hop attempts, negative_control_log is probe_graph4.log.\nVERDICT diff: read commit e10345013 against base 3c1c0ce8f; one file, +31/-0, the evidence fragment only \u2014 no product source, test, schema or graph write.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the node's question is answered in docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html:3 \u2014 none of the tree fills the arrays and the equilibrium fill sites (eqvacu.f JLOOP(I)=K, mgfild.f JTPRB/JNPRB) are named \u2014 satisfying the plan's fallback clause.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate is an instrument-controlled graph probe whose logs (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/getseldata-index-probe/probe_graph4.log) I read and reconciled with the fragment table; eddbreadTime=10 is the positive control that shows the search sees getseldata text before reporting the three zeros.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 3c1c0ce8f e10345013 shows one file, +31/-0, docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html, inside the declared write paths; no code, plan, index or graph write was made.\nSCORE durability: 13\nJUSTIFICATION durability: the node changes no product code so there is no regression surface, but the measure's probe scripts (probe_graph.py..probe_graph4.py) live only under the run reports directory and are not committed, so nothing in the repository would redden if the fragment's claim were later contradicted.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling-fragment idiom under docs/evidence/fragments/jt60sa-discovery-completion/ (a section whose element ids all begin with the node id, with table and list), and the commit subject is conventional with a body and no plan or ticket identifiers.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module \u2014 it is a data/evidence fragment \u2014 so nothing forks a capability the repository already owns.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html:3 follow-on: the opening sentence and the landing line assert \"No file under /analysis/src/getseldata_v4.2 mentions the arrays\" over the whole tree, but the measurement covers only the 15 graph-visible CodeFile rows because the hop was down and the tree was never greppable, so the never-discovered class the plan's follow-on named (\"including files below the ingest gate\") is not excluded; the fragment's own bound at line 28 states the narrower claim, so the headline is an absence stronger than the instrument supports.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/getseldata-index-probe.html:31 follow-on: the probe scripts that produced every figure in the fragment are not committed to the repository (they sit under the run reports directory), so a later reader cannot re-derive the measure from the fragment alone.\n",
+  "review_run_id": "r-20261007T061251194714-review-of-getseldata-index-probe",
+  "reviewed_base_sha": "3c1c0ce8fcaf574a3b69de6f0a6089ba6e921810",
+  "reviewed_head_sha": "e1034501393d1f4d9f7c6e909f6faefded1810f1",
+  "reviewed_run_id": "r-20261007T054624131965-getseldata-index-probe",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T06:19:30.128091+00:00",
+  "total": 105
+}
