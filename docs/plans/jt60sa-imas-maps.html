@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -370,7 +370,10 @@
     <div class="r-comment-body"><p>candidate_worker now ends its stage before its first claim when judgments_available() is false — one warning names OPENROUTER_API_KEY_IMAS_CODEX, the candidate phase is marked done and the worker returns without claiming a source; gate 13 passed.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T155558693440-review-of-candidate-worker-key-skip" data-who="reckon-build" data-when="2026-10-07T16:10:13.417Z">
-    <div class="r-comment-body"><p>Independent review of run r-20261007T154229329439-candidate-worker-key-skip at base dcf52306b / head c0c71ec3f — a parsed record scoring all six dimensions 0..20 (durability 18, evidence 19, fit 19, goal_fidelity 20, reuse 20, scope_discipline 20; total 116) is stored; the guard was falsified by the reviewer&#x27;s own mutation and added_failure_count is 0 against the reviewed node&#x27;s own gate.</p></div>
+    <div class="r-comment-body"><p>Independent review of run r-20261007T154229329439-candidate-worker-key-skip at base dcf52306b / head c0c71ec3f — a parsed record scoring all six dimensions 0..20 (durability 18, evidence 19, fit 19, goal_fidelity 20, reuse 20, scope_discipline 20; total 116) is stored; the guard was falsified by the reviewer's own mutation and added_failure_count is 0 against the reviewed node's own gate.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T152205646783-dd-path-search-rerank" data-who="reckon-build" data-when="2026-10-07T16:09:12.937Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/jt60sa-imas-maps/dd-path-search-rerank.html — nDCG@10 0.3451 (embedding order) → 0.4102 (reranked) and grade-3-only precision@5 0.2667 → 0.3333, mean over 15 hand-labelled mapping questions on the completed multi-IDS labels, k=10</p></div>
 </div>
 </section>
 </main>
