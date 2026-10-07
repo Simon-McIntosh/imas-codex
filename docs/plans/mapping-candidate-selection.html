@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="92">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;deferred&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-blocks" content="jt60sa-imas-maps,facility-discovery-sequence">
@@ -535,7 +535,12 @@
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
             <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/core/paths.py</code>,
             <code>imas_codex/ids/validation.py</code>, <code>imas_codex/ids/assembler.py</code>,
-            <code>tests/core/</code> and <code>tests/ids/</code>.</li>
+            <code>imas_codex/ids/progress.py</code>, <code>tests/core/</code> and
+            <code>tests/ids/</code>. <code>progress.py</code> is carried from the third node's
+            review: its assign-stage cost line (<code>imas_codex/ids/progress.py:256</code>) reads
+            the cost recorded under <code>assign_targets</code>, while the renamed call records it
+            under <code>choose_targets</code>, so the display shows zero spend for every escalated
+            choice.</li>
           <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
             tests/cli/test_discover_map.py tests/test_cli.py tests/core -p no:cacheprovider</code>
             passes, with tests showing:
@@ -560,7 +565,9 @@
               <li>an assignment built from a picked node takes the node's top-level ancestor
                 as its section, and its type from that section: a time-indexed array is
                 <code>time_slice</code>, another array <code>struct_array</code>, a 0-D node
-                <code>scalar</code>.</li>
+                <code>scalar</code>;</li>
+              <li>the progress display's assign line reports the cost recorded under
+                <code>choose_targets</code>.</li>
             </ul>
             After <code>uv run build-models --force</code> in the worktree, which regenerates the
             gitignored <code>models.py</code> and <code>schema_context_data.py</code> from
