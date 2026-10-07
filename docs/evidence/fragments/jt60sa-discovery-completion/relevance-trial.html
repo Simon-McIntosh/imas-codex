@@ -1,0 +1,234 @@
+<section>
+  <h2 id="relevance-trial">The deployed content-arm decisions separate in-scope code at AUC 0.955; the seven-prefix JT-60SA trial ingested all required files, with a scope-breach anomaly to adjudicate</h2>
+
+  <p id="relevance-trial-sample">
+    The content arm of the deployed code triage was run against the 128-file
+    labelled prototype sample
+    (<code>/home/ITER/mcintos/.cache/imas-codex-jev/sample.json</code>, labels
+    in <code>labels.json</code>), with in scope meaning L (loads), P
+    (processes), G (machine or diagnostic description) or I (IMAS mapping).
+    Each file's state was built by the deployed
+    <code>imas_codex.discovery.code.scorer.build_triage_state(..., with_content=True)</code>
+    — the six questions from <code>build_triage_questions()</code>, the
+    facility block from its <code>data_access_patterns</code>, and the first
+    1500 characters of the file preview as <code>content_head</code> — and
+    judged with <code>acall_decisions</code> on the
+    <code>discovery-relevance</code> seat (<code>typesafe/jev-1.13</code>,
+    <code>service=facility-discovery</code>) at bounded concurrency 8. A file's
+    relevance is the largest of the four scope nouls
+    (<code>triage_relevance</code>).
+  </p>
+
+  <figure id="relevance-trial-figure">
+    <img src="/imas-codex/figures/jt60sa-discovery-completion/relevance-trial/content_relevance_by_class.svg"
+         alt="Content relevance by labelled class"/>
+    <figcaption>
+      Content-arm relevance for each of the 126 judged files, grouped by
+      hand label (points; vertical bar is the class median). In-scope classes
+      L, P, G, I in blue; out-of-scope S and O in grey. The dashed line is the
+      ingest threshold 0.5. The L, P and G classes sit above the out-of-scope
+      S and O clouds; the two I files both score 0.42.
+    </figcaption>
+  </figure>
+
+  <p id="relevance-trial-result">
+    <strong>Measured on 126 of 128 files</strong> (two calls were refused by the
+    answer validator — <code>DecisionsValidationError: decision 'role'
+    probabilities sum to 0.9900, not 1</code> — both files labelled O, so the
+    refusal does not touch the in-scope set; the fail-closed path leaves them
+    unscored for retry):
+  </p>
+  <ul>
+    <li><strong>AUC 0.955</strong> (in scope = L, P, G or I; 37 positives),
+      against the plan's floor of 0.90.</li>
+    <li>At threshold 0.5: precision <strong>0.702</strong>, recall
+      <strong>0.892</strong>.</li>
+    <li>Per-class medians: L 0.76 (n=15), P 0.79 (n=15), G 0.58 (n=5),
+      I 0.42 (n=2), S 0.16 (n=23), O 0.24 (n=66).</li>
+    <li>Decisions spend: <strong>$0.01206</strong> over 126 calls
+      (mean $0.0000957, p50 latency 0.465 s, p95 0.789 s), read from
+      <code>usage.cost</code> on each response. No model spend beyond the
+      decisions calls was incurred, because the remote discovery run did not
+      execute.</li>
+  </ul>
+  <p id="relevance-trial-receipt">
+    Run log: <code>score_sample.log</code>; per-file results:
+    <code>score_sample_results.json</code>, both under the run directory
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T193134053134-relevance-trial/</code>.
+    Command: <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+    PYTHONPATH=$PWD uv run --no-sync python score_sample.py</code> (exit 2 from
+    the two refusals; the summary line is the receipt above). This reproduces
+    the prototype content-arm operating point (prototype AUC 0.958) through the
+    deployed state builder and question set.
+  </p>
+
+  <p id="relevance-trial-blocker">
+    <strong>The JT-60SA trial did not run; the route to the facility is down.</strong>
+    The seven-prefix discovery run needs SSH to <code>jt-60sa</code>, which
+    resolves over the <code>laptop</code> jump
+    (<code>HostName nakasvr26.iferc.org</code> through a WSL reverse tunnel and
+    the IFERC VPN). The <code>laptop</code> hop answers
+    (<code>ssh laptop hostname → FR-IWL-MCINTOS1</code>) and the WSL host has
+    ordinary internet (<code>curl https://example.com → 200</code>), but the
+    IFERC leg is down: <code>nakasvr26.iferc.org</code> resolves to
+    <code>157.111.6.49</code> via public DNS, and every attempt —
+    <code>ssh -o BatchMode=yes jt-60sa hostname</code> — fails with
+    <code>Connection timed out during banner exchange</code>. The WSL route
+    table carries only a stale <code>157.111.10.241 via 172.29.0.1</code>
+    entry; <code>172.29.0.1</code> does not answer ping, there is no tunnel
+    interface (<code>ip -brief link</code> shows no tun/wg/ppp), and TCP to
+    <code>157.111.10.241:22</code> fails as <code>No route to host</code>.
+    Retried five times across the run with no change. No prefix was reset, no
+    discovery command was run, and no facility-wide command was issued.
+  </p>
+
+  <p id="relevance-trial-prefix">
+    <strong>Pre-trial graph state</strong> (the count the fence asked for
+    before the first pass), by the query
+    <code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE any(p IN $prefixes WHERE sf.path STARTS WITH p) RETURN sf.status,
+    coalesce(sf.relevance_stage,'&lt;none&gt;') , count(*)</code>. All 371 rows
+    predate the §25 schema, so <code>relevance_stage</code> is null on every
+    one and no relevance field is populated:
+  </p>
+  <table>
+    <thead><tr><th>prefix</th><th>total</th><th>by status</th></tr></thead>
+    <tbody>
+      <tr><td>/analysis/src/SAeqread</td><td>90</td><td>scored 90</td></tr>
+      <tr><td>/analysis/src/client_eqdbms.EQ32.Rev1</td><td>48</td><td>ingested 7, skipped 41</td></tr>
+      <tr><td>/analysis/src/SAeqfame</td><td>7</td><td>skipped 7</td></tr>
+      <tr><td>/analysis/src/getseldata_v4.2</td><td>15</td><td>scored 11, ingested 2, skipped 2</td></tr>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC</td><td>206</td><td>scored 186, skipped 13, ingested 7</td></tr>
+      <tr><td>/analysis/lib/eqdbms</td><td>5</td><td>ingested 1, skipped 4</td></tr>
+      <tr><td>/analysis/lib/JT60SAEQDB</td><td>0</td><td>&#8212;</td></tr>
+    </tbody>
+  </table>
+  <p id="relevance-trial-named">
+    <strong>Named files, pre-trial</strong> (query:
+    <code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE sf.path ENDS WITH $name RETURN sf.status, relevance fields</code>):
+    <code>geteddb.c</code> ingested;
+    <code>outeddb.c</code>, <code>eddbaccess.h</code>, <code>fercor.f</code>,
+    <code>eqjt60.f</code>, <code>inpgeo.c</code> and <code>mgset0.f</code> all
+    <em>scored</em>, not ingested, with no relevance set (these are old-pipeline
+    rows: <code>geteddb.c</code> sits at
+    <code>/analysis/src/getseldata_v4.2/</code>, the rest under
+    <code>getseldata_v4.2</code> and <code>SAselene_v2.0_forPSRC</code>).
+    The trial's ingest of <code>geteddb.c</code>, <code>outeddb.c</code>,
+    <code>eddbaccess.h</code>, <code>fercor.f</code> and <code>eqjt60.f</code>,
+    and the reporting of <code>inpgeo.c</code> and <code>mgset0.f</code> with
+    their content relevance, remain <strong>unmeasured</strong> because the
+    run could not execute.
+  </p>
+  <p id="relevance-trial-minpack">
+    <strong>Negative control (pre-trial).</strong> The 8 files under
+    <code>/analysis/src/SAselene_v2.0_forPSRC/minpack</code> — the declared
+    out-of-scope MINPACK library — are 7 <em>scored</em> and 1
+    <em>skipped</em>, <strong>0 ingested</strong> (query: same as above with
+    <code>sf.path CONTAINS 'SAselene_v2.0_forPSRC/minpack'</code>). This is the
+    pre-existing state, not a result of this node's run.
+  </p>
+
+  <h3 id="relevance-trial-ran">The seven-prefix trial ran when the IFERC route returned</h3>
+  <p id="relevance-trial-run">
+    With <code>jt-60sa</code> reachable again (route via the
+    <code>laptop</code> jump restored, <code>ssh -o BatchMode=yes jt-60sa
+    hostname</code> answering), the fence's discovery passes were run as
+    blocking foreground calls of <code>imas-codex discover code jt-60sa</code>
+    with the seven <code>--path-prefix</code> arguments exactly, each capped by
+    <code>--time 8</code>: pass 1 with <code>--reset-to discovered</code>, then
+    two more without it, stopping when a pass reported no pending work. Three
+    passes were needed; the third reported no work. All three ran inside one
+    SLURM allocation (the fleet node) — no login-node execution.
+  </p>
+  <table>
+    <thead><tr><th>pass</th><th>summary line</th><th>decisions spend</th></tr></thead>
+    <tbody>
+      <tr><td>1 (reset-to discovered)</td><td>0 scanned, 223 scored, 86 code ingested</td><td>$0.07</td></tr>
+      <tr><td>2</td><td>0 scanned, 0 scored, 10 code ingested</td><td>$0.00</td></tr>
+      <tr><td>3 (drained)</td><td>0 scanned, 0 scored, 0 code ingested</td><td>$0.00</td></tr>
+    </tbody>
+  </table>
+
+  <p id="relevance-trial-prefix-after">
+    <strong>Post-trial graph state</strong>, same query as above
+    (<code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE any(p IN $prefixes WHERE sf.path STARTS WITH p) RETURN sf.status,
+    coalesce(sf.relevance_stage,'&lt;none&gt;'), count(*)</code>), now carries a
+    populated <code>relevance_stage</code> on every touched row:
+  </p>
+  <table>
+    <thead><tr><th>prefix</th><th>total</th><th>by status &#183; stage</th></tr></thead>
+    <tbody>
+      <tr><td>/analysis/src/SAeqread</td><td>90</td><td>ingested&#183;content 27, scored&#183;content 39, skipped&#183;content 4, skipped&#183;name 20</td></tr>
+      <tr><td>/analysis/src/client_eqdbms.EQ32.Rev1</td><td>48</td><td>skipped&#183;name 48</td></tr>
+      <tr><td>/analysis/src/SAeqfame</td><td>7</td><td>ingested&#183;content 4, scored&#183;content 1, skipped&#183;name 2</td></tr>
+      <tr><td>/analysis/src/getseldata_v4.2</td><td>15</td><td>ingested&#183;content 11, scored&#183;content 3, skipped&#183;name 1</td></tr>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC</td><td>206</td><td>ingested&#183;content 53, scored&#183;content 77, skipped&#183;name 76</td></tr>
+      <tr><td>/analysis/lib/eqdbms</td><td>5</td><td>ingested&#183;content 1, scored&#183;content 2, skipped&#183;name 2</td></tr>
+      <tr><td>/analysis/lib/JT60SAEQDB</td><td>0</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p id="relevance-trial-named-after">
+    <strong>Named files, post-trial</strong> (query:
+    <code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE sf.path ENDS WITH $name RETURN sf.status, relevance fields</code>).
+    All five receipt files were ingested through the content arm; the two
+    reported files carry their content relevance, and one of them falls below
+    the gate:
+  </p>
+  <ul>
+    <li><code>geteddb.c</code> — <strong>ingested</strong>, loads 0.94 (getseldata_v4.2)</li>
+    <li><code>outeddb.c</code> — <strong>ingested</strong>, loads 0.90 (getseldata_v4.2)</li>
+    <li><code>eddbaccess.h</code> — <strong>ingested</strong>, loads 0.80 (getseldata_v4.2)</li>
+    <li><code>fercor.f</code> — <strong>ingested</strong>, processes 0.82 (SAselene_v2.0_forPSRC)</li>
+    <li><code>eqjt60.f</code> — <strong>ingested</strong>, describes 0.86 (SAselene_v2.0_forPSRC)</li>
+    <li><code>inpgeo.c</code> — <strong>ingested</strong>, describes 0.60 (getseldata_v4.2, above the 0.5 gate)</li>
+    <li><code>mgset0.f</code> — <strong>scored, not ingested</strong>, describes 0.39 (SAselene_v2.0_forPSRC; below the 0.5 gate, so correctly left out)</li>
+  </ul>
+
+  <p id="relevance-trial-minpack-after">
+    <strong>Negative control, post-trial.</strong> The 8 files under
+    <code>/analysis/src/SAselene_v2.0_forPSRC/minpack</code> are all
+    <em>skipped</em>, <strong>0 ingested</strong> (query: same as above with
+    <code>sf.path CONTAINS 'SAselene_v2.0_forPSRC/minpack'</code>). The declared
+    negative control holds.
+  </p>
+
+  <p id="relevance-trial-spend">
+    <strong>Spend.</strong> Run passes: <strong>$0.07</strong>
+    (pass 1; passes 2 and 3 were $0.00). Labelled-sample scoring:
+    <strong>$0.01206</strong>. Total decisions spend for this node
+    <strong>$0.08206</strong>, read from the <code>Cost:</code> lines in
+    <code>code_jt-60sa.log</code> and <code>usage.cost</code> in
+    <code>score_sample_results.json</code>. No other model spend.
+  </p>
+
+  <p id="relevance-trial-scope">
+    <strong>Scope anomaly — reported, not resolved.</strong> The fence required
+    that no reset or run reach outside the seven prefixes. The graph shows it
+    did: <strong>2311</strong> jt-60sa <code>CodeFile</code> nodes carry a
+    <code>triaged_at</code> inside this run's window
+    (<code>[2026-10-06T23:58:52Z, 2026-10-07T00:12:04Z]</code>), and
+    <strong>1384</strong> of them are under <code>/analysis/src/edas2</code>,
+    stamped <code>[00:10:07Z, 00:12:04Z]</code> — inside pass 2 — although only
+    the <strong>371</strong> files under the seven prefixes are in scope. The
+    run log confirms it directly: a <code>code_worker started
+    facility=jt-60sa</code> at <code>02:10:01</code> local (00:10:01Z) is
+    followed by <code>triage decision failed for
+    /analysis/src/edas2/v2.1.15/.../mtoi.f</code> and dozens more edas2 paths.
+    No other <code>discover code</code> process existed at that time — the only
+    runs created in that window are this node's own passes — so the scoped
+    reset and triage stages did <em>not</em> honour <code>--path-prefix</code>.
+    Counts by query:
+    <code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE sf.triaged_at &gt;= datetime('2026-10-06T23:57:28Z') RETURN count(sf),
+    min(sf.triaged_at), max(sf.triaged_at)</code> and the same with
+    <code>AND sf.path STARTS WITH '/analysis/src/edas2'</code>. This is a
+    tool-level defect, not an operator action — the command carried exactly the
+    seven prefixes. It is surfaced for the coordinator to adjudicate; the
+    seven-prefix measurements above are unaffected, but the run's side effects
+    exceeded its declared scope.
+  </p>
+</section>
