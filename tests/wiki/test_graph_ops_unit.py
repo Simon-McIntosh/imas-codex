@@ -533,3 +533,83 @@ class TestDeferFailedDocuments:
 
         assert defer_failed_documents("jt-60sa") == 0
         mock_defer.assert_not_called()
+
+
+class TestDocumentStatusWriterFailClosed:
+    """A status write that does not reach the graph surfaces to the caller.
+
+    A deferral or failure mark that never landed must not read as a success
+    beside a warning: each writer raises, and each caller either propagates
+    the failure or counts only the writes that landed.
+    """
+
+    @staticmethod
+    def _raising_gc(mock_gc_class):
+        mock_gc = MagicMock()
+        mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc_class.return_value.__exit__ = MagicMock(return_value=False)
+        mock_gc.query.side_effect = RuntimeError("Neo4j unavailable")
+        return mock_gc
+
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_mark_document_deferred_raises_when_write_fails(self, mock_gc_class):
+        from imas_codex.discovery.wiki.graph_ops import mark_document_deferred
+
+        self._raising_gc(mock_gc_class)
+
+        with pytest.raises(RuntimeError):
+            mark_document_deferred("doc:1", "dead link")
+
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_mark_document_failed_raises_when_write_fails(self, mock_gc_class):
+        from imas_codex.discovery.wiki.graph_ops import mark_document_failed
+
+        self._raising_gc(mock_gc_class)
+
+        with pytest.raises(RuntimeError):
+            mark_document_failed("doc:2", "boom")
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    def test_failed_or_deferred_propagates_deferred_write_failure(self, mock_defer):
+        from imas_codex.discovery.wiki.graph_ops import (
+            mark_document_failed_or_deferred,
+        )
+
+        mock_defer.side_effect = RuntimeError("Neo4j unavailable")
+
+        with pytest.raises(RuntimeError):
+            mark_document_failed_or_deferred(
+                "doc:1", "cannot find loader for this WMF file", "presentation"
+            )
+        mock_defer.assert_called_once_with("doc:1", "unsupported image format (WMF)")
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
+    def test_failed_or_deferred_propagates_failed_write_failure(self, mock_failed):
+        from imas_codex.discovery.wiki.graph_ops import (
+            mark_document_failed_or_deferred,
+        )
+
+        mock_failed.side_effect = RuntimeError("Neo4j unavailable")
+
+        with pytest.raises(RuntimeError):
+            mark_document_failed_or_deferred("doc:2", "Connection refused", "pdf")
+        mock_failed.assert_called_once_with("doc:2", "Connection refused")
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_defer_failed_documents_surfaces_write_failure(
+        self, mock_gc_class, mock_defer
+    ):
+        from imas_codex.discovery.wiki.graph_ops import defer_failed_documents
+
+        mock_gc = MagicMock()
+        mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc_class.return_value.__exit__ = MagicMock(return_value=False)
+        mock_gc.query.return_value = [
+            {"id": "d1", "error": "HTTP Error 404: Not Found", "document_type": "pdf"}
+        ]
+        mock_defer.side_effect = RuntimeError("Neo4j unavailable")
+
+        with pytest.raises(RuntimeError):
+            defer_failed_documents("jt-60sa")
+        mock_defer.assert_called_once_with("d1", "dead link")

@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <body>
+    <section>
+      <h2 id="document-status-fail-closed">Document status writers report a failed write</h2>
+      <p id="document-status-fail-closed-landing">
+        <code>mark_document_failed</code>,
+        <code>mark_document_deferred</code> and
+        <code>mark_document_failed_or_deferred</code> in
+        <code>imas_codex/discovery/wiki/graph_ops.py</code> no longer wrap
+        their write in <code>except Exception</code> and log a warning: a
+        status write that does not reach the graph now raises. The callers
+        handle it explicitly — <code>defer_failed_documents</code> counts only
+        the writes that landed and re-raises on a failure, and the deferral
+        sites in <code>imas_codex/discovery/wiki/workers.py</code> and the
+        terminal-record site in <code>imas_codex/discovery/wiki/pipeline.py</code>
+        log the failed write and re-raise.
+      </p>
+      <p id="document-status-fail-closed-measure">
+        Measured before the change: with the swallow flipped to re-raise in a
+        scratch copy, <code>tests/wiki</code> and <code>tests/discovery</code>
+        ran <strong>1899 passed, 0 failed</strong> — no test passed only because
+        the write swallowed its error. The swallow was therefore unexercised by
+        the suite, and the new tests below are its first coverage.
+      </p>
+      <p id="document-status-fail-closed-gate">
+        Gate:
+        <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/wiki/test_graph_ops_unit.py tests/wiki/test_workers.py tests/wiki/test_pipeline.py</code>
+        — <strong>112 passed, exit 0</strong>. New tests in
+        <code>TestDocumentStatusWriterFailClosed</code> drive each writer
+        against a graph client that raises and assert the failure surfaces, and
+        assert <code>defer_failed_documents</code> and the pipeline's
+        <code>ingest_from_graph</code> propagate a failing status write.
+      </p>
+      <p id="document-status-fail-closed-negative-control">
+        Negative control (declared mutation): restore the except-and-warn in
+        <code>mark_document_deferred</code> in a scratch copy and run the
+        status-writer test — exits non-zero, first failure
+        <code>test_mark_document_deferred_raises_when_write_fails</code>
+        (<strong>1 failed, 4 passed</strong>).
+      </p>
+    </section>
+  </body>
+</html>
