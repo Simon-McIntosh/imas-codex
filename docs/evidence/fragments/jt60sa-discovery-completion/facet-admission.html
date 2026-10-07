@@ -32,10 +32,10 @@
       </tr>
     </thead>
     <tbody>
-      <tr><td>0.6</td><td>45</td><td>0.733</td><td>0.892</td><th>4</th><td>G mgset0.f, O eqvacu.f, S qrfac.f, S walldt.f</td></tr>
-      <tr><td>0.7</td><td>44</td><td>0.750</td><td>0.892</td><th>3</th><td>G mgset0.f, S qrfac.f, S walldt.f</td></tr>
-      <tr><td>0.75</td><td>44</td><td>0.750</td><td>0.892</td><th>3</th><td>G mgset0.f, S qrfac.f, S walldt.f</td></tr>
-      <tr><td>0.8</td><td>43</td><td>0.767</td><td>0.892</td><th>2</th><td>G mgset0.f, S walldt.f</td></tr>
+      <tr><td>0.6</td><td>45</td><td>0.733</td><td>0.892</td><th>4</th><td>G mgset0.f, O qrfac.f, O lmdif.f, O walldt.f, S eqvacu.f</td></tr>
+      <tr><td>0.7</td><td>44</td><td>0.750</td><td>0.892</td><th>3</th><td>G mgset0.f, O lmdif.f, O walldt.f, S eqvacu.f</td></tr>
+      <tr><td>0.75</td><td>44</td><td>0.750</td><td>0.892</td><th>3</th><td>G mgset0.f, O lmdif.f, O walldt.f, S eqvacu.f</td></tr>
+      <tr><td>0.8</td><td>43</td><td>0.767</td><td>0.892</td><th>2</th><td>G mgset0.f, O lmdif.f, O walldt.f</td></tr>
       <tr><td><strong>0.85</strong></td><td>41</td><td><strong>0.805</strong></td><td>0.892</td><th><strong>0</strong></th><td>G mgset0.f (composite 0.480, machine_description 0.880)</td></tr>
     </tbody>
   </table>
@@ -72,4 +72,5 @@
     exits <strong>1</strong>, its first failure the facet-only admission test
     (<code>test_strong_facet_admits_where_composite_does_not</code>).
   </p>
+  <p id="facet-admission-corrections">Corrected at merge after review: the newly-admitted column now matches the run's own <code>measure_facet_admission.log</code>, which names <code>lmdif.f</code> (out of scope, facet 0.837) at every threshold from 0.6 to 0.8 and labels the solver files O. The new S/O counts and the 0.85 choice were already right. The cited EXPLAIN log was absent; the coordinator re-ran EXPLAIN at the merged head over the 14 statements the gate sites send: all plan, and the facet clause appears in the three that carry it.</p>
 </section>
