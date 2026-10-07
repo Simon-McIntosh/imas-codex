@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T02:52:59.343Z",
+  "dispatched_at": "2026-10-07T02:43:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/retrieval-miss-census.html",
+      "line": "q05",
+      "severity": "follow-on",
+      "text": "follow-on: the row's class ingested-and-embedded-but-ranked-below-30 describes eqgrd.f's embedded chunk while chunk_state.out shows the CodeFile status is scored at composite 0.35, below the same 0.5 ingest gate that makes Q01 skipped-by-judgment; the fragment states neither the status nor the divergence, so a reader takes ingested from the class label alone."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read against base 261b199c; one conventional docs(evidence) change with a body, one file, 101 insertions, no code and no graph write.",
+    "done_when": "the plan asks for one class per miss with its graph evidence and the repair each class needs; the fragment's Repair-each-class-needs list names a gate/graded-facet rule for Q01 and a retrieval change for the ranked four, and names the two classes no miss fell in.",
+    "goal": "node retrieval-miss-census is an evidence-only census that gives each of five JT-60SA questions one miss class with its graph evidence; docs/evidence/fragments/discovery-judgments-through-jev/retrieval-miss-census.html gives each of Q01/Q05/Q12/Q14/Q18 exactly one class with the stored relevance/status and a deeper rank.",
+    "manifest": "read; status complete, head ac57f30ba, gate deep_search.py exit 0, positive control in negative_control.out (Q16 relevant at ranks 0/1/3); its baseline_suite and after_suite arms are absent, so the added-failure count is unmeasured.",
+    "write_paths": "the reviewed manifest declares the reports dir, the fragment and a figures dir; git diff --stat 261b199c..ac57f30ba shows one changed file, the fragment, inside them."
+  },
+  "justifications": {
+    "durability": "no test guards the census; its falsifier is the Q16 positive control in negative_control.out and the pinned graph fields in chunk_state.out, but the scripts that take them sit in the uncommitted reports dir.",
+    "evidence": "census.out/chunk_state.out/deep_search.out under ~/.config/reckon/crew/reports/imas-codex/retrieval-miss-census reproduce mgset0.f r_desc 0.39 below the 0.5 gate (settings.py:1051), eqequb.f rank 159 and use_compiler-en rank 181, and the Q16 positive control at ranks 0/1/3 shows the procedure separates a hit from a miss.",
+    "fit": "retrieval-miss-census.html follows the evidence-fragment idiom (section id, data-reckon evidence, per-row ids) of its siblings and adds no forbidden name.",
+    "goal_fidelity": "retrieval-miss-census.html classifies each of the five misses with the graph fields the plan asks for (q01 skipped-by-judgment; q05/q12/q14/q18 ingested-and-embedded-but-ranked-below-30).",
+    "reuse": "the census reuses _search_code/_search_docs (imas_codex/llm/search_tools.py) rather than adding a searcher, and the fragment adds no new mechanism.",
+    "scope_discipline": "the single changed path, retrieval-miss-census.html, is inside the manifest's declared write paths, and the plan's no-code and no-graph-write constraint is honoured."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: node retrieval-miss-census is an evidence-only census that gives each of five JT-60SA questions one miss class with its graph evidence; docs/evidence/fragments/discovery-judgments-through-jev/retrieval-miss-census.html gives each of Q01/Q05/Q12/Q14/Q18 exactly one class with the stored relevance/status and a deeper rank.\nVERDICT done_when: the plan asks for one class per miss with its graph evidence and the repair each class needs; the fragment's Repair-each-class-needs list names a gate/graded-facet rule for Q01 and a retrieval change for the ranked four, and names the two classes no miss fell in.\nVERDICT write_paths: the reviewed manifest declares the reports dir, the fragment and a figures dir; git diff --stat 261b199c..ac57f30ba shows one changed file, the fragment, inside them.\nVERDICT manifest: read; status complete, head ac57f30ba, gate deep_search.py exit 0, positive control in negative_control.out (Q16 relevant at ranks 0/1/3); its baseline_suite and after_suite arms are absent, so the added-failure count is unmeasured.\nVERDICT diff: read against base 261b199c; one conventional docs(evidence) change with a body, one file, 101 insertions, no code and no graph write.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: retrieval-miss-census.html classifies each of the five misses with the graph fields the plan asks for (q01 skipped-by-judgment; q05/q12/q14/q18 ingested-and-embedded-but-ranked-below-30).\nSCORE evidence: 18\nJUSTIFICATION evidence: census.out/chunk_state.out/deep_search.out under ~/.config/reckon/crew/reports/imas-codex/retrieval-miss-census reproduce mgset0.f r_desc 0.39 below the 0.5 gate (settings.py:1051), eqequb.f rank 159 and use_compiler-en rank 181, and the Q16 positive control at ranks 0/1/3 shows the procedure separates a hit from a miss.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single changed path, retrieval-miss-census.html, is inside the manifest's declared write paths, and the plan's no-code and no-graph-write constraint is honoured.\nSCORE durability: 17\nJUSTIFICATION durability: no test guards the census; its falsifier is the Q16 positive control in negative_control.out and the pinned graph fields in chunk_state.out, but the scripts that take them sit in the uncommitted reports dir.\nSCORE fit: 19\nJUSTIFICATION fit: retrieval-miss-census.html follows the evidence-fragment idiom (section id, data-reckon evidence, per-row ids) of its siblings and adds no forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the census reuses _search_code/_search_docs (imas_codex/llm/search_tools.py) rather than adding a searcher, and the fragment adds no new mechanism.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/retrieval-miss-census.html:q05 follow-on: the row's class ingested-and-embedded-but-ranked-below-30 describes eqgrd.f's embedded chunk while chunk_state.out shows the CodeFile status is scored at composite 0.35, below the same 0.5 ingest gate that makes Q01 skipped-by-judgment; the fragment states neither the status nor the divergence, so a reader takes ingested from the class label alone.\n",
+  "review_run_id": "r-20261007T024318808911-review-of-retrieval-miss-census",
+  "reviewed_base": "261b199cdf6c7a3b5f00eb589233aadc7ffc2476",
+  "reviewed_base_sha": "261b199cdf6c7a3b5f00eb589233aadc7ffc2476",
+  "reviewed_commit": "ac57f30badc6865bd0eb3730389e501dd3ff2b26",
+  "reviewed_head_sha": "ac57f30badc6865bd0eb3730389e501dd3ff2b26",
+  "reviewed_run_id": "r-20261007T022046912954-retrieval-miss-census",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-07T02:54:04.919409+00:00",
+  "total": 113
+}
