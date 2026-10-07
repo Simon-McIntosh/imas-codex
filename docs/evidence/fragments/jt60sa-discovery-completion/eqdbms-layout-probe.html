@@ -1,0 +1,122 @@
+<section>
+  <h2 id="eqdbms-layout-probe">Where the EQDBMS record layout is defined, and why the search criterion misses it</h2>
+  <p id="eqdbms-layout-probe-finding">
+    The EQDBMS equilibrium record layout — the sequence of typed sections
+    <code>EQ10…EQ32</code> a reader decodes an equilibrium record with, and the
+    field-list COMMON blocks (<code>#AAA</code>, <code>#CNT</code>,
+    <code>#GEO</code>, <code>#EQU</code>, <code>#EQV</code>, <code>#OUT</code>,
+    <code>#PAR</code>, <code>#VAC</code>, <code>#MSEDB</code>,
+    <code>#EQ2M</code>) that fix each section's fields — is defined across the
+    EQDBMS library trees, and it is <strong>only partly in the graph</strong>.
+    At its default pool the criterion
+    <code>_search_code('EQDBMS record layout', facility='jt-60sa')</code> names
+    the wrong sources: it returns EDAS <code>eqread_pac</code> client code
+    (<code>eqdata_get.f</code>, <code>Fledd.py</code>, <code>eqlist_get.f</code>),
+    none of which holds the layout. The layout surfaces only when the candidate
+    pool is widened to <code>k=50</code> and then re-ranked. So the criterion
+    should name the EQDBMS-library readers/writers rather than the EQDBMS
+    <em>clients</em>, and the layout still needs fuller ingesting — the
+    field-list include files are absent from the graph entirely.
+  </p>
+
+  <p id="eqdbms-layout-probe-holders">
+    <strong>What holds the layout, and its graph state.</strong> The field list
+    is reproduced (inlined as <code>_BF</code> COMMON declarations) inside the
+    two ingested readers <code>/analysis/lib/eqdbms/eqdbget2m.f</code>
+    (status <code>ingested</code>, relevance_stage <code>content</code>,
+    score_composite <strong>0.54</strong>, <strong>4 chunks</strong>,
+    <code>IRDM_BF</code>/<code>IZDM_BF</code> present) and
+    <code>/analysis/src/SAeqread/eqdbget.f</code> (ingested / content /
+    <strong>0.57</strong> / <strong>5 chunks</strong>, <code>IRDM_BF</code>,
+    <code>IZDM_BF</code>, <code>EQ10</code> present). The per-section readers
+    and writers <code>eqrdNN.f</code>/<code>eqwtNN.f</code> live in the EDAS
+    EQDBMS library at
+    <code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms/EQDB/</code>,
+    of which only <code>eqwt10.f</code> (ingested / content / 0.56) and
+    <code>eqwt11.f</code> (ingested / content / 0.52) are ingested;
+    <code>eqwt13.f</code> and <code>eqwt2.f</code> are only <code>triaged</code>
+    and <code>eqwt15.f</code> is <code>skipped</code>. The variant reader
+    <code>/analysis/src/SAeqfame/eqdbget.f</code> also carries the <code>_BF</code>
+    field list (5 chunks). The definitive per-section <em>write</em> layout is
+    the Fortran <code>WRITE</code> statement in <code>EQDB/eqwtNN.f</code>
+    (e.g. <code>eqwt10.f</code> under <code>C::EQDATA TYPE(EQIDX.EQ.'EQ10')</code>).
+  </p>
+
+  <p id="eqdbms-layout-probe-missing">
+    <strong>What the graph lacks.</strong> The include files that carry the
+    field list as a standalone definition (<code>#AAA.bf</code>,
+    <code>#GEO.bf</code>, <code>#EQU.bf</code>, <code>#EQV.bf</code>,
+    <code>#OUT.bf</code>, <code>#PAR.bf</code>, <code>#VAC.bf</code>,
+    <code>#MSEDB.bf</code>, <code>#EQ2M.bf</code>) have <strong>zero</strong>
+    CodeFile rows; a path query for <code>.bf</code>/<code>#AAA</code>/<code>#GEO</code>/<code>#EQU</code>/<code>#VAC</code>/<code>#MSEDB</code> matches
+    nothing. The whole client reader/writer set
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/*</code>
+    (<code>eqdb_get.f</code>, <code>eqdbio.f</code>, <code>eqdblist.f</code>,
+    <code>eqrdNN.f</code>, <code>eqwtNN.f</code>, <code>ftplistget.f</code>) is
+    <code>skipped</code> at <code>name</code>, i.e. identified but never
+    fetched or chunked. <code>/analysis/lib/JT60SAEQDB</code> has no CodeFile
+    rows. So an operating reader/writer, the <code>EQDBGET</code> interface a
+    JT-60SA client calls, is in the graph only through the SAeqread/SAeqfame
+    readers and the two EDAS <code>eqwt</code> writers.
+  </p>
+
+  <p id="eqdbms-layout-probe-rank">
+    <strong>Rank of the layout's chunks.</strong> Under the tool's own hybrid
+    order (rerank off) the layout is absent from the default pool entirely: at
+    <code>k=10</code> and <code>k=30</code> every returned candidate is EDAS
+    <code>eqread_pac</code> client code, and the layout's chunks first appear
+    only at <code>k=50</code> — <code>lib/eqdbms/eqdbget2m.f</code> at
+    <strong>#39</strong> (0.886), EDAS <code>EQDB/eqdbio.f</code> at #44,
+    <code>SAeqfame/eqdbget.f</code> at #45–46, <code>geteddbt.c</code> at #50.
+    With the Jev rerank on (one score question per candidate,
+    <code>typesafe/jev-1.13</code>) the outcome depends on the pool: over the
+    <code>k=30</code> pool the layout chunks are not present, so the rerank
+    cannot surface them and the criterion still fails (top = EDAS
+    <code>eqread_pac</code> files) — this is the failure the criterion reports.
+    Over the <code>k=50</code> pool, once the layout chunks are in the pool, the
+    rerank lifts them hard to the top: <code>SAeqfame/eqdbget.f</code> to
+    <strong>#2</strong> (jev 2.01), <code>lib/eqdbms/eqdbget2m.f</code> to
+    <strong>#4</strong> (jev 1.72), EDAS <code>eqdbms/EQDB/eqdbio.f</code> to
+    <strong>#8</strong> (jev 1.52), while the tool's own #1
+    (<code>eqdata_get.f</code>) falls to #9. The criterion's defect is therefore
+    a <em>retrieval</em> (pool-size) defect, not a ranking one.
+  </p>
+
+  <p id="eqdbms-layout-probe-host">
+    <strong>Host grep could not run.</strong>
+    <code>ssh -o BatchMode=yes jt-60sa hostname</code> through the
+    <code>/tmp/sshwrap/ssh</code> wrapper (which execs
+    <code>/usr/bin/ssh -F $HOME/.ssh/config</code> with all arguments) failed:
+    the ProxyJump chain reaches the intermediate node's port 22 but the final
+    hop to <code>localhost:2222</code> returns <em>Connection timed out during
+    banner exchange</em> / <em>Connection refused</em> — the JT-60SA hop is
+    <strong>down</strong>. Per the criterion, classification is therefore from
+    the graph alone, and no on-host grep was possible.
+  </p>
+
+  <p id="eqdbms-layout-probe-verdict">
+    <strong>Verdict.</strong> The criterion names the right <em>topic</em> but
+    the wrong <em>sources</em>: it should name the EQDBMS-library readers and
+    writers (<code>eqdbget2m.f</code>, <code>SAeqread/eqdbget.f</code>,
+    <code>SAeqfame/eqdbget.f</code>, EDAS <code>EQDB/eqwtNN.f</code>) that hold
+    the record structure, not the EDAS <code>eqread_pac</code> clients that
+    consume it. The layout also needs further ingesting: the standalone
+    field-list include files and the client_eqdbms reader/writer set are absent
+    or skipped, so a search for the record layout cannot reach the definition
+    itself, only its reproduction inside the two ingested readers.
+  </p>
+
+  <p id="eqdbms-layout-probe-artifacts">
+    Evidence: graph queries and their logs under
+    <code>~/.config/reckon/crew/reports/imas-codex/eqdbms-layout-probe/</code>
+    — <code>q_verify.py</code> → <code>out_verify.txt</code> (CodeFile statuses,
+    chunk counts, the <code>_BF</code> field-list files, the
+    path-absent include check; <code>q_candidates_k.py</code> →
+    <code>candidates_k30.json</code>/<code>candidates_k50.json</code> (the tool's
+    own candidate pool); <code>rerank_eqdbms.py</code> →
+    <code>jev_rerank_eqdbms.json</code>/<code>jev_rerank_eqdbms_k50.json</code>
+    (per-candidate Jev score and cost); <code>out_search_k10/k30/k50.txt</code>
+    (tool output at each pool size). No graph write, no repository code change,
+    no discover run.
+  </p>
+</section>
