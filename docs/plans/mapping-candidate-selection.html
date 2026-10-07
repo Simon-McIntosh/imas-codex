@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -483,7 +483,21 @@
       <li><strong><code>map-run-maps-each-home</code></strong>, role implement, 1.25 h.
         It owns the per-IDS map claim, the section-level <code>target_id</code> guard, the
         section and target type derived from the DD, the <code>mapping_status</code>
-        summary, and the retired fields.
+        summary, and the retired fields. Since <code>map-run-chooses-candidates</code>, the
+        assign stage no longer fills the in-memory assignments the map stage reads
+        (<code>state.assignments</code> in <code>imas_codex/ids/workers.py</code>). It only marks
+        selected edges. So each IDS pass builds its <code>TargetAssignment</code>s from the
+        claimed sources' selected edges, read through <code>read_candidates</code>, and a
+        <code>selected</code> source and an escalated source the assign stage resolved are mapped
+        the same way. It also corrects the assign stage's record of a <code>none</code>
+        verdict. That verdict keeps <code>mapping_disposition</code> and
+        <code>mapping_evidence</code>, but it is currently also written into
+        <code>mapping_status</code>, whose range is <code>MappingPipelineStatus</code>
+        (assigned, mapped, validated) and which holds no disposition value. The verdict leaves
+        <code>mapping_status</code> untouched. This node is dispatched on the unmerged head of
+        <code>map-run-chooses-candidates</code> and merged with it. Merged alone, the third node
+        would leave <code>imas map run</code> claiming sources and releasing every one for want
+        of an assignment.
         <ul>
           <li>Write paths: <code>imas_codex/ids/workers.py</code>,
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
@@ -493,6 +507,10 @@
             with tests showing:
             <ul>
               <li>a selected source is mapped without an assign call;</li>
+              <li>an escalated source the assign stage resolved is mapped in the same run, from
+                assignments built out of its selected edges;</li>
+              <li>a <code>none</code> verdict leaves <code>mapping_status</code> unset while
+                recording <code>mapping_disposition</code> and <code>mapping_evidence</code>;</li>
               <li>a source with selected edges in <code>magnetics</code> and
                 <code>summary</code> is claimed by each IDS's pass and bound in both, and a
                 second <code>magnetics</code> pass skips it;</li>
