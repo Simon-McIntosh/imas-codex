@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -324,7 +324,10 @@
     <div class="r-comment-body"><p>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment.html — four foreground enrich-only passes; enriched SignalSource 13→953 of 2,249 (1,296 left, none failed), Jev rerank spend USD 0.31 of the USD 50 cap, run stopped at the 50-minute mark with 1,256 signals still claimable</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261007T123205644425-member-identifier-varying-segments" data-who="reckon-build" data-when="2026-10-07T12:40:01.814Z">
-    <div class="r-comment-body"><p>§11 member-identifier-varying-segments — extract_member_identifier now builds each member identifier only from the accessor&#x27;s numeric runs that differ across the source&#x27;s members, dropping constant runs (the JT-60SA reference shot 101173 no longer appears); tests/discovery/test_member_identifier.py pins the JT-60SA 81..86 case, the two-varying-run 010/048 case and the constant-first-run case, and tests/discovery/test_signals_pipeline.py still passes (49 passed, EXIT=0).</p></div>
+    <div class="r-comment-body"><p>§11 member-identifier-varying-segments — extract_member_identifier now builds each member identifier only from the accessor's numeric runs that differ across the source's members, dropping constant runs (the JT-60SA reference shot 101173 no longer appears); tests/discovery/test_member_identifier.py pins the JT-60SA 81..86 case, the two-varying-run 010/048 case and the constant-first-run case, and tests/discovery/test_signals_pipeline.py still passes (49 passed, EXIT=0).</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261007T124038267181-review-of-member-identifier-varying-segments" data-who="reckon-build" data-when="2026-10-07T12:59:06.075Z">
+    <div class="r-comment-body"><p>§11 member-identifier-varying-segments reviewed — verdict passed on the reviewed work: extract_member_identifier now keeps only the accessor runs that vary across a source&#x27;s members (constant JT-60SA shot 101173 dropped, 81..86; two varying runs still join 010/048); head 49 passed EXIT=0, base 45 passed EXIT=0, negative control fires 4 failed EXIT=1; total 113/120; two follow-ons recorded (mislabeled gate-log revision header; an unreachable untested all-constant branch).</p></div>
 </div>
 </section>
 </main>

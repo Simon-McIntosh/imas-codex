@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest's baseline_suite and after_suite fields are empty, so no base/head arm pair was supplied and no added-failure count is derivable from the reviewed record alone. The reviewer reconstructed both arms: base arm at 289aff08 over tests/discovery/test_signals_pipeline.py (the only one of the two gate files that exists at base) records 45 passed, EXIT=0 (review-gate-base.log); head arm at f6c4c25ed over both gate files records 49 passed, EXIT=0 (review-gate-head.log). No test fails at the head arm, so adding the new tests introduces no failure and the added-failure set is empty. The reviewed node's own negative control (and the reviewer's reconstruction) deliberately reverts the fix and fails the new tests, which is the intended red arm, not an added failure.",
+  "after_suite": {
+    "added_failure_count": 0,
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_member_identifier.py tests/discovery/test_signals_pipeline.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T124038267181-review-of-member-identifier-varying-segments/review-gate-head.log",
+    "revision": "f6c4c25ed1f3355db27e625ad048a5445c5766a9"
+  },
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_signals_pipeline.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T124038267181-review-of-member-identifier-varying-segments/review-gate-base.log",
+    "revision": "289aff0821f6202a658d651b7dd2befe34312adb"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:individualize_source_descriptions (calls individualize_members at line 4627)",
+    "imas_codex/discovery/signals/parallel.py:individualize_members (calls extract_member_identifier at line 2074)"
+  ],
+  "completed_at": "2026-10-07T12:59:06.075Z",
+  "dispatched_at": "2026-10-07T12:40:47Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123205644425-member-identifier-varying-segments/gate_head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's first line names revision 289aff0821, but the run collected tests/discovery/test_member_identifier.py, which does not exist at 289aff08 (it is added by the fix commit 4d14e8b4a). Re-running the named command at 289aff08 exits 4 with 'file or directory not found: tests/discovery/test_member_identifier.py', so the 49-passed result is not reproducible from the revision the header names \u2014 the measurement required uncommitted working-tree changes the header does not record. negative_control.log carries the same header and the same gap. The result itself is sound: reproduced at the committed head f6c4c25ed in review-gate-head.log (49 passed, EXIT=0)."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "2041",
+      "severity": "follow-on",
+      "text": "follow-on (not live): extract_member_identifier returns \"\" when no run varies across the member set. A probe confirms an all-constant accessor set yields '' (which would render a template as e.g. 'Channel ' before strip), and the old positional code returned the runs instead. This is unreachable from the only caller: individualize_source_descriptions selects 'WHERE size(members) > 1', and two members of one pattern group necessarily differ in a 2+ digit run (accessors differing only in single-digit or letter content form distinct patterns), so varying is never empty in production. Recorded so the degenerate branch is a known untested edge rather than a silent one."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site in the reviewed change: individualize_source_descriptions (parallel.py:4627) calls individualize_members (parallel.py:2074) which calls extract_member_identifier (parallel.py:2074 body); extract_member_identifier and individualize_members have no other callers in imas_codex/.",
+    "diff": "read the source commit 4d14e8b4a and the evidence commit f6c4c25ed commit by commit: parallel.py replaces the positional first-N-runs extraction with a varying-run extraction driven by the member accessor set, drops source_key from both extract_member_identifier and individualize_members, and updates the single call site in individualize_source_descriptions; test_member_identifier.py adds four cases; the fragment records the landing.",
+    "done_when": "All three pinned cases pass and were reproduced independently: test_jt60sa_constant_shot_dropped (81..86, no 101173), test_two_varying_runs_join (010/048), test_constant_first_run_dropped (001); plus test_individualize_members_uses_varying_runs end to end. The declared negative control fires \u2014 my reconstruction against base 289aff08 code with the new tests reports 4 failed, EXIT=1, the JT-60SA case failing on '101173/81'. tests/discovery/test_signals_pipeline.py still passes: review-gate-head.log 49 passed EXIT=0, review-gate-base.log 45 passed EXIT=0.",
+    "goal": "The section asks that the member identifier be built only from the numeric runs that differ across the source's members, dropping a run held constant across every member and still joining several varying runs with '/'. Delivered at imas_codex/discovery/signals/parallel.py:extract_member_identifier, which takes the accessor plus member_accessors and keeps position i only when some peer differs there. individualize_members builds accessors = [m['accessor'] for m in members] and calls the extractor with it, so varying positions come from the source's members. Reproduced: extract_member_identifier on the JT-60SA group returns '81' (no 101173) and CALIB_GAS_010..PARAM_048 returns '010/048'. Residual: the 'if not varying: return \"\"' branch returns an empty identifier for an all-constant accessor set; I verified by probe that a singleton/constant group returns '', but the production query (size(members) > 1) excludes singletons and multi-member groups must differ in a 2+ digit run, so the branch is unreachable from the only caller.",
+    "manifest": "read; status complete; commits 4d14e8b4a and f6c4c25ed; changed_paths match the diff; the gate 'uv run --no-sync pytest tests/discovery/test_member_identifier.py tests/discovery/test_signals_pipeline.py -> 49 passed, EXIT=0' was independently reproduced at review-gate-head.log; negative_control_log is present and fires. baseline_suite and after_suite are empty, so no base/head arm pair was supplied and the added-failure count is unmeasurable from the reviewed record alone; the reviewer reconstructed both arms.",
+    "write_paths": "git diff 289aff08..f6c4c25ed touches imas_codex/discovery/signals/parallel.py, tests/discovery/test_member_identifier.py and docs/evidence/fragments/jt60sa-imas-maps/member-identifier-varying-segments.html \u2014 exactly the manifest's declared write paths; no plan edit, no graph write and no signals run."
+  },
+  "justifications": {
+    "durability": "the regression is guarded by four tests in tests/discovery/test_member_identifier.py pinning the JT-60SA constant-shot case (all names 81..86, no 101173), the two-varying-run join, the constant-first-run drop, and individualize_members end to end; the negative control against the unchanged function fails three of them with the shot in the identifier, so the tests are load-bearing rather than true-by-construction. The all-constant/singleton case is untested, but the production query filters to size(members) > 1 and grouped members necessarily differ in a 2+ digit run, so that branch is unreachable from individualize_source_descriptions.",
+    "evidence": "the gate is green and independently reproduced at the committed head. review-gate-head.log (f6c4c25ed) records 49 passed, EXIT=0; review-gate-base.log (289aff08) records 45 passed, EXIT=0; the negative control fires (review-negative-control.log, 4 failed, EXIT=1, JT-60SA identifiers come back '101173/81'). Weakness: the reviewed run's own gate_head.log and negative_control.log name revision 289aff08 on their first line while the runs required uncommitted working-tree changes (test_member_identifier.py does not exist at 289aff08), so neither log is reproducible from the revision it names; the manifest also left baseline_suite and after_suite empty, so no base/head arm pair was supplied and the added-failure count is only measurable from the reviewer's reconstruction.",
+    "fit": "symbols are named by behaviour \u2014 extract_member_identifier(accessor, member_accessors), individualize_members(name_template, description_template, members) \u2014 with no plan, sprint or ticket labels; the docstring states the mechanism ('a run constant across every member belongs to the group') and carries worked examples rather than a plan item, and the now-unused source_key parameter was removed rather than left vestigial.",
+    "goal_fidelity": "the plan asks for the member identifier to be built only from the accessor runs whose value differs across a source's members, with a constant run dropped and several varying runs joined by '/'. imas_codex/discovery/signals/parallel.py:extract_member_identifier(accessor, member_accessors) now computes exactly that: it collects _PATTERN_RE runs, keeps positions where any peer differs, and returns those joined. Extract, 'E101173' shot is dropped so the JT-60SA group yields 81..86, and both-varying 010/048 still join. All three done-when cases are pinned and pass. The only residual is the unreachable all-constant branch (returns ''), a degenerate with no live path.",
+    "reuse": "the fix reuses the existing _PATTERN-safe _PATTERN_RE and the existing individualize_members/individualize_source_descriptions path, deriving the varying positions from the source's own member accessors instead of adding a second grouping or pattern pass; no new pipeline, module or duplicate pattern regex was introduced.",
+    "scope_discipline": "git diff 289aff08..f6c4c25ed changes exactly the three declared write paths (imas_codex/discovery/signals/parallel.py, tests/discovery/test_member_identifier.py, docs/evidence/fragments/jt60sa-imas-maps/member-identifier-varying-segments.html), 112 insertions / 32 deletions across 3 files; the reviewed worktree is clean and no plan, sprint or graph state was mutated."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The section asks that the member identifier be built only from the numeric runs that differ across the source's members, dropping a run held constant across every member and still joining several varying runs with '/'. Delivered at imas_codex/discovery/signals/parallel.py:extract_member_identifier, which takes the accessor plus member_accessors and keeps position i only when some peer differs there; individualize_members passes the member accessor set through. Reproduced: the JT-60SA group yields '81' (no 101173) and CALIB_GAS_010..PARAM_048 yields '010/048'. Residual: the 'if not varying: return \"\"' branch is an unreachable untested edge (production selects size(members) > 1).\nVERDICT done_when: All three pinned cases pass and were reproduced: test_jt60sa_constant_shot_dropped, test_two_varying_runs_join, test_constant_first_run_dropped, plus test_individualize_members_uses_varying_runs. The negative control fires (review-negative-control.log, 4 failed, EXIT=1, JT-60SA '101173/81'). tests/discovery/test_signals_pipeline.py still passes (review-gate-head.log 49 passed EXIT=0; review-gate-base.log 45 passed EXIT=0).\nVERDICT write_paths: git diff 289aff08..f6c4c25ed touches exactly imas_codex/discovery/signals/parallel.py, tests/discovery/test_member_identifier.py and docs/evidence/fragments/jt60sa-imas-maps/member-identifier-varying-segments.html; no plan edit, no graph write, no signals run.\nVERDICT manifest: read; status complete; commits 4d14e8b4a and f6c4c25ed; gate reproduced at review-gate-head.log (49 passed, EXIT=0); negative_control_log present and fires. baseline_suite and after_suite are empty, so no base/head arm pair was supplied and the reviewer reconstructed both.\nVERDICT diff: source 4d14e8b4a replaces the positional first-N-runs extraction with a varying-run extraction over the member accessor set, drops source_key from extract_member_identifier and individualize_members, and updates the single call site; test_member_identifier.py adds four cases; f6c4c25ed adds the evidence fragment.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:individualize_source_descriptions (calls individualize_members), imas_codex/discovery/signals/parallel.py:individualize_members (calls extract_member_identifier)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: extract_member_identifier now keeps only the accessor runs whose value differs across the source's members, drops the constant JT-60SA shot and joins several varying runs; all three done-when cases are pinned and pass. The only residual is the unreachable all-constant branch.\nSCORE evidence: 16\nJUSTIFICATION evidence: head and base arms reproduced green (49 and 45 passed, EXIT=0) and the negative control fires (4 failed, EXIT=1), but the reviewed run's own logs name revision 289aff08 while the runs required uncommitted working-tree changes, and the manifest left baseline_suite/after_suite empty. \nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff is exactly the three declared write paths with a clean reviewed worktree and no plan, sprint or graph mutation.\nSCORE durability: 18\nJUSTIFICATION durability: four tests pin the constant-shot, two-varying-run, constant-first-run and end-to-end cases and the negative control shows they are load-bearing; the all-constant branch is untested but unreachable.\nSCORE fit: 20\nJUSTIFICATION fit: behaviour-named symbols with no plan labels, a docstring stating the mechanism with worked examples, and the vestigial source_key parameter removed.\nSCORE reuse: 20\nJUSTIFICATION reuse: reuses the existing _PATTERN_RE and the existing individualization path, deriving varying positions from the source's own members rather than adding a second pattern pass.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123205644425-member-identifier-varying-segments/gate_head.log:1 follow-on: the gate log header names rev 289aff08 but the run collected tests/discovery/test_member_identifier.py, which does not exist at 289aff08; the command exits 4 there, so the 49-passed result is not reproducible from the named revision (it is reproducible at the committed head f6c4c25ed).\nFINDING imas_codex/discovery/signals/parallel.py:2041 follow-on (not live): extract_member_identifier returns '' when no run varies; unreachable because individualize_source_descriptions selects size(members) > 1 and grouped members necessarily differ in a 2+ digit run.",
+  "review_run_id": "r-20261007T124038267181-review-of-member-identifier-varying-segments",
+  "reviewed_base": "289aff0821f6202a658d651b7dd2befe34312adb",
+  "reviewed_base_sha": "289aff0821f6202a658d651b7dd2befe34312adb",
+  "reviewed_commit": "f6c4c25ed1f3355db27e625ad048a5445c5766a9",
+  "reviewed_head_sha": "f6c4c25ed1f3355db27e625ad048a5445c5766a9",
+  "reviewed_run_id": "r-20261007T123205644425-member-identifier-varying-segments",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T12:50:58.198140+00:00",
+  "total": 113
+}
