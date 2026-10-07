@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T03:46:21.225Z",
+  "dispatched_at": "2026-10-07T03:28:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html",
+      "line": "167",
+      "severity": "follow-on",
+      "text": "follow-on: Q12's lifting change (a saturating BM25 term) is named but never measured by nDCG@10, while \u00a711's done_when requires the lifting change measured over the 18 questions; none of the three measured variants raises Q12 into top 30 because the reserved-slot variant reserves only 20 leaders and shtrd.f's chunk sits at facility vector rank 49."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: the Q14/Q18 \"Tool rank\" figures (1734/2000 and 1330/2000) come from a k=2000 call and contradict the node's own census fragment (which reports the same pages at ranks 181 and 163) and stages.json (181 and 164 at k=200), so the column does not name the rank the tool gives the answer at any depth it is actually called with."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "one file against the base, +175 lines, docs-only \u2014 no code change and no graph write, as \u00a711 requires.",
+    "done_when": "the done_when names the burying stage per answer plus a lifting change measured over the 18 \u00a79 questions by nDCG@10; final_metrics.py measures three changes (bounded fusion, RRF, reserved slots) and none of them lifts Q12, whose named remedy is asserted but unmeasured.",
+    "goal": "the node goal is to trace how _search_code/_search_docs build and score for the four \u00a711 answers; docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:1-60 does exactly that, naming for each of Q05/Q12/Q14/Q18 the vector index and k, the facility pre-filter, the hybrid terms and the final sort.",
+    "manifest": "the reviewed manifest reads status complete and names the nDCG comparison in final_metrics.py against labels.json, with the raw per-query JSON and stage logs recorded beside it.",
+    "write_paths": "the declared write paths are the node report dir, docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html, and docs/figures/discovery-judgments-through-jev/retrieval-scoring-probe; the single landed file is inside them and the figures path is unused."
+  },
+  "justifications": {
+    "durability": "the node ships no test; a docs-only evidence fragment cannot carry one, so its only guard is the re-runnable raw JSON and scripts under the report dir, and no assertion fails if the numbers drift.",
+    "evidence": "the gate at final_metrics.py:50-101 measures the nDCG@10 changes and its per-query result is recorded in final_metrics_rrf.json, but the reviewed run ships two divergent baselines (fusion_rrf.json variant_scores baseline 0.2763 vs final_metrics_rrf.json current 0.4204) and the docs tool rank in docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:77 is depth-dependent.",
+    "fit": "docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:1-8 follows the sibling fragment's idiom (section[data-reckon=evidence], id-per-block, caption) and introduces no plan or ticket label.",
+    "goal_fidelity": "docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:40-100 traces both tools' candidate stages and reproduces the raw cosine of each answer from its stored embedding (0.438/0.560/0.713/0.764 in stages.json), so the burying stage is named from measurement, not inference.",
+    "reuse": "the diff adds no code, but the report scripts duplicate a capability the repository already owns \u2014 the tool's merge formula is re-implemented in fusion_eval.py:40-79 and nDCG is implemented twice (fusion_eval.py:32 and final_metrics.py:30).",
+    "scope_discipline": "the diff adds exactly docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html and nothing else, inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to trace how _search_code/_search_docs build and score for the four \u00a711 answers; docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:1-60 does exactly that, naming for each of Q05/Q12/Q14/Q18 the vector index and k, the facility pre-filter, the hybrid terms and the final sort.\nVERDICT done_when: the done_when names the burying stage per answer plus a lifting change measured over the 18 \u00a79 questions by nDCG@10; final_metrics.py measures three changes (bounded fusion, RRF, reserved slots) and none of them lifts Q12, whose named remedy is asserted but unmeasured.\nVERDICT write_paths: the declared write paths are the node report dir, docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html, and docs/figures/discovery-judgments-through-jev/retrieval-scoring-probe; the single landed file is inside them and the figures path is unused.\nVERDICT manifest: the reviewed manifest reads status complete and names the nDCG comparison in final_metrics.py against labels.json, with the raw per-query JSON and stage logs recorded beside it.\nVERDICT diff: one file against the base, +175 lines, docs-only \u2014 no code change and no graph write, as \u00a711 requires.\nCALL_SITES: none\nreviewed_base_sha: c53d0f98433251842fb04c78c1f725ca5dec264f\nreviewed_head_sha: 49aed047d26e252ab48f382306080433e2dcc201\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:40-100 traces both tools' candidate stages and reproduces the raw cosine of each answer from its stored embedding (0.438/0.560/0.713/0.764 in stages.json), so the burying stage is named from measurement, not inference.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate at final_metrics.py:50-101 measures the nDCG@10 changes and its per-query result is recorded in final_metrics_rrf.json, but the reviewed run ships two divergent baselines (fusion_rrf.json variant_scores baseline 0.2763 vs final_metrics_rrf.json current 0.4204) and the docs tool rank in docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:77 is depth-dependent.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the diff adds exactly docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html and nothing else, inside the declared write paths.\nSCORE durability: 10\nJUSTIFICATION durability: the node ships no test; a docs-only evidence fragment cannot carry one, so its only guard is the re-runnable raw JSON and scripts under the report dir, and no assertion fails if the numbers drift.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:1-8 follows the sibling fragment's idiom (section[data-reckon=evidence], id-per-block, caption) and introduces no plan or ticket label.\nSCORE reuse: 15\nJUSTIFICATION reuse: the diff adds no code, but the report scripts duplicate a capability the repository already owns \u2014 the tool's merge formula is re-implemented in fusion_eval.py:40-79 and nDCG is implemented twice (fusion_eval.py:32 and final_metrics.py:30).\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:167 follow-on: Q12's lifting change (a saturating BM25 term) is named but never measured by nDCG@10, while \u00a711's done_when requires the lifting change measured over the 18 questions; none of the three measured variants raises Q12 into top 30 because the reserved-slot variant reserves only 20 leaders and shtrd.f's chunk sits at facility vector rank 49.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:77 follow-on: the Q14/Q18 \"Tool rank\" figures (1734/2000 and 1330/2000) come from a k=2000 call and contradict the node's own census fragment (which reports the same pages at ranks 181 and 163) and stages.json (181 and 164 at k=200), so the column does not name the rank the tool gives the answer at any depth it is actually called with.\n",
+  "review_run_id": "r-20261007T032751096451-review-of-retrieval-scoring-probe",
+  "reviewed_base_sha": "c53d0f98433251842fb04c78c1f725ca5dec264f",
+  "reviewed_head_sha": "49aed047d26e252ab48f382306080433e2dcc201",
+  "reviewed_run_id": "r-20261007T025440701113-retrieval-scoring-probe",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:44:04.841018+00:00",
+  "total": 90
+}
