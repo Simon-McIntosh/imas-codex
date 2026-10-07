@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T14:55:27.102Z",
+  "dispatched_at": "2026-10-05T14:50:58Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/vector_search.py:17",
+      "id": "deep_module-1",
+      "reason": "the helper should own the example\u2192chunk join so a single source of truth governs which edge resolves the path, otherwise the module adds surface without depth.",
+      "text": "\u00a719 proposes extracting only the `coalesce(ce.source_file, cc.source_file)` RETURN expression into a function taking the example and chunk aliases, but the join that actually resolves the path \u2014 `OPTIONAL MATCH (\u2026)-[:HAS_CHUNK]->(\u2026)` in `parallel.py:203` versus the divergent edge the helper's callers use \u2014 stays at each call site, so the shallow helper hides a string while the substantial behaviour and its edge remain spread across three sites",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:203",
+      "id": "thin_wrapper-1",
+      "reason": "extending the existing owner removes the class of defect (divergent joins behind one shared string) instead of adding one more convention that importers must honour.",
+      "text": "\u00a719 adds a thin layer beside existing machinery instead of extending it: `imas_codex/graph/vector_search.py` already owns the rendered-Cypher helpers (`build_vector_search`) that all three sites call, and the plan gives no justification why that owner cannot also render the example\u2192chunk join and coalesce rather than exposing an alias-parameterised string that each caller pairs with its own MATCH",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:480",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must reconcile the source-path resolution onto the writer's `HAS_CHUNK` edge (extend that owner in `imas_codex/ingestion/pipeline.py`/the readers) and repair `find_code`, not reproduce a broken exemplar behind a shared fragment.",
+      "text": "\u00a719 names `find_code` as one of \"the two existing sites\" whose resolution it will copy, but `find_code` binds the example on `(cc)-[:CODE_EXAMPLE_ID]->(ce:CodeExample)`, an edge the schema does not declare and the chunk writer never creates (`MERGE (e)-[:HAS_CHUNK]->(c)`, `imas_codex/ingestion/pipeline.py:522`); the one site that uses the writer's edge is `_enrich_code_chunks` (`imas_codex/llm/search_tools.py:1638`), so `find_code`'s `ce.source_file` arm is already dead and the plan would carry that divergence into the new helper",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c643434ef553eaf7fc6d2e35d60d9d6f83b6bd847856113f29923831b513d6a3",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 111,
+  "project": "imas-codex",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:56:33.950889+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:56:35.105649+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:56:34.556216+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T145054400328-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "f3d648c16184b92ce13adce55141b91f5d389751",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a719's helper hides only the `coalesce` RETURN string while the join that resolves the path stays per-caller in `imas_codex/graph/vector_search.py`.",
+    "duplicate_owner": "a finding \u2014 `find_code` (`imas_codex/graph/domain_queries.py:480`) resolves the source path on a divergent edge the plan must reconcile rather than copy.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no CLI option (it modifies the existing `--root` branch) and \u00a719 adds one module-level helper while naming in its own text the two hand-written `coalesce` copies it consolidates, so no added surface is left unaccounted.",
+    "reuse_search": "pass \u2014 \u00a714 cites the seed/claim/expand cycle it extends in `imas_codex/discovery/paths/frontier.py` and `.../parallel.py`, and \u00a719 names the two `coalesce(ce.source_file, cc.source_file)` sites, `build_vector_search` and the chunk writer; all were opened and the cited mechanisms exist.",
+    "thin_wrapper": "a finding \u2014 \u00a719 adds a fragment layer over `imas_codex/graph/vector_search.py` rather than extending the helper owner \u2014 no reason is given why the existing rendered-Cypher owner cannot carry the join it would need."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:55:43.629887+00:00"
+}

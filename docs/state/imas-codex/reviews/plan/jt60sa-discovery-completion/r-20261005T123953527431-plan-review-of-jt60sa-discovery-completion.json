@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T12:43:28.263Z",
+  "dispatched_at": "2026-10-05T12:39:57Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/embed_worker.py:222",
+      "id": "duplicate_owner-1",
+      "reason": "routing the code phase's pending count through the existing uncalled `_count_unembedded` meets \u00a717's own goal (\"a row the worker will fetch is never reported as non-pending\") with one edit point in the owner instead of three copies that will drift.",
+      "text": "\u00a717 widens the pending-embed predicate (`embedding IS NULL AND embed_failed_at IS NULL`) to admit a stale `embed_failed_at`, and plans to edit that predicate in three separate copies \u2014 the owner's `_fetch_unembedded` (embed_worker.py:209), the owner's own `_count_unembedded` (embed_worker.py:254), and the hand-rolled count in `imas_codex/discovery/code/parallel.py:479-480` \u2014 although `_count_unembedded` is label-parameterised, already expresses exactly this predicate, and has zero callers (grep confirms only `_fetch_unembedded` is called), so the code phase's count is a duplicate of the owner rather than a caller of it",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/search_tools.py:441",
+      "id": "duplicate_owner-2",
+      "reason": "both already share the real owner, `build_vector_search`, so the residual duplication is one predicate string per call site and unifying the two search surfaces is a larger refactor outside \u00a716's scope; naming it is enough for the author to judge.",
+      "text": "\u00a716 must edit the facility predicate in two parallel implementations of the same vector search over each of the same two indexes to hold its \"one facility-filter mechanism\" invariant \u2014 `_vector_search_signals` (search_tools.py:454 over `facility_signal_desc_embedding`) beside `_find_signals_semantic` (domain_queries.py:148 over the same index), and `_vector_search_wiki_chunks` (search_tools.py:832) beside `_find_wiki_semantic` (domain_queries.py:278 over the same index)",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "ef9f748a1c18c9ecc7082200d62256692c813d65995a2bda4576719bbfd8fef8",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 89,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:44:59.414908+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "both call sites already share the real owner, build_vector_search, and the residual is one predicate string per call site; the landed \u00a716 node renders the facility predicate through the same prefilter_clauses in both modules, which is the mechanism the section unifies",
+      "when": "2026-10-05T12:44:59.891223+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T123953527431-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "8abe3a9f9e3db56a5663aa3362868c2329a80892",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 neither \u00a716 nor \u00a717 adds a module; \u00a716 edits existing search functions that already route through the single `build_vector_search` builder, and \u00a717 extends the single shared `imas_codex/discovery/base/embed_worker.py` owner that both phases import, so complexity stays behind the existing interface.",
+    "duplicate_owner": "a finding \u2014 \u00a717 changes the pending-embed predicate in three places, two of them `imas_codex/discovery/base/embed_worker.py` and a third hand-rolled copy in `imas_codex/discovery/code/parallel.py`, while the owner's own `_count_unembedded` sits uncalled.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a716 and \u00a717 each state \"Interface budget: nothing added\" and neither adds a public definition, CLI option, MCP view or refusal family (the annotation key and the reset field both pre-exist after \u00a712), so no section adds surface needing to name a retirement or merge.",
+    "reuse_search": "pass \u2014 \u00a716 cites the \u00a712 mechanism (the `vector_index_filters` slot annotation and `build_vector_search(prefilter_clauses=...)`, confirmed in `imas_codex/graph/vector_search.py:17` and `imas_codex/schemas/facility.yaml:3299`) and \u00a717 cites the `claimed_at` cutoff shape (`imas_codex/discovery/paths/parallel.py:372`), and the code it names matches what is on disk.",
+    "thin_wrapper": "pass \u2014 no section wraps existing machinery; \u00a716 changes predicates inside existing queries and \u00a717 changes one predicate inside the existing worker, with each stating why the existing mechanism (not a parallel one) is extended."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:44:14.508045+00:00"
+}

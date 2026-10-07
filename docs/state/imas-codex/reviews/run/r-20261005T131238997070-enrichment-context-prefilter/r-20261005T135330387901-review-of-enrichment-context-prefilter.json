@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-05T14:03:31.269Z",
+  "dispatched_at": "2026-10-05T13:53:46Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "3617",
+      "severity": "follow-on",
+      "text": "The narrowed handler now lets a Neo4j failure escape _fetch_code_chunks, and _fetch_code_context's caller loop (the `for group_key, indexed_signals in context_groups.items():` at parallel.py:3724) is not wrapped in try/except \u2014 the only handler near it guards the LLM call, not the context build. So a transient planner or connection fault that formerly degraded one group's context to empty now propagates out of enrich_worker to the engine's worker-level handling. That is the intended visibility change (the prior review asked for it), but its blast radius \u2014 worker abort versus logged degradation and retry \u2014 is asserted by nothing in the diff."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "255",
+      "severity": "follow-on",
+      "text": "The guard keys on the literal code Neo.ClientError.Schema.IndexNotFound, which appears nowhere else in the repository and is asserted only against a synthetic _neo4j_code in test_absent_index_returns_empty; it is not verified against a live engine's actual code for a missing code_chunk_embedding vector index. The failure direction is safe \u2014 a mismatched code raises (visible) rather than returning empty \u2014 but whether the absent-index branch is ever taken in production is unconfirmed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "enrich_worker's _fetch_code_context now awaits asyncio.to_thread(_fetch_code_chunks, state.facility, query_text); the helper is the only new symbol and remains private. No public interface changed, so there are no new external call sites to verify.",
+    "diff": "Read the full diff of b3261004e..eaa54ae5; the broad handler is replaced by `except ClientError` with the IndexNotFound condition, non-matching ClientErrors and all other failures re-raise, the success path is unchanged, and the evidence fragment gains the handler paragraph.",
+    "done_when": "Read \u00a718's done-when against the run's gate logs and my own reproduction; the named gate exits 0 at head (54 passed reproduced), the PSRC live counts stand (wiki 4->5, code 0->3), and both in-SEARCH predicates remain pinned.",
+    "goal": "Read \u00a718 and the run's manifest; the gained commits narrow the code-context lookup's fault handling to an absent index and document it, on top of the already-reviewed in-SEARCH pre-filter delivery.",
+    "manifest": "Read the delivered manifest.md; it carries the revision pair, the baseline and after suite records with absolute commands, two negative-control logs, the live counts and two follow-ons, and its claims reconcile with the gate logs and the evidence fragment.",
+    "write_paths": "Read the run's declared write paths against git diff --name-only 516d9dcc2 eaa54ae5; all five changed paths are within the grant, and the gained range touches exactly the three assigned files."
+  },
+  "justifications": {
+    "durability": "The new TestCodeContextLookupErrors class pins the narrowed handler: a DatabaseError and an unrelated ClientError must raise, and only the IndexNotFound ClientError may return empty. The guard is demonstrably live, not passing in both states \u2014 my mutation back to the broad handler reddens two of the three tests (EXIT=1). Deducted two: the tests exercise the helper directly and never drive enrich_worker, so a regression that re-inlines a swallowing handler at the call site would not be caught; and the propagated failure has no test showing how enrich_worker or the engine surfaces it, so the new failure mode is uncharacterised even though it is the intent of the change.",
+    "evidence": "Independent gates reproduced from this review node in my own scratch extraction of eaa54ae5 (/tmp/reckon-crew-scratch/.../ecp-review-eaa54ae5): the head gate ran 54 passed, EXIT=0 with module.__file__ resolving to the scratch tree and cwd the scratch tree (gate-ecp-head-eaa54ae5.log). The reviewed run's own gate logs are readable and complete: base 29bede1cf 49 passed EXIT=0 (gate/base.log), head eaa54ae50 54 passed EXIT=0 (gate/head-narrowed.log). I re-derived the negative control independently: reverting the handler to the former broad `except Exception` in the scratch tree fails TestCodeContextLookupErrors::test_database_error_propagates and ::test_other_client_error_propagates while ::test_absent_index_returns_empty still passes (2 failed, 1 passed, EXIT=1; gate-ecp-negctl-eaa54ae5.log), matching the run's own gate/negative-control-handler.log. added_failure_count is 0 because both arms report zero failures. Deducted one because the absent-index code string is asserted only against a synthetic _neo4j_code and against no live engine.",
+    "fit": "The delta follows the module's existing shape: the lookup is extracted to the module-level _fetch_code_chunks beside _build_code_context_query, the call site uses await asyncio.to_thread(...) as the neighbouring wiki/context lookups do, the docstring states the mechanism (why only an absent index may yield empty) rather than a plan label, and the two commits are a conventional two-part fix and docs pair. No plan or ticket identifiers appear in source, symbols or comments.",
+    "goal_fidelity": "This is the incremental review of the two commits the run gained after its first review (base = the previously reviewed head b3261004e; the run's original base is 516d9dcc2). fbc4dc2b2 narrows the code-context lookup's fault handling and eaa54ae50 records it in the evidence fragment. \u00a718's done-when was already delivered and reviewed at b3261004e (both in-SEARCH predicates pinned, PSRC live counts wiki 4->5 / code 0->3, gate green); the delta adds the fix the first review's follow-on asked for. The inline block in enrich_worker becomes the module-level _fetch_code_chunks (parallel.py:214), which now catches only ClientError carrying Neo.ClientError.Schema.IndexNotFound and re-raises every other Neo4j failure instead of the former broad `except Exception` that logged at debug and returned []. The narrowing is correct against the installed driver (neo4j 5.28.3): Neo4jError.code is a read-only property over _neo4j_code, so getattr(e,\"code\",None) sees the hydrated code and DatabaseError (a sibling, not a subclass, of ClientError) propagates. Deducted one because the change routes a Neo4j failure out of enrich_worker with no local handler (the group loop at parallel.py:3724 is not wrapped), and no test demonstrates the resulting worker-level behaviour.",
+    "reuse": "The extraction removes the previously duplicated inline encoder/graph/format block and gives one place where the code-context lookup is issued and faulted, matching how the file already centralises its query builders. Deducted one only because _fetch_code_chunks remains a private helper reachable in tests yet not exercised through its real caller, so its reuse is local rather than end-to-end.",
+    "scope_discipline": "The gained range b3261004e..eaa54ae5 changed exactly the three files this node was dispatched to review (docs/evidence/fragments/jt60sa-discovery-completion/enrichment-context-prefilter.html, imas_codex/discovery/signals/parallel.py, tests/discovery/test_signals_pipeline.py), and the whole run 516d9dcc2..eaa54ae5 changed exactly its five declared write paths. No path outside the run's grant was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the gained commits narrow the code-context lookup fault handling to an absent index and document it, completing \u00a718 on top of the already-reviewed in-SEARCH pre-filter delivery.\nVERDICT done_when: head gate exits 0 (54 passed, reproduced independently in a scratch extraction of eaa54ae5), PSRC live counts wiki 4->5 / code 0->3 stand, both in-SEARCH predicates remain pinned.\nVERDICT write_paths: the gained range b3261004e..eaa54ae5 touches exactly the three assigned files; the whole run touches its five declared paths; nothing outside the grant.\nVERDICT manifest: carries the revision pair, both suite records with absolute commands, two negative-control logs, live counts and two follow-ons; claims reconcile with the logs.\nVERDICT diff: broad except replaced by `except ClientError` with the IndexNotFound condition; other failures re-raise; success path unchanged; evidence fragment documents it.\nVERDICT call_sites: _fetch_code_chunks is the only new symbol (private); _fetch_code_context awaits it via asyncio.to_thread; no public interface change.\nSCORE goal_fidelity: 19\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 19\nSCORE reuse: 19\nFINDING imas_codex/discovery/signals/parallel.py:3617 follow-on: the propagated Neo4j failure escapes enrich_worker because the group loop at 3724 has no local handler; the resulting worker-level behaviour is untested.\nFINDING imas_codex/discovery/signals/parallel.py:255 follow-on: Neo.ClientError.Schema.IndexNotFound is unverified against a live engine; the fail-closed direction is safe but the absent-index branch may never fire.",
+  "review_run_id": "r-20261005T135330387901-review-of-enrichment-context-prefilter",
+  "reviewed_base_sha": "b3261004e1b50aec441498912db4bac6091a820c",
+  "reviewed_head_sha": "eaa54ae50cb9e3c2a27c56c7df68295fd7de8365",
+  "reviewed_run_id": "r-20261005T131238997070-enrichment-context-prefilter",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:03:00+00:00",
+  "total": 114
+}

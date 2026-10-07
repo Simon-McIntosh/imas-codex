@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: baseline_suite 7bc7c86c9 (baseline.log, EXIT=0, completed true, failure_count 0) and after_suite 3f879c996 (gate.log, EXIT=0, completed true, failure_count 0); added-failure count 0 with no ids.",
+  "backend": "local",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/graph/build_dd.py:4690 (_embed_cluster_text)",
+    "imas_codex/graph/dd_identifier_enrichment.py:354 (embed_identifier_schemas)",
+    "imas_codex/graph/dd_identifier_enrichment.py:694 (embed_identifier_nodes)",
+    "imas_codex/graph/dd_ids_enrichment.py:455 (embed_ids_nodes)",
+    "imas_codex/discovery/wiki/pipeline.py:1655 (ensure_wiki_vector_index)"
+  ],
+  "completed_at": "2026-10-05T12:05:32.298Z",
+  "dispatched_at": "2026-10-05T11:57:34Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/vector-index-ddl-owner.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the plan's literal done_when command still matches prose docstrings at imas_codex/graph/schema.py:280, imas_codex/graph/vector_search.py:10 and imas_codex/graph/client.py:100, so the literal command is not clean; the node records this residual and the ast scan at tests/graph/test_vector_index_ddl_owner.py:98 is the binding measure."
+    },
+    {
+      "file": "tests/graph/test_vector_index_ddl_owner.py",
+      "line": "110",
+      "severity": "follow-on",
+      "text": "follow-on: test_module_delegates_to_the_owner asserts only the substring \"ensure_vector_indexes(\" in each module's source, which passes if the call is deleted but a comment retains the text; the ast scan at :98 is the real guard so this check is secondary."
+    },
+    {
+      "file": "tests/graph/test_vector_index_ddl_owner.py",
+      "line": "98",
+      "severity": "follow-on",
+      "text": "follow-on: the scan flags only a single string constant carrying the whole marker, so a statement reintroduced by concatenating \"CREATE VECTOR \" + \"INDEX ...\" would evade it; contrived, but the guard's stated property is that no string literal carries the marker."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112840464990-vector-index-ddl-owner/negative-control.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the control log header names revision 2c135a284 while the mutation was applied against the widened test that landed as 3f879c996, so the recorded revision under-describes the tree the control exercised; the manifest's negative_control_note explains the widening."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read cbca1d529..3f879c996 commit by commit (refactor, docs, test-widening); it replaces the five hand-written statements with owner calls, drops now-unused get_embedding_dimension imports, and widens the source scan from a regex to an ast walk over every string constant with a structural docstring exclusion.",
+    "done_when": "the measure is that the scanner finds only the owner's statement, the four test groups pass and SHOW INDEXES lists the five indexes; gate.log records 136 passed EXIT=0 at 3f879c996 against baseline.log 131 passed EXIT=0 and show-indexes.log lists five ONLINE VECTOR dim=256, but the literal `rg --glob '*.py' 'CREATE VECTOR INDEX' imas_codex` still matches prose docstrings at imas_codex/graph/schema.py:280, imas_codex/graph/vector_search.py:10 and imas_codex/graph/client.py:100, which the plan's AGENTS.md carve-out does not cover.",
+    "goal": "the goal is that GraphClient.ensure_vector_indexes is the sole composer of CREATE VECTOR INDEX DDL with all five hand-written copies replaced by calls to it; the diff removes the copies and calls client.ensure_vector_indexes() at imas_codex/graph/build_dd.py:4690, imas_codex/graph/dd_identifier_enrichment.py:354 and :694, imas_codex/graph/dd_ids_enrichment.py:455 and imas_codex/discovery/wiki/pipeline.py:1655.",
+    "manifest": "read; status complete, negative_control_log names a red run (EXIT=1, one failing id test_only_the_owner_composes_vector_index_ddl), baseline_suite and after_suite both carry completed true with failure_count 0, and the residual and call-site set are recorded.",
+    "write_paths": "read the manifest's declared set; git diff 8736d628d..3f879c996 touches imas_codex/graph/build_dd.py, imas_codex/graph/dd_identifier_enrichment.py, imas_codex/graph/dd_ids_enrichment.py, imas_codex/discovery/wiki/pipeline.py, tests/graph/test_vector_index_ddl_owner.py and docs/evidence/fragments/jt60sa-discovery-completion/vector-index-ddl-owner.html, every path inside the declared set."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_vector_index_ddl_owner.py:98 scans every string constant and I reproduced it green on the head tree and red (1 failed, EXIT=1) on a clause-less hand-written statement; docked because the delegation check at :110 is a bare substring assertion and a marker split across concatenated literals would evade the scan.",
+    "evidence": "gate.log records 136 passed EXIT=0 at 3f879c996 and baseline.log 131 passed EXIT=0, both completed, with show-indexes.log listing five indexes ONLINE VECTOR dim=256; docked because baseline.log ran at 7bc7c86c9, an ancestor of the node base 8736d628d, and the literal done_when command is not clean.",
+    "fit": "the owner calls match the existing pattern at imas_codex/graph/build_dd.py:3185, the comments describe the mechanism, no plan identifiers appear, and ruff reports the changed files clean.",
+    "goal_fidelity": "only imas_codex/graph/client.py:115 composes a real CREATE VECTOR INDEX statement and all five former sites now delegate to imas_codex/graph/client.py:407, so one function owns the DDL and the schema-derived cluster_label_embedding copy is preserved.",
+    "reuse": "the change deletes five duplicated DDL copies and routes each through the existing owner imas_codex/graph/client.py:407, adding no new DDL mechanism.",
+    "scope_discipline": "git diff 8736d628d..3f879c996 touches only the four source files, the new test and the evidence fragment, every path inside the manifest's declared write set."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that GraphClient.ensure_vector_indexes is the sole composer of CREATE VECTOR INDEX DDL with all five hand-written copies replaced by calls to it; the diff removes the copies and calls client.ensure_vector_indexes() at imas_codex/graph/build_dd.py:4690, imas_codex/graph/dd_identifier_enrichment.py:354 and :694, imas_codex/graph/dd_ids_enrichment.py:455 and imas_codex/discovery/wiki/pipeline.py:1655.\nVERDICT done_when: the measure is that the scanner finds only the owner's statement, the four test groups pass and SHOW INDEXES lists the five indexes; gate.log records 136 passed EXIT=0 at 3f879c996 against baseline.log 131 passed EXIT=0 and show-indexes.log lists five ONLINE VECTOR dim=256, but the literal `rg --glob '*.py' 'CREATE VECTOR INDEX' imas_codex` still matches prose docstrings at imas_codex/graph/schema.py:280, imas_codex/graph/vector_search.py:10 and imas_codex/graph/client.py:100, which the plan's AGENTS.md carve-out does not cover.\nVERDICT write_paths: read the manifest's declared set; git diff 8736d628d..3f879c996 touches imas_codex/graph/build_dd.py, imas_codex/graph/dd_identifier_enrichment.py, imas_codex/graph/dd_ids_enrichment.py, imas_codex/discovery/wiki/pipeline.py, tests/graph/test_vector_index_ddl_owner.py and docs/evidence/fragments/jt60sa-discovery-completion/vector-index-ddl-owner.html, every path inside the declared set.\nVERDICT manifest: read; status complete, negative_control_log names a red run (EXIT=1, one failing id test_only_the_owner_composes_vector_index_ddl), baseline_suite and after_suite both carry completed true with failure_count 0, and the residual and call-site set are recorded.\nVERDICT diff: read cbca1d529..3f879c996 commit by commit (refactor, docs, test-widening); it replaces the five hand-written statements with owner calls, drops now-unused get_embedding_dimension imports, and widens the source scan from a regex to an ast walk over every string constant with a structural docstring exclusion.\nVERDICT call_sites: verified the five production call sites that now delegate, plus the pre-existing build_dd.py:3185 site, all reaching imas_codex/graph/client.py:407.\nCALL_SITES: imas_codex/graph/build_dd.py:4690 (_embed_cluster_text), imas_codex/graph/dd_identifier_enrichment.py:354 (embed_identifier_schemas), imas_codex/graph/dd_identifier_enrichment.py:694 (embed_identifier_nodes), imas_codex/graph/dd_ids_enrichment.py:455 (embed_ids_nodes), imas_codex/discovery/wiki/pipeline.py:1655 (ensure_wiki_vector_index)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: only imas_codex/graph/client.py:115 composes a real CREATE VECTOR INDEX statement and all five former sites now delegate to imas_codex/graph/client.py:407, so one function owns the DDL and the schema-derived cluster_label_embedding copy is preserved.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate.log records 136 passed EXIT=0 at 3f879c996 and baseline.log 131 passed EXIT=0, both completed, with show-indexes.log listing five indexes ONLINE VECTOR dim=256; docked because baseline.log ran at 7bc7c86c9, an ancestor of the node base 8736d628d, and the literal done_when command is not clean.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 8736d628d..3f879c996 touches only the four source files, the new test and the evidence fragment, every path inside the manifest's declared write set.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_vector_index_ddl_owner.py:98 scans every string constant and I reproduced it green on the head tree and red (1 failed, EXIT=1) on a clause-less hand-written statement; docked because the delegation check at :110 is a bare substring assertion and a marker split across concatenated literals would evade the scan.\nSCORE fit: 20\nJUSTIFICATION fit: the owner calls match the existing pattern at imas_codex/graph/build_dd.py:3185, the comments describe the mechanism, no plan identifiers appear, and ruff reports the changed files clean.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change deletes five duplicated DDL copies and routes each through the existing owner imas_codex/graph/client.py:407, adding no new DDL mechanism.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/vector-index-ddl-owner.html:1 follow-on: the plan's literal done_when command still matches prose docstrings at imas_codex/graph/schema.py:280, imas_codex/graph/vector_search.py:10 and imas_codex/graph/client.py:100, so the literal command is not clean; the node records this residual and the ast scan at tests/graph/test_vector_index_ddl_owner.py:98 is the binding measure.\nFINDING tests/graph/test_vector_index_ddl_owner.py:110 follow-on: test_module_delegates_to_the_owner asserts only the substring \"ensure_vector_indexes(\" in each module's source, which passes if the call is deleted but a comment retains the text; the ast scan at :98 is the real guard so this check is secondary.\nFINDING tests/graph/test_vector_index_ddl_owner.py:98 follow-on: the scan flags only a single string constant carrying the whole marker, so a statement reintroduced by concatenating \"CREATE VECTOR \" + \"INDEX ...\" would evade it; contrived, but the guard's stated property is that no string literal carries the marker.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112840464990-vector-index-ddl-owner/negative-control.log:2 follow-on: the control log header names revision 2c135a284 while the mutation was applied against the widened test that landed as 3f879c996, so the recorded revision under-describes the tree the control exercised; the manifest's negative_control_note explains the widening.\n",
+  "review_run_id": "r-20261005T115729606467-review-of-vector-index-ddl-owner",
+  "reviewed_base_sha": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "reviewed_head_sha": "3f879c996bc89a50a41c8d12d5a084bf7df27c36",
+  "reviewed_run_id": "r-20261005T112840464990-vector-index-ddl-owner",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:37:32.729124+00:00",
+  "total": 117,
+  "verdict": "SOUND WITH FINDINGS"
+}

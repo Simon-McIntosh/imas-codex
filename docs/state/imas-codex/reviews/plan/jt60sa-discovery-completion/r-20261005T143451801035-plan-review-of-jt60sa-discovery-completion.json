@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T14:41:32.112Z",
+  "dispatched_at": "2026-10-05T14:34:56Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/cli/discover/paths.py:262",
+      "id": "reuse_search-1",
+      "reason": "the `--root` seeding path already mutates the root row's status, so the plan must correct its account of `--root` and reconcile the reset with the seed that overwrites it, and it may find that clearing `expanded_at` (its other half) is the only genuinely missing piece, since the plan's stated mechanism assumes `--root` leaves the root row untouched.",
+      "text": "the plan's premise that `discover paths jt-60sa --root /analysis/src` \"re-lists nothing\" because \"`--root` only filters rows that exist\" is contradicted by the code: the `--root` branch calls `seed_facility_roots(facility, root_paths=root_filter)`, whose write is `MERGE (n {id}) SET n += item` with `status='discovered'` (imas_codex/graph/client.py:605, create_nodes), so it UPSERTS the existing /analysis/src row's status back to `discovered`; worse, paths.py runs the reset at 244-248 BEFORE the seed at 258-265, so the `--reset-to scanned` status the plan sets on the root row is immediately clobbered by the seed that follows",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/paths/parallel.py:539",
+      "id": "duplicate_owner-1",
+      "reason": "reset_to_status should gain the same `root_filter` parameter its sibling claim paths already expose so the predicate is rendered in one place, which is a smaller and more consistent change than a sixth inline clause.",
+      "text": "the plan's one-line extension has the CLI build a `STARTS WITH` root-prefix clause inline and hand it to reset_to_status through extra_filter, but that exact clause is already written out five times in parallel.py (lines 483, 539, 596, 714, 794: `AND any(root IN $root_filter WHERE p.path STARTS WITH root)`); the plan would add a sixth copy rather than extend the existing root_filter mechanism",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "658483c58187a0359b0f04a5f0c233a80f455e1817d8fe35a56ec962d202f610",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 109,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "the section no longer adds any clause or reset: the --root branch's seed_facility_roots upsert already re-lists the root, so no extra_filter and no sixth STARTS WITH copy is written",
+      "when": "2026-10-05T14:42:54.998931+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T14:42:54.507472+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T143451801035-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "e5cdb4a0a42edccd6c20441bb423e97effc63329",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 neither implementable section adds a module; \u00a714 is two field/argument extensions inside the existing reset owner and \u00a719 is one rendered-fragment helper beside build_vector_search.",
+    "duplicate_owner": "a finding \u2014 \u00a714 plans to render the root-prefix predicate a sixth time inline at the reset call site, when the identical `p.path STARTS WITH root` clause is already hand-rendered five times in imas_codex/discovery/paths/parallel.py.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 changes the behaviour of the existing `--reset-to`/`--root` options without adding an option, and \u00a719 explicitly merges the two `coalesce(ce.source_file, cc.source_file)` copies into one helper and states that nothing is added.",
+    "reuse_search": "a finding \u2014 the plan cites the real reset machinery (\u00a714: reset_to_status, PATH_RESET_SPECS, claim_paths_for_expanding, persist_scan_results; \u00a719: the two coalesce sites and the HAS_CHUNK writer) but mis-states the `--root` prior art: `discover paths <facility> --root` upserts the existing root row's status through seed_facility_roots, so \"`--root` only filters rows that exist\" is wrong.",
+    "thin_wrapper": "pass \u2014 \u00a714 states why `discover paths --reset-to` cannot be used as-is (unscoped reset, `expanded_at` not cleared) and extends that owner rather than adding a parallel command, and \u00a719 reuses the codebase's established rendered-Cypher-fragment pattern rather than wrapping an existing reader."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T14:41:48.006285+00:00"
+}

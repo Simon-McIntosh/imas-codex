@@ -1,0 +1,105 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T20:59:30.210Z",
+  "dispatched_at": "2026-10-06T20:54:08Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/claims.py:162",
+      "id": "deep_module-1",
+      "reason": "\u00a77's own text must name the claim-token property as part of the merged routine's parameters (as `reset_stale_claims` and the claim side already carry it), otherwise the consolidation loses behaviour the routines it replaces perform.",
+      "text": "the merged release routine is specified to gain only the `claimed_field` keyword, but the routines \u00a77 merges it with clear two properties, not one: `release_mapping_claim` clears `mapping_claimed_at` and `mapping_claim_token` (imas_codex/ids/workers.py:280-281) and `release_mapping_claims_batch` does the same (imas_codex/ids/workers.py:296-297), while `claims.py:162` and `claims.py:184` clear `claimed_at` alone; folding the workers.py behaviour into an interface parameterised only by the timestamp silently drops the token clear, leaving a stale `mapping_claim_token` on every released source",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/claims.py:1",
+      "id": "duplicate_owner-1",
+      "reason": "the author placed a generic routine in the shared owner and stated adoption is left to \"their own change\"; naming the full adopter census (or excluding it with a reason) is what makes the scope decision reviewable and lets the deferred adopters be picked up in one pass rather than one review at a time.",
+      "text": "\u00a77 generalises the claim pattern into `claims.py`, the shared owner, but its census stops at the SignalSource families (workers.py, base/grouping.py, mdsplus/graph_ops.py) and does not name the other seven modules that re-implement the identical `claimed_at`+`claim_token` claim/release pair that the new generic routine is positioned to own: imas_codex/discovery/code/graph_ops.py:170,326,425,512; imas_codex/discovery/wiki/graph_ops.py:862,938,1678,1763; imas_codex/discovery/paths/frontier.py:2834,2995; imas_codex/discovery/signals/parallel.py:906,1183; imas_codex/discovery/documents/workers.py:45; imas_codex/discovery/mdsplus/graph_ops.py:184,730,912,967,1938; imas_codex/discovery/base/grouping.py:128",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/workers.py:357",
+      "id": "duplicate_owner-2",
+      "reason": "the plan should name one reader for the candidate-route census and have both status surfaces call it, rather than leave \u00a77 and \u00a78 to introduce parallel count queries against the same label and property.",
+      "text": "\u00a77 says `discover status` gains the counts by candidate route and \u00a78 says `imas map status` shows the candidate routes beside the mapping status, so two surfaces will each compute the same \"count SignalSources grouped by `candidate_route`\" aggregate; the existing grouped-count reader `count_sources_by_mapping_status` (imas_codex/ids/workers.py:357, currently uncalled) is neither extended nor named as the single owner, and `imas map status` today reads only IMASMapping nodes (imas_codex/cli/map.py:703) so it would grow a second SignalSource reader",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8c1ce3b5d9e92b2973fa1f5fa03c411a0dbda8c9c6052244308e287caee64cdf",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 38,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "deep_module-1",
+      "reason": "",
+      "when": "2026-10-06T21:00:23.008674+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T21:00:25.380110+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-06T21:00:27.642337+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:00:23.008674+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:00:25.380110+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:00:27.642337+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v38.json",
+  "review_run_id": "r-20261006T205400684370-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "767c979d5025d3944772de8644a5b63c50e9cf77",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the \"one claim / one release / one pending\" routine \u00a77 places in `claims.py` is specified with `claimed_field` only, so the interface is narrower than the behaviour it must absorb (the existing `workers.py` release clears the claim token as well).",
+    "duplicate_owner": "findings \u2014 the claim+token pattern is duplicated at ~30 sites across seven discovery modules, and the candidate-route census is a second reader beside an existing uncalled one.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a77 adds one subcommand and five options but names them all as reused CLI names and states in its own text why no existing command can absorb them (\"A separate command is needed because the candidate stage runs on a different cadence\"), while \u00a78 retires `--skip-metadata`, `--skip-errors` and the two `mapping_target_*` fields.",
+    "reuse_search": "pass \u2014 the plan names and extends the existing machinery it depends on at every mechanism: `claims.py` as the claim/release owner, `run_discovery_engine` + `OrphanRecoverySpec` (`workers.py:903,973`), \u00a75's `retrieve_candidates`/`route_ids`/`judge_candidates`/`write_candidates`, `PipelineCost` (`mapping.py:78`), and the `MAPS_TO_IMAS` writers it consolidates; each was opened and exists.",
+    "thin_wrapper": "pass \u2014 `run_candidate_engine` is a thin wiring over `run_discovery_engine`, but \u00a77's decision `cli-home` states why the candidate stage is a separate command rather than a fifth phase of `run_mapping_engine` (different cadence, no reasoning-model call), which is the required justification."
+  },
+  "section_digests": {
+    "_document": "bfd320a268c1925095f3577ace21fcd1ba04db37665ccb02d0665e5b4b73f540",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "2c51cab5622c4a71d3c2f59a41fb5cf716a5f6413be1ecaf3c80a9b316a83e00",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "4e43ca3de419f8b813989f0f0160e073f480bee005da46c3b692c5adf015bafe",
+    "s8": "5b057ea82a3c19b5db7412012cda583666e49b2df146bbc4c4aa17d825105ced",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T21:00:20.391774+00:00"
+}

@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs and confirmed by re-run. The reviewed manifest declares baseline_suite=null and after_suite=null and its test_logs names only gate2.log; its own on-disk arms are gate.log (revision 83474769b+dirty, 36 passed, EXIT=0) and gate2.log (42 passed, EXIT=0). To measure the change against its base I re-ran the declared gate in the reviewed tree: base b1debac9eab3212bf27ba0e58970a75c0a976286 via a scratch extraction of the same revision gave 36 passed, EXIT=0 (base-gate.log), and head 5ff0d13cabf74127279076d631e021c272aba293 in the reviewed worktree gave 42 passed, EXIT=0 (head-gate.log). Neither arm carries a FAILED or ERROR line, so added_failure_count=0 and added_failure_ids=[].",
+  "backend": "local",
+  "base_log_revision": "b1debac9eab3212bf27ba0e58970a75c0a976286",
+  "completed_at": "2026-10-05T11:22:56.368Z",
+  "dispatched_at": "2026-10-05T11:02:53Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "252",
+      "severity": "follow-on",
+      "text": "follow-on: the new category predicate scopes the enrich/check claim queries and the enrich_phase/check_phase pending-work predicates, but the module-level has_pending_work (parallel.py:468) still calls has_pending_enrich_work/has_pending_check_work without the categories argument, so a category-scoped caller of that helper would see work in categories it did not ask for. Non-blocking: the signals pipeline itself completes through enrich_phase/check_phase (parallel.py:360-368), which do carry self.categories, so the scoped run drained and finished; has_pending_work has no in-package caller."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/edas-enrich-check.html",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded no_data count does not reconcile. The evidence fragment states the remainder are success=false/error_type='no_data' reads without a count and the manifest follow_on states '237 census rows carry a genuine success=false no_data verdict at E101163'; the live graph returns 238 success=false edges at shot 101163, all error_type='no_data' (525 success=true + 238 success=false = 763 CHECKED_WITH edges). Off by one; the substance (a genuine no_data gap for those catalogue names at that shot) is correct."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T072049913761-edas-enrich-check/manifest.md",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on (evidence): the reviewed run's manifest carries baseline_suite=null and after_suite=null (per its own classification.json) and test_logs names only gate2.log, so the run's own record cannot yield an added-failure count; gate2.log also has no revision/tree/command header (its first line is the pytest session banner), unlike gate.log which carries one. The gate measurement is nevertheless reproducible (re-run 0 added failures) but a coordinator reading only the manifest cannot see it."
+    },
+    {
+      "file": "docs/figures/jt60sa-discovery-completion",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the run's declared orientation_write_paths include docs/figures/jt60sa-discovery-completion/edas-enrich-check and the brief calls the artifact a research fragment, but no figure was delivered \u2014 the fragment is text-only and the figures directory does not exist. Its section is a bare <section> and its plan-peers are likewise text-only, so this is not scored against the fragment; noted for the graphics expectation on evidence documents."
+    }
+  ],
+  "head_log_revision": "5ff0d13cabf74127279076d631e021c272aba293",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read b1debac9e..5ff0d13ca commit by commit (five commits): 83474769b adds --category threaded through run_parallel_data_discovery into the enrich/check claim queries and the phase pending-work predicates via one build_category_predicate helper; bd4871cfb moves the predicate's path from name to coalesce(data_source_path,name) because enrichment rewrites the name; 2778b27e1 makes the EDAS scanner check() read the EDDB catalogue key from data_source_path (fallback name) and has parallel.py pass data_source_path and data_class into the FacilitySignalModel; d7a9e7f52 and 5ff0d13ca record the evidence fragment.",
+    "done_when": "the four named signals are checked with a success=true CHECKED_WITH edge at E101163 (verified live: PSRC/calIp, PSRC/magFluxLp1, PSRC/magPbTC1, MMSYS/curCS1LKAT), the census categories show 763 of 764 checked (live: MAG 18, MDAC 273, PSRC 325, FAME 100, MMSYS 47), and spend USD 1.3218 (live sum of llm_cost over the 764 rows = 1.3218429078401543) is under the USD 8 cap.",
+    "goal": "plan \u00a72 / f-jdc-001 ask for census-category enrichment and access check under a cost cap with the verdicts on the graph; the node delivers 764 enriched (description and physics_domain non-named) and 763 checked, four named verdicts ok, spend under cap.",
+    "live_measure": "against the live jt-60sa graph: 764 in-scope rows, 764 with description+physics_domain, status 763 checked + 1 enriched (mdac_1651_i002, MDAC/NeyP10), 763 CHECKED_WITH edges, success=true at 101163: MAG 10, MDAC 147, MMSYS 47, PSRC 321, FAME 0 (525 total), success=false at 101163: 238 all error_type='no_data'; sum(llm_cost)=1.3218429.",
+    "manifest": "read; status complete, six changed_paths equal the diff paths, artifacts name the evidence fragment, negative_control is present and red; declared baseline_suite/after_suite are null and gate2.log has no revision header (see findings).",
+    "write_paths": "the diff touches exactly the six declared paths (imas_codex/cli/discover/signals.py, imas_codex/discovery/signals/parallel.py, imas_codex/discovery/signals/scanners/edas.py, tests/discovery/test_signals_pipeline.py, tests/discovery/test_edas_scanner.py, the evidence fragment) and nothing outside them."
+  },
+  "justifications": {
+    "durability": "the category filter is one shared helper (build_category_predicate) used at every enrich and check claim site and at both phase pending-work predicates, so the claim filter and the completion gate cannot drift; four TestCategoryScope tests (test_signals_pipeline.py:779+) assert the rendered predicate and the $categories binding at each site, and the negative control (build_category_predicate returning literal 'true') reddens three of them at EXIT=1; the scanner source-path key is pinned by two new tests (test_edas_scanner.py:158+) including the name fallback. Dock for the unfiltered has_pending_work helper left behind.",
+    "evidence": "every claimed figure reconciles with the live graph and the two gate arms were re-run (base 36 passed EXIT=0, head 42 passed EXIT=0, 0 added failures). Docked for the reviewed manifest's own under-declaration (null baseline/after arms, gate2.log without a revision header) and the 237-vs-238 no_data count.",
+    "fit": "commits are conventional with bodies, carry no AI attribution and no plan identifiers (grep clean); the change reuses one helper rather than forking the predicate, keeps the FacilitySignalModel-construction idiom, and the evidence fragment is a bare <section> as the brief requires.",
+    "goal_fidelity": "plan \u00a72 / f-jdc-001 met end to end on the graph: 764 enriched, 763 checked, four named signals each a success=true edge at the data-carrying shot, spend USD 1.32 against USD 8. The reference shot is E101163 rather than the criterion's E101173 and the scanner change exceeds the brief's fences, but both are coordinator-authorized (plan comment 2026-10-05T08:20Z: probe downward from E101173 and check with --reference-shot, record the negative; and widen the node onto the scanner and its test) and the negative at E101173 (irc=1015 for PSRC) is recorded.",
+    "scope_discipline": "the six changed paths equal the manifest's declared changed_paths; the scanner and its test are within the coordinator's recorded widening though outside the brief's original fence, and the one-time 82-row status SET is coordinator-authorized and recorded with its row count. Dock for the declared-but-undelivered figures path."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: b1debac9eab3212bf27ba0e58970a75c0a976286\nreviewed_head_sha: 5ff0d13cabf74127279076d631e021c272aba293\nVERDICT goal: plan \u00a72 / f-jdc-001 ask that the equilibrium-relevant EDAS signals be enriched and access-checked under a cost cap and the verdicts land on the graph. The node enriched all 764 census-category signals (MAG, MDAC, PSRC, FAME, MMSYS) and checked 763 at reference shot E101163; the live graph reproduces 764 description+physics_domain rows, 763 checked, and 525 success=true CHECKED_WITH edges at E101163. The four named signals (PSRC/calIp, PSRC/magFluxLp1, PSRC/magPbTC1, MMSYS/curCS1LKAT) each carry a single success=true edge at E101163. Spend USD 1.3218 against a USD 8 cap. Met.\nVERDICT evidence: the run's own record under-declares its gate \u2014 its manifest carries no baseline_suite/after_suite block, test_logs names only gate2.log (which has no revision header), and the follow_on count '237' no_data rows measures as 238. The measurement itself is sound: I re-ran the declared gate at base (36 passed, EXIT=0) and head (42 passed, EXIT=0), 0 added failures, and every graph claim verifies against the live jt-60sa graph.\nVERDICT scope: the six changed paths equal the manifest's declared changed_paths and nothing else; the EDAS scanner + its test are a coordinator-authorized widening (plan comment 2026-10-05T08:20Z) though the brief's fences named neither, and the bounded 82-row status SET was coordinator-authorized and recorded.\nVERDICT durability: the category filter is one shared helper bound by four TestCategoryScope tests whose negative control reddens three at EXIT=1, and the scanner source-path key is pinned by two new tests.\nVERDICT fit: conventional commits with bodies, no attribution, no plan identifiers; one helper reused at every claim and pending-work site.\n",
+  "review_run_id": "r-20261005T110112885055-review-of-edas-enrich-check",
+  "reviewed_base_sha": "b1debac9eab3212bf27ba0e58970a75c0a976286",
+  "reviewed_head_sha": "5ff0d13cabf74127279076d631e021c272aba293",
+  "reviewed_run_id": "r-20261005T072049913761-edas-enrich-check",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T11:30:00+00:00",
+  "total": 92,
+  "verdict": "SOUND WITH FINDINGS"
+}

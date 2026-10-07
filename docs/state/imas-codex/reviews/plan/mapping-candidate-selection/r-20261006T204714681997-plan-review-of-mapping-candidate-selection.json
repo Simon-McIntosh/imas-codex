@@ -1,0 +1,126 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T20:52:24.272Z",
+  "dispatched_at": "2026-10-06T20:47:22Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/mapping.py:2008",
+      "id": "reuse_search-1",
+      "reason": "consolidating three writers and one deleter into a single owner needs a census command that actually enumerates them, else a site is left behind and the \"every create and delete lives in one module\" claim is false.",
+      "text": "\u00a78 rests its writer census on `grep 'MERGE (sg)-\\[r?e?l?:MAPS_TO_IMAS\\]' imas_codex/` and states it \"finds exactly these three\", but that BRE pattern treats `?` literally, so the command returns 0 matches; the three real writers are imas_codex/ids/mapping.py:2008, imas_codex/ids/graph_ops.py:367 and imas_codex/ids/models.py:580 (written `[r:MAPS_TO_IMAS]` and `[rel:MAPS_TO_IMAS]`), and the \"only delete site\" claim for _clear_mapping (imas_codex/cli/map.py:661) carries no census command at all",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/workers.py:213",
+      "id": "duplicate_owner-1",
+      "reason": "the retirement is a partial census; the claim filter and the reset would keep reading and nulling a property the plan deletes, so \u00a78 must name every site before removing the fields.",
+      "text": "\u00a78 states SignalSource \"loses mapping_target_path and mapping_target_ids\" and names only workers.py:237 as the reader, but those scalars are read or written at four sites in that file: the claim predicate `AND sg.mapping_target_ids = $ids_name` (workers.py:213), the projection target_ids/target_path/target_type (workers.py:236\u2013238), the reset filter `AND sg.mapping_target_ids IN $ids_names` (workers.py:380) and the null-out of all three fields (workers.py:392\u2013394)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/grouping.py:92",
+      "id": "duplicate_owner-2",
+      "reason": "either route enrichment's claim through the new owner or state why the parameterised routine cannot serve it; otherwise the same duplicate recurs for the deferred families (base/grouping.py and mdsplus/graph_ops.py) the plan names.",
+      "text": "\u00a77 adds a generic claim routine to imas_codex/discovery/base/claims.py and defers grouping.py's family as \"a different lifecycle stage\", but grouping.py's claim_signal_sources (grouping.py:92) claims the same `SignalSource` label with the same ORDER BY rand() + claim_token two-step pattern, and \u00a77's own parameterisation (label, status predicate, claim property names, returned fields) already covers it \u2014 so the plan knowingly leaves two claim implementations on one label inside one package",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/__init__.py:86",
+      "id": "interface_budget-1",
+      "reason": "the section must name, in its own text, what it retires or merges in the CLI-option family, or state why nothing can be, as the rubric requires.",
+      "text": "\u00a77 adds the `discover map` subcommand with five options, the `DISCOVERY_DOMAINS` value \"map\" (imas_codex/cli/discover/common.py:30) and status/clear dispatch branches, but names no cli_option it retires or merges for that addition: the \"seven helpers become three\" merge is a public_definitions change and the two retired options belong to \u00a78, not \u00a77",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "780c33df5759e84203c6ac79fb8f4c29a09498256906b0350caa1205456e7d79",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 37,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-06T20:53:29.606292+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T20:53:32.209608+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-06T20:53:34.269862+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "Declined, as in the previous review. grouping.py and mdsplus/graph_ops.py claim SignalSource for the enrichment stage on claimed_at, with live callers in discovery/static. Moving them changes a working pipeline outside this plan's product. The parameterised claims.py routine makes that move a call-site change in its own focused commit.",
+      "when": "2026-10-06T20:53:36.601440+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T20:53:32.209608+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "reason": "Declined, as in the previous review. grouping.py and mdsplus/graph_ops.py claim SignalSource for the enrichment stage on claimed_at, with live callers in discovery/static. Moving them changes a working pipeline outside this plan's product. The parameterised claims.py routine makes that move a call-site change in its own focused commit.",
+      "when": "2026-10-06T20:53:36.601440+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T20:53:34.269862+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T20:53:29.606292+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v37.json",
+  "review_run_id": "r-20261006T204714681997-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "cb088037e4e8b7a4a9534feb0b593327b8763b14",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the candidate stage hides retrieval, judgment and routing behind candidates.py's retrieve_candidates/judge_candidates/route, and \u00a77 places the generalised claim routines in the shared owner imas_codex/discovery/base/claims.py rather than in a new module.",
+    "duplicate_owner": "a finding \u2014 \u00a78's retirement of the mapping_target_* scalars names one reader where imas_codex/ids/workers.py holds four read/write sites, and \u00a77 leaves a second same-label claim implementation beside the owner it creates.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a77 adds five CLI options and a subcommand (cli_options family) without naming any cli_option it retires or merges.",
+    "reuse_search": "a finding \u2014 the plan's account of the existing MAPS_TO_IMAS writers is asserted through a grep that returns zero matches, so its prior-art search for the edge machinery is not shown to see the sites it consolidates.",
+    "thin_wrapper": "pass \u2014 \u00a710 deletes the _capture_decisions_cost monkeypatch and extends the existing PipelineCost/_acall_llm cost path (imas_codex/ids/mapping.py:78) rather than layering a wrapper over it; \u00a77 reuses run_discovery_engine and OrphanRecoverySpec rather than adding a second engine."
+  },
+  "section_digests": {
+    "_document": "bfd320a268c1925095f3577ace21fcd1ba04db37665ccb02d0665e5b4b73f540",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "2c51cab5622c4a71d3c2f59a41fb5cf716a5f6413be1ecaf3c80a9b316a83e00",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "ddb6e98f8b99ad48d28ecfc742402d9a5bfdd3adf69f47ce112a231570923c95",
+    "s8": "f6c6513f41c0c554d771bac4fb9097cc0d8c1b3c8ea68982bd2330986b023fdf",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T20:53:16.466506+00:00"
+}

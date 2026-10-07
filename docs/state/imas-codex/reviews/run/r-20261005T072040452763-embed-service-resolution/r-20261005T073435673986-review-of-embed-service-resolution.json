@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest (role implement) names no baseline_suite or after_suite gate logs, so the added-failure count was not derivable from its own record; the reviewer's independent base/head arms over tests/embeddings/test_readiness.py give 6 added ids, recorded under findings and artifacts.",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/settings.py:629 get_embed_remote_url",
+    "imas_codex/graph/neo4j_ops.py:367 resolve_service_url(protocol=http)",
+    "imas_codex/graph/profiles.py:317 _service_url_for_slurm"
+  ],
+  "completed_at": "2026-10-05T07:48:16.334Z",
+  "dispatched_at": "2026-10-05T07:34:40Z",
+  "findings": [
+    {
+      "file": "tests/embeddings/test_readiness.py",
+      "line": "402",
+      "severity": "follow-on",
+      "text": "follow-on: the change deletes readiness._resolve_url_for_compute and settings._embed_host_from_facility, but this file still imports both (lines 29, 402), so six tests are red at the head (verified: base tests/embeddings/test_readiness.py 26 passed EXIT=0; head 6 failed, 20 passed); the file is outside the reviewed node's fence and needs those tests deleted, and the reviewed manifest names this as a follow-on."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/embed-service-resolution.html",
+      "line": "93",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's gate line names tests/remote and tests/graph/test_schema_context.py, omitting tests/embeddings, the directory that covers imas_codex/embeddings/readiness.py, one of the four files the change touched; the gate therefore did not measure the six failures the removal caused in tests/embeddings/test_readiness.py."
+    },
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "92",
+      "severity": "follow-on",
+      "text": "follow-on: _slurm_service_uri is a fifth live copy of the same squeue + recorded-host + loopback resolution and still owns it; plan section 8 (amended after this commit) now names it in scope, so it should delegate to imas_codex/remote/locations.py:277 rather than resolve independently."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read b1debac9eab3212bf27ba0e58970a75c0a976286 to c120c1285846f28ce0d2d23abc2f6b141798bcca: the resolver gains _discover_slurm_compute_node and _service_url_for_slurm and drops the local gate; profiles.py delegates; settings.get_embed_host reads the resolved URL host and _embed_host_from_facility is retired; readiness._resolve_url_for_compute and its call site are deleted; a 6-case test module is added.",
+    "done_when": "the done-when names the compute/service/login/remote cases, the live embed status, and the unified copies; tests/remote/test_locations_resolution.py:52 covers the cases and the live measure reproduces the gpu node URL with no tunnel.",
+    "goal": "the node goal is one owner of SLURM service-node discovery reachable from a compute node; imas_codex/remote/locations.py:311 drops the `local and` gate and imas_codex/remote/locations.py:277 is the shared helper.",
+    "manifest": "read; status complete, gate uv run pytest tests/remote tests/graph/test_schema_context.py 106 passed EXIT=0, negative control reds test_compute_node_caller_reaches_discovered_service_node, but no baseline_suite/after_suite gate logs are named.",
+    "write_paths": "read the reviewed manifest's declared paths; git diff --name-only b1debac9..c120c1285 lists exactly the six declared paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/remote/test_locations_resolution.py:52 asserts the compute-node URL and reddens when the `local and` gate is restored (negative-control.log EXIT=1), but the removal of _resolve_url_for_compute and _embed_host_from_facility leaves six tests red in tests/embeddings/test_readiness.py (base 26 passed, head 6 failed).",
+    "evidence": "tests/remote/test_locations_resolution.py:52 with the verified live measure (get_embed_remote_url()=http://98dci4-gpu-0002:18765) and the red negative-control.log are strong, but the gate at docs/evidence/fragments/jt60sa-discovery-completion/embed-service-resolution.html:93 omits tests/embeddings, the directory covering imas_codex/embeddings/readiness.py, and the reviewed manifest carries no baseline_suite/after_suite gate logs.",
+    "fit": "profiles.py:315 delegates its SLURM branch to the shared owner in imas_codex/remote/locations.py:277 while keeping its remote auto-tunnel branch, and no public name is added, though tests/embeddings/test_readiness.py:402 still binds the deleted internals.",
+    "goal_fidelity": "imas_codex/remote/locations.py:311-345 drops the `local and` gate so the SLURM branch decides by discovery, and on this compute node get_embed_remote_url() now returns http://98dci4-gpu-0002:18765 where the base revision returned http://localhost:18765.",
+    "scope_discipline": "git show --stat c120c1285 lists exactly the six declared paths (locations.py, profiles.py, settings.py, readiness.py, test_locations_resolution.py, the fragment) with no dependency, schema or plan change."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: b1debac9eab3212bf27ba0e58970a75c0a976286\nreviewed_head_sha: c120c1285846f28ce0d2d23abc2f6b141798bcca\nVERDICT goal: the node goal is one owner of SLURM service-node discovery reachable from a compute node; imas_codex/remote/locations.py:311 drops the `local and` gate and imas_codex/remote/locations.py:277 is the shared helper.\nVERDICT done_when: the done-when names the compute/service/login/remote cases, the live embed status, and the unified copies; tests/remote/test_locations_resolution.py:52 covers the cases and the live measure reproduces the gpu node URL with no tunnel.\nVERDICT write_paths: read the reviewed manifest's declared paths; git diff --name-only b1debac9..c120c1285 lists exactly the six declared paths and nothing else.\nVERDICT manifest: read; status complete, gate uv run pytest tests/remote tests/graph/test_schema_context.py 106 passed EXIT=0, negative control reds test_compute_node_caller_reaches_discovered_service_node, but no baseline_suite/after_suite gate logs are named.\nVERDICT diff: read b1debac9eab3212bf27ba0e58970a75c0a976286 to c120c1285846f28ce0d2d23abc2f6b141798bcca: the resolver gains _discover_slurm_compute_node and _service_url_for_slurm and drops the local gate; profiles.py delegates; settings.get_embed_host reads the resolved URL host and _embed_host_from_facility is retired; readiness._resolve_url_for_compute and its call site are deleted; a 6-case test module is added.\nCALL_SITES: imas_codex/settings.py:629 get_embed_remote_url, imas_codex/graph/neo4j_ops.py:367 resolve_service_url(protocol=http), imas_codex/graph/profiles.py:317 _service_url_for_slurm\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/remote/locations.py:311-345 drops the `local and` gate so the SLURM branch decides by discovery, and on this compute node get_embed_remote_url() now returns http://98dci4-gpu-0002:18765 where the base revision returned http://localhost:18765.\nSCORE evidence: 15\nJUSTIFICATION evidence: tests/remote/test_locations_resolution.py:52 with the verified live measure (get_embed_remote_url()=http://98dci4-gpu-0002:18765) and the red negative-control.log are strong, but the gate at docs/evidence/fragments/jt60sa-discovery-completion/embed-service-resolution.html:93 omits tests/embeddings, the directory covering imas_codex/embeddings/readiness.py, and the reviewed manifest carries no baseline_suite/after_suite gate logs.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: git show --stat c120c1285 lists exactly the six declared paths (locations.py, profiles.py, settings.py, readiness.py, test_locations_resolution.py, the fragment) with no dependency, schema or plan change.\nSCORE durability: 16\nJUSTIFICATION durability: tests/remote/test_locations_resolution.py:52 asserts the compute-node URL and reddens when the `local and` gate is restored (negative-control.log EXIT=1), but the removal of _resolve_url_for_compute and _embed_host_from_facility leaves six tests red in tests/embeddings/test_readiness.py (base 26 passed, head 6 failed).\nSCORE fit: 18\nJUSTIFICATION fit: profiles.py:315 delegates its SLURM branch to the shared owner in imas_codex/remote/locations.py:277 while keeping its remote auto-tunnel branch, and no public name is added, though tests/embeddings/test_readiness.py:402 still binds the deleted internals.\nFINDING tests/embeddings/test_readiness.py:402 follow-on: the change deletes readiness._resolve_url_for_compute and settings._embed_host_from_facility, but this file still imports both (lines 29, 402), so six tests are red at the head (verified: base tests/embeddings/test_readiness.py 26 passed EXIT=0; head 6 failed, 20 passed); the file is outside the reviewed node's fence and needs those tests deleted, and the reviewed manifest names this as a follow-on.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/embed-service-resolution.html:93 follow-on: the fragment's gate line names tests/remote and tests/graph/test_schema_context.py, omitting tests/embeddings, the directory that covers imas_codex/embeddings/readiness.py, one of the four files the change touched; the gate therefore did not measure the six failures the removal caused in tests/embeddings/test_readiness.py.\nFINDING imas_codex/graph/client.py:92 follow-on: _slurm_service_uri is a fifth live copy of the same squeue + recorded-host + loopback resolution and still owns it; plan section 8 (amended after this commit) now names it in scope, so it should delegate to imas_codex/remote/locations.py:277 rather than resolve independently.",
+  "review_run_id": "r-20261005T073435673986-review-of-embed-service-resolution",
+  "reviewed_base_sha": "b1debac9eab3212bf27ba0e58970a75c0a976286",
+  "reviewed_head_sha": "c120c1285846f28ce0d2d23abc2f6b141798bcca",
+  "reviewed_run_id": "r-20261005T072040452763-embed-service-resolution",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:46:14.907660+00:00",
+  "total": 85,
+  "verdict": "SOUND WITH FINDINGS"
+}

@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:03:25.590Z",
+  "dispatched_at": "2026-10-06T08:56:43Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/code/workers.py:558",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's bounding claim is false at the ingest stage, so its own done-when (\"the count of jt-60sa rows outside the three trees whose status changed reads 0\"; code chunks only under the four trees) cannot hold unless the prefix scope is applied to those claims or the plan verifies no out-of-scope CodeFile is claimable.",
+      "text": "\u00a714 runs `discover code jt-60sa --path-prefix \u2026 --min-score 0` and states \"the seven prefixes already bound the run, so the threshold has nothing left to protect here\", but only the file-scan claim is prefix-scoped (`claim_paths_for_file_scan`, imas_codex/discovery/code/graph_ops.py:99,141); the code-ingest claim at this line matches `CodeFile` facility-wide (`WHERE sf.status='scored' AND sf.score_composite >= $min_score`, no prefix clause), as do `claim_files_for_triage` (imas_codex/discovery/code/graph_ops.py:279), `claim_files_for_enrichment` (:362), `claim_files_for_scoring` (:446) and `has_pending_code_work` (imas_codex/discovery/code/graph_ops.py:646, used unpinned at imas_codex/discovery/code/parallel.py:177). With `--min-score` lowered to 0 the run therefore reaches every jt-60sa `CodeFile` at a claimable status facility-wide, not only the seven trees.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/reset.py:254",
+      "id": "duplicate_owner-2",
+      "reason": "widening the shared spec changes every unscoped `--reset-to scanned` invocation facility-wide (a never-scanned `discovered` row would be moved past enumeration), so the plan must name the spec it extends and its bound, or add a dedicated prefix-scoped spec, rather than leave the mechanism to a conditional.",
+      "text": "\u00a714's root-restore \"uses the existing path reset scoped by --root to clear their triage, extending the reset's source statuses only if no existing spec reaches a discovered row with a triage score\", but neither `PATH_RESET_SPECS` entry does: `\"triaged\"` has source_statuses `[\"scored\"]` (imas_codex/discovery/base/reset.py:255) and `\"scanned\"` has `[\"triaged\",\"scored\"]` (:262), and the scan claim admits only `discovered` rows whose `triage_composite IS NULL` (imas_codex/discovery/paths/parallel.py:488). The plan's conditional therefore fires (the seed overwrite left exactly those three roots at `discovered` with a triage score), and the remedy it implies is adding `discovered` to a shared spec's `source_statuses`.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "07426bef86bb98d1d8c52aac1d9d75f6d1a719e4cf4daeaa67187ffd08bde91e",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 204,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T085637572671-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "465ad604aa9239701c8adb3baef2a276b7d6ef86",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a714 adds no new module. It extends two existing owners by one keyword-only parameter each (`reset_to_status(path_prefixes=\u2026)` at imas_codex/discovery/base/reset.py:63, `create_nodes(create_only=\u2026)` at imas_codex/graph/client.py:611) and adds one shared renderer inside the module that already owns Cypher fragment rendering (imas_codex/graph/query_builder.py:268); the complexity stays behind the owners it belongs to.",
+    "duplicate_owner": "a finding \u2014 the plan's scoped code run is bounded only at the file-scan claim; the four downstream `CodeFile` claims re-implement their predicates without the shared prefix scope, so `--min-score 0` is not confined to the seven `--path-prefix` trees as the plan asserts.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no CLI option (`--root`, `--path-prefix`, `--min-score`, `--reset-to` all pre-exist at imas_codex/cli/discover/{paths,code}.py), adds no MCP view or refusal family, and it names what it retires (`seed_missing_roots` retired, `create_child_paths` deleted), so the section accounts for its interface surface.",
+    "reuse_search": "pass \u2014 the plan searched the codebase it extends and each cited mechanism verifies: `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268) has exactly the eight call sites the plan names (imas_codex/discovery/paths/parallel.py:484,540,597,715,795; imas_codex/discovery/code/graph_ops.py:141,566; imas_codex/discovery/base/reset.py:98), `GraphClient.create_nodes` gained a `create_only` parameter (imas_codex/graph/client.py:611) rather than a parallel writer, the \"thirteen ON CREATE SET precedents\" claim in frontier.py verifies at 13, and the retired `seed_missing_roots` / `create_child_paths` leave no residue in imas_codex/ or tests/.",
+    "thin_wrapper": "pass \u2014 `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268) is a one-line fragment renderer placed in the module that already owns such fragments, replacing eight previously inline spellings; the plan states the reason it exists (one owner for the `any(prefix IN $\u2026)` predicate, so claims and the reset cannot drift), which is the justification the item requires."
+  },
+  "section_digests": {
+    "_document": "2c01167777dff15a911759db4430e405917b0054142f449147249dc8aed64c84",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "e327738bebee5a44d47c1e84055b3a3902b6e47c4966db7ff4863caf6a00d3a5",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T09:37:00.524192+00:00"
+}

@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T03:05:36.207Z",
+  "dispatched_at": "2026-10-07T03:00:29Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/units/data_dictionary_unit_aliases.txt",
+      "id": "duplicate_owner-1",
+      "reason": "a second alias file forks the one alias owner the normaliser and every Unit-node write depend on, so unit canonicalisation drifts between the JT-60SA path and every other path.",
+      "text": "\u00a74 proposes \"a facility-unit alias file beside data_dictionary_unit_aliases.txt\", a second alias file loaded into the one module-level registry; the existing file already IS the facility/data-source alias mechanism (its own comments read \"malformed units used in the IMAS Data Dictionary\" and \"Case-sensitive aliases for MDSplus unit strings\", i.e. per-source spellings), and the loader at imas_codex/units/__init__.py:48-53 loads exactly one definitions file into the single unit_registry \u2014 the honest change is to add the JT-60SA spellings to that file, not to fork a second one",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py",
+      "id": "duplicate_owner-2",
+      "reason": "naming merge_units_to_graph (and adding its file to the write paths, or calling it unchanged) is the difference between extending the one writer and creating a second one.",
+      "text": "\u00a74's \"EDAS signals are then linked to Unit nodes the way the MDSplus path links its signals\" names no writer, and the owner of that write is merge_units_to_graph (imas_codex/discovery/mdsplus/graph_ops.py:321), which is already facility-generic, already reused by signals/parallel.py:3105 and static/workers.py:205, and already imported there to MERGE Unit nodes and create HAS_UNIT edges; \u00a74's declared write paths (imas_codex/units/, imas_codex/discovery/signals/, tests/units/) exclude that owner file, so a worker following the plan will build a parallel HAS_UNIT writer inside discovery/signals/",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/units/__init__.py",
+      "id": "thin_wrapper-1",
+      "reason": "the plan should extend the existing alias owner or state why it cannot, per the thin-wrapper rule.",
+      "text": "the facility-unit alias file is a thin layer whose only job is to forward spellings into the same unit_registry the existing file already feeds; the plan gives no justification for why the existing alias file or dd_unit_exceptions.yaml (\"the single registry of DD-side unit bugs\", imas_codex/units/dd_unit_exceptions.py:8) cannot be extended instead",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/mdsplus/graph_ops.py:321",
+      "id": "reuse_search-1",
+      "reason": "folded into the duplicate_owner finding above; naming the owner there fixes it, so it needs no separate plan revision.",
+      "text": "\u00a74's only un-named reuse is the HAS_UNIT link; the plan searched well elsewhere (it cites create_signal_source, normalize_unit_symbol, hybrid_dd_search and the shared rerank owner by file and line), so this is a single gap rather than a general one",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e5f63dadad6aa11dbc7e340854abcc641bf2cb3e59e7137e993e8a06d878f44e",
+  "plan_slug": "jt60sa-imas-maps",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T03:06:08.952229+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-07T03:06:11.761784+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-07T03:06:15.316661+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T03:06:19.404466+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:06:08.952229+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:06:11.761784+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:06:19.404466+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:06:15.316661+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-imas-maps.v2.json",
+  "review_run_id": "r-20261007T030019612484-plan-review-of-jt60sa-imas-maps",
+  "reviewed_blob_sha": "b6f7d4fb62135a13782b939ade68aa64c3a447a0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan composes existing machinery rather than spreading complexity across new wrappers; its only new code surfaces are an extension of create_signal_source (\u00a73) and a rerank call into a shared owner (\u00a78), each hiding more than it exposes.",
+    "duplicate_owner": "a finding \u2014 \u00a74 re-implements the alias-definition owner and, separately, risks a second HAS_UNIT writer beside the existing owner.",
+    "interface_budget": "pass \u2014 this week's figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section (\u00a72 CLI runs, \u00a73 grouping extension, \u00a74 alias data file, \u00a75\u2013\u00a77 existing CLI runs, \u00a78 in-tool rerank) adds a public definition, a CLI option, an MCP view or a refusal family, so none owes a retirement or merge.",
+    "reuse_search": "a finding \u2014 the plan cites most mechanisms it extends by name (build_enrich_claimable_predicate, create_signal_source, normalize_unit_symbol, hybrid_dd_search, claim_sources_for_candidates, the Jev rerank owner), but \u00a74 describes the Unit link only as \"the way the MDSplus path links its signals\" and names no owner, and proposes a \"facility-unit alias file beside data_dictionary_unit_aliases.txt\" without citing the existing alias owner it duplicates.",
+    "thin_wrapper": "a finding \u2014 \u00a74's facility-unit alias file is a thin parallel layer over the existing pint alias mechanism, and the plan does not say why the existing alias file cannot simply carry the facility spellings."
+  },
+  "section_digests": {
+    "_document": "34a6f4e9e5a87ab03c928a4c6f398704dfdca02e94f03b178043a9eaf675ff20",
+    "s1": "ad3734b283c2edabdad9f9d344f5033b3ca7bf633a6ef690bf7fbb8710a3a156",
+    "s2": "75668ff463815cc207e25ac27ea9ce7ea5aed158d029ea11a37414d889264046",
+    "s3": "77f84779398286dd3fa546979c44a780c03be2af61a00dd94ec9564345c9e1fe",
+    "s4": "382c8e176ecedd42086562577da757c52a28d22b886f756d2a83f7e7f6907d26",
+    "s5": "65f58745c4a17441faf6c0957f35bed795691900c1a6c77cd137c57cd4c42e29",
+    "s6": "c8d788838af5f57d060c70a9a1c105fa692a0f4daf01d4b374564068bb4aa11b",
+    "s7": "97fe9c5fca60eacb3cab1a67839b4b5bf6ebeac4dc8b11ba9ef022ff6e064a2a",
+    "s8": "178803b16cc3cdb46dc10052784658b5750a08601b12efaceee738c09a14a451"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:06:05.673682+00:00"
+}

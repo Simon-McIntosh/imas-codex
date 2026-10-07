@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:50:53.253Z",
+  "dispatched_at": "2026-10-05T15:43:04Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ingestion/graph.py:64",
+      "id": "duplicate_owner-1",
+      "reason": "the renderer belongs in the graph layer (or a neutral, import-free module) so the four graph/llm readers extend their own layer instead of the graph query layer depending on ingestion; the plan should name the owner that keeps the dependency direction.",
+      "text": "\u00a719 names `imas_codex/ingestion/graph.py` as the owner of the chunk-source renderer, but four of the five call sites that must embed the fragment are in the graph and llm layers (`imas_codex/graph/domain_queries.py:480` binds `(cc)-[:CODE_EXAMPLE_ID]->(ce)`, `imas_codex/graph/schema_context.py:95` and `imas_codex/llm/server.py:827` join the undeclared `(CodeFile)-[:HAS_CHUNK]->(node)`, `imas_codex/llm/search_tools.py:1649` joins `(ce:CodeExample)-[:HAS_CHUNK]->(cc)`); placing the owner in the ingestion package makes every one of those readers import downward across the graph\u2192ingestion boundary, when the established graph-layer Cypher builder beside it is `imas_codex/graph/vector_search.py` and `graph/` already renders relationship predicates",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "dababee829aa531d1e9bb870736b7c6c4403ddaa69a1c885ee1d1af08a1c9eb1",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 116,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T15:52:02.840726+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T154248693525-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "e5609ac5833df5769a315f0daa6d2dd43c187da0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a719 hides the error-prone part (edge direction plus the source coalesce) behind one renderer in `imas_codex/ingestion/graph.py` that five call sites embed, rather than five hand-written traversals; \u00a714 extends the existing seeder rather than adding a module.",
+    "duplicate_owner": "a finding \u2014 the shared renderer is placed in imas_codex/ingestion/graph.py while four of its five consumers live in the graph and llm layers, inverting the graph\u2192ingestion layering.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no interface family (it adds one `clear_fields` entry and a conditional property clear through the existing seeder) and \u00a719 states its budget (\"nothing added\") while retiring the phantom `CODE_EXAMPLE_ID` relationship and the two undeclared traversals, so no section adds surface without accounting for it.",
+    "reuse_search": "pass \u2014 \u00a714 extends the mechanisms it names, `seed_facility_roots` (imas_codex/discovery/paths/frontier.py:426, whose `root_paths` parameter and `create_nodes` upsert at imas_codex/graph/client.py:667 `SET n += item` both already exist) and `PATH_RESET_SPECS` (imas_codex/discovery/base/reset.py:240); \u00a719 consolidates the five existing readers it enumerates over the one `HAS_CHUNK` edge whose single writer it names (imas_codex/ingestion/pipeline.py:521, `MERGE (e:CodeExample)-[:HAS_CHUNK]->(c)`), and it checks each of the five against the code.",
+    "thin_wrapper": "pass \u2014 \u00a719 states why the existing builder `imas_codex/graph/vector_search.py` is left unchanged (it is a SEARCH-syntax builder with no join or return) and consolidates instead of forking, so the fragment has a stated justification beyond forwarding."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T15:51:10.087829+00:00"
+}

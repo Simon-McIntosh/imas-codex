@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:embed_description_worker",
+    "imas_codex/discovery/wiki/parallel.py:embed_description_worker",
+    "imas_codex/discovery/paths/parallel.py:embed_description_worker",
+    "imas_codex/discovery/code/progress.py:get_code_discovery_stats",
+    "imas_codex/cli/discover/__init__.py:get_code_discovery_stats"
+  ],
+  "completed_at": "2026-10-05T13:39:17.209Z",
+  "dispatched_at": "2026-10-05T13:28:55Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/cypher_property_check.py",
+      "line": "105",
+      "severity": "blocking",
+      "text": "blocking: moving the CodeChunk.embed_failed_at occurrence out of imas_codex/discovery/code/parallel.py:480 into the rendered fragment (alias n, no statically declared label) orphans this frozen [runtime] adjudication row, so the audit reports a stale adjudication and tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties fails at the reviewed head (reproduced, EXIT=1); the row must be relocated to imas_codex/discovery/base/embed_worker.py or removed, which is outside this node's declared write paths."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit fd319e291 file by file; the predicate is rendered once, all three decision sites embed it, the signal reset spec gains embed_failed_at, and the manual-clear docstring is retired.",
+    "done_when": "the tests the done_when names exit 0 (154 passed) and the reset spec that clears embeddings now also clears embed_failed_at; the gate is read from gate_head.log and the new reset assertion from test_reset.py.",
+    "goal": "\u00a717 asks for one rendered pending-embedding predicate shared by _fetch_unembedded, _count_unembedded and the code phase's three-aggregate progress query, plus a cutoff retry; the landed diff delivers exactly that at imas_codex/discovery/base/embed_worker.py:93.",
+    "manifest": "read the delivered manifest.md; it records the revision pair, the gate log and a negative-control log, and its claims reconcile with gate_head.log and negative_control.log.",
+    "write_paths": "read the manifest's declared paths against git show fd319e291 --stat; all seven changed paths (three source, three test, one evidence fragment) lie inside the grant."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_embed_worker.py:113 is a real falsifiable guard (negative_control.log shows it reddens when the cutoff is dropped), but test_fetch_query_embeds_shared_fragment at line 128 compares pending_embed_predicate(\"n\") against SQL built by that same function, so both sides move together, and no added test guards the orphaned inventory row.",
+    "evidence": "gate_head.log records \"154 passed\" EXIT=0 for the four named files and negative_control.log a real red arm (EXIT=1), but the gate's four-file scope missed a default-suite test the change breaks (tests/graph/test_cypher_property_check.py), so the recorded result does not cover the change's reach.",
+    "fit": "pending_embed_predicate, embed_retry_cutoff_time and DEFAULT_EMBED_RETRY_HOURS name the mechanism, the f-string braces in imas_codex/discovery/code/parallel.py:476 are escaped correctly, and no plan or ticket label appears.",
+    "goal_fidelity": "imas_codex/discovery/base/embed_worker.py:93 renders the pending fragment once and the three decision sites embed it, with the cutoff retry and the reset-spec field, exactly as \u00a717 states.",
+    "reuse": "the predicate extends the owner imas_codex/discovery/base/embed_worker.py rather than adding a second renderer, and the code phase's hand-rolled count now embeds the same fragment.",
+    "scope_discipline": "every path in git show fd319e291 --stat lies inside the declared write paths and the diff is minimal; deducted because moving the occurrence out of imas_codex/discovery/code/parallel.py:480 left its repo-wide inventory row untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a717 asks for one rendered pending-embedding predicate shared by _fetch_unembedded, _count_unembedded and the code phase's three-aggregate progress query, plus a cutoff retry; the landed diff delivers exactly that at imas_codex/discovery/base/embed_worker.py:93.\nVERDICT done_when: the tests the done_when names exit 0 (154 passed) and the reset spec that clears embeddings now also clears embed_failed_at; the gate is read from gate_head.log and the new reset assertion from test_reset.py.\nVERDICT write_paths: read the manifest's declared paths against git show fd319e291 --stat; all seven changed paths (three source, three test, one evidence fragment) lie inside the grant.\nVERDICT manifest: read the delivered manifest.md; it records the revision pair, the gate log and a negative-control log, and its claims reconcile with gate_head.log and negative_control.log.\nVERDICT diff: read commit fd319e291 file by file; the predicate is rendered once, all three decision sites embed it, the signal reset spec gains embed_failed_at, and the manual-clear docstring is retired.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:embed_description_worker, imas_codex/discovery/wiki/parallel.py:embed_description_worker, imas_codex/discovery/paths/parallel.py:embed_description_worker, imas_codex/discovery/code/progress.py:get_code_discovery_stats, imas_codex/cli/discover/__init__.py:get_code_discovery_stats\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/base/embed_worker.py:93 renders the pending fragment once and the three decision sites embed it, with the cutoff retry and the reset-spec field, exactly as \u00a717 states.\nSCORE evidence: 13\nJUSTIFICATION evidence: gate_head.log records \"154 passed\" EXIT=0 for the four named files and negative_control.log a real red arm (EXIT=1), but the gate's four-file scope missed a default-suite test the change breaks (tests/graph/test_cypher_property_check.py), so the recorded result does not cover the change's reach.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git show fd319e291 --stat lies inside the declared write paths and the diff is minimal; deducted because moving the occurrence out of imas_codex/discovery/code/parallel.py:480 left its repo-wide inventory row untouched.\nSCORE durability: 15\nJUSTIFICATION durability: tests/discovery/test_embed_worker.py:113 is a real falsifiable guard (negative_control.log shows it reddens when the cutoff is dropped), but test_fetch_query_embeds_shared_fragment at line 128 compares pending_embed_predicate(\"n\") against SQL built by that same function, so both sides move together, and no added test guards the orphaned inventory row.\nSCORE fit: 19\nJUSTIFICATION fit: pending_embed_predicate, embed_retry_cutoff_time and DEFAULT_EMBED_RETRY_HOURS name the mechanism, the f-string braces in imas_codex/discovery/code/parallel.py:476 are escaped correctly, and no plan or ticket label appears.\nSCORE reuse: 20\nJUSTIFICATION reuse: the predicate extends the owner imas_codex/discovery/base/embed_worker.py rather than adding a second renderer, and the code phase's hand-rolled count now embeds the same fragment.\nFINDING imas_codex/graph/cypher_property_check.py:105 blocking: moving the CodeChunk.embed_failed_at occurrence out of imas_codex/discovery/code/parallel.py:480 into the rendered fragment (alias n, no statically declared label) orphans this frozen [runtime] adjudication row, so the audit reports a stale adjudication and tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties fails at the reviewed head (reproduced, EXIT=1); the row must be relocated to imas_codex/discovery/base/embed_worker.py or removed, which is outside this node's declared write paths.\n",
+  "review_run_id": "r-20261005T132845629644-review-of-embed-failed-retry",
+  "reviewed_base_sha": "516d9dcc2a68e8e3315e733aef2273f02cdcb41d",
+  "reviewed_head_sha": "fd319e2911fe0ac6a64fa7fb05eaaee19e0d56fb",
+  "reviewed_run_id": "r-20261005T131211484525-embed-failed-retry",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T13:52:00+00:00",
+  "total": 103
+}

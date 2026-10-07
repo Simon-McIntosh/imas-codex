@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: baseline_suite (c120c1285) completed=true with 6 failures, all in tests/embeddings/test_readiness.py (5 TestResolveUrlForCompute + 1 TestEmbeddingHostDiscovery), which this node was dispatched to retire; after_suite (c5a0b064e) completed=true with 0 failures. Failures present at head but not at base: none, so added_failure_count=0. The reviewer independently reproduced the head arm (274 passed, 1 skipped, 6 deselected, EXIT=0) in a scratch tree at c5a0b064e.",
+  "backend": "local",
+  "base_log_revision": "c120c1285846f28ce0d2d23abc2f6b141798bcca",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/client.py:113 (bolt_port via resolve_neo4j auto_tunnel=False, the delegated call)",
+    "imas_codex/remote/tunnel.py:579 discover_compute_node_local (the retained owner)",
+    "imas_codex/remote/locations.py:346 _resolve_compute_host (the retained owner)"
+  ],
+  "completed_at": "2026-10-05T08:15:35.164Z",
+  "dispatched_at": "2026-10-05T08:06:27Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "102",
+      "severity": "follow-on",
+      "text": "follow-on: _slurm_service_uri now delegates, but the symbol and the SLURM branch of _resolve_graph_uri that calls it remain as duplication of profiles.py Mode 2, since resolve_service_url already answers the SLURM case from a compute node. Deleting them is blocked from this node's fence because tests/graph/test_client_address_resolution.py imports and pins _slurm_service_uri (verified: 9 passed at head); a future node owning tests/graph could delete both and rework that module. The reviewed manifest names this as a follow-on."
+    }
+  ],
+  "head_log_revision": "c5a0b064e31c5dc753e9b768c11df98bdf797f0c",
+  "item_aggregate": 7,
+  "item_verdicts": {
+    "call_sites": "verified the delegated call at imas_codex/graph/client.py:113 and the two retained owner functions in remote/",
+    "diff": "read c120c1285 to c5a0b064e: _slurm_service_uri drops its own discover_compute_node_local + _resolve_compute_host fallback and loopback test, delegating to remote.locations._service_url_for_slurm with protocol=bolt, local=False, service_job_name=info.service_job_name; six retired readiness tests are deleted; three cases added to tests/remote/test_locations_resolution.py; a bare-section fragment added.",
+    "done_when": "brief (a): graph/ carries no discover_compute_node_local/_resolve_compute_host call (git grep at head: only locations.py and tunnel.py) and GraphClient from this compute node resolves bolt://98dci4-gpu-0002:7687 (verified live). brief (b): the six retired tests are removed and the surviving different-nodes claim re-expressed in tests/remote/test_locations_resolution.py::test_graph_and_embedding_jobs_may_sit_on_different_nodes.",
+    "goal": "one owner of SLURM service-node discovery; imas_codex/graph/client.py:102 delegates its bolt resolution to imas_codex/remote/locations.py:_service_url_for_slurm, so graph and embedding paths cannot diverge.",
+    "manifest": "read; status complete, baseline_suite and after_suite both present and completed (6 failures -> 0), negative_control_log reds test_graph_client_obtains_its_bolt_uri_from_the_shared_owner, gate EXIT=0.",
+    "write_paths": "git diff --name-only c120c1285..c5a0b064e lists exactly the four declared paths (client.py, test_readiness.py, test_locations_resolution.py, the fragment) and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/remote/test_locations_resolution.py::test_graph_client_obtains_its_bolt_uri_from_the_shared_owner pins the delegation with a sentinel and reddens when the direct call is restored (reviewer re-ran the negative control: 1 failed, 8 passed, EXIT=1); the compute-node case pins the resolved address; the removed different-nodes claim is re-expressed. The residual duplication of the symbol is a documented follow-on, not a broken guard.",
+    "evidence": "the reviewed run now carries both baseline_suite and after_suite gate logs (the gap in the prior node's record), the negative control is red and the reviewer reproduced it, and the head arm reproduces exactly (274 passed, EXIT=0). The live GraphClient measure is recorded but does not by itself discriminate this change (the base already reaches the gpu node after the prior node's fix), which the sentinel test and negative control cover.",
+    "fit": "the client asks the shared owner rather than resolving independently; local=False preserves the None-means-undiscovered contract and an unreadable location still raises through resolve_location; no public name added, and the choice of delegation over deletion is justified by an out-of-scope module pinning the symbol (verified).",
+    "goal_fidelity": "imas_codex/graph/client.py:102 routes the graph client's SLURM bolt resolution through imas_codex/remote/locations.py:_service_url_for_slurm, graph/ carries no discover_compute_node_local or _resolve_compute_host call, and GraphClient() from this compute node resolves bolt://98dci4-gpu-0002:7687.",
+    "scope_discipline": "git show --stat c5a0b064e lists exactly the four declared paths with no dependency, schema, plan or unrelated change; the out-of-scope test module is left untouched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: c120c1285846f28ce0d2d23abc2f6b141798bcca\nreviewed_head_sha: c5a0b064e31c5dc753e9b768c11df98bdf797f0c\nVERDICT goal: one owner of SLURM service-node discovery; imas_codex/graph/client.py:102 delegates its bolt resolution to imas_codex/remote/locations.py:_service_url_for_slurm, so graph and embedding paths cannot diverge.\nVERDICT done_when: brief (a): graph/ carries no discover_compute_node_local/_resolve_compute_host call (git grep at head: only locations.py and tunnel.py) and GraphClient from this compute node resolves bolt://98dci4-gpu-0002:7687 (verified live). brief (b): the six retired tests are removed and the surviving different-nodes claim re-expressed in tests/remote/test_locations_resolution.py::test_graph_and_embedding_jobs_may_sit_on_different_nodes.\nVERDICT write_paths: git diff --name-only c120c1285..c5a0b064e lists exactly the four declared paths (client.py, test_readiness.py, test_locations_resolution.py, the fragment) and nothing else.\nVERDICT manifest: read; status complete, baseline_suite and after_suite both present and completed (6 failures -> 0), negative_control_log reds test_graph_client_obtains_its_bolt_uri_from_the_shared_owner, gate EXIT=0.\nVERDICT diff: read c120c1285 to c5a0b064e: _slurm_service_uri drops its own discover_compute_node_local + _resolve_compute_host fallback and loopback test, delegating to remote.locations._service_url_for_slurm with protocol=bolt, local=False, service_job_name=info.service_job_name; six retired readiness tests are deleted; three cases added to tests/remote/test_locations_resolution.py; a bare-section fragment added.\nCALL_SITES: imas_codex/graph/client.py:113 (bolt_port via resolve_neo4j auto_tunnel=False, the delegated call), imas_codex/remote/tunnel.py:579 discover_compute_node_local (the retained owner), imas_codex/remote/locations.py:346 _resolve_compute_host (the retained owner)\nADDED_FAILURES: 0 (baseline_suite 6 failures all in tests/embeddings/test_readiness.py, after_suite 0; reviewer reproduced head arm 274 passed EXIT=0)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/graph/client.py:102 routes the graph client's SLURM bolt resolution through imas_codex/remote/locations.py:_service_url_for_slurm, graph/ carries no discover_compute_node_local or _resolve_compute_host call, and GraphClient() from this compute node resolves bolt://98dci4-gpu-0002:7687.\nSCORE evidence: 19\nJUSTIFICATION evidence: the reviewed run now carries both baseline_suite and after_suite gate logs (the gap in the prior node's record), the negative control is red and the reviewer reproduced it, and the head arm reproduces exactly (274 passed, EXIT=0). The live GraphClient measure is recorded but does not by itself discriminate this change (the base already reaches the gpu node after the prior node's fix), which the sentinel test and negative control cover.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat c5a0b064e lists exactly the four declared paths with no dependency, schema, plan or unrelated change; the out-of-scope test module is left untouched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/remote/test_locations_resolution.py::test_graph_client_obtains_its_bolt_uri_from_the_shared_owner pins the delegation with a sentinel and reddens when the direct call is restored (reviewer re-ran the negative control: 1 failed, 8 passed, EXIT=1); the compute-node case pins the resolved address; the removed different-nodes claim is re-expressed. The residual duplication of the symbol is a documented follow-on, not a broken guard.\nSCORE fit: 19\nJUSTIFICATION fit: the client asks the shared owner rather than resolving independently; local=False preserves the None-means-undiscovered contract and an unreadable location still raises through resolve_location; no public name added, and the choice of delegation over deletion is justified by an out-of-scope module pinning the symbol (verified).\nFINDING imas_codex/graph/client.py:102 follow-on: _slurm_service_uri now delegates, but the symbol and the SLURM branch of _resolve_graph_uri that calls it remain as duplication of profiles.py Mode 2, since resolve_service_url already answers the SLURM case from a compute node. Deleting them is blocked from this node's fence because tests/graph/test_client_address_resolution.py imports and pins _slurm_service_uri (verified: 9 passed at head); a future node owning tests/graph could delete both and rework that module. The reviewed manifest names this as a follow-on.",
+  "review_run_id": "r-20261005T080622449659-review-of-embed-resolution-residue",
+  "reviewed_base_sha": "c120c1285846f28ce0d2d23abc2f6b141798bcca",
+  "reviewed_head_sha": "c5a0b064e31c5dc753e9b768c11df98bdf797f0c",
+  "reviewed_run_id": "r-20261005T074717216467-embed-resolution-residue",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T08:13:30.000000+00:00",
+  "total": 95,
+  "verdict": "SOUND WITH FINDINGS"
+}

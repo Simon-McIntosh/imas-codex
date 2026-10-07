@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T07:37:37.156Z",
+  "dispatched_at": "2026-10-06T07:31:58Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/frontier.py:426",
+      "id": "duplicate_owner-1",
+      "reason": "a pre-query in one caller leaves the defect type in place at a second site; extending the owner (a create-only mode on `GraphClient.create_nodes`, or the module's own `ON CREATE SET`) fixes every FacilityPath creator once and lets `create_child_paths` be corrected or removed.",
+      "text": "the \u00a714 seed-fix makes `seed_facility_roots` additive by pre-querying which paths already exist (the `p.path IN $paths` filter lifted from `seed_missing_roots` at frontier.py:587), but the clobbering write it is working around is `MERGE (n {id}) SET n += item` in the node-creation owner `GraphClient.create_nodes` (imas_codex/graph/client.py:605, the SET at client.py:667), and the established create-if-absent mechanism in this same module is `MERGE \u2026 ON CREATE SET`, used thirteen times (frontier.py:903,933,1014,1187,1217,1445,2151,2169,2193,2242,2283,2341,2381) and mirrored by `GraphClient.ensure_facility` (client.py:753); the same unguarded create remains at `create_child_paths` (frontier.py:643, `create_nodes` at :694, hardcoding `status=discovered` and `depth` so any existing scored child would be reset), which has no live caller (referenced only in the docstring at frontier.py:1823)",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b266b9e130d170c503d5a4eb029427ff16a86bdc3da2e70f5a4196f780664a8a",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 191,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T073152245985-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "7cf6ad887c4fd28bc07a24c66fc7ffe13c5cde8e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the shared renderer collapses eight inline `STARTS WITH` path clauses to one function (callers at imas_codex/discovery/paths/parallel.py:484,540,597,715,795; imas_codex/discovery/code/graph_ops.py:141,566; imas_codex/discovery/base/reset.py:98), and the remaining seed fix folds an existing one-function wrapper into its owner; \u00a714 adds no new shallow layer.",
+    "duplicate_owner": "a finding \u2014 the plan implements the create-without-clobber invariant as a second mechanism (an existence pre-query moved from seed_missing_roots into seed_facility_roots) instead of adopting the create-if-absent idiom the owning module already uses in thirteen places.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no surface in any family and explicitly names the one public definition it retires (the `seed_missing_roots` export from imas_codex/discovery/__init__.py and imas_codex/discovery/paths/__init__.py), while its runs reuse the already-landed `--root`, `--path-prefix` and `--reset-to` options.",
+    "reuse_search": "pass \u2014 \u00a714 names and reuses the mechanisms it extends: `seed_missing_roots` (imas_codex/discovery/paths/frontier.py:587) for the existence filter, `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268) for the prefix predicate, `reset_to_status` and the ResetSpec tables (imas_codex/discovery/base/reset.py:59,254,363), and `get_facility` (imas_codex/discovery/base/facility.py) for the committed root list; no new subsystem is introduced.",
+    "thin_wrapper": "pass \u2014 the plan retires the thin wrapper `seed_missing_roots` (frontier.py:587, which only computes a missing set and delegates to `seed_facility_roots`) by moving its filter into the function it wraps, rather than adding a parallel wrapper."
+  },
+  "section_digests": {
+    "_document": "105f5d77458c8dc162350b589b042341cbbbd47a9cb320eea1eead92d4f8922b",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "4334eac16458921c048df6472cbedacebd9976fda9725214e744b7e4c104ef7a",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T07:45:32.414765+00:00"
+}

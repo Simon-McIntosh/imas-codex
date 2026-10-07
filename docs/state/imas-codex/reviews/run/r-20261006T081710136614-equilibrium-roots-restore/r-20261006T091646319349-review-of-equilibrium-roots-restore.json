@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest's baseline_suite and after_suite arms are empty, so its own record carried no measured pair; the reviewer took both arms. In scratch trees materialized from the two revisions, tests/discovery at base 5e0d75eb5 reads 1166 passed ... EXIT=0 and at the reviewed head b951e16db reads 1171 passed ... EXIT=0, with no FAILED ids on either side. Head-minus-base added failures = 0 with no ids.",
+  "base_log_revision": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "base_log_revision_arm": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/cli/discover/paths.py:247",
+    "imas_codex/cli/discover/code.py:200",
+    "imas_codex/cli/discover/documents.py:138",
+    "imas_codex/cli/discover/wiki.py:358",
+    "imas_codex/cli/discover/signals.py:227"
+  ],
+  "completed_at": "2026-10-06T09:55:03.954Z",
+  "dispatched_at": "2026-10-06T09:16:55Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-roots-restore.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's tests_discovery.log header names revision 61b5141b3, whose reset.py is the superseded first attempt (source_statuses=[discovered, triaged, scored]), not the reviewed head b951e16db. The head's reset.py therefore ran under no full-suite gate in the run's own evidence; the reviewer supplied that arm (head 1171 passed, base 1166 passed, 0 added failures). A run whose final commit changes the core module should re-run its gate at that head."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-roots-restore.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the run manifest's baseline_suite and after_suite arms are empty, so the run's own record carries no measured added-failure pair and the reviewer had to derive it by running both arms. Recording the two arm-suite fields would let the promotion audit read added failures without a second measurement."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-roots-restore.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the '0 jt-60sa rows outside the three trees changed status' claim is supported by before/after snapshots under /tmp/eqroots, which are node-local scratch and invisible to a later reader from login. The fragment names the count but no durable log; a saved diff under the run directory would let the claim be rechecked."
+    }
+  ],
+  "head_log_revision": "b951e16db0bdbfc89e2387f40de50549363ff157",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "reset_to_status has five production callers (paths.py:247, code.py:200, documents.py:138, wiki.py:358, signals.py:227); only the paths caller reads PATH_RESET_SPECS and can pass the filtered scanned spec, and the other spec families set no source_filter, so the new OR branch renders for none of them.",
+    "diff": "reset.py gains an optional source_filter on ResetSpec (default None) and reset_to_status ORs it into the status predicate: WHERE (n.status IN $source_statuses OR (<source_filter>)); the scanned PATH_RESET_SPECS entry carries the predicate n.status = 'discovered' AND n.triage_composite IS NOT NULL. test_reset.py gains five tests pinning the spec, the rendered predicate, the exclusion of a null-triage discovered row, and the bare-predicate case for a spec with no filter.",
+    "done_when": "the three roots are scored, the bounded reset admits a discovered row that carries a triage score and leaves a never-scanned one untouched, and a second scoped --root seed leaves the roots scored at $0. All present: reset_to_status over PATH_RESET_SPECS['scanned'] scoped to the three roots; both directions pinned in tests; run 2's create-only seed left the roots scored with unchanged scores.",
+    "goal": "SS14's root-restore node brings the three equilibrium tree roots back to scored through the scoped path reset and the paths pipeline, never by writing status by hand, and bounds the scanned reset so it reaches a discovered row only when that row carries a triage score; implemented at b951e16db. Verified against the live graph: all three roots read scored with scores 0.30/0.60/0.75 and triage 0.75/0.70/0.80.",
+    "manifest": "present and self-consistent: status complete, commits fb6736d0e/61b5141b3/b951e16db, changed_paths matching the diff, gate logs named, and the negative-control note naming the checked mutation. Its baseline_suite and after_suite arms are empty, so the run's own record carries no measured added-failure pair.",
+    "write_paths": "the diff 5e0d75eb5..b951e16db touches exactly three paths - imas_codex/discovery/base/reset.py, tests/discovery/test_reset.py and the evidence fragment - all within the declared scope; the granted figures directory is untouched and the reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "source_filter defaults to None, so every spec that does not set it renders the bare status predicate unchanged; only the scanned path spec opts in, leaving the other reset callers unaffected. The bound is general - the 42 stranded discovered-with-triage rows at JET (21), ITER (18) and TCV (3) become reachable again - and both directions are pinned. A live-graph check confirms the create-only seed leaves existing rows scored, which the seed fix's tests prove only against a model of the database.",
+    "evidence": "independently reproduced: the declared mutation (the scanned spec's source_filter removed) fails exactly three tests - test_path_scanned_reset_admits_only_stranded_discovered_rows, test_scanned_reset_renders_the_stranded_row_predicate and test_scanned_reset_excludes_never_scanned_discovered_rows - 3 failed, 24 passed, EXIT=1; with the predicate in place the same file is 27 passed. I ran the tests/discovery gate myself in scratch trees at both revisions - base 1166 passed, head 1171 passed, EXIT=0 - giving an added-failure pair the reviewed manifest did not record. Deductions: the run's own full-suite gate log header names revision 61b5141b3, whose reset.py is the superseded first attempt, so the head's reset.py was covered only by test_reset.py in the run's own logs; and the outside-tree claim rests on node-local /tmp/eqroots snapshots that are not durable.",
+    "fit": "three conventional commits, each with a body stating what changed and why; no AI attribution and no plan, sprint or ticket identifier or phase name in subjects, bodies, symbol names, filenames or comments; source_filter names the mechanism rather than the plan item.",
+    "goal_fidelity": "every clause of the node's goal holds and the live graph reproduces the headline exactly (three roots scored at 0.30/0.60/0.75, triage 0.75/0.70/0.80). One deduction: SS14 names the mechanism as a default extra_filter appended beside any caller's filter, but an appended filter is ANDed and cannot widen a status match, so the head adds a new source_filter field ORed into the status predicate instead. The goal is not changed by that; the exact SPEC differs.",
+    "reuse": "the change extends the existing reset path rather than adding a query builder, and reuses reset_to_status's existing predicate assembly; deduction only because SS14 asked to keep one predicate mechanism and the head adds a second (the new field plus the OR branch) - justified, since an ANDed extra_filter cannot express the widening, but it does grow the surface.",
+    "scope_discipline": "the diff is confined to exactly three declared paths, deletes nothing, and the reviewed worktree is clean; no write a reader cannot account for."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: SS14's root-restore node brings the three equilibrium tree roots back to scored through the scoped path reset and the paths pipeline, never by writing status by hand, and bounds the scanned reset so it reaches a discovered row only when that row carries a triage score; implemented at b951e16db. Verified against the live graph: all three roots read scored with scores 0.30/0.60/0.75 and triage 0.75/0.70/0.80.\nVERDICT done_when: the three roots are scored, the bounded reset admits a discovered row that carries a triage score and leaves a never-scanned one untouched, and a second scoped --root seed leaves the roots scored at $0. All present: reset_to_status over PATH_RESET_SPECS['scanned'] scoped to the three roots; both directions pinned in tests; run 2's create-only seed left the roots scored with unchanged scores.\nVERDICT write_paths: the diff 5e0d75eb5..b951e16db touches exactly three paths - imas_codex/discovery/base/reset.py, tests/discovery/test_reset.py and the evidence fragment - all within the declared scope; the granted figures directory is untouched and the reviewed worktree is clean.\nVERDICT manifest: present and self-consistent: status complete, commits fb6736d0e/61b5141b3/b951e16db, changed_paths matching the diff, gate logs named, and the negative-control note naming the checked mutation. Its baseline_suite and after_suite arms are empty, so the run's own record carries no measured added-failure pair.\nVERDICT diff: reset.py gains an optional source_filter on ResetSpec (default None) and reset_to_status ORs it into the status predicate: WHERE (n.status IN $source_statuses OR (<source_filter>)); the scanned PATH_RESET_SPECS entry carries the predicate n.status = 'discovered' AND n.triage_composite IS NOT NULL. test_reset.py gains five tests pinning the spec, the rendered predicate, the exclusion of a null-triage discovered row, and the bare-predicate case for a spec with no filter.\nVERDICT call_sites: reset_to_status has five production callers (paths.py:247, code.py:200, documents.py:138, wiki.py:358, signals.py:227); only the paths caller reads PATH_RESET_SPECS and can pass the filtered scanned spec, and the other spec families set no source_filter, so the new OR branch renders for none of them.\nCALL_SITES: imas_codex/cli/discover/paths.py:247, imas_codex/cli/discover/code.py:200, imas_codex/cli/discover/documents.py:138, imas_codex/cli/discover/wiki.py:358, imas_codex/cli/discover/signals.py:227\nSCORE goal_fidelity: 18\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 20\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: every clause of the node's goal holds and the live graph reproduces the headline exactly (three roots scored at 0.30/0.60/0.75, triage 0.75/0.70/0.80). One deduction: SS14 names the mechanism as a default extra_filter appended beside any caller's filter, but an appended filter is ANDed and cannot widen a status match, so the head adds a new source_filter field ORed into the status predicate instead. The goal is not changed by that; the exact SPEC differs.\nJUSTIFICATION evidence: independently reproduced: the declared mutation (the scanned spec's source_filter removed) fails exactly three tests - test_path_scanned_reset_admits_only_stranded_discovered_rows, test_scanned_reset_renders_the_stranded_row_predicate and test_scanned_reset_excludes_never_scanned_discovered_rows - 3 failed, 24 passed, EXIT=1; with the predicate in place the same file is 27 passed. I ran the tests/discovery gate myself in scratch trees at both revisions - base 1166 passed, head 1171 passed, EXIT=0 - giving an added-failure pair the reviewed manifest did not record. Deductions: the run's own full-suite gate log header names revision 61b5141b3, whose reset.py is the superseded first attempt, so the head's reset.py was covered only by test_reset.py in the run's own logs; and the outside-tree claim rests on node-local /tmp/eqroots snapshots that are not durable.\nJUSTIFICATION scope_discipline: the diff is confined to exactly three declared paths, deletes nothing, and the reviewed worktree is clean; no write a reader cannot account for.\nJUSTIFICATION durability: source_filter defaults to None, so every spec that does not set it renders the bare status predicate unchanged; only the scanned path spec opts in, leaving the other reset callers unaffected. The bound is general - the 42 stranded discovered-with-triage rows at JET (21), ITER (18) and TCV (3) become reachable again - and both directions are pinned. A live-graph check confirms the create-only seed leaves existing rows scored, which the seed fix's tests prove only against a model of the database.\nJUSTIFICATION fit: three conventional commits, each with a body stating what changed and why; no AI attribution and no plan, sprint or ticket identifier or phase name in subjects, bodies, symbol names, filenames or comments; source_filter names the mechanism rather than the plan item.\nJUSTIFICATION reuse: the change extends the existing reset path rather than adding a query builder, and reuses reset_to_status's existing predicate assembly; deduction only because SS14 asked to keep one predicate mechanism and the head adds a second (the new field plus the OR branch) - justified, since an ANDed extra_filter cannot express the widening, but it does grow the surface.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-roots-restore.html:0 follow-on: the reviewed run's tests_discovery.log header names revision 61b5141b3, whose reset.py is the superseded first attempt (source_statuses=[discovered, triaged, scored]), not the reviewed head b951e16db. The head's reset.py therefore ran under no full-suite gate in the run's own evidence; the reviewer supplied that arm (head 1171 passed, base 1166 passed, 0 added failures). A run whose final commit changes the core module should re-run its gate at that head.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-roots-restore.html:0 follow-on: the run manifest's baseline_suite and after_suite arms are empty, so the run's own record carries no measured added-failure pair and the reviewer had to derive it by running both arms. Recording the two arm-suite fields would let the promotion audit read added failures without a second measurement.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/equilibrium-roots-restore.html:0 follow-on: the '0 jt-60sa rows outside the three trees changed status' claim is supported by before/after snapshots under /tmp/eqroots, which are node-local scratch and invisible to a later reader from login. The fragment names the count but no durable log; a saved diff under the run directory would let the claim be rechecked.\nreviewed_base_sha: 5e0d75eb5c267885cac96fb14469125d94860b7d\nreviewed_head_sha: b951e16db0bdbfc89e2387f40de50549363ff157\n",
+  "review_run_id": "r-20261006T091646319349-review-of-equilibrium-roots-restore",
+  "reviewed_base": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "reviewed_base_sha": "5e0d75eb5c267885cac96fb14469125d94860b7d",
+  "reviewed_commit": "b951e16db0bdbfc89e2387f40de50549363ff157",
+  "reviewed_head_sha": "b951e16db0bdbfc89e2387f40de50549363ff157",
+  "reviewed_run_id": "r-20261006T081710136614-equilibrium-roots-restore",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:37:32.951483+00:00",
+  "total": 111
+}

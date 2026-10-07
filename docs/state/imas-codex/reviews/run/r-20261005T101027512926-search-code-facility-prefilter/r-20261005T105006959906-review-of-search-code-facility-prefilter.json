@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: baseline_suite at 65c01fbbdcebcfc2caceccb9794c2d9aafd247ee (base-gate.log, EXIT=0, completed, 663 passed, 10 skipped, 0 failures) and after_suite at 36ddec3e863a1bee7f500338dcd153bcab934e62 (head-gate.log, EXIT=0, completed, 678 passed, 10 skipped, 0 failures). Neither log carries a FAILED or ERROR line, so added_failure_count=0 and added_failure_ids=[].",
+  "backend": "local",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:1543 (_vector_search_code_chunks reached by _search_code and the MCP search_code tool at imas_codex/llm/server.py:1703)",
+    "imas_codex/graph/client.py:398 (GraphClient.ensure_vector_indexes reached from graph construction and imas_codex/graph/build_dd.py:3185)"
+  ],
+  "completed_at": "2026-10-05T10:57:20.945Z",
+  "dispatched_at": "2026-10-05T10:50:11Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "415",
+      "severity": "follow-on",
+      "text": "follow-on: EXPECTED_VECTOR_INDEX_FILTERS is read from the gitignored generated schema_context_data, and its ImportError fallback is an empty map, so on a checkout whose generated module predates the vector_index_filters annotation the expected property set is the embedding alone; ensure_vector_indexes then drops the correctly-registered live index and recreates it without the WITH clause, after which the always-rendered in-SEARCH predicate fails to plan. Regenerating via `uv run build-models --force` after merge closes it, and it is recorded at docs/evidence/fragments/jt60sa-discovery-completion/search-code-facility-prefilter.html#search-code-facility-prefilter-followon."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read 65c01fbbd..36ddec3e8 commit by commit (single commit 36ddec3e8); it adds prefilter_clauses to build_vector_search, a vector_index_filters schema annotation emitted by the generator into VECTOR_INDEX_FILTERS, and ensure_vector_indexes reconciliation against the live property set.",
+    "done_when": "each clause has an artifact: tests/llm/test_search_tools.py:824 pins the predicate inside SEARCH end to end; tests/graph/test_vector_search.py:106 pins the builder ordering; tests/graph/test_schema_context.py:199/212/248 pin the facility filter annotation, the unchanged 3-tuple vector_indexes and 2-tuple generated VECTOR_INDEXES, the DDL WITH clause and the recreation on a filter mismatch; head-gate.log records 678 passed, 10 skipped, EXIT=0.",
+    "goal": "the node goal is that search_code selects vector candidates inside the facility through a filter property registered on the code-chunk index so a small facility's chunks survive the ANN cut; imas_codex/llm/search_tools.py:1523 pushes `cc.facility_id = $facility` into prefilter_clauses and imas_codex/graph/vector_search.py:70 renders it as a WHERE between FOR and LIMIT inside SEARCH.",
+    "manifest": "read; status complete, baseline_suite (65c01fbbd, EXIT=0, 663 passed) and after_suite (36ddec3e8, EXIT=0, 678 passed) name run-dir logs, and negative_control_log names a red run.",
+    "write_paths": "read the manifest's eleven declared paths and the diff; every changed path (imas_codex/schemas/facility.yaml, imas_codex/graph/schema.py, scripts/gen_schema_context.py, imas_codex/graph/client.py, imas_codex/graph/vector_search.py, imas_codex/llm/search_tools.py, the three test files, the evidence fragment and the figure) lies inside them."
+  },
+  "justifications": {
+    "durability": "negative-control.log reds tests/llm/test_search_tools.py:838 when the predicate is moved back outside SEARCH, and tests/graph/test_schema_context.py:224 asserts against the literal `WITH [n.facility_id]` and the drop name; docked because no test pins the 'signal search unchanged' clause beyond the diff not reaching it.",
+    "evidence": "head-gate.log records 678 passed, 10 skipped, EXIT=0 against base-gate.log's 663 passed at 65c01fbbd, and negative-control.log is red at EXIT=1; docked because the head log carries no revision/tree/command header while the base log does, so its provenance rests on the new test names it lists rather than on its own first lines.",
+    "fit": "the change extends build_vector_search and ensure_vector_indexes in place, commit 36ddec3e8 carries a conventional subject and a body, and the new _slot_annotation helper at imas_codex/graph/schema.py:210 follows the file's existing local-import idiom; no forbidden name appears.",
+    "goal_fidelity": "imas_codex/llm/search_tools.py:1523 renders `cc.facility_id = $facility` inside SEARCH through imas_codex/graph/vector_search.py:70, and live-selene-query.log shows _search_code's own output returning three /analysis/src/SAselene_v2.0_forPSRC/eqequb.f chunks in the top ten at default k.",
+    "reuse": "it extends the single owner of SEARCH-clause construction (imas_codex/graph/vector_search.py:16) and the single owner of index creation (imas_codex/graph/client.py:89) and forks no capability; a search over imas_codex/graph and imas_codex/llm found no second facility-prefilter or filter-registration mechanism.",
+    "scope_discipline": "git diff 65c01fbbd..36ddec3e8 touches exactly the eleven declared paths and nothing outside them."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 65c01fbbdcebcfc2caceccb9794c2d9aafd247ee\nreviewed_head_sha: 36ddec3e863a1bee7f500338dcd153bcab934e62\nVERDICT goal: the node goal is that search_code selects vector candidates inside the facility through a filter property registered on the code-chunk index so a small facility's chunks survive the ANN cut; imas_codex/llm/search_tools.py:1523 pushes `cc.facility_id = $facility` into prefilter_clauses and imas_codex/graph/vector_search.py:70 renders it as a WHERE between FOR and LIMIT inside SEARCH.\nVERDICT done_when: each clause has an artifact: tests/llm/test_search_tools.py:824 pins the predicate inside SEARCH end to end; tests/graph/test_vector_search.py:106 pins the builder ordering; tests/graph/test_schema_context.py:199/212/248 pin the facility filter annotation, the unchanged 3-tuple vector_indexes and 2-tuple generated VECTOR_INDEXES, the DDL WITH clause and the recreation on a filter mismatch; head-gate.log records 678 passed, 10 skipped, EXIT=0.\nVERDICT write_paths: read the manifest's eleven declared paths and the diff; every changed path (imas_codex/schemas/facility.yaml, imas_codex/graph/schema.py, scripts/gen_schema_context.py, imas_codex/graph/client.py, imas_codex/graph/vector_search.py, imas_codex/llm/search_tools.py, the three test files, the evidence fragment and the figure) lies inside them.\nVERDICT manifest: read; status complete, baseline_suite (65c01fbbd, EXIT=0, 663 passed) and after_suite (36ddec3e8, EXIT=0, 678 passed) name run-dir logs, and negative_control_log names a red run.\nVERDICT diff: read 65c01fbbd..36ddec3e8 commit by commit (single commit 36ddec3e8); it adds prefilter_clauses to build_vector_search, a vector_index_filters schema annotation emitted by the generator into VECTOR_INDEX_FILTERS, and ensure_vector_indexes reconciliation against the live property set.\nCALL_SITES: imas_codex/llm/search_tools.py:1543 (_vector_search_code_chunks reached by _search_code and the MCP search_code tool at imas_codex/llm/server.py:1703), imas_codex/graph/client.py:398 (GraphClient.ensure_vector_indexes reached from graph construction and imas_codex/graph/build_dd.py:3185)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/llm/search_tools.py:1523 renders `cc.facility_id = $facility` inside SEARCH through imas_codex/graph/vector_search.py:70, and live-selene-query.log shows _search_code's own output returning three /analysis/src/SAselene_v2.0_forPSRC/eqequb.f chunks in the top ten at default k.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-gate.log records 678 passed, 10 skipped, EXIT=0 against base-gate.log's 663 passed at 65c01fbbd, and negative-control.log is red at EXIT=1; docked because the head log carries no revision/tree/command header while the base log does, so its provenance rests on the new test names it lists rather than on its own first lines.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 65c01fbbd..36ddec3e8 touches exactly the eleven declared paths and nothing outside them.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control.log reds tests/llm/test_search_tools.py:838 when the predicate is moved back outside SEARCH, and tests/graph/test_schema_context.py:224 asserts against the literal `WITH [n.facility_id]` and the drop name; docked because no test pins the 'signal search unchanged' clause beyond the diff not reaching it.\nSCORE fit: 19\nJUSTIFICATION fit: the change extends build_vector_search and ensure_vector_indexes in place, commit 36ddec3e8 carries a conventional subject and a body, and the new _slot_annotation helper at imas_codex/graph/schema.py:210 follows the file's existing local-import idiom; no forbidden name appears.\nSCORE reuse: 20\nJUSTIFICATION reuse: it extends the single owner of SEARCH-clause construction (imas_codex/graph/vector_search.py:16) and the single owner of index creation (imas_codex/graph/client.py:89) and forks no capability; a search over imas_codex/graph and imas_codex/llm found no second facility-prefilter or filter-registration mechanism.\nFINDING imas_codex/graph/client.py:415 follow-on: EXPECTED_VECTOR_INDEX_FILTERS is read from the gitignored generated schema_context_data, and its ImportError fallback is an empty map, so on a checkout whose generated module predates the vector_index_filters annotation the expected property set is the embedding alone; ensure_vector_indexes then drops the correctly-registered live index and recreates it without the WITH clause, after which the always-rendered in-SEARCH predicate fails to plan. Regenerating via `uv run build-models --force` after merge closes it, and it is recorded at docs/evidence/fragments/jt60sa-discovery-completion/search-code-facility-prefilter.html#search-code-facility-prefilter-followon.",
+  "review_run_id": "r-20261005T105006959906-review-of-search-code-facility-prefilter",
+  "reviewed_base_sha": "65c01fbbdcebcfc2caceccb9794c2d9aafd247ee",
+  "reviewed_head_sha": "36ddec3e863a1bee7f500338dcd153bcab934e62",
+  "reviewed_run_id": "r-20261005T101027512926-search-code-facility-prefilter",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T10:56:26.665877+00:00",
+  "total": 116,
+  "verdict": "SOUND WITH FINDINGS"
+}

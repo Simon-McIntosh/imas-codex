@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: baseline_suite at f7eb40d7607e4b98a4a54eb67b7535f7cf6486fb (gate-baseline.log, EXIT=0, completed, 273 passed, 1 skipped, 0 failures) and after_suite at ae7c70ad5f8f7839a3d70013a3b29b6bad1282b7 (gate-after.log, EXIT=0, completed, 276 passed, 1 skipped, 0 failures). Neither log carries a FAILED or ERROR line, so added_failure_count=0 and added_failure_ids=[].",
+  "backend": "local",
+  "base_log_revision": "f7eb40d7607e4b98a4a54eb67b7535f7cf6486fb",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/settings.py:1042 (get_graph_profile, reached by get_graph_uri from GraphClient construction)",
+    "imas_codex/graph/client.py:100 (_resolve_graph_uri via get_graph_uri)",
+    "imas_codex/graph/neo4j_ops.py:131 (service start/stop)",
+    "imas_codex/graph/health.py:54 (health check)",
+    "imas_codex/graph/profiles.py:563 (get_graph_status)"
+  ],
+  "completed_at": "2026-10-05T10:27:45.447Z",
+  "dispatched_at": "2026-10-05T10:16:53Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/profiles.py",
+      "line": "421",
+      "severity": "follow-on",
+      "text": "follow-on: the `except Exception` around the port convention in the NEO4J_URI early return falls back to `_get_all_offsets().get(location, 0)` (profiles.py:422), which does not reproduce `get_port_offset`'s mapping of a compute location to its parent facility's offset (imas_codex/remote/locations.py:165 uses `info.facility`). For a compute location (get_graph_location's own docstring gives \"titan\") whose facility config is unreadable, the fallback ports are the base ports rather than the parent facility's offset slots, and the bare `except Exception` also masks any non-location error raised by the port helpers. Non-blocking: it is the degenerate unreadable-location path the early return exists to survive, NEO4J_URI names the endpoint outright, the covered ports serve service management rather than the connection, and the done-when is met."
+    }
+  ],
+  "head_log_revision": "ae7c70ad5f8f7839a3d70013a3b29b6bad1282b7",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read f7eb40d76..ae7c70ad5 commit by commit (three commits): c9d8b28db hoists the env-URI branch ahead of resolve_location into an early return; 3e35c4422 replaces the hardcoded base ports with the location convention plus a locations-list fallback so an offset location keeps its slots; ae7c70ad5 records the evidence fragment and its widened gate.",
+    "done_when": "each clause of the done-when has its own artifact: tests/graph/test_client_address_resolution.py:107 pins resolve_location to raise under NEO4J_URI and asserts GraphClient().uri == EXPLICIT_URI (module constant at line 30); tests/graph/test_client_address_resolution.py:183 keeps the no-override raise; gate-after.log records 276 passed, 1 skipped, EXIT=0.",
+    "goal": "plan \u00a711 asks that resolve_neo4j apply NEO4J_URI before it reads the location; imas_codex/graph/profiles.py:417 now returns a Neo4jProfile carrying the env URI before resolve_location is imported or called, and profiles.py:419-424 keep the location's port convention, so the escape hatch is applied before anything is read.",
+    "manifest": "read; status complete, baseline_suite (f7eb40d76, EXIT=0, completed, 0 failures) and after_suite (ae7c70ad5, EXIT=0, completed, 0 failures) carry run-dir log paths, negative_control_log is present and red, and the orientation_write_paths no longer declare the non-existent tests/graph/test_profiles.py the prior review flagged.",
+    "write_paths": "read the manifest's four declared paths; the diff touches three of them (imas_codex/graph/profiles.py, tests/graph/test_client_address_resolution.py, docs/evidence/fragments/jt60sa-discovery-completion/neo4j-uri-before-location.html) and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_client_address_resolution.py:107/129/146 each name a condition under which they redden \u2014 moving the env check back after resolve_location, and hardcoding the base ports or dropping the locations-list fallback \u2014 and compare against independent literals (EXPLICIT_URI, bolt 7688, http 7475) rather than a value handed to the code under test; negative-control.log reds the ordering case at EXIT=1, and the two port cases are the reading-verified guards for the prior review's port-offset finding.",
+    "evidence": "gate-after.log carries rev ae7c70ad5 and records 276 passed, 1 skipped, 6 deselected, EXIT=0 against gate-baseline.log's 273 passed at f7eb40d76, negative-control.log is red with EXIT=1 at the new ordering case, and both arms are readable with a summary line, so each done-when clause has a recorded, not merely claimed, artifact.",
+    "fit": "the early return at imas_codex/graph/profiles.py:417 reuses the module's own Neo4jProfile, BOLT_BASE_PORT/HTTP_BASE_PORT and ACTIVE_LINK idioms, ruff check is clean on both changed Python files, and both fix commits carry a conventional subject and a body; docked for the bare `except Exception` at profiles.py:421 and for the \u00a7-section reference carried into docs/evidence/fragments/jt60sa-discovery-completion/neo4j-uri-before-location.html:11 rather than stated by mechanism.",
+    "goal_fidelity": "imas_codex/graph/profiles.py:417-431 returns the env URI before any location read and derives the ports through _convention_bolt_port/_convention_http_port with a file-free fallback, so it closes both the ordering defect \u00a711 names and the port-offset residue the prior review recorded, and the no-override raise at profiles.py:409-411 is untouched.",
+    "reuse": "the change extends the single owner of profile resolution, imas_codex/graph/profiles.py:resolve_neo4j, reuses the existing _convention_bolt_port/_convention_http_port/_get_all_offsets helpers and forks no capability; a search over imas_codex/graph and imas_codex/remote/locations found no second owner of the NEO4J_URI precedence or the port offset.",
+    "scope_discipline": "git diff f7eb40d76..ae7c70ad5 touches only imas_codex/graph/profiles.py, tests/graph/test_client_address_resolution.py and the declared evidence fragment, and the docstring rewrites in tests/graph/test_client_address_resolution.py:53-104 are confined to the lines the ordering change invalidated."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: f7eb40d7607e4b98a4a54eb67b7535f7cf6486fb\nreviewed_head_sha: ae7c70ad5f8f7839a3d70013a3b29b6bad1282b7\nVERDICT goal: plan \u00a711 asks that resolve_neo4j apply NEO4J_URI before it reads the location; imas_codex/graph/profiles.py:417 now returns a Neo4jProfile carrying the env URI before resolve_location is imported or called, and profiles.py:419-424 keep the location's port convention, so the escape hatch is applied before anything is read.\nVERDICT done_when: each clause of the done-when has its own artifact: tests/graph/test_client_address_resolution.py:107 pins resolve_location to raise under NEO4J_URI and asserts GraphClient().uri == EXPLICIT_URI (module constant at line 30); tests/graph/test_client_address_resolution.py:183 keeps the no-override raise; gate-after.log records 276 passed, 1 skipped, EXIT=0.\nVERDICT write_paths: read the manifest's four declared paths; the diff touches three of them (imas_codex/graph/profiles.py, tests/graph/test_client_address_resolution.py, docs/evidence/fragments/jt60sa-discovery-completion/neo4j-uri-before-location.html) and nothing outside them.\nVERDICT manifest: read; status complete, baseline_suite (f7eb40d76, EXIT=0, completed, 0 failures) and after_suite (ae7c70ad5, EXIT=0, completed, 0 failures) carry run-dir log paths, negative_control_log is present and red, and the orientation_write_paths no longer declare the non-existent tests/graph/test_profiles.py the prior review flagged.\nVERDICT diff: read f7eb40d76..ae7c70ad5 commit by commit (three commits): c9d8b28db hoists the env-URI branch ahead of resolve_location into an early return; 3e35c4422 replaces the hardcoded base ports with the location convention plus a locations-list fallback so an offset location keeps its slots; ae7c70ad5 records the evidence fragment and its widened gate.\nCALL_SITES: imas_codex/settings.py:1042 (get_graph_profile, reached by get_graph_uri from GraphClient construction), imas_codex/graph/client.py:100 (_resolve_graph_uri via get_graph_uri), imas_codex/graph/neo4j_ops.py:131 (service start/stop), imas_codex/graph/health.py:54 (health check), imas_codex/graph/profiles.py:563 (get_graph_status)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/graph/profiles.py:417-431 returns the env URI before any location read and derives the ports through _convention_bolt_port/_convention_http_port with a file-free fallback, so it closes both the ordering defect \u00a711 names and the port-offset residue the prior review recorded, and the no-override raise at profiles.py:409-411 is untouched.\nSCORE evidence: 20\nJUSTIFICATION evidence: gate-after.log carries rev ae7c70ad5 and records 276 passed, 1 skipped, 6 deselected, EXIT=0 against gate-baseline.log's 273 passed at f7eb40d76, negative-control.log is red with EXIT=1 at the new ordering case, and both arms are readable with a summary line, so each done-when clause has a recorded, not merely claimed, artifact.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f7eb40d76..ae7c70ad5 touches only imas_codex/graph/profiles.py, tests/graph/test_client_address_resolution.py and the declared evidence fragment, and the docstring rewrites in tests/graph/test_client_address_resolution.py:53-104 are confined to the lines the ordering change invalidated.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_client_address_resolution.py:107/129/146 each name a condition under which they redden \u2014 moving the env check back after resolve_location, and hardcoding the base ports or dropping the locations-list fallback \u2014 and compare against independent literals (EXPLICIT_URI, bolt 7688, http 7475) rather than a value handed to the code under test; negative-control.log reds the ordering case at EXIT=1, and the two port cases are the reading-verified guards for the prior review's port-offset finding.\nSCORE fit: 18\nJUSTIFICATION fit: the early return at imas_codex/graph/profiles.py:417 reuses the module's own Neo4jProfile, BOLT_BASE_PORT/HTTP_BASE_PORT and ACTIVE_LINK idioms, ruff check is clean on both changed Python files, and both fix commits carry a conventional subject and a body; docked for the bare `except Exception` at profiles.py:421 and for the \u00a7-section reference carried into docs/evidence/fragments/jt60sa-discovery-completion/neo4j-uri-before-location.html:11 rather than stated by mechanism.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the single owner of profile resolution, imas_codex/graph/profiles.py:resolve_neo4j, reuses the existing _convention_bolt_port/_convention_http_port/_get_all_offsets helpers and forks no capability; a search over imas_codex/graph and imas_codex/remote/locations found no second owner of the NEO4J_URI precedence or the port offset.\nFINDING imas_codex/graph/profiles.py:421 follow-on: the `except Exception` around the port convention in the NEO4J_URI early return falls back to `_get_all_offsets().get(location, 0)` (profiles.py:422), which does not reproduce `get_port_offset`'s mapping of a compute location to its parent facility's offset (imas_codex/remote/locations.py:165 uses `info.facility`). For a compute location (get_graph_location's own docstring gives \"titan\") whose facility config is unreadable, the fallback ports are the base ports rather than the parent facility's offset slots, and the bare `except Exception` also masks any non-location error raised by the port helpers. Non-blocking: it is the degenerate unreadable-location path the early return exists to survive, NEO4J_URI names the endpoint outright, and the done-when is met.",
+  "review_run_id": "r-20261005T101616617453-review-of-neo4j-uri-before-location",
+  "reviewed_base_sha": "f7eb40d7607e4b98a4a54eb67b7535f7cf6486fb",
+  "reviewed_head_sha": "ae7c70ad5f8f7839a3d70013a3b29b6bad1282b7",
+  "reviewed_run_id": "r-20261005T094926627029-neo4j-uri-before-location",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T10:22:00+00:00",
+  "total": 117,
+  "verdict": "SOUND WITH FINDINGS"
+}

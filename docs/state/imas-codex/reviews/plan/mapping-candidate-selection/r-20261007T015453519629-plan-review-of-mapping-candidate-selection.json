@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T02:01:56.072Z",
+  "dispatched_at": "2026-10-07T01:55:04Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/mapping.py",
+      "id": "thin_wrapper-1",
+      "reason": "the author should either drop the new helper and read the ordered edges at the one call site, or extend candidates.py's owner; the text currently claims a shared cut that the persisted edges already provide.",
+      "text": "the plan adds escalated_shortlist as \"the one cut of a source's shortlist plus its \u00a711 siblings\", but the cut already exists: candidates.py's route materialises shortlist = tuple(ordered[: limits.shortlist_size]) into Route.shortlist (imas_codex/ids/candidates.py:478,499), and \u00a711 landed the widened set with each candidate's Jev rank and its cluster-sibling provenance persisted on the MAPPING_CANDIDATE edge itself (rank, arms = 'cluster'; described at imas_codex/graph/models.py:14562). After \u00a78 the map stage reads those edges through read_candidates (already Jev-ordered, imas_codex/ids/graph_ops.py:576), so \"top N plus \u00a711 siblings\" is a filter over output the stage already holds. The plan neither extends the candidates.py owner nor states why reading the ordered edges directly cannot serve the prompt, which risks a second shortlist-cut implementation drifting from the discover-stage one.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/graph_ops.py:608",
+      "id": "duplicate_owner-1",
+      "reason": "the plan already names this residual, states why the Cypher expression cannot call Python, and adds an agreement test over every returned edge, so it has accounted for the duplicate rather than leaving it undiscovered.",
+      "text": "the plan states \"One owner for a path's section\" and places section_of in imas_codex/core/paths.py to merge three copies, but read_candidates computes the same rule independently in Cypher as parts[0] + '/' + parts[1] (imas_codex/ids/graph_ops.py:608) and the plan keeps it, defending the residual only with a test that asserts agreement with section_of; a rule with two owners is the exact defect this item names, and the Cypher owner is not extendable from Python, so the two can diverge silently between the guard and the reader.",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "690fe20fde83e754a6a1eb3996a2df3a11a8cd25f3ab2ee40fc428ab364ed69e",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 80,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "finding": "thin_wrapper-1",
+      "reason": "The two cuts serve different inputs and rules, not one rule twice. route cuts in-memory PairJudgments at the candidate stage, top map-shortlist-size of every judgment, to decide whether a source escalates. escalated_shortlist cuts the persisted MAPPING_CANDIDATE edges for the reasoning prompt and keeps every cluster-arm sibling even beyond the top N, so cross-IDS homes reach the model. Both order by the same persisted Jev rank and read the same map-shortlist-size setting, so their order and size cannot drift; reading the ordered edges directly at the call site would just inline the sibling rule at two call sites (prompt and worker) instead of one helper.",
+      "when": "2026-10-07T02:02:33.857447+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "Already accounted for in the section text: the Cypher expression in read_candidates cannot call Python, so it stays, and a test asserts it agrees with section_of on every returned edge; the reviewer marks this as not changing the plan.",
+      "when": "2026-10-07T02:02:35.625335+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "reason": "Already accounted for in the section text: the Cypher expression in read_candidates cannot call Python, so it stays, and a test asserts it agrees with section_of on every returned edge; the reviewer marks this as not changing the plan.",
+      "when": "2026-10-07T02:02:35.625335+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "reason": "The two cuts serve different inputs and rules, not one rule twice. route cuts in-memory PairJudgments at the candidate stage, top map-shortlist-size of every judgment, to decide whether a source escalates. escalated_shortlist cuts the persisted MAPPING_CANDIDATE edges for the reasoning prompt and keeps every cluster-arm sibling even beyond the top N, so cross-IDS homes reach the model. Both order by the same persisted Jev rank and read the same map-shortlist-size setting, so their order and size cannot drift; reading the ordered edges directly at the call site would just inline the sibling rule at two call sites (prompt and worker) instead of one helper.",
+      "when": "2026-10-07T02:02:33.857447+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v80.json",
+  "review_run_id": "r-20261007T015453519629-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "f8c48d6dc19142e5362e6746393810d003661fb4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the candidate capability is hidden behind small interfaces: candidates.py exposes retrieve_candidates/route_ids/judge_candidates/route/expand_cluster_siblings (imas_codex/ids/candidates.py:132,318,391,453,514) behind four typed results, and graph_ops.py owns the candidate edge store behind write_candidates/read_candidates/select_candidates/clear_candidates (imas_codex/ids/graph_ops.py:485,576,636,823).",
+    "duplicate_owner": "a finding \u2014 the plan declares \"One owner for a path's section\" but leaves a second owner of the identical rule in the Cypher of read_candidates beside the new paths.py section_of.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 accounts for its surface in its own text, naming seven added definitions (read_candidates, select_candidates, TargetChoice, TargetChoiceBatch, escalated_shortlist, choose_targets/achoose_targets, section_of). It names the retirements that offset them \u2014 count_sources_by_mapping_status, the workers.py copy of count_candidates_by_route, assign_targets/aassign_targets, generate_mapping, claim_sources_for_assignment, ids/graph_ops.py's create_signal_source, the --skip-metadata and --skip-errors options, and the three retired SignalSource fields \u2014 and states the net (\"seven added and four removed\", \"raise the count by three\").",
+    "reuse_search": "pass \u2014 the plan cites and extends existing machinery at every stage: hybrid_dd_search and related_dd_search for retrieval (\u00a73/\u00a74, imas_codex/graph/dd_search.py), the shared decisions layer call_decisions/acall_decisions with a model parameter (gate g-mcs-1, imas_codex/discovery/base/llm.py:3435), claims.py's generalised claim_batch (imas_codex/discovery/base/claims.py:259), PipelineCost for spend (\u00a710), the existing TargetType enum (imas_codex/ids/models.py:44), and normalize_imas_path as the home for section_of (imas_codex/core/paths.py:57).",
+    "thin_wrapper": "a finding \u2014 the plan adds escalated_shortlist (mapping stage) without saying why the already-persisted, Jev-ordered candidate edges cannot be read directly instead of re-cutting the shortlist in a new helper."
+  },
+  "section_digests": {
+    "_document": "97288df4cb4c01be01f0a14a899c374f216a0d76dce137a4eaa93147f473c515",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "49fe6b47dc67cb4a5a3a7a08b070a40a4ba1149a112d708ca012d446f48a932c",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "abeeef2f343f2e14ff39cdd1865e169b22977fb729580f6247a499a10767b3d0",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T02:02:31.883654+00:00"
+}

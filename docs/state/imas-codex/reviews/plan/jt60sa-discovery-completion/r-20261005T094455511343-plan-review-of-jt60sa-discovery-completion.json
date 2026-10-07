@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T09:48:27.303Z",
+  "dispatched_at": "2026-10-05T09:44:59Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/search_tools.py:1516",
+      "id": "reuse_search-1",
+      "reason": "the author must decide between registering facility_id as an additional vector index property (a schema/index change in `graph/schema.py`, heavier than the \"no new parameter\" query tweak \u00a712 implies) or over-fetching k, and as written the node would land a post-filter that reproduces the exact defect it set out to fix.",
+      "text": "\u00a712 proposes to \"restrict the neighbour search to that facility's chunks (the same shape the signal search already uses when it scopes by facility)\", but `_vector_search_signals` (search_tools.py:470) passes the facility to `build_vector_search` as a `where_clauses` post-filter, identical to the code path \u00a712 describes as broken; `imas_codex/graph/vector_search.py:8` documents that in-index (candidate-selection) pre-filtering requires the property to be registered as an additional vector index property, and `imas_codex/graph/schema.py:211` derives only three-element (name, label, property) indexes with no filter properties, so the plan's done-when (\"a facility-scoped vector query carries the facility predicate inside the candidate selection\") cannot be met by the change \u00a712 describes, and the plan names neither the index owner nor the mechanism to register facility_id.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/remote/python.py:266",
+      "id": "reuse_search-2",
+      "reason": "the node's design and its counting test must account for the discover preflight caller, or the pass-down change leaves a live duplicate probe the section claims to have removed.",
+      "text": "\u00a79 asserts \"`check_all_tools` keeps the probe and is the only caller of `probe_remote_environment`\", but the probe has a third caller at `imas_codex/cli/discover/common.py:461` (`require_remote_environment`, the discover preflight), so the caller enumeration the refactor rests on is incomplete; a worker implementing the node would leave that caller probing independently while the two others are unified, and the \u00a79 done-when (\"a test counts calls to `probe_remote_environment`\") reads against a caller set the plan misstates.",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c1cbbecf053812864339a79ffc5d97b91ca88a71910c8fac6832b2f07a206752",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 58,
+  "project": "imas-codex",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T09:49:24.890118+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T09:49:25.346918+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T094455511343-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "c6da9f883800482732b39e310a16108792df8467",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the remaining sections extend existing deep modules (`imas_codex/llm/search_tools.py` query builders, `imas_codex/graph/profiles.py::resolve_neo4j`, `imas_codex/discovery/signals/parallel.py`) and \u00a79 consolidates the DataAccess writer behind one function rather than spreading wrappers over the same machinery.",
+    "duplicate_owner": "pass \u2014 \u00a79 removes a duplicate DataAccess writer, \u00a711/\u00a712/\u00a713 modify their existing owners (`profiles.resolve_neo4j`, `_vector_search_code_chunks`, `_text_search_wiki_chunks`), and \u00a714 reuses the existing `discover paths -r` scoping option (`imas_codex/cli/discover/paths.py:20`) rather than a new pipeline.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a712 states zero new surface and \u00a72's typed slots landed with the prototype keyword parking they retire, so no implementable section adds unaccounted surface to any of the four families.",
+    "reuse_search": "a finding \u2014 \u00a712 cites `_vector_search_signals` as the prior art for facility-scoped candidate selection, but that function post-filters facility exactly as the code path \u00a712 claims to differ from, so the search did not surface how candidate-level facility restriction is actually achieved.",
+    "thin_wrapper": "pass \u2014 no implementable section adds a forwarding layer over existing machinery without justification: \u00a711 is a reorder inside its owner, \u00a712 and \u00a713 are query-parameter changes, not parallel wrappers."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T09:48:42.554712+00:00"
+}

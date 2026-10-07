@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T03:07:21.494Z",
+  "dispatched_at": "2026-10-07T03:00:47Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/cli/discover/sequence.py:1 (\u00a74, docs/plans/facility-discovery-sequence.html#s4)",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a74 should invoke `imas map run FACILITY` once and let \u00a78's landed target selection iterate, instead of forking per-IDS enumeration into sequence.py.",
+      "text": "the `mapping` stage re-derives the facility's IDS targets itself (\"run imas map run for each IDS that holds a selected or escalated candidate edge \u2026 read through the candidate reader\") when `imas map run FACILITY` already enumerates targets through `discover_mappable_ids` (imas_codex/ids/tools.py:376, called at imas_codex/cli/map.py:211) and mapping-candidate-selection \u00a78 has `imas map run` itself consume the candidate edges (selected/escalated/no_candidate); a second target-selection path will drift from that owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/sequence.py:1 (\u00a72, docs/plans/facility-discovery-sequence.html#s2)",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a72 should extend `ServiceMonitor`'s checks (or reuse `ssh_health_check`/`wiki_auth_check` rather than a fresh probe set) and derive the registry's domain list from `DISCOVERY_DOMAINS`, so one owner holds facility access and one holds the domain set.",
+      "text": "the plan builds a new access-probe orchestration over `check_ssh_connection`/`probe_remote_environment` and a new domain enumeration alongside two existing owners: (a) the facility-access probe owner `create_service_monitor` (imas_codex/discovery/base/services.py:1117) / `ServiceMonitor` (imas_codex/discovery/base/services.py:830), with `neo4j_health_check` (imas_codex/discovery/base/services.py:159), `ssh_health_check` (imas_codex/discovery/base/services.py:178) and `wiki_auth_check` (imas_codex/discovery/base/services.py:200), reached by every discover command through `create_discovery_monitor` (imas_codex/cli/discover/common.py:502); and (b) `DISCOVERY_DOMAINS` (imas_codex/cli/discover/common.py:30), the existing ordered domain enumeration that `domain_option` (imas_codex/cli/discover/common.py:427) already validates against",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/sequence.py:1 (\u00a72, docs/plans/facility-discovery-sequence.html#s2)",
+      "id": "reuse_search-1",
+      "reason": "the registry should name each stage's predicate as its existing `has_pending_*` owner (or add one where none exists) rather than implying a new predicate per stage, which is a census that decides where the skip reason comes from.",
+      "text": "\u00a72 says each stage records \"the predicate that says whether it has work\" without citing any owner, but those pending-work predicates already exist per domain and are the only thing that can make \"skipped: nothing to do\" true or false: imas_codex/discovery/paths/parallel.py:198 `has_pending_work`; imas_codex/discovery/signals/parallel.py:549 `has_pending_work`, :556 `has_pending_enrich_work`, :587 `has_pending_check_work`; imas_codex/discovery/code/graph_ops.py:579 `has_pending_scan_work`, :627 `has_pending_score_work`, :655 `has_pending_triage_work`, :682 `has_pending_enrich_work`, :717 `has_pending_code_work`; imas_codex/ids/workers.py:386 `has_pending_mapping_work`, :395 `has_pending_validation_work`, :404 `has_pending_candidate_work`",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "55cc714e5df9a29dacf816f50e47bb69784aa8d27b9bb39160f4620c8c604a62",
+  "plan_slug": "facility-discovery-sequence",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T03:07:58.635868+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-07T03:08:00.778493+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T03:08:02.212672+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:07:58.635868+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:08:00.778493+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:08:02.212672+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-facility-discovery-sequence.v2.json",
+  "review_run_id": "r-20261007T030037139934-plan-review-of-facility-discovery-sequence",
+  "reviewed_blob_sha": "a157bd4544b5b170138c207058bbbe9b6102dff2",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one module (`sequence.py`) holds the ordered registry, the run loop, the probe delegation and the report table behind a single small surface, rather than spreading the same behaviour over many wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan re-implements two shared mechanisms: IDS-target selection (\u00a74 re-derives which IDS hold candidates beside `discover_mappable_ids`) and facility-access probing (\u00a72 builds a parallel probe orchestration beside the `ServiceMonitor` every discover command already uses).",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 names the one CLI entry it adds and, in its own text, states that it retires none and why the per-domain commands must stay (they carry stage-specific options), which is the \"why nothing can be\" account the item requires.",
+    "reuse_search": "a finding \u2014 the plan cites some prior art (`run_discovery`, `check_ssh_connection`, `probe_remote_environment`, `verify_tunnel`/`is_tunnel_active`) but omits the existing access-probe owner `ServiceMonitor`/`create_service_monitor` and every existing pending-work predicate (`has_pending_*`), which \u00a72's \"skipped: nothing to do\" outcome must rest on.",
+    "thin_wrapper": "pass \u2014 the runner is a thin loop over the existing click commands, and \u00a73 states the justification the item asks for: `ctx.invoke` is the only path that reuses each stage whole \"without refactoring seven commands or starting subprocesses\"."
+  },
+  "section_digests": {
+    "_document": "c3bb9efb02d3880d6d7dd862cd495fb5b00fcb9706f602659d21b862ef161b62",
+    "s1": "3992671283458b0f4b8b18b7b0aed3eeb299da5f7c62dba76e5df85f856f9819",
+    "s2": "68620e18577d2a7dcc38d6e62d6b249c3f81f34e46f6867a330d57f8cdc31d90",
+    "s3": "ef96624cfe65d4ab04c57076d74dc4c3c71fa1a60cac251743b1ba3f6479de85",
+    "s4": "85bbd67c09d6443c6423b52718f80b15a434daa3aa580dddc233f9abd7b717d5",
+    "s5": "35854a905209a1dcd19601ea1a80cc5bb1f8dce9ff6b03379aec21d9ea74ccdd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:07:55.482224+00:00"
+}

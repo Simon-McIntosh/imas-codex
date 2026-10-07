@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T06:37:23.118Z",
+  "dispatched_at": "2026-10-05T06:33:15Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/remote/environment.py:59",
+      "id": "reuse_search-1",
+      "reason": "\u00a76 must shrink to its two genuinely open items (extending `get_python_status`/`check_all_tools` to run under the block and report the floor, and retiring `data_access_patterns.setup_commands`) rather than re-propose a block and resolver the branch already carries, or the first \u00a76 node will rebuild landed code.",
+      "text": "\u00a76 describes \"two homes\" for the remote recipe and proposes giving it \"one home, a facility-level `remote_environment` block\" with \"one resolver\", but that exact machinery is already on this branch: `resolve_remote_environment` and the `RemoteEnvironment`/`RequiredModule` dataclasses are in `imas_codex/remote/environment.py` (commit 8f50f6642, an ancestor of HEAD 67af8f835), the schema block is at `imas_codex/schemas/facility_config.yaml:313` with `min_python_version` (378) and `required_modules` (383), the block is populated in `imas_codex/config/facilities/jt-60sa.yaml:25`, `iter.yaml:49` and `tcv.yaml:23`, and it is already consumed by `imas_codex/remote/tools.py:193` (`run_script`) and `imas_codex/discovery/signals/parallel.py:75` (`_facility_scanner_config`), whose docstring states the block-override precedence verbatim",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/remote/tools.py:193",
+      "id": "duplicate_owner-1",
+      "reason": "naming `tools.py` as the resolver home invites a second merge path beside `remote/environment.py`, which is the placement duplication the rubric names; the plan should extend `remote/environment.py` and keep `tools.py` as a consumer.",
+      "text": "the plan says \"One resolver in the facility-aware layer (`imas_codex/remote/tools.py`, which already resolves `ssh_host` and the nice level from facility config) merges the block\", but `remote/tools.py` does not own resolution and must not: it imports `resolve_remote_environment` from `imas_codex/remote/environment.py:59` and passes the result down as executor parameters, and the signals pipeline reaches the same resolver through `parallel.py:75`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c8386c1b60374248ccec5ac75465eb10995e1380f49a3ae92dd018c15af16f1f",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 15,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:38:59.174318+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:38:58.133201+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T063311377935-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "b832be98b2bbdbbcc30e669d688682501ffa91f0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72 and \u00a74 put new behaviour behind existing single entry points (the scanner config, the document pipeline), and \u00a73 reuses the existing `WikiChunk-[:DOCUMENTS]->FacilitySignal` edge (written at `imas_codex/discovery/wiki/pipeline.py:319`, read at `imas_codex/llm/search_tools.py:547` and `:818`) rather than a second edge.",
+    "duplicate_owner": "a finding \u2014 the plan names `imas_codex/remote/tools.py` as the resolver's home, but the resolver already lives in `imas_codex/remote/environment.py` and `tools.py` only consumes it, so placing new resolution logic in `tools.py` would fork the owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 names its one addition (`fronts_database`) and states in-text that it retires nothing and why, \u00a76 names `data_access_patterns.setup_commands` as the thing it retires and states no CLI command is added, and \u00a72's three FacilitySignal slots are accounted for in its locked decision (they replace the keywords stopgap).",
+    "reuse_search": "a finding \u2014 \u00a76 proposes a facility-level `remote_environment` block and a resolver as if new, but both already exist on this branch (`imas_codex/remote/environment.py::resolve_remote_environment`, consumed by `imas_codex/remote/tools.py` and `imas_codex/discovery/signals/parallel.py`), so the section's central search is against a state the code has already moved past.",
+    "thin_wrapper": "pass \u2014 \u00a73 and \u00a76 each extend an existing owner (the wiki scorer and the remote-environment resolver/probe) with a stated reason, and \u00a76 explicitly adds no new CLI command."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:38:12.245160+00:00"
+}

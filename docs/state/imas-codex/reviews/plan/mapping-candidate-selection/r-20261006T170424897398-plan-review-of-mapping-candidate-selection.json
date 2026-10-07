@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T17:08:28.536Z",
+  "dispatched_at": "2026-10-06T17:04:30Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/grouping.py:92",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's own \"does not add a third copy\" intent is defeated if the consolidation lands beside the shared owner rather than inside it, and the author should place the routine in `discovery/base/` or justify why the base owner cannot serve SignalSource.",
+      "text": "\u00a77 (\"claim_sources_for_assignment\" and \"claim_sources_for_mapping\" `workers.py:136,199` become one claim routine; `release_mapping_claim`/`release_mapping_claims_batch` `workers.py:274,287` become one release routine; the three `has_pending_*` checks `workers.py:303,329,343` become one pending check) is a census: every one of those seven helpers restates a claim/release/pending pattern the shared discovery layer already owns, via `claim_signal_sources` in `imas_codex/discovery/base/grouping.py:92` and `release_claim`/`release_claims_batch`/`reset_stale_claims`/`retry_on_deadlock` in `imas_codex/discovery/base/claims.py`; the generalised routine belongs in the base owner (parameterised by status predicate, claim property names and returned fields, as \u00a77 itself describes) so the other six claim families in `discovery/{paths,code,wiki,signals,mdsplus}` can converge on it, not in a fourth local variant in `ids/workers.py`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "plan#s6",
+      "id": "interface_budget-1",
+      "reason": "with the week's counts at 0/0/0/0 the section must, in its own text, account for the schema and public-definition surface it introduces, or state why none can be merged.",
+      "text": "\u00a76 adds a `MAPPING_CANDIDATE` relationship, `candidate_status`/`candidate_route`/`candidate_claimed_at`/`candidate_claim_token`/`candidate_judged_at`/`candidate_model` on SignalSource, and the public functions `write_candidates` and `clear_candidates` in `imas_codex/ids/graph_ops.py`, and unlike \u00a74 (which names the construction it moves and deletes), \u00a75 (which states it retires nothing and why) and \u00a77 (which names seven helpers collapsing to three and two `imas map run` options retiring in \u00a78), it names neither what in these families it retires or merges nor why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "489058cc96de29d1396f8e4b4426e40032a84772638371d8f246e4e19386d04e",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T17:10:29.203820+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-06T17:10:31.409499+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T17:10:29.203820+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T17:10:31.409499+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v4.json",
+  "review_run_id": "r-20261006T170424897398-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "eae38c61ac809dbf4f6eda56c5d11d38855c0d07",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a74/\u00a75 place retrieval, pair judgment and routing behind one module, `imas_codex/ids/candidates.py`, with `retrieve_candidates`, `judge_candidates` and `route` hiding the shortlist, the LLM call and the threshold logic; \u00a77 consolidates seven claim helpers into three rather than adding a fourth.",
+    "duplicate_owner": "a finding \u2014 \u00a77 generalises the SignalSource claim pattern inside `imas_codex/ids/workers.py:136,199,274,287,303,329,343`, but that pattern is already owned by the shared discovery layer (`imas_codex/discovery/base/grouping.py:92 claim_signal_sources`; `imas_codex/discovery/base/claims.py` `retry_on_deadlock`, `release_claim`, `release_claims_batch`, `reset_stale_claims`), which the plan does not extend or name.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 adds a schema relationship, six SignalSource fields and two public functions without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 \u00a74 re-points the shortlist construction at `hybrid_dd_search` (`imas_codex/graph/dd_search.py:97`), `cluster_search` (`dd_search.py:869`, which does support the path-lookup branch `ClusterSearcher.search_by_path` relied on today), `analyze_units` (`imas_codex/ids/tools.py:168`) and `fetch_cross_facility_mappings` (`tools.py:733`), and \u00a75 reuses the \u00a725 decisions layer rather than writing a client.",
+    "thin_wrapper": "pass \u2014 the new `candidates.py` is a *move* of the construction already at `imas_codex/ids/mapping.py:781\u2013820` into a shared owner that `gather_ids_context` then calls, and \u00a74 states why the maintained search owners cannot be widened (`hybrid_dd_search` signature frozen) instead of forking them."
+  },
+  "section_digests": {
+    "_document": "fe693026503f9013804697728088f9f292dafe5bcdcd0bedf13da88a2ec84229",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "ec13a0282b939de0be8d24d37a9ff728acf742492fae13fd7ee25a9cb1420f62",
+    "s3": "8b16ee78437e3754f16f3a871dcf816381cdc1370707ca2e5ab5dc487636b3ad",
+    "s4": "1731b64073c60517007879863e318e9f1d47a607814e118e62b442a0678038e5",
+    "s5": "b39ebcbff71ed4d97b6edcbfe4add80ab8983164853fb355a8832cccadd3e23f",
+    "s6": "833b69d48bb37ccb6eac3c5f9065133b6e57b5fd31604a2b524b970c83340b8b",
+    "s7": "60ea3b12e62826141bfeb0cf329ea66e8a3df72d2909b179072c419e517b2d0c",
+    "s8": "1a8df02546802f3be70dc2be41678af1e1b281bf3fa76ef6cfc41cb8305a8596",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T17:10:27.161076+00:00"
+}

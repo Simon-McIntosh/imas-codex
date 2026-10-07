@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T07:38:17.845Z",
+  "dispatched_at": "2026-10-05T07:34:10Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/remote/locations.py:206",
+      "id": "deep_module-1",
+      "reason": "the plan must name the owner's host-returning interface (e.g. discovery returns a host, `resolve_service_url` layers the URL on top), or the consolidation is under-specified and the embed path cannot call the owner as written.",
+      "text": "\u00a78 makes `resolve_service_url` the single owner, but its result is a URL (`http://node:port`) while `get_embed_host()` at settings.py:670 must return a bare hostname; the plan says \"the embed host helpers call it\" without naming a host-shaped entry point, so either the owner must expose a host accessor beneath the URL constructor or `get_embed_host` must parse the URL it is handed \u2014 neither is stated, and a URL-parsing wrapper is exactly the thin layer \u00a78 exists to remove",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/scanners/edas.py:179",
+      "id": "duplicate_owner-1",
+      "reason": "naming `scanners/edas.py` (and its `remote/scripts/enumerate_edas.py` remote script) as the owner of the PID enumeration removes the ambiguity and prevents a second EDAS writer from appearing in \u00a73.",
+      "text": "\u00a73(c) enumerates the PID-keyed one-point/condition data as \"its own FacilitySignal group\" but does not name where that enumeration lives; `scanners/edas.py` is the existing EDAS owner and already writes `pid=raw.get(\"udp_id\")` (line 201) and the `eddbreadOne` accessor (line 179), so a PID enumeration placed outside it would fork the EDAS signal writer the \u00a72 scan just consolidated",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3864c5eff485d6fede693e65daa188d2b0c0fd7f6a18bcb0ebfa91dbea642bf1",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 35,
+  "project": "imas-codex",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:39:06.860637+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:39:07.568583+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T073407049546-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "9a5fe6aedde4f4aa496ab2e0f15b39efda90a3b1",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a78 names `resolve_service_url` the one owner of SLURM discovery, but the owner returns a URL while `get_embed_host()` (settings.py:670) needs a bare host, so the interface the plan hands the embed path is the wrong shape for one of its named consumers.",
+    "duplicate_owner": "a finding \u2014 \u00a73(c) routes the PID-keyed one-point enumeration into a new FacilitySignal group but does not name the owner, and `scanners/edas.py` (the EDAS scanner that already writes `pid` at line 201) is the existing owner that enumeration should extend.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the two sections that add to a family state their accounting in their own text (\u00a72 retires the prototype `class:`/`shots:`/`udpid:` keyword parking for its typed slots and `SignalDataClass` enum; \u00a73 states `fronts_database` retires nothing because no existing WikiPage property records the database a rendered page is backed by), and no section adds a CLI option or MCP view.",
+    "reuse_search": "pass \u2014 the plan cites the mechanisms it extends (the facility-agnostic `scanners/base.py` registry for \u00a72, `link_chunks_to_entities` for \u00a73) and its \u00a78 inventory of five SLURM-discovery copies was verified in the code: `resolve_service_url` (locations.py:206), `_embed_host_from_facility` (settings.py:686), `_resolve_url_for_compute` rewrite (readiness.py:69), `_resolve_uri_uncached` (profiles.py:286, whose docstring falsely claims to delegate), and `_slurm_service_uri` (client.py:92).",
+    "thin_wrapper": "pass \u2014 no section adds a layer over existing machinery without justification; \u00a73 extends the existing `DOCUMENTS` writer and the wiki scorer rather than adding a second edge-writer, and \u00a79 removes surface (two probes become one, three DataAccess writes become one) rather than adding it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:38:37.943532+00:00"
+}

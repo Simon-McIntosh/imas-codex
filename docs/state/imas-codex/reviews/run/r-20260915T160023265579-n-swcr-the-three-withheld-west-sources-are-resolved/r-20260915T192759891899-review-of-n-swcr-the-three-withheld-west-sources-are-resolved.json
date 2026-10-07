@@ -1,0 +1,48 @@
+{
+  "absent": [],
+  "backend": "codex",
+  "completed_at": "",
+  "dispatched_at": "2026-09-15T19:27:59.891899+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md",
+      "line": "43",
+      "text": "the quoted source-liveness receipt reports one global edge, projection and cache drop but names neither the calorimetry source nor the responsible run; the surrounding before/after evidence makes the attribution plausible, but the receipt itself does not independently identify which source was detached."
+    },
+    {
+      "file": "manifest.md",
+      "line": "11",
+      "text": "no automated regression test or recurring exact-source gate was armed, so a later loss of the accepted attachment or weakening of either refusal would not fail a durable check; the committed evidence preserves what happened but does not enforce that the live state remains true."
+    },
+    {
+      "file": "manifest.md",
+      "line": "10",
+      "text": "the causal source-liveness log is referenced at a shared mutable application-log path without a retained copy or digest, which weakens later independent reproduction of the edge-loss diagnosis after that log rotates or changes."
+    }
+  ],
+  "justifications": {
+    "durability": "manifest.md:11-12 explicitly leaves both suites unarmed, while the committed evidence and change-ledger identity preserve a strong historical record but supply no test that fails if the exact live attachment or refusal predicates regress.",
+    "evidence": "manifest.md:9 and docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md:13-147 record 3/3 before rows, both real guard refusals, the governed attachment, and an exact postflight, although the calorimetry detachment attribution rests on an aggregate reconcile receipt.",
+    "fit": "docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md:149-162 uses the repository's governed attach command, bounded graph reads, dry-run refusals, project-absolute evidence links, and no ad-hoc mutation or forbidden source naming.",
+    "goal_fidelity": "docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md:13-17 gives every requested source a final disposition and lines 57-147 prove one accepted validation-valid binding plus two source-specific exclusions as the goal permits.",
+    "scope_discipline": "manifest.md:3 and the c5821adac..dd30581b4 diff agree exactly on the three declared documentation paths, with no product, test, generated, or unrelated file in either commit."
+  },
+  "model": "gpt-5.6-sol",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md:13-17 gives every requested source a final disposition and lines 57-147 prove one accepted validation-valid binding plus two source-specific exclusions as the goal permits.\nSCORE evidence: 17\nJUSTIFICATION evidence: manifest.md:9 and docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md:13-147 record 3/3 before rows, both real guard refusals, the governed attachment, and an exact postflight, although the calorimetry detachment attribution rests on an aggregate reconcile receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: manifest.md:3 and the c5821adac..dd30581b4 diff agree exactly on the three declared documentation paths, with no product, test, generated, or unrelated file in either commit.\nSCORE durability: 8\nJUSTIFICATION durability: manifest.md:11-12 explicitly leaves both suites unarmed, while the committed evidence and change-ledger identity preserve a strong historical record but supply no test that fails if the exact live attachment or refusal predicates regress.\nSCORE fit: 20\nJUSTIFICATION fit: docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md:149-162 uses the repository's governed attach command, bounded graph reads, dry-run refusals, project-absolute evidence links, and no ad-hoc mutation or forbidden source naming.\nFINDING docs/evidence/sn-west-catalog-release/the-three-withheld-sources.md:43 the quoted source-liveness receipt reports one global edge, projection and cache drop but names neither the calorimetry source nor the responsible run; the surrounding before/after evidence makes the attribution plausible, but the receipt itself does not independently identify which source was detached.\nFINDING manifest.md:11 no automated regression test or recurring exact-source gate was armed, so a later loss of the accepted attachment or weakening of either refusal would not fail a durable check; the committed evidence preserves what happened but does not enforce that the live state remains true.\nFINDING manifest.md:10 the causal source-liveness log is referenced at a shared mutable application-log path without a retained copy or digest, which weakens later independent reproduction of the edge-loss diagnosis after that log rotates or changes.",
+  "review_run_id": "r-20260915T192759891899-review-of-n-swcr-the-three-withheld-west-sources-are-resolved",
+  "reviewed_base": "c5821adac71aa830370bf55c7b9867be8af6e828",
+  "reviewed_commit": "dd30581b46a513ba96cc8e1d5e8474730bc411c0",
+  "reviewed_run_id": "r-20260915T160023265579-n-swcr-the-three-withheld-west-sources-are-resolved",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-15T19:32:44Z",
+  "total": 85
+}

@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own suites and independently reproduced. baseline_suite (base-arm.log, revision 8736d628d, EXIT=0, completed true, failure_count 0) and after_suite (gate.log, revision d3643e2d, EXIT=0, completed true, failure_count 0). This review re-ran the head arm in a scratch tree (head-arm-repro.log, 132 passed, EXIT=0). Zero failures in both arms bounds added failures at 0; added_failure_ids empty.",
+  "backend": "local",
+  "base_log_revision": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/remote/tools.py:703 (check_all_tools)",
+    "imas_codex/cli/discover/common.py:461 (ensure_remote_environment)",
+    "imas_codex/cli/tools.py:108 (tools status)",
+    "imas_codex/remote/python.py:492 (create_venv)",
+    "imas_codex/remote/python.py:619 (setup_python_env)",
+    "imas_codex/discovery/signals/parallel.py:2556 and :2598 (seed_worker)"
+  ],
+  "completed_at": "2026-10-05T12:25:12.106Z",
+  "dispatched_at": "2026-10-05T12:16:43Z",
+  "findings": [
+    {
+      "file": "imas_codex/remote/python.py",
+      "line": "670",
+      "severity": "follow-on",
+      "text": "follow-on: setup_python_env probes the remote environment at python.py:618 then calls create_venv (python.py:670) without threading that environment down, so create_venv probes again at python.py:491 \u2014 an `imas-codex tools install <facility>` invocation opens the probe twice, contradicting \u00a79's stated \"one probe per CLI invocation\" and the commit's \"keeping one probe per invocation\"; create_venv should accept and reuse the resolved environment."
+    },
+    {
+      "file": "docs/plans/jt60sa-discovery-completion.html",
+      "line": "200",
+      "severity": "follow-on",
+      "text": "follow-on: \u00a79's done-when still reads \"a test asserts the MDSplus branch produces ScanResult.data_access\", but that branch builds no ScanResult; the landed test asserts routing through persist_data_access, so the wording is unmeetable as written."
+    }
+  ],
+  "head_log_revision": "d3643e2db7036d94baadf3fd42d598f316fcbd9c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read 8736d628d..d3643e2d commit by commit; 90cfdb5a extracts persist_data_access and reroutes both branches plus the one-probe wiring, and d3643e2d restores floor judgement to create_venv/setup_python_env, adds the below-floor refusal and the source-scan test.",
+    "done_when": "every done-when item is met and recorded \u2014 the two probe-count tests pass (1 call each), the single-MERGE grep holds, test_data_access_written_without_signals and test_mdsplus_branch_routes_through_persist_data_access pass, the \u00a77 ordering test passes, and pytest tests/remote tests/cli/test_tools_status_environment.py tests/discovery/test_signals_pipeline.py exits 0 (base 8736d628d 124 passed, head d3643e2d 132 passed, both EXIT=0).",
+    "goal": "\u00a79's two halves both land \u2014 `tools status` opens the remote environment once (check_all_tools probes, cli/tools.py:108 hands the resolved dict to get_python_status) and signals discovery carries one DataAccess MERGE at parallel.py:2403 inside persist_data_access with both the MDSplus and non-MDSplus branches as callers.",
+    "manifest": "read; status complete, baseline_suite (8736d628d, EXIT=0, completed true, 0 failures) and after_suite (d3643e2d, EXIT=0, completed true, 0 failures) both recorded, and negative_control_log/negative_control_note name two red runs.",
+    "write_paths": "the diff touches exactly the seven declared paths; two declared-but-unneeded paths (imas_codex/remote/tools.py, imas_codex/cli/discover/common.py) were correctly left unmodified."
+  },
+  "justifications": {
+    "durability": "the source-scan test at tests/discovery/test_signals_pipeline.py:600 reddens on a planted second MERGE (negative-control-single-writer.log) and the probe-count test at tests/cli/test_tools_status_environment.py:168 reddens on a restored second probe (negative-control.log), but no test pins create_venv's restored floor judgement nor the setup path's probe count.",
+    "evidence": "the gate measures the done-when and its result is recorded \u2014 gate.log/EXIT=0 (132 passed) and base-arm.log/EXIT=0 (124 passed) with failure_count 0 in both manifest suites \u2014 and negative-control.log and negative-control-single-writer.log both show EXIT=1 on tests that pass at head.",
+    "fit": "persist_data_access (parallel.py:2385) is capability-named with a mechanism docstring, and _probe_facility_environment (python.py:156) is a thin helper replacing the duplicated local guard; no plan label or attribution appears.",
+    "goal_fidelity": "\u00a79's two halves land \u2014 cli/tools.py:99-111 opens one probe for tools status and parallel.py:2403 is the one DataAccess MERGE inside persist_data_access (parallel.py:2385) \u2014 docked for the setup path, where setup_python_env probes at python.py:618 and its nested create_venv probes again at python.py:491.",
+    "reuse": "no owner of a probe-or-None local wrapper or of a source-scan helper exists to fork; _probe_facility_environment (python.py:156) and the signal-discovery writer extend their capabilities, and the code/mdsplus DataAccess MERGEs live in other packages outside \u00a79's scope.",
+    "scope_discipline": "the diff 8736d628d..d3643e2d touches exactly the seven declared paths and nothing else, with two declared-but-unneeded paths correctly left unmodified."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a79's two halves both land \u2014 `tools status` opens the remote environment once (check_all_tools probes, cli/tools.py:108 hands the resolved dict to get_python_status) and signals discovery carries one DataAccess MERGE at parallel.py:2403 inside persist_data_access with both the MDSplus and non-MDSplus branches as callers.\nVERDICT done_when: every done-when item is met and recorded \u2014 the two probe-count tests pass (1 call each), the single-MERGE grep holds, test_data_access_written_without_signals and test_mdsplus_branch_routes_through_persist_data_access pass, the \u00a77 ordering test passes, and pytest tests/remote tests/cli/test_tools_status_environment.py tests/discovery/test_signals_pipeline.py exits 0 (base 8736d628d 124 passed, head d3643e2d 132 passed, both EXIT=0).\nVERDICT write_paths: the diff touches exactly the seven declared paths; two declared-but-unneeded paths (imas_codex/remote/tools.py, imas_codex/cli/discover/common.py) were correctly left unmodified.\nVERDICT manifest: read; status complete, baseline_suite (8736d628d, EXIT=0, completed true, 0 failures) and after_suite (d3643e2d, EXIT=0, completed true, 0 failures) both recorded, and negative_control_log/negative_control_note name two red runs.\nVERDICT diff: read 8736d628d..d3643e2d commit by commit; 90cfdb5a extracts persist_data_access and reroutes both branches plus the one-probe wiring, and d3643e2d restores floor judgement to create_venv/setup_python_env, adds the below-floor refusal and the source-scan test.\nCALL_SITES: imas_codex/remote/tools.py:703 (check_all_tools), imas_codex/cli/discover/common.py:461 (ensure_remote_environment), imas_codex/cli/tools.py:108 (tools status), imas_codex/remote/python.py:492 (create_venv), imas_codex/remote/python.py:619 (setup_python_env), imas_codex/discovery/signals/parallel.py:2556 and :2598 (seed_worker)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: \u00a79's two halves land \u2014 cli/tools.py:99-111 opens one probe for tools status and parallel.py:2403 is the one DataAccess MERGE inside persist_data_access (parallel.py:2385) \u2014 docked for the setup path, where setup_python_env probes at python.py:618 and its nested create_venv probes again at python.py:491.\nSCORE evidence: 19\nJUSTIFICATION evidence: the gate measures the done-when and its result is recorded \u2014 gate.log/EXIT=0 (132 passed) and base-arm.log/EXIT=0 (124 passed) with failure_count 0 in both manifest suites \u2014 and negative-control.log and negative-control-single-writer.log both show EXIT=1 on tests that pass at head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff 8736d628d..d3643e2d touches exactly the seven declared paths and nothing else, with two declared-but-unneeded paths correctly left unmodified.\nSCORE durability: 17\nJUSTIFICATION durability: the source-scan test at tests/discovery/test_signals_pipeline.py:600 reddens on a planted second MERGE (negative-control-single-writer.log) and the probe-count test at tests/cli/test_tools_status_environment.py:168 reddens on a restored second probe (negative-control.log), but no test pins create_venv's restored floor judgement nor the setup path's probe count.\nSCORE fit: 19\nJUSTIFICATION fit: persist_data_access (parallel.py:2385) is capability-named with a mechanism docstring, and _probe_facility_environment (python.py:156) is a thin helper replacing the duplicated local guard; no plan label or attribution appears.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner of a probe-or-None local wrapper or of a source-scan helper exists to fork; _probe_facility_environment (python.py:156) and the signal-discovery writer extend their capabilities, and the code/mdsplus DataAccess MERGEs live in other packages outside \u00a79's scope.\nFINDING imas_codex/remote/python.py:670 follow-on: setup_python_env probes the remote environment at python.py:618 then calls create_venv (python.py:670) without threading that environment down, so create_venv probes again at python.py:491 \u2014 an `imas-codex tools install <facility>` invocation opens the probe twice, contradicting \u00a79's stated \"one probe per CLI invocation\" and the commit's \"keeping one probe per invocation\"; create_venv should accept and reuse the resolved environment.\nFINDING docs/plans/jt60sa-discovery-completion.html:200 follow-on: \u00a79's done-when still reads \"a test asserts the MDSplus branch produces ScanResult.data_access\", but that branch builds no ScanResult; the landed test asserts routing through persist_data_access, so the wording is unmeetable as written.\n",
+  "review_run_id": "r-20261005T121628997080-review-of-one-probe-one-writer",
+  "reviewed_base_sha": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "reviewed_head_sha": "d3643e2db7036d94baadf3fd42d598f316fcbd9c",
+  "reviewed_run_id": "r-20261005T112754675095-one-probe-one-writer",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:24:23.078318+00:00",
+  "total": 113,
+  "verdict": "SOUND WITH FINDINGS"
+}

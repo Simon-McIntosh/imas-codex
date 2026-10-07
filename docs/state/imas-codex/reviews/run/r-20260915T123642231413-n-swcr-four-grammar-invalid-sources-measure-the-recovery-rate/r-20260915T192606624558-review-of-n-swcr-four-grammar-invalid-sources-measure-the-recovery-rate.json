@@ -1,0 +1,48 @@
+{
+  "absent": [],
+  "backend": "codex",
+  "completed_at": "",
+  "dispatched_at": "2026-09-15T19:26:06.624558+00:00",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "6",
+      "text": "the recorded commit 46c35918ab49c9a36b7f436f62378c5d81fdc72e does not exist; the source worktree's actual clean head is 46c35918a2b36ad23c7aa8a03db682e08688c396, so a coordinator following the durable receipt cannot resolve or promote the stated commit."
+    },
+    {
+      "file": "manifest.md",
+      "line": "8",
+      "text": "the 1,580.509-second compose gate was launched directly from the login-node worktree rather than through a debug-partition allocation; the retained command contains no srun, so the heavy-gate evidence violates the workstation compute contract and must be re-measured on SLURM before acceptance."
+    },
+    {
+      "file": "docs/evidence/archive/sn-west-catalog-release-landed.html",
+      "line": "537",
+      "text": "no committed regression test or receipt fixture asserts the four selected paths, the 3/4 rate, or the SNRun binding; the recorded audit-doc and marker greps are point-in-time structural checks and would not fail if these scientific facts later drifted."
+    }
+  ],
+  "justifications": {
+    "durability": "manifest.md:6 records a nonexistent commit and the committed evidence at docs/evidence/archive/sn-west-catalog-release-landed.html:537-579 has no regression test binding its four paths, receipt id, or 3/4 result.",
+    "evidence": "manifest.md:8-9 and focused-four-source-sn-run.log retain the exact four-path command, exit 0, completed SNRun receipt, independent 3/4 graph read-back, exact scope and claim cleanup, but the 1,580.509-second gate was run directly on the login node instead of the required debug partition.",
+    "fit": "docs/evidence/archive/sn-west-catalog-release-landed.html:537-579 follows the surrounding evidence idiom with a named anchor, a per-source table, exact receipt fields, and an explicit lifecycle and operational qualifier.",
+    "goal_fidelity": "docs/evidence/archive/sn-west-catalog-release-landed.html:537-579 names exactly four claim-free sources, the bounded names-only compose command, the complete 3/4 result, and every before-and-after lifecycle outcome required by the node goal.",
+    "scope_discipline": "manifest.md:3 and manifest.md:7 agree with the base-to-head diff, which changes only the cumulative evidence HTML and the plan landing record inside the three declared paths."
+  },
+  "model": "gpt-5",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/archive/sn-west-catalog-release-landed.html:537-579 names exactly four claim-free sources, the bounded names-only compose command, the complete 3/4 result, and every before-and-after lifecycle outcome required by the node goal.\nSCORE evidence: 16\nJUSTIFICATION evidence: manifest.md:8-9 and focused-four-source-sn-run.log retain the exact four-path command, exit 0, completed SNRun receipt, independent 3/4 graph read-back, exact scope and claim cleanup, but the 1,580.509-second gate was run directly on the login node instead of the required debug partition.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: manifest.md:3 and manifest.md:7 agree with the base-to-head diff, which changes only the cumulative evidence HTML and the plan landing record inside the three declared paths.\nSCORE durability: 8\nJUSTIFICATION durability: manifest.md:6 records a nonexistent commit and the committed evidence at docs/evidence/archive/sn-west-catalog-release-landed.html:537-579 has no regression test binding its four paths, receipt id, or 3/4 result.\nSCORE fit: 20\nJUSTIFICATION fit: docs/evidence/archive/sn-west-catalog-release-landed.html:537-579 follows the surrounding evidence idiom with a named anchor, a per-source table, exact receipt fields, and an explicit lifecycle and operational qualifier.\nFINDING manifest.md:6 the recorded commit 46c35918ab49c9a36b7f436f62378c5d81fdc72e does not exist; the source worktree's actual clean head is 46c35918a2b36ad23c7aa8a03db682e08688c396, so a coordinator following the durable receipt cannot resolve or promote the stated commit.\nFINDING manifest.md:8 the 1,580.509-second compose gate was launched directly from the login-node worktree rather than through a debug-partition allocation; the retained command contains no srun, so the heavy-gate evidence violates the workstation compute contract and must be re-measured on SLURM before acceptance.\nFINDING docs/evidence/archive/sn-west-catalog-release-landed.html:537 no committed regression test or receipt fixture asserts the four selected paths, the 3/4 rate, or the SNRun binding; the recorded audit-doc and marker greps are point-in-time structural checks and would not fail if these scientific facts later drifted.",
+  "review_run_id": "r-20260915T192606624558-review-of-n-swcr-four-grammar-invalid-sources-measure-the-recovery-rate",
+  "reviewed_base": "6f88d29e31ba07b99906a1860ac17774dcfea0c7",
+  "reviewed_commit": "46c35918a2b36ad23c7aa8a03db682e08688c396",
+  "reviewed_run_id": "r-20260915T123642231413-n-swcr-four-grammar-invalid-sources-measure-the-recovery-rate",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-15T19:30:55Z",
+  "total": 84
+}

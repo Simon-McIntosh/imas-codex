@@ -1,0 +1,91 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:03:50.240Z",
+  "dispatched_at": "2026-10-06T00:58:24Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:333",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite these builders and choose the shared home against them, or state why they are not the same mechanism.",
+      "text": "\u00a714's search omits build_category_predicate(alias) and build_enrich_claimable_predicate(alias), the existing alias-parameterised claim predicates in the discovery layer, so it proposes a new predicate-builder home without citing the family it belongs to",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/query_builder.py:68",
+      "id": "duplicate_owner-1",
+      "reason": "a forked home for a discovery-only predicate splits the alias-parameterised predicate family and should instead extend the discovery-layer builder it most resembles.",
+      "text": "the plan puts render_prefix_clause beside render_chunk_source in the general graph search builder, but render_chunk_source resolves a schema fact while the prefix clause is a discovery scoping concern whose existing owners (build_category_predicate / build_enrich_claimable_predicate) live in the discovery layer",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/reset.py:251",
+      "id": "duplicate_owner-2",
+      "reason": "the fallback as written is a no-op for the excluded case it names; the spec's source_statuses must be widened (or a re-seed path named), or the exclusion branch dropped as inapplicable.",
+      "text": "\u00a714 extends PATH_RESET_SPECS only with expanded_at, but the scanned spec's source_statuses [\"triaged\",\"scored\"] exclude the \"skipped\" rows persist_scan_results writes for excluded directories (frontier.py:2316), so the section's own exclusion fallback (narrow the facility YAML, then --reset-to scanned --root) cannot reprocess an already-excluded tree",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0581e44d34d7b087735e50624d3ed5dd58b6d6066b68ad0804b7d16fb429f785",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 132,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "the only shared layer below discovery that both claim modules and the reset already import is the graph layer, and graph/query_builder.py already owns alias-parameterised Cypher fragments; the signal builders are domain-private, and an earlier review of this section rejected discovery/base/claims.py as a claim-token module.",
+      "when": "2026-10-06T01:05:41.553858+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T01:05:42.499603+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "build_category_predicate and build_enrich_claimable_predicate encode FacilitySignal semantics (SignalSource membership, catalogue categories) and are private to the signals worker module; the path claims, the code-scan claims and the reset cannot import a signals domain module, so they are not a home for a predicate those three share.",
+      "when": "2026-10-06T01:05:40.962213+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T005819475886-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "b7ef9e23aae29e09265aff422769baf19d32204d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a714 hides making a subtree reprocessable behind the existing reset_to_status spec interface (one extra clear field plus a scoped filter) and adds no new module.",
+    "duplicate_owner": "a finding \u2014 the new prefix-clause renderer is placed in graph/query_builder.py while the discovery layer already owns alias-parameterised predicate builders, and the reset spec extension misses the excluded-row statuses its own fallback names.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds one public renderer and states in its own text that the seven inline prefix copies merge into it, adding no CLI option, MCP view or refusal family.",
+    "reuse_search": "a finding \u2014 \u00a714 cites reset.py, the five parallel.py claim sites and the two graph_ops.py sites but never cites build_category_predicate/build_enrich_claimable_predicate, the existing alias-parameterised predicate builders in the discovery layer, so its reuse map omits the closest prior art for the mechanism it adds.",
+    "thin_wrapper": "pass \u2014 the reset scoping extends reset_to_status's existing extra_filter/extra_params rather than wrapping it, and reuses --reset-to/--root with no new CLI option."
+  },
+  "section_digests": {
+    "_document": "dd6e47e1620717054d2f3497567b7ac712d3d026140be21dd9cd35c2cc716744",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "55911055e341d233f19bf3c03f6eb464469c0b174f9c3365d478e29ce49516c2",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:04:05.253348+00:00"
+}

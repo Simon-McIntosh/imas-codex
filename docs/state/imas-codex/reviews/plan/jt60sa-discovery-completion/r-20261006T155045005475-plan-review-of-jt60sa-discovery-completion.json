@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-06T15:50:45.005475+00:00",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/llm.py:1616",
+      "id": "reuse_search-1",
+      "reason": "the plan should name these owners and say whether the new call reuses or extends them instead of leaving a second cost/retry path beside the first.",
+      "text": "\u00a725 places the decisions call layer in the module that already owns cost and retry policy but re-derives both: \"returns the answers and the cost from `usage.cost`\" duplicates `extract_cost` (llm.py:1616), and \"429 and 5xx responses retry with backoff\" duplicates `_is_retryable` (llm.py:1188) and `_is_rate_limited` (llm.py:1215); the guard pattern it cites is reckon's `tests/test_suite_never_calls_live_jev.py` while this repo already has `set_litellm_offline_env` (llm.py:831) and the \u00a723 prompt-schema coverage test (tests/llm/test_prompt_schema_coverage.py) as in-tree precedents",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/code/state.py:29",
+      "id": "duplicate_owner-1",
+      "reason": "the author must name the owner being extended or retired, else two threshold owners coexist for one gate and the default-0.75 path silently outlives its purpose.",
+      "text": "the code triage/ingest gates already have owners (`min_triage_score: float = 0.75` at state.py:29; `get_triage_threshold()` at imas_codex/settings.py:1009, derived from `[tool.imas-codex.discovery].triage-offset`; `get_discovery_threshold()` at settings.py:997), and \u00a725 adds `code-triage-threshold` (0.4) and `code-ingest-threshold` (0.6) in the same `[tool.imas-codex.discovery]` block without naming whether `min_triage_score`, `get_triage_threshold` or `triage-offset` are retired or extended \u2014 the existing triage threshold is read at workers.py:314/349/975, parallel.py:137/174/428, graph_ops.py:403/695 and scorer.py:468-470",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/code/workers.py:235",
+      "id": "duplicate_owner-2",
+      "reason": "without naming the retirement the plan leaves a dead prompt/batch/helpers behind and reddens the prompt-coverage guard the plan itself landed one section earlier.",
+      "text": "\u00a725 \"replaces the code triage stage's LLM call with the names-arm decision\" but names no owner it orphans: the existing triage decision is owned by `get_model(\"discovery-triage\")` + `call_llm_structured` (workers.py:235), the prompt `imas_codex/llm/prompts/code/triage.md`, and `FileTriageBatch`/`_build_triage_system_prompt`/`apply_triage_results` in imas_codex/discovery/code/scorer.py; orphaning `triage.md` also removes a registered prompt that \u00a723's landed guard (tests/llm/test_prompt_schema_coverage.py, landed 5cfab2ce7) asserts is rendered somewhere",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/settings.py:144",
+      "id": "interface_budget-1",
+      "reason": "the section must state what the new seat supersedes or why nothing can, so the seat registry does not grow a second triage-adjacent name with no retirement line.",
+      "text": "\u00a725 adds the seat `discovery-relevance` to the `MODEL_SECTIONS` registry (settings.py:144) with defaults (settings.py:172) and an env var (settings.py:214), a public-interface addition, and neither names a seat it retires or merges nor states why none can be; the existing `discovery-triage` seat (settings.py:144, used at workers.py:235) loses its code-file call to the new seat and is left unaccounted",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "58e3be422261c0ba412c41f51d5f63f9468fb4cbd90e76ac4a32ce35b54b479f",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 231,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T155045005475-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "72ccf0389b6b00705fe74d37e21a0d26244b226f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `call_decisions`/`acall_decisions` hide POST, backoff, answer validation and cost extraction behind two functions and return `(answers, cost)`; that is a small interface over substantial behaviour, not a spread of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a725 adds `code-triage-threshold`/`code-ingest-threshold` and replaces the code-triage LLM call without naming the existing owners of those two decisions (`min_triage_score`/`get_triage_threshold`/`triage-offset`, and `workers.py:235` + `code/triage.md` + `FileTriageBatch`).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 (read 2026-10-06T15:50:45Z); \u00a725 adds a seat to the `MODEL_SECTIONS` registry without naming any seat it retires or merges, or stating why none can be.",
+    "reuse_search": "a finding \u2014 \u00a725 proposes `call_decisions`/`acall_decisions` in `imas_codex/discovery/base/llm.py` and new cost/retry handling beside owners already in that file (`extract_cost`, `_is_retryable`, `_is_rate_limited`, `set_litellm_offline_env`), and cites another repository's live-call guard instead of this repo's own offline mechanism.",
+    "thin_wrapper": "pass \u2014 \u00a725 extends existing call sites (reuses `get_model`, `get_api_key_for_service`, `render_prompt`, and the `facility.data_access_patterns` injection the wiki scorer already uses) rather than interposing a parallel layer over them."
+  },
+  "section_digests": {
+    "_document": "4667c0f839247f9db145897bdbd9716823d2212f97e5ae64f5a1f0b351eb69df",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "ea093845012af148321609dc0ccef4ad78f3fc5209bb8e337d40245f676f6968",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "c014d9c0b2fec663e1f07a721658d81f134c0c13da9253f2574652517102a7d1",
+    "s25": "9519dd07794cd5e4a3a46fb2e387202f7278fc96f3d9c730812c79c1cd05b2f7",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-id",
+  "timestamp": "2026-10-06T16:08:51.682484+00:00"
+}

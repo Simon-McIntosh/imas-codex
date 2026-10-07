@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T23:08:36.629Z",
+  "dispatched_at": "2026-10-06T23:02:16Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:1913",
+      "id": "reuse_search-1",
+      "reason": "the section's premise that the provenance field is pre-existing is false, so \u00a711 must declare a new facility.yaml schema property, extend `_CANDIDATE_EDGE_FIELDS`, add the SET term to `write_candidates`, and change the producer, none of which its text currently names.",
+      "text": "\u00a711 asserts the MAPPING_CANDIDATE edge \"persists that arms list, as the edge's schema description \u2026 already promises its retrieval provenance\", but the declared edge carries only rank, retrieval_score, ids, choice_probability, p_same_quantity, model, judged_at and route (facility.yaml:1909-1920); `_CANDIDATE_EDGE_FIELDS` (imas_codex/ids/graph_ops.py:425-433), the writer's SET list (imas_codex/ids/graph_ops.py:514-524) and the producer `_candidate_records` (imas_codex/ids/workers.py:975-1014) all omit `arms`, and no `arms` property exists on the edge anywhere in the tree \u2014 the only `arms` is the in-memory `Candidate.arms` at imas_codex/ids/candidates.py:78",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-candidate-selection.html#s11",
+      "id": "interface_budget-1",
+      "reason": "the section must name the edge property and the Route field it adds, or state why neither can be avoided, so the added surface is visible against the zero budget instead of hidden behind the margin retirement.",
+      "text": "with the supplied counts all zero, \u00a711 adds interface surface it does not account for: a new `arms` property on the MAPPING_CANDIDATE edge in imas_codex/schemas/facility.yaml and a selected-set field on the public `Route` dataclass (imas_codex/ids/candidates.py:97, currently decision+shortlist only), yet its text claims \"no field is added\" and books only the select_margin retirement (imas_codex/settings.py:1078, pyproject.toml:293) against the arm-vocabulary value",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e881305114f02a860d2e5ae7031f742617b70d7a69c2de38daf2b4e161e4de23",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 65,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T230209820768-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "9163ecbee56479c335950abfd10d737bbd24e2f2",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 candidates.py hides retrieval, IDS routing, pair judgment and the select/escalate/reject decision behind four functions; \u00a78 keeps DD-edge reading/writing in graph_ops.py and the target-type rule a private helper in mapping.py.",
+    "duplicate_owner": "pass \u2014 the plan collapses the live `count_candidates_by_route` duplicate (imas_codex/ids/workers.py:419 and imas_codex/ids/graph_ops.py:653) onto the graph_ops.py owner, and its MAPS_TO_IMAS writer census is complete (graph_ops.py:585 create, :640 delete; no third writer survives at 3a9d6859b).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a711 adds the `arms` edge property and a selected-set field to `Route` while stating \"no field is added\", so the section does not account for the surface it adds.",
+    "reuse_search": "a finding \u2014 \u00a711 justifies a new persistence field with a schema claim that the tree does not support (`arms` on the MAPPING_CANDIDATE edge).",
+    "thin_wrapper": "pass \u2014 every new layer the plan adds names why the existing mechanism cannot absorb it (select_candidates is split from write_candidates because a pick must not disturb the shortlist; the second Jev call is needed because siblings depend on the first call's ranking; the imas_node_embedding arm is removed rather than wrapped)."
+  },
+  "section_digests": {
+    "_document": "97288df4cb4c01be01f0a14a899c374f216a0d76dce137a4eaa93147f473c515",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "c6256e7351174ac3b427ff70c68f8ebf816003125068853620b968f1bd50859a",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "fdfd11260e22e984d3e727a6cf69c35ed389ab1c2cfd22bff8431c15a6527995",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T23:14:07.434223+00:00"
+}

@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T03:16:14.139Z",
+  "dispatched_at": "2026-10-07T03:09:43Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/grouping.py:26",
+      "id": "reuse_search-1",
+      "reason": "a worker following \u00a73 would revive dead code believing it is the sanctioned creation path, instead of extending the function actually doing the work.",
+      "text": "the plan's \u00a73 prior-art claim (\"the existing owner of SignalSource creation, create_signal_source\") is checked by opening the code: `grep -rn create_signal_source` across imas_codex/ and tests/ returns only the definition at grouping.py:26 and the docstring at grouping.py:9 \u2014 no caller. The mechanism the plan cites as existing does not exist in the live call graph",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:1556",
+      "id": "duplicate_owner-1",
+      "reason": "without naming the live owner, the plan forks a fourth path off a shared mechanism whose two existing creators already disagree, and the signal-group path (parallel.py) is the one the singleton work must live beside.",
+      "text": "SignalSource creation for FacilitySignals is owned by detect_signal_sources (parallel.py:1556, invoked at parallel.py:5077 preflight and parallel.py:3643 enrich-loop), which builds the node with its own inline `MERGE (sg:SignalSource {id: $group_id}) ON CREATE SET \u2026` rather than calling create_signal_source; \u00a73 proposes a further singleton path through grouping.py:26, leaving the census of creators at three: detect_signal_sources (parallel.py:1556, live, FacilitySignal), detect_and_create_signal_sources (imas_codex/discovery/mdsplus/graph_ops.py:455, live, inline MERGE at graph_ops.py:556, SignalNode), and create_signal_source (grouping.py:26, dead). The owner \u00a73 must extend is parallel.py:1556",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:1556",
+      "id": "duplicate_owner-2",
+      "reason": "the honest change may be to unify the three creators and extend the existing grouping rather than add a parallel routine, which is exactly the reuse question \u00a73 must answer.",
+      "text": "existing singleton-capable behaviour is not recognised: detect_signal_sources already takes min_instances (parallel.py:1556, default 3) and groups by pattern template, so a signal whose accessor pattern is unique forms a one-member group at min_instances=1; the plan adds a separate \"singleton SignalSource\" routine for enriched standalones without stating why extending this parameterised grouping (or extracting the inline MERGE at parallel.py:1617-1650 into create_signal_source, unifying all three creators) cannot serve",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-imas-maps.html#s3",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the interface surface it adds in its own text, and here that accounting is the same question as the duplicate-owner reconciliation.",
+      "text": "\u00a73 adds a new singleton-source creation definition/path (write paths imas_codex/discovery/base/grouping.py and imas_codex/discovery/signals/parallel.py) with public_definitions at 0 for the week and no sentence naming what it retires or merges, or why nothing can be; the section should state that it extends the existing creator rather than adds one, or name the surface it removes",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "21656aaef03c3a830877791b593fd9e3f8b70c86a0ef5f5839bccfd05181f7ac",
+  "plan_slug": "jt60sa-imas-maps",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T03:17:56.906827+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T03:18:00.751967+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-07T03:18:04.466585+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-07T03:18:08.646099+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:18:00.751967+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:18:04.466585+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:18:08.646099+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T03:17:56.906827+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-imas-maps.v3.json",
+  "review_run_id": "r-20261007T030933213170-plan-review-of-jt60sa-imas-maps",
+  "reviewed_blob_sha": "afda662d67168f85a75cdb015ea081f5b465126d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no new module; \u00a73 extends an existing discovery stage, \u00a74 edits the single unit-alias data file, and \u00a78 extends the existing search_dd_paths tool, so no behaviour is spread across shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan routes its new singleton creation through a dead function while the SignalSource-creation family already carries two live, duplicated inline creators it does not reconcile.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 introduces a new singleton-source creation definition/path without naming in its own text what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a73 cites create_signal_source (imas_codex/discovery/base/grouping.py:26) as \"the existing owner of SignalSource creation\", but that function has no callers anywhere in the repository; the live machinery that creates SignalSource for these signals is detect_signal_sources (imas_codex/discovery/signals/parallel.py:1556), which the plan names only as a write path without identifying it as the owner.",
+    "thin_wrapper": "pass \u2014 no wrapper is proposed; \u00a78 explicitly reuses the search-time rerank owner that discovery-judgments-through-jev \u00a79 lands rather than adding a second rerank, and \u00a74 extends the alias file the registry already loads instead of layering a parser over it."
+  },
+  "section_digests": {
+    "_document": "34a6f4e9e5a87ab03c928a4c6f398704dfdca02e94f03b178043a9eaf675ff20",
+    "s1": "226d78d808808a04d5f33b9c8b9a67053eb401abb1e885cc65a939290365e2d5",
+    "s2": "75668ff463815cc207e25ac27ea9ce7ea5aed158d029ea11a37414d889264046",
+    "s3": "77f84779398286dd3fa546979c44a780c03be2af61a00dd94ec9564345c9e1fe",
+    "s4": "59f66b3e7a8371e080e56ed3b275fb0629cf90f95884509447a9d52948243e57",
+    "s5": "65f58745c4a17441faf6c0957f35bed795691900c1a6c77cd137c57cd4c42e29",
+    "s6": "c8d788838af5f57d060c70a9a1c105fa692a0f4daf01d4b374564068bb4aa11b",
+    "s7": "97fe9c5fca60eacb3cab1a67839b4b5bf6ebeac4dc8b11ba9ef022ff6e064a2a",
+    "s8": "178803b16cc3cdb46dc10052784658b5750a08601b12efaceee738c09a14a451"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:17:54.645903+00:00"
+}

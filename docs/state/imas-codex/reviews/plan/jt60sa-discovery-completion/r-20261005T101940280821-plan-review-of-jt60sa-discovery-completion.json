@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T10:26:57.472Z",
+  "dispatched_at": "2026-10-05T10:20:06Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:2483",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a79 must state the actual route (have the MDSplus branch build a `DataAccess` and call `persist_data_access` directly, or give it a scanner that returns a `ScanResult`), otherwise its stated mechanism does not reach the branch it claims to unify.",
+      "text": "\u00a79(b) makes `persist_data_access(data_access)` the single DataAccess writer and says the MDSplus branch \"stops constructing its node inline and populates `ScanResult.data_access` like every other scanner\", but the MDSplus path is a bespoke branch (tested at parallel.py:2406 `if scanner_type == \"mdsplus\":`) that never calls `scanner.scan()` and never builds a `ScanResult`; it constructs the node inline at 2483-2506 and `continue`s at 2518, so there is no `ScanResult` to populate and the new writer is unreachable there \u2014 the duplicate survives and the \u00a79 done-when (rg finds exactly one `MERGE (\u2026:DataAccess` inside `persist_data_access`) cannot be met.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/search_tools.py:1574",
+      "id": "duplicate_owner-2",
+      "reason": "the section enumerates \"the signal and wiki-chunk indexes\" as the remaining starvation sites; this index is a fourth, in the very call path \u00a712 fixes, so the annotation list must include it (or say why it is out of scope).",
+      "text": "\u00a712 rebuilds only the `code_chunk_embedding` index and \u00a716 lists only the signal and wiki-chunk indexes, but `_search_code` also calls `_vector_search_code_examples`, which post-filters `ce.facility_id = $facility` after the ANN cut on a third index (`code_example_desc_embedding`) and hides every failure behind a bare `except Exception: return []` at 1593, so a small facility's code examples stay silently starved after this plan lands.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/search_tools.py:911",
+      "id": "duplicate_owner-3",
+      "reason": "repairing in place matches the pattern \u00a73 already landed and is the smaller change; extracting a helper is separate cleanup, not a defect this plan introduces.",
+      "text": "\u00a713 repairs the wiki-chunk fulltext query-parameter collision and the over-broad `except` in place, a third copy of the repair \u00a73 already landed in `_text_search_signals` (search_tools.py:514) and `_text_search_code_chunks` (search_tools.py:1663), with no shared helper extracted and a fourth site possible.",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas_codex/docs/plans/jt60sa-discovery-completion.html#s9",
+      "id": "reuse_search-1",
+      "reason": "the three call sites and the one-probe-per-invocation invariant are correct; only the helper's name in the brief is wrong, a one-word correction.",
+      "text": "\u00a79(a) cites its third `probe_remote_environment` caller as `require_remote_environment` in `imas_codex/cli/discover/common.py`, but no such symbol exists; the function is `ensure_remote_environment` (common.py:441, called from discover/signals.py:163 and discover/code.py:185).",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "ff5f415c493d65dd41f762b0229c65de377f0fd947c597ae450aee0666f52d96",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 66,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:30:18.549019+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:30:19.259976+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "repairing the wiki-chunk collision in place matches the pattern \u00a73 landed in the signal and code-chunk searches and is the smaller change; extracting a shared fulltext helper is separate cleanup that this plan did not introduce",
+      "when": "2026-10-05T10:30:21.127635+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T10:30:19.939815+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T101940280821-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "2589119115d946792153cbf524530dd1ee36c361",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no section adds a parallel subsystem; \u00a712/\u00a715 route all index DDL through the existing owner and \u00a715 explicitly removes wrappers rather than adding them.",
+    "duplicate_owner": "two findings \u2014 \u00a79(b)'s consolidated writer is unreachable from the MDSplus branch, and \u00a712/\u00a716 leave a third starved index in the same `_search_code` call path.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds to any counted family. \u00a712's added schema surface (the `vector_index_filters` property and its sibling generated map) is named in-text together with what it retires (the `cc.facility_id = $facility` where-clauses entry in `_search_code`), \u00a716 states nothing is added because the annotation key already exists and the over-fetch constant is retired, and \u00a79's added `environment=` parameter is an internal function argument that retires `get_python_status`'s second probe.",
+    "reuse_search": "pass \u2014 the plan names the owners it extends for every mechanism (\u00a711 `resolve_neo4j`, \u00a712/\u00a715 `ensure_vector_indexes` + `GraphSchema.vector_indexes` + `build_vector_search`, \u00a79 `probe_remote_environment` + `ScanResult.data_access`, \u00a714 the existing `discover paths --root` scope); spot checks at imas_codex/graph/profiles.py:411/424, imas_codex/graph/client.py:373-420, imas_codex/graph/schema.py:211-266, imas_codex/cli/discover/paths.py:21 and imas_codex/discovery/signals/scanners/base.py:54 all confirmed, and the claimed absence of an in-index pre-filter form is real (imas_codex/graph/vector_search.py:67 emits WHERE outside the SEARCH parens). One minor citation error only (see reuse_search finding).",
+    "thin_wrapper": "pass \u2014 the one new function \u00a79 adds (`persist_data_access`) is justified against the alternative of moving the write into `ingest_discovered_signals`, which the section shows returns early on an empty signal list; \u00a715 is the inverse (it deletes thin copies)."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T10:29:02.108535+00:00"
+}

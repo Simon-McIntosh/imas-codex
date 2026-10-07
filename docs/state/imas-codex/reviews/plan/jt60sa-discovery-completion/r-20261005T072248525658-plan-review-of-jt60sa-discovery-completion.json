@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T07:27:08.345Z",
+  "dispatched_at": "2026-10-05T07:22:52Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:2240",
+      "id": "reuse_search-1",
+      "reason": "a coordinator re-dispatching \u00a72 from the snapshot could re-create a landed schema node instead of the remaining code scan, so \u00a72 must be reframed to its unbuilt remainder.",
+      "text": "\u00a72 says \"the first node of this section extends schemas/facility.yaml with data_class, shot_range and pid on FacilitySignal, regenerates the models ... and only then runs the scan\", but those slots and the SignalDataClass enum already exist (facility.yaml:102, :2240, :2246, :2251) and the EDAS scanner already writes pid from the catalogue (imas_codex/discovery/signals/scanners/edas.py:201); the plan's own \u00a72 comment (c-run-r-20261005T055214976074-signal-typed-slots, gate 59 passed at 42c171fdd) records the node as landed, so the snapshot re-proposes machinery that is in the tree",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/common.yaml:222",
+      "id": "duplicate_owner-1",
+      "reason": "the acceptance criterion names a status the pipeline cannot write, so as written the \u00a74 done-when is unsatisfiable and should name the existing `deferred` value instead of a parallel one.",
+      "text": "\u00a74's done-when says \"WMF files and dead links are marked `unsupported` with the reason rather than retried\", but DocumentStatus is a closed enum whose permissible values are discovered/scored/ingested/deferred/skipped/failed, with no `unsupported`; the owner of the \"high-value but unparseable, do not retry\" state is `deferred` and mark_document_deferred (imas_codex/discovery/wiki/graph_ops.py:1929), and the landed recovery already wrote `deferred` with reasons (comment c-run-r-20261005T061235195800)",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "bdb660195b99f0a208b9b8c976155b563ef3b99a2a8aa3ce5dcce34f8b5a8136",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 33,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:27:57.118587+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:27:56.439737+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T072248525658-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "08c1f57070cd0f3926f332a9b3333f6888f2a552",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a78 unifies four copies of SLURM service discovery behind the one owner resolve_service_url (imas_codex/remote/locations.py), and \u00a79 collapses the double probe and the three DataAccess writes behind one call site each; the remaining sections add behaviour to existing owners rather than spreading it.",
+    "duplicate_owner": "a finding \u2014 \u00a74's done-when marks WMF and dead-link documents `unsupported`, a value absent from the closed DocumentStatus enum, whose existing owner is `deferred` / mark_document_deferred, which the landed recovery already used.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 accounts for the three slots and the SignalDataClass enum by naming the prototype keyword parking they retire, and \u00a73 states in its own text why fronts_database retires nothing; no section adds a CLI option or MCP view.",
+    "reuse_search": "a finding \u2014 \u00a72's prose frames the typed FacilitySignal slots and the scanner move onto them as the section's first unbuilt node, but that machinery already exists in the tree (SignalDataClass enum and data_class/shot_range/pid slots on FacilitySignal, facility.yaml) and the plan's own \u00a72 comment records the typed-slots node as landed (commit 42c171fdd); the section should be reframed to its remaining work.",
+    "thin_wrapper": "pass \u2014 no section introduces a thin layer over existing machinery without justification; \u00a73 explicitly routes signal\u2194handbook linkage through the existing WikiChunk-[:DOCUMENTS]->FacilitySignal edge and the existing writer, and \u00a78/\u00a79 are consolidations, not new wrappers."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:27:27.197938+00:00"
+}

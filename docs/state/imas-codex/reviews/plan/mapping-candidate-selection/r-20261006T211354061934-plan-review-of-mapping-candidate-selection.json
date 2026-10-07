@@ -1,0 +1,105 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T21:19:32.893Z",
+  "dispatched_at": "2026-10-06T21:14:01Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/workers.py:300",
+      "id": "duplicate_owner-1",
+      "reason": "without a claim predicate covering `candidate_route = 'escalated'`, the section's central escalated path is unreachable and the map stage maps nothing; the owner to extend is the claim pair at `workers.py:290`/`:311`.",
+      "text": "\u00a78 replaces the map claim predicate `sg.mapping_target_ids = $ids_name` with \"a match on the selected edge's IDS\", but a source's candidates are flagged selected only when `decision.decision == \"selected\"` (`workers.py:1148-1152`), so an `escalated` source carries no selected edge; under \u00a75's landed default of escalating every source, and with the `jev-role` decision recommending pre-screen-only, the map stage would claim no source and never reach \u00a78's own escalated reasoning seat.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/graph_ops.py:544",
+      "id": "reuse_search-1",
+      "reason": "the node must either add `imas_codex/ids/graph_ops.py` to its write scope with a candidate reader beside `write_candidates`, or the read query is authored ad hoc in `workers.py`/`mapping.py` and drifts from the writer it must mirror.",
+      "text": "\u00a78 states \"the map stage reads each source's shortlist from its `MAPPING_CANDIDATE` edges\" but names no reader and grants node `map-run-consumes-candidates` no write path into `graph_ops.py`, the module that owns those edges (`write_candidates`:544, `clear_candidates`:632) and the analogous SignalSource\u2192IMASNode read (`load_signal_mappings`:139); the plan's own \"one owner for the edge\" bullet scopes ownership to create and delete only, leaving the read unplaced.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/tools.py:769",
+      "id": "reuse_search-2",
+      "reason": "the deletion leaves a broken test outside the node's scope, so the plan must enumerate every importer and grant `tests/tools` (or scope the deletion), and must name the schema declaration site the field-retirement grep will otherwise still match.",
+      "text": "\u00a78 retires `compute_semantic_matches` and its done-when gate greps only `imas_codex/`, but the unplanned importer `tests/tools/test_dd_version_filtering.py:443` imports and calls it (`:457`), and node `map-run-consumes-candidates` grants write paths only under `tests/ids/` with a gate (`pytest tests/ids tests/discovery tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py`) that excludes `tests/tools`; \u00a78's \"Retired fields\" bullet likewise names only `imas_codex/ids/workers.py` sites, while the census `grep -rn 'mapping_target_ids\\|mapping_target_path'` also hits the field declarations at `imas_codex/schemas/facility.yaml:1943-1945` and the generated `imas_codex/graph/models.py:14569-14570` / `schema_context_data.py:1064-1065`.",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7a51520208c10d158332ecbb2ed3125895ca0df46494f44a989308c92ed1ed09",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 43,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T21:20:43.811706+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-06T21:20:46.123033+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "reuse_search-2",
+      "reason": "",
+      "when": "2026-10-06T21:20:48.352493+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:20:43.811706+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:20:46.123033+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:20:48.352493+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v43.json",
+  "review_run_id": "r-20261006T211354061934-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "0a38a1301c9125fa09b10daeb3f5e33634ecc8d4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `imas_codex/ids/candidates.py` hides retrieval, IDS routing, pair judgment and threshold routing behind four functions, and \u00a78's edge consolidation collapses three `MAPS_TO_IMAS` writers into one function rather than spreading wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a78's replacement claim predicate reaches only sources with a selected `MAPPING_CANDIDATE` edge and so drops every escalated source, forking the claim owner in `imas_codex/ids/workers.py`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 retires two CLI options (`--skip-metadata`, `--skip-errors`), one function (`create_signal_source`), one count reader (`count_sources_by_mapping_status`) and two SignalSource fields, and \u00a710 deletes `_capture_decisions_cost`, so the added surface is matched by named retirements.",
+    "reuse_search": "a finding \u2014 \u00a78 needs a reader for a source's `MAPPING_CANDIDATE` shortlist and cites no existing owner, while `imas_codex/ids/graph_ops.py` already owns SignalSource\u2192IMASNode graph access (`load_signal_mappings`:139, `write_candidates`:544, `clear_candidates`:632) and holds no candidate reader.",
+    "thin_wrapper": "pass \u2014 the graph_ops edge-write extraction adds the zero-row count check the three silent `MATCH`-gated writers lacked, and `imas map status` reuses `count_candidates_by_route` rather than wrapping it."
+  },
+  "section_digests": {
+    "_document": "bfd320a268c1925095f3577ace21fcd1ba04db37665ccb02d0665e5b4b73f540",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "2c51cab5622c4a71d3c2f59a41fb5cf716a5f6413be1ecaf3c80a9b316a83e00",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "350b77b397f0b54d20a992f7e21c065829db7ca722a90105502f901e268436c9",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T21:20:31.135497+00:00"
+}

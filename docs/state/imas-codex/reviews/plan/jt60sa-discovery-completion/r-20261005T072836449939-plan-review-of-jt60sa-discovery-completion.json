@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T07:32:08.906Z",
+  "dispatched_at": "2026-10-05T07:28:40Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/client.py:92",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a78 must add graph/client.py:_slurm_service_uri to the delegating set and to its done-when, or the drift the section removes persists in the graph client's own SLURM step.",
+      "text": "`_slurm_service_uri` (called from `_resolve_graph_uri` at client.py:147) calls `discover_compute_node_local` at client.py:116 and re-implements the same squeue\u2192`_resolve_compute_host`\u2192localhost/direct-host resolution that \u00a78 exists to remove, yet \u00a78 names only profiles.py as the graph-client copy and its done-when requires only `profiles.py`, `get_embed_host` and `readiness.py` to delegate \u2014 landing \u00a78 as written leaves this fifth independent discovery in place.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2ef51894384962a209093bfffc10d813df4a01e58682debab9886b915058124d",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 34,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T07:33:13.103951+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T072836449939-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "abc9e6943fe69628afd48edd299111306e65e68d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a78 concentrates four (in fact five, see below) SLURM discovery paths behind one owner, resolve_service_url, and \u00a79 concentrates the DataAccess node write beside the edge merge in ingest_discovered_signals; no new module spreads complexity across shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a78 enumerates \"four copies\" of the SLURM service discovery and unifies three named files plus a rewrite, but imas_codex/graph/client.py:_slurm_service_uri is a fifth, live copy it does not name.",
+    "interface_budget": "pass \u2014 this week's supplied figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the adding sections account for themselves in their own text \u2014 \u00a72 names the prototype keyword parking its three typed slots retire, \u00a73 states why fronts_database retires nothing (no existing WikiPage property records the database a rendered page fronts), \u00a78 states it adds no public definition and removes two private copies plus one rewrite, and \u00a79 adds no interface.",
+    "reuse_search": "pass \u2014 the plan cites the mechanisms it extends for every new move: enumerate_edas.py/check_edas.py (\u00a72), the existing WikiChunk-[:DOCUMENTS]->FacilitySignal linkage written by link_chunks_to_entities and already followed by the MCP tools at imas_codex/llm/search_tools.py:547 and :818 (\u00a73), the existing `deferred` document state (marked by mark_document_deferred, pipeline.py:1694) (\u00a74), resolve_service_url as the discovery owner (\u00a78), and the existing DataAccess writers (\u00a79).",
+    "thin_wrapper": "pass \u2014 each proposed layer extends an existing mechanism rather than wrapping it (the linker gains one key in link_chunks_to_entities, tools-status reuses probe_remote_environment once, parallel.py consolidates to one DataAccess write), and \u00a78 keeps only the remote auto-tunnel branch in profiles.py that the owner does not carry."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T07:32:27.009486+00:00"
+}

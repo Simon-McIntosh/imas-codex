@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T16:09:31.174Z",
+  "dispatched_at": "2026-10-05T16:04:00Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/frontier.py:426",
+      "id": "duplicate_owner-1",
+      "reason": "the plan already names and extends the owner, reset_to_status already takes an extra_filter scoping hook but the re-expand case (a root already at status triaged) is not a status transition it can express, so the seed clear is a defensible second entry point rather than a fork, and the author would decline with that reason.",
+      "text": "the section makes the seed item clear expanded_at on an explicit --root reseed, a second writer of the field that imas_codex/discovery/base/reset.py:PATH_RESET_SPECS owns (it gains expanded_at in clear_fields for its scanned/triaged specs), so the field that makes a path reprocessable is now cleared in two places that must stay in agreement",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/llm/search_tools.py:1565",
+      "id": "reuse_search-1",
+      "reason": "both uncited sites read the chunk's own source_file, which the plan elsewhere acknowledges is populated and correct, so they carry no null-source defect; the finding only asks the author to state that scope, not to change the mechanism.",
+      "text": "the section's inventory states \"Five readers exist today\" but a sixth and seventh site resolve a CodeChunk's source and are not cited: _vector_search_code_chunks joins \"(cf:CodeFile {path: cc.source_file})\" and imas_codex/ids/tools.py:715 joins (cf)-[:HAS_EXAMPLE]->(ce)-[:HAS_CHUNK]->(cc), so the stated invariant \"every reader resolves a chunk's source through one owner\" is broader than the five sites the design repairs",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "ef4d20d06f6cbdbe0851dc568934593f1baafd3e3567b40b3e66eb9e79a8200e",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 118,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "The reset spec owns status transitions; an already-triaged root re-expanding is not a transition, so the explicit --root seed is a second entry point that the section names and tests beside the owner, not a fork.",
+      "when": "2026-10-05T16:10:08.871665+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "_vector_search_code_chunks and ids/tools.py read the chunk's own populated source_file and carry no null-source defect; the brief states that scope so the worker leaves them alone.",
+      "when": "2026-10-05T16:10:09.334865+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T160355940189-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "df884f078808fb26162331e260e63fa481eda06b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a719 adds one parameterised renderer to imas_codex/graph/query_builder.py (a module that already composes relationship traversals) that hides the HAS_CHUNK OPTIONAL MATCH plus coalesce behind a single alias/output-name interface, and \u00a714 adds no new module at all, extending the seed item and the reset owner in place; neither section spreads a mechanism across new wide-shallow surface.",
+    "duplicate_owner": "a finding \u2014 \u00a714 clears expanded_at inside seed_facility_roots beside the reset owner that owns the reprocessability stamp.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a719 adds one slot-annotation key (inverse_of) and one renderer and, in its own text, names the three relationship names it retires (CODE_EXAMPLE_ID, WIKI_PAGE_ID, DOCUMENT_ID) plus the dead CodeFile-[:HAS_CHUNK] arm, and \u00a714 adds no public definition, CLI option, MCP view or refusal family.",
+    "reuse_search": "pass \u2014 both live design sections cite the machinery they extend rather than proposing a subsystem blind: \u00a714 names seed_facility_roots/persist_scan_results/claim_paths_for_expanding (imas_codex/discovery/paths/frontier.py) and PATH_RESET_SPECS (imas_codex/discovery/base/reset.py:240), and \u00a719 names the five divergent chunk-source readers, GraphSchema.relationships (imas_codex/graph/schema.py:109) and query_builder._parse_traverse/graph_search; the only prior-art gap I found is recorded as a finding.",
+    "thin_wrapper": "pass \u2014 the \u00a719 renderer is new consolidating machinery over five divergent call sites, not a layer over one existing mechanism whose extension would do; \u00a719 states why the resolution cannot live in imas_codex/ingestion (four of five readers sit in the graph and llm layers above it), which is the justification the item asks a wrapper to give."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:09:49.381093+00:00"
+}

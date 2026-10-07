@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T10:35:20.877Z",
+  "dispatched_at": "2026-10-05T10:30:35Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/schema.py:211",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is to widen the one owned map and update its loud unpack sites; a parallel generated map must stay key-synced with the owner forever and is more surface than the edit it avoids.",
+      "text": "\u00a712 adds a second generated index-metadata map (`GraphSchema.vector_index_filters` emitted as a sibling generated map, read by `ensure_vector_indexes`) alongside the map `scripts/gen_schema_context.py:148` already owns (`VECTOR_INDEXES`), both keyed by index name; the plan rejects widening the existing tuple on the grounds that four unpack sites break with a `ValueError` or \"a silently shifted field\", but widening a tuple value fails loudly at every `for name, (label, prop) in \u2026` site (scripts/gen_schema_reference.py:64, imas_codex/graph/schema_context.py:200 and :264, imas_codex/graph/query_builder.py:42, imas_codex/llm/server.py:733) and each is a one-line update, so the sibling map trades four trivial edits for a permanent two-map key-sync invariant",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "1331149d4ad002069920541aa2fa44df127b2f0a379a6356a4fd40828ee5fe22",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 69,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "the generated schema_context_data module already carries index metadata as sibling name-keyed maps (VECTOR_INDEXES beside FULLTEXT_INDEXES), all written by the one generator from GraphSchema, so a filter-property map keyed by index name is another field of that single owner, not a second owner; widening the 3-tuple would churn five unpack sites to carry metadata only one index uses today, and the \u00a712 node is already in flight on the sibling-map design",
+      "when": "2026-10-05T10:36:28.039109+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T103028206344-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "c99cc5e2b3fc19f93f024d342f87135410dc2a4e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a715 collapses five hand-written `CREATE VECTOR INDEX` statements (imas_codex/graph/build_dd.py:4694, dd_identifier_enrichment.py:356 and :707, dd_ids_enrichment.py:457, discovery/wiki/pipeline.py:1667) into the one owner `ensure_vector_indexes`, and \u00a712/\u00a716 add behaviour to that owner and the search builder instead of standing up parallel machinery.",
+    "duplicate_owner": "a finding \u2014 \u00a712 forks the schema-context generator's index-metadata channel instead of widening the one it owns.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the sections that add surface account for it in their own text (\u00a72 retires the prototype `class:`/`shots:`/`udpid:` keyword parking, \u00a712 retires the `_search_code` facility `where_clauses` post-filter entry, \u00a716 states nothing is added), and no section adds a CLI option, MCP view or refusal family.",
+    "reuse_search": "pass \u2014 the plan names and extends the mechanisms it found rather than rebuilding them; opening the code confirms each exists: `build_vector_search` (imas_codex/graph/vector_search.py:16) is extended, `ensure_vector_indexes` (imas_codex/graph/client.py:356) is extended, `probe_remote_environment` (imas_codex/remote/tools.py:550) keeps one caller, `resolve_neo4j` (imas_codex/graph/profiles.py) is reordered, \u00a714's \"existing scoping option\" is `discover paths --root/-r` (imas_codex/cli/discover/paths.py:20), and \u00a72's code scan reuses `discover code --path-prefix` (imas_codex/cli/discover/code.py:35).",
+    "thin_wrapper": "pass \u2014 \u00a79's `persist_data_access` and \u00a712's builder extension consolidate existing inline work into a single call site rather than adding a forwarder over machinery that already exists."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T10:35:41.701438+00:00"
+}

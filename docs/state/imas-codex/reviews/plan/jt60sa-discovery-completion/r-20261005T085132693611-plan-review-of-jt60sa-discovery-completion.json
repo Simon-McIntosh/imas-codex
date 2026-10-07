@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T08:58:17.828Z",
+  "dispatched_at": "2026-10-05T08:51:36Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/wiki/pipeline.py:338",
+      "id": "deep_module-1",
+      "reason": "the plan must name the scorer/pipeline call site (the file:function where a chunk is scored or written) so the rule fires on every ingest, or state the operator-run step as the intended interface; a rule with no call site is dead code and the done-when's \"pages carry fronts_database\" is satisfiable only by hand-run.",
+      "text": "the plan's \u00a73 (b) says \"the wiki scorer gains a dynamic-page rule\", but detect_dynamic_page (:338) and apply_dynamic_page_rule (:396) have no production call site \u2014 both appear only in the module __all__ (:2702, :2704) and are operator-invoked, not wired into the wiki pipeline where chunks are scored or written; the behaviour (mark page, stub chunk, key the DOCUMENTS edge) is therefore spread across four functions that nothing calls, which is the opposite of one module hiding substantial behaviour behind a small interface",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/remote/tools.py:703",
+      "id": "thin_wrapper-1",
+      "reason": "the plan should state which function keeps the probe and which gains the parameter, because the fix is otherwise under-specified and the second probe remains.",
+      "text": "check_all_tools already probes the remote environment and stores results[\"environment\"] (:703) while get_python_status independently re-probes (imas_codex/remote/python.py:266) and cli/tools.py renders only the latter's environment, so the check_all_tools probe output is dead; \u00a79(a) adds the pass-down (\"run once and feed both\") without naming which of the two public functions is changed or retired, and since \"run once\" across two public functions requires an interface change (get_python_status acquiring an environment parameter, or the CLI probing once and passing it), the duplicate probe survives unless the plan names the mechanism",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/wiki/pipeline.py:469",
+      "id": "reuse_search-1",
+      "reason": "the MCP-surfaces node must open by naming the search_docs/fetch_content implementation and the query it extends (or the plan must verify the read path before dispatching that node), because a done-when built on an unshown read path may be unachievable as designed.",
+      "text": "the plan's \u00a73 rests its done-when on \"the one linkage the MCP tools already follow\" and \"search_docs and fetch_content on a dynamic page return the signals it fronts\", but it names no file or function owning that read path and no query it extends; \u00a73's own review record (c-20261005T0820-s3-handbook) already logged \"no search_docs or fetch_content call on a dynamic page was shown\", so the plan's central reuse claim is asserted, not demonstrated",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "de1687f569aa4de4d91b32de2c43dd2dedaae4027eab89ddc8a70039d5929bea",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 46,
+  "project": "imas-codex",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T08:58:48.350890+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T08:59:13.139963+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T08:59:12.306341+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T085132693611-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "964082f4ade4f9419b93f1edec986b1e091f2a68",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the \u00a73 \"dynamic-page rule\" is split across detect_dynamic_page / dynamic_page_stub / fronts_databases_for_topic / apply_dynamic_page_rule with no production call site, so it is a helper set rather than the scorer rule the design describes.",
+    "duplicate_owner": "pass \u2014 \u00a79 and \u00a710 both name the shared owner to extend (parallel.py DataAccess sites; remote.locations._service_url_for_slurm) rather than forking, and \u00a73 reuses link_chunks_to_entities as a fourth merge key instead of a second edge-writer.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no remaining section (\u00a72 enrichment, \u00a73 MCP surfaces, \u00a74 drain, \u00a79, \u00a710) adds to any of the four families, \u00a710 removes surface, and the two sections that did add a property/enum each state in their own text what they retire or why nothing can be (\u00a72 retires class:/shots:/udpid: keyword parking; \u00a73 records that fronts_database retires nothing because no existing WikiPage property binds a page to its database).",
+    "reuse_search": "a finding \u2014 the plan cites its write-side reuse precisely (link_chunks_to_entities, the WikiChunk DOCUMENTS edge, edas.py) but asserts the MCP read path \"already follow[s]\" DOCUMENTS without naming the search_docs/fetch_content owner or the query it extends.",
+    "thin_wrapper": "a finding \u2014 \u00a79(a) proposes \"run once and feed both\" without naming which of the two independently-probing public functions (check_all_tools, get_python_status) keeps its probe or gains the parameter, so the duplicate probe is not actually retired by the design as written."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T08:58:33.423727+00:00"
+}

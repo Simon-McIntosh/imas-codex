@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T22:53:59.450Z",
+  "dispatched_at": "2026-10-06T22:49:47Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:1913",
+      "id": "duplicate_owner-1",
+      "reason": "the property should be renamed (or the existing routed-IDS field extended) so one vocabulary covers both, otherwise \u00a78's prompt and \u00a79's counts read an ambiguous field.",
+      "text": "\u00a711 adds an edge property `arm` (values `retrieval`|`cluster`), but the MAPPING_CANDIDATE edge already carries \"the routed IDS and its Choice probability\" (facility.yaml:1913-1916) and imas_codex/ids/candidates.py:78 already defines `Candidate.arms` as the set of routed/IDS arms that returned a hit; the same word now names two different axes on the same edge and module, so a reader of the prompt (\u00a78) or the \u00a79 home-source count cannot tell which \"arm\" a value means \u2014 the owner to extend is the existing routed-IDS property on the edge and `Candidate.arms`, not a parallel property",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-candidate-selection.html#s11",
+      "id": "interface_budget-1",
+      "reason": "\u00a711 must state in its own text what the added property/refusal retires or merges, or why nothing can be, to match \u00a78's accounting.",
+      "text": "with the week's supplied figures at public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, \u00a711 adds surface (the `arm` schema property, and a write_candidates refusal when `arm` is neither `retrieval` nor `cluster`, \u00a711 done-when) while naming only that \"No setting is added\" and specifying no retirement or merge \u2014 \u00a78 by contrast accounts for its surface by retiring --skip-metadata/--skip-errors, mapping_target_path/ids/type, create_signal_source and count_sources_by_mapping_status",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/core/node_classifier.py:400",
+      "id": "reuse_search-1",
+      "reason": "the concepts do not overlap, so naming node_classifier would be a citation nicety rather than a reuse the plan should adopt.",
+      "text": "\u00a78 derives TargetType in a new classmethod on TargetType (imas_codex/ids/models.py:44) fed by section fields without citing imas_codex/core/node_classifier.py, whose docstring claims to be the \"single source of truth\" for DD node classification; the search shows the two are different axes (node_classifier emits node_category: quantity/geometry/identifier/coordinate, while TargetType is struct_array/time_slice/scalar/profile), so the owner cannot in fact be extended and no code change is owed",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "efb8646d18b04c98702e6ca387d5761ec0102cf7d2d116e90470da44b5ed8642",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 62,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T224939592542-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "c155187279ad8b7f619999dbd829723f45bc6da9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the candidate stage stays behind imas_codex/ids/candidates.py (retrieve_candidates, route_ids, judge_candidates, route over three small frozen dataclasses), and \u00a711 places its cluster expansion in that same module beside retrieve_candidates rather than in a new one, so behaviour is hidden behind a handful of functions rather than spread over parallel wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a711 adds a second meaning of \"arm\" on the same edge and module that already carry a routed-IDS/arms vocabulary.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a711 adds a facility.yaml schema property (`arm`) and a new write_candidates refusal without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 \u00a74 reuses hybrid_dd_search through retrieve_candidates (imas_codex/ids/candidates.py:120), \u00a711 reuses related_dd_search(..., relationship_types=\"cluster\") (imas_codex/graph/dd_search.py:606) rather than writing a second cluster query, and \u00a78 reuses claim_batch (imas_codex/discovery/base/claims.py:255), write_mapping_binding/clear_mapping_bindings (imas_codex/ids/graph_ops.py:552,621) and fetch_cross_facility_mappings (imas_codex/ids/tools.py:733); the plan cites each by name, and the only uncited neighbour is node_classifier.py, which classifies a different axis.",
+    "thin_wrapper": "pass \u2014 read_candidates and select_candidates (\u00a78, map-context-reads-candidates) are not wrappers over an existing reader; a grep for MAPPING_CANDIDATE shows no reader exists today (only write_candidates/count/clear in graph_ops.py), and the plan states why select_candidates cannot be write_candidates (write_candidates deletes and rewrites every edge, a pick must flag existing edges without disturbing the shortlist)."
+  },
+  "section_digests": {
+    "_document": "93865400bfd7d3fb936165becda789ec8ab4cd2829cffa56d85efa27561a1337",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "498f051931b734b5f4c143c5f6c352e86d32a91d73a00637de5edf19fce2aef2",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "94439913f6f53b050036478d0a500f5b91ff2ef8fb26df2990649fcdc6dffd7c",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T23:14:07.437831+00:00"
+}

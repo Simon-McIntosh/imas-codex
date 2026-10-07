@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T02:18:13.157Z",
+  "dispatched_at": "2026-10-07T02:14:14Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/claims.py:255",
+      "id": "duplicate_owner-1",
+      "reason": "naming claim_batch as the owner to extend, and listing the counters and the reset registry as sites that move with the predicate, turns one predicate replicated nine ways into one owner plus its dependents.",
+      "text": "\u00a73's \"each pipeline's own judgment claim also admits a row that is past judgment\" adds a stale-model predicate and a never-judged-first ORDER BY to N separate hand-rolled claim queries, while the shared owner claim_batch (already used only by ids/workers.py:276) already carries a claimable status_predicate and return_clause and would need one ordering/multi-predicate hook to express this once; the instances are discovery/code/graph_ops.py:282 (claim_files_for_triage), discovery/code/graph_ops.py:469 (claim_files_for_scoring), discovery/paths/parallel.py:608 (claim_paths_for_triaging), discovery/paths/parallel.py:806 (claim_paths_for_scoring), discovery/wiki/graph_ops.py:817 (claim_pages_for_scoring), discovery/wiki/graph_ops.py:1630 (claim_documents_for_scoring), discovery/wiki/graph_ops.py:1987 (claim_images_for_scoring) and discovery/signals/parallel.py:821 (claim_signals_for_enrichment), each of which re-implements the same claim_token/ORDER BY rand() pattern that claim_batch owns; the same predicate must also reach the progress counters that count the same state (discovery/code/parallel.py:413 and :451) or the run's pending counts will disagree with what it claims, and the new X_probs/X_confidence fields must be added to the reset field registries that own clear_field lists (discovery/base/reset.py:339 _CODE_RELEVANCE_FIELDS and discovery/code/scorer.py:52 _RELEVANCE_FIELDS) or reset_to_status will leave distributions behind",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/judgment.py:1",
+      "id": "interface_budget-1",
+      "reason": "adding one accounting line per section is bookkeeping, not a design change, since the three-function contract is already fixed in \u00a73.",
+      "text": "\u00a75 and \u00a76 each add a pipeline's question builder, state builder and applier and retire nothing in their own text, while \u00a74 retires the 0.9 path gate and \u00a73 and \u00a79 carry explicit interface accounts (\"one public function and one module added\", \"adds no seat\"); with public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 the sections must say which public definitions the new functions replace",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e316e95a26e96423f2f27b8cc4eac33536b57e58e61337029ec5496d81ba1600",
+  "plan_slug": "discovery-judgments-through-jev",
+  "plan_version": 10,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T02:19:54.576611+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-07T02:19:57.242050+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T02:19:54.576611+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T02:19:57.242050+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-discovery-judgments-through-jev.v10.json",
+  "review_run_id": "r-20261007T021401833246-plan-review-of-discovery-judgments-through-jev",
+  "reviewed_blob_sha": "0254407b70ffbb74d0c4d8c63bf9ba53cc285b9f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73 puts claim, concurrency bound, acall_decisions, cost booking and apply behind one function in discovery/base/judgment.py, so the code arm and content arm (code/workers.py:270\u2013341, :452\u2013470) collapse from two hand-written loops to two callers of one interface.",
+    "duplicate_owner": "a finding \u2014 the stale-judgment predicate and its never-judged-first ordering are added to each pipeline's hand-rolled judgment claim rather than to the shared claim owner discovery/base/claims.py:255 claim_batch, and the predicate is replicated across eight queries plus the progress counters and the reset field registry.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 and \u00a76 add a question builder, state builder and applier per pipeline (public definitions) without naming what they retire or merge, while \u00a73 and \u00a79 both carry an interface account.",
+    "reuse_search": "pass \u2014 \u00a72's census names the seven judgment call sites and their response models (code/scorer.py, wiki/models.py, signals/parallel.py, graph/dd_domain_classifier.py) and \u00a73 cites the owners it extends (discovery/base/reset.py, code/scorer.py build_triage_questions/build_triage_state) and declines reset.py with a reason, so the plan searched the codebase it names.",
+    "thin_wrapper": "pass \u2014 the one interface the plan adds over existing machinery (the judge function over discovery/base/llm.py acall_decisions) is a genuine extraction of an existing inline loop, and \u00a73 states why reset.py's --reset-to cannot serve re-judging (its targets clear ingested_at/chunk_count, so re-judging through them re-fetches and re-embeds)."
+  },
+  "section_digests": {
+    "_document": "b1ac3972368b58f7816c671ffab03ed5138ef36f41c5aeeefa421fe20995197d",
+    "s1": "e6ed0dfe853f3f242923d7b9bca83fb125586f4f1620d4a6becb8392c02c5fe7",
+    "s10": "830573f7a62e8c47679fd0fb0fdfa0f93b8d176403981d821d55becbc6f44a3d",
+    "s2": "7889041df1493423b902f12bed103f678abc02ce079dba88ef32d604f533ec8a",
+    "s3": "4d0bc667d729492f5354796ac248dcf8d2f049ee6c521164ee18a2ee977e2dc6",
+    "s4": "ec02f698f7539ba44cea1235ecc63eafc4f6401062cff4d0eaf6781b80bf4485",
+    "s5": "3878deffc47d95195013135765df26911fd97964a9003a61e9d0daaeb72d5b76",
+    "s6": "34bf832aa43478f4e05f9f63573276919bb4f8cccdaacc0943aa601327f4e3f1",
+    "s7": "65815dcec23706975640bf842758839232a604a86ca763c940b639b3af0dae0e",
+    "s8": "2995253050e0a467fb6eff3f70e71e0d3abf78c06d05b28020695df8f311e85a",
+    "s9": "8a1e4e22f0138add4f389efaace3d61fe0384c85b6a752c1cf4e2afb29673b3b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T02:19:51.573290+00:00"
+}

@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T21:29:54.117Z",
+  "dispatched_at": "2026-10-06T21:26:48Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/graph_ops.py:544",
+      "id": "thin_wrapper-1",
+      "reason": "the plan should either parameterise the existing writer or state why the two edge types cannot share one guarded write, which is exactly the count-guard duplication \u00a78 exists to remove.",
+      "text": "\u00a78's new consolidated MAPS_TO_IMAS writer would duplicate `write_candidates`'s mechanism (write the edge batch, compare the returned count against the expected count, raise on shortfall; graph_ops.py:605-620), differing only in relationship type and payload properties, and the plan nowhere says why `write_candidates` cannot be generalised over (relationship type, property payload, expected-count semantics) instead of a parallel function being added",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/workers.py:419",
+      "id": "duplicate_owner-1",
+      "reason": "the count should move beside `write_candidates` in graph_ops.py so `discover status`, `discover clear` and `imas map status` all read one owner, which is the single-owner rule \u00a78 applies to the MAPS_TO_IMAS edge.",
+      "text": "`count_candidates_by_route` is a candidate-state reader that \u00a78 relies on for `imas map status` reuse, yet \u00a78's own node rule states \"No candidate query is written in workers.py or mapping.py\" while placing the other three candidate operations (`write_candidates`, `clear_candidates`, and the new `read_candidates`/`select_candidate`) in imas_codex/ids/graph_ops.py, so candidate-state ownership is split across two modules and workers.py (the claim-loop module) is a second owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f3f0869f15ffb851cc79b52a9be889de182fdb4aa2031b3d8a1f46890c95b0cc",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 48,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T21:30:54.641317+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "finding": "thin_wrapper-1",
+      "reason": "The two writers share only a three-line count comparison. write_candidates deletes a source's prior MAPPING_CANDIDATE edges, writes the new set, sets candidate_route under a CASE guard and releases the claim in one statement. The MAPS_TO_IMAS writer upserts bindings with transform properties and touches no route or claim. A generic writer would interpolate the relationship type and merge two different replace semantics behind flags, which adds indirection without removing any logic.",
+      "when": "2026-10-06T21:30:57.580959+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T21:30:54.641317+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "reason": "The two writers share only a three-line count comparison. write_candidates deletes a source's prior MAPPING_CANDIDATE edges, writes the new set, sets candidate_route under a CASE guard and releases the claim in one statement. The MAPS_TO_IMAS writer upserts bindings with transform properties and touches no route or claim. A generic writer would interpolate the relationship type and merge two different replace semantics behind flags, which adds indirection without removing any logic.",
+      "when": "2026-10-06T21:30:57.580959+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v48.json",
+  "review_run_id": "r-20261006T212641574600-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "a88cdc42b985fc7147a762e8e9727262314d0372",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 imas_codex/ids/candidates.py (479 lines) hides embedding, per-arm retrieval, arm-merge, decisions-code judgment and threshold routing behind `retrieve_candidates`/`route_ids`/`judge_candidates`/`route` plus three frozen dataclasses that compose `SearchHit` rather than copy it; \u00a78 keeps all candidate-edge lifecycle in one module (imas_codex/ids/graph_ops.py), which is depth, not spread.",
+    "duplicate_owner": "a finding \u2014 the candidate-state reader \u00a78 depends on lives outside the module \u00a78 itself declares owns every candidate query.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 is net-negative surface and names its retirements in its own text: it deletes `compute_semantic_matches` (imas_codex/ids/tools.py:769), deletes `count_sources_by_mapping_status` (imas_codex/ids/workers.py:434, verified callerless), removes two `imas map run` options (`--skip-metadata`, `--skip-errors`) and two SignalSource fields, so its two added functions (`read_candidates`, `select_candidate`) are accounted for by the functions they retire.",
+    "reuse_search": "pass \u2014 the plan cites and extends existing mechanisms throughout: `hybrid_dd_search` for retrieval (imas_codex/graph/dd_search.py:97), shared `call_decisions` (imas_codex/discovery/base/llm.py) for pair judgment, `fetch_wiki_context`/`fetch_code_context`/`fetch_cross_facility_mappings` (imas_codex/ids/tools.py:638/681/733), the generalised claim routines in imas_codex/discovery/base/claims.py for \u00a77, and `PipelineCost` for \u00a710; \u00a78's only new machinery is a per-source candidate-edge reader and the consolidated MAPS_TO_IMAS writer, both of which have no prior owner.",
+    "thin_wrapper": "a finding \u2014 \u00a78 adds a second MAPS_TO_IMAS edge-write function in graph_ops.py beside `write_candidates`, which already implements the identical conditional-write-with-count-guard mechanism."
+  },
+  "section_digests": {
+    "_document": "bfd320a268c1925095f3577ace21fcd1ba04db37665ccb02d0665e5b4b73f540",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "21508fa92847f1d6dc42e2cbc7cc6b3d3b1e2ff3e937b482f6e8c2f468c8cfe0",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T21:30:51.544700+00:00"
+}

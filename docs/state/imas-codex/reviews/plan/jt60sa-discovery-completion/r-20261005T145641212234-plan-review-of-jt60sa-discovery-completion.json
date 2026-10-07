@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:02:08.394Z",
+  "dispatched_at": "2026-10-05T14:56:46Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/server.py:827",
+      "id": "reuse_search-1",
+      "reason": "a consolidation that fixes three of five readers leaves two dead resolutions against the same machinery, so the \"one owner\" done-when is met while the defect survives; the inventory must include server.py:827 and schema_context.py:95 (or state why they are out of scope).",
+      "text": "\u00a719 asserts \"the three readers resolve a chunk's source\" and consolidates exactly those three, but `_search_code_chunks` at llm/server.py:827 reads `OPTIONAL MATCH (sf:CodeFile)-[:HAS_CHUNK]->(node)` and returns `sf.path AS source_file`, and imas_codex/graph/schema_context.py:95 emits the same `MATCH (cf:CodeFile)-[:HAS_CHUNK]->(node)`; the schema declares CodeFile-[:HAS_EXAMPLE]->CodeExample-[:HAS_CHUNK]->CodeChunk (facility.yaml CodeFile block has only AT_FACILITY/IN_DIRECTORY/HAS_EXAMPLE; CodeExample owns has_chunks), and the sole writer (ingestion/pipeline.py:522) MERGEs the CodeExample edge \u2014 so both sites return a null source_file on a live path and are not touched by the plan",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/reset.py:240",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should add expanded_at to PATH_RESET_SPECS clear_fields (extending the owner) and/or say why the seed must own the clear, otherwise the reset path the plan cites as \"facility-wide, no --reset-to involved\" remains silently unable to re-expand.",
+      "text": "\u00a714 fixes re-expansion by having seed_facility_roots write `expanded_at: null` into its `SET n += item` map, but the owner of making a FacilityPath reprocessable is PATH_RESET_SPECS / reset_to_status in discovery/base/reset.py (driven by `discover paths --reset-to`), whose clear_fields for \"triaged\" and \"scanned\" do NOT include expanded_at \u2014 so the plan forks a second clearing site and `--reset-to scanned|triaged` still cannot re-expand an already-expanded path",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ae0cb97e5c54e4c6a4dfe5ff2ac48c2ae8c754af2c4a11e2d5a15ae136c77f53",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 112,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T15:09:52.800494+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T15:09:44.003233+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T145641212234-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "8297a7d6593418b13d63f5446b8bca0d6eca6d96",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a719 consolidates the resolution behind one parameterised helper instead of a wrapper per site, and \u00a714 extends an existing function by one key; neither adds shallow surface.",
+    "duplicate_owner": "a finding \u2014 \u00a714 adds a SECOND site that clears a FacilityPath lifecycle stamp, beside the shared reset owner that already owns FacilityPath state fields.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a719 states its budget and names the merge it performs (\"all three sites embed it, find_code's dead arm goes with it\"), and \u00a714 adds no CLI option, MCP view, refusal family or public definition.",
+    "reuse_search": "a finding \u2014 \u00a719's reader inventory is incomplete: it names three chunk\u2192source readers but two more resolve the same quantity via an undeclared edge, and are left unfixed.",
+    "thin_wrapper": "pass \u2014 the \u00a719 helper is justified by three divergent readers it replaces (find_code's dead arm is retired with it) and \u00a714 extends the existing seed branch rather than wrapping it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T15:02:30.966545+00:00"
+}

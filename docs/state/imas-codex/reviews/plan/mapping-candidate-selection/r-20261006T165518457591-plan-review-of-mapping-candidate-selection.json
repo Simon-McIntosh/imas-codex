@@ -1,0 +1,104 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T17:01:01.245Z",
+  "dispatched_at": "2026-10-06T16:55:24Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/workers.py:136",
+      "id": "duplicate_owner-1",
+      "reason": "a reviewer wants the claim pattern generalized once in `workers.py` and reused by the candidate stage, not a third copy that then drifts from the mapping stage it mirrors.",
+      "text": "\u00a77 adds `claim_sources_for_candidates`, `release_candidate_claim`, `has_pending_candidate_work and candidate_worker` \"beside their mapping counterparts\", a third near-copy of the claim machinery that is already duplicated once: `claim_sources_for_assignment` (workers.py:136) and `claim_sources_for_mapping` (workers.py:199) are the same claim-token + `ORDER BY rand()` + cutoff query differing only in the status predicate and returned properties, and the release/`has_pending` helpers (`workers.py:274,287,303,329,343`) repeat the same shape; the plan multiplies the surface again rather than extending the owner with a claim routine parameterized by (from-status, claim property names, returned fields); the census of the duplicated family is workers.py:136, 199, 274, 287, 303, 329, 343.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/ids/mapping.py:781",
+      "id": "duplicate_owner-2",
+      "reason": "the honest change is to move the existing shortlist construction out of `mapping.py` into `candidates.py` and re-point retrieval at `hybrid_dd_search`, so the cluster-expansion/dedup code is not written twice and \u00a78's retirement becomes a deletion rather than a rewrite.",
+      "text": "\u00a74 creates a new module `imas_codex/ids/candidates.py` whose job \u2014 build a per-source shortlist of embedded DD nodes, expand it through semantic clusters, dedup \u2014 is already performed by `gather_shared_context`, which constructs `source_candidates` at `mapping.py:781\u2013854` (vector hits at 782\u2013794, cluster expansion via `cluster_searcher.search_by_path` at 803, dedup at 800\u2013801), with the `ClusterSearcher` load at `mapping.py:631\u2013635`; \u00a74 says the legacy \"is retired by \u00a78, not by this section\", so the plan knowingly writes fresh orchestration rather than lifting the existing construction (its cluster-expansion and dedup logic) into the new owner.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/settings.py:1009",
+      "id": "interface_budget-1",
+      "reason": "with all four supplied counts at 0, each section that moves a counter off zero must account for the added surface in its own text; \u00a75 in particular should name what it retires (or say why it cannot) rather than adding a parallel judgment module and seat unaccounted.",
+      "text": "\u00a75 adds new public definitions `PairJudgment`, `Route`, `judge` and `route` in `imas_codex/ids/judgment.py`, plus a new model seat `[tool.imas-codex.mapping-candidates]` registered in `MODEL_SECTIONS` and three settings accessors beside `get_triage_threshold` (`settings.py:1009`), and does not name anything in these families it retires or merges, nor state why nothing can be; \u00a77 likewise adds a new subcommand `discover map` and a new `--domain map` value (extending `DISCOVERY_DOMAINS`, `cli/discover/common.py:30`) while naming retirement only of two options in `imas map run` (\u00a78).",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "9a8be5104185b1330f765be6c0ebff9297d73f02ee45a18b961b147d0cc6a758",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-06T17:02:40.091146+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-06T17:02:41.766661+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "finding": "interface_budget-1",
+      "reason": "Partly acted: the three threshold accessors became one, and judgment moved into candidates.py beside retrieval. The seat and the discover map command stay: every LLM stage keeps its own seat so its model can change alone, the candidate stage runs on a different cadence from mapping, and \u00a75 and \u00a77 now state their surface and what it displaces.",
+      "when": "2026-10-06T17:02:43.908905+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T17:02:40.091146+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-06T17:02:41.766661+00:00"
+    },
+    "interface_budget-1": {
+      "action": "declined",
+      "by": "mapping-20261006",
+      "reason": "Partly acted: the three threshold accessors became one, and judgment moved into candidates.py beside retrieval. The seat and the discover map command stay: every LLM stage keeps its own seat so its model can change alone, the candidate stage runs on a different cadence from mapping, and \u00a75 and \u00a77 now state their surface and what it displaces.",
+      "when": "2026-10-06T17:02:43.908905+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v2.json",
+  "review_run_id": "r-20261006T165518457591-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "18aa807f08d8f9c8f120246f8a720f6e1fff338f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `retrieve_candidates` and `judgment.judge`/`route` each hide substantial behaviour (multi-arm retrieval + filter + cluster expansion + dedup; state build + batching + typed result + threshold routing) behind one entry point per stage.",
+    "duplicate_owner": "a finding \u2014 the candidate claim family in \u00a77 duplicates the existing mapping claim machinery in its own owner module instead of parameterizing it.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 adds public definitions and a model seat without naming anything it retires or merges, and \u00a77 adds a subcommand plus a `--domain` value whose retirement is stated only for a sibling command.",
+    "reuse_search": "pass \u2014 the plan cites maintained owners it verified: `hybrid_dd_search` (`imas_codex/graph/dd_search.py:97`), `cluster_search` (`dd_search.py:869`), the dimension check in `analyze_units` (`imas_codex/ids/tools.py:168`), `fetch_cross_facility_mappings` (`tools.py:733`), `DiscoveryConfig`+`run_discovery` (`imas_codex/cli/discover/common.py:103,212`), `run_discovery_engine` (`imas_codex/discovery/base/engine.py:92`), `get_api_key_for_service` (`imas_codex/discovery/base/llm.py:910`) and the sibling-plan `call_decisions` layer; each named mechanism exists, so the plan is honest about prior art even where (see findings) it re-homes one.",
+    "thin_wrapper": "pass \u2014 the plan's wrappers add behaviour the underlying owners lack (facility/source/candidate state construction, batching, typed `PairJudgment`, route decision) and \u00a74 explicitly keeps `hybrid_dd_search`'s signature fixed rather than forking it."
+  },
+  "section_digests": {
+    "_document": "fe693026503f9013804697728088f9f292dafe5bcdcd0bedf13da88a2ec84229",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s2": "ec13a0282b939de0be8d24d37a9ff728acf742492fae13fd7ee25a9cb1420f62",
+    "s3": "006a602fa9b7b7db9055c1b4d5ddfc3fdee4080226e0cdd70dbc3a5500278361",
+    "s4": "9fa9ef98a503b739ce8ade1f5cb6fb5ea198c8ad34e848392c5fb30540c83833",
+    "s5": "1780a0e3ec2c8f792624aee877bf1e865e6b1a521081ca75938e2f7cd0553ea5",
+    "s6": "833b69d48bb37ccb6eac3c5f9065133b6e57b5fd31604a2b524b970c83340b8b",
+    "s7": "6511c78d1f3f7eb58cf5292f7dfe25619f8a5783c14a9c6dc926eacd869985c6",
+    "s8": "44453d0fa0fb09b1cf4c27ac541460943651eea9d267bce4afc8687ef0b5596c",
+    "s9": "62d322230ba47b748657adab47a5b0ab7d2bda0fe32a8bb2ee5841c63ccba1af"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T17:01:51.648284+00:00"
+}

@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T12:38:18.989Z",
+  "dispatched_at": "2026-10-05T12:32:45Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/llm/search_tools.py:456",
+      "id": "reuse_search-1",
+      "reason": "the node brief must either retain a bounded over-fetch for the sibling post-filters or move those predicates in-index too, rather than a blanket removal that reintroduces the starvation \u00a716 exists to fix.",
+      "text": "\u00a716 says to \"remove the over-fetch, which the in-index filter makes unnecessary\", but only the facility predicate moves inside SEARCH; the same functions keep other predicates as post-filters behind the same over-fetch \u2014 `_vector_search_signals` (search_tools.py:454-475) appends `s.diagnostic` and `s.physics_domain` to the post-filter list, and `_vector_search_wiki_chunks` (search_tools.py:807-845) post-filters `p.wiki_site`, `p.physics_domain` and `p.<score_dim>` \u2014 so a diagnostic-, site- or score-filtered query would again lose its matches to the global ANN cut.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:148,278",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a716 is to be dispatched as an implementable node and its brief must name the functions to edit; \"those two queries\" leaves the implementer to rediscover them.",
+      "text": "\u00a716 says the \"same two indexes are also queried by `domain_queries.py` \u2026 those two queries switch to the `facility_id` property\", but it names only `find_code` and `_find_data_nodes_semantic` explicitly; the two AT_FACILITY post-filtering semantic queries that must actually change are `_find_signals_semantic` (facility_signal_desc_embedding, line 148) and `_find_wiki_semantic` (wiki_chunk_embedding, line 278), and neither is named.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f4ee500273c38464554b10b4eec435bdea951196ee340a4bd2410280ff518551",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 88,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:39:48.405676+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:39:47.914035+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T123240956646-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "3fa4aee324b1a59c39c2769e8d945cc68ced6fca",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the implementable sections extend one existing owner (`build_vector_search`'s `prefilter_clauses` plus the `vector_index_filters` slot annotation) rather than spreading new wrappers over the same machinery; \u00a717 extends the single label-parameterised `embed_worker` rather than adding a parallel retry path.",
+    "duplicate_owner": "a finding \u2014 \u00a716 names `imas_codex/graph/domain_queries.py` as a change site but leaves its two in-scope AT_FACILITY queries as the unnamed \"those two queries\", so the node brief does not name `_find_signals_semantic` or `_find_wiki_semantic`, the functions it must extend.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a716 (\"nothing added \u2026 the over-fetch constant is retired\") and \u00a717 (\"no new `--reset-to` value or CLI surface appears\") each name what they retire and add no public definition, CLI option, MCP view or refusal family.",
+    "reuse_search": "a finding \u2014 \u00a716 reuses the in-index facility pre-filter but removes the ANN over-fetch without accounting for the sibling post-filters already present in the same functions (diagnostic/physics_domain in `_vector_search_signals`; site/physics_domain/min_score in `_vector_search_wiki_chunks`), which the over-fetch also compensates.",
+    "thin_wrapper": "pass \u2014 no new layer is added; \u00a716 and \u00a717 each retire surface (the `max(k*2, 50)` over-fetch expression; the \"to retry, clear the property manually\" instruction), and \u00a717 explicitly extends the owner instead of adding beside it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:38:33.089947+00:00"
+}

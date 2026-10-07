@@ -1,0 +1,86 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T04:23:06.539Z",
+  "dispatched_at": "2026-10-07T04:18:26Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/signals/models.py:166",
+      "id": "reuse_search-1",
+      "reason": "the \u00a72 census is the plan's reuse map and its file column is the address the implementer opens; a wrong path sends the \u00a76 node to the wrong module.",
+      "text": "\u00a72's census table places `SignalEnrichmentBatch` in `discovery/signals/parallel.py`, but the response model is defined at `imas_codex/discovery/signals/models.py:166` and `parallel.py` only imports the pipeline base classes; \u00a76's \"retires those classification fields from its language-model response model\" will therefore edit a file the census never names",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/code/graph_ops.py:654",
+      "id": "reuse_search-2",
+      "reason": "the claim and its counter must agree for \u00a73's \"never-judged-first\" ordering to reconcile, so the sentence has to name the file that owns the predicate (`graph_ops.py`), not the file that calls it.",
+      "text": "\u00a73 says \"the pending counters that count the same state (`code/parallel.py`) read the same predicate\", but `has_pending_triage_work` and `has_pending_score_work` are defined in `imas_codex/discovery/code/graph_ops.py:654` and `:626`; `code/parallel.py:30\u201335` only imports them",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "fecc0ef393e95d42defb7dcc6862a31620713521193d3ea92fb93524cfe6b1da",
+  "plan_slug": "discovery-judgments-through-jev",
+  "plan_version": 20,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T04:23:55.369576+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-2",
+      "reason": "",
+      "when": "2026-10-07T04:23:59.620608+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T04:23:55.369576+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T04:23:59.620608+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-discovery-judgments-through-jev.v20.json",
+  "review_run_id": "r-20261007T041816598521-plan-review-of-discovery-judgments-through-jev",
+  "reviewed_blob_sha": "bf9e6777c4083bcb8d0eba5f6c9d068ab8580091",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73's `imas_codex/discovery/base/judgment.py` hides claim, bounded concurrency, cost booking, answer application and fail-open-on-row (leave unjudged) behind one function taking a batch plus three per-pipeline builders; the five pipelines supply callers, not wrappers over the same machinery.",
+    "duplicate_owner": "pass \u2014 the shared mechanisms are extended at their owners rather than forked: the stale-claim predicate and never-judged-first order are added to `claim_batch` (`imas_codex/discovery/base/claims.py:255`, keeping the `ORDER BY rand()` anti-deadlock pattern at line 322), the reset owner `imas_codex/discovery/base/reset.py` keeps its meaning, the decision transport stays `acall_decisions`, and no new placement, path-resolution or scheduler query is introduced.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the only surface \u00a73 adds is one public function and one module, and \u00a73's own interface account names the retiree (\"the code pipeline's inline decision loops retired\", \"No CLI option, no seat and no driver\"), \u00a75 and \u00a76 name the response-model fields they retire, and \u00a79 states it adds no seat.",
+    "reuse_search": "a finding \u2014 the design searched and cites the mechanisms it extends (`acall_decisions` in `imas_codex/discovery/base/llm.py:3543`, `claim_batch` in `imas_codex/discovery/base/claims.py:255`, the reset registries in `imas_codex/discovery/base/reset.py:339` and `imas_codex/discovery/code/scorer.py:57`, the `discovery-relevance` seat, `_search_code`/`_search_docs` in `imas_codex/llm/search_tools.py`), but two of its census citations name the wrong owner file.",
+    "thin_wrapper": "pass \u2014 the one layer added over existing machinery (the \u00a79 rerank inside `_search_code`/`_search_docs`) is a rerank of those same tools, reuses the existing `discovery-relevance` seat and states its fallback (embedding order kept on failure); \u00a73's judge function is a batch driver over the single-call primitive `acall_decisions`, and the plan names the two inline loops it retires."
+  },
+  "section_digests": {
+    "_document": "0f95ea8f1eb298f9bf106cfadcf390c9b11200fd75efb6b4726cd67c616e7a51",
+    "s1": "e6ed0dfe853f3f242923d7b9bca83fb125586f4f1620d4a6becb8392c02c5fe7",
+    "s10": "90c0038b2e3ee1f52a792eaf54834086ddeceb46b160ae70554db5fdb5bf8de1",
+    "s11": "64c3adbcbcb984ce3247ada0491a64d7ffee9b6d6a6a09b35e47fe9925d4090e",
+    "s12": "93d376bc32b0e673ed09662ec5adce4c0d93281c5f9efb06c86be2b44a521240",
+    "s2": "7889041df1493423b902f12bed103f678abc02ce079dba88ef32d604f533ec8a",
+    "s3": "0d6b8c9f0a64e1998bc87fe43b7b1749e63148de114674aa8e802ebbe7d2c290",
+    "s4": "ec02f698f7539ba44cea1235ecc63eafc4f6401062cff4d0eaf6781b80bf4485",
+    "s5": "30921946c9fad0b75ae7d952e90b33b69f003a24aeff996838a5667f54877b2e",
+    "s6": "597594c4c02e7635ea02376655d175f85a55bc27850abada9847438b56c7faf3",
+    "s7": "65815dcec23706975640bf842758839232a604a86ca763c940b639b3af0dae0e",
+    "s8": "2995253050e0a467fb6eff3f70e71e0d3abf78c06d05b28020695df8f311e85a",
+    "s9": "b23b6c242c064a16c1c013469085dd798db7f4376029c78b52206385a233978a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:23:51.019865+00:00"
+}

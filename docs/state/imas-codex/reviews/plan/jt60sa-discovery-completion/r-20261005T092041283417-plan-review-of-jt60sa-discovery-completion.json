@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T09:25:14.684Z",
+  "dispatched_at": "2026-10-05T09:20:45Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/client.py:90",
+      "id": "reuse_search-1",
+      "reason": "\u00a710 should be dropped or closed as already-landed so no implement node is dispatched to re-delete machinery that is gone, and the section's budget is freed.",
+      "text": "\u00a710 plans to delete `_slurm_service_uri` and the SLURM branch of `_resolve_graph_uri` as duplicates of `profiles.py`, but neither exists: `git grep _slurm_service_uri -- imas_codex tests` returns nothing, `_resolve_graph_uri` is a one-line delegation to `get_graph_uri()`, and \u00a710's own done-when (`rg '_slurm_service_uri|discover_compute_node_local|_resolve_compute_host' imas_codex/graph`) is already empty \u2014 the deletion landed in `30597f737`, an ancestor of HEAD and newer than the plan's last listed commit `4a30fab9d`.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/wiki/pipeline.py:396",
+      "id": "thin_wrapper-1",
+      "reason": "the section must name the scorer call site that invokes the rule (or the mark is dead in the scan pipeline), rather than asserting the scorer gains a rule it never calls.",
+      "text": "\u00a73(b) states \"the wiki scorer gains a dynamic-page rule\", but `apply_dynamic_page_rule` has no production call site anywhere in `imas_codex/` and the existing scorer `_score_pages_heuristic` (`imas_codex/discovery/wiki/scoring.py:961`) is not extended or invoked; the rule is operator-invoked only, so the `fronts_database` mark never applies during a scan.",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e797ba722c8bd39077cb2ef428a1384b55abc652e7008b482fe3a3ab4aa99e7b",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 49,
+  "project": "imas-codex",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T09:25:46.817402+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T09:25:47.316423+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T092041283417-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "f198357e0785411567bf7bee911029aee76633e4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no module; \u00a79 condenses three DataAccess write sites behind one `persist_data_access(data_access)` function, adding depth rather than surface.",
+    "duplicate_owner": "pass \u2014 the plan names the owners it extends rather than forking them: the EDAS scanner and `enumerate_edas.py` for the PID pass (\u00a73c), `link_chunks_to_entities` for the DOCUMENTS merge (\u00a73a), `resolve_service_url` through the profile layer (\u00a710).",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 names its retiral (the prototype `class:`/`shots:`/`udpid:` keyword parking), \u00a73 states `fronts_database` retires nothing and why, and \u00a79/\u00a710 add no CLI, MCP-view or refusal surface.",
+    "reuse_search": "a finding \u2014 \u00a710 proposes deleting `imas_codex/graph/client.py::_slurm_service_uri` and the SLURM branch of `_resolve_graph_uri`, both of which are already absent from HEAD.",
+    "thin_wrapper": "a finding \u2014 \u00a73(b) says the wiki scorer gains a dynamic-page rule, but the landed `apply_dynamic_page_rule` has no production call site and the existing scorer is not named as the extension point."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T09:25:29.069923+00:00"
+}

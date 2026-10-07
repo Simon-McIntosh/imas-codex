@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T12:31:34.370Z",
+  "dispatched_at": "2026-10-05T12:24:33Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:581",
+      "id": "duplicate_owner-1",
+      "reason": "the section either converts this fourth search to the facility_id pre-filter or must scope its \"one mechanism remains\" claim and say why SignalNode is exempt, since leaving it silently reproduces the facility-starved ANN cut \u00a716 exists to fix.",
+      "text": "\u00a716 states \"One facility-filter mechanism remains across both modules\", but `_find_data_nodes_semantic` (the semantic branch of `find_data_nodes`, facility required) still appends `(n)-[:AT_FACILITY]->(:Facility {id: $facility})` to `pre_filter_parts` and passes it as `where_clauses=` to `build_vector_search` at line 593, i.e. as a post-ANN filter \u2014 the identical defect \u00a716 removes from `_find_signals_semantic` (line 148) and `_find_wiki_semantic` (line 278)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/code/parallel.py:480",
+      "id": "duplicate_owner-2",
+      "reason": "the section already asserts the count predicates are \"kept in step\", and this owner (with `_count_unembedded`, embed_worker.py:254) must be updated in the same change or the reported pending_embed drifts from the work the worker actually does.",
+      "text": "\u00a717 adds an embed_failed_at cutoff to `_fetch_unembedded` so it can retry old failures, but the code phase's pending-embed count in `code/parallel.py` independently encodes the retryability predicate (`count(CASE WHEN cc.embedding IS NULL AND cc.embed_failed_at IS NULL \u2026)`) and is not a caller of the shared worker, so after the change it reports a row as non-pending that the worker will now fetch",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "addb10091b6a596373c1be22101c0906a9f1cad34c087e7d587856fce23e4190",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 86,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:32:35.265367+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T12:32:35.866751+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T122428828034-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "a0659405b3bb0bea7d9caf4ab30dd9ec3fee638d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is introduced; \u00a716 renders the SEARCH predicate through the existing build_vector_search and the index DDL through GraphClient.ensure_vector_indexes, and \u00a717 extends the one label-parameterised embed_worker rather than adding a parallel worker.",
+    "duplicate_owner": "a finding \u2014 \u00a716 converts the facility filter to the facility_id property on the signal, wiki-chunk and code searches but leaves domain_queries.py:581 post-filtering the same facility by an AT_FACILITY relationship, so two facility-filter mechanisms would remain where the section claims one.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the two sections that could add surface state their retirement in their own text (\u00a716 retires the over-fetch constant, \u00a717 retires the manual-clear docstring instruction, adds no --reset-to value) and \u00a79/\u00a714 add none beyond consolidating existing statements.",
+    "reuse_search": "pass \u2014 every implementable section names the mechanism it extends at file level (\u00a712's vector_index_filters annotation and GraphClient.ensure_vector_indexes for \u00a716; embed_worker.py and reset.py for \u00a717; the discover paths/code scoping option for \u00a714; probe_remote_environment and persist the existing DataAccess writer for \u00a79), and \u00a717 cites the claimed_at cutoff shape as prior art.",
+    "thin_wrapper": "pass \u2014 \u00a79's persist_data_access consolidates three inline DataAccess writes into one statement with two callers and retires the duplicate MERGEs, and \u00a717 adds a cutoff to an existing fetch predicate; neither adds a layer over machinery it declines to extend."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T12:31:49.822573+00:00"
+}

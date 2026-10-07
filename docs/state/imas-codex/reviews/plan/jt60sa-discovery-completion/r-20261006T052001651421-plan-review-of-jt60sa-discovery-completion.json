@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T05:24:36.551Z",
+  "dispatched_at": "2026-10-06T05:20:07Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/llm.py:2259",
+      "id": "duplicate_owner-1",
+      "reason": "the section must name the routing conjunction (`_use_local` / `_is_local_api_base`) as the suppression gate, or state why the model prefix alone is the correct discriminator, so suppression cannot diverge from routing.",
+      "text": "\u00a722 says a model served by the dedicated local client, identified by the predicate `_is_local_client_model` (llm.py:947, a `local/`/`hosted_vllm/` prefix test), \"never sends `response_format`\", but the actual decision that a request is served by the dedicated local client is the conjunction `_use_local = _is_local_client_model(model) and _is_local_api_base(api_base)` (llm.py:2259, 2451, 2907). Gating suppression on the prefix alone forks the locality decision: a `local/*` or `hosted_vllm/*` model routed through litellm (no `api_base`) would lose its `response_format` and fall back to prompt-injected schema while its transport never took the local branch the change exists to protect, and any future local prefix would silently affect non-local routing; the plan itself asserts \"OpenRouter models are unchanged\", which only holds if suppression is bound to the same predicate that selects the local client.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "17727e9fbd1dcfa5db4385a8d050dde5536f44b51de1ee7879e8116b8197ee7a",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 166,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T052001651421-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "3dc1e33348c2d04308a2d7f679fd09f4d2ffade2",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; the abort behaviour lands in llm.py, the owner of the structured-call loops, and the reset/paths changes land in reset.py and query_builder.py, each of which already hides its record shape and call loop behind a small interface.",
+    "duplicate_owner": "a finding \u2014 \u00a722 gates its new response_format suppression on `_is_local_client_model` alone (llm.py:947), a prefix test, while the owner of the \"this request is served by the dedicated local client\" decision is the routing conjunction `_use_local = _is_local_client_model(model) and _is_local_api_base(api_base)` at imas_codex/discovery/base/llm.py:2259, so the plan forks that decision instead of extending it.",
+    "interface_budget": "pass \u2014 this week's figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a722 states it adds no error family (reusing `EmptyResponseError`) and adds no CLI option or MCP view, and \u00a714's remaining nodes edit existing config/CLI values (`discovery_roots`, `--root`/`--path-prefix`) and add only tests, so no section adds surface to any family without accounting for it.",
+    "reuse_search": "pass \u2014 \u00a722 extends existing machinery rather than rebuilding it: the structured-call retry contract already exists (`EmptyResponseError` at imas_codex/discovery/base/llm.py:475, its `empty response content` message already a member of `RETRYABLE_PATTERNS` at llm.py:718 with no `NON_RETRYABLE_PATTERNS` entry matching `abort`), and the schema-injection path already exists (`schema_needs` frontmatter and the shared partial providers in imas_codex/llm/prompt_loader.py:367,1041,1361); \u00a714 reuses `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268), `reset_to_status` (imas_codex/discovery/base/reset.py:59), `get_facility` (imas_codex/discovery/base/facility.py:113) and `seed_facility_roots`, all of which exist and are the named owners.",
+    "thin_wrapper": "pass \u2014 \u00a722's local-transport change extends `_build_kwargs`/`_completion_local`/`_local_call_kwargs` in place (llm.py:1974,190,146) and states why the engine cannot take `response_format` (the xgrammar `Grammar accept_token failed` abort), so the added conditional is justified rather than a parallel layer."
+  },
+  "section_digests": {
+    "_document": "a507e04135209e4e48d06a0ce2bbf5854ad336f732e793bbf42b21c3fe398fcd",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "d6d5a73cb0dec6ffd86906f917269a075a7911e82a8eef8ad19e5451325e0836",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "2cdf9621fe5a2c8074a265d04032e6c12b5ccc12f40076eba38d02184ac0ad53",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T05:38:29.936490+00:00"
+}

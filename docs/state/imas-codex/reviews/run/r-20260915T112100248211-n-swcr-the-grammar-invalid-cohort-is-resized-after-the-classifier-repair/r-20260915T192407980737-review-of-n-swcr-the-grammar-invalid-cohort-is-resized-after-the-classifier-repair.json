@@ -1,0 +1,48 @@
+{
+  "absent": [],
+  "backend": "codex",
+  "completed_at": "",
+  "dispatched_at": "2026-09-15T19:24:07.980737+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md",
+      "line": "12",
+      "text": "the 2/12 numerator is two reattachments to pre-existing accepted identities using per_toroidal_mode and flux_surface_averaged, while the repaired defect was the coordinate-indexed derivative_with_respect_to operator lookup; without a base-versus-repaired comparison or a recovered coordinate-indexed case, this measures pipeline recovery after the repair but not how much recovery the classifier caused."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md",
+      "line": "10",
+      "text": "the recorded done_when requires the sample to be released with sn retry --failed, but this receipt proves the command released zero of twelve and the resumed run composed them directly under coordinator advice; that is a justified gate change, not satisfaction of the unchanged recorded gate, so promotion must preserve the deviation rather than call the original measure passed."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md",
+      "line": "17",
+      "text": "the only full transcript is referenced under crew/runs and no test references this evidence file or its cumulative anchor, so a later edit to the 109-row census, 47-source denominator, or 2/12 outcome can still pass every recorded audit-doc and diff-check gate."
+    }
+  ],
+  "justifications": {
+    "durability": "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:17 names hashed logs and the three documents are committed, but no test under tests/ or imas_codex/ references this receipt or its archive anchor, so the measured values have no regression guard.",
+    "evidence": "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:7-17 records the positive control, complete census counts, exact sample, terminal run receipt, spend and scope counts, and both log hashes match, but the named retry command released 0/12 and the resumed log elides its exact command while summarizing post-run graph reads without their query output.",
+    "fit": "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:19-44 follows the repository's operational-receipt idiom with a compact per-source table, explicit negative evidence and no unnecessary graphic, while the archive anchor and plan comments use project-absolute links.",
+    "goal_fidelity": "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:12 supplies a bounded 2/12 source-recovery result, but neither recovered name exercises the coordinate-indexed derivative classification changed by imas_codex/standard_names/models.py:536, so the claimed classifier-specific effect is not isolated.",
+    "scope_discipline": "git diff c2912941c..856345a9c changes only docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md, docs/evidence/archive/sn-west-catalog-release-landed.html and docs/plans/sn-west-catalog-release.html, exactly the three declared paths, and the worktree is clean."
+  },
+  "model": "gpt-5.6-sol",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:12 supplies a bounded 2/12 source-recovery result, but neither recovered name exercises the coordinate-indexed derivative classification changed by imas_codex/standard_names/models.py:536, so the claimed classifier-specific effect is not isolated.\nSCORE evidence: 14\nJUSTIFICATION evidence: docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:7-17 records the positive control, complete census counts, exact sample, terminal run receipt, spend and scope counts, and both log hashes match, but the named retry command released 0/12 and the resumed log elides its exact command while summarizing post-run graph reads without their query output.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff c2912941c..856345a9c changes only docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md, docs/evidence/archive/sn-west-catalog-release-landed.html and docs/plans/sn-west-catalog-release.html, exactly the three declared paths, and the worktree is clean.\nSCORE durability: 5\nJUSTIFICATION durability: docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:17 names hashed logs and the three documents are committed, but no test under tests/ or imas_codex/ references this receipt or its archive anchor, so the measured values have no regression guard.\nSCORE fit: 19\nJUSTIFICATION fit: docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:19-44 follows the repository's operational-receipt idiom with a compact per-source table, explicit negative evidence and no unnecessary graphic, while the archive anchor and plan comments use project-absolute links.\nFINDING docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:12 the 2/12 numerator is two reattachments to pre-existing accepted identities using per_toroidal_mode and flux_surface_averaged, while the repaired defect was the coordinate-indexed derivative_with_respect_to operator lookup; without a base-versus-repaired comparison or a recovered coordinate-indexed case, this measures pipeline recovery after the repair but not how much recovery the classifier caused.\nFINDING docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:10 the recorded done_when requires the sample to be released with sn retry --failed, but this receipt proves the command released zero of twelve and the resumed run composed them directly under coordinator advice; that is a justified gate change, not satisfaction of the unchanged recorded gate, so promotion must preserve the deviation rather than call the original measure passed.\nFINDING docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md:17 the only full transcript is referenced under crew/runs and no test references this evidence file or its cumulative anchor, so a later edit to the 109-row census, 47-source denominator, or 2/12 outcome can still pass every recorded audit-doc and diff-check gate.\n",
+  "review_run_id": "r-20260915T192407980737-review-of-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+  "reviewed_base": "c2912941c153629dfc2ec8eccce87c6d353da3be",
+  "reviewed_commit": "856345a9c6d7744485f5960428d106470fe58dc3",
+  "reviewed_run_id": "r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+  "scores": {
+    "durability": 5,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-15T19:31:57.567819+00:00",
+  "total": 73
+}

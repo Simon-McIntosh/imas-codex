@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured from the reviewed run's own record: its manifest (role implement) names no baseline_suite or after_suite gate logs; its only gate log tests.log is the head arm, 103 passed EXIT=0 over tests/wiki/{test_pipeline,test_graph_ops_unit,test_workers}.py. The reviewer ran independent base/head arms over the reviewed run's own gate surface tests/wiki in scratch trees at the reviewed revisions: base 595faff3 521 passed EXIT=0 (/tmp/hdp-review-base.log), head 02e0c336 530 passed EXIT=0 (/tmp/hdp-review-head.log), the 9-test delta being the added TestDynamicPageDetector/Stub/ExtractDatabaseLinks/LinkChunksToEntitiesDatabaseMerge classes. Zero added failures.",
+  "backend": "local",
+  "base_log_revision": "595faff3f",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-05T08:16:14.884Z",
+  "dispatched_at": "2026-10-05T08:06:17Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "396",
+      "severity": "follow-on",
+      "text": "follow-on: apply_dynamic_page_rule and detect_dynamic_page have zero production call sites (git grep at 02e0c336: the only non-test references are the definitions and the __all__ entries), and imas_codex/discovery/wiki/scoring.py is not modified, so plan section 3's 'the wiki scorer gains a dynamic-page rule' is implemented as an operator-invoked function, not a scorer rule; link_chunks_to_entities runs on ingest (imas_codex/discovery/wiki/parallel.py:815) but fronts_database is written only by the uncalled function, so a fresh ingest of the handbook re-creates header-only pages with no fronts_database and links nothing."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "437",
+      "severity": "follow-on",
+      "text": "follow-on: only 2 of the seven handbook tables are marked. apply_discover.log records a third linking topic, CategoryInformation2, fronting LCDB and MBDB, and apply_live.log Q1 lists only jt-60sa:CategoryInformation ['EDDB','PMDB'] and jt-60sa:DataInformation ['UDDB','EQDB','FAME'], so the LCDB and MBDB tables carry no fronts_database value and neither the fragment nor the manifest's follow_ons mentions them; the done-when's seven-table coverage is satisfied for five databases."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/handbook-dynamic-pages.html",
+      "line": "48",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's live measure asserts MCP follow-through from the stored graph state but shows no search_docs or fetch_content call on a dynamic page, so the done-when's 'search_docs and fetch_content on a dynamic page return the signals it fronts ... proved by search_docs(\"flux loop\", facility=\"jt-60sa\") returning the PSRC flux-loop signals' is claimed from edges rather than demonstrated by the named tools."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "368",
+      "severity": "follow-on",
+      "text": "follow-on: fronts_databases_for_topic(facility_id, topic_name, linking_texts) never reads its facility_id argument, which is passed by both call sites in apply_dynamic_page_rule; drop the parameter or use it to scope the linking chunks."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/pipeline.py",
+      "line": "558",
+      "severity": "follow-on",
+      "text": "follow-on: the fourth DOCUMENTS merge uses a dynamic map lookup $database_sources[database] with database_sources passed as a parameter map; TestLinkChunksToEntitiesDatabaseMerge asserts the query's shape through a mocked GraphClient, and the repo's default markers exclude the graph marker, so the Cypher is never parsed or run against a live database by any gate."
+    }
+  ],
+  "head_log_revision": "02e0c3363",
+  "item_aggregate": 7,
+  "item_verdicts": {
+    "call_sites": "zero production call sites: git grep at 02e0c336 finds apply_dynamic_page_rule and detect_dynamic_page referenced only in imas_codex/discovery/wiki/pipeline.py (definition and __all__) and tests/wiki/test_pipeline.py; the wiki scorer imas_codex/discovery/wiki/scoring.py is untouched and link_chunks_to_entities is invoked at imas_codex/discovery/wiki/parallel.py:815 but fronts_database is set only by the uncalled apply_dynamic_page_rule.",
+    "diff": "read 595faff3f89de937d26d2d2a8c4cf182fc001028 to 02e0c3363c93eb03a361ba85eaec929e9613dc5b: pipeline.py gains DATABASE_SIGNAL_SOURCES, extract_database_links, _is_header_only_form, detect_dynamic_page, dynamic_page_stub, fronts_databases_for_topic, apply_dynamic_page_rule and a fourth DOCUMENTS merge in link_chunks_to_entities; facility.yaml gains the multivalued WikiPage.fronts_database property; test_pipeline.py gains four test classes; the fragment and reach.png record the live result.",
+    "done_when": "the marked pages (CategoryInformation ['EDDB','PMDB'], DataInformation ['UDDB','EQDB','FAME']) are ingested and reach signals through HAS_CHUNK then DOCUMENTS; jt-60sa:general/psrc_magfluxlp1 is reached from both chunks of the EDDB-fronting page; only 2 of the seven handbook tables are marked, and the MCP follow-through is asserted from stored chunk/edge state rather than shown through a search_docs/fetch_content call.",
+    "goal": "section 3 done-when asks the seven handbook tables to carry fronts_database, every section-2 FacilitySignal to be reached from its database's handbook page via a chunk DOCUMENTS edge, a PID-keyed one-point enumeration for E101173 (owned by the sibling pid-enumeration node), and the MCP tools to follow the edges both ways; the change delivers the marking mechanism, the linker key, and two marked handbook pages reaching 6298 EDDB signals, but marks only two pages.",
+    "manifest": "read; status complete, four commits 386d33e54/4a30fab9d/2965f7c79/02e0c3363, gate uv run pytest tests/wiki/{test_pipeline,test_graph_ops_unit,test_workers}.py 103 passed EXIT=0, negative control reds test_header_only_without_database_is_not_dynamic EXIT=1 with head arm green; the manifest names no baseline_suite/after_suite gate logs.",
+    "write_paths": "read the reviewed manifest's declared paths; git diff --name-only 595faff3..02e0c336 lists exactly the five paths the manifest's changed_paths names and nothing else."
+  },
+  "justifications": {
+    "durability": "The added test classes are focused and the negative control demonstrates the guard fires rather than merely passing. It loses points because the merge query's Cypher map lookup $database_sources[database] is exercised only through a mocked GraphClient and never against a live database (repo rule: default markers exclude graph), so a Cypher that failed to parse would pass the suite, and because an unintegrated rule leaves a re-ingest of the handbook unmarked with no regression to catch it.",
+    "evidence": "The fragment carries a figure, a live measure through the pipeline's own functions (apply_dynamic_page_rule then link_chunks_to_entities, not hand Cypher) with the 12400-to-6298 brief growth reconciled, and a negative control (negative_control.log EXIT=1 reds test_header_only_without_database_is_not_dynamic, negative_control_head.log EXIT=0 3 passed). It loses points because the live measure reports only two marked pages and never names the third topic or LCDB/MBDB, so the evidence does not show the seven-table coverage the done-when states.",
+    "fit": "The page reaches its signals through the existing WikiChunk-[:DOCUMENTS]->FacilitySignal relationship and the existing link_chunks_to_entities writer, so no new edge and no new edge-owner is introduced, and WikiPageStatus is not widened: the page keeps status 'ingested'. The pure helpers are named by mechanism and exported. It loses points because the rule is not integrated into any production path: apply_dynamic_page_rule and detect_dynamic_page have zero call sites outside tests and __all__ (see finding call-site).",
+    "goal_fidelity": "The change realises the three mechanisms plan section 3 names minus the PID pass that belongs to the dynamic-page sibling node: extract_database_links parses ?db= from stored chunk text, detect_dynamic_page marks a header-only table fronting a known database, and link_chunks_to_entities gains a fourth DOCUMENTS merge keyed on fronts_database. On the live graph CategoryInformation carries ['EDDB','PMDB'] and DataInformation ['UDDB','EQDB','FAME'], both ingested, database_signals_linked=12596, and jt-60sa:general/psrc_magfluxlp1 is reached from both chunks of the EDDB page (apply_live.log Q1-Q4). It loses points because only 2 of the seven handbook tables were marked: apply_discover.log shows a third linking topic CategoryInformation2 fronting LCDB and MBDB, absent from the applied set and from apply_live.log Q1, and the wiki scorer still scores a dynamic page as content (see finding corpus).",
+    "scope_discipline": "git diff --stat 595faff3..02e0c336 lists exactly the five declared paths (imas_codex/schemas/facility.yaml, imas_codex/discovery/wiki/pipeline.py, tests/wiki/test_pipeline.py, the evidence fragment, the reach.png figure) with +471/-2; no dependency, schema-context or plan edit is swept in, and the wider orientation_write_paths the manifest declared (graph_ops.py, scraper.py, test_graph_ops_unit.py, test_scraper.py) were deliberately left unchanged."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 595faff3f89de937d26d2d2a8c4cf182fc001028\nreviewed_head_sha: 02e0c3363c93eb03a361ba85eaec929e9613dc5b\nVERDICT goal: the change delivers the marking mechanism, the front_database key on the linker, and two marked handbook pages reaching 6298 EDDB signals in the live jt-60sa graph; it falls short of the seven-table done-when because a third linking topic, CategoryInformation2 (LCDB, MBDB), is left unmarked.\nVERDICT scope: exactly the five declared paths changed, no swept edits.\nVERDICT evidence: figure, live measure through the pipeline's own functions, and a real negative control; the measure does not show the seven-table coverage.\nVERDICT fit: reuses the existing WikiChunk-DOCUMENTS-FacilitySignal relationship and the existing writer; but the rule is not wired into the scorer or any production path.\nVERDICT durability: focused tests and a firing negative control; the merge Cypher is mock-only and an unintegrated rule leaves a re-ingest unmarked.\nADDED FAILURES: 0 (reviewer base/head arms over tests/wiki: base 521 passed, head 530 passed, both EXIT=0).",
+  "review_run_id": "r-20261005T080612927124-review-of-handbook-dynamic-pages",
+  "reviewed_base_sha": "595faff3f89de937d26d2d2a8c4cf182fc001028",
+  "reviewed_head_sha": "02e0c3363c93eb03a361ba85eaec929e9613dc5b",
+  "reviewed_run_id": "r-20261005T073314446582-handbook-dynamic-pages",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 14,
+    "goal_fidelity": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T08:14:00+00:00",
+  "total": 76,
+  "verdict": "SOUND WITH FINDINGS"
+}

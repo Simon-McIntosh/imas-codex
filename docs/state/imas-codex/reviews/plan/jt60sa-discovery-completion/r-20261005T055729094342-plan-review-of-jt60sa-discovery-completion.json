@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T06:00:45.174Z",
+  "dispatched_at": "2026-10-05T05:57:32Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/schemas/facility_config.yaml:426",
+      "id": "duplicate_owner-1",
+      "reason": "extending DataSystemBase keeps the single config path every scanner already reads and removes the two-surfaces-drift the plan cites as its motivation; a new block forks it.",
+      "text": "the plan introduces a new facility-level remote_environment block instead of extending the DataSystemBase mixin that already defines setup_commands/python_command for every data system (EDASConfig et al. mix it in, scanners read config.get(\"setup_commands\")/config.get(\"python_command\"), parallel.py merges it)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/facility.py:113",
+      "id": "reuse_search-1",
+      "reason": "the missed search result is precisely the mechanism to extend, so both the premise and the chosen surface change.",
+      "text": "the plan's premise \"that knowledge lives in two loosely typed keys under one data system\" is inaccurate: get_facility already returns facility-wide config and the DataSystemBase mixin already generalizes those two keys across all data systems, so the plan proposes new surface without having cited the owner it should extend",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility_config.yaml:426",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added interface surface by stating the merge or why nothing can be retired, which the review item exists to force.",
+      "text": "\u00a76 adds the remote_environment block (four fields) and the interpreter-floor/module-importability probe results as new definition surface without naming in its own text what it retires or merges; the per-data-system keys are kept as an \"optional override\" so both surfaces persist",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "09c23fe41628e58ba73c69f55a4ec5df3f61a33c0555a6c48e60fa29daf53ab1",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "A code scan, a path scan and the facility tool probe have no data system, so the DataSystemBase mixin cannot carry the host-wide interpreter recipe they need; the facility block is that default and the mixin keys stay as the per-data-system override (TCV mdsplus sources a different profile from a plain python call). The genuine duplicate is data_access_patterns.setup_commands, which no code reads: \u00a76 now retires it into the block.",
+      "when": "2026-10-05T06:02:23.388685+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:02:24.347783+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T06:02:23.871440+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T055729094342-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "11652eeaac06e776d2a8ca2c2f400f4aadf388e4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72 extends FacilitySignal with three typed slots through the existing schema/build-models path, \u00a73 adds one property to WikiPage and reuses the existing chunk edge, and \u00a76 hides the block+override merge behind one resolver function rather than spreading wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a76 adds a facility-level remote_environment block beside the existing DataSystemBase mixin (imas_codex/schemas/facility_config.yaml:426) whose setup_commands/python_command every scanner already reads and which imas_codex/discovery/signals/parallel.py already merges.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 adds the remote_environment block (setup_commands, python_command, interpreter floor, required modules) while retaining the per-data-system keys as an override, so it names no retirement or merge of the surface \u00a76 itself says is already duplicated.",
+    "reuse_search": "a finding \u2014 \u00a73 correctly reuses the existing WikiChunk-[:DOCUMENTS]->FacilitySignal edge (created at imas_codex/discovery/wiki/pipeline.py:318, read at imas_codex/llm/search_tools.py:818) and \u00a76 reuses check_all_tools, but \u00a76's prior-art premise that the remote-environment knowledge lives in \"two loosely typed keys under one data system\" misses the DataSystemBase mixin at imas_codex/schemas/facility_config.yaml:426, which already carries setup_commands and python_command for every data system.",
+    "thin_wrapper": "pass \u2014 the \u00a76 resolver adds real merge behaviour (facility block plus per-data-system override) over the existing facility-config read; it is not a forwarding shim, and the check-stage change extends the existing check_edas.py rather than adding a parallel script."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:01:45.577785+00:00"
+}

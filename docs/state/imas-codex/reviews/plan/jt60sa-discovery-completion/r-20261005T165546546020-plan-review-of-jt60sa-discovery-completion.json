@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T17:00:12.013Z",
+  "dispatched_at": "2026-10-05T16:55:51Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/jt60sa-discovery-completion.html:235 (imas_codex/discovery/paths/frontier.py:428)",
+      "id": "duplicate_owner-1",
+      "reason": "moving the reprocessability write into reset.py (the owner \u00a714 itself names) removes the duplicate writer and replaces the argument-presence trigger with an explicit, root-scoped reset, so the fixed end-state is reached through one mechanism rather than two.",
+      "text": "\u00a714 clears expanded_at from two places: inside the seed item map when root_paths was supplied (frontier.py:528) and, via clear_fields, in PATH_RESET_SPECS (reset.py:245, :252). \u00a714's stated reason for the extra seed writer \u2014 \"--root is the only root-scoped entry point while the reset is facility-wide\" \u2014 is inaccurate: reset_to_status already takes extra_filter/extra_params (reset.py:63, applied at reset.py:87) and the signals CLI already scopes a reset with them (cli/discover/signals.py:224-228). A root-scoped path filter on the existing reset (the same shape the signals command uses) is therefore the single-owner change, not a second writer. Keying the new behaviour on the presence of root_paths is also ambiguous: three callers pass root_paths (cli/discover/paths.py:262 for --root, cli/discover/__init__.py:312 for `discover seed --path`, frontier.py:640 via seed_missing_roots), so \u00a714's \"supplied explicitly\" trigger silently changes the seed's contract for two callers that are not the intended reprocess entry point.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0e7adf830183cc1ec9893dfce148c0de4d4d9be4145097e63a8c6c09ee789be9",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 126,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-05T17:02:03.451067+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T165546546020-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "cb76327a9ff7837c507996c6b65fba76e73e6041",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 neither remaining section introduces a module; \u00a714 adds a conditional inside one existing function (frontier.py:426) and one key to clear_fields, \u00a720 adds a single graph-tier test file, so there is no new interface to weigh against what it hides.",
+    "duplicate_owner": "a finding \u2014 \u00a714 makes seed_facility_roots a second writer of expanded_at beside the owner it names, PATH_RESET_SPECS, whose reset path already supports caller scoping.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no new symbol (a branch in an existing function plus an entry in PATH_RESET_SPECS.clear_fields) and \u00a720 adds only a test file, so none of the four families grows.",
+    "reuse_search": "pass \u2014 \u00a714 cites seed_facility_roots (frontier.py:426), create_nodes (graph/client.py:605), claim_paths_for_expanding (paths/parallel.py:520) and PATH_RESET_SPECS (base/reset.py:240) and every claim about them checks out (SET n += item at client.py:668 removes a null property; the claim predicate at parallel.py:547-549 matches the plan's text); \u00a720 cites render_chunk_source (graph/query_builder.py:68) and the tests/graph live-graph pattern it follows.",
+    "thin_wrapper": "pass \u2014 no wrapper layer is proposed; \u00a714 extends the existing seed and reset mechanisms in place and \u00a720 adds a test with an explicit \"no source changes, no new helper\"."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T17:00:26.964751+00:00"
+}

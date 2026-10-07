@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/__init__.py:24",
+    "imas_codex/cli/discover/signals.py:356"
+  ],
+  "completed_at": "2026-10-05T07:07:37.326Z",
+  "dispatched_at": "2026-10-05T06:58:18Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "2455",
+      "severity": "follow-on",
+      "text": "follow-on: the MDSplus branch still seeds SignalEpochs via seed_versions and creates its mdsplus:tree_tdi DataAccess in its own block, so whether a first MDSplus scan's access edges are complete was not audited; the node disclosed this as its follow_ons #2 rather than leaving it hidden."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read a212437f against base 887486007 commit by commit: parallel.py reorders the DataAccess block before the signal ingest (60 lines moved), test_signals_pipeline.py adds the ordering test (102 lines), and the fragment records the cause and gate (44 lines).",
+    "done_when": "the brief's measure is the two-file gate plus a negative control; gate.log records 41 passed EXIT=0 at 887486007 and I re-ran the same command in the reviewed worktree to 41 passed EXIT=0.",
+    "goal": "the plan's deliverable is that a facility's FIRST signal scan writes its DATA_ACCESS edges; the diff moves the scanner's DataAccess MERGE ahead of ingest_discovered_signals in seed_worker (imas_codex/discovery/signals/parallel.py:2546), so the ingest edge phase (parallel.py:2321) MATCHes the node on the first pass.",
+    "manifest": "read; status complete, one commit a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f, tests and test_logs recorded with the negative control, and no baseline_suite or after_suite gate arm.",
+    "write_paths": "the manifest declares parallel.py, tests/discovery/test_signals_pipeline.py, the fragment and the figures directory; the diff touches exactly the first three, all inside that scope."
+  },
+  "justifications": {
+    "durability": "test_signals_pipeline.py:362 asserts the DataAccess write precedes the first signal batch and fails under the restored old order, which I reproduced in a scratch tree (EXIT=1).",
+    "evidence": "I re-ran the gate in the reviewed worktree (41 passed, EXIT=0) and independently reproduced the negative control, where the restored old order fails test_signals_pipeline.py:459 with events ['signal_ingest', 'data_access_write'], but the manifest records no baseline_suite or after_suite arm so the added-failure count is unmeasured and the live-graph proof is deferred.",
+    "fit": "the change reorders the existing DataAccess block in place at parallel.py:2546 with no new function or module, and its comment states the mechanism rather than a plan label.",
+    "goal_fidelity": "parallel.py:2546 now writes the scanner's DataAccess before ingest_discovered_signals is called at parallel.py:2587, which is exactly the ordering fix the goal names, and the MDSplus branch (parallel.py:2455) is disclosed as a separate path.",
+    "scope_discipline": "git show --stat a212437f lists exactly imas_codex/discovery/signals/parallel.py, tests/discovery/test_signals_pipeline.py and the fragment, all declared write paths, with no scanner, schema or facility-YAML file touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the plan's deliverable is that a facility's FIRST signal scan writes its DATA_ACCESS edges; the diff moves the scanner's DataAccess MERGE ahead of ingest_discovered_signals in seed_worker (imas_codex/discovery/signals/parallel.py:2546), so the ingest edge phase (parallel.py:2321) MATCHes the node on the first pass.\nVERDICT done_when: the brief's measure is the two-file gate plus a negative control; gate.log records 41 passed EXIT=0 at 887486007 and I re-ran the same command in the reviewed worktree to 41 passed EXIT=0.\nVERDICT write_paths: the manifest declares parallel.py, tests/discovery/test_signals_pipeline.py, the fragment and the figures directory; the diff touches exactly the first three, all inside that scope.\nVERDICT manifest: read; status complete, one commit a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f, tests and test_logs recorded with the negative control, and no baseline_suite or after_suite gate arm.\nVERDICT diff: read a212437f against base 887486007 commit by commit: parallel.py reorders the DataAccess block before the signal ingest (60 lines moved), test_signals_pipeline.py adds the ordering test (102 lines), and the fragment records the cause and gate (44 lines).\nCALL_SITES: imas_codex/discovery/signals/__init__.py:24, imas_codex/cli/discover/signals.py:356\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: parallel.py:2546 now writes the scanner's DataAccess before ingest_discovered_signals is called at parallel.py:2587, which is exactly the ordering fix the goal names, and the MDSplus branch (parallel.py:2455) is disclosed as a separate path.\nSCORE evidence: 17\nJUSTIFICATION evidence: I re-ran the gate in the reviewed worktree (41 passed, EXIT=0) and independently reproduced the negative control, where the restored old order fails test_signals_pipeline.py:459 with events ['signal_ingest', 'data_access_write'], but the manifest records no baseline_suite or after_suite arm so the added-failure count is unmeasured and the live-graph proof is deferred.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat a212437f lists exactly imas_codex/discovery/signals/parallel.py, tests/discovery/test_signals_pipeline.py and the fragment, all declared write paths, with no scanner, schema or facility-YAML file touched.\nSCORE durability: 19\nJUSTIFICATION durability: test_signals_pipeline.py:362 asserts the DataAccess write precedes the first signal batch and fails under the restored old order, which I reproduced in a scratch tree (EXIT=1).\nSCORE fit: 19\nJUSTIFICATION fit: the change reorders the existing DataAccess block in place at parallel.py:2546 with no new function or module, and its comment states the mechanism rather than a plan label.\nFINDING imas_codex/discovery/signals/parallel.py:2455 follow-on: the MDSplus branch still seeds SignalEpochs via seed_versions and creates its mdsplus:tree_tdi DataAccess in its own block, so whether a first MDSplus scan's access edges are complete was not audited; the node disclosed this as its follow_ons #2 rather than leaving it hidden.",
+  "review_run_id": "r-20261005T065813705543-review-of-data-access-before-ingest",
+  "reviewed_base_sha": "887486007d862b2a920b71c02c7138e821929901",
+  "reviewed_head_sha": "a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f",
+  "reviewed_run_id": "r-20261005T064834038813-data-access-before-ingest",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:37:32.427641+00:00",
+  "total": 94,
+  "verdict": "SOUND WITH FINDINGS"
+}

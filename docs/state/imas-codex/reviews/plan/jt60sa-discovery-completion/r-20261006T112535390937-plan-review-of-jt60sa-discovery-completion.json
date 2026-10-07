@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T11:28:40.628Z",
+  "dispatched_at": "2026-10-06T11:25:41Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/query_builder.py:282",
+      "id": "thin_wrapper-1",
+      "reason": "extending build_path_prefix_filter(alias, prefixes, negated=False) keeps one builder that cannot detach its clause from its binding, which is exactly the failure the original helper was introduced to prevent.",
+      "text": "\u00a724 says it \"uses one negated form beside build_path_prefix_filter\": build_path_prefix_filter already returns the clause-and-parameters pair, so a negated sibling is a second thin wrapper over render_path_prefix_clause instead of one builder that takes the polarity, and the plan states no reason the existing builder cannot carry a `negated` flag",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/paths/parallel.py:197,265-359",
+      "id": "duplicate_owner-1",
+      "reason": "without the same guard on the paths-side predicates the run reports pending work it cannot drain, which is the non-terminating-phase defect the code-side node was written to close.",
+      "text": "\u00a724 names the path claims and the code has-work predicates as the sites that must skip excluded rows, but omits the paths-side phase-liveness predicates: has_pending_work (parallel.py:197) and the five _has_pending_scan/expand/triage/enrich/score_work helpers (parallel.py:265-359) match FacilityPath facility-wide, so a scoped run keeps its paths phases alive on the 7,668 /home rows it can never claim; the \u00a714 code-claims node already treated the code-side has-work predicates as an owner to extend, and \u00a724 does not apply the same census to the paths side",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/config/discovery_config.py:144",
+      "id": "duplicate_owner-2",
+      "reason": "the plan should state that the claim predicate is rendered from ExclusionConfig.path_prefixes and that the remaining exclusion families are deliberately claim-invisible, or route every family through one owner, so the two evaluators cannot drift.",
+      "text": "\u00a724 adds a Cypher negated-prefix predicate in imas_codex/graph/query_builder.py that is a second implementation of the exclusion decision whose owner is ExclusionConfig.should_exclude, and the plan leaves the owner's other families (directories matched by basename, patterns, archive_extensions, dotfiles, scratch) unhonoured by any claim, so a new entry added to excludes.directories or excludes.patterns silently stops excluding at claim time while still excluding at seed and scan time",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "jt60sa-discovery-completion.html#s24",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added surface in its own text, and folding the negation into build_path_prefix_filter would bring the addition back to zero.",
+      "text": "the section adds a public clause builder in imas_codex/graph/query_builder.py and new exclusion wiring across the path and code claims with this week's public_definitions budget at 0, and it names no symbol it retires or merges and gives no reason nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "964a2d7f32790976f94ff89b096674377358285666d64fdb9884929a712a66ff",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 216,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T112535390937-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "a6eef430cf475140a9edd191b3cfd8e4ff709817",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design concentrates behaviour behind few owners (one prefix renderer, one clause+params builder, one create-only node write, one bounded reset spec) rather than spreading wrappers over the same machinery.",
+    "duplicate_owner": "a finding \u2014 \u00a724 extends the exclusion guard to the claims but not to the paths-phase liveness owner it must travel with, and it forks the exclusion predicate away from its ExclusionConfig owner.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a724 adds a public clause builder and wires exclusion into the claims without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the two implementable sections name the mechanisms they extend (render_path_prefix_clause and build_path_prefix_filter in imas_codex/graph/query_builder.py, GraphClient.create_nodes in imas_codex/graph/client.py, seed_facility_roots in imas_codex/discovery/paths/frontier.py, ExclusionConfig.should_exclude in imas_codex/config/discovery_config.py), and each citation checks out against the code.",
+    "thin_wrapper": "a finding \u2014 \u00a724 adds a second thin clause builder beside build_path_prefix_filter rather than extending it with a negation."
+  },
+  "section_digests": {
+    "_document": "09490c8adaf4c1375701ae4af3acfa5a70e2abe1b8d7dfdb44856148a560ff1a",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "29d9b089079e8a479a2c4345afce23a54bb8146946c6dca02c20b050944ecd02",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "854e6f73f3c3b0b0f296655d81e9f58a100a4c96e6b6ae3c25053e839a0e9869",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T11:44:46.634740+00:00"
+}

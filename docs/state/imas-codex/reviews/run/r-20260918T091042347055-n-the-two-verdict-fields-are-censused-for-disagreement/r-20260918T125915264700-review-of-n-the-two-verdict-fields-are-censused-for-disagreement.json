@@ -1,0 +1,48 @@
+{
+  "absent": [],
+  "backend": "claude-code",
+  "completed_at": "",
+  "dispatched_at": "2026-09-18T12:59:15.264700+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md",
+      "line": "134",
+      "text": "the 42-row arm is called \"a live write-ordering fault\", but I measured all 42 carrying no updated_at, no claim_token and no run_id while every current writer of 'exhausted' stamps updated_at in the same statement as the stage, so no current route is implicated by the row markers and the state is legacy rather than live \u2014 with the doc's own follow_on asking for a live route to be found."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md",
+      "line": "96",
+      "text": "\"refine_stop_reason has exactly one read path\" counts only workers.py:6924 and omits the projection at graph_ops.py:18144, which projects the field into the refine-name claim query's returned items; the conclusion that nothing gates on the field still holds, but the single-read-path claim is a miscount as written."
+    },
+    {
+      "file": "docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md",
+      "line": "92",
+      "text": "the writer map pairs the clear at graph_ops.py:10721 with reconcile_reviewable_name_stage (:14275), but the statement at 10721 is inside _lock_claimed_name_bindings (def at graph_ops.py:10589) and the function named at 14275 never touches refine_stop_reason, so a reader tracing the clearer lands in the wrong function."
+    }
+  ],
+  "justifications": {
+    "durability": "nothing regresses the census if it rots \u2014 no test or code artifact carries the predicate, and audit-doc, the only standing structural gate, passes the two HTML artifacts while failing this markdown file and its siblings identically on missing meta, so it is not a value gate.",
+    "evidence": "the measurement reproduces independently and every wall time sits under the ceiling (my re-run max 0.074 s against the 10 s limit), but the classification of the 42-row arm at :134 as a live write fault is not supported by the row markers I measured \u2014 42/42 carry no updated_at, no claim_token and no run_id while both current writers of 'exhausted' (graph_ops.py:17255, :24598) stamp updated_at in the same statement \u2014 and the read-path count at :96 omits the projection at graph_ops.py:18144.",
+    "fit": "the doc follows the sibling evidence idiom (headline answer, instrument tables, a \"What a read should do\" close; accepted-restage-proof.md:1-5), the commit subject and body are conventional, and no plan, sprint or stage identifier appears in the following file, its section id, or the archive anchor.",
+    "goal_fidelity": "docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md:3-9 answers both halves of the goal \u2014 the count and the authoritative field \u2014 over a named predicate, and every count in it (62 total, 42/11/7/2 breakdown, the :114-123 separation table, the 2,508 and 251 discovery rows) re-derived exactly in my own live re-run through GraphClient.",
+    "scope_discipline": "the single commit e6c43eac touches exactly the three declared paths (+192/-0) and the plan edit is a three-line comment inside its own followup section with the plan-version and plan-modified meta lines untouched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md:3-9 answers both halves of the goal \u2014 the count and the authoritative field \u2014 over a named predicate, and every count in it (62 total, 42/11/7/2 breakdown, the :114-123 separation table, the 2,508 and 251 discovery rows) re-derived exactly in my own live re-run through GraphClient.\nSCORE evidence: 16\nJUSTIFICATION evidence: the measurement reproduces independently and every wall time sits under the ceiling (my re-run max 0.074 s against the 10 s limit), but the classification of the 42-row arm at :134 as a live write fault is not supported by the row markers I measured \u2014 42/42 carry no updated_at, no claim_token and no run_id while both current writers of 'exhausted' (graph_ops.py:17255, :24598) stamp updated_at in the same statement \u2014 and the read-path count at :96 omits the projection at graph_ops.py:18144.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit e6c43eac touches exactly the three declared paths (+192/-0) and the plan edit is a three-line comment inside its own followup section with the plan-version and plan-modified meta lines untouched.\nSCORE durability: 12\nJUSTIFICATION durability: nothing regresses the census if it rots \u2014 no test or code artifact carries the predicate, and audit-doc, the only standing structural gate, passes the two HTML artifacts while failing this markdown file and its siblings identically on missing meta, so it is not a value gate.\nSCORE fit: 18\nJUSTIFICATION fit: the doc follows the sibling evidence idiom (headline answer, instrument tables, a \"What a read should do\" close; accepted-restage-proof.md:1-5), the commit subject and body are conventional, and no plan, sprint or stage identifier appears in the following file, its section id, or the archive anchor.\nFINDING docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md:134 the 42-row arm is called \"a live write-ordering fault\", but I measured all 42 carrying no updated_at, no claim_token and no run_id while every current writer of 'exhausted' stamps updated_at in the same statement as the stage, so no current route is implicated by the row markers and the state is legacy rather than live \u2014 with the doc's own follow_on asking for a live route to be found.\nFINDING docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md:96 \"refine_stop_reason has exactly one read path\" counts only workers.py:6924 and omits the projection at graph_ops.py:18144, which projects the field into the refine-name claim query's returned items; the conclusion that nothing gates on the field still holds, but the single-read-path claim is a miscount as written.\nFINDING docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md:92 the writer map pairs the clear at graph_ops.py:10721 with reconcile_reviewable_name_stage (:14275), but the statement at 10721 is inside _lock_claimed_name_bindings (def at graph_ops.py:10589) and the function named at 14275 never touches refine_stop_reason, so a reader tracing the clearer lands in the wrong function.",
+  "review_run_id": "r-20260918T125915264700-review-of-n-the-two-verdict-fields-are-censused-for-disagreement",
+  "reviewed_base": "a157681223a8ceb8a009859fa692dc8b5a14978e",
+  "reviewed_commit": "e6c43eac4d56d62c562e73bcdca357daf00b53c0",
+  "reviewed_run_id": "r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-18T13:36:30.768047+00:00",
+  "total": 85
+}

@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T01:45:27.851Z",
+  "dispatched_at": "2026-10-07T01:39:45Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/graph_ops.py:608",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a78's own discipline is \"one owner\" for edge, route count and claim state, and this names a shared mechanism (path\u2192section, target\u2208section) with two pre-existing owners and a third arriving, so the author can fold the derivation into the owner `read_candidates` instead of adding a parallel one.",
+      "text": "the \"section is the IDS top-level ancestor (first two path segments)\" rule is already computed in at least two places and the \"is this target inside the section\" test in a third, and \u00a78 introduces the section as the unit of its map-stage guard and of the new target-type rule without naming any of them as the owner to extend. Census of the type: `imas_codex/ids/graph_ops.py:608` (`WITH sg, r, ip, parts[0] + '/' + parts[1] AS section_id` in `read_candidates`, which \u00a76 landed and \u00a78's map stage will consume), `imas_codex/ids/validation.py:842` (`section = \"/\".join(parts[:2]) if len(parts) >= 2 else ids_name`, an independent re-derivation of the same rule), and `imas_codex/ids/assembler.py:187` (`m.target_id.startswith(f\"{self.ids_name}/{section_name}\")`, an independent containment test \u2014 exactly what \u00a78's new guard restates). The owner to extend is `read_candidates` in `imas_codex/ids/graph_ops.py`, which already returns the section on every edge; a shared `section_of(path)` / `in_section(target, section)` helper beside it would let validation.py:842 and assembler.py:187 drop their copies and let \u00a78's guard be a call rather than a fourth statement.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ae06d9d6ea0015fd0f5c2014badd9341b4db745c6368bb50f50c74186a0d31a6",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 78,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T01:46:13.860483+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "mapping-20261006",
+      "reason": "",
+      "when": "2026-10-07T01:46:13.860483+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-candidate-selection.v78.json",
+  "review_run_id": "r-20261007T013934756507-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "86f0873ba6a550781a698003dd9a64a9476a19a7",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a78 extends existing deep modules rather than adding a module: the candidate/edge state stays behind `graph_ops` (`write_candidates`/`read_candidates`/`select_candidates`/`clear_candidates`/`write_mapping_binding`/`clear_mapping_bindings`), retrieval and judgment stay behind `ids/candidates.py`, and the map stage's `TargetAssignment` construction stays in `ids/mapping.py`; no spread of shallow wrappers is proposed.",
+    "duplicate_owner": "a finding \u2014 the \"section = IDS top-level ancestor\" derivation and its containment test already have two owners in the tree and \u00a78 adds a third consumer without naming them.",
+    "interface_budget": "pass \u2014 this week's counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 states what it adds (`read_candidates`, `select_candidates`) and what it retires (`count_sources_by_mapping_status`, the `workers.py` copy of `count_candidates_by_route`, the `--skip-metadata`/`--skip-errors` options, three `mapping_target_*` fields), and the two remaining nodes add none to any of the four families, so the section accounts for its surface.",
+    "reuse_search": "pass \u2014 the plan cites the mechanisms it extends and reuses each one: `imas_codex/ids/graph_ops.py` (the candidate/edge owner), `discovery/base/claims.py` (`claim_batch`, verified present at claims.py:255 and used by `claim_sources_for_candidates`), `assembler.adiscover_assembly` and `_prepare_section_context` (mapping.py:1142, still the map prompt's context builder), `read_candidates`/`select_candidates` (graph_ops.py:576/:636) and `fetch_cross_facility_mappings`; \u00a78 adds no new subsystem.",
+    "thin_wrapper": "pass \u2014 the only new public functions \u00a78 introduces are `read_candidates` and `select_candidates`, and the plan states in its own text why the second cannot be folded into the writer (`write_candidates` deletes and rewrites every edge, while a pick must flag existing edges without disturbing the shortlist), which is the justification the item asks for."
+  },
+  "section_digests": {
+    "_document": "97288df4cb4c01be01f0a14a899c374f216a0d76dce137a4eaa93147f473c515",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "49fe6b47dc67cb4a5a3a7a08b070a40a4ba1149a112d708ca012d446f48a932c",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "b4e5aef405bc06119aa960a5e91caeedd071aed5772797fe4271513af85b2676",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T01:46:10.104875+00:00"
+}

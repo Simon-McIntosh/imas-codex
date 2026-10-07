@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T08:16:49.510Z",
+  "dispatched_at": "2026-10-06T08:12:09Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/domain_queries.py:545, imas_codex/graph/domain_queries.py:591",
+      "id": "duplicate_owner-1",
+      "reason": "the renderer's declared scope is the path claims and the scoped status reset, and these two sites are a search API taking a scalar prefix rather than the renderer's list, so consolidating them is an optional follow-on refactor outside \u00a714, not a change to the plan.",
+      "text": "`_find_data_nodes` (line 545) and `_find_data_nodes_semantic` (line 591) each hand-spell `n.path STARTS WITH $path_prefix` for SignalNode search, the same predicate family the landed renderer declares itself the sole owner of; this is the full census (no other path-prefix predicate remains in the discovery package; frontier.py:3315 is a parent/child sibling check, not a prefix filter)",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "ef2bd202d6a4dd986c5689188cf4be74c067492145dfbf844bec2fad18cc61fe",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 199,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "jt60sa-20261005",
+      "reason": "Those two SignalNode search functions take one scalar prefix, a different predicate from the list-form renderer whose declared scope is the path claims and the scoped reset; consolidating them is an optional refactor outside \u00a714.",
+      "when": "2026-10-06T08:17:08.675485+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T081204676676-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "b95c6304ed640e82110ed4a8711b443b404981f5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the \u00a714 changes are small and each sits behind an existing owner (a `create_only` flag on `create_nodes`, a `path_prefixes` argument on `reset_to_status`, a source-status widening on a `ResetSpec`); `render_path_prefix_clause(alias, param)` hides the whole prefix predicate \u2014 list membership plus `path STARTS WITH` \u2014 behind two string arguments, so no call site spells the clause.",
+    "duplicate_owner": "a finding \u2014 the renderer's own docstring calls itself \"the single renderer for the prefix predicate ... do not spell the clause inline\", but two path-prefix predicates are still hand-spelled outside it.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no CLI option, MCP view or refusal family, and the one public renderer plus the two new parameters are accounted for in the section's own text, which names their merges (the paths CLI's inline prefix block replaced by passing `--root`, the eight inline clauses collapsed into one renderer) and its retirements (seed_missing_roots retired with its exports; create_child_paths deleted).",
+    "reuse_search": "pass \u2014 the plan cites and extends the mechanisms it needs: `render_path_prefix_clause` (imas_codex/graph/query_builder.py:268), `GraphClient.create_nodes` (imas_codex/graph/client.py:605), `reset_to_status`/`ResetSpec` (imas_codex/discovery/base/reset.py:59), `seed_facility_roots` (imas_codex/discovery/paths/frontier.py:426) and the `ON CREATE SET` idiom already used by `ensure_facility` (client.py:762); I verified the renderer census is complete \u2014 five path-claim sites (discovery/paths/parallel.py:484,540,597,715,795), two code-scan sites (discovery/code/graph_ops.py:141,566) and the reset (reset.py:98) \u2014 matching the plan's \"five path claims, the two code-scan claims and the reset\".",
+    "thin_wrapper": "pass \u2014 nothing in \u00a714 is a layer over machinery that could have been extended instead: `create_nodes` is the node-write owner and gains the option in place, and the plan retires `seed_missing_roots` and deletes `create_child_paths` rather than wrapping them (both verified gone from imas_codex/ and tests/)."
+  },
+  "section_digests": {
+    "_document": "5ef94796ca3f9e694a23c08ccda4fffc0c66d935d157eda7192179fc7a581c5a",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "32a57ef4b446fcb60e40f8f07126b03e66edebc6b805a49667129ca113308d2d",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T08:17:08.067702+00:00"
+}

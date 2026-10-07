@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: baseline_suite at 65c01fbbdcebcfc2caceccb9794c2d9aafd247ee (base-gate.log, EXIT=0, completed, 663 passed, 10 skipped, 0 failures) and after_suite at 41bd6be11a738aab5bd497bc489af58b15d9d1cf (head-gate-guard.log, EXIT=0, completed, 681 passed, 10 skipped, 0 failures). Neither log carries a FAILED or ERROR line, so added_failure_count=0 and added_failure_ids=[].",
+  "backend": "local",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/graph/client.py:402 (_initialize_schema_impl, reached from GraphClient.initialize_schema)",
+    "imas_codex/graph/build_dd.py:3185 (_ensure_indexes, reached from imas_codex/graph/dd_workers.py:260/310)"
+  ],
+  "completed_at": "2026-10-05T11:21:51.992Z",
+  "dispatched_at": "2026-10-05T11:09:50Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/client.py",
+      "line": "499",
+      "severity": "follow-on",
+      "text": "when the filter map is unreadable the create path still composes the index without the WITH clause, so a stale checkout that has to CREATE code_chunk_embedding builds it without facility_id and a facility-scoped search fails to plan against it; reproduced independently (unknown-map create has WITH: False, known-map True), it is loud rather than silent and heals on a later build-models --force plus reconcile, but the fail-closed guard currently covers only the drop path, not the create path."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read 36ddec3e8..41bd6be11 commit by commit (single commit 41bd6be11); it makes EXPECTED_VECTOR_INDEX_FILTERS None when the generated map is unreadable, guards the reconciliation so only a dimension difference drops on an unknown map, adds owned-index and known-empty branches, and extends the evidence fragment.",
+    "done_when": "the delta's own measure is head-gate-guard.log: uv run pytest tests/search tests/llm tests/graph/test_schema_context.py tests/graph/test_vector_search.py at 41bd6be11 exits 0 with 681 passed, 10 skipped (base 65c01fbbd 663 passed); tests/graph/test_schema_context.py:409/437/455 pin the three branches of the guard.",
+    "goal": "the node goal is that search_code selects vector candidates inside the facility through a filter property registered on the code-chunk index; this delta (client.py:427-504) hardens the index owner so an unreadable filter map, which is what a stale generated schema_context_data yields, is represented as None and the registered filter property is then not used as a reason to drop the live index.",
+    "manifest": "read; status complete, baseline_suite (65c01fbbd, EXIT=0, 663 passed) and after_suite (41bd6be11, EXIT=0, 681 passed, log head-gate-guard.log), and negative_control_log names a red run.",
+    "write_paths": "read the manifest's eleven declared paths; the delta touches exactly three (imas_codex/graph/client.py, tests/graph/test_schema_context.py, docs/evidence/fragments/jt60sa-discovery-completion/search-code-facility-prefilter.html), all inside the declared set."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_schema_context.py:409 reddens when the guard is reverted, reproduced independently: driving the same scenario with the map as {} drops code_chunk_embedding while None does not; docked because no test pins the unchanged signal-search clause.",
+    "evidence": "head-gate-guard.log records 681 passed, 10 skipped, EXIT=0 at 41bd6be11 against base-gate.log's 663 passed at 65c01fbbd, and the evidence fragment records the new tests and the 681 measure; docked because head-gate-guard.log carries no revision/tree/command header, so its revision rests on content rather than its own first line.",
+    "fit": "the guard follows the file's existing comment idiom at imas_codex/graph/client.py:76-90 and 421-432, and commit 41bd6be11 carries a conventional subject and a body; no forbidden name appears.",
+    "goal_fidelity": "imas_codex/graph/client.py:427-470 leaves an index carrying facility_id untouched when the filter map is None, so the registered filter the goal depends on is not silently undone; the create path at imas_codex/graph/client.py:499 still builds a filterless index on a stale checkout.",
+    "reuse": "it extends the single owner of index reconciliation, ensure_vector_indexes at imas_codex/graph/client.py:356, and forks no capability; the added branches reuse _vector_index_ddl rather than a second DDL path.",
+    "scope_discipline": "git diff 36ddec3e8..41bd6be11 touches exactly imas_codex/graph/client.py, tests/graph/test_schema_context.py and the evidence fragment, all declared; no path outside the manifest's eleven."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 36ddec3e863a1bee7f500338dcd153bcab934e62\nreviewed_head_sha: 41bd6be11a738aab5bd497bc489af58b15d9d1cf\nVERDICT goal: the node goal is that search_code selects vector candidates inside the facility through a filter property registered on the code-chunk index; this delta (client.py:427-504) hardens the index owner so an unreadable filter map, which is what a stale generated schema_context_data yields, is represented as None and the registered filter property is then not used as a reason to drop the live index.\nVERDICT done_when: the delta's own measure is head-gate-guard.log: uv run pytest tests/search tests/llm tests/graph/test_schema_context.py tests/graph/test_vector_search.py at 41bd6be11 exits 0 with 681 passed, 10 skipped (base 65c01fbbd 663 passed); tests/graph/test_schema_context.py:409/437/455 pin the three branches of the guard.\nVERDICT write_paths: read the manifest's eleven declared paths; the delta touches exactly three (imas_codex/graph/client.py, tests/graph/test_schema_context.py, docs/evidence/fragments/jt60sa-discovery-completion/search-code-facility-prefilter.html), all inside the declared set.\nVERDICT manifest: read; status complete, baseline_suite (65c01fbbd, EXIT=0, 663 passed) and after_suite (41bd6be11, EXIT=0, 681 passed, log head-gate-guard.log), and negative_control_log names a red run.\nVERDICT diff: read 36ddec3e8..41bd6be11 commit by commit (single commit 41bd6be11); it makes EXPECTED_VECTOR_INDEX_FILTERS None when the generated map is unreadable, guards the reconciliation so only a dimension difference drops on an unknown map, adds owned-index and known-empty branches, and extends the evidence fragment.\nCALL_SITES: imas_codex/graph/client.py:402 (GraphClient._initialize_schema_impl -> GraphClient.initialize_schema), imas_codex/graph/build_dd.py:3185 (_ensure_indexes, reached from imas_codex/graph/dd_workers.py:260/310)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/graph/client.py:427-470 leaves an index carrying facility_id untouched when the filter map is None, so the registered filter the goal depends on is not silently undone; the create path at imas_codex/graph/client.py:499 still builds a filterless index on a stale checkout.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-gate-guard.log records 681 passed, 10 skipped, EXIT=0 at 41bd6be11 against base-gate.log's 663 passed at 65c01fbbd, and the evidence fragment records the new tests and the 681 measure; docked because head-gate-guard.log carries no revision/tree/command header, so its revision rests on content rather than its own first line.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 36ddec3e8..41bd6be11 touches exactly imas_codex/graph/client.py, tests/graph/test_schema_context.py and the evidence fragment, all declared; no path outside the manifest's eleven.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_schema_context.py:409 reddens when the guard is reverted, reproduced independently: driving the same scenario with the map as {} drops code_chunk_embedding while None does not; docked because no test pins the unchanged signal-search clause.\nSCORE fit: 19\nJUSTIFICATION fit: the guard follows the file's existing comment idiom at imas_codex/graph/client.py:76-90 and 421-432, and commit 41bd6be11 carries a conventional subject and a body; no forbidden name appears.\nSCORE reuse: 20\nJUSTIFICATION reuse: it extends the single owner of index reconciliation, ensure_vector_indexes at imas_codex/graph/client.py:356, and forks no capability; the added branches reuse _vector_index_ddl rather than a second DDL path.\nFINDING imas_codex/graph/client.py:499 follow-on: when the filter map is unreadable the create path still composes the index without the WITH clause, so a stale checkout that has to CREATE code_chunk_embedding builds it without facility_id and a facility-scoped search fails to plan against it; reproduced independently (unknown-map create has WITH: False, known-map True), it is loud rather than silent and heals on a later build-models --force plus reconcile, but the fail-closed guard currently covers only the drop path, not the create path.",
+  "review_run_id": "r-20261005T110931136294-review-of-search-code-facility-prefilter",
+  "reviewed_base_sha": "36ddec3e863a1bee7f500338dcd153bcab934e62",
+  "reviewed_head_sha": "41bd6be11a738aab5bd497bc489af58b15d9d1cf",
+  "reviewed_run_id": "r-20261005T101027512926-search-code-facility-prefilter",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T11:35:00.000000+00:00",
+  "total": 115,
+  "verdict": "SOUND WITH FINDINGS"
+}

@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "backend": "clive",
+  "completed_at": "",
+  "dispatched_at": "2026-09-21T12:18:53.334425+00:00",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/enrichment.py",
+      "line": "399",
+      "text": "the terminal cap cannot bind, because each channel is already capped at its own cap, so the break at :403 can only fire once nothing distinct remains. NIT Consequence: no test fails if :399-403 are deleted."
+    },
+    {
+      "file": "docs/plans/sn-catalog-audit-instrument.html",
+      "line": "611",
+      "text": "states the bound as flat 30 over a 2-15-item batch, while enrichment.py:277-281 gives 20 below an 11-item batch; the archive states it precisely at sn-catalog-audit-instrument-landed.html:384. NIT"
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits; 93614e077 is the code plus its two tests, 4f51651d0 the archive section and the plan comment, both with substantive commit bodies and no attribution.",
+    "done_when": "read; test_review_comparator_budget.py pins the returned counts and the returned length, and the stream shows the suite on all_debug with ADDED against its own base.",
+    "goal": "read the goal; enrichment.py:336 shares the unit budget per candidate and :399 states the returned bound, so both halves land on the returned list.",
+    "manifest": "read; its 34 base and 23 head failure counts and its zero-added claim reproduce exactly from the two logs it cites.",
+    "write_paths": "read the four declared paths; the diff d31f8cb9..4f51651d0 touches only those four files and nothing else."
+  },
+  "justifications": {
+    "durability": "run against the base module, the starvation test fails with AssertionError {'m': 10} while the bound test passes, so the terminal cap has no test that fails when removed.",
+    "evidence": "the named suite ran on all_debug into the two logs the manifest cites, and the zero-added claim reproduces from those logs; the base ran from /dev/shm without .env, an asymmetry the node discloses.",
+    "fit": "the share-then-spend structure at enrichment.py:355-393 mirrors _collect_nearby_name_comparators at imas_codex/standard_names/workers.py:1827-1869, and no landed name carries a plan or ticket identifier.",
+    "goal_fidelity": "enrichment.py:336 shares the budget per candidate and :399 states the bound, with one looseness in the record at docs/plans/sn-catalog-audit-instrument.html:611.",
+    "scope_discipline": "the diff against d31f8cb9 is the four declared write paths and nothing else, and no prompt template was touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the goal; enrichment.py:336 shares the unit budget per candidate and :399 states the returned bound, so both halves land on the returned list.\nVERDICT done_when: read; test_review_comparator_budget.py pins the returned counts and the returned length, and the stream shows the suite on all_debug with ADDED against its own base.\nVERDICT write_paths: read the four declared paths; the diff d31f8cb9..4f51651d0 touches only those four files and nothing else.\nVERDICT manifest: read; its 34 base and 23 head failure counts and its zero-added claim reproduce exactly from the two logs it cites.\nVERDICT diff: read both commits; 93614e077 is the code plus its two tests, 4f51651d0 the archive section and the plan comment, both with substantive commit bodies and no attribution.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: enrichment.py:336 shares the budget per candidate and :399 states the bound, with one looseness in the record at docs/plans/sn-catalog-audit-instrument.html:611.\nSCORE evidence: 19\nJUSTIFICATION evidence: the named suite ran on all_debug into the two logs the manifest cites, and the zero-added claim reproduces from those logs; the base ran from /dev/shm without .env, an asymmetry the node discloses.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff against d31f8cb9 is the four declared write paths and nothing else, and no prompt template was touched.\nSCORE durability: 16\nJUSTIFICATION durability: run against the base module, the starvation test fails with AssertionError {'m': 10} while the bound test passes, so the terminal cap has no test that fails when removed.\nSCORE fit: 19\nJUSTIFICATION fit: the share-then-spend structure at enrichment.py:355-393 mirrors _collect_nearby_name_comparators at imas_codex/standard_names/workers.py:1827-1869, and no landed name carries a plan or ticket identifier.\nFINDING imas_codex/standard_names/review/enrichment.py:399 the terminal cap cannot bind, because each channel is already capped at its own cap, so the break at :403 can only fire once nothing distinct remains. NIT Consequence: no test fails if :399-403 are deleted.\nFINDING docs/plans/sn-catalog-audit-instrument.html:611 states the bound as flat 30 over a 2-15-item batch, while enrichment.py:277-281 gives 20 below an 11-item batch; the archive states it precisely at sn-catalog-audit-instrument-landed.html:384. NIT\n",
+  "review_run_id": "r-20260921T121853334425-review-of-n-the-unit-comparator-budget-is-shared-and-bounded",
+  "reviewed_base": "d31f8cb92ae868dffc5d16dbb7f06c7ca7992eeb",
+  "reviewed_commit": "4f51651d009b6fbb751eb079d46deabaa44a6451",
+  "reviewed_run_id": "r-20260921T101344384603-n-the-unit-comparator-budget-is-shared-and-bounded",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-21T13:41:16.663602+00:00",
+  "total": 93,
+  "verdict": "SOUND"
+}

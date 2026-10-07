@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "after_suite carries failure_count 0 (completed true) at head 95c4c283d; the reviewed manifest records baseline_suite: none, so no base arm exists and the head arm contributes no added failures.",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/remote/tools.py:193",
+    "imas_codex/discovery/signals/parallel.py:81",
+    "imas_codex/discovery/signals/parallel.py:2530",
+    "imas_codex/discovery/signals/parallel.py:4665"
+  ],
+  "completed_at": "2026-10-05T06:36:41.108Z",
+  "dispatched_at": "2026-10-05T06:30:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/remote-environment-block.html",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: the landing record's evidence table states \"base green at 5ae2cf2f9\", but the reviewed manifest records baseline_suite: none and no baseline gate log exists, and 5ae2cf2f9 differs from the manifest's own orientation_base_sha b4cf687f3; the base-green claim is not tied to any retained log."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T060721963502-remote-environment-block/logs/jt60sa-env-tests.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's header names revision 8f50f6642 while the reviewed head is 95c4c283d (the second commit changes only the evidence HTML), so the 95-passed result is not tied to the reviewed head by the log itself."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T060721963502-remote-environment-block/logs/jt60sa-env-livemeasure.log",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: the live-measure log retains only RESULT[:200] (which begins with the signals array) and RESULT_LEN, so the done-when's ncats > 0 (reported 73) is asserted in the manifest and landing fragment but is not shown in the retained log."
+    }
+  ],
+  "head_log_revision": "8f50f6642eed2c4c7e5fe39d8302bd48365e9bae",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read base b4cf687f3 to head 95c4c283d: a new resolver module, a schema block with the loose key retired, a facility-aware tools wrapper, a scanner-config merge in parallel.py, four facility/executor/worker files, three YAML adoptions and two test files; executor.py and ssh_worker.py changes are docstrings only.",
+    "done_when": "the block exists in the schema and the three YAMLs, data_access_patterns.setup_commands is gone from both the schema and tcv.yaml, every remote launch through the facility-aware layer carries the block, and the live jt-60sa launch returned signals; the tools-status done-when half and the interpreter-floor probe belong to the next node by the brief.",
+    "goal": "the node goal is one facility-level remote_environment block declared in the facility config schema, resolved by one function and passed to the executor as parameters by every facility-aware caller, carried by jt-60sa/iter/tcv; imas_codex/schemas/facility_config.yaml adds RemoteEnvironmentConfig/RemoteEnvironmentModule and the block slot, imas_codex/remote/environment.py:62 adds resolve_remote_environment(), imas_codex/remote/tools.py:160 adds the facility-aware run_python_script wrapper and imas_codex/discovery/signals/parallel.py:68 merges the block into each scanner config.",
+    "manifest": "read; status complete, gate pytest tests/remote tests/config 95 passed EXIT=0 at 8f50f6642ee, negative-control log red on the override test, baseline_suite none and after_suite failure_count 0.",
+    "write_paths": "read the manifest's twelve declared paths; git diff --name-only b4cf687f3..95c4c283d lists exactly those twelve and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/remote/test_remote_environment.py asserts resolver precedence, the facility-aware wrapper passing python_command/setup_commands to the executor, and the scanner-config merge; the negative control deletes the data-system override branch and test_data_system_override_wins reddens (assert 'python' == 'python3') with the scratch environment.py named, and tests/config/test_facility_config_compliance.py::TestRemoteEnvironmentBlock asserts the three YAMLs carry the block and the loose key is gone.",
+    "evidence": "logs/jt60sa-env-tests.log records the manifest's exact command at 95 passed EXIT=0 and logs/jt60sa-env-negctl.log records the mutation turning the precedence test red; the live-measure log shows the resolved recipe (python, the two module commands) and a 1,191,243-character JSON result; three follow-ons qualify the base revision, the gate header and the ncats figure.",
+    "fit": "imas_codex/remote/environment.py is the single resolver and imas_codex/remote/tools.py extends the layer that already resolves ssh_host and the nice level rather than adding a parallel owner; the executor and ssh_worker stay facility-agnostic with only their docstrings changed; no new CLI command is added.",
+    "goal_fidelity": "the deliverable of plan jt60sa-discovery-completion section 6 first node is delivered end to end: the block is declared and resolved once, carried to the executor as parameters by the facility-aware wrapper and the signals scanner-config merge, adopted by jt-60sa/iter/tcv, the loose key retired, and the interpreter floor (min_python_version, required_modules with optional path) is exposed for the next node to read.",
+    "scope_discipline": "git diff --stat b4cf687f3..95c4c283d lists the twelve declared paths and no dependency or config change; executor.py and ssh_worker.py carry docstring edits only, as the brief fenced; the changes under imas_codex/discovery/ are the parallel.py scanner-config merge the brief names, not a scanner plugin file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is one facility-level remote_environment block declared in the facility config schema, resolved by one function and passed to the executor as parameters by every facility-aware caller, carried by jt-60sa/iter/tcv; imas_codex/schemas/facility_config.yaml adds RemoteEnvironmentConfig/RemoteEnvironmentModule and the block slot, imas_codex/remote/environment.py:62 adds resolve_remote_environment(), imas_codex/remote/tools.py:160 adds the facility-aware run_python_script wrapper and imas_codex/discovery/signals/parallel.py:68 merges the block into each scanner config.\nVERDICT done_when: the block exists in the schema and the three YAMLs, data_access_patterns.setup_commands is gone from both the schema and tcv.yaml, every remote launch through the facility-aware layer carries the block, and the live jt-60sa launch returned signals; the tools-status done-when half and the interpreter-floor probe belong to the next node by the brief.\nVERDICT write_paths: read the manifest's twelve declared paths; git diff --name-only b4cf687f3..95c4c283d lists exactly those twelve and nothing else.\nVERDICT manifest: read; status complete, gate pytest tests/remote tests/config 95 passed EXIT=0 at 8f50f6642ee, negative-control log red on the override test, baseline_suite none and after_suite failure_count 0.\nVERDICT diff: read base b4cf687f3 to head 95c4c283d: a new resolver module, a schema block with the loose key retired, a facility-aware tools wrapper, a scanner-config merge in parallel.py, four facility/executor/worker files, three YAML adoptions and two test files; executor.py and ssh_worker.py changes are docstrings only.\nCALL_SITES: imas_codex/remote/tools.py:193, imas_codex/discovery/signals/parallel.py:81, imas_codex/discovery/signals/parallel.py:2530, imas_codex/discovery/signals/parallel.py:4665\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the deliverable of plan jt60sa-discovery-completion section 6 first node is delivered end to end: the block is declared and resolved once, carried to the executor as parameters by the facility-aware wrapper and the signals scanner-config merge, adopted by jt-60sa/iter/tcv, the loose key retired, and the interpreter floor (min_python_version, required_modules with optional path) is exposed for the next node to read.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/jt60sa-env-tests.log records the manifest's exact command at 95 passed EXIT=0 and logs/jt60sa-env-negctl.log records the mutation turning the precedence test red; the live-measure log shows the resolved recipe (python, the two module commands) and a 1,191,243-character JSON result; three follow-ons qualify the base revision, the gate header and the ncats figure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat b4cf687f3..95c4c283d lists the twelve declared paths and no dependency or config change; executor.py and ssh_worker.py carry docstring edits only, as the brief fenced; the changes under imas_codex/discovery/ are the parallel.py scanner-config merge the brief names, not a scanner plugin file.\nSCORE durability: 18\nJUSTIFICATION durability: tests/remote/test_remote_environment.py asserts resolver precedence, the facility-aware wrapper passing python_command/setup_commands to the executor, and the scanner-config merge; the negative control deletes the data-system override branch and test_data_system_override_wins reddens (assert 'python' == 'python3') with the scratch environment.py named, and tests/config/test_facility_config_compliance.py::TestRemoteEnvironmentBlock asserts the three YAMLs carry the block and the loose key is gone.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/remote/environment.py is the single resolver and imas_codex/remote/tools.py extends the layer that already resolves ssh_host and the nice level rather than adding a parallel owner; the executor and ssh_worker stay facility-agnostic with only their docstrings changed; no new CLI command is added.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/remote-environment-block.html:77 follow-on: the landing record's evidence table states \"base green at 5ae2cf2f9\", but the reviewed manifest records baseline_suite: none and no baseline gate log exists, and 5ae2cf2f9 differs from the manifest's own orientation_base_sha b4cf687f3; the base-green claim is not tied to any retained log.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T060721963502-remote-environment-block/logs/jt60sa-env-tests.log:1 follow-on: the gate log's header names revision 8f50f6642 while the reviewed head is 95c4c283d (the second commit changes only the evidence HTML), so the 95-passed result is not tied to the reviewed head by the log itself.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T060721963502-remote-environment-block/logs/jt60sa-env-livemeasure.log:6 follow-on: the live-measure log retains only RESULT[:200] (which begins with the signals array) and RESULT_LEN, so the done-when's ncats > 0 (reported 73) is asserted in the manifest and landing fragment but is not shown in the retained log.\n",
+  "review_run_id": "r-20261005T063001812860-review-of-remote-environment-block",
+  "reviewed_base_sha": "b4cf687f3d62546d41a134f76d18ffc13860b828",
+  "reviewed_head_sha": "95c4c283db886823e414f26bdc90b188b3cdb3ac",
+  "reviewed_run_id": "r-20261005T060721963502-remote-environment-block",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T06:34:50.000269+00:00",
+  "total": 93,
+  "verdict": "SOUND WITH FINDINGS"
+}

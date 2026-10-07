@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T23:00:38.815Z",
+  "dispatched_at": "2026-10-06T22:55:50Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/search/search_strategy.py:165",
+      "id": "reuse_search-1",
+      "reason": "the author should either populate `see_also` (or explain in \u00a711 why a populated-in-shortlist field cannot carry the siblings) or state that the field is dead and being retired, rather than silently adding a competing vocabulary for cross-IDS siblings.",
+      "text": "`SearchHit.see_also` is declared \"Cross-IDS sibling paths from shared semantic clusters\", the exact concept \u00a711 introduces; it is never populated by any producer (`hybrid_dd_search` builds `SearchHit` at dd_search.py:369 without it and no other site sets it), and the only reader is `imas_codex/llm/search_formatters.py:1212`. \u00a711 instead invents a second vocabulary, `arms = cluster:<seed path>`, on the `Candidate` that composes that very `SearchHit`",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/tests/tools/test_dd_version_filtering.py:436",
+      "id": "reuse_search-2",
+      "reason": "the write path names the whole file, so \"removed with it\" reads as deleting coverage for a helper two reused search functions depend on; \u00a78 must name the single class to drop and keep the rest.",
+      "text": "\u00a78 says \"The test of that arm's DD-version filter in `tests/tools/test_dd_version_filtering.py` is removed with it\", but the file also holds `TestDDVersionClause` (9 tests of `_dd_version_clause`), `TestClusterScopeQuery`, `TestOverviewQueryStructure`, `TestExportQueryStructure`, `TestListPathsQuery` and `TestClusterReranking` \u2014 and `_dd_version_clause` is the shared filter `hybrid_dd_search` (\u00a74) and `related_dd_search` (\u00a711) both call; only `TestSemanticMatchDDVersion` (:436) is arm-specific",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/ids/models.py:44",
+      "id": "interface_budget-1",
+      "reason": "the section must name what the `TargetType` classmethod retires or merges, or state why nothing can be, so the added public-definition surface is accounted for as the rubric requires.",
+      "text": "with this week's `public_definitions` at 0, \u00a78 adds three public definitions \u2014 `read_candidates` and `select_candidates` (graph_ops.py), and a classmethod on `TargetType` (:44) \u2014 while naming only two retirements in that family (`count_sources_by_mapping_status` workers.py:434 and the workers.py `count_candidates_by_route` :419); \u00a78's other retirements are three SignalSource fields and two CLI options (both already removed by edge-ownership, eb75bb0ab, so they offset nothing new)",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "6f31b21223ff1fe65ef5c98582b372e24cfd48cbef751b990e4ccebd8b1ab007",
+  "plan_slug": "mapping-candidate-selection",
+  "plan_version": 64,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T225542875567-plan-review-of-mapping-candidate-selection",
+  "reviewed_blob_sha": "6acbcbfff9d8b9d3073de4099bf50cb1b1df036e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `imas_codex/ids/candidates.py` is one deep module hiding embedding, per-IDS arm merge, IDS routing, batched pair judgment and routing behind five functions; \u00a711 adds its expansion beside `retrieve_candidates` in the same module rather than spreading wrappers.",
+    "duplicate_owner": "pass \u2014 the plan names the owners it consolidates: `count_candidates_by_route` is a live duplicate (`imas_codex/ids/workers.py:419` and `imas_codex/ids/graph_ops.py:653`, functionally identical queries) and \u00a78 deletes the workers.py copy and repoints `discover status`/`clear`; the `MAPS_TO_IMAS` create/delete census now resolves to `graph_ops.py:585`/`:640` as the plan states.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 adds public definitions without naming an offsetting retirement in that family (below).",
+    "reuse_search": "a finding \u2014 \u00a78/\u00a711 reuse `hybrid_dd_search`, `related_dd_search` (dd_search.py:606, verified to return cross-IDS cluster siblings exactly as claimed), `call_decisions`, `PipelineCost`, `candidate_worker`/`claim_batch` and the `_candidate_record`/`CandidateWriteError` check; but one existing home for the \u00a711 concept is left unused (below), and \u00a78 removes a shared-filter test file.",
+    "thin_wrapper": "pass \u2014 `read_candidates`/`select_candidates` are not thin wrappers: the plan justifies `select_candidates` as a distinct function because `write_candidates` (graph_ops.py:464) deletes and rewrites every edge of a source while a pick must flag existing edges without disturbing the shortlist."
+  },
+  "section_digests": {
+    "_document": "97288df4cb4c01be01f0a14a899c374f216a0d76dce137a4eaa93147f473c515",
+    "s1": "cc2d5696684519324f4c2e20b669b8feaa71c8e58784372077f8ccaaff8598b0",
+    "s10": "1c4c7cd75e940a115a897e2d0b01b144f355dea2dbe284c53ce0aa5576ac5635",
+    "s11": "3ffbeba3167d105d2a5b9204441d90d4e77e9d277e3ddfe64199fd027a037c7a",
+    "s2": "fb57ea293b1f83c9343ca9b366716026a89299b9842a8ef4b0aaf18d29d616a6",
+    "s3": "d4857944ee4125601df1caabc8c9bf2a670ae18a7d2864017df4b49d1aa478cf",
+    "s4": "e751973a2724aea6b0b1db06c4d8a62a294d5a9755a6194654da560025643a2d",
+    "s5": "1936c7512642e0e0d7754eaeae4cab27fb0a4c14e1f2c3dc9c74b93d0fc29832",
+    "s6": "2d29543ea37d86232d059fd63311079b5da43717d519946e00fa2fcd28e96784",
+    "s7": "f6032b472865026dca6c76322ad4e19999289d4651d3ba426fdd40b742e88807",
+    "s8": "94439913f6f53b050036478d0a500f5b91ff2ef8fb26df2990649fcdc6dffd7c",
+    "s9": "612a340ac965b252980b14dd9f0fee7aa2f403adb1be3c288c3c0c9af28d3bd9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T23:14:07.435964+00:00"
+}

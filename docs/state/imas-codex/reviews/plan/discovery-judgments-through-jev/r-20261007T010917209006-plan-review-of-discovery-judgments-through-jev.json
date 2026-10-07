@@ -1,0 +1,146 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T01:14:17.541Z",
+  "dispatched_at": "2026-10-07T01:09:27Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/reset.py:66",
+      "id": "duplicate_owner-1",
+      "reason": "the graph-only re-judge is one flag (stored-text-only, no SSH) on the existing reset+worker owner, so \u00a73's five new drivers fork scoping and status ownership that already exists and will drift.",
+      "text": "\u00a73 adds \"one re-judge driver beside each pipeline's claim functions\" and \u00a77 runs it \"per facility and pipeline ... scoped and bounded\", rebuilding the status reset plus facility and path-prefix scoping that `reset_to_status(spec, facility, path_prefixes=...)` already owns; the census of existing owners the plan should extend instead is `SIGNAL_RESET_SPECS` (reset.py:163), `PATH_RESET_SPECS` (:264), `WIKI_RESET_SPECS` (:320), `CODE_RESET_SPECS` (:378), `DOCUMENT_RESET_SPECS` (:433), dispatched through `DOMAIN_RESET_SPECS` (:453) and already wired to a `--reset-to` CLI at imas_codex/cli/discover/signals.py:218, paths.py:244, wiki.py:355, code.py:197, documents.py:133",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/llm.py:3435",
+      "id": "deep_module-1",
+      "reason": "extracting one `discovery/base/` judge-and-apply driver parameterised by each pipeline's questions/state/apply collapses five drivers to one and is where the complexity belongs.",
+      "text": "the judgment behaviour the plan would add (per-row state build, `acall_decisions`, validation, cost booking, apply-or-leave, claim/release) is a deep module the code pipeline already implements inline in imas_codex/discovery/code/workers.py:270 and imas_codex/discovery/code/scorer.py:76; \u00a73 spreads that same behaviour across five per-pipeline drivers, so the plan grows surface five-fold over one shared driver rather than adding depth",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/llm.py:3499",
+      "id": "thin_wrapper-1",
+      "reason": "without the justification the honest change is to extend the existing driver with a source-of-text flag, not to add a second path per pipeline.",
+      "text": "each proposed re-judge driver forwards to `call_decisions` with a pipeline's own question template and per-row state, the shape already proven by `build_triage_questions`/`build_triage_state`/`apply_triage_results` (imas_codex/discovery/code/scorer.py:76,107,475); the plan justifies neither why the existing pipeline worker cannot be extended with a graph-only mode nor why the code pipeline's driver is not made shared, so the wrappers are a parallel copy",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:91",
+      "id": "reuse_search-1",
+      "reason": "naming the reset owner and the true response-model homes changes which files \u00a73\u2013\u00a76 declare as the files they modify.",
+      "text": "the plan's search covers `call_decisions` and the \u00a725 code pipeline for the gate forms, but misses the re-processing owner above, and its \u00a72 census mislocates the response models it would replace \u2014 `TriageBatch` and `ScoreBatch` live in imas_codex/discovery/paths/models.py:126,214 (not `paths/scorer.py`/`paths/parallel.py`) and `ImageScoreBatch` in imas_codex/discovery/wiki/models.py:470 (not `base/image.py`) \u2014 so the prior-art map is incomplete at the two files the design would actually edit",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:91",
+      "id": "interface_budget-1",
+      "reason": "extending the existing reset/worker owner (see duplicate_owner) removes the added definitions entirely, and the section must account for the surface it adds.",
+      "text": "every supplied figure is zero (public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0), yet \u00a73 introduces new public re-judge driver definitions without stating any it retires or merges, and \u00a79 introduces \"a seat named for the rerank\" beside the existing seats in imas_codex/settings.py:181-185 without naming a seat it retires; no section states why nothing can be retired",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "28272834ee163fb9d722bad57effe28ed29f6db6dd46f743a8be247569f70309",
+  "plan_slug": "discovery-judgments-through-jev",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T01:22:02.213605+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "deep_module-1",
+      "reason": "",
+      "when": "2026-10-07T01:22:05.107887+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-07T01:22:06.458172+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T01:22:07.722530+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-07T01:22:09.056232+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:22:05.107887+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:22:02.213605+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:22:09.056232+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:22:07.722530+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T01:22:06.458172+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-discovery-judgments-through-jev.v4.json",
+  "review_run_id": "r-20261007T010917209006-plan-review-of-discovery-judgments-through-jev",
+  "reviewed_blob_sha": "8feb5374faa7bcf3c60f08b10369b6d516ee50e0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a73 spreads one behaviour (build state from stored fields, ask `call_decisions`, apply the answers, book the cost) across five per-pipeline re-judge drivers instead of one shared driver in `discovery/base/`.",
+    "duplicate_owner": "a finding \u2014 \u00a73/\u00a77 re-implement facility- and prefix-scoped status re-processing that `imas_codex/discovery/base/reset.py` already owns.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds five re-judge drivers and \u00a79 adds a rerank seat without naming, in its own text, what each retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites the mechanism it extends for the judgment calls (`call_decisions` in `imas_codex/discovery/base/llm.py` and the \u00a725 code pipeline), but it never searches the machinery that already re-processes stored rows: `imas_codex/discovery/base/reset.py` and the `--reset-to` CLI in `imas_codex/cli/discover/`.",
+    "thin_wrapper": "a finding \u2014 the five re-judge drivers add no behaviour the existing pipeline worker plus the reset path lacks other than a graph-only flag, and the plan does not say why the pipeline cannot take that flag."
+  },
+  "section_digests": {
+    "_document": "fd64b85b1744102d9664a97ed53d75469e256f4336194a534321e6e5b04d7e5e",
+    "s1": "e6ed0dfe853f3f242923d7b9bca83fb125586f4f1620d4a6becb8392c02c5fe7",
+    "s2": "62278d5c4bbda5332f942af6f073d9871390374dd572e47659bdacd5291c25fd",
+    "s3": "c0af28d90c3998d20bcaf8d5212892e46faeb427e685ec2ccea797d0fb4a6177",
+    "s4": "ec02f698f7539ba44cea1235ecc63eafc4f6401062cff4d0eaf6781b80bf4485",
+    "s5": "3878deffc47d95195013135765df26911fd97964a9003a61e9d0daaeb72d5b76",
+    "s6": "34bf832aa43478f4e05f9f63573276919bb4f8cccdaacc0943aa601327f4e3f1",
+    "s7": "799a0a4e90e3c6a4dfc4beb3e07c50411059fda3eb9588a850fce65654f08f13",
+    "s8": "2995253050e0a467fb6eff3f70e71e0d3abf78c06d05b28020695df8f311e85a",
+    "s9": "0d99db5fbaa644e599312790bec5712f6d493a6b3d7a65157a24a0cf39856a3a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T01:20:59.999991+00:00"
+}

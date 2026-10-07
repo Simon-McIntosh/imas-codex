@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T00:44:07.034Z",
+  "dispatched_at": "2026-10-06T00:40:09Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/paths/parallel.py:483",
+      "id": "duplicate_owner-1",
+      "reason": "naming the existing predicate owner (or extracting one helper in `parallel.py`) lets \u00a714 express its root scope through it, which removes the duplication the plan would otherwise deepen and is a one-file change of the same size as the fragment it replaces.",
+      "text": "\u00a714 proposes `AND any(p IN $root_prefixes WHERE n.path = p OR n.path STARTS WITH p + '/')` as new text in the paths reset, but the paths-claim layer already spells \"under these roots\" five times inline (`AND any(root IN $root_filter WHERE p.path STARTS WITH root)` at parallel.py:483, :539, :596, :714, :794), and `seed_facility_roots`/`claim_paths_for_expanding` already accept a `root_filter`; the plan neither names this recurring duplicate nor extracts one owner for it, so the subsystem gains a sixth spelling in a second module",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "29755c6b0ef1b24b22938246dc8b53ee0afd16c4f11eb1f8c7852900fa897c21",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 129,
+  "project": "imas-codex",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-06T00:45:32.704458+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T004003476956-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "954ed3e8e825267facb0c62a45a69f0d5453532e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the live design adds no module and no fan-out of small wrappers; it makes two field-level changes inside one already-deep owner (`imas_codex/discovery/base/reset.py`) and one call-site change in the paths command, each with a test.",
+    "duplicate_owner": "a finding \u2014 \u00a714 introduces a sixth root-scoping predicate (as the `reset_to_status` `extra_filter` fragment) beside the five inline copies already in `imas_codex/discovery/paths/parallel.py` (:483, :539, :596, :714, :794), none of which the plan names or consolidates.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a714 adds no option to any family (it scopes the existing `--reset-to` with the existing `--root`), so there is no new surface to retire or merge.",
+    "reuse_search": "pass \u2014 \u00a714 names and extends the existing owner rather than adding a reprocess subsystem: `reset_to_status` with `extra_filter`/`extra_params` and `PATH_RESET_SPECS` in `imas_codex/discovery/base/reset.py`, citing the signals command's precedent at `imas_codex/cli/discover/signals.py:224`; verified `reset_to_status` already takes both parameters (reset.py:53) and that `expanded_at` is never cleared anywhere in the package.",
+    "thin_wrapper": "pass \u2014 nothing is wrapped; \u00a714 modifies the owner in place (add `expanded_at` to the `scanned`/`triaged` `clear_fields`, pass `--root` prefixes through `extra_filter`) rather than layering a parallel path over it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T00:44:23.581379+00:00"
+}

@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-05T13:38:54.284Z",
+  "dispatched_at": "2026-10-05T13:33:30Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "3601",
+      "severity": "follow-on",
+      "text": "The code-context query is wrapped in a broad `except Exception` that logs at debug level, so the base form's planner failure (Neo.DatabaseError.Statement.ExecutionFailed) returned [] silently for every facility at every enrichment run and was invisible. The repaired query plans, but the swallow remains: a future index or planner regression would again degrade provider-less, undetected, on the code-context branch. Narrowing the handler or raising on DatabaseError would make the failure visible."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "183",
+      "severity": "follow-on",
+      "text": "jt-60sa CodeChunks returned by the code-context lookup carry no (src)-[:HAS_CHUNK]-> link, so the OPTIONAL MATCH resolves src to null and source_path renders empty for that facility despite the chunks being returned. This is an ingestion-side link gap outside this node's write scope, adjacent to the CODE_EXAMPLE_ID gap noted after the sibling-indexes node."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "The only production call site changed is enrich_worker's code-context query, now _build_code_context_query(); fetch_semantic_wiki_context keeps its signature and is called from three parallel.py sites (3428, 3496 area) with k/min_score unchanged. No new public interface, so there are no new external call sites to verify.",
+    "diff": "Read the full diff of the two source files and two test files; the facility predicate is inside SEARCH for both, the p.facility_id and src.facility_id post-filters are gone, the source joins are OPTIONAL/MATCH kept for output fields, and the 3-slot ANN limit is preserved.",
+    "done_when": "Read the \u00a7 done-when; the named gate exits 0 at head (reproduced independently at 51 passed), the PSRC signal jt-60sa:general/dcsv_1pdatpsrc records wiki 4->5 and code 0->3 increases at default limits, and both in-SEARCH predicates are pinned by a test that fails when reverted to a post-filter.",
+    "goal": "Read \u00a718 of jt60sa-discovery-completion; both named lookups are moved onto build_vector_search with the facility predicate inside SEARCH and both post-filter predicates are retired, with the page and source joins kept only for the rendered fields.",
+    "manifest": "Read the delivered manifest.md; it carries the revision pair, the two suite records with absolute commands, the negative-control log, the live counts and two follow-ons, and its claims reconcile with the gate logs and evidence fragment it names.",
+    "write_paths": "Read the reviewed run's declared write paths against git diff --name-only 516d9dcc2 b3261004e; all five changed paths are within the grant and the worktree is clean at HEAD."
+  },
+  "justifications": {
+    "durability": "Both lookups have a test pinning the predicate inside SEARCH and the absence of the post-filter (tests/discovery/test_scanners.py:TestSemanticWikiContextFacilityPredicate, tests/discovery/test_signals_pipeline.py:TestCodeContextFacilityPredicate), and the wiki test is falsified by the recorded negative control, so the guard is demonstrably live rather than passing in both states. Deducted two: the code-context test only asserts on the string returned by _build_code_context_query() and never drives the enrich_worker call path, so a regression that bypasses the builder (e.g. re-inlining a post-filtered query at the call site) would not be caught; and correctness of the in-SEARCH predicate depends on the external precondition that the two indexes actually carry facility_id, which lives in the generated, gitignored schema_context_data.py and is not asserted by any test in this node.",
+    "evidence": "The named gate exits 0 at head (51 passed, EXIT=0) and 0 at base 29bede1cf (49 passed, EXIT=0), and I reproduced the head run independently from this review node (review-gate-head.log, 51 passed, EXIT=0). The live before/after counts the plan requires are recorded for the PSRC signal jt-60sa:general/dcsv_1pdatpsrc at default limits: wiki 4->5 jt-60sa chunks and code 0->3 (evidence fragment enrichment-context-prefilter.html; manifest live_counts). The negative control is a real red arm (EXIT=1, TestSemanticWikiContextFacilityPredicate::test_facility_predicate_inside_search fails with ValueError). Deducted one because the code-context 'before' count is a reconstruction: the true base query form did not plan on the live engine, so the measured 0 comes from a global-cut form without the immediate post-SEARCH score predicate (manifest failure_attribution), and I did not re-run the live graph measurement on this node.",
+    "fit": "The change reuses the exact mechanism \u00a716 landed \u2014 build_vector_search(prefilter_clauses=...) with the predicate on the chunk's own facility_id \u2014 rather than inventing a second pattern, keeping the page/source joins only for rendered fields as \u00a718 states. Comments and docstrings state the mechanism (why the predicate must be inside SEARCH) rather than the plan label, and the two commits are conventional two-part messages (fix(signals): ... with a body; docs(evidence): ...). Naming is mechanism-based with no plan or ticket identifiers in source.",
+    "goal_fidelity": "\u00a718's two claims are both delivered at head b3261004e. The wiki-context lookup (imas_codex/discovery/signals/scanners/wiki.py:309) and the code-context lookup (imas_codex/discovery/signals/parallel.py:183) each pass prefilter_clauses=[\"node.facility_id = $facility\"] to build_vector_search, which renders the predicate as a WHERE between FOR $embedding and LIMIT \u2014 inside the SEARCH parentheses (imas_codex/graph/vector_search.py:79-81). The WikiPage and CodeChunk source joins are retained only for the rendered fields (p.title, src.path), and both post-filter predicates are retired: git grep of p.facility_id and src.facility_id over the two modules at head returns nothing (the surviving facility_id strings in parallel.py are an unrelated DataSource MERGE at 1993-1997). The plan's interface budget 'nothing added' holds for the public surface; the only new symbol is the private _build_code_context_query() helper, which the plan does not forbid.",
+    "reuse": "build_vector_search is now the single facility-pre-filter mechanism for both enrichment-context lookups, matching how search_tools.py and domain_queries.py already use it, and the two hand-rolled SEARCH blocks are retired rather than paralleled. Deducted one because the code-context query is extracted to a new module-level symbol where the plan set an interface budget of nothing added; the symbol is private and justified for testability without driving enrich_worker, so the cost is minor but non-zero.",
+    "scope_discipline": "git diff --name-only 516d9dcc2..b3261004e lists exactly five paths, all inside the reviewed run's declared write_paths (two source modules, two test files, one evidence fragment). The reviewed worktree is clean at HEAD (git status --porcelain empty). No path outside the grant was touched, and no out-of-scope file was edited. The evidence fragment write path is under the plan's own fragment directory."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a718's two lookups both move onto build_vector_search with the facility predicate inside SEARCH, both post-filter predicates retired, and the page/source joins kept only for rendered fields.\nVERDICT done_when: the named gate exits 0 at head (51 passed, reproduced independently), the PSRC signal records wiki 4->5 and code 0->3 at default limits, and both in-SEARCH predicates are pinned.\nVERDICT write_paths: all five changed paths lie within the declared grant and the worktree is clean at HEAD b3261004e.\nVERDICT manifest: carries the revision pair, both suite records with absolute commands, the negative-control log, live counts and two follow-ons, reconciling with the gate logs and fragment.\nVERDICT diff: predicate inside SEARCH for both lookups, p.facility_id and src.facility_id post-filters gone, joins retained for output fields, ANN limit preserved.\nVERDICT call_sites: no new public interface; the private _build_code_context_query helper is the only added symbol.\nSCORE goal_fidelity: 20\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 19\nSCORE reuse: 19\nFINDING imas_codex/discovery/signals/parallel.py:3601 follow-on: the broad except-Exception at debug level hid the base query's planner failure, so code-context returned [] silently for every facility; the swallow survives the fix and would hide a future regression.\nFINDING imas_codex/discovery/signals/parallel.py:183 follow-on: jt-60sa CodeChunks carry no HAS_CHUNK link, so source_path renders empty for that facility; ingestion-side gap outside scope.",
+  "review_run_id": "r-20261005T133325682371-review-of-enrichment-context-prefilter",
+  "reviewed_base_sha": "516d9dcc2a68e8e3315e733aef2273f02cdcb41d",
+  "reviewed_head_sha": "b3261004e1b50aec441498912db4bac6091a820c",
+  "reviewed_run_id": "r-20261005T131238997070-enrichment-context-prefilter",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T13:38:00+00:00",
+  "total": 115
+}
