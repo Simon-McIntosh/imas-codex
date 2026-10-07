@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed node's own record carries no baseline_suite/after_suite arm pair (both absent), so the required added-failure figure is derived here from two arms this review ran in scratch extractions under $TMPDIR: baseline_suite at the reviewed base 1096edf46 (UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T164051199743-review-of-dd-search-rerank-note/base uv run --no-sync pytest -p no:cacheprovider tests/tools/test_dd_path_search_rerank.py tests/tools/test_tools.py, 25 passed, EXIT=0, review_base.log) and after_suite at the reviewed head 54c5a3f66 (UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T164051199743-review-of-dd-search-rerank-note/head uv run --no-sync pytest -p no:cacheprovider tests/tools/test_dd_path_search_rerank.py tests/tools/test_tools.py, 27 passed, EXIT=0, review_head.log). Both arms ran to their summary line; both failure-id sets are empty, so the set difference is empty and added_failure_count is 0. The reviewed gate (27 passed, 1 warning, EXIT=0) and the reviewed declared negative control (drop the note in _rerank_dd_hits -> 1 failed, EXIT=1) both reproduce exactly against the reviewed head; a second, independent mutation by this review removing the formatter's note-print block also reds the same new test. The reviewed run changed no test outside tests/tools/test_dd_path_search_rerank.py; tests/tools/test_tools.py is included because it composes the same tool.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T164051199743-review-of-dd-search-rerank-note/head uv run --no-sync pytest -p no:cacheprovider tests/tools/test_dd_path_search_rerank.py tests/tools/test_tools.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T164051199743-review-of-dd-search-rerank-note/logs/review_head.log",
+    "revision": "54c5a3f66a244c16d63136d15ee7270581aa08d5"
+  },
+  "base_log_revision": "1096edf46310d7423d29a7c72616755c6ef5832d",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T164051199743-review-of-dd-search-rerank-note/base uv run --no-sync pytest -p no:cacheprovider tests/tools/test_dd_path_search_rerank.py tests/tools/test_tools.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T164051199743-review-of-dd-search-rerank-note/logs/review_base.log",
+    "revision": "1096edf46310d7423d29a7c72616755c6ef5832d"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/tools/graph_search.py:456 GraphSearchTool.search_dd_paths calls _rerank_dd_hits(query, hits) and now unpacks (hits, rerank_note); _rerank_dd_hits (graph_search.py:341) is the single caller of the shared owner rerank_candidates (imas_codex/llm/search_tools.py:171). At the reviewed head _rerank_dd_hits has exactly one caller (search_dd_paths); the only other consumers of the changed return are the node's own tests."
+  ],
+  "completed_at": "2026-10-07T16:56:52.075Z",
+  "dispatched_at": "2026-10-07T16:41:00Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's record carries no baseline_suite/after_suite arm pair, so the required added-failure figure cannot be read from its own record and is reconstructed here (base arm at 1096edf46 25 passed EXIT=0; head arm at 54c5a3f66 27 passed EXIT=0; added_failure_count 0). Not a defect in the change \u2014 the reproducible claims the manifest does carry (gate 27 passed EXIT=0 and the declared negative control 1 failed EXIT=1) both reproduce exactly \u2014 but a reviewed record that omits the two arms leaves the regression question to the reviewer. Naming the arms would make the record self-contained. The same gap was reported on the sibling reviews of this section.",
+      "type": "record-accuracy"
+    },
+    {
+      "file": "tests/tools/test_tools.py",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: TestToolsComposition::test_search_tool_interface drives a live search_dd_paths call against the graph and timed out once at pytest's 30 s per-test budget during this review's first full head-arm run (30.51 s, EXIT=1), then passed 3/3 in isolation (10.5-11.2 s) and passed in the head-arm re-run that produced the recorded after_suite, matching the reviewed gate. The same test passed at the reviewed base. It exercises no code this node changed on its default path (the tool is built without a rerank switch, so the only touched lines are the summary dict construction, which is identical in shape), so the timeout is a live-endpoint latency flake, not a regression introduced here. Pinning the fixture to a stub graph or recording a timeout budget explicitly would remove the flake from the gate.",
+      "type": "environment-dependent-test"
+    }
+  ],
+  "head_log_revision": "54c5a3f66a244c16d63136d15ee7270581aa08d5",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "durability": "The new surface is falsifiable in both directions and shown so by mutation. Removing the note at its source in _rerank_dd_hits (return `ordered, None`) reds test_skipped_rerank_leaves_the_note_in_summary_and_report (1 failed, 15 passed, EXIT=1) \u2014 reproduced independently here at 54c5a3f66. A second, distinct mutation this review applied \u2014 deleting the formatter's note-print block from format_search_dd_report \u2014 reds the same test (1 failed, EXIT=1), so both halves of the surface (summary propagation and report rendering) carry a guard that fires. The inverse is held by test_completed_rerank_leaves_no_note, which pins that a completed rerank leaves neither the summary key nor an `Rerank:` line in the report. Marked just short of perfect because the skipped-path test asserts presence and propagation only, not the note's wording (a deliberate ownership boundary, documented in the manifest and the test docstring), and the read-only/DD-only zero-call tests assert call counts on a separately-constructed tool rather than driving the server object end to end.",
+    "evidence": "Independently reproduced, not read. The reviewed head 54c5a3f66 was extracted with git archive into $TMPDIR and its declared gate re-run with module.__file__ under the scratch tree: 27 passed, 1 warning, EXIT=0 (review_head.log), matching the reviewed gate.txt exactly. The base arm at 1096edf46 gives 25 passed EXIT=0 (review_base.log), from which added_failure_count is 0. The reviewed declared negative control reproduces (drop the note -> 1 failed EXIT=1, review_negative_control_node.log), and an independent mutation of the formatter also reds the new test (review_negative_control.log). The skipped path was additionally driven end to end under pytest and shown to yield the summary key 'rerank_note'='rerank incomplete: 2 of 2 candidates kept their embedding position (unscored at the 5.0s budget)' and the report line '> Rerank: ...'. Marked down because the reviewed record itself carries no baseline/after arm pair, so the required added-failure figure had to be reconstructed here, and because one arm of the gate carries a pre-existing live-endpoint test that flaked once under contention (30 s timeout) before passing on re-run.",
+    "fit": "Extends the mechanism \u00a78 already built rather than adding a second one. The note is the string the shared owner rerank_candidates (imas_codex/llm/search_tools.py:171, used by both code and wiki search) already returns; _rerank_dd_hits stops discarding it, the summary carries it under the key the plan names (rerank_note), and format_search_dd_report prints it beneath the hits exactly where the plan says. The switch remains the construction-time decision the prior node landed (server sets it from its mode); this node does not re-derive it but makes the server-mode tests count rerank_candidates calls, which is the specific fix the prior review of dd-path-search-rerank flagged as a follow-on. No new predicate, no second rerank, no new wording owner.",
+    "goal_fidelity": "EXACT. Every clause of the node's done-when is pinned and verified against the reviewed head: a skipped rerank with the key removed leaves the note in the result summary and in the formatted report (test_skipped_rerank_leaves_the_note_in_summary_and_report; reproduced here end to end, note text 'rerank incomplete: 2 of 2 candidates kept their embedding position (unscored at the 5.0s budget)' reaching both summary['rerank_note'] and the report line '> Rerank: ...'); a completed rerank leaves neither (test_completed_rerank_leaves_no_note); and a read-only or DD-only server makes zero rerank_candidates calls (test_read_only_server_never_reranks and test_dd_only_server_never_reranks now assert spy.call_count == 0, with test_full_server_reranks asserting 1). The note's wording is correctly left to the shared owner \u2014 the plan's second decision about naming the missing variable is the separate decisions-key-skip node's remit, and this node's manifest records that boundary explicitly.",
+    "manifest": "status complete; commits [54c5a3f66a244c16d63136d15ee7270581aa08d5]; changed_paths reconciles with the diffstat (graph_search.py, search_formatters.py, the test file, the evidence fragment \u2014 four files, 150 insertions / 20 deletions). The gate log (27 passed, 1 warning) and the negative-control log (drop the note -> 1 failed, EXIT=1) both reproduce exactly at the reviewed head. The record carries no baseline_suite/after_suite arms, so the added-failure count is 0 by this review's own base/head measurement rather than read from the reviewed record \u2014 the one substantive record gap, reported as a follow-on.",
+    "write_paths": "Declared in the reviewed orientation: imas_codex/tools/graph_search.py, imas_codex/llm/search_formatters.py, tests/tools/test_dd_path_search_rerank.py and docs/evidence/fragments/jt60sa-imas-maps/dd-search-rerank-note.html. The diff at 54c5a3f66 touches exactly those four paths and no others. The fragment is present, carries the section id dd-search-rerank-note and data-reckon=\"evidence\"; no figure was written, which the small-node rule permits for a change whose brief names no artifact."
+  },
+  "justifications": {
+    "durability": "Two independent mutations red the new test and one test pins the inverse, so the surface is guarded, not merely exercised. Marked down from perfect for the untested wording boundary and the tool-in-isolation shape of the zero-call tests.",
+    "evidence": "Head gate, base arm and both negative controls reproduced in scratch; the skipped path was driven end to end to show the note text reaching summary and report. The mark-down is the reviewed record's missing arms and the one flaked gate test \u2014 neither is a defect in the change.",
+    "fit": "Pure reuse of the shared rerank owner and the summary key the plan names; no second rerank.",
+    "goal_fidelity": "All three done-when clauses pinned and verified against the reviewed head.",
+    "reuse": "rerank_candidates is called unchanged through the existing import; the note is passed through verbatim with no re-wording and no second spelling; the summary dict is built once and the note added conditionally. No new store, no new dependency, no duplicated predicate.",
+    "scope_discipline": "Four changed files, all declared; diffstat 150/20; no path outside the declared set."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: _rerank_dd_hits (imas_codex/tools/graph_search.py) no longer discards the note rerank_candidates returns \u2014 it now returns (hits, note), search_dd_paths puts the note on the result summary as rerank_note, and format_search_dd_report prints it beneath the hits. \u00a78's node dd-search-rerank-note, exactly. EVIDENCE: head gate independently re-run 27 passed EXIT=0 in a scratch extraction at 54c5a3f66; base arm at 1096edf46 25 passed EXIT=0, added_failure_count 0; the reviewed declared negative control reproduces (drop the note -> 1 failed EXIT=1) and an independent formatter mutation also reds the new test. The skipped path end-to-end yields summary['rerank_note']='rerank incomplete: 2 of 2 candidates kept their embedding position (unscored at the 5.0s budget)' and the report line '> Rerank: ...'. SCOPE: four declared files, 150 insertions / 20 deletions; no path outside the declared set. DURABILITY: both halves of the surface (summary propagation, report rendering) carry a mutation-falsified guard; the inverse (completed rerank leaves no note) is pinned. FIT: reuses the shared rerank owner rerank_candidates unchanged; adds no second rerank. REUSE: note passed through verbatim; summary dict built once. Follow-ons: the reviewed record carries no baseline_suite/after_suite arms, so the added-failure figure was reconstructed here; and tests/tools/test_tools.py::test_search_tool_interface flaked once at the 30 s budget under contention (live-graph query, pre-existing test, passed at base and on re-run).",
+  "review_run_id": "r-20261007T164051199743-review-of-dd-search-rerank-note",
+  "reviewed_base_sha": "1096edf46310d7423d29a7c72616755c6ef5832d",
+  "reviewed_head_sha": "54c5a3f66a244c16d63136d15ee7270581aa08d5",
+  "reviewed_run_id": "r-20261007T163030363738-dd-search-rerank-note",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:56:00Z",
+  "total": 116
+}

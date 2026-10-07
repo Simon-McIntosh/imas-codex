@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -402,6 +402,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T163030363738-dd-search-rerank-note" data-who="reckon-build" data-when="2026-10-07T16:40:11.577Z">
     <div class="r-comment-body"><p>dd-search-rerank-note — _rerank_dd_hits returns the rerank_candidates note and search_dd_paths puts it on the result summary as rerank_note, printed beneath the hits by format_search_dd_report; gate tests/tools/test_dd_path_search_rerank.py + tests/tools/test_tools.py 27 passed EXIT=0, negative control 1 failed EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T164051199743-review-of-dd-search-rerank-note" data-who="reckon-build" data-when="2026-10-07T16:56:52.075Z">
+    <div class="r-comment-body"><p>review of dd-search-rerank-note (r-20261007T163030363738) stored at head 54c5a3f66 — §8 dd-search-rerank-note scored 116/120, status parsed; the note rerank_candidates returns now reaches SearchPathsResult.summary[&quot;rerank_note&quot;] and the formatted DD report; two follow-ons (record omits baseline/after arms; a pre-existing live-graph gate test flaked once under contention).</p></div>
 </div>
 </section>
 </main>
