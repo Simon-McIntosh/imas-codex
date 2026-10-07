@@ -1,0 +1,20 @@
+<!-- candidate_worker in imas_codex/ids/workers.py now checks
+     judgments_available() once before its first claim. With
+     OPENROUTER_API_KEY_IMAS_CODEX unset the stage logs one warning naming the
+     variable, marks the candidate phase done and returns without claiming a
+     source, instead of claiming and releasing in a loop until its deadline.
+     Gate: tests/ids/test_candidate_worker_key_skip.py plus the existing
+     candidate-worker and decisions-key tests (13 passed). Negative control
+     removes the up-front check and the new test fails (EXIT=1) with the claim
+     recorder entered in a loop. -->
+<section id="candidate-worker-key-skip" data-reckon="evidence">
+  <h2 id="candidate-worker-key-skip-heading">Candidate worker skips the stage without the decisions key</h2>
+  <p id="candidate-worker-key-skip-landing">
+    <code>candidate_worker</code> checks <code>judgments_available</code> once
+    before its first claim. With <code>OPENROUTER_API_KEY_IMAS_CODEX</code>
+    unset it logs one warning naming the variable, marks the candidate phase
+    done and returns, so no source is claimed and no routing or judgment call
+    is made — where previously each claim could only fail and be released in a
+    loop until the deadline.
+  </p>
+</section>

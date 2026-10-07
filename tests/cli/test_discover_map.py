@@ -94,7 +94,12 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0, expand=
     ``PipelineCost`` the worker passes, so the cost-limit test exercises the real
     budget path rather than a patched seam. ``expand`` optionally replaces
     ``expand_cluster_siblings``; it defaults to no siblings.
+
+    A decisions key is set here because the worker declines to claim, route or
+    judge anything while the key is absent, so an unset key would measure the
+    skip in place of the pipeline these tests replace the calls for.
     """
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
     remaining = list(SOURCES)
 
     def fake_claim(facility, domains=None, batch_size=10):

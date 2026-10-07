@@ -248,6 +248,15 @@ class TestNoCandidateLogged:
         state.candidate_phase = MagicMock(done=True)
         return state
 
+    @pytest.fixture(autouse=True)
+    def _decisions_key(self, monkeypatch):
+        """Set a decisions key so the worker reaches the judgement it replaces.
+
+        The worker ends the stage before its first claim when the key is
+        absent, so an unset key would test the skip instead of the routing.
+        """
+        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+
     def test_candidate_worker_skips_and_logs_no_candidate(self, caplog):
         import asyncio
         import logging
