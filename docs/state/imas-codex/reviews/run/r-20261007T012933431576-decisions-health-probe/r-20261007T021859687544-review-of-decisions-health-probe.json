@@ -1,0 +1,51 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/discover/code.py:233 _llm_check calls llm_health_check_with_decisions(\"discovery-score\") and registers it as the monitor's llm row through DiscoveryConfig.extra_service_checks at code.py:247; imas_codex/discovery/base/services.py:464 llm_health_check_with_decisions calls decisions_health_check(service=\"facility-discovery\")",
+    "the tag the relevance workers pass to acall_decisions."
+  ],
+  "completed_at": "2026-10-07T02:30:31.568Z",
+  "dispatched_at": "2026-10-07T02:19:12Z",
+  "findings": [],
+  "head_log_revision": "007d979b070cfe05e63be3f646dbaa631ed5dc88",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against base 11a270c0; one commit 007d979b changes three files for 18 insertions and 7 deletions.",
+    "done_when": "the done_when's gate is pytest over tests/discovery/test_base_services.py tests/discovery tests/cli with any failure attributed against the base revision; the run's gate.log records 3 failed / 1495 passed, EXIT=1 at revision 007d979b, the three failures being the pre-existing cli timeouts the base arm reproduces at 7a637199.",
+    "goal": "the run's goal is to make the code panel's llm check also probe the decisions endpoint; the incremental commit keeps the score seat's detail on the all-healthy path so the composed row matches its own docstring, at imas_codex/discovery/base/services.py:466.",
+    "manifest": "read; it records both gate arms, the focused-file result, the negative control and the commit list ending at 007d979b.",
+    "write_paths": "read the manifest's declared paths; the incremental diff touches only imas_codex/discovery/base/services.py, tests/discovery/test_base_services.py and docs/evidence/fragments/jt60sa-discovery-completion/decisions-health-probe.html, all inside them."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_base_services.py compares detail against the independently supplied mock seat detail \"titan\", so reinstating the pre-fix return True, detail (the decisions host) reddens the assertion.",
+    "evidence": "both gate arms are on disk (logs/base-arm.log, logs/gate.log) and the focused file tests/discovery/test_base_services.py is green at 007d979b; the full gate exits 1 rather than the 0 the done_when names, its three failures attributed against base 7a637199.",
+    "fit": "the change keeps the module's tuple-return idiom and introduces no name the repository naming rules forbid.",
+    "goal_fidelity": "services.py:462-466 binds seat_detail and decisions_detail separately and returns the seat's detail when both endpoints answer, matching the docstring promise at services.py:453.",
+    "reuse": "the change extends llm_health_check_with_decisions in place rather than forking it; a capability search over imas_codex/discovery for a composed llm health check named no other owner.",
+    "scope_discipline": "the single commit touches only the three declared paths, 18 added lines, carrying nothing the run's goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the run's goal is to make the code panel's llm check also probe the decisions endpoint; the incremental commit keeps the score seat's detail on the all-healthy path so the composed row matches its own docstring, at imas_codex/discovery/base/services.py:466.\nVERDICT done_when: the done_when's gate is pytest over tests/discovery/test_base_services.py tests/discovery tests/cli with any failure attributed against the base revision; the run's gate.log records 3 failed / 1495 passed, EXIT=1 at revision 007d979b, the three failures being the pre-existing cli timeouts the base arm reproduces at 7a637199.\nVERDICT write_paths: read the manifest's declared paths; the incremental diff touches only imas_codex/discovery/base/services.py, tests/discovery/test_base_services.py and docs/evidence/fragments/jt60sa-discovery-completion/decisions-health-probe.html, all inside them.\nVERDICT manifest: read; it records both gate arms, the focused-file result, the negative control and the commit list ending at 007d979b.\nVERDICT diff: read commit by commit against base 11a270c0; one commit 007d979b changes three files for 18 insertions and 7 deletions.\nCALL_SITES: imas_codex/cli/discover/code.py:233 _llm_check calls llm_health_check_with_decisions(\"discovery-score\") and registers it as the monitor's llm row through DiscoveryConfig.extra_service_checks at code.py:247; imas_codex/discovery/base/services.py:464 llm_health_check_with_decisions calls decisions_health_check(service=\"facility-discovery\"), the tag the relevance workers pass to acall_decisions.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: services.py:462-466 binds seat_detail and decisions_detail separately and returns the seat's detail when both endpoints answer, matching the docstring promise at services.py:453.\nSCORE evidence: 18\nJUSTIFICATION evidence: both gate arms are on disk (logs/base-arm.log, logs/gate.log) and the focused file tests/discovery/test_base_services.py is green at 007d979b; the full gate exits 1 rather than the 0 the done_when names, its three failures attributed against base 7a637199.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit touches only the three declared paths, 18 added lines, carrying nothing the run's goal does not imply.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_base_services.py compares detail against the independently supplied mock seat detail \"titan\", so reinstating the pre-fix return True, detail (the decisions host) reddens the assertion.\nSCORE fit: 18\nJUSTIFICATION fit: the change keeps the module's tuple-return idiom and introduces no name the repository naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends llm_health_check_with_decisions in place rather than forking it; a capability search over imas_codex/discovery for a composed llm health check named no other owner.\n",
+  "review_run_id": "r-20261007T021859687544-review-of-decisions-health-probe",
+  "reviewed_base_sha": "11a270c024a7c1719ac04fdcff3f9d07ffdd3d80",
+  "reviewed_head_sha": "007d979b070cfe05e63be3f646dbaa631ed5dc88",
+  "reviewed_run_id": "r-20261007T012933431576-decisions-health-probe",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-07T02:26:51.520698+00:00",
+  "total": 113,
+  "verdict": "SOUND"
+}
