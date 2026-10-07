@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs and independently reproduced arms. Reviewed run baseline_suite revision 52f616dd (gate_base.log, 496 passed, EXIT=0) and after_suite revision a8998c5a (gate_head_final.log, 891 passed, EXIT=0): 0 failures on both, so added_failure_count=0 and added_failure_ids=[]. My own range arms: base 09ff452ee reviewer_prev_arm.log 526 passed EXIT=0, head reviewer_head_arm.log 891 passed EXIT=0.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T061546254649-eddb-unit-normalisation/gate_head_final.log",
+    "revision": "a8998c5a4f11934826328d22ab07af7909c634b4"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T061546254649-eddb-unit-normalisation/gate_base.log",
+    "revision": "52f616dd261ce21072921abca93d8f2291fe3c19"
+  },
+  "blockers": "none",
+  "completed_at": "2026-10-07T09:18:44.979Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-07T08:50:41Z",
+  "evidence_inputs": "range shas base 09ff452ee head a8998c5a; negative control (reviewer_negative_control.log): restoring the caret-symbol definitions (m2 = 1 meter ** 2 = m^2, etc.) fails exactly 9 tests - test_equivalent_spellings_denote_one_unit[1/m2-m^-2|1/m3-m^-3|T/m2-T.m^-2], test_normalisation_round_trips[1/m2|1/m3|T/m2], test_no_factor_carries_two_exponents[1/m2|1/m3|T/m2] - 9 failed, 386 passed, EXIT=1; these ids all pass at the head arm. Independent arms: reviewer_prev_arm.log 526 passed / reviewer_head_arm.log 891 passed. Probe facts (head): roundtrip_mismatches=0 over parsed catalogue strings ('-' is the dimensionless marker and does not parse, so it is excluded); equivalences KA!=A, KA==kA, m2==m3... ; analyze_units(KA,A) compatible True factor 1000.0; analyze_units(uST,1) compatible True factor 1e-06; celsius 20 degC/DegC/oC -> 293.15 K. Observed divergence: normalize('DegC') and normalize('oC') return the degree-sign spelling while normalize('degC') returns 'degC' - one unit, two strings, grouped by the census's pint-equivalence.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-imas-maps/eddb-unit-normalisation.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: accuracy - the intro paragraph asserts that 'a case variant and a glued form are both defined through @alias'. The glued forms are not @alias entries: the head alias file defines m2 = 1 meter ** 2, m3 = 1 meter ** 1... as standalone units with no symbol, and the file's own comment says 'the glued forms are units in their own right. They carry no symbol'. The very next paragraph of the same fragment says 'Each glued spelling is a unit in its own right, defined without a symbol', so the fragment contradicts itself. The defect was introduced by 8f7162012 (the repair of the previously-garbled sentence) and was not corrected by a8998c5a4, though that commit rewrote the fragment. Only case variants (DEG->degree, DegC/oC->degC) use @alias. Fix: 'a case variant is defined through @alias and a glued form as a unit of its own'.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "tests/units/jt60sa_unit_strings.txt",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: accuracy - the catalogue spelling 'deg. C' (44 signals in the census, present in this list) normalises to 'C.deg', which pint reads as coulomb*degree ([current]*[time]), not a temperature. Reproduced: normalize_unit_symbol('deg. C') == 'C.deg'; analyze_units('C.deg','K') is incompatible with error 'Incompatible dimensions: [current] * [time] vs [temperature]'. The round-trip invariant is satisfied (the output denotes the same unit as the input string), so no test catches it, and the census presents the spelling as resolved rather than flagged. If 'deg. C' denotes Celsius on those 44 signals they will fail temperature mapping silently. The temperature aliases cover DEG, degC, DegC, oC and degreeC but not 'deg. C'. This is a pre-existing pint fallback reading the range did not introduce, but the refreshed census and evidence fragment (a8998c5a4) publish it as resolved.",
+      "verdict": "PLAUSIBLE"
+    }
+  ],
+  "follow_ons": "none - repairs, if wanted, are documentation-level: (1) correct the fragment intro to say only case variants use @alias (a glued form is its own unit); (2) decide whether 'deg. C' (44 signals) should map to Celsius rather than the pint fallback coulomb*degree. Both are outside this review's write scope. The prior review's follow-ons are addressed in this range: the manifest now carries populated baseline_suite/after_suite JSON, and the Celsius canonical-string divergence (degC vs the degree-sign spelling) is made harmless by comparing units with units_are_equivalent rather than strings.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "three commits against reviewed base 09ff452ee: 8f7162012 (repair a garbled fragment sentence), a6102f2f1 (define m2/m3/Pam3 without a caret symbol and add units_are_equivalent), a8998c5a4 (regroup the census by pint unit and refresh the fragment). Net: 5 files, +303 insertions, -35 deletions.",
+    "done_when": "met. The gate uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider passes at head (891 passed, 5 skipped, EXIT=0; reproduced 891 passed in my own scratch head arm). normalize_unit_symbol parses each added spelling and analyze_units finds KA compatible with A at 1000.0 (probe). The census normalises or lists-with-reason each of the 76 JT-60SA unit strings (76 distinct / 50 pint units / 64 normalised strings / 12 unresolved over 6298 signals).",
+    "goal": "the node goal - parse the EDDB free-text spellings through the one alias file the registry loads and list anything that names no physical unit - is delivered and strengthened in this range: the round-trip invariant replaces a string-canonicalisation claim, and equivalence is decided by pint. The empty string, Unit, MPaG, the neutron-yield family, ph/srsm2 and the hyphenated exponents each normalise to None.",
+    "manifest": "the reviewed manifest reads status complete, lists all six commits and the measurement block, and now carries populated baseline_suite/after_suite JSON (revision/command/exit_status/log_path/completed/failure_ids), so the added-failure count is readable without a base-arm re-run - the prior review's third follow-on is resolved.",
+    "write_paths": "the net diff touches imas_codex/units/__init__.py, imas_codex/units/data_dictionary_unit_aliases.txt, tests/units/test_unit_alias_spellings.py, tests/units/jt60sa_unit_strings.txt and the evidence fragment - all inside the run's granted fence; no plan or index edit, no graph write."
+  },
+  "justifications": {
+    "durability": "19: the new module adds a parametrized round-trip invariant over every catalogue and DD unit string, an explicit malformed-factor guard, and a DD regression snapshot compared by unit. My mutation restoring the caret-symbol definitions fails exactly 9 tests, so the guard is load-bearing rather than decorative.",
+    "evidence": "18: I reproduced the gate independently (prev 09ff452ee 526 passed / head a8998c5a4 891 passed, both EXIT=0), a fresh-process probe over the head tree returned zero round-trip mismatches across the 75 parsed catalogue strings, all 13 equivalence pairs hold, and the negative control fires. Deduction for two in-range documentation defects below.",
+    "fit": "18: symbols and filenames are mechanism-named (units_are_equivalent, jt60sa_unit_strings.txt) with no plan or ticket identifiers, and the alias-file comment explains the grammar it must express. Deducted for the evidence fragment's intro, which now misstates the mechanism (see finding 1).",
+    "goal_fidelity": "19: the range refines the plan's mechanism rather than departing from it - glued spellings (m2, m3, Pam3) are now units in their own right defined without a symbol, so the formatter's output always re-parses to the unit the source wrote, and the census and every DD unit string are compared by pint equivalence, not by string. The \u00a74 done-when is met: the gate passes, each added spelling parses (probe: KA->kA, KA/A compatible at 1000.0, uST dimensionless 1e-6), the 76 JT-60SA strings are each normalised or unresolved with a reason.",
+    "reuse": "19: units_are_equivalent reuses pint's own reading and matches the comparison analyze_units and build_dd._units_changed already make, so tests and the census share one helper; the glued forms reuse pint's base units (meter, pascal) instead of inventing a spelling, and uST reuses the dimensionless base.",
+    "scope_discipline": "19: the net change stays inside the granted write paths (the alias file, tests/units/, imas_codex/units/__init__.py and the evidence fragment) with bounded graph reads. Note the plan text names only the alias file and tests/units/ while the code took a 37-line helper in imas_codex/units/__init__.py; that file is inside the run's granted fence and the helper is shared by tests and the census, so it is legitimate, but the plan's write-path list has drifted from what the node actually needed."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the range refines the plan's mechanism: glued spellings become units in their own right without a symbol so the formatter output re-parses to the source unit, and comparison is by pint equivalence. \u00a74 done-when met (gate passes; each spelling parses; KA/A compatible at 1000.0; uST 1e-6; 76 strings normalised or unresolved with reason).\nSCORE evidence: 18\nJUSTIFICATION evidence: independently reproduced prev arm 526 passed and head arm 891 passed (EXIT=0), fresh-process probe zero round-trip mismatches, 13 equivalence pairs hold, negative control fires (9 failures). Deduction for two in-range documentation defects.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: change inside granted write paths with bounded graph reads; the plan text names fewer paths than the node needed but the helper sits inside the granted fence.\nSCORE durability: 19\nJUSTIFICATION durability: parametrized round-trip invariant plus malformed-factor guard plus DD regression snapshot; a mutation restoring caret-symbol definitions fails 9 tests.\nSCORE fit: 18\nJUSTIFICATION fit: mechanism-named symbols and files, no identifiers; deducted for the fragment intro misstating glued forms as @alias-defined.\nSCORE reuse: 19\nJUSTIFICATION reuse: units_are_equivalent matches analyze_units/_units_changed; glued forms reuse pint base units; uST reuses the dimensionless base.\n",
+  "review_run_id": "r-20261007T085029831420-review-of-eddb-unit-normalisation",
+  "review_scope": "incremental node: commits 09ff452ee..a8998c5a4 (8f7162012, a6102f2f1, a8998c5a4) gained since the prior review at 09ff452ee; files imas_codex/units/__init__.py, imas_codex/units/data_dictionary_unit_aliases.txt, tests/units/test_unit_alias_spellings.py, tests/units/jt60sa_unit_strings.txt, docs/evidence/fragments/jt60sa-imas-maps/eddb-unit-normalisation.html",
+  "reviewed_base_sha": "09ff452ee1540a3ed79d7055f85ce3b41a9d703c",
+  "reviewed_head_sha": "a8998c5a4f11934826328d22ab07af7909c634b4",
+  "reviewed_run_id": "r-20261007T061546254649-eddb-unit-normalisation",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T09:10:29+00:00",
+  "total": 112
+}
