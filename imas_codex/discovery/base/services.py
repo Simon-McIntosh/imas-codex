@@ -379,6 +379,93 @@ def _probe_local_endpoint_models(section: str) -> tuple[bool, str]:
         return False, str(e)[:80]
 
 
+def decisions_health_check(
+    service: str = "facility-discovery",
+    timeout: int = 10,
+) -> tuple[bool, str]:
+    """Cheap reachability probe of the decisions route a seat calls.
+
+    The code-relevance pipeline calls the OpenRouter decisions endpoint
+    directly, with the credential named by ``service``, rather than through the
+    LiteLLM proxy the chat seats use — so a proxy readiness probe says nothing
+    about whether those calls can reach the route. This sends one authenticated
+    ``GET`` to the key-info endpoint on the decisions route's own origin: it
+    carries no model, state or questions, so the decisions endpoint is never
+    asked to judge anything and no decision is billed.
+
+    Returns:
+        (healthy, detail) tuple where detail names the route host on success
+        and the refusal on failure (``endpoint refused``, ``auth refused
+        (401)``, ``endpoint timeout``, ...).
+    """
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    from imas_codex.discovery.base.llm import (
+        DECISIONS_ENDPOINT,
+        _service_headers,
+        get_api_key_for_service,
+    )
+
+    try:
+        api_key = get_api_key_for_service(service)
+    except Exception as e:  # noqa: BLE001 - a missing credential is a failure
+        return False, f"no key: {str(e)[:60]}"
+
+    origin = urllib.parse.urlsplit(DECISIONS_ENDPOINT)
+    probe_url = f"{origin.scheme}://{origin.netloc}/api/v1/key"
+    label = origin.netloc or DECISIONS_ENDPOINT
+    request_headers = {
+        "Authorization": "Bearer " + api_key,
+        **_service_headers(service),
+    }
+
+    try:
+        req = urllib.request.Request(probe_url, headers=request_headers)
+        with urllib.request.urlopen(req, timeout=timeout):
+            return True, label
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            return False, f"auth refused ({e.code})"
+        return False, f"HTTP {e.code}"
+    except urllib.error.URLError as e:
+        reason = str(e.reason).lower()
+        if "refused" in reason:
+            return False, "endpoint refused"
+        if "timed out" in reason or "timeout" in reason:
+            return False, "endpoint timeout"
+        return False, str(e.reason)[:60]
+    except Exception as e:  # noqa: BLE001 - any transport failure is unhealthy
+        return False, str(e)[:80]
+
+
+def llm_health_check_with_decisions(
+    section: str,
+    service: str = "facility-discovery",
+) -> tuple[bool, str]:
+    """Probe a chat seat and the decisions route, naming whichever failed.
+
+    A code-discovery run reaches two distinct LLM endpoints: the chat seat that
+    scores files (``section``) and the OpenRouter decisions route the relevance
+    seat calls. The panel's ``llm`` row is up only when both answer, so this
+    reports the chat seat's own result when it fails, the decisions route's
+    when that fails, and the seat's detail when both succeed.
+
+    Args:
+        section: Chat model section to check (e.g. discovery-score).
+        service: Service tag whose credential the decisions route needs.
+    """
+    healthy, detail = llm_health_check(section)
+    if not healthy:
+        return False, f"score ({detail})"
+
+    healthy, detail = decisions_health_check(service)
+    if not healthy:
+        return False, f"decisions ({detail})"
+    return True, detail
+
+
 def llm_deep_health_check(section: str) -> tuple[bool, str, dict]:
     """Full model-level health check via /health — makes real LLM API calls.
 
@@ -1199,9 +1286,11 @@ __all__ = [
     "ServiceStatus",
     "build_servers_row",
     "create_service_monitor",
+    "decisions_health_check",
     "embed_health_check",
     "get_graph_display_label",
     "llm_health_check",
+    "llm_health_check_with_decisions",
     "neo4j_health_check",
     "ssh_health_check",
 ]

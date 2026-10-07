@@ -162,6 +162,7 @@ def code(
         use_rich_output,
     )
     from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.services import llm_health_check_with_decisions
     from imas_codex.settings import get_discovery_threshold
 
     if min_score is None:
@@ -229,6 +230,9 @@ def code(
                 min_score=min_score,
             )
 
+        def _llm_check() -> tuple[bool, str]:
+            return llm_health_check_with_decisions("discovery-score")
+
         disc_config = DiscoveryConfig(
             domain="code",
             facility=facility,
@@ -237,9 +241,20 @@ def code(
             display=display,
             check_graph=True,
             check_embed=not scan_only and not score_only,
-            check_model=not scan_only,
+            check_model=False,  # the llm row is registered below, probing both seats
             check_ssh=True,
             check_auth=False,
+            extra_service_checks=(
+                []
+                if scan_only
+                else [
+                    (
+                        "llm",
+                        _llm_check,
+                        {"poll_interval": 60.0, "critical": False},
+                    )
+                ]
+            ),
             suppress_loggers=[
                 "imas_codex.embeddings",
                 "imas_codex.discovery.code.scanner",
