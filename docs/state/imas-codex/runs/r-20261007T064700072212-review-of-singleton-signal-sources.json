@@ -519,6 +519,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "c4da67c15657f43b346fec4e66599a1c5dfafbc2",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 205523340,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261007T064700072212-review-of-singleton-signal-sources",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 205523340,
+        "path": "/tmp/reckon-crew-scratch/r-20261007T064700072212-review-of-singleton-signal-sources"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/review-of-singleton-signal-sources",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
