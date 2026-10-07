@@ -333,7 +333,7 @@ class TestNoPathVerdictPersisted:
             patch("imas_codex.ids.graph_ops.read_candidates", return_value=edges),
             patch("imas_codex.ids.graph_ops.select_candidates") as mock_select,
             patch("imas_codex.ids.mapping.achoose_targets", return_value=choice),
-            patch("imas_codex.ids.workers.set_mapping_status") as mock_status,
+            patch("imas_codex.ids.workers.refresh_mapping_status") as mock_status,
             patch("imas_codex.ids.workers.record_mapping_verdict") as mock_verdict,
             patch("imas_codex.ids.workers.release_mapping_claim") as mock_release,
         ):

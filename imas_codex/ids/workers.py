@@ -314,30 +314,6 @@ def claim_sources_for_candidates(
     )
 
 
-def set_mapping_status(source_id: str, status: str, **props: Any) -> None:
-    """Set mapping_status on a source and clear the claim."""
-    set_clauses = [
-        "sg.mapping_status = $status",
-        "sg.mapping_claimed_at = null",
-        "sg.mapping_claim_token = null",
-    ]
-    params: dict[str, Any] = {"id": source_id, "status": status}
-
-    for key, val in props.items():
-        param_name = f"p_{key}"
-        set_clauses.append(f"sg.mapping_{key} = ${param_name}")
-        params[param_name] = val
-
-    with GraphClient() as gc:
-        gc.query(
-            f"""
-            MATCH (sg:SignalSource {{id: $id}})
-            SET {", ".join(set_clauses)}
-            """,
-            **params,
-        )
-
-
 def record_mapping_verdict(
     source_id: str,
     disposition: str,
@@ -365,29 +341,31 @@ def record_mapping_verdict(
         )
 
 
-def _mapping_status_for(selected_ids: list[str], bound_ids: set[str]) -> str | None:
-    """The mapping_status summary for a source's selected homes.
+def refresh_mapping_status(source_id: str, ids_name: str) -> str | None:
+    """Set mapping_status for a source from its selected homes; clear its claim.
 
-    ``None`` when the source has no selected home, so the caller leaves the
-    status untouched. ``mapped`` once every IDS of the source's selected edges
-    is bound, ``assigned`` before that.
-    """
-    ids = {i for i in selected_ids if i}
-    if not ids:
-        return None
-    return "mapped" if ids <= set(bound_ids) else "assigned"
+    The single owner of the ``assigned``/``mapped``/``validated`` rule. Both
+    stages call it at the end of a pass and neither writes a status literal of
+    its own. ``ids_name`` names the IDS the calling pass just handled, which is
+    what separates the two stages at the same graph state:
 
+    - ``validated`` once every IDS of the source's selected
+      ``MAPPING_CANDIDATE`` edges carries a ``MAPS_TO_IMAS`` binding — written
+      by the validate stage only after an IDS persists its bindings;
+    - ``mapped`` while the pass's own IDS is one of the unbound IDSs, i.e. its
+      field mappings have been generated but its bindings are not yet written;
+      this is what ``has_pending_validation_work`` selects;
+    - ``assigned`` while some selected IDS other than this pass's own is
+      unbound, so a source mapped in two IDSs is not called validated when only
+      one of them has been validated.
 
-def refresh_mapping_status(source_id: str) -> str:
-    """Set a source's mapping_status from its selected homes, and return it.
-
-    The status is a per-source summary: ``mapped`` once every IDS of the
-    source's selected ``MAPPING_CANDIDATE`` edges carries a ``MAPS_TO_IMAS``
-    binding, and ``assigned`` before that. A source with no selected edge, or
-    a verdict that selected nothing, is left untouched.
+    ``mapping_status`` is left untouched when the source has no selected edge.
+    The claim is cleared in every case, so a finished pass releases the source
+    for the same IDS's next pass and for the other IDSs' passes.
 
     Args:
-        source_id: SignalSource ID whose summary is refreshed.
+        source_id: ``SignalSource`` ID whose summary is refreshed.
+        ids_name: IDS the calling pass just handled.
 
     Returns:
         The status written, or the source's unchanged status when it has no
@@ -400,17 +378,21 @@ def refresh_mapping_status(source_id: str) -> str:
             OPTIONAL MATCH (sg)-[c:MAPPING_CANDIDATE]->(:IMASNode)
               WHERE c.route = true
             WITH sg, [i IN collect(DISTINCT c.ids) WHERE i IS NOT NULL] AS sel_ids
-            WITH sg, [i IN sel_ids WHERE NOT EXISTS {
-                    (sg)-[:MAPS_TO_IMAS]->(:IMASNode {ids: i})
+            WITH sg, sel_ids,
+                 [i IN sel_ids WHERE NOT EXISTS {
+                     (sg)-[:MAPS_TO_IMAS]->(:IMASNode {ids: i})
                  }] AS unbound
-            WITH sg, sel_ids, unbound
             SET sg.mapping_status = CASE
-                    WHEN size(sel_ids) > 0 AND size(unbound) = 0 THEN 'mapped'
-                    WHEN size(sel_ids) > 0 THEN 'assigned'
-                    ELSE sg.mapping_status END
+                    WHEN size(sel_ids) = 0 THEN sg.mapping_status
+                    WHEN size(unbound) = 0 THEN 'validated'
+                    WHEN $ids_name IN unbound THEN 'mapped'
+                    ELSE 'assigned' END,
+                sg.mapping_claimed_at = null,
+                sg.mapping_claim_token = null
             RETURN sg.mapping_status AS status
             """,
             id=source_id,
+            ids_name=ids_name,
         )
         return rows[0]["status"] if rows else None
 
@@ -788,7 +770,7 @@ async def map_worker(
     )
     from imas_codex.ids.models import SignalMappingBatch
 
-    handled: set[str] = set()
+    handled: set[tuple[str, str]] = set()
 
     while not state.should_stop():
         found_any = False
@@ -796,18 +778,24 @@ async def map_worker(
             if state.should_stop():
                 break
 
-            sources = await asyncio.to_thread(
+            claimed = await asyncio.to_thread(
                 claim_sources_for_mapping,
                 state.facility,
                 ids_name,
                 batch_size=3,
             )
-            sources = [s for s in sources if s["id"] not in handled]
+            # ``handled`` is keyed by (IDS, source): the same source claimed by
+            # this IDS's pass is still eligible for every other IDS's pass,
+            # and the claim this pass cannot use is released at once.
+            sources = [s for s in claimed if (ids_name, s["id"]) not in handled]
+            skipped = [s["id"] for s in claimed if (ids_name, s["id"]) in handled]
+            if skipped:
+                await asyncio.to_thread(release_mapping_claims_batch, skipped)
             if not sources:
                 continue
 
             found_any = True
-            handled.update(s["id"] for s in sources)
+            handled.update((ids_name, s["id"]) for s in sources)
             state.map_phase.record_activity(len(sources))
 
             context = state.contexts.get(ids_name, {})
@@ -876,7 +864,9 @@ async def map_worker(
                         state.bindings_total += len(batch.mappings)
                         state.map_stats.processed += 1
 
-                        await asyncio.to_thread(refresh_mapping_status, source_id)
+                        await asyncio.to_thread(
+                            refresh_mapping_status, source_id, ids_name
+                        )
 
                         wlog.info(
                             "Mapped %s -> %s: %d bindings",
@@ -1063,12 +1053,14 @@ async def validate_worker(
                     status,
                 )
 
-            # Mark sources as validated in graph
+            # Refresh each source's status through the single owner. It writes
+            # 'validated' only once every selected IDS of the source is bound,
+            # and leaves 'assigned' while another selected IDS is still unbound.
             for a, _ in batches_for_ids:
                 await asyncio.to_thread(
-                    set_mapping_status,
+                    refresh_mapping_status,
                     a.source_id,
-                    "validated",
+                    ids_name,
                 )
 
             wlog.info(
