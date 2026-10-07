@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured, and correctly so: the reviewed run is a data-pipeline execution (`discover code jt-60sa`), not a pytest suite. Its manifest declares no baseline_suite or after_suite arm and its classification record carries both as null. read_review derives the count from run_dir(run_id)/manifest.md, so with both arms absent the derivation is (None, []). The landed change is a single evidence fragment, docs/evidence/fragments/jt60sa-discovery-completion/facet-rejudge.html, +99/-0, with no test file and no code touched (git diff --stat d4a91a66ba4632123ebbe0dfcd3c0a30b51409fa 7daaf8dadf24d2fd1d9e319807b5a3478ce07ee0), so a suite arm cannot reach the change; per the repo Test Execution Protocol no suite was run.",
+  "after_suite": null,
+  "backend": "local",
+  "baseline_suite": null,
+  "blockers": "none",
+  "completed_at": "2026-10-07T11:23:53.655Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-07T11:12:50Z",
+  "evidence_inputs": "The node resets the JT-60SA content-stage files through the new content reset target and records the outcome in one evidence fragment. I verified every headline number live against the graph and the run's own log/artifacts, and all match. by_status (jt-60sa): skipped 1904, scored 723, ingested 552, failed 29; content-stage total 1348. content-stage facet confidence above zero: data_access 726, signal_processing 661, machine_description 738, imas_mapping 755, relevance_grade 624 of 1348 (fragment: identical). Facet-only admissions (content stage, composite < 0.5, strongest facet >= 0.85) are exactly two and both ingested: /analysis/src/SAselene_v2.0_forPSRC/mgset0.f (machine 0.8733, composite 0.30) and /analysis/src/SAselene_v2.0_forPSRC/plt/prbplt.f (machine 0.8567, composite 0.32) \u2014 the positive control that the facet branch actually fires, since a composite below 0.5 can only have been admitted by the facet clause. Named files: eqgrd.f (SAselene) re-judged to machine_description 0.4833, composite 0.22, status scored (not admitted); a second eqgrd.f (topics/eqmain) ingested on composite 0.54. Newly ingested 13, all matching the fragment's list and composites (live query; the facility log's own summary line 32816 reads '0 scanned, 779 scored, 13 code ingested'; pass 1 Cost $0.09 Time 198.6s, confirming pass Cost $0.00 Time 479.6s \u2014 all as the fragment states). Residual work: triaged 0, admitted-and-claimable-pending-ingest 0. The two chunk-less eslice_set_fitting_func_area.py files sit at scored with composite 0.80 (10,374 lines) and 0.75 (10,467 lines), above the claim's line_count <= 10000 bound, as the fragment says. Negative control reproduces: 721 content-stage files at scored carry composite and every facet below their thresholds and are not admitted (fragment: 721). One traceability gap is confirmed: the cited after_final.json carries newly_ingested: [].",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/facet-rejudge.html",
+      "line": "facet-rejudge-ingested",
+      "severity": "follow-on",
+      "text": "follow-on: evidence: the fragment states 'Thirteen files were newly ingested' and names all thirteen, but the artifact it cites for the after state, /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/facet-rejudge/after_final.json, carries \"newly_ingested\": [] \u2014 its query filters n.ingested_at STARTS WITH '2026-10-07T12:5' on the local clock while ingested_at is stored in UTC, and the thirteen landed 10:53:09Z..10:56:16Z, so the filter matches none. The claim is true: a live query returns exactly the thirteen named ingestions with the fragment's composites, and the facility log's own summary (line 32816, '0 scanned, 779 scored, 13 code ingested') confirms the count, but a reader checking the cited JSON itemizes nothing. Fix: cite the facility log line, or correct the artifact's ingested_at time window to UTC.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/facet-rejudge.html",
+      "line": "facet-rejudge-before-after",
+      "severity": "follow-on",
+      "text": "follow-on: evidence: the fragment (and the before table) asserts every facet confidence was zero on all 1,348 content-stage files before the pass, but 162 of the ingested content-stage files carry NULL facet confidences rather than 0 \u2014 the census counts `confidence > 0` == 0, which cannot distinguish a stored zero from an unset property. The functional claim (no real facet was present before) holds on every count I checked; the literal wording 'zero' is imprecise and would be stronger as 'no facet answer was stored'.",
+      "verdict": "PLAUSIBLE"
+    }
+  ],
+  "follow_ons": "The landed fragment should cite the facility log's summary line for the thirteen newly-ingested files (or the after-state artifact should be corrected) so the pre-existing artifact and the fragment agree. The residual beside the report is not this node's: the two eslice_set_fitting_func_area.py files admitted on composite but above the 10,000-line claim bound belong to \u00a731, and the fragment already names them as such. The 162 ingested content-stage files whose facets are unset (only 13 ingested files carry a facet) are the cross-pipeline re-judge's work, correctly deferred by the plan. No blocker.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites: the change is a docs-only evidence fragment (+99/-0); it adds no code and calls nothing.",
+    "diff": "single file, docs/evidence/fragments/jt60sa-discovery-completion/facet-rejudge.html, +99/-0, one commit 7daaf8dadf24d2fd1d9e319807b5a3478ce07ee0 (docs(discovery): record the JT-60SA content-stage re-judge outcome) with a mechanism body; git diff --stat d4a91a66ba4632123ebbe0dfcd3c0a30b51409fa 7daaf8dadf24d2fd1d9e319807b5a3478ce07ee0 shows exactly that one file. No code, test, schema, generated model or plan edit.",
+    "done_when": "the node's done-when (\u00a726 re-judge) is to reset the non-ingested content-stage files through the content target, re-judge them in foreground passes with no SSH re-enrichment, and report how many the facet rule admits with mgset0.f and eqgrd.f named. The fragment reports all of it: 780 reset (710 scored + 70 skipped, per the plan's updated count of 1,348 content-stage), 723 scored / 44 skipped / 13 ingested after, the facet rule admitting exactly two (mgset0.f, prbplt.f), eqgrd.f re-judged to 0.4833 and not admitted, spend $0.09, and 0 residual waiting at triaged or pending ingest. Each figure reconciles with the graph and the facility log.",
+    "goal": "the node goal \u2014 re-judge the JT-60SA content-stage files with the content question set now asked and record which files the facet rule admits \u2014 is delivered and independently verified. Every facet confidence was zero/unset before and now carries a real answer on the re-judged set; the facet branch is shown live by mgset0.f and prbplt.f, which a composite below the 0.5 gate could only admit through the facet clause; the pipeline drained to 0 waiting.",
+    "manifest": "read at head 7daaf8dadf24d2fd1d9e319807b5a3478ce07ee0; status complete, commits [7daaf8da], changed path the fragment, tests the two discover passes (0 scanned, 780 re-judged, Cost $0.09; then 0 scanned/0 scored/0 ingested, Cost $0.00), retry_failures none, blockers none, one follow-on (the 539 ingested files keep their zeroed facets pending the cross-pipeline re-judge). It declares no baseline_suite/after_suite arm (both null), so the added-failure count is unmeasured by construction.",
+    "write_paths": "the reviewed run's declared write paths were the reports dir, the facet-rejudge fragment and the figures dir; the net change is exactly the fragment, one path inside that set. The figures path was correctly left empty (\u00a726 names no figure). No out-of-scope file, no plan or index edit, no generated model."
+  },
+  "justifications": {
+    "durability": "durability 18: the deliverable is a committed evidence fragment whose figures are traceable to the run's own artifacts and the shared facility log. The two discover passes and their cost/time summaries are on the log (lines 32816, 32851: '0 scanned, 779 scored, 13 code ingested' / 'Cost: $0.09, Time: 198.6s' and '0 scanned, 0 scored, 0 code ingested' / 'Cost: $0.00, Time: 479.6s'), the before/after status and confidence census is in before_census.json / after_final.json, and the facet-only pair, named files and eslice pair all reproduce on a live query. Residual: the cited after_final.json does not itemize the thirteen newly-ingested files (its time filter is local-clock against a UTC field), so that one list rests on the facility log rather than the cited JSON; and the fragment's node-id element ids are consistent with the sibling fragments' convention.",
+    "evidence": "evidence 18: every headline number is independently reproduced and matches \u2014 statuses (skipped 1904, scored 723, ingested 552, failed 29), content-stage total 1348, the five facet-confidence counts (726/661/738/755/624), facet-only admissions exactly two (mgset0.f machine 0.8733 composite 0.30; prbplt.f 0.8567 / 0.32), eqgrd.f 0.4833 scored, the second eqgrd.f ingested on 0.54, the thirteen newly-ingested files with their composites, the eslice pair at 0.80/10374 and 0.75/10467 lines, and the negative-control count 721. The facet branch carries a genuine positive control here: the two admitted files sit below the composite gate, so only the facet clause could have ingested them \u2014 stronger than the code-pass node, whose facet zero lacked one. The gaps are traceability, not falsity: the thirteen-name list is absent from the cited after_final.json, and the 'zero' before-state conflates 0 with unset.",
+    "fit": "fit 19: the fragment follows the sibling fragments' conventions in docs/evidence/fragments/jt60sa-discovery-completion/ \u2014 element ids prefixed with the node id, tabular facts as tables, before/after census in one table \u2014 and the prompt's requirement that no figure was needed is honoured (the figures path is empty). No plan, phase or ticket identifier appears in the prose or the ids; the mechanism names (code-facet-admission-threshold, code-ingest-threshold, relevance_stage, score_machine_description) are the code's own.",
+    "goal_fidelity": "goal_fidelity 18: the mechanism the node exists to drive \u2014 re-judging the content-stage files so facets are asked and stored, then reporting the facet rule's admission \u2014 is delivered and verified: facets now carry real answers where they were uniform before, the facet rule admits exactly the two named files, and the pipeline drained to no waiting work. The shortfall is small and evidentiary: the thirteen-name list the done-when report carries is not backed by the cited after-state artifact, and the reconciliation of the plan's 235/780/1348 figures is left to the reader (the fragment states 780; the log's own summary says 779 scored).",
+    "reuse": "reuse 19: the fragment reuses the run's own measured artifacts (before_census.json, after_final.json, the three read-only census scripts) and the shared facility log rather than re-deriving or duplicating them, and the pipeline's own admission predicate (composite >= 0.5 OR strongest facet >= 0.85 with the line_count <= 10000 claim bound) is applied rather than a re-implemented rule; the two arms cannot drift because the same facet list feeds both.",
+    "scope_discipline": "scope_discipline 20: the net change is a single file inside the declared write paths, docs-only, with no code, test, schema, generated model or plan edit; one commit, one changed path, all under docs/evidence/fragments/jt60sa-discovery-completion/."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "review_run_id": "r-20261007T111235039137-review-of-facet-rejudge",
+  "review_scope": "full node: commit 7daaf8dadf24d2fd1d9e319807b5a3478ce07ee0 (base d4a91a66ba4632123ebbe0dfcd3c0a30b51409fa); the only changed path is docs/evidence/fragments/jt60sa-discovery-completion/facet-rejudge.html (+99/-0). Reviewed as a data-pipeline evidence node; the headline graph figures were reproduced live and the facility log's two pass summaries verified.",
+  "reviewed_base_sha": "d4a91a66ba4632123ebbe0dfcd3c0a30b51409fa",
+  "reviewed_head_sha": "7daaf8dadf24d2fd1d9e319807b5a3478ce07ee0",
+  "reviewed_run_id": "r-20261007T105027614901-facet-rejudge",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:22:00Z",
+  "total": 112
+}
