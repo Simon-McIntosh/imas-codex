@@ -701,6 +701,65 @@ class TestSearchDocs:
         # Page title should appear once as header, not twice
         assert result.count('### Page: "Same Page"') == 1
 
+    def test_cosine_breaks_saturated_score_ties(self, mock_gc, mock_encoder):
+        """Chunks tied at the 1.0 clamp come back in descending cosine order.
+
+        The hybrid score ties at the same value for many chunks, and a title
+        match then clamps every displayed score to 1.00, so nothing in the
+        displayed score can order them. The raw cosine must, rather than the
+        arbitrary set-iteration order the ranking previously inherited.
+        """
+        query = "equilibrium flux"
+        n = 8
+        cosines = [0.90 - 0.05 * i for i in range(n)]
+        # Text hits chosen so every chunk's hybrid score rounds to the same
+        # 0.82: 0.7*cosine + 0.3*text + 0.1. A title overlap of two query
+        # terms then lifts each to 1.02, which clamps to 1.00.
+        text_scores = [(0.72 - 0.7 * c) / 0.3 for c in cosines]
+        chunk_vector = [{"id": f"c{i}", "score": c} for i, c in enumerate(cosines)]
+        text_hits = [{"id": f"c{i}", "score": t} for i, t in enumerate(text_scores)]
+        enrichment = [
+            {
+                "id": f"c{i}",
+                "text": f"chunk body number {i}",
+                "section": f"sec{i}",
+                "page_title": "equilibrium flux",
+                "page_url": None,
+                "linked_signals": [],
+                "linked_data_nodes": [],
+                "imas_refs": [],
+            }
+            for i in range(n)
+        ]
+
+        def handler(cypher: str, **kwargs: Any) -> list[dict[str, Any]]:
+            if "wiki_chunk_embedding" in cypher:
+                return chunk_vector
+            if "wiki_chunk_text" in cypher:
+                return text_hits
+            if "WikiChunk {id: cid}" in cypher:
+                by_id = {e["id"]: e for e in enrichment}
+                return [by_id[c] for c in kwargs["chunk_ids"]]
+            return []
+
+        mock_gc.query = MagicMock(side_effect=handler)
+
+        result = _search_docs(
+            query=query,
+            facility="jt-60sa",
+            k=30,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+
+        # Every chunk is displayed at the clamp, so the score alone cannot
+        # order them.
+        assert result.count("[score: 1.00]") == n
+        positions = [result.index(f"**Section: sec{i}**") for i in range(n)]
+        # Cosine order is c0 (0.90) .. c{n-1} (0.50); anything else means the
+        # tie was broken arbitrarily.
+        assert positions == sorted(positions)
+
     def test_cross_links_shown(self, mock_gc, mock_encoder):
         """Cross-links to signals and IMAS paths are shown."""
         chunk_vector = [{"id": "c1", "score": 0.9}]

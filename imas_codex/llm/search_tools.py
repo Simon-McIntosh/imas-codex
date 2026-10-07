@@ -738,6 +738,10 @@ def _search_docs(
             score_dimension=score_dimension,
         )
 
+        # Keep the raw cosine so a tied hybrid score can be broken by it below
+        # rather than by set-iteration order.
+        vector_cosine = dict(scores)
+
         # Step 1b: Text search for keyword matches (hybrid boost)
         text_chunks = _text_search_wiki_chunks(gc, query, facility, k)
         for r in text_chunks:
@@ -749,10 +753,15 @@ def _search_docs(
                 scores[cid] = text_score
                 chunk_ids.append(cid)
 
-        # Re-sort and limit to k
-        chunk_ids = sorted(
-            set(chunk_ids), key=lambda cid: scores.get(cid, 0), reverse=True
-        )[:k]
+        # Re-sort and limit to k. The hybrid score ties at the same value for
+        # many chunks, so the raw cosine breaks every tie deterministically and
+        # the order no longer depends on set-iteration order.
+        ranked = sorted(
+            set(chunk_ids),
+            key=lambda cid: (scores.get(cid, 0), vector_cosine.get(cid, -1.0)),
+            reverse=True,
+        )
+        chunk_ids = ranked[:k]
 
         # Step 2: Vector search on documents/images
         document_results, document_scores = _vector_search_documents(

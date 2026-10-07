@@ -1,0 +1,137 @@
+<!-- Docs-search score ties: _search_docs ordered saturated / hybrid-tied chunks
+     arbitrarily and let unbounded keyword-only hits bury the facility's nearest
+     embeddings below the returned window. Read-only graph reads bounded by
+     facility; the deployed code change is a deterministic cosine tie-break, with
+     the reserved-slot variant measured and rejected. Scripts and raw output:
+     ~/.config/reckon/crew/reports/imas-codex/docs-score-ties/ -->
+<section id="docs-score-ties" data-reckon="evidence">
+  <h2 id="docs-score-ties-heading">Docs search ordered its score ties arbitrarily</h2>
+
+  <p id="docs-score-ties-intro">
+    <code>_search_docs</code> in <code>imas_codex/llm/search_tools.py</code> ranked wiki
+    chunks with a plain descending score sort, so the many chunks that share a hybrid
+    score came back in set-iteration order, and the unbounded keyword term let
+    keyword-only chunks enter at their raw BM25 score (9 to 16, far above any cosine)
+    and take the whole window. Both effects push the facility's nearest embeddings out
+    of the returned results. <strong>Decision: deploy the raw-cosine tie-break alone.</strong>
+    The tie-break makes the tie order deterministic and changes no reported mean. The
+    reserved-slot variant (keep the top 10, fill the rest of the k=30 window with the
+    facility's vector leaders) was measured and <em>not</em> deployed: it lowers
+    nDCG@30 and, on three of the six docs questions, lower recall@30. The two
+    answering chunks the reserve lifted into the window are left for the Jev rerank,
+    which the plan sizes over a pool larger than 30.
+  </p>
+
+  <h3 id="docs-score-ties-repro-heading">The defect reproduces</h3>
+  <ul id="docs-score-ties-repro">
+    <li id="docs-score-ties-repro-q14">
+      <strong>Q14</strong> — the answering chunk
+      <code>jt-60sa:use_compiler-en.html:chunk_0</code> (raw cosine 0.856) is not in
+      the tool's returned k=30 window, because keyword-only chunks outscore the whole
+      clamp tie block.
+    </li>
+    <li id="docs-score-ties-repro-q18">
+      <strong>Q18</strong> — the answering chunk
+      <code>jt-60sa:use_login-en.html:chunk_0</code> (raw cosine 0.882) is likewise
+      absent from the returned window.
+    </li>
+  </ul>
+
+  <h3 id="docs-score-ties-method-heading">Measurement</h3>
+  <p id="docs-score-ties-method">
+    The measurement reproduces the tool's own wiki-chunk order instead of re-deriving
+    it: <code>docs_ties_eval.py</code> calls the same stage functions
+    <code>_search_docs</code> calls and merges them with the tool's own rule
+    (<code>0.7*vec + 0.3*bm25 + 0.1</code>, rounded, with the title boost excluded
+    because <code>_search_docs</code> fixes the chunks' order before it applies the
+    display boost and never re-sorts). Fidelity is asserted before any number is
+    reported: the reimplemented order's top 30 overlaps the rerank prototype's stored
+    docs candidate set at <span id="docs-score-ties-repro-counts">q13 30/30, q14 30/30,
+    q15 30/30, q16 27/30, q17 30/30, q18 30/30</span> — the shortfall on q16 is the
+    one passing document that occupies a slot in the prototype's 30. nDCG uses a
+    <em>fixed</em> ideal set taken from the whole label pool, so changing which chunks
+    are in the window cannot inflate the score. Relevance labels are the rerank
+    prototype's <code>labels.json</code> (keyed by candidate id) plus the answering
+    chunks it does not cover, labelled by the same rule and written to
+    <code>reports/imas-codex/docs-score-ties/new_labels.json</code>. Because the
+    deployed change is in <code>_search_docs</code>, every mean is over the six docs
+    questions q13–q18, not over all 18.
+  </p>
+
+  <h3 id="docs-score-ties-variants-heading">Variants, six docs questions, k=30</h3>
+  <table id="docs-score-ties-variants">
+    <thead>
+      <tr><th>variant</th><th>mean nDCG@10</th><th>mean nDCG@30</th><th>mean recall@30</th><th>Q16 nDCG@10</th><th>Q14 answer rank</th><th>Q18 answer rank</th></tr>
+    </thead>
+    <tbody>
+      <tr id="docs-score-ties-row-current"><td>current (plain sort)</td><td>0.4076</td><td>0.5298</td><td>0.6667</td><td>0.9675</td><td>absent</td><td>absent</td></tr>
+      <tr id="docs-score-ties-row-cosine"><td>cosine tie-break only (deployed)</td><td>0.4076</td><td>0.5298</td><td>0.6667</td><td>0.9675</td><td>absent</td><td>absent</td></tr>
+      <tr id="docs-score-ties-row-reserved"><td>cosine + 20 reserved slots</td><td>0.4076</td><td>0.4784</td><td>0.6646</td><td>0.9675</td><td>15</td><td>13</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="docs-score-ties-recall-heading">Per-question recall@30, fixed denominator</h3>
+  <p id="docs-score-ties-recall-note">
+    recall@30 is the number of a question's relevant chunks inside the returned k=30
+    denominator the question's whole relevant pool (from the merged labels), so a
+    variant cannot gain by shrinking the window. The reserve lifts the Q14 and Q18
+    answers in (0.00 → 1.00) but drops recall on Q13, Q15 and Q17 — the decision rule
+    was to keep the reserve only if recall@30 does not fall on any docs question with
+    known answers.
+  </p>
+  <table id="docs-score-ties-recall">
+    <thead>
+      <tr><th>question</th><th>relevant</th><th>current</th><th>cosine</th><th>reserved</th></tr>
+    </thead>
+    <tbody>
+      <tr id="docs-score-ties-recall-q13"><td>Q13</td><td>6</td><td>1.00</td><td>1.00</td><td>0.17</td></tr>
+      <tr id="docs-score-ties-recall-q14"><td>Q14</td><td>1</td><td>0.00</td><td>0.00</td><td>1.00</td></tr>
+      <tr id="docs-score-ties-recall-q15"><td>Q15</td><td>19</td><td>1.00</td><td>1.00</td><td>0.42</td></tr>
+      <tr id="docs-score-ties-recall-q16"><td>Q16</td><td>3</td><td>1.00</td><td>1.00</td><td>1.00</td></tr>
+      <tr id="docs-score-ties-recall-q17"><td>Q17</td><td>5</td><td>1.00</td><td>1.00</td><td>0.40</td></tr>
+      <tr id="docs-score-ties-recall-q18"><td>Q18</td><td>3</td><td>0.00</td><td>0.00</td><td>1.00</td></tr>
+    </tbody>
+  </table>
+
+  <p id="docs-score-ties-read">
+    The deployed tie-break leaves the result untouched where it can be read: the
+    displayed top 10 is bit-identical to the current order on every docs question, so
+    <strong>nDCG@10 is unchanged (0.4076), nDCG@30 is unchanged (0.5298), recall@30 is
+    unchanged (0.6667), and Q16 stays at 0.9675</strong>. Its whole effect is that the
+    tie order within a saturated hybrid score is now deterministic by raw cosine rather
+    than by set-iteration order — a bare tie-break cannot move the Q14/Q18 answers,
+    because they sit inside a score tie that the keyword-only chunks outrank as a
+    block, so they remain outside the returned window. The reserve was rejected: it
+    lowers the docs mean nDCG@30 from 0.5298 to 0.4784 (q13 0.6457 to 0.3026, q15
+    0.9058 to 0.5320, q17 0.6596 to 0.4372) and lowers recall@30 on Q13, Q15 and Q17
+    while raising it only on Q14 and Q18, so the mean recall@30 falls slightly (0.6667
+    to 0.6646) and the decision rule fails. The window problem — the two answers that
+    neither the plain order nor the tie-break can surface — is deferred to the Jev
+    rerank, which the plan sizes over a pool larger than 30 (its answer
+    <code>eqgrd.f</code> sits at merged rank 85, for example).
+  </p>
+
+  <h3 id="docs-score-ties-gate-heading">Gate</h3>
+  <p id="docs-score-ties-gate">
+    <code>uv run --no-sync pytest -p no:cacheprovider tests/llm tests/test_imas_search_scoring.py</code>
+    (exact command and header in
+    <code>reports/imas-codex/docs-score-ties/gate.log</code>): 290 passed, 15 skipped,
+    1 failed. The single failure, <code>test_graceful_on_missing_index</code>, is
+    pre-existing — it fails identically with <code>search_tools.py</code> restored to
+    the base revision (<code>reports/imas-codex/docs-score-ties/base_arm.log</code>)
+    because the test raises a bare <code>Exception</code> while the function
+    deliberately surfaces anything but a Neo4j <code>ClientError</code>/<code>DatabaseError</code>;
+    it is outside this node's write scope. New test kept:
+    <code>test_cosine_breaks_saturated_score_ties</code> (chunks sharing the clamped
+    hybrid score come back ordered by raw cosine). Negative control
+    (<code>negative_control.log</code>): dropping the cosine key from the sort makes
+    that test fail — the arm exits non-zero (EXIT=1) — so the test is load-bearing.
+  </p>
+
+  <h3 id="docs-score-ties-files-heading">Files</h3>
+  <ul id="docs-score-ties-files">
+    <li id="docs-score-ties-files-code"><code>imas_codex/llm/search_tools.py</code> — deterministic (score, raw cosine) tie-break in <code>_search_docs</code>; <code>_search_code</code> untouched.</li>
+    <li id="docs-score-ties-files-test"><code>tests/llm/test_search_tools.py</code> — <code>test_cosine_breaks_saturated_score_ties</code>.</li>
+    <li id="docs-score-ties-files-data">Scripts and raw output: <code>reports/imas-codex/docs-score-ties/</code> (<code>docs_ties_eval.py</code>, <code>run_eval.py</code>, <code>run_negative_control.py</code>, <code>variant_metrics.json</code>, <code>new_labels.json</code>, <code>eval.log</code>, <code>gate.log</code>, <code>base_arm.log</code>, <code>negative_control.log</code>).</li>
+  </ul>
+</section>
