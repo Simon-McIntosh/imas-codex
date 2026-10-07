@@ -115,10 +115,12 @@ logger = logging.getLogger(__name__)
     default=False,
     help=(
         "Re-judge content-stage files already at 'ingested' from their stored "
-        "chunk text — no file is fetched over the facility hop. Clears their "
-        "content judgment fields, then asks the content arm the same questions "
-        "through the same seat and rewrites the answer in place, leaving status, "
-        "example and chunks untouched."
+        "chunk text — no file is fetched over the facility hop. Asks the content "
+        "arm the same questions through the same seat and rewrites the answer in "
+        "place, leaving status, example and chunks untouched. The pass takes only "
+        "files with no recorded answer, so a repeated invocation resumes on the "
+        "files a prior pass left unanswered. To request a fresh re-judge, clear "
+        "the judgments first with --reset-to ingested."
     ),
 )
 @reset_to_option("code")
@@ -193,21 +195,26 @@ def code(
 
     if rejudge_ingested:
         # A re-judge reads the file's text from its stored CodeChunks, so it
-        # needs neither the facility hop nor the scan/triage/enrich stages:
-        # it clears the ingested files' content judgment fields through the
-        # reset owner and rewrites the answer in place.
+        # needs neither the facility hop nor the scan/triage/enrich stages: it
+        # takes the ingested files that carry no recorded answer and rewrites
+        # the answer in place. The reset that clears a fresh request's judgments
+        # is the explicit --reset-to ingested step (owner: reset_to_status), run
+        # once when a re-judge is requested; a plain --rejudge-ingested leaves
+        # the recorded answers alone so a following pass resumes on the files a
+        # prior pass left unanswered rather than restarting the whole set.
         from imas_codex.cli.shutdown import safe_asyncio_run
         from imas_codex.discovery.base.reset import CODE_RESET_SPECS, reset_to_status
         from imas_codex.discovery.code.workers import rejudge_ingested_files
 
         prefixes = list(path_prefixes) or None
-        cleared = reset_to_status(
-            CODE_RESET_SPECS["ingested"], facility, path_prefixes=prefixes
-        )
-        log_print(
-            f"[yellow]Cleared the content judgment of {cleared} ingested "
-            "file(s) for re-judging[/yellow]"
-        )
+        if reset_to == "ingested":
+            cleared = reset_to_status(
+                CODE_RESET_SPECS["ingested"], facility, path_prefixes=prefixes
+            )
+            log_print(
+                f"[yellow]Cleared the content judgment of {cleared} ingested "
+                "file(s) for re-judging[/yellow]"
+            )
         result = safe_asyncio_run(
             rejudge_ingested_files(
                 facility, path_prefixes=prefixes, cost_limit=cost_limit

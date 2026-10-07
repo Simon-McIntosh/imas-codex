@@ -726,19 +726,26 @@ async def rejudge_ingested_files(
         path_prefixes=path_prefixes,
         ingested_rejudge=True,
     ):
-        file_id_map = {f["path"]: f["id"] for f in batch}
         batch_ids = [f["id"] for f in batch]
-        # A decision that failed leaves its file eligible for the same claim, so
-        # stop once a batch brings back only files this run already attempted:
-        # each file is judged at most once per run rather than looping on a
-        # refusal.
-        if set(batch_ids) <= attempted:
+        # A decision that failed leaves its file eligible for the same claim
+        # (its facet confidence is still zero), so a later batch can mix files
+        # this run already attempted with fresh ones.  Take only the fresh
+        # files: the attempted ones are dropped from the batch, so no file is
+        # judged twice in one pass and ``rejudged`` counts the distinct files
+        # judged rather than the repeats.  A batch that brings back only
+        # attempted files has no fresh work left, so release it and stop.
+        fresh = [f for f in batch if f["id"] not in attempted]
+        if not fresh:
             await asyncio.to_thread(release_file_score_claims, batch_ids)
             break
-        attempted.update(batch_ids)
+        attempted.update(f["id"] for f in fresh)
+        batch = fresh
+        file_id_map = {f["path"]: f["id"] for f in batch}
         batches += 1
 
-        chunks_by_file = await asyncio.to_thread(fetch_file_chunk_text, batch_ids)
+        chunks_by_file = await asyncio.to_thread(
+            fetch_file_chunk_text, [f["id"] for f in batch]
+        )
         states = [
             build_triage_state(
                 f,
