@@ -2,14 +2,18 @@
   <h2 id="names-arm-recall">How many name-skipped JT-60SA files the content arm would admit</h2>
 
   <p id="names-arm-recall-finding">
-    The content arm admits <strong>3 of 75</strong> sampled name-skipped JT-60SA
+    The content arm admits <strong>6 of 75</strong> sampled name-skipped JT-60SA
     files and <strong>2 of 31</strong> files of the <code>client_eqdbms</code>
-    EQDB cohort when it judges them from their fetched source. The admission
-    fractions are small — 0.00 to 0.07 in every 0.05 bin of
-    <code>score_composite</code> between 0.15 and 0.40, and 0.065 for the
-    cohort — so lowering the names-arm pass gate would drain only a few percent
-    of the files it newly exposes, at the cost of one fetch over the JT-60SA
-    hop per admitted file. The <code>client_eqdbms</code> miss is therefore a
+    EQDB cohort when it judges them from their fetched source, in the primary
+    measurement run the manifest cites (<code>measurement.log</code>,
+    <code>content_full</code>, spend $0.0259). The admission fractions stay
+    small — 0.00 to 0.20 across the 0.05 bins of <code>score_composite</code>
+    between 0.15 and 0.40, and 0.065 for the cohort — so lowering the names-arm
+    pass gate would drain a small fraction of the files it newly exposes, at the
+    cost of one fetch over the JT-60SA hop per admitted file. Three further
+    repeats over the same records admitted 3, 3 and 4 of 75, so the sampled
+    total lies between 3 and 6 of 75 (0.04–0.08) across four runs; the primary
+    run sits at the high end. The <code>client_eqdbms</code> miss is a
     names-arm path-vocabulary defect rather than a gate-threshold defect: the
     content arm reads two of those files as in-scope (<code>eqrd13.f</code>,
     <code>eqwt13.f</code>) and keeps the other twenty-nine below both gates even
@@ -49,47 +53,54 @@
 
   <table id="names-arm-recall-bins">
     <caption>Admission by <code>score_composite</code> bin (15 sampled per bin,
-    seeded draw 20261007; representative run <code>stability.json</code> repeat 0).</caption>
+    seeded draw 20261007) in the primary measurement run (<code>measurement.log</code>,
+    <code>content_full</code>, spend $0.0259).</caption>
     <thead>
       <tr><th>bin</th><th>sampled</th><th>admitted</th><th>admitted fraction</th><th>admitted paths</th></tr>
     </thead>
     <tbody>
       <tr><td>0.15–0.20</td><td>15</td><td>0</td><td>0.00</td><td>—</td></tr>
-      <tr><td>0.20–0.25</td><td>15</td><td>1</td><td>0.07</td><td><code>eqwt13.f</code></td></tr>
+      <tr><td>0.20–0.25</td><td>15</td><td>1</td><td>0.067</td><td><code>eqwt13.f</code></td></tr>
       <tr><td>0.25–0.30</td><td>15</td><td>0</td><td>0.00</td><td>—</td></tr>
-      <tr><td>0.30–0.35</td><td>15</td><td>1</td><td>0.07</td><td><code>ecpant.f90</code></td></tr>
-      <tr><td>0.35–0.40</td><td>15</td><td>1</td><td>0.07</td><td><code>trset_torm.f</code></td></tr>
-      <tr><td>sampled total</td><td>75</td><td>3</td><td>0.04</td><td></td></tr>
+      <tr><td>0.30–0.35</td><td>15</td><td>2</td><td>0.133</td><td><code>ecpant.f90</code>, <code>eccdpr.f90</code></td></tr>
+      <tr><td>0.35–0.40</td><td>15</td><td>3</td><td>0.200</td><td><code>trset_torm.f</code>, <code>p2isett.f</code>, <code>fbjt60.f</code></td></tr>
+      <tr><td>sampled total</td><td>75</td><td>6</td><td>0.080</td><td></td></tr>
       <tr><td>cohort (EQDB)</td><td>31</td><td>2</td><td>0.065</td><td><code>eqrd13.f</code>, <code>eqwt13.f</code></td></tr>
     </tbody>
   </table>
 
   <p id="names-arm-recall-stability">
     <strong>Run-to-run variance.</strong> The decisions model is stochastic and
-    several files sit within 0.03 of the 0.5 gate, so the count is not exact.
-    Three repeats over the same 106 records (<code>stability.log</code>) gave
-    sampled admissions of <strong>3, 3 and 4 of 75</strong> and cohort
-    admissions of <strong>2, 2 and 2 of 31</strong>. The stable admissions are
-    <code>eqwt13.f</code> (bin 0.20–0.25), <code>ecpant.f90</code> (bin
-    0.30–0.35), <code>trset_torm.f</code> (bin 0.35–0.40), and cohort
-    <code>eqrd13.f</code> and <code>eqwt13.f</code>. Files that flicker across
-    the gate at 0.50–0.51 are <code>p2isett.f</code>, <code>fbjt60.f</code> and
-    <code>eccdpr.f90</code>.
+    several files sit within 0.05 of the 0.5 gate, so the count is not exact.
+    Four full-arm runs over the same 106 records — the primary run above plus
+    three repeats in <code>stability.log</code> — admitted <strong>6, 3, 3 and 4
+    of 75</strong> sampled files and <strong>2, 2, 2 and 2 of 31</strong> cohort
+    files. The primary run sits at the high end of an observed 0.04–0.08 range.
+    The bins that are non-empty in every run are 0.20–0.25 (1 file),
+    0.30–0.35 (1–2) and 0.35–0.40 (1–3); 0.15–0.20 and 0.25–0.30 admitted none
+    in any run. The admissions common to all four runs are
+    <code>eqwt13.f</code> (0.20–0.25), <code>ecpant.f90</code> (0.30–0.35),
+    <code>trset_torm.f</code> (0.35–0.40) and cohort <code>eqrd13.f</code> and
+    <code>eqwt13.f</code>. Files that flicker across the gate at 0.50–0.51 are
+    <code>p2isett.f</code>, <code>fbjt60.f</code> and <code>eccdpr.f90</code>.
   </p>
 
   <table id="names-arm-recall-admitted">
-    <caption>Every admitted path: names-arm relevance, content composite and
-    strongest facet. All five admitted on the composite clause; none reached the
-    0.85 facet clause.</caption>
+    <caption>Every admitted path in the primary run: names-arm relevance,
+    content composite and strongest facet. All admitted on the composite
+    clause; none reached the 0.85 facet clause.</caption>
     <thead>
       <tr><th>path</th><th>name relevance</th><th>content composite</th><th>strongest facet</th></tr>
     </thead>
     <tbody>
-      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqwt13.f</code></td><td>0.24</td><td>0.59–0.62</td><td>0.55 machine_description</td></tr>
-      <tr><td><code>/analysis/src/ECCD/v9l3/src_a2/ecpant.f90</code></td><td>0.30</td><td>0.53–0.55</td><td>0.57 machine_description</td></tr>
-      <tr><td><code>/analysis/src/topics_release/topics/topics/trmain/trset_torm.f</code></td><td>0.35</td><td>0.50–0.52</td><td>0.50 signal_processing</td></tr>
-      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqrd13.f</code> (cohort)</td><td>0.30</td><td>0.58–0.60</td><td>0.62 machine_description</td></tr>
-      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqwt13.f</code> (cohort)</td><td>0.24</td><td>0.53–0.62</td><td>0.54 machine_description</td></tr>
+      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqwt13.f</code> (also cohort)</td><td>0.24</td><td>0.60</td><td>0.553 machine_description</td></tr>
+      <tr><td><code>/analysis/src/ECCD/v9l3/src_a2/ecpant.f90</code></td><td>0.30</td><td>0.53</td><td>0.573 machine_description</td></tr>
+      <tr><td><code>/analysis/src/ECCD/v9l3/src_a2/eccdpr.f90</code></td><td>0.32</td><td>0.50</td><td>0.457 machine_description</td></tr>
+      <tr><td><code>/analysis/src/topics_release/topics/topics/trmain/trset_torm.f</code></td><td>0.35</td><td>0.51</td><td>0.497 signal_processing</td></tr>
+      <tr><td><code>/analysis/src/topics_release/topics/tool/plot2imas/p2isett.f</code></td><td>0.39</td><td>0.51</td><td>0.413 imas_mapping</td></tr>
+      <tr><td><code>/analysis/src/topics_release/topics/topics/eq_fct/fbjt60.f</code></td><td>0.39</td><td>0.50</td><td>0.613 machine_description</td></tr>
+      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqrd13.f</code> (cohort)</td><td>0.30</td><td>0.58</td><td>0.620 machine_description</td></tr>
+      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqwt13.f</code> (cohort)</td><td>0.24</td><td>0.62</td><td>0.537 machine_description</td></tr>
     </tbody>
   </table>
 
@@ -119,16 +130,20 @@
     arm is documented in <code>scorer.py</code> and as the earlier
     labelled-sample prototype asked them, because the admission rule and the
     requested strongest-facet column both read facets. An identity-only repeat
-    over the same files admitted 3–4 of 75 sampled and 2 of 31 cohort, the same
+    over the same files admitted 3 of 75 sampled and 2 of 31 cohort, the same
     order as the full arm.
   </p>
 
   <p id="names-arm-recall-conclusion">
-    <strong>Reading.</strong> The content arm admits about 4 % of the sampled
-    name-skipped files across the whole 0.15–0.40 band and 6.5 % of the
+    <strong>Reading.</strong> The content arm admits 6 of 75 sampled name-skipped
+    files (0.08) across the 0.15–0.40 band in the primary run, 3–4 of 75 across
+    three repeats (an observed 0.04–0.08 range), and 2 of 31 (0.065) of the
     <code>client_eqdbms</code> cohort, and every admission is a composite near
-    the 0.5 gate rather than a strong facet. No bin shows a material admitted
-    fraction that would justify moving the pass gate to its lower edge. The
+    the 0.5 gate rather than a strong facet. The highest bin fraction seen is
+    0.200 (bin 0.35–0.40 in the primary run), but it rests on 3 of 15 files and
+    falls to 1–2 of 15 in the repeats, so no bin's fraction is stable enough to
+    justify moving the pass gate to its lower edge; the 0.15–0.20 and
+    0.25–0.30 bins admitted none in any run. The
     <code>client_eqdbms</code> miss is largely a names-arm vocabulary defect:
     its path and filename evidence reads as <code>infrastructure_or_utility</code>
     (0.16–0.30) before the source is seen, and seeing the source lifts only two
