@@ -1,0 +1,16 @@
+<!-- Fixed rerank_pool's return annotation in imas_codex/discovery/base/judgment.py
+     to tuple[list[Mapping[str, Any]], str | None, float], matching the
+     (ordered, note, cost) triple every return path already builds. Before the
+     change typing.get_type_hints(rerank_pool)['return'] carried two args
+     (verified by reproduction); after, its third arg is float. mypy on the
+     module reports no return-value error at rerank_pool; the three covering
+     test files pass (118 passed, 8 skipped). -->
+<section id="rerank-pool-return-annotation" data-reckon="evidence">
+  <h2 id="rerank-pool-return-annotation-heading">rerank_pool return annotation</h2>
+  <p id="rerank-pool-return-annotation-landing">
+    <code>judgment.rerank_pool</code> returns <code>(ordered, note, cost)</code>
+    but declared only <code>tuple[list[Mapping[str, Any]], str | None]</code>.
+    The annotation now names the trailing <code>float</code> the cost already
+    is, so the declared type matches the value on every return path.
+  </p>
+</section>
