@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run is docs-only (its manifest declares tests none) and names no baseline_suite or after_suite gate log, so no reviewed arm pair exists and the added-failure count was not taken. This review recomputed the reviewed metric itself (metrics.json reproduced bit-identically from the stored artifacts, review_metrics_repro.log).",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T02:08:49.587Z",
+  "dispatched_at": "2026-10-07T01:58:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/search-rerank-prototype.html",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: the phrase \"random control\" is used for two different quantities \u2014 the single fixed-seed draw that gives the per-question table column and the averages-table row (0.241 all / 0.334 answerable), and the 200-permutation mean cited in the prose (0.207 / 0.286); a reader can take one for the other, so label the single-draw and the multi-seed expected value distinctly."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/search-rerank-prototype.html",
+      "line": "124",
+      "severity": "follow-on",
+      "text": "follow-on: the provenance paragraph cites queries.json, retrieve.py and the other artifacts by bare filename with no directory, and plan \u00a79 places the scripts under /home/ITER/mcintos/.cache/imas-codex-jev/ while the delivered set is in the crew reports directory \u2014 reconcile the plan and state the absolute directory so a reader can locate the raw data behind the figures."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites: this node changes no code; the scripts only read the production search tools.",
+    "diff": "two docs(evidence) commits 89d52c50d and 92a1ceacc, conventional subjects with mechanism bodies, no AI attribution and no plan identifier; +1610 lines over the fragment and the figure only.",
+    "done_when": "18 questions (12 code, 6 docs) each carry a top-30 candidate set from _search_code/_search_docs (facility jt-60sa), hand labels, one Jev score per candidate, and nDCG@10/MRR per question and averaged for both orders plus a random-order control; recomputed here from the stored artifacts the numbers reproduce byte-for-byte.",
+    "goal": "\u00a79's prototype goal is met \u2014 the record measures whether a Jev relevance rerank improves JT-60SA code and docs search, and at head it does: mean nDCG@10 rises 0.246 -> 0.508 over all 18 questions and 0.340 -> 0.704 over the 13 with a relevant candidate retrieved.",
+    "manifest": "complete and self-consistent at head 92a1ceacc; it declares tests none and carries no baseline_suite/after_suite arm, so this review recomputed the reviewed metric itself rather than reading a gate log.",
+    "write_paths": "the diff touches only the fragment and one SVG figure, both inside the node's declared write paths; no repository code, no plan edit, no graph write."
+  },
+  "justifications": {
+    "durability": "two committed, mechanism-stated commits on the run worktree with the embedding-baseline correction documented in both the commit body and the fragment; docked because the raw artifacts and scripts the claim rests on (candidates.json, labels.json, jev_rerank.json, the five scripts) live outside version control in the crew reports directory and are cited by bare filename only.",
+    "evidence": "metrics.json reproduces bit-identically from candidates.json/labels.json/jev_rerank.json at head, the shuffled-Jev falsification drops the rerank from 0.508 to 0.302 while the embedding order stays 0.246, and the declared random-order control holds (0.207 multiseed, 0.241 single draw, both below the 0.246 embedding baseline); docked because 'random control' names two different quantities and the embedding order clears a single random draw by only 0.005.",
+    "fit": "evidence lives at its convention-correct home (docs/evidence/fragments/<plan>/<node>.html and docs/figures/<plan>/<node>/), the figure uses the project-absolute src /imas-codex/figures/... , and every element id is prefixed with the node id.",
+    "goal_fidelity": "the record delivers exactly \u00a79's prototype (18 questions, both orders' nDCG@10 and MRR, cost and latency, one data-ink figure), and the plan's done-when item \u2014 the prototype's measured nDCG@10 and MRR for both orders recorded \u2014 holds at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank-prototype.html.",
+    "reuse": "retrieve.py reuses the production _search_code/_search_docs by wrapping their report formatters rather than reimplementing search, rerank.py reuses get_api_key_for_service, and plot_ndcg.py reuses the shared data-ink style; the only mild duplication is rerank.py's hand-rolled httpx Jev call, which the plan's deploy section would route through call_decisions.",
+    "scope_discipline": "git diff --stat 7a6371996ac1e679e3c70bbfabd803866697d764..92a1ceacca31558a975e7a89b8ba4272e6f1d113 lists exactly the fragment and docs/figures/.../ndcg10.svg (1610 insertions, 0 deletions), both within the node's write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a79's prototype goal is met \u2014 the record measures whether a Jev relevance rerank improves JT-60SA code and docs search, and at head it does: mean nDCG@10 rises 0.246 -> 0.508 over all 18 questions and 0.340 -> 0.704 over the 13 with a relevant candidate retrieved.\nVERDICT done_when: 18 questions (12 code, 6 docs) each carry a top-30 candidate set from _search_code/_search_docs (facility jt-60sa), hand labels, one Jev score per candidate, and nDCG@10/MRR per question and averaged for both orders plus a random-order control; recomputed here from the stored artifacts the numbers reproduce byte-for-byte.\nVERDICT write_paths: the diff touches only the fragment and one SVG figure, both inside the node's declared write paths; no repository code, no plan edit, no graph write.\nVERDICT manifest: complete and self-consistent at head 92a1ceacc; it declares tests none and carries no baseline_suite/after_suite arm, so this review recomputed the reviewed metric itself rather than reading a gate log.\nVERDICT diff: two docs(evidence) commits 89d52c50d and 92a1ceacc, conventional subjects with mechanism bodies, no AI attribution and no plan identifier; +1610 lines over the fragment and the figure only.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 19\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: the record delivers exactly \u00a79's prototype (18 questions, both orders' nDCG@10 and MRR, cost and latency, one data-ink figure), and the plan's done-when item \u2014 the prototype's measured nDCG@10 and MRR for both orders recorded \u2014 holds at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank-prototype.html.\nJUSTIFICATION evidence: metrics.json reproduces bit-identically from candidates.json/labels.json/jev_rerank.json at head, the shuffled-Jev falsification drops the rerank from 0.508 to 0.302 while the embedding order stays 0.246, and the declared random-order control holds (0.207 multiseed, 0.241 single draw, both below the 0.246 embedding baseline); docked because 'random control' names two different quantities and the embedding order clears a single random draw by only 0.005.\nJUSTIFICATION scope_discipline: git diff --stat 7a6371996ac1e679e3c70bbfabd803866697d764..92a1ceacca31558a975e7a89b8ba4272e6f1d113 lists exactly the fragment and docs/figures/.../ndcg10.svg (1610 insertions, 0 deletions), both within the node's write paths.\nJUSTIFICATION durability: two committed, mechanism-stated commits on the run worktree with the embedding-baseline correction documented in both the commit body and the fragment; docked because the raw artifacts and scripts the claim rests on (candidates.json, labels.json, jev_rerank.json, the five scripts) live outside version control in the crew reports directory and are cited by bare filename only.\nJUSTIFICATION fit: evidence lives at its convention-correct home (docs/evidence/fragments/<plan>/<node>.html and docs/figures/<plan>/<node>/), the figure uses the project-absolute src /imas-codex/figures/... , and every element id is prefixed with the node id.\nJUSTIFICATION reuse: retrieve.py reuses the production _search_code/_search_docs by wrapping their report formatters rather than reimplementing search, rerank.py reuses get_api_key_for_service, and plot_ndcg.py reuses the shared data-ink style; the only mild duplication is rerank.py's hand-rolled httpx Jev call, which the plan's deploy section would route through call_decisions.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/search-rerank-prototype.html:104 follow-on: the phrase \"random control\" is used for two different quantities \u2014 the single fixed-seed draw that gives the per-question table column and the averages-table row (0.241 all / 0.334 answerable), and the 200-permutation mean cited in the prose (0.207 / 0.286); a reader can take one for the other, so label the single-draw and the multi-seed expected value distinctly.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/search-rerank-prototype.html:124 follow-on: the provenance paragraph cites queries.json, retrieve.py and the other artifacts by bare filename with no directory, and plan \u00a79 places the scripts under /home/ITER/mcintos/.cache/imas-codex-jev/ while the delivered set is in the crew reports directory \u2014 reconcile the plan and state the absolute directory so a reader can locate the raw data behind the figures.\nreviewed_base_sha: 7a6371996ac1e679e3c70bbfabd803866697d764\nreviewed_head_sha: 92a1ceacca31558a975e7a89b8ba4272e6f1d113\n",
+  "review_run_id": "r-20261007T015817839561-review-of-search-rerank-prototype",
+  "reviewed_base": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "reviewed_base_sha": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "reviewed_commit": "92a1ceacca31558a975e7a89b8ba4272e6f1d113",
+  "reviewed_head_sha": "92a1ceacca31558a975e7a89b8ba4272e6f1d113",
+  "reviewed_run_id": "r-20261007T013029393604-search-rerank-prototype",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-07T02:07:25+00:00",
+  "total": 110
+}
