@@ -12,3 +12,25 @@ unit_error = [error]
 
 # Case-sensitive aliases for MDSplus unit strings
 @alias ohm = Ohm
+
+# Catalogue free-text unit spellings. The EDDB catalogue writes units as human
+# text, so standard symbols appear with varied letter case (KA, KV, Mpa, DegC,
+# oC, DEG, KeV), with glued digit exponents (m2, m3), or with a glued product
+# (Pam3). Each definition carries the canonical symbol, so every spelling of one
+# unit normalises to the same string. Bare "n" is the neutron-count numerator of
+# the yield-rate spellings (n/day, n/s, n/shot).
+KA = 1000 ampere = kA
+KV = 1000 volt = kV
+Mpa = 1e6 pascal = MPa
+DEG = 1 degree = deg
+DegC = 1 degC = degC
+oC = 1 degC = degC
+KeV = 1000 electronvolt = keV
+m2 = 1 meter ** 2 = m^2
+m3 = 1 meter ** 3 = m^3
+Pam3 = 1 pascal * meter ** 3 = m^3.Pa
+n = 1 count = count
+
+# Strain gauges publish microstrain. Strain is a dimensionless ratio, so the
+# micro prefix is the unit's entire scale: 1 uST = 1e-6.
+uST = 1e-6
