@@ -80,11 +80,6 @@ logger = logging.getLogger(__name__)
 # survives into the prompt.
 CONTEXT_CANDIDATE_POOL = 30
 
-# The discovery-relevance seat's measured cost per judgement. One context
-# rerank issues a judgement per candidate; the enrichment run's cost total
-# absorbs them so the enrichment cap covers the paid decisions.
-DECISION_COST_PER_JUDGEMENT_USD = 0.000035
-
 # Wall-time budget for one context rerank. A slow rerank returns the embedding
 # order rather than delaying enrichment.
 _CONTEXT_RERANK_BUDGET_SECONDS = 5.0
@@ -176,9 +171,9 @@ def rerank_context_chunks(
     failed batch keeps the embedding order and logs why — ranking is not a
     gate, so enrichment never stops for want of a ranking.
 
-    The rerank's decision spend is appended to ``spend`` when a sink is given,
-    so the caller can add it to its run's cost total. A batch the decision
-    service could not serve adds nothing.
+    The rerank's decision cost, returned by ``rerank_pool``, is appended to
+    ``spend`` when a sink is given, so the caller can add it to its run's cost
+    total. A batch the decision service could not serve returns ``0.0``.
     """
     if not chunks:
         return []
@@ -188,7 +183,7 @@ def rerank_context_chunks(
 
     question = _CONTEXT_RERANK_QUESTION["relevance_grade"]
     try:
-        ordered, note = _run_coro(
+        ordered, note, cost = _run_coro(
             rerank_pool(
                 query_text,
                 chunks,
@@ -207,8 +202,8 @@ def rerank_context_chunks(
 
     if note:
         logger.info("Context rerank incomplete for %r: %s", query_text, note)
-    if spend is not None and (note is None or "unavailable" not in note):
-        spend.append(len(chunks) * DECISION_COST_PER_JUDGEMENT_USD)
+    if spend is not None:
+        spend.append(cost)
     return list(ordered)[:keep]
 
 

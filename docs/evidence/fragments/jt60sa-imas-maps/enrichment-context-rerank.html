@@ -2,11 +2,17 @@
      embedding order alone. Both context fetches now search a 30-candidate pool
      above their existing score floor and pass the pool, with the enrichment
      query and each candidate's text, to the shared Jev relevance rerank,
-     keeping the reranked top k and adding the decision spend to the run's cost
-     total. Verified by tests/discovery/test_enrichment_context_rerank.py under
-     `uv run --no-sync pytest tests/discovery` (1318 passed, exit 0) with the
-     declared negative control (bypass rerank_pool, keep embedding order ->
-     Jev-order test fails). Logs:
+     keeping the reranked top k. The rerank returns its own decision cost, which
+     the fetches hand back to the run and the run adds to its cost total.
+     Verified by tests/discovery/test_judgment.py,
+     tests/discovery/test_enrichment_context_rerank.py and
+     tests/llm/test_search_tools.py under `uv run --no-sync pytest
+     tests/discovery tests/llm/test_search_tools.py` (exit 0) with the declared
+     negative control (make rerank_pool return a constant 0.0 cost -> the
+     summed-cost test fails). Measured on 15 JT-60SA sources: precision at the
+     kept count rises from 0.067 (embedding order) to 0.222 (reranked), for
+     $0.0215 of real decision spend over 900 judgements. Logs and raw
+     per-source data:
      ~/.config/reckon/crew/runs/r-20261007T103117703398-enrichment-context-rerank/ -->
 <section id="enrichment-context-rerank" data-reckon="evidence">
   <h2 id="enrichment-context-rerank-heading">Enrichment context — ranking the prompt's code and wiki chunks by relevance</h2>
@@ -20,8 +26,10 @@
     passes the pool, the enrichment query and each candidate's text to
     <code>judgment.rerank_pool</code>, and keeps the reranked top k — 3 for
     code, the caller's k for wiki. When the rerank returns no ordering the
-    fetch keeps the embedding order and logs why, because ranking is not a
-    gate.
+    fetch keeps the embedding order and logs why,
+    because ranking is not a gate. The rerank returns the batch's real
+    decision cost, which the fetch hands to the run and the run adds to its
+    cost total.
   </p>
 
   <table id="enrichment-context-rerank-checks">
@@ -30,21 +38,91 @@
       <tr><th>behaviour</th><th>check</th><th>result</th></tr>
     </thead>
     <tbody>
-      <tr id="enrichment-context-rerank-pool"><td>each fetch requests 30 candidates above its floor</td><td><code>test_code_context_searches_the_wider_pool</code>; wiki asserts the index <code>k</code> is the pool</td><td>pass</td></tr>
+      <tr id="enrichment-context-rerank-pool"><td>each fetch requests 3 code and 3 wiki chunks from a 30-candidate pool above its floor</td><td><code>test_code_context_searches_the_wider_pool</code>; the wiki test asserts the index <code>k</code> is the pool</td><td>pass</td></tr>
       <tr id="enrichment-context-rerank-query"><td>rerank is called with the enrichment query and each candidate's text</td><td><code>test_code_fetch_reranks_with_the_query_and_keeps_jev_order</code></td><td>pass</td></tr>
-      <tr id="enrichment-context-rerank-order"><td>the reranked top k is kept in Jev order</td><td>same test, reversed pool comes back 29/28/27</td><td>pass</td></tr>
+      <tr id="enrichment-context-rerank-order"><td>the reranked top k is kept in Jev order</td><td>same test, a reversed pool comes back 29/28/27</td><td>pass</td></tr>
       <tr id="enrichment-context-rerank-fallback"><td>embedding order is kept when the rerank returns no ordering</td><td><code>test_code_fetch_falls_back_to_embedding_order_when_unordered</code></td><td>pass</td></tr>
-      <tr id="enrichment-context-rerank-spend"><td>the decision spend reaches the run's cost total</td><td><code>test_code_fetch_adds_the_rerank_spend_to_the_run_cost_total</code></td><td>pass</td></tr>
-      <tr id="enrichment-context-rerank-gate"><td>full discovery suite</td><td><code>uv run --no-sync pytest tests/discovery</code></td><td>1318 passed, exit 0</td></tr>
-      <tr id="enrichment-context-rerank-negative-control"><td>declared mutation: bypass <code>rerank_pool</code>, keep embedding order</td><td>Jev-order test must fail</td><td>failed as declared (see <code>negative-control.log</code>)</td></tr>
+      <tr id="enrichment-context-rerank-spend"><td>the rerank's own returned cost reaches the run's cost total</td><td><code>test_code_fetch_adds_the_rerank_cost_to_the_run_cost_total</code>; the summed per-item cost is asserted in <code>test_rerank_pool_orders_by_descending_score</code>, and 0.0 for a wholly failed batch</td><td>pass</td></tr>
+      <tr id="enrichment-context-rerank-gate"><td>discovery and search-tools suites</td><td><code>uv run --no-sync pytest tests/discovery tests/llm/test_search_tools.py</code></td><td>pass, exit 0</td></tr>
+      <tr id="enrichment-context-rerank-negative-control"><td>declared mutation: make <code>rerank_pool</code> return a constant 0.0 cost</td><td>the summed-cost test must fail</td><td>failed as declared (<code>negative-control-cost.log</code>)</td></tr>
+      <tr id="enrichment-context-rerank-negative-control-order"><td>declared mutation: bypass <code>rerank_pool</code>, keep embedding order</td><td>the Jev-order test must fail</td><td>failed as declared (<code>negative-control.log</code>)</td></tr>
     </tbody>
   </table>
 
+  <p id="enrichment-context-rerank-measurement-method">
+    The benefit was measured on 15 JT-60SA signal sources. Selection rule:
+    group every <code>jt-60sa</code> FacilitySignal by the enrichment group key
+    the pipeline uses (<code>edas:&lt;category&gt;</code>, the part of the name
+    before the first <code>/</code>), then take the 10 groups with the most
+    members plus the first 5 single-member groups by key, so multi-member and
+    one-member sources are both represented. For each source the code and wiki
+    queries are built exactly as the enrichment worker builds them, and both
+    fetches are run twice — once with the rerank bypassed (the embedding
+    top-k) and once through the product fetch (the reranked top-k). Labelling
+    method: each kept chunk was read against the source's members and its group
+    key and marked relevant when it names or describes the diagnostic, device
+    subsystem, or physical quantity the group's signals belong to, closely
+    enough to supply a true, useful statement in the group's description;
+    generic access-layer and equilibrium-calculation code and unrelated
+    subsystems do not qualify. Precision is taken at the kept count — 3 chunks
+    per fetch, 3 code and 3 wiki per source — and the reported spend is the
+    rerank's own returned cost, not an estimate.
+  </p>
+
+  <figure id="enrichment-context-rerank-figure">
+    <img src="/jt60sa-imas-maps/figures/enrichment-context-rerank.svg" alt="Left: mean precision at the kept count for code and wiki chunks under the embedding order and under the reranked order; the rerank raises both. Right: the real decision spend per source, about 1.2 to 1.6 milli-USD." />
+    <figcaption>
+      Mean precision at the kept count over the 15 measured JT-60SA sources
+      (left) and the real decision spend each source's two reranks incurred
+      (right). In each pair the embedding order is the grey bar, the reranked
+      order the blue one.
+    </figcaption>
+  </figure>
+
+  <table id="enrichment-context-rerank-measurement">
+    <caption>Per-source precision at the kept count, 3 chunks per fetch, and the real decision spend of the source's two reranks. “0/3 → 1/3” reads as none of the 3 embedding-order code chunks relevant, one of the 3 reranked ones relevant.</caption>
+    <thead>
+      <tr><th>source (group key)</th><th>members</th><th>code, embedding → reranked</th><th>wiki, embedding → reranked</th><th>spend [USD]</th></tr>
+    </thead>
+    <tbody>
+      <tr id="enrichment-context-rerank-row-dcsv"><td><code>edas:DCSV</code></td><td>753</td><td>0/3 → 0/3</td><td>0/3 → 0/3</td><td>0.001504</td></tr>
+      <tr id="enrichment-context-rerank-row-cryohrs"><td><code>edas:CryoHRS</code></td><td>704</td><td>0/3 → 0/3</td><td>0/3 → 0/3</td><td>0.001394</td></tr>
+      <tr id="enrichment-context-rerank-row-qms"><td><code>edas:QMS</code></td><td>650</td><td>0/3 → 0/3</td><td>0/3 → 0/3</td><td>0.001515</td></tr>
+      <tr id="enrichment-context-rerank-row-psc"><td><code>edas:PSC</code></td><td>494</td><td>0/3 → 0/3</td><td>0/3 → 0/3</td><td>0.001529</td></tr>
+      <tr id="enrichment-context-rerank-row-cryomag"><td><code>edas:CryoMag</code></td><td>413</td><td>0/3 → 1/3</td><td>0/3 → 0/3</td><td>0.001208</td></tr>
+      <tr id="enrichment-context-rerank-row-cryoctb"><td><code>edas:CryoCTB</code></td><td>379</td><td>0/3 → 0/3</td><td>0/3 → 0/3</td><td>0.001524</td></tr>
+      <tr id="enrichment-context-rerank-row-cryoil"><td><code>edas:CryoIL</code></td><td>286</td><td>0/3 → 1/3</td><td>0/3 → 0/3</td><td>0.001535</td></tr>
+      <tr id="enrichment-context-rerank-row-dhc"><td><code>edas:DHC</code></td><td>272</td><td>0/3 → 0/3</td><td>0/3 → 0/3</td><td>0.001545</td></tr>
+      <tr id="enrichment-context-rerank-row-cryots"><td><code>edas:CryoTS</code></td><td>121</td><td>0/3 → 0/3</td><td>0/3 → 0/3</td><td>0.001403</td></tr>
+      <tr id="enrichment-context-rerank-row-ech"><td><code>edas:ECH</code></td><td>119</td><td>1/3 → 1/3</td><td>0/3 → 0/3</td><td>0.001558</td></tr>
+      <tr id="enrichment-context-rerank-row-atpl1"><td><code>edas:AT-PL1 Magnetic Signal for Plasma Control</code></td><td>1</td><td>0/3 → 1/3</td><td>1/3 → 3/3</td><td>0.001411</td></tr>
+      <tr id="enrichment-context-rerank-row-atpl1sp"><td><code>edas:AT-PL1-SP Magnetic Signal</code></td><td>1</td><td>0/3 → 1/3</td><td>1/3 → 1/3</td><td>0.001262</td></tr>
+      <tr id="enrichment-context-rerank-row-atpl15sp"><td><code>edas:AT-PL15-SP Magnetic Signal for Plasma Control</code></td><td>1</td><td>0/3 → 1/3</td><td>1/3 → 2/3</td><td>0.001374</td></tr>
+      <tr id="enrichment-context-rerank-row-atpl3"><td><code>edas:AT-PL3 Magnetic Signal for Plasma Control</code></td><td>1</td><td>0/3 → 1/3</td><td>1/3 → 3/3</td><td>0.001375</td></tr>
+      <tr id="enrichment-context-rerank-row-atpl5"><td><code>edas:AT-PL5 Magnetic Signal for Plasma Control</code></td><td>1</td><td>0/3 → 1/3</td><td>1/3 → 3/3</td><td>0.001344</td></tr>
+    </tbody>
+  </table>
+
+  <p id="enrichment-context-rerank-measurement-summary">
+    Mean precision at the kept count over the 15 sources: code 0.022 (embedding)
+    to 0.178 (reranked), wiki 0.111 to 0.267, and 0.067 to 0.222 across both
+    fetches — a 3.3× rise. Total real decision spend for the 900 judgements
+    was $0.0215, about $0.0014 per source. The gain is concentrated in the
+    one-member magnetic-probe sources, whose embedding order keeps general
+    equilibrium and plotting code while the reranked order promotes the MECS
+    plasma-position-and-shape-control pages that actually concern a
+    magnetic-probe channel; the large cryogenic and control-system groups gain
+    little because the corpus holds no subsystem-specific content for them, and
+    their precision stays low under both orders.
+  </p>
+
   <p id="enrichment-context-rerank-spend-note">
-    The rerank's paid decisions are charged to the enrichment run at the
-    discovery-relevance seat's measured cost per judgement
-    (<code>DECISION_COST_PER_JUDGEMENT_USD</code>), one per candidate, so the
-    enrichment cap covers them. The relevance rerank reuses the seat the code
-    relevance judgements already use and adds no seat of its own.
+    The rerank's paid decisions are charged to the enrichment run at the cost
+    the decision service returns for the batch
+    (<code>rerank_pool</code>'s third return value, summed from
+    <code>decide_batch</code>), so the enrichment cap covers them, and a batch
+    the service could not serve contributes nothing. The relevance rerank
+    reuses the seat the code relevance judgements already use and adds no seat
+    of its own.
   </p>
 </section>

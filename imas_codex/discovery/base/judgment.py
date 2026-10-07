@@ -138,14 +138,15 @@ async def rerank_pool(
         budget_seconds: Wall-time budget for the whole pool.
 
     Returns:
-        ``(ordered, note)``. ``note`` is ``None`` when every candidate was
-        scored, otherwise it names how many kept their retrieval position.
-        A failed batch returns the pool in its original order and says so —
-        ranking is not a gate, so it never raises.
+        ``(ordered, note, cost)``. ``note`` is ``None`` when every candidate
+        was scored, otherwise it names how many kept their retrieval position.
+        ``cost`` is the batch's summed decision cost, ``0.0`` when the whole
+        batch failed. A failed batch returns the pool in its original order
+        and says so — ranking is not a gate, so it never raises.
     """
     items = list(candidates)
     if not items:
-        return [], None
+        return [], None, 0.0
 
     question = {
         question_name: {
@@ -156,7 +157,7 @@ async def rerank_pool(
     }
     states = [state_for(query, item) for item in items]
     try:
-        results, _cost = await decide_batch(
+        results, cost = await decide_batch(
             states,
             question,
             model=model,
@@ -166,7 +167,7 @@ async def rerank_pool(
         )
     except Exception as exc:  # noqa: BLE001 - ranking is not a gate
         logger.warning("rerank failed for %r: %s", query, exc)
-        return items, f"rerank unavailable ({exc}); embedding order returned"
+        return items, f"rerank unavailable ({exc}); embedding order returned", 0.0
 
     scores: list[float | None] = []
     for result in results:
@@ -195,7 +196,7 @@ async def rerank_pool(
 
     unscored = sum(1 for score in scores if score is None)
     if not unscored:
-        return ordered, None
+        return ordered, None, cost
     reason = (
         "judgement failed"
         if budget_seconds is None
@@ -205,4 +206,5 @@ async def rerank_pool(
         ordered,
         f"rerank incomplete: {unscored} of {len(items)} candidates kept "
         f"their embedding position ({reason})",
+        cost,
     )

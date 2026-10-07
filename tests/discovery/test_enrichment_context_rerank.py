@@ -70,7 +70,7 @@ def test_code_context_searches_the_wider_pool():
 def test_code_fetch_reranks_with_the_query_and_keeps_jev_order():
     gc = _gc_returning(CODE_ROWS)
     jev_order = list(reversed(CODE_ROWS))
-    rerank = AsyncMock(return_value=(jev_order, None))
+    rerank = AsyncMock(return_value=(jev_order, None, 0.012))
 
     with (
         patch.object(parallel_mod, "GraphClient", return_value=gc),
@@ -99,6 +99,7 @@ def test_code_fetch_falls_back_to_embedding_order_when_unordered():
         return_value=(
             list(CODE_ROWS),
             "rerank unavailable (boom); embedding order returned",
+            0.0,
         )
     )
 
@@ -113,9 +114,9 @@ def test_code_fetch_falls_back_to_embedding_order_when_unordered():
     assert [c["text"] for c in kept] == ["code 0", "code 1", "code 2"]
 
 
-def test_code_fetch_adds_the_rerank_spend_to_the_run_cost_total():
+def test_code_fetch_adds_the_rerank_cost_to_the_run_cost_total():
     gc = _gc_returning(CODE_ROWS)
-    rerank = AsyncMock(return_value=(list(CODE_ROWS), None))
+    rerank = AsyncMock(return_value=(list(CODE_ROWS), None, 0.0123))
     stats = WorkerStats()
     spend: list[float] = []
 
@@ -127,20 +128,17 @@ def test_code_fetch_adds_the_rerank_spend_to_the_run_cost_total():
     ):
         parallel_mod._fetch_code_chunks("jt-60sa", "plasma current", spend=spend)
 
-    assert spend == pytest.approx(
-        [_POOL * parallel_mod.DECISION_COST_PER_JUDGEMENT_USD]
-    )
+    # the fetch reports the cost the rerank returned, not an imputed rate
+    assert spend == pytest.approx([0.0123])
     parallel_mod.charge_context_spend(stats, spend)
-    assert stats.cost == pytest.approx(
-        _POOL * parallel_mod.DECISION_COST_PER_JUDGEMENT_USD
-    )
+    assert stats.cost == pytest.approx(0.0123)
     assert spend == []
 
 
 def test_wiki_fetch_searches_the_wider_pool_and_reranks():
     gc = _gc_returning(WIKI_ROWS)
     jev_order = list(reversed(WIKI_ROWS))
-    rerank = AsyncMock(return_value=(jev_order, None))
+    rerank = AsyncMock(return_value=(jev_order, None, 0.02))
     spend: list[float] = []
 
     with (
