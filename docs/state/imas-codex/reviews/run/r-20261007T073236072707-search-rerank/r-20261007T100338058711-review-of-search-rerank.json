@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured from this review's own arm pair on the reviewed delta. Base arm at 2113ec741 over tests/llm/test_search_tools.py, tests/discovery/test_llm_decisions.py, tests/discovery/test_judgment.py, tests/graph/test_domain_queries.py ran 180 passed, 8 skipped, EXIT=0 (gate_base.log); head arm at 4ae89e6ac over the same four files ran 180 passed, 8 skipped, EXIT=0 (gate_head.log). Zero failures in either arm, so zero added. The reviewed run's own baseline_suite/after_suite are declared not run, so this review supplied the pair.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:_search_docs",
+    "imas_codex/llm/search_tools.py:_search_code",
+    "imas_codex/graph/domain_queries.py:find_code"
+  ],
+  "completed_at": "2026-10-07T10:24:39.052Z",
+  "dispatched_at": "2026-10-07T10:03:47Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html",
+      "line": "107",
+      "severity": "follow-on",
+      "text": "follow-on: the prose states every pool's wall p95 passes 8 s at 48 in flight, which the fragment's own latency table refutes \u2014 pool 30 is 3.49 s at line 120 \u2014 and the live retime disagrees with that replay table by 4.8 s with no reconciliation."
+    },
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: the pool value 60 is not guarded by any committed test; the tests reference RERANK_POOL symbolically at tests/llm/test_search_tools.py:825, so a regression to 30 passes the suite and the depth property is checked only by the out-of-tree answer_checks.py."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "follow-on: the provenance comment's brace list closes with a stray close-parenthesis and leaves gate.log and negative_control.log outside it, so the files a reader would locate from the comment are mis-listed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read per change against 2113ec741; four commits (a111c9923, 08712beb2, 67a513e0a, 4ae89e6ac), conventional subjects with mechanism bodies, no AI attribution and no plan identifier.",
+    "done_when": "section 9 requires the deployed tools to rerank with the prototype's measured gain reproduced on the same queries; embedding_baseline.log measures the pre-rerank order through the deployed _search_code/_search_docs and table.log reproduces embedding 0.2670 to rerank 0.4976 against the prototype's 0.2457 to 0.5085, so the clause is now met.",
+    "goal": "the delta answers the two findings the earlier review left on this node \u2014 the pool constant is RERANK_POOL=60 at imas_codex/llm/search_tools.py:65 and the gain table now carries the embedding order beside the rerank at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:56.",
+    "manifest": "read at head 4ae89e6ac; it reports status complete, names gate.log and the measurement scripts, and declares baseline_suite/after_suite not run, so this review supplied the arm pair.",
+    "write_paths": "the delta's three files (the fragment, the SVG figure and imas_codex/llm/search_tools.py) are all inside the node's declared write paths; no repository file outside them."
+  },
+  "justifications": {
+    "durability": "no committed test asserts RERANK_POOL is deeper than the k the tools return, so a regression to 30 passes tests/llm/test_search_tools.py:825.",
+    "evidence": "the pool table now carries the embedding order and reproduces from sweep.json, but the prose at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:107 claims every pool's p95 passes 8 s at 48 in flight while its own table at line 120 shows pool 30 at 3.49 s.",
+    "fit": "the figure follows the data-ink style and despines its axes, but the provenance comment at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:4 closes its brace list with a stray close-parenthesis so the file list a reader parses is broken.",
+    "goal_fidelity": "both prior findings are answered \u2014 RERANK_POOL=60 at imas_codex/llm/search_tools.py:65 and the embedding baseline at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:56 \u2014 though the pool still cannot reach the census answers.",
+    "reuse": "the delta adds no new definition \u2014 it changes a constant and documents a measurement already produced by the shared rerank_pool core in imas_codex/discovery/base/judgment.py.",
+    "scope_discipline": "the delta touches only the three declared paths and writes no repository file outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the delta answers the two findings the earlier review left on this node \u2014 the pool constant is RERANK_POOL=60 at imas_codex/llm/search_tools.py:65 and the gain table now carries the embedding order beside the rerank at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:56.\nVERDICT done_when: section 9 requires the deployed tools to rerank with the prototype's measured gain reproduced on the same queries; embedding_baseline.log measures the pre-rerank order through the deployed _search_code/_search_docs and table.log reproduces embedding 0.2670 to rerank 0.4976 against the prototype's 0.2457 to 0.5085, so the clause is now met.\nVERDICT write_paths: the delta's three files (the fragment, the SVG figure and imas_codex/llm/search_tools.py) are all inside the node's declared write paths; no repository file outside them.\nVERDICT manifest: read at head 4ae89e6ac; it reports status complete, names gate.log and the measurement scripts, and declares baseline_suite/after_suite not run, so this review supplied the arm pair.\nVERDICT diff: read per change against 2113ec741; four commits (a111c9923, 08712beb2, 67a513e0a, 4ae89e6ac), conventional subjects with mechanism bodies, no AI attribution and no plan identifier.\nCALL_SITES: imas_codex/llm/search_tools.py:_search_docs, imas_codex/llm/search_tools.py:_search_code, imas_codex/graph/domain_queries.py:find_code\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: both prior findings are answered \u2014 RERANK_POOL=60 at imas_codex/llm/search_tools.py:65 and the embedding baseline at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:56 \u2014 though the pool still cannot reach the census answers.\nSCORE evidence: 14\nJUSTIFICATION evidence: the pool table now carries the embedding order and reproduces from sweep.json, but the prose at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:107 claims every pool's p95 passes 8 s at 48 in flight while its own table at line 120 shows pool 30 at 3.49 s.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the delta touches only the three declared paths and writes no repository file outside them.\nSCORE durability: 12\nJUSTIFICATION durability: no committed test asserts RERANK_POOL is deeper than the k the tools return, so a regression to 30 passes tests/llm/test_search_tools.py:825.\nSCORE fit: 16\nJUSTIFICATION fit: the figure follows the data-ink style and despines its axes, but the provenance comment at docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:4 closes its brace list with a stray close-parenthesis so the file list a reader parses is broken.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no new definition \u2014 it changes a constant and documents a measurement already produced by the shared rerank_pool core in imas_codex/discovery/base/judgment.py.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:107 follow-on: the prose states every pool's wall p95 passes 8 s at 48 in flight, which the fragment's own latency table refutes \u2014 pool 30 is 3.49 s at line 120 \u2014 and the live retime disagrees with that replay table by 4.8 s with no reconciliation.\nFINDING imas_codex/llm/search_tools.py:65 follow-on: the pool value 60 is not guarded by any committed test; the tests reference RERANK_POOL symbolically at tests/llm/test_search_tools.py:825, so a regression to 30 passes the suite and the depth property is checked only by the out-of-tree answer_checks.py.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:4 follow-on: the provenance comment's brace list closes with a stray close-parenthesis and leaves gate.log and negative_control.log outside it, so the files a reader would locate from the comment are mis-listed.",
+  "review_run_id": "r-20261007T100338058711-review-of-search-rerank",
+  "reviewed_base": "2113ec741729475ed0bb2c06ddc65a039ee591f3",
+  "reviewed_base_sha": "2113ec741729475ed0bb2c06ddc65a039ee591f3",
+  "reviewed_commit": "4ae89e6ac6b077e3e935f9bf887552446c8bee76",
+  "reviewed_head_sha": "4ae89e6ac6b077e3e935f9bf887552446c8bee76",
+  "reviewed_run_id": "r-20261007T073236072707-search-rerank",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T10:23:15.950382+00:00",
+  "total": 95
+}

@@ -1,0 +1,376 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "redispatch",
+  "backend": "clive",
+  "base_sha": "5faf0886e9dc7698bf383cd44549c7c598f0fac9",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8026594,
+      "input_tokens_cumulative": 8026594,
+      "output_tokens": 36784,
+      "output_tokens_cumulative": 36784,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-07T10:24:39.052Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-07T10:03:47Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html:107",
+    "3.49",
+    "retime_c48.log",
+    "8.3",
+    "4.8"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "python3 -c \"import json;assert json.load(open('/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261007T073236072707-search-rerank.json'))['status']=='parsed'\"",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T100338058711-review-of-search-rerank/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.45,
+    "plan": "discovery-judgments-through-jev",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T11:03:38.843200+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-07T10:03:38Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 4,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": 4,
+    "mean_context": 134286,
+    "observed_at": "2026-10-07T10:03:34Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 4,
+      "aggregate_tokens_per_second": 411.761,
+      "detail": "",
+      "mean_tokens_per_second": 36.764,
+      "observed_at": "2026-10-07T10:03:34Z",
+      "runs": 11.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-07T10:24:39.052Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "redispatch",
+    "previous_run_id": "r-20261007T090313261214-review-of-search-rerank",
+    "root_run_id": "r-20261007T090313261214-review-of-search-rerank"
+  },
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T100338058711-review-of-search-rerank/manifest.md",
+  "member": "disposable-r-20261007T100338058711-review-of-search-rerank",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run: stores a review record, no repository change",
+  "node": "review-of-search-rerank",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 529,
+          "cached_input_tokens": 231662,
+          "input_tokens": 232193,
+          "output_tokens": 126,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 232319,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "the review for r-20261007T073236072707-search-rerank stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261007T073236072707-search-rerank covering only the commits it gained since it was reviewed: docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html, docs/figures/discovery-judgments-through-jev/search-rerank/pool_sweep.svg, imas_codex/llm/search_tools.py",
+    "id": "review-of-search-rerank",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-07T10:03:38Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 4,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": 4,
+      "mean_context": 134286,
+      "observed_at": "2026-10-07T10:03:34Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 4,
+        "aggregate_tokens_per_second": 411.761,
+        "detail": "",
+        "mean_tokens_per_second": 36.764,
+        "observed_at": "2026-10-07T10:03:34Z",
+        "runs": 11.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T100338058711-review-of-search-rerank/manifest.md",
+    "negative_control": "",
+    "plan": "discovery-judgments-through-jev",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§9",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261007T073236072707-search-rerank.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261007T073236072707-search-rerank.at-4ae89e6ac6b077e3e935f9bf887552446c8bee76.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "review-of-search-rerank",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-07T10:03:42.408604+00:00",
+    "score": 0.625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.528,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "discovery-judgments-through-jev",
+  "plan_impl_at_dispatch": 0.45,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "5faf0886e9dc7698bf383cd44549c7c598f0fac9",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261007T100338058711-review-of-search-rerank",
+    "reviewed_base_sha": "2113ec741729475ed0bb2c06ddc65a039ee591f3",
+    "reviewed_head_sha": "4ae89e6ac6b077e3e935f9bf887552446c8bee76",
+    "scores": {
+      "durability": 12,
+      "evidence": 14,
+      "fit": 16,
+      "goal_fidelity": 17,
+      "reuse": 20,
+      "scope_discipline": 16
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "none",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261007T100338058711-review-of-search-rerank",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§9",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "dfd89062-4235-43ad-a8a6-4109ff4b0e45",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 8026594,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1244.041,
+    "generated_tokens": 36784,
+    "generation_seconds": 912.203,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.0,
+    "machine_seconds": 331.838,
+    "peak_input_tokens": 174906,
+    "tokens_per_second": 40.32,
+    "wall_tokens_per_second": 29.57
+  },
+  "time_budget": "60m",
+  "tool_steps": 71.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1252,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-07T10:24:46Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-07T10:03:53Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261007T100338058711-review-of-search-rerank",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7216,
+    "worker_pid": 1084418
+  },
+  "worker_seconds": 1227,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
