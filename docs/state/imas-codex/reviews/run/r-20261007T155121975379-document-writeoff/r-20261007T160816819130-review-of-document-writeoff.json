@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T16:25:37.108Z",
+  "dispatched_at": "2026-10-07T16:08:27Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite/after_suite gate-log pair, so added_failure_count is unmeasured from its own record and the regression question is left to the reviewer; the gate log also opens with BEFORE by family x status rather than a header naming the revision, tree and command the manifest contract asks for."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/document-writeoff/write_off_unreachable_jt60sa.py",
+      "line": "118",
+      "severity": "follow-on",
+      "text": "follow-on: the printed marked total is computed from the selection length, not from confirmed writes, and mark_document_deferred (imas_codex/discovery/wiki/graph_ops.py:1943) swallows every exception with a warning, so a partially failed bulk mark would still print marked 781; the AFTER counts catch it here, but the script's own marked figure is not evidence of the write."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against its base c05818cf9; the single commit 85542f90c adds only docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html (42 insertions, one new file), with no code change and no other path.",
+    "done_when": "the done-when names before/after family-by-status counts, a marking through mark_document_deferred, 0 remaining, 250 ingested, the reason on every write-off and the committed fragment; the gate log write_off_output.log records every one and its AFTER family-by-status table matches an independent live read exactly.",
+    "goal": "the node's goal is to defer the unreachable JT-60SA documents with the lead's write-off reason; the graph now holds 781 documents deferred in the two retired-source families plus the two vendor URLs, 0 left at scored or discovered and the 250 ingested untouched, which this review re-read live.",
+    "manifest": "read; it records status complete, commit 85542f90c, the gate command with EXIT=0, the gate log path and the before/after counts, but it carries no baseline_suite/after_suite arm pair, so the added-failure figure is unmeasured from its own record.",
+    "write_paths": "the declared write paths are the reports/imas-codex/document-writeoff directory, docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html and a docs/figures/jt60sa-discovery-completion/document-writeoff directory; the diff touches only the fragment and the report directory holds the script and its log."
+  },
+  "justifications": {
+    "durability": "the change is a graph mutation recorded in docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html with no test that fails if the deferral is reverted, so its stability rests on the recorded negative controls in write_off_output.log rather than on a guard.",
+    "evidence": "write_off_output.log records the before/after family-by-status counts, REMAINING_IN_SCOPE 0, INGESTED_AFTER 250 and both negative controls, and this review re-read the same figures live; one mark down because the manifest carries no arm pair.",
+    "fit": "the marking script reuses mark_document_deferred (imas_codex/discovery/wiki/graph_ops.py:1928) rather than a hand-written Cypher SET, and the fragment follows the evidence-fragment idiom of a section with an id-anchored h2 and p.",
+    "goal_fidelity": "the live graph holds 0 JT-60SA documents at scored or discovered in nakasvr23_web and ssh_twiki_pub with 779 carrying the retired-host reason, exactly the node goal, marked through imas_codex/discovery/wiki/graph_ops.py:1928.",
+    "reuse": "every added artifact extends an owner the repository already has \u2014 the marking is mark_document_deferred at imas_codex/discovery/wiki/graph_ops.py:1928, reused unchanged, and the review's search over imas_codex/discovery found no capability duplicate and no new definition.",
+    "scope_discipline": "the diff's only path is the declared fragment docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html and the report directory holds the script and log; no code, discover run or host access."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of run r-20261007T155121975379-document-writeoff (node document-writeoff), read after its own gate.\n\nVERDICT goal: the node's goal is to defer the unreachable JT-60SA documents with the lead's write-off reason; the graph now holds 781 documents deferred in the two retired-source families plus the two vendor URLs, 0 left at scored or discovered and the 250 ingested untouched, which this review re-read live.\nVERDICT done_when: the done-when names before/after family-by-status counts, a marking through mark_document_deferred, 0 remaining, 250 ingested, the reason on every write-off and the committed fragment; the gate log write_off_output.log records every one and its AFTER family-by-status table matches an independent live read exactly.\nVERDICT write_paths: the declared write paths are the reports/imas-codex/document-writeoff directory, docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html and a docs/figures/jt60sa-discovery-completion/document-writeoff directory; the diff touches only the fragment and the report directory holds the script and its log.\nVERDICT manifest: read; it records status complete, commit 85542f90c, the gate command with EXIT=0, the gate log path and the before/after counts, but it carries no baseline_suite/after_suite arm pair, so the added-failure figure is unmeasured from its own record.\nVERDICT diff: read commit by commit against its base c05818cf9; the single commit 85542f90c adds only docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html (42 insertions, one new file), with no code change and no other path.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the live graph holds 0 JT-60SA documents at scored or discovered in nakasvr23_web and ssh_twiki_pub with 779 carrying the retired-host reason, exactly the node goal, marked through imas_codex/discovery/wiki/graph_ops.py:1928.\nSCORE evidence: 19\nJUSTIFICATION evidence: write_off_output.log records the before/after family-by-status counts, REMAINING_IN_SCOPE 0, INGESTED_AFTER 250 and both negative controls, and this review re-read the same figures live; one mark down because the manifest carries no arm pair.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff's only path is the declared fragment docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html and the report directory holds the script and log; no code, discover run or host access.\nSCORE durability: 13\nJUSTIFICATION durability: the change is a graph mutation recorded in docs/evidence/fragments/jt60sa-discovery-completion/document-writeoff.html with no test that fails if the deferral is reverted, so its stability rests on the recorded negative controls in write_off_output.log rather than on a guard.\nSCORE fit: 19\nJUSTIFICATION fit: the marking script reuses mark_document_deferred (imas_codex/discovery/wiki/graph_ops.py:1928) rather than a hand-written Cypher SET, and the fragment follows the evidence-fragment idiom of a section with an id-anchored h2 and p.\nSCORE reuse: 20\nJUSTIFICATION reuse: every added artifact extends an owner the repository already has \u2014 the marking is mark_document_deferred at imas_codex/discovery/wiki/graph_ops.py:1928, reused unchanged, and the review's search over imas_codex/discovery found no capability duplicate and no new definition.\nFINDING manifest.md:0 follow-on: the reviewed manifest carries no baseline_suite/after_suite gate-log pair, so added_failure_count is unmeasured from its own record and the regression question is left to the reviewer; the gate log also opens with BEFORE by family x status rather than a header naming the revision, tree and command the manifest contract asks for.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/document-writeoff/write_off_unreachable_jt60sa.py:118 follow-on: the printed marked total is computed from the selection length, not from confirmed writes, and mark_document_deferred (imas_codex/discovery/wiki/graph_ops.py:1943) swallows every exception with a warning, so a partially failed bulk mark would still print marked 781; the AFTER counts catch it here, but the script's own marked figure is not evidence of the write.",
+  "review_run_id": "r-20261007T160816819130-review-of-document-writeoff",
+  "reviewed_base_sha": "c05818cf96bd68cdfcec51c958342bb6b08c8b28",
+  "reviewed_head_sha": "85542f90c9f714cdfc89c50710c20809445e52ac",
+  "reviewed_run_id": "r-20261007T155121975379-document-writeoff",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:21:19.715685+00:00",
+  "total": 111
+}
