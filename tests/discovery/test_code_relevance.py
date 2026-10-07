@@ -47,13 +47,34 @@ def _relevance(row: dict) -> float:
     )
 
 
-def _answers(*nouls: float, role: str = "diagnostic_data_access") -> dict:
+def _facet(row: dict) -> float:
+    """The strongest stored facet, the value the admission clause reads."""
+    return max(
+        float(row.get(key) or 0.0)
+        for key in (
+            "score_data_access",
+            "score_signal_processing",
+            "score_machine_description",
+            "score_imas_mapping",
+        )
+    )
+
+
+def _answers(
+    *nouls: float,
+    role: str = "diagnostic_data_access",
+    facets: tuple[float, float, float, float] = (4.0, 3.0, 2.0, 1.0),
+) -> dict:
     """Answer set with the four scope nouls set positionally.
 
     Carries the content arm's graded relevance and four facet Scores as well;
     the names arm's question set has no score questions, so its validator
-    ignores them.
+    ignores them.  The facet Scores are independent of the scope nouls, so a
+    file whose composite is weak can still carry a strong facet, which is what
+    the admission clause reads.  *facets* sets the raw Scores for (data access,
+    signal processing, machine description, imas mapping).
     """
+    data_score, signal_score, machine_score, imas_score = facets
     out = {
         name: {"type": "noul", "noul": value}
         for name, value in zip(SCOPE, nouls, strict=True)
@@ -80,25 +101,25 @@ def _answers(*nouls: float, role: str = "diagnostic_data_access") -> dict:
             },
             "data_access_depth": {
                 "type": "score",
-                "score": 4.0,
+                "score": data_score,
                 "probabilities": {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 1.0},
                 "confidence": 0.9,
             },
             "signal_processing_depth": {
                 "type": "score",
-                "score": 3.0,
+                "score": signal_score,
                 "probabilities": {0: 0.0, 1: 0.0, 2: 0.0, 3: 1.0},
                 "confidence": 0.6,
             },
             "machine_description_depth": {
                 "type": "score",
-                "score": 2.0,
+                "score": machine_score,
                 "probabilities": {0: 0.0, 1: 0.0, 2: 1.0, 3: 0.0},
                 "confidence": 0.5,
             },
             "imas_mapping_depth": {
                 "type": "score",
-                "score": 1.0,
+                "score": imas_score,
                 "probabilities": {0: 0.0, 1: 1.0, 2: 0.0, 3: 0.0},
                 "confidence": 0.4,
             },
@@ -189,6 +210,9 @@ def _stub_common(monkeypatch, claims: list[dict]):
         "imas_codex.settings.get_reasoning_effort", lambda section: None
     )
     monkeypatch.setattr("imas_codex.settings.get_code_ingest_threshold", lambda: 0.6)
+    monkeypatch.setattr(
+        "imas_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
+    )
     monkeypatch.setattr(
         "imas_codex.discovery.code.graph_ops.claim_files_for_triage", claim_once
     )
@@ -388,7 +412,7 @@ def test_content_arm_writes_every_stage_field(monkeypatch):
 
 
 def test_content_arm_describes_only_a_passing_file(monkeypatch):
-    """The local model is called only for files above the ingest threshold."""
+    """The local model is called only for files the ingest gate admits."""
     passing = "/analysis/src/reader.f"
     below = "/analysis/src/plot.f"
     files = [
@@ -397,7 +421,9 @@ def test_content_arm_describes_only_a_passing_file(monkeypatch):
     ]
     answers = {
         passing: _answers(0.75, 0.4, 0.2, 0.1),
-        below: _answers(0.2, 0.1, 0.1, 0.1),
+        # Weak composite and weak facets: neither gate admits this file, so
+        # it is scored but never described.
+        below: _answers(0.2, 0.1, 0.1, 0.1, facets=(0.0, 1.0, 0.0, 0.0)),
     }
     graph, _, _, description_calls = _run_score(monkeypatch, files, answers)
 
@@ -512,12 +538,19 @@ class _IngestStub:
         text = " ".join(cypher.split())
         if "SET sf.claimed_at" in text:
             require_stage = "sf.relevance_stage = 'content'" in text
+            facet_gate = kwargs.get("min_facet_relevance")
             eligible = [
                 r
                 for r in self.rows
                 if r["status"] == "scored"
                 and (not require_stage or r.get("relevance_stage") == "content")
-                and _relevance(r) >= kwargs["min_relevance"]
+                and (
+                    _relevance(r) >= kwargs["min_relevance"]
+                    or (
+                        facet_gate is not None
+                        and _facet(r) >= facet_gate
+                    )
+                )
                 and r.get("line_count", 0) <= kwargs["max_line_count"]
             ]
             eligible.sort(key=_relevance, reverse=True)
