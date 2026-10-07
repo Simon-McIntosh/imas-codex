@@ -34,25 +34,31 @@ SCOPE = (
     "processes_diagnostic_signals",
     "describes_machine_or_diagnostics",
     "maps_to_imas",
+    "reads_or_writes_reconstruction_db",
 )
 
 
 def _answers(
     *nouls: float,
+    reconstruction_db: float = 0.0,
     role: str = "diagnostic_data_access",
     facets: tuple[float, float, float, float] = (4.0, 3.0, 2.0, 1.0),
 ) -> dict:
-    """Answer set with the four scope nouls set positionally.
+    """Answer set with the scope nouls set positionally.
 
-    Carries the content arm's graded relevance and four facet Scores as well;
+    The four positional nouls fill the first four scope questions; the
+    reconstruction-database noul is the fifth and is set by keyword so a caller
+    passing the four legacy nouls still answers every scope question.  Carries
+    the content arm's graded relevance and four facet Scores as well;
     *facets* sets the raw Scores for (data access, signal processing, machine
     description, imas mapping).  The facet Scores are independent of the scope
     nouls, so a file whose composite is weak can still carry a strong facet.
     """
     data_score, signal_score, machine_score, imas_score = facets
+    values = (*nouls, reconstruction_db)
     out = {
         name: {"type": "noul", "noul": value}
-        for name, value in zip(SCOPE, nouls, strict=True)
+        for name, value in zip(SCOPE, values, strict=True)
     }
     out["is_simulation"] = {"type": "noul", "noul": 0.05}
     other = (
