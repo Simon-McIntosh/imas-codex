@@ -46,11 +46,17 @@
     Negative control (log recorded at
     <code>negative_control.log</code>): in a scratch copy with the
     <code>score</code> range check removed from
-    <code>_validate_decisions_answers</code>, the run exits <strong>1</strong> —
-    <code>test_score_above_top_level_is_refused</code> and
-    <code>test_score_below_zero_is_refused</code> both fail while the other
-    twenty-one tests stay green — so an out-of-range score reaching the graph is
-    caught by those assertions alone. The live graph write recomputed
+    <code>_validate_decisions_answers</code>, the control arm ran only the two
+    score-range tests (<code>test_score_above_top_level_is_refused</code> and
+    <code>test_score_below_zero_is_refused</code>) and both fail, with 23
+    deselected, exiting <strong>1</strong>; the remaining tests' passing is
+    shown by <code>gate.log</code>, not by this arm. The distribution
+    tolerance is 0.005 per offered option — the number of criteria or score
+    levels the question offered — not per option reported nonzero: an option
+    whose true probability is 0.004 is reported as 0.00 while still holding
+    that mass, so an 87-option route choice can honestly lose a quarter of its
+    total to options that round to zero, and the honest bound counts every
+    offered option. The live graph write recomputed
     <code>score_composite</code> from each staged file's stored nouls through
     <code>scope_relevance</code>, the same maximum the arms' writer uses: of
     2,311 CodeFiles carrying a <code>relevance_stage</code> (397 content, 1,914
