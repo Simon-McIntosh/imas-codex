@@ -71,7 +71,7 @@
     relevance floor and its scope and exclusion clauses; and the
     failed&rarr;scored reset clears <code>error</code>. Every changed Cypher
     statement was planned against the live graph with <code>EXPLAIN</code>:
-    <strong>12 statements, 0 planning failures</strong>.
+    <strong>11 statements, 0 planning failures</strong> (<code>explain.log</code>: planned=11 failures=0).
   </p>
   <p id="ingest-settles-terminal-clause">
     <strong>Terminal clause — not yet satisfied.</strong> The section asks that
@@ -97,8 +97,11 @@
     (<code>1 failed</code>, exit 1), against it passing here; dropping the
     settle query's exclusion and scope clauses fails
     <code>test_settle_unclaimable_files_matches_the_claim_set</code>
-    (<code>1 failed</code>, exit 1); and the corrected tests pass with the
-    pipeline's example write left as the <code>create_nodes</code> call it
-    replaced, since that call already merged.
+    (<code>1 failed</code>, exit 1). No control was run with the example write
+    reverted to the <code>create_nodes</code> call. That call already merged, so
+    the revert changes no graph behaviour, and the idempotency test asserts the
+    explicit merge query text, so it would fail on that revert by construction
+    rather than on a behaviour. (Coordinator correction at merge, from the
+    re-review.)
   </p>
 </section>
