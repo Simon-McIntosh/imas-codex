@@ -1,0 +1,70 @@
+<section>
+  <h2 id="twiki-attachment-probe">The JT-60SA TWiki attachments are not on nakasvr26, and nakasvr26 hosts no wiki</h2>
+  <p id="twiki-attachment-probe-result">
+    The retired host is <code>nakasvr23.iferc.org</code>, not
+    <code>nakasvr26</code>. The graph's 781 un-drained JT-60SA documents — those at
+    <code>scored</code> or <code>discovered</code> — come from two source
+    families. The first, <strong>548 documents</strong>,
+    is served from the old web host <code>nakasvr23.iferc.org</code>:
+    <strong>535</strong> under <code>https://nakasvr23.iferc.org/twiki_html/rsrc/Code/&lt;Topic&gt;/&lt;file&gt;</code>
+    (331 under <code>TOPICS8</code>, 67 under <code>TOPICS10</code>, 25 under
+    <code>MECSver_eng</code>, and ~40 smaller topics) plus 13 under
+    <code>nakasvr23.iferc.org/./etc/manual/</code> and <code>/etc/</code>. The
+    second, <strong>231 documents</strong> (131 <code>scored</code>, 100
+    <code>discovered</code>), is the ssh path
+    <code>ssh://jt-60sa/var/www/html/twiki/pub/&lt;Web&gt;/&lt;Topic&gt;/&lt;file&gt;</code>
+    — the old TWiki <code>pub</code> tree on nakasvr26 itself. The remaining two
+    are external (<code>www.intel.co.jp</code>, <code>www.mathworks.com</code>).
+  </p>
+  <p id="twiki-attachment-probe-evidence">
+    <strong>nakasvr26 hosts no web server and no wiki.</strong>
+    <code>ls -d /var/www/* /srv/* /opt/* /data*</code> returns only seven
+    <code>/opt</code> system directories (<code>amsd</code>, <code>McAfee</code>,
+    <code>MegaRAID</code>, <code>mellanox</code>, <code>pbs</code>,
+    <code>smartstorageadmin</code>, <code>syc</code>): <code>/var/www</code>,
+    <code>/srv/*</code> and <code>/data*</code> do not exist. There is no
+    <code>httpd</code>, <code>apache2</code> or <code>nginx</code> binary and no
+    <code>/etc/httpd</code>, <code>/etc/apache2</code> or <code>/etc/nginx</code>.
+    A bounded <code>find</code> (<code>-maxdepth 6</code>) for
+    <code>*twiki*</code> or <code>*foswiki*</code> under
+    <code>/opt /usr/local /srv /var/www /etc</code> returns nothing, and no
+    directory named <code>pub</code> exists under any non-home root.
+    <br/><br/>
+    <strong>No migration found for either family.</strong> The same bounded
+    <code>find</code> (<code>-maxdepth 8</code>), run for each of ten sample
+    attachment filenames over every directory the web-root listing returned plus
+    the other non-home roots (<code>/analysis /analysis_DB /admin /scratch /work
+    /srv /var /usr/local</code>), returned <strong>0 hits</strong>. The positive
+    control — the identical command for a filename known to exist,
+    <code>find /opt -maxdepth 8 -name qsub</code> — returned
+    <code>/opt/pbs/bin/qsub</code>, so the instrument locates a file that is
+    present when one is. Even filenames of documents the graph already records as
+    <code>ingested</code> from nakasvr26 (<code>Shift_20201015.png</code>,
+    <code>PrinterIcon.jpg</code>, <code>fig10-9.png</code>) are absent from every
+    non-home root. From nakasvr26, <code>curl -sI</code> against two sample old
+    URLs (<code>https://nakasvr23.iferc.org/twiki_html/rsrc/Code/V9L3vsV9L4/TOPPLT_s39713B902a_1_v9l4.pdf</code>
+    and <code>https://nakasvr23.iferc.org/./etc/manual/Filezilla_manual.pdf</code>)
+    timed out (exit 124): <code>nakasvr23</code> resolves to
+    <code>157.111.10.188</code> but answers nothing — no redirect, no mirror.
+    <br/><br/>
+    <strong>Coverage if a mapping were found: 0.</strong> No old-to-new path
+    mapping exists on nakasvr26 for either prefix family, so no document can be
+    re-pointed from this host. The attachments, if they survive anywhere, are not
+    on the machine the ssh alias <code>jt-60sa</code> reaches
+    (<code>nakasvr26.iferc.org</code>, hostname <code>intr26-2</code>); the old
+    web server they were served from is dead. Writing the set off as
+    pre-migration, or opening a path to <code>nakasvr23</code>, remains the
+    lead's decision (followup f-jdc-002).
+    <br/><br/>
+    <strong>Bound and residual.</strong> All commands were read-only; no user home
+    directory was entered, so a copy parked in a home directory cannot be ruled
+    out by this probe. Scripts and raw output:
+    <code>reports/imas-codex/twiki-attachment-probe/</code>
+    (<code>graph_prefixes.json</code>, <code>graph_prefixes.py</code>,
+    <code>remote_search.sh</code>, <code>remote_search.out</code>). The ssh
+    wrapper required on this host was used
+    (<code>ssh -F $HOME/.ssh/config</code>); the positive control
+    <code>ssh -o BatchMode=yes jt-60sa hostname</code> returned
+    <code>intr26-2</code>.
+  </p>
+</section>
