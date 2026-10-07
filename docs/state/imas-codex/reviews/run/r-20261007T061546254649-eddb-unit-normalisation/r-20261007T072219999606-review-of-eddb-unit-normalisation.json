@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs plus independently reproduced arms. The reviewed run's after arm is gate_head.log (526 passed, 5 skipped, 14 deselected, EXIT=0). Its manifest carries baseline_suite/after_suite as null (classification.json confirms null), so I re-ran both arms in scratch trees under TMPDIR: base 52f616dd261ce21072921abca93d8f2291fe3c19 (reviewer_base_arm.log, 496 passed, 5 skipped, 14 deselected, 0 failed, EXIT=0) and after 09ff452ee1540a3ed79d7055f85ce3b41a9d703c (reviewer_after_arm.log, 526 passed, 5 skipped, 14 deselected, 0 failed, EXIT=0). Both arms ran to their summary line with 0 failures, so added_failure_count=0 and added_failure_ids=[]. My after arm reproduces the reviewed run's gate_head.log exactly. The +30 tests are tests/units/test_unit_alias_spellings.py, new at the head.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T072219999606-review-of-eddb-unit-normalisation/arms/after uv run --no-sync --directory /tmp/reckon-crew-scratch/r-20261007T072219999606-review-of-eddb-unit-normalisation/arms/after pytest tests/units tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T072219999606-review-of-eddb-unit-normalisation/reviewer_after_arm.log",
+    "revision": "09ff452ee1540a3ed79d7055f85ce3b41a9d703c"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T072219999606-review-of-eddb-unit-normalisation/arms/base uv run --no-sync --directory /tmp/reckon-crew-scratch/r-20261007T072219999606-review-of-eddb-unit-normalisation/arms/base pytest tests/units tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T072219999606-review-of-eddb-unit-normalisation/reviewer_base_arm.log",
+    "revision": "52f616dd261ce21072921abca93d8f2291fe3c19"
+  },
+  "blockers": "none",
+  "completed_at": "2026-10-07T07:52:06.265Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-07T07:22:31Z",
+  "evidence_inputs": "Node adds 22 lines to imas_codex/units/data_dictionary_unit_aliases.txt: case variants of an existing unit go through @alias (@alias degree = DEG, @alias degC = DegC = oC) so the original unit object and its temperature offset survive; glued digit-exponent and product forms are new units carrying the canonical symbol (KA = 1000 ampere = kA, KV, Mpa, KeV, m2, m3, Pam3); uST = 1e-6 dimensionless. A bare 'n' is deliberately NOT defined because it shadows the nano prefix's parse space and breaks 'count' itself, so the neutron-yield spellings stay unresolved with a reason. New test module tests/units/test_unit_alias_spellings.py (150 lines, 30 tests) proves each spelling against a registry parsed fresh from the alias file; tests/units/collect_dd_unit_strings.py and dd_unit_strings{_base}.txt carry a 487-string DD regression snapshot. Independent review evidence: (1) a live-graph census re-run via GraphClient reproduces census.json exactly - 76 distinct jt-60sa unit strings over 6298 signals, 3954 normalised (64 strings), 2344 unresolved (12 strings); (2) a fresh-process normaliser probe returns zero mismatches - all 16 added spellings normalise to the census's canonical strings, all 11 unresolved spellings return None, analyze_units(KA,A) is compatible at conversion_factor 1000.0 and analyze_units(uST,1) dimensionless at 1e-6, and 20 degC/DegC/oC each convert to 293.15 K in a fresh registry; (3) the negative control reproduces exactly - restoring the self-referential 'DegC = 1 degC = degC' fails test_celsius_spellings_convert_to_kelvin for degC/DegC/oC with RecursionError, 3 failed EXIT=1, and those three ids pass at the head arm.",
+  "findings": [
+    {
+      "file": "imas_codex/units/__init__.py",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: consistency - one temperature unit has two canonical spellings depending on the input string. normalize_unit_symbol calls imas_standard_names.canonical_unit first, which formats through its own pint registry and does not load data_dictionary_unit_aliases.txt, so 'DegC' and 'oC' fall through to the alias-loaded registry whose Celsius symbol is the degree sign (\u00b0C), while 'degC' and 'degreeC' short-circuit to 'degC'. Reproduced: normalize('DegC') and normalize('oC') both return '\u00b0C', normalize('degreeC') returns 'degC'. The conversion is correct (20 -> 293.15 K) and no symbol is redefined, but a downstream consumer comparing canonical strings sees two identities for one unit. The reviewed run discloses this in follow_ons and the test comment says pinning one spelling would pin the wrong layer. Fix: have canonical_unit load the alias file - imas_codex/units/__init__.py and imas_standard_names, outside this node's write paths.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-imas-maps/eddb-unit-normalisation.html",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: fit - the fragment's intro sentence is garbled: 'The alias file now resolves these without claiming a name instead use @alias: a case variant keeps the original offset unit'. The clause 'without claiming a name that pint already owns, and instead uses @alias' has lost its verb and conjunction and closes with a stray colon. The meaning is recoverable from the next sentence, but the paragraph reads as a copy edit left mid-flight. Fix: 'The alias file resolves these without claiming a name pint already owns; a case variant instead uses @alias, which keeps the original offset unit'.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "imas_codex/units/data_dictionary_unit_aliases.txt",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: evidence - the reviewed manifest leaves baseline_suite and after_suite null, so the added-failure count cannot be read from the record alone and is only recoverable by re-running the arms. This is not a defect in the node's work (the head gate is genuinely green and I reproduced it), but it costs every downstream consumer a base-arm re-run. Fix: fill the manifest's own baseline_suite/after_suite JSON so the added-failure count is readable, as sibling implement nodes do.",
+      "verdict": "PLAUSIBLE"
+    }
+  ],
+  "follow_ons": "resolve the cross-registry canonical-spelling divergence for Celsius (canonical_unit must load the alias file), which the reviewed run correctly scoped out; repair the garbled intro sentence in the evidence fragment; fill the reviewed manifest's baseline_suite/after_suite JSON so the added-failure count is readable without a re-run.",
+  "item_aggregate": 4,
+  "item_verdicts": {
+    "diff": "three commits against reviewed base 52f616dd: 897fb3473 (alias file + tests/units/test_unit_alias_spellings.py), 9d94a8f83 (repair - removes the self-referential definitions), 09ff452ee (evidence fragment + dd unit-string snapshots + collect script). Net: 6 files, +1238 insertions, 0 deletions.",
+    "done_when": "the node done-when asks that normalize_unit_symbol parse each added spelling, that analyze_units find KA compatible with A at factor 1000, that the gate pass, and that a live census show each of the 76 distinct unit strings normalised or unresolved with count and reason. All four are met: I reproduced the census exactly (76 distinct / 64 normalised / 12 unresolved), the probe shows zero mismatches, analyze_units(KA,A)=1000.0, and the head gate is green (526 passed).",
+    "goal": "the node goal - parse the EDDB free-text spellings through the one alias file the registry loads and list anything that names no physical unit - is delivered and tested. Nothing is guessed: the empty string, Unit, MPaG, the neutron-yield family, ph/srsm2 and the hyphenated exponents each normalise to None with a stated reason.",
+    "manifest": "the manifest reads status complete and gives the three commits, all changed paths, the negative control and the census; it openly discloses the cross-registry canonical-spelling divergence as a follow-on. Its baseline_suite/after_suite fields are null, so the added-failure count is only recoverable by re-running the arms.",
+    "write_paths": "declared and granted for the implement node are imas_codex/units/data_dictionary_unit_aliases.txt and tests/units/, plus the evidence fragment the node declared in its own manifest. The net diff touches the alias file, four files inside tests/units/, and the evidence fragment; no source outside the alias file, no plan or index edit, no graph write."
+  },
+  "justifications": {
+    "durability": "durability 18: the new module is 30 tests over a fresh-registry fixture plus a checked-in 487-string DD regression snapshot that guards every previously-resolving symbol against a new definition colliding. The negative control is load-bearing and reproduced. Gaps: the unresolved-spelling test asserts None but not the reason string the census carries, so the reasons are run-artifact-only; and the degreeC-vs-DegC divergence is deliberately left untested, so that inconsistency can drift.",
+    "evidence": "evidence 19: I reproduced every headline quantity independently. The live-graph census matches census.json to the digit (76/6298/3954/2344 signals, 64/12 strings). A fresh-process probe returns zero mismatches across 16 added and 11 unresolved spellings, KA/A factor 1000, uST dimensionless 1e-6, and 293.15 K for 20 degC/DegC/oC. The negative control reproduces exactly (3 failed, EXIT=1, exactly the ids that pass at head). Both suite arms complete to their summary line with 0 failures. Residual: the reviewed manifest carries no canonical baseline_suite/after_suite JSON, and the Celsius canonical-spelling divergence (degC vs DegC/oC) is a real inconsistency disclosed only as a follow-on.",
+    "fit": "fit 19: symbols and filenames are mechanism-named (test_unit_alias_spellings.py, collect_dd_unit_strings.py, dd_unit_strings.txt); no plan, sprint, ticket or version identifiers in code, filenames or comments; the alias-file comment explains the grammars the file must express. Minor defect: the evidence-fragment intro sentence is garbled ('without claiming a name instead use @alias').",
+    "goal_fidelity": "goal_fidelity 19: the plan's mechanism is implemented verbatim - spelled forms parsed through the single alias file, a spelling that names no unit listed as unresolved with its count and reason and never guessed, gauge pressure (MPaG) and the neutron-yield family explicitly left unresolved. Delivery is confirmed live and the gate passes. The plan text itself is silent on the cross-registry canonical-spelling interaction the run uncovered.",
+    "reuse": "reuse 19: the repair stays in the one file the registry already loads and reuses pint's own offset unit via @alias rather than cloning degC into a second definition, which is the defect the first attempt had. Case variants reuse the canonical unit object; glued forms collapse onto the canonical symbol (KA->kA, Pam3->m^3.Pa). The census script reuses GraphClient.query with bounded DISTINCT reads, and uST reuses the dimensionless base rather than inventing a dimension.",
+    "scope_discipline": "scope_discipline 20: the net change sits entirely inside the granted write paths (the alias file, tests/units/, and the declared evidence fragment); no out-of-scope source file, no plan or index edit, no unrelated cleanup; the graph reads the census script performs are bounded DISTINCT queries, not scans."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: goal_fidelity 19: the plan's mechanism is implemented verbatim - spelled forms parsed through the single alias file, a spelling that names no unit listed as unresolved with its count and reason and never guessed, gauge pressure (MPaG) and the neutron-yield family explicitly left unresolved. Delivery is confirmed live and the gate passes. The plan text itself is silent on the cross-registry canonical-spelling interaction the run uncovered.\nSCORE evidence: 19\nJUSTIFICATION evidence: evidence 19: I reproduced every headline quantity independently. The live-graph census matches census.json to the digit (76/6298/3954/2344 signals, 64/12 strings). A fresh-process probe returns zero mismatches across 16 added and 11 unresolved spellings, KA/A factor 1000, uST dimensionless 1e-6, and 293.15 K for 20 degC/DegC/oC. The negative control reproduces exactly. Both suite arms complete to their summary line with 0 failures. Residual: no canonical baseline_suite/after_suite JSON in the reviewed manifest, and the degC-vs-DegC canonical-spelling divergence is disclosed only as a follow-on.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: scope_discipline 20: the net change sits entirely inside the granted write paths (the alias file, tests/units/, and the declared evidence fragment); no out-of-scope source file, no plan or index edit, no unrelated cleanup; the census graph reads are bounded DISTINCT queries.\nSCORE durability: 18\nJUSTIFICATION durability: durability 18: the new module is 30 tests over a fresh-registry fixture plus a checked-in 487-string DD regression snapshot. The negative control is load-bearing and reproduced. Gaps: the unresolved test asserts None but not the reason string the census carries, and the degreeC/DegC divergence is deliberately left untested.\nSCORE fit: 19\nJUSTIFICATION fit: fit 19: symbols and filenames are mechanism-named; no plan, sprint, ticket or version identifiers in code, filenames or comments; the alias-file comment explains the grammars the file must express. Minor: the evidence-fragment intro sentence is garbled ('without claiming a name instead use @alias').\nSCORE reuse: 19\nJUSTIFICATION reuse: reuse 19: the repair stays in the one file the registry already loads and reuses pint's own offset unit via @alias rather than cloning degC, which is the defect the first attempt had. Case variants reuse the canonical unit object; glued forms collapse onto the canonical symbol.\n",
+  "review_run_id": "r-20261007T072219999606-review-of-eddb-unit-normalisation",
+  "review_scope": "full node: commits 52f616dd261ce21072921abca93d8f2291fe3c19..09ff452ee1540a3ed79d7055f85ce3b41a9d703c (897fb3473, 9d94a8f83, 09ff452ee); files imas_codex/units/data_dictionary_unit_aliases.txt, tests/units/test_unit_alias_spellings.py, tests/units/collect_dd_unit_strings.py, tests/units/dd_unit_strings.txt, tests/units/dd_unit_strings_base.txt, docs/evidence/fragments/jt60sa-imas-maps/eddb-unit-normalisation.html",
+  "reviewed_base_sha": "52f616dd261ce21072921abca93d8f2291fe3c19",
+  "reviewed_head_sha": "09ff452ee1540a3ed79d7055f85ce3b41a9d703c",
+  "reviewed_run_id": "r-20261007T061546254649-eddb-unit-normalisation",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T07:47:00+00:00",
+  "total": 114
+}
