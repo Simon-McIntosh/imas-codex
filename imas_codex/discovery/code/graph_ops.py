@@ -469,6 +469,23 @@ def release_file_enrich_claims(file_ids: list[str]) -> None:
 # ---------------------------------------------------------------------------
 
 
+def ingested_rejudge_selection() -> str:
+    """Cypher predicate selecting the files a re-judge pass should judge.
+
+    A re-judged file keeps its status and stage, so the only key that drains the
+    claim is the recorded answer itself.  The reset leaves
+    ``score_data_access_confidence`` *absent*; the writer sets it to the answer's
+    confidence, which may be a genuine 0.0.  Absence -- not a coalesce to 0.0,
+    which a real 0.0 answer also satisfies -- therefore marks a file as
+    unanswered.  Keying on a coalesced zero would re-open a 0.0-confidence file
+    on every pass, so the re-judge would never drain.
+    """
+    return (
+        f"sf.status = 'ingested' AND sf.relevance_stage = {RELEVANCE_STAGE_CONTENT!r} "
+        "AND sf.score_data_access_confidence IS NULL"
+    )
+
+
 @retry_on_deadlock()
 def claim_files_for_scoring(
     facility: str,
@@ -510,11 +527,7 @@ def claim_files_for_scoring(
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     selection = (
-        # A re-judged file keeps its status and stage, so the only key that
-        # drains the claim is the recorded answer itself: a file whose facet
-        # confidence is still absent or zero has no content-arm judgment yet.
-        f"sf.status = 'ingested' AND sf.relevance_stage = {RELEVANCE_STAGE_CONTENT!r} "
-        "AND coalesce(sf.score_data_access_confidence, 0.0) = 0.0"
+        ingested_rejudge_selection()
         if ingested_rejudge
         else "sf.status = 'triaged' AND sf.is_enriched = true"
     )

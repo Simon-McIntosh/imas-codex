@@ -21,6 +21,7 @@ database.
 from __future__ import annotations
 
 import asyncio
+import importlib
 import json
 
 import pytest
@@ -43,6 +44,7 @@ def _answers(
     reconstruction_db: float = 0.0,
     role: str = "diagnostic_data_access",
     facets: tuple[float, float, float, float] = (4.0, 3.0, 2.0, 1.0),
+    data_access_confidence: float = 0.9,
 ) -> dict:
     """Answer set with the scope nouls set positionally.
 
@@ -84,7 +86,7 @@ def _answers(
                 "type": "score",
                 "score": data_score,
                 "probabilities": {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 1.0},
-                "confidence": 0.9,
+                "confidence": data_access_confidence,
             },
             "signal_processing_depth": {
                 "type": "score",
@@ -383,8 +385,11 @@ def test_rejudge_claim_selects_ingested_content_stage_files(monkeypatch):
 
     assert "sf.status = 'ingested'" in query
     assert "sf.relevance_stage = 'content'" in query
-    # The drain key: a file with a recorded facet answer is not re-claimed.
-    assert "coalesce(sf.score_data_access_confidence, 0.0) = 0.0" in query
+    # The drain key is the *absence* of a facet answer: the reset leaves the
+    # field null and the writer sets it to the answer's confidence, so a
+    # coalesce to 0.0 would re-claim a file whose real answer was 0.0 forever.
+    assert "sf.score_data_access_confidence IS NULL" in query
+    assert "coalesce(sf.score_data_access_confidence" not in query
     assert "sf.status = 'triaged'" not in query
 
 
@@ -418,3 +423,326 @@ def test_chunk_content_head_orders_by_start_line_and_cuts_to_the_fetched_length(
     # The cut matches the fetched path's content-head length.
     long = [{"start_line": 1, "text": "x" * (CONTENT_HEAD_CHARS + 500)}]
     assert len(chunk_content_head(long)) == CONTENT_HEAD_CHARS
+
+
+# ---------------------------------------------------------------------------
+# A repeated pass resumes: the reset is once per request, not once per pass
+# ---------------------------------------------------------------------------
+
+
+class _MemoryRejudge:
+    """The graph state a re-judge pass reads and writes, held in memory.
+
+    Models the two ends the pass depends on: the reset clears each ingested
+    content-stage file's *recorded answer*, and the judgment write records one.
+    The claim is stubbed against this same state, so a second pass sees exactly
+    the files the first left unanswered.  ``confidence`` stands for the facet
+    confidence the claim drains on and is ``None`` when no answer is recorded --
+    the state the reset leaves and the state a written 0.0 answer must be told
+    apart from, since a genuine 0.0 is a recorded answer.
+    """
+
+    def __init__(self, files: list[tuple[str, list[dict]]]):
+        self.files = {
+            path: {
+                "id": path,
+                "path": path,
+                "confidence": None,
+                "claimed": False,
+                "chunks": chunks,
+            }
+            for path, chunks in files
+        }
+        self.queries: list[str] = []
+        self.reset_calls = 0
+        self.writes: list[dict] = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def query(self, cypher, **kwargs):
+        text = " ".join(cypher.split())
+        self.queries.append(text)
+        if "n.status = $target_status" in text and "reset_count" in text:
+            # reset_to_status: clear the recorded answer wherever one is set,
+            # leaving the field *absent* (``None``), not 0.0.
+            self.reset_calls += 1
+            cleared = 0
+            for f in self.files.values():
+                if f["confidence"] is not None:
+                    f["confidence"] = None
+                    cleared += 1
+                f["claimed"] = False
+            return [{"reset_count": cleared}]
+        if "HAS_CHUNK" in text:
+            rows: list[dict] = []
+            for fid in kwargs["ids"]:
+                for chunk in self.files.get(fid, {}).get("chunks", []):
+                    rows.append(
+                        {
+                            "file_id": fid,
+                            "start_line": chunk["start_line"],
+                            "text": chunk["text"],
+                        }
+                    )
+            return rows
+        if "UNWIND $items AS item" in text:
+            self.writes.append(kwargs)
+            for item in kwargs["items"]:
+                f = self.files.get(item["id"])
+                if f is not None:
+                    f["confidence"] = item.get("score_data_access_confidence")
+                    f["claimed"] = False
+            return []
+        return []
+
+    def claim(self, facility, limit=100, path_prefixes=None, *, ingested_rejudge=False):
+        """The claim's own selection, mirroring the production drain key.
+
+        Reads ``ingested_rejudge_selection`` and applies the same predicate the
+        production claim does, so this harness fails wherever the claim it
+        stands in for fails: absence of the facet confidence when the clause
+        tests ``IS NULL``, a coalesced zero when it does not.  A file whose
+        answer recorded a genuine 0.0 is therefore answered under the ``IS NULL``
+        form and unanswered under the ``coalesce`` form.
+        """
+        if not ingested_rejudge:
+            return []
+        from imas_codex.discovery.code.graph_ops import ingested_rejudge_selection
+
+        clause = ingested_rejudge_selection()
+        drains_on_absence = "IS NULL" in clause
+
+        def unanswered(f: dict) -> bool:
+            return (
+                f["confidence"] is None
+                if drains_on_absence
+                else (f["confidence"] or 0.0) == 0.0
+            )
+
+        out: list[dict] = []
+        for f in self.files.values():
+            if unanswered(f) and not f["claimed"] and len(out) < limit:
+                f["claimed"] = True
+                out.append(_file(f["id"]))
+        return out
+
+    def release(self, file_ids):
+        for fid in file_ids:
+            f = self.files.get(fid)
+            if f is not None:
+                f["claimed"] = False
+
+
+def _drive_passes(
+    monkeypatch,
+    memory: _MemoryRejudge,
+    answers_by_path: dict,
+    *,
+    failing: tuple[str, ...] = (),
+    batch_size: int = 10,
+    passes: int = 1,
+):
+    """Run the re-judge ``passes`` times over the memory graph.
+
+    Returns the per-pass result dicts and, for each pass, the paths whose
+    decision was requested, so a test can assert what a pass did and did not
+    judge.  A path in ``failing`` raises at the HTTP seam the *first* time its
+    decision is requested, so the failure is transient: its answer is left
+    unwritten on the first pass and the next pass can take it again.
+    """
+    from imas_codex.discovery.code import graph_ops
+
+    requests: list[str] = []
+    seen: dict[str, int] = {}
+
+    async def fake_post(headers, body, timeout):
+        path = body["state"]["file"]["path"]
+        requests.append(path)
+        count = seen.get(path, 0)
+        seen[path] = count + 1
+        if path in failing and count == 0:
+            raise RuntimeError("simulated decision failure")
+        return _FakeResponse(_payload(answers_by_path[path]))
+
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+    )
+    monkeypatch.setattr("imas_codex.settings.get_model", lambda section: "fake-model")
+    monkeypatch.setattr("imas_codex.settings.get_code_ingest_threshold", lambda: 0.6)
+    monkeypatch.setattr(
+        "imas_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
+    )
+    monkeypatch.setattr(graph_ops, "claim_files_for_scoring", memory.claim)
+    monkeypatch.setattr(graph_ops, "release_file_score_claims", memory.release)
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda: memory)
+    monkeypatch.setattr("imas_codex.discovery.code.scorer.GraphClient", lambda: memory)
+    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: memory)
+    monkeypatch.setattr(llm, "_apost_decisions", fake_post)
+
+    from imas_codex.discovery.code.workers import rejudge_ingested_files
+
+    results: list[dict] = []
+    per_pass: list[list[str]] = []
+    for _ in range(passes):
+        before = len(requests)
+        results.append(
+            asyncio.run(rejudge_ingested_files(FACILITY, batch_size=batch_size))
+        )
+        per_pass.append(requests[before:])
+    return results, per_pass
+
+
+def test_second_pass_judges_only_the_file_the_first_left_unanswered(monkeypatch):
+    """Three ingested files, one decision fails on pass one.
+
+    Pass one judges all three and records the two answers it got; the failed
+    file keeps no answer.  Pass two takes only that file, because the claim
+    drains on the recorded answer and no reset intervenes between the passes.
+    """
+    paths = [f"/analysis/src/f{i}.f" for i in range(3)]
+    memory = _MemoryRejudge([(p, [{"start_line": 1, "text": "x\n"}]) for p in paths])
+    answers = {p: _answers(0.75, 0.4, 0.2, 0.1) for p in paths}
+    failed = paths[1]
+
+    results, per_pass = _drive_passes(
+        monkeypatch, memory, answers, failing=(failed,), passes=2
+    )
+
+    assert set(per_pass[0]) == set(paths)
+    assert results[0]["rejudged"] == 2
+    # The second pass resumes: only the file with no recorded answer is taken.
+    assert per_pass[1] == [failed]
+    assert results[1]["rejudged"] == 1
+    # Neither pass resets: the reset is a separate, once-per-request step.
+    assert memory.reset_calls == 0
+
+
+def test_no_file_is_judged_twice_in_one_pass_and_count_matches(monkeypatch):
+    """A batch that mixes an attempted file with a fresh one takes only the fresh.
+
+    With a batch size of two over three files, pass one's first batch is
+    ``[A, B]``; A's decision fails and leaves no answer, so the next claim
+    returns ``[A, C]`` -- an already-attempted file beside a fresh one.  Only C
+    is judged, so each file is asked once and ``rejudged`` counts the two
+    distinct files whose answers were written, not the repeat.
+    """
+    paths = [f"/analysis/src/g{i}.f" for i in range(3)]
+    memory = _MemoryRejudge([(p, [{"start_line": 1, "text": "x\n"}]) for p in paths])
+    answers = {p: _answers(0.75, 0.4, 0.2, 0.1) for p in paths}
+    failed = paths[0]
+
+    results, per_pass = _drive_passes(
+        monkeypatch, memory, answers, failing=(failed,), batch_size=2
+    )
+
+    judged = per_pass[0]
+    assert len(judged) == len(set(judged)), f"a file was judged twice: {judged}"
+    assert set(judged) == set(paths)
+    assert results[0]["rejudged"] == 2
+
+
+def test_zero_confidence_answer_is_not_reclaimed_on_the_next_pass(monkeypatch):
+    """A file whose answer recorded a genuine 0.0 confidence is answered.
+
+    The reset leaves the facet-confidence field *absent*, so absence -- not a
+    coalesced zero, which a real 0.0 answer also satisfies -- marks a file as
+    unanswered.  A file whose decision succeeded with data-access confidence
+    0.0 is therefore drained: the next pass does not take it.  Under the
+    ``coalesce(..., 0.0) = 0.0`` form the file is re-claimed on every pass.
+    """
+    paths = ["/analysis/src/zero.f", "/analysis/src/some.f"]
+    memory = _MemoryRejudge([(p, [{"start_line": 1, "text": "x\n"}]) for p in paths])
+    answers = {
+        paths[0]: _answers(0.75, 0.4, 0.2, 0.1, data_access_confidence=0.0),
+        paths[1]: _answers(0.75, 0.4, 0.2, 0.1),
+    }
+
+    results, per_pass = _drive_passes(monkeypatch, memory, answers, passes=2)
+
+    assert set(per_pass[0]) == set(paths)
+    assert results[0]["rejudged"] == 2
+    # The 0.0-confidence file recorded an answer, so the second pass takes none.
+    assert per_pass[1] == []
+    assert results[1]["rejudged"] == 0
+
+
+# ---------------------------------------------------------------------------
+# The CLI reset is an explicit, once-per-request step, not a per-pass one
+# ---------------------------------------------------------------------------
+
+
+def _invoke_rejudge_cli(monkeypatch, args: list[str]):
+    """Drive ``discover code``'s re-judge branch with its seams stubbed.
+
+    The reset owner and the re-judge worker are replaced by recorders, so a test
+    reads exactly whether the reset ran and when, without a live graph or LLM.
+    """
+    from click.testing import CliRunner
+
+    code_mod = importlib.import_module("imas_codex.cli.discover.code")
+
+    reset_calls: list = []
+    rejudge_calls: list = []
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility",
+        lambda facility: {"ssh_host": "host"},
+    )
+    monkeypatch.setattr("imas_codex.settings.get_discovery_threshold", lambda: 0.5)
+    monkeypatch.setattr(
+        "imas_codex.cli.discover.common.setup_logging", lambda *a, **k: None
+    )
+    monkeypatch.setattr(
+        "imas_codex.cli.discover.common.make_log_print",
+        lambda *a, **k: lambda msg: None,
+    )
+    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.reset.reset_to_status",
+        lambda *a, **k: (reset_calls.append((a, k)), 0)[1],
+    )
+
+    async def fake_rejudge(facility, **kwargs):
+        rejudge_calls.append(facility)
+        return {"rejudged": 0, "below_gate": [], "cost": 0.0, "batches": 0}
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.code.workers.rejudge_ingested_files", fake_rejudge
+    )
+    monkeypatch.setattr(
+        "imas_codex.cli.shutdown.safe_asyncio_run", lambda coro: asyncio.run(coro)
+    )
+
+    result = CliRunner().invoke(code_mod.code, args)
+    return result, reset_calls, rejudge_calls
+
+
+def test_rejudge_ingested_alone_does_not_reset(monkeypatch):
+    """A plain ``--rejudge-ingested`` resumes: it never clears recorded answers."""
+    result, reset_calls, rejudge_calls = _invoke_rejudge_cli(
+        monkeypatch, ["jt-60sa", "--rejudge-ingested"]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert reset_calls == [], "a plain re-judge must not reset"
+    assert rejudge_calls == ["jt-60sa"]
+
+
+def test_rejudge_ingested_with_reset_to_ingested_resets_once(monkeypatch):
+    """The fresh-request reset rides the explicit ``--reset-to ingested`` step."""
+    from imas_codex.discovery.base.reset import CODE_RESET_SPECS
+
+    result, reset_calls, rejudge_calls = _invoke_rejudge_cli(
+        monkeypatch, ["jt-60sa", "--reset-to", "ingested", "--rejudge-ingested"]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert len(reset_calls) == 1, "the reset runs exactly once per request"
+    (spec, *_), _ = reset_calls[0]
+    assert spec is CODE_RESET_SPECS["ingested"]
+    assert rejudge_calls == ["jt-60sa"]
