@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: the after arm is reports/imas-codex/docs-score-ties/gate.log (1 failed, 290 passed, 15 skipped, 5 deselected) and the baseline arm is reports/imas-codex/docs-score-ties/base_arm.log (search_tools.py restored to base_sha 4b65489eb4b9c7f8c7273e1e1a5abecd9a145bc0; 1 failed, EXIT=1). Both name the same single failure tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index, so reckon.crew.review.added_failures_from_gate_logs(base_arm.log, gate.log) returns (0, []). The reviewed manifest carries no baseline_suite/after_suite JSON, so the arms were taken from the two logs its test_logs field names; I also re-ran the exact gate command at the reviewed head ca20e4cb (reviewer_gate.log) and got the same 1 failed, 290 passed, 15 skipped, EXIT=1.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/docs-score-ties uv run --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/docs-score-ties --no-sync pytest -p no:cacheprovider tests/llm tests/test_imas_search_scoring.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/docs-score-ties/gate.log",
+    "revision": "ca20e4cb4fe0d7232de60d0fe47037a113f04f18"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/docs-score-ties uv run --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/docs-score-ties --no-sync pytest -p no:cacheprovider tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index (imas_codex/llm/search_tools.py restored to 4b65489eb4b9c7f8c7273e1e1a5abecd9a145bc0)",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/docs-score-ties/base_arm.log",
+    "revision": "4b65489eb4b9c7f8c7273e1e1a5abecd9a145bc0"
+  },
+  "blockers": "none",
+  "completed_at": "2026-10-07T06:28:41.233Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-07T06:11:14Z",
+  "evidence_inputs": "The three commits gained since the f7eea5c1 review are 710774fc2 (adds a reserve test, rewrites the fragment to support the deployed reserve), 2b87114cd (removes the reserve helper, its constant, its test and the reserve call, leaving the (score, raw cosine) tie-break alone; the test file is net-zero against f7eea5c1) and ca20e4cb (docs only: restates the decision and adds a per-question recall@30 table). Net code change over the three: imas_codex/llm/search_tools.py -38 lines (no _reserve_vector_leaders, no _DOC_VECTOR_RESERVE, chunk_ids = ranked[:k]) plus the evidence fragment. The reviewed manifest records the coordinator as the authority for reversing the deployed approach ('the coordinator reversed the deployed approach after the corrected table showed the reserve fails its own decision rule'), so no worker-discipline finding attaches to the reversal; the plan \u00a79 text and the node done_when still prescribe the reserve and should be reconciled. Decision rule the coordinator applied: keep the reserve only if recall@30 does not fall on any docs question with known answers; measured recall@30 falls on Q13 (1.00->0.17), Q15 (1.00->0.42) and Q17 (1.00->0.40), so the tie-break alone is deployed. The deployed tie-break changes no docs mean (nDCG@10 0.4076, nDCG@30 0.5298, recall@30 0.6667, Q16 0.9675 all unchanged) and leaves the displayed top 10 bit-identical on every docs question; its measured effect is determinism, which the goal asks for. Added failures 0 (both arms fail only the pre-existing test_graceful_on_missing_index).",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html",
+      "line": "117",
+      "severity": "follow-on",
+      "text": "follow-on: evidence: the gate paragraph says the exact command and header are in reports/imas-codex/docs-score-ties/gate.log, but gate.log opens at 'test session starts' and carries no header, revision, tree, module path or command line. A reader cannot tell from the log which revision its 290 passed / 1 failed describes -- and the log predates the two commits that landed after it, so its own contents cannot settle that. The result is correct (I re-ran the exact command at ca20e4cb to confirm: 1 failed, 290 passed, 15 skipped, 5 deselected, EXIT=1, in ~27 s), but the log the fragment points at is not self-describing. Fix: emit a header naming revision, module.__file__ and the literal command, as run_eval.py does for the measurement."
+    },
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "704",
+      "severity": "follow-on",
+      "text": "follow-on: durability: test_cosine_breaks_saturated_score_ties uses n=8 chunks at k=30, so all eight clamp and all eight fit the returned window. It asserts the displayed order follows cosine, but because the tie block never reaches the k=30 cut it cannot show the tie-break decides WHICH chunks enter the window -- the behaviour the change exists to make deterministic (a saturated tie block larger than k). A case with n>=k tied chunks (for example 40 tied at k=30) would cover window membership; the current test covers order within a window that swallows the whole tie."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html",
+      "line": "99",
+      "severity": "follow-on",
+      "text": "follow-on: evidence: the baseline ('current') arm is computed as sorted(set(chunk_ids), key=score, reverse=True) with Python's set order deciding every score tie, and Python randomizes string hashing per process (PYTHONHASHSEED) unless it is pinned. On docs questions the tie block is large, so the baseline's top-30 membership is drawn from an unpinned order: the 'current' figures (0.4076 / 0.5298 / 0.6667) and the reproduction overlap (q16 27/30) are reported as stable but are not shown to reproduce across runs. The deployed cosine arm is deterministic, so this bears on the comparison arm and the fidelity assertion, not on the shipped order. Fix: pin PYTHONHASHSEED in run_eval.py, or sort the baseline tie block by a fixed key (for example candidate id), so the arm is reproducible."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html",
+      "line": "99",
+      "severity": "follow-on",
+      "text": "follow-on: fit: the measurement paragraph explains the q16 reproduction shortfall as 'the one passing document that occupies a slot in the prototype's 30', but the overlap is 27/30 -- three of the tool's current top-30 chunks are absent from the prototype's 30 stored chunks (and proto_chunks is 30, so it is not a denominator artifact). State the three-way difference or drop the enumerating claim; the fidelity improvement itself (27-30/30 against the previously reported 11-25/30) is real and verified in variant_metrics.json reproduction."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: goal: the fragment records the deployed decision (cosine tie-break alone, reserve measured and rejected), but plan \u00a79 and the node's own done_when still say the node 'deploys the variant that keeps Q16 and lifts the most answers into the top 30'. The deployed variant lifts neither answer (Q14/Q18 stay absent from the window; they enter only under the reserve, at ranks 15 and 13). The manifest attributes the reversal to the coordinator, so this is not a worker defect -- but the plan text now disagrees with the landed code and the Q14/Q18 window problem is deferred to the rerank node, which \u00a79 sizes over a pool larger than 30. The plan section should be updated to record the reversal and the deferral."
+    }
+  ],
+  "follow_ons": "gate.log should carry a revision/command header; the tie-break test should include a tie block larger than k so window membership is covered; the eval should pin PYTHONHASHSEED (or sort the baseline tie block) so the baseline arm and the reproduction overlap are reproducible; the fragment should correct the q16 shortfall explanation; plan \u00a79 should record that the reserve was reverted and the Q14/Q18 window problem deferred to the rerank node; tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index stays red at base and is outside this node's write scope.",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "three commits against the reviewed head f7eea5c1: 710774fc2 (test + fragment), 2b87114cd (search_tools.py -38 lines, test file -67 lines), ca20e4cb (fragment only). Net: imas_codex/llm/search_tools.py and docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html change; tests/llm/test_search_tools.py is net-zero. Head carries the tie-break (_search_docs sorts by (score, vector_cosine.get(cid, -1.0))) and no reserve (_reserve_vector_leaders, _DOC_VECTOR_RESERVE absent at ca20e4cb, present at f7eea5c1).",
+    "done_when": "the node done_when asks to measure four variants and deploy 'the variant that keeps Q16 at or above its current value and lifts the most answers into the top 30', with a test that candidates tied at the clamp come back cosine-ordered. The clamp tie test exists and is load-bearing; but the deployed variant lifts no answers (Q14/Q18 stay outside the window; only the reserve lifts them, at ranks 15 and 13), so the 'lifts the most answers' half is not met by the deployed change. The reversal is a recorded coordinator decision justified by a measured recall@30 fall on Q13/Q15/Q17, and the window problem is deferred to the rerank; the plan text is not updated.",
+    "goal": "the node goal -- stop _search_docs ordering saturated score ties arbitrarily -- is met: the returned order is deterministic on (score, raw cosine) instead of set-iteration order, and the deployable variant that lifts the answers was measured and rejected on a recall@30 cost. The plan's mechanism (the reserve) is abandoned, so plan and code disagree.",
+    "manifest": "the manifest reads status complete and names all five commits; it records the measurement numbers, the coordinator reversal, the negative control and the pre-existing-failure attribution. Its canonical baseline_suite/after_suite JSON fields are still absent, so a read-time annotation cannot recover the added-failure count from the manifest alone; the two gate logs it names are sufficient and were used here.",
+    "write_paths": "declared paths are imas_codex/llm/search_tools.py, tests/llm/test_search_tools.py, the node report dir, the fragment and the figures dir; the net diff touches the two source/evidence paths inside them; no _search_code change, no graph write and no discover run."
+  },
+  "justifications": {
+    "durability": "durability 14: the deployed tie-break has a real test and a fresh, load-bearing negative control (dropping the cosine key makes test_cosine_breaks_saturated_score_ties fail, negative_control.log ends EXIT=1 at the head's line 761), and the removed reserve needs no test; but the test uses n=8 chunks at k=30, so every chunk fits the window and it verifies displayed order only -- it cannot show the tie-break decides window membership when a tie block straddles the k=30 cut, which is the case the defect was about; the run also net-added no test.",
+    "evidence": "evidence 15: both prior blocking findings are addressed -- the ideal set is now fixed from the whole label pool so a variant cannot gain by shrinking it (nDCG@10 is honestly reported unchanged at 0.4076 rather than the withdrawn 0.2763->0.3672), every mean is over the six docs questions only, new_labels.json now exists, the eval calls the tool's own stage functions, and I independently reproduced the gate at the reviewed head (1 failed, 290 passed, 15 skipped, EXIT=1) and computed added_failure_count 0. Residual: gate.log carries no revision/command header though the fragment claims it does, the q16 27/30 shortfall is explained as one slot when three differ, and the baseline arm's tie order is set-iteration order (PYTHONHASHSEED-dependent) which the eval does not pin.",
+    "fit": "fit 18: the fragment follows its sibling's structure and mechanism-named symbols, carries no plan or ticket identifiers, and now cites new_labels.json which exists; the only defect is the inaccurate one-slot explanation of the q16 reproduction shortfall.",
+    "goal_fidelity": "goal_fidelity 16: the literal goal -- stop _search_docs ordering saturated ties arbitrarily -- is delivered and tested (the returned order is now (score, raw cosine) instead of set order), but the plan's prescribed mechanism is abandoned: \u00a79 and the node's own done_when say the node deploys 'the variant that keeps Q16 and lifts the most answers into the top 30', and the deployed tie-break alone lifts neither answer, while the reserve that does lift them is reverted; the reversal is a recorded coordinator decision, not a worker's unilateral call, and the plan text is left disagreeing with the code.",
+    "reuse": "reuse 17: docs_ties_eval.py now calls the tool's own stage functions and merges with the tool's ranking rule instead of reimplementing the merge, and the reserve helper is held in the eval as a comparison arm rather than shipped; the baseline arm necessarily re-encodes the pre-change sort.",
+    "scope_discipline": "scope_discipline 20: the net change over the three gained commits is imas_codex/llm/search_tools.py and the evidence fragment only; the test file is net-zero (a test added in one commit and removed with the reverted reserve in the next); no _search_code edit, no graph write, no discover run, every landed path inside the declared set."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: goal_fidelity 16: the literal goal -- stop _search_docs ordering saturated ties arbitrarily -- is delivered and tested (the returned order is now (score, raw cosine) instead of set order), but the plan's prescribed mechanism is abandoned: \u00a79 and the node's own done_when say the node deploys 'the variant that keeps Q16 and lifts the most answers into the top 30', and the deployed tie-break alone lifts neither answer, while the reserve that does lift them is reverted; the reversal is a recorded coordinator decision, not a worker's unilateral call, and the plan text is left disagreeing with the code.\nSCORE evidence: 15\nJUSTIFICATION evidence: evidence 15: both prior blocking findings are addressed -- the ideal set is now fixed from the whole label pool so a variant cannot gain by shrinking it (nDCG@10 is honestly reported unchanged at 0.4076 rather than the withdrawn 0.2763->0.3672), every mean is over the six docs questions only, new_labels.json now exists, the eval calls the tool's own stage functions, and I independently reproduced the gate at the reviewed head (1 failed, 290 passed, 15 skipped, EXIT=1) and computed added_failure_count 0. Residual: gate.log carries no revision/command header though the fragment claims it does, the q16 27/30 shortfall is explained as one slot when three differ, and the baseline arm's tie order is set-iteration order (PYTHONHASHSEED-dependent) which the eval does not pin.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: scope_discipline 20: the net change over the three gained commits is imas_codex/llm/search_tools.py and the evidence fragment only; the test file is net-zero (a test added in one commit and removed with the reverted reserve in the next); no _search_code edit, no graph write, no discover run, every landed path inside the declared set.\nSCORE durability: 14\nJUSTIFICATION durability: durability 14: the deployed tie-break has a real test and a fresh, load-bearing negative control (dropping the cosine key makes test_cosine_breaks_saturated_score_ties fail, negative_control.log ends EXIT=1 at the head's line 761), and the removed reserve needs no test; but the test uses n=8 chunks at k=30, so every chunk fits the window and it verifies displayed order only -- it cannot show the tie-break decides window membership when a tie block straddles the k=30 cut, which is the case the defect was about; the run also net-added no test.\nSCORE fit: 18\nJUSTIFICATION fit: fit 18: the fragment follows its sibling's structure and mechanism-named symbols, carries no plan or ticket identifiers, and now cites new_labels.json which exists; the only defect is the inaccurate one-slot explanation of the q16 reproduction shortfall.\nSCORE reuse: 17\nJUSTIFICATION reuse: reuse 17: docs_ties_eval.py now calls the tool's own stage functions and merges with the tool's ranking rule instead of reimplementing the merge, and the reserve helper is held in the eval as a comparison arm rather than shipped; the baseline arm necessarily re-encodes the pre-change sort.\n",
+  "review_run_id": "r-20261007T061104692277-review-of-docs-score-ties",
+  "review_scope": "incremental: only the commits gained since the previous review, f7eea5c18508ee1cb89a5a4e1b89b2f07f42c2f7..ca20e4cb4fe0d7232de60d0fe47037a113f04f18 (710774fc2, 2b87114cd, ca20e4cb); files docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html and imas_codex/llm/search_tools.py",
+  "reviewed_base_sha": "4b65489eb4b9c7f8c7273e1e1a5abecd9a145bc0",
+  "reviewed_head_sha": "ca20e4cb4fe0d7232de60d0fe47037a113f04f18",
+  "reviewed_run_id": "r-20261007T042509171825-docs-score-ties",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T06:31:00+00:00",
+  "total": 100
+}
