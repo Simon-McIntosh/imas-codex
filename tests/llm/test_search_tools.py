@@ -10,6 +10,7 @@ or the addition of new query stages (text search, hybrid merge, etc.).
 
 from __future__ import annotations
 
+import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -759,6 +760,72 @@ class TestSearchDocs:
         # Cosine order is c0 (0.90) .. c{n-1} (0.50); anything else means the
         # tie was broken arbitrarily.
         assert positions == sorted(positions)
+
+    def test_reserved_vector_slots_promote_leaders_below_the_top_ten(
+        self, mock_gc, mock_encoder
+    ):
+        """The window keeps its top ten and refills ranks 10..k-1 with leaders.
+
+        Keyword-only chunks enter the hybrid ranking at their raw BM25 score,
+        which is far above any cosine, so a page whose nearest embeddings are
+        relevant but poorly matched on keywords can drop out of the window
+        entirely. The reserved slots give those embeddings a rank below the
+        displayed top ten -- without displacing anything the user already saw.
+        """
+        k = 30
+        n_vec = 30
+        n_txt = 30
+        # Vector stage: v0 is the nearest embedding. Text stage: keyword-only
+        # chunks w0.. whose BM25 score dwarfs every cosine, so they take the
+        # whole window unless the vector leaders are reserved a place.
+        vector = [{"id": f"v{i}", "score": 0.95 - 0.01 * i} for i in range(n_vec)]
+        text_hits = [{"id": f"w{i}", "score": 12.0 - 0.1 * i} for i in range(n_txt)]
+        enrichment = [
+            {
+                "id": f"{p}{i}",
+                "text": f"{p} body {i}",
+                "section": f"s{p}{i}",
+                "page_title": "Docs",
+                "page_url": None,
+                "linked_signals": [],
+                "linked_data_nodes": [],
+                "imas_refs": [],
+            }
+            for p in ("v", "w")
+            for i in range(n_vec)
+        ]
+
+        def handler(cypher: str, **kwargs: Any) -> list[Any]:
+            if "wiki_chunk_embedding" in cypher:
+                return vector
+            if "wiki_chunk_text" in cypher:
+                return text_hits
+            if "WikiChunk {id: cid}" in cypher:
+                by_id = {e["id"]: e for e in enrichment}
+                return [by_id[c] for c in kwargs["chunk_ids"]]
+            return []
+
+        mock_gc.query = MagicMock(side_effect=handler)
+
+        result = _search_docs(
+            query="some query",
+            facility="jt-60sa",
+            k=k,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+
+        order = re.findall(r"\*\*Section: (s\w+)\*\*", result)
+        assert len(order) == k
+        assert len(set(order)) == k, f"duplicate chunk in window: {order}"
+        # The displayed top ten is unchanged: the keyword chunks keep it, and
+        # no vector leader is promoted into it.
+        assert order[:10] == [f"sw{i}" for i in range(10)]
+        # The twenty reserved ranks carry the nearest embeddings, highest
+        # cosine first, even though the keyword term pushed them past the cut.
+        assert order[10:30] == [f"sv{i}" for i in range(20)]
+        # v0 was outside the plain top 30, so the reserve is what places it.
+        assert "sv0" in order
 
     def test_cross_links_shown(self, mock_gc, mock_encoder):
         """Cross-links to signals and IMAS paths are shown."""
