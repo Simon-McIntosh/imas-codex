@@ -38,6 +38,7 @@ import logging
 import re
 import subprocess
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -2011,55 +2012,53 @@ def propagate_source_enrichment(
         return updated
 
 
-def extract_member_identifier(source_key: str, accessor: str) -> str:
-    """Extract the varying part of an accessor given the source pattern.
+def extract_member_identifier(accessor: str, member_accessors: Sequence[str]) -> str:
+    """Extract the varying part of an accessor within its signal source.
 
-    The source_key has NNN placeholders where numeric segments vary.
-    This function extracts those segments from a concrete accessor.
+    The identifier is built only from the numeric runs whose value differs
+    across the source's members. A run that is constant across every member
+    belongs to the group rather than to the member, so it is dropped. Several
+    varying runs join with ``/``.
 
     Examples:
-        source_key='CALIB_GAS_NNN:PROPERTIES:PARAM_NNN:LIM'
-        accessor='CALIB_GAS_010:PROPERTIES:PARAM_048:LIM'
-        → '010/048'
+        member_accessors=[
+            "eddbreadTime('E101173', 'CryoCP', 'm1TAF81', t1, t2)",
+            "eddbreadTime('E101173', 'CryoCP', 'm1TAF86', t1, t2)",
+        ]
+        accessor="eddbreadTime('E101173', 'CryoCP', 'm1TAF82', t1, t2)"
+        → '82'  (the shot 101173 is constant and is dropped)
 
-        source_key='MAGB_NNN:BPOL'
-        accessor='MAGB_042:BPOL'
-        → '042'
+        accessor='CALIB_GAS_010:PROPERTIES:PARAM_048:LIM' with both runs
+        varying across the members → '010/048'
     """
-    # Find all NNN positions in the source_key
-    parts = []
-    accessor_segments = _PATTERN_RE.findall(accessor)
-
-    # The source key uses NNN → replaced with 999 for regex matching.
-    # The accessor has actual numeric values. Extract them in order.
-    nnn_count = source_key.count("NNN")
-    if nnn_count == 0:
+    runs = _PATTERN_RE.findall(accessor)
+    if not runs:
         return accessor
 
-    # Walk through and collect the varying numeric segments
-    key_idx = 0
-    for seg in accessor_segments:
-        if key_idx < nnn_count:
-            parts.append(seg)
-            key_idx += 1
-
-    return "/".join(parts) if len(parts) > 1 else (parts[0] if parts else accessor)
+    peer_runs = [(_PATTERN_RE.findall(a)) for a in member_accessors]
+    varying = [
+        i
+        for i in range(len(runs))
+        if any(peer[i] != runs[i] for peer in peer_runs if len(peer) > i)
+    ]
+    if not varying:
+        return ""
+    parts = [runs[i] for i in varying]
+    return "/".join(parts) if len(parts) > 1 else parts[0]
 
 
 def individualize_members(
-    source_key: str,
     name_template: str,
     description_template: str,
     members: list[dict],
 ) -> list[dict]:
     """Apply name/description templates to each member signal.
 
-    Uses the source_key pattern (with NNN placeholders) to extract the
-    member-specific identifier from each accessor, then formats the
+    Extracts the member-specific identifier from each accessor from the
+    numeric runs that vary across the source's members, then formats the
     templates. Supports {member_id} and {node_description} placeholders.
 
     Args:
-        source_key: Pattern key with NNN placeholders.
         name_template: Name template with {member_id} placeholder.
         description_template: Description template with {member_id} and
             optional {node_description} placeholder.
@@ -2069,9 +2068,10 @@ def individualize_members(
     Returns:
         List of dicts with 'id', 'name', and 'description' keys.
     """
+    accessors = [m["accessor"] for m in members]
     results = []
     for member in members:
-        member_id = extract_member_identifier(source_key, member["accessor"])
+        member_id = extract_member_identifier(member["accessor"], accessors)
         node_desc = member.get("node_description", "")
         try:
             name = name_template.format(member_id=member_id, node_description=node_desc)
@@ -4625,7 +4625,6 @@ async def individualize_source_descriptions(
 
             # Apply templates deterministically
             individualized = individualize_members(
-                src["group_key"],
                 result.name_template,
                 result.description_template,
                 enriched_members,
