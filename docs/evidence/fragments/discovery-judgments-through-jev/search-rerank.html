@@ -1,0 +1,125 @@
+<!-- Search rerank: the shared pool-rerank core, and the pool size it runs at.
+     Judgements are live Jev Score calls over the JT-60SA question set. Scripts and
+     raw output:
+     ~/.config/reckon/crew/reports/imas-codex/search-rerank/{pool_sweep.py,table.py,sweep.json,sweep_calls.json,sweep.log,eqdbms_check.py,eqdbms_check.json,gate.log,negative_control.log}
+     Labels: ~/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/labels.json,
+     plus the four census answers from the retrieval-miss census in the same reports tree. -->
+<section id="search-rerank" data-reckon="evidence">
+  <h2 id="search-rerank-heading">Search rerank — the shared pool core, and the pool size it runs at</h2>
+
+  <p id="search-rerank-core">
+    The pool rerank now lives in one core, <code>rerank_pool</code> in
+    <code>imas_codex/discovery/base/judgment.py</code>, beside <code>decide_batch</code>. It takes
+    the query, the retrieved pool, a builder that produces one judgement state per candidate, the
+    five score levels, and the budget, concurrency, service and model; it judges the pool through
+    <code>decide_batch</code> and returns the pool ordered by descending score, with a candidate
+    that was unscored keeping its own retrieval position. The search tools keep
+    <code>rerank_candidates</code> as the thin search-side caller that owns the judgement state
+    (path, title, first 1500 characters of text) and the <code>facility-discovery</code> seat, so
+    <code>find_code</code> and both search tools behave exactly as before. The core imports nothing
+    from <code>imas_codex.llm</code>, asserted by a test that parses its import statements, which is
+    what lets a discovery-side caller reuse it without depending on the search package.
+  </p>
+
+  <table id="search-rerank-pool-table">
+    <caption>
+      Live rerank of the retrieved pool at four sizes, over 18 JT-60SA questions (12 code, 6
+      documentation). nDCG@10 and recall@10 use the hand labels for the retrieved top 30 plus the
+      four census answers wherever they fall; every candidate without a label counts as
+      irrelevant, which penalises a deeper pool for candidates judged above the labelled set.
+      "Labelled only" ranks the labelled candidates alone and removes that penalty. Wall time
+      replays the production scheduler's rule (submission order, 16 in flight) over the recorded
+      per-call latencies; every pool scored 100% of its candidates under the 120 s sweep budget.
+    </caption>
+    <thead>
+      <tr>
+        <th>Pool</th><th>nDCG@10</th><th>nDCG@10, labelled only</th><th>recall@10</th>
+        <th>Cost, 18 queries</th><th>Wall p50</th><th>Wall p95</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="search-rerank-pool-30">
+        <td><strong>30</strong></td><td><strong>0.3671</strong></td><td>0.4637</td>
+        <td>0.3750</td><td>$0.019</td><td>1.89 s</td><td>2.75 s</td>
+      </tr>
+      <tr id="search-rerank-pool-60">
+        <td>60</td><td>0.2775</td><td>0.4493</td><td>0.3534</td><td>$0.038</td>
+        <td>3.51 s</td><td>4.27 s</td>
+      </tr>
+      <tr id="search-rerank-pool-100">
+        <td>100</td><td>0.2872</td><td>0.5673</td><td>0.3919</td><td>$0.064</td>
+        <td>5.47 s</td><td>6.27 s</td>
+      </tr>
+      <tr id="search-rerank-pool-150">
+        <td>150</td><td>0.2343</td><td>0.6285</td><td>0.4956</td><td>$0.097</td>
+        <td>7.81 s</td><td>8.43 s</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="search-rerank-pool-decision">
+    <strong>Pool 30.</strong> It has the best nDCG@10 of any size (0.3671 against 0.2775 at 60,
+    0.2872 at 100, 0.2343 at 150), and it is also the best of the two sizes whose p95 wall time
+    fits the 5 s budget, so the smallest pool within 0.02 of the best under that constraint is 30
+    under either reading of the ranking: ranking the labelled candidates alone gives 0.4637 at 30
+    against 0.4493 at 60, still the best of the affordable pair. Cost falls with it, from $0.097 to
+    $0.019 per 18 queries. The 100 that shipped before this measurement was set by the prototype's
+    retrieval size and was never affordable at a 5 s budget: at 100 the p95 wall time is 6.27 s, so
+    the budget truncates the slower half of the queries and leaves their candidates in retrieval
+    order.
+  </p>
+
+  <figure id="search-rerank-pool-figure">
+    <img src="/imas-codex/figures/discovery-judgments-through-jev/search-rerank/pool_sweep.svg"
+         alt="Mean nDCG@10 and labelled-only nDCG@10 fall and rise respectively with pool size, while per-query wall p95 passes the 5 s production budget between a pool of 60 and 100.">
+    <figcaption>
+      Left: mean nDCG@10 over the 18 questions at each pool, with the same ranking taken over the
+      labelled candidates alone. Right: per-query wall p95, against the 5 s budget the rerank runs
+      under. Pool 30 is the best nDCG@10 and the cheapest of the sizes the budget can serve.
+    </figcaption>
+  </figure>
+
+  <h3 id="search-rerank-answers-heading">The four census answers need a pool the budget cannot afford</h3>
+  <p id="search-rerank-answers-prose">
+    The census placed four answers the retrieval ranks out of reach: the poloidal flux grid —
+    (<code>eqgrd.f</code>, deep rank 159), the plasma-current reader (<code>shtrd.f</code>, beyond
+    150 and absent from every pool this sweep retrieved), <code>use_compiler-en</code> (173) and
+    <code>use_login-en</code> (181). Reranking cannot recover what the retrieval never returned.
+    Where an answer did enter the pool the rerank lifted it hard: <code>use_login-en</code> sits at
+    reranked rank 2 at pool 100 and rank 1 at pool 150. <code>shtrd.f</code>'s absence is a
+    retrieval miss, not a rerank miss, and no pool sizes fix it.
+  </p>
+  <table id="search-rerank-answers-table">
+    <caption>Answer rank after the rerank, per pool; "absent" means the candidate was not retrieved at that pool size</caption>
+    <thead>
+      <tr><th>Question</th><th>Known answer</th><th>Pool 30</th><th>Pool 60</th><th>Pool 100</th><th>Pool 150</th></tr>
+    </thead>
+    <tbody>
+      <tr id="search-rerank-answer-q05"><td>Q05 — how the poloidal flux grid is built</td><td><code>eqgrd.f</code> / <code>eqequb.f</code></td><td>absent</td><td>absent</td><td>absent</td><td>rank 21</td></tr>
+      <tr id="search-rerank-answer-q12"><td>Q12 — where the plasma current is read</td><td><code>shtrd.f</code></td><td>absent</td><td>absent</td><td>absent</td><td>absent</td></tr>
+      <tr id="search-rerank-answer-q14"><td>Q14 — environment setup on the analysis server</td><td><code>use_compiler-en</code></td><td>absent</td><td>absent</td><td>absent</td><td>rank 21</td></tr>
+      <tr id="search-rerank-answer-q18"><td>Q18 — login and account steps</td><td><code>use_login-en</code></td><td>absent</td><td>absent</td><td>rank 2</td><td>rank 1</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="search-rerank-eqdbms-heading">EQDBMS record layout</h3>
+  <p id="search-rerank-eqdbms-prose">
+    <code>_search_code('EQDBMS record layout', facility='jt-60sa')</code> returns 10 chunks,
+    headed by <code>edas_share/eqread_pac/db/Fledd.py</code> and including
+    <code>eqread_pac/fledd.pac/eqdata_get.f</code>, <code>eqlist_get.f</code> and
+    <code>eslice_esurf/default/Eqread.py</code>. <strong>No chunk from <code>SAeqread</code> or
+    <code>client_eqdbms</code> is returned.</strong> The tool answers this query from the EDAS
+    <code>eqread_pac</code> tree; those two sources are not in the top 10 at any pool this sweep
+    tested.
+  </p>
+
+  <h3 id="search-rerank-checks-heading">Checks</h3>
+  <p id="search-rerank-checks-prose">
+    The scoped gate (search tools, the decision call layer, the new core, the domain queries)
+    runs <strong>180 passed, 8 skipped, EXIT=0</strong> at the head that carries the pool change
+    (<code>gate.log</code>). The negative control reuses the production test against a copy whose
+    rerank is replaced by an identity, so the tool returns the embedding order unchanged: it exits
+    non-zero and its first failure is the ordering assertion, with the lower-Score candidate before
+    the higher-Score one (<code>negative_control.log</code>, last line <code>EXIT=1</code>).
+  </p>
+</section>
