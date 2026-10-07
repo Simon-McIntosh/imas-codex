@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="86">
+<meta name="plan-version" content="87">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -801,6 +801,13 @@ documented cross-node merge-ordering dependency. added_failure_count 0.</p></div
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T005407332544-map-run-chooses-candidates" data-who="reckon-build" data-when="2026-10-07T02:20:30.470Z">
     <div class="r-comment-body"><p>The assign stage chooses a set of listed shortlist paths for each escalated source and persists a 'none' verdict so it is not re-asked; gate 1805 passed exit 0, negative control 1 failed exit 1.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T022100849054-review-of-map-run-chooses-candidates" data-who="reckon-build" data-when="2026-10-07T02:38:58.389Z">
+    <div class="r-comment-body"><p>Delta review of a7abccf8f..0d3198e4b stored for r-20261007T005407332544-map-run-chooses-candidates
+at reviewed_base_sha ddd9571c7f6659f43ab642fedd836367830942a0 / reviewed_head_sha
+0d3198e4bfe28e5c73f450ebd0cba8071f1480ab: 6 dimensions scored 0..20, total 113,
+added_failure_count 0; two follow-ons (progress.py:256 stale cost key; evidence
+fragment names only one negative control).</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261006T2316-s11-dispatch" data-who="reckon-build" data-when="2026-10-06T23:16:00Z">
     <div class="r-comment-body"><p>Dispatched <code>cross-ids-siblings</code> (run <code>r-20261006T231514344990-cross-ids-siblings</code>) with the unreviewed-plan waiver. The stored review at version 66 covers §11 as dispatched, and its one finding was answered as acted. The only uncovered unit was §8, whose version-67 edit is that finding's fix: the claim-predicate exception and the full route-count census. A review of the current content runs before §8's next node is dispatched.</p></div>

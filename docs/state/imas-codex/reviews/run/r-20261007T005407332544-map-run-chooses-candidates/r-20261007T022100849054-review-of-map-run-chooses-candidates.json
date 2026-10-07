@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest names no baseline_suite/after_suite objects; its own test_logs name the two arms, baseline.log (base 7f1cab2257855be52dab947583a35a7be850f9df, 1794 passed, 5 skipped, 2 deselected, exit 0) and gate.log (head, re-run after the repair, 1805 passed, 5 skipped, 2 deselected, exit 0). Neither log reports a FAILED or ERROR id, so the head added no failing test: added_failure_count = 0, added_failure_ids = [].",
+  "backend": "clive",
+  "base_log_revision": "7f1cab2257855be52dab947583a35a7be850f9df",
+  "call_site_count": 3,
+  "call_sites": [
+    "_validate_choice is called from mapping.py:358, the shared body of choose_targets/achoose_targets; the delta adds the paths+disposition refusal there.",
+    "candidate_worker (workers.py:1072, the no_candidate log the delta's rewritten test now drives) is invoked by the pipeline at workers.py:1363.",
+    "candidate_worker imports and calls route() from imas_codex.ids.candidates; the rewritten test patches that runtime function."
+  ],
+  "completed_at": "2026-10-07T02:38:58.389Z",
+  "dispatched_at": "2026-10-07T02:21:10Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/progress.py",
+      "line": "256",
+      "severity": "follow-on",
+      "text": "(follow-on) pre-existing and still unaddressed from the prior review: the SECTIONS cost row reads s.cost.steps.get(\"assign_targets\") while the renamed step records under step_name=\"choose_targets\" (mapping.py:382 and :404), so the mapping-run progress display shows an empty cost for the assign stage. progress.py is outside this node's declared write paths, so the repair belongs to a follow-on"
+    },
+    {
+      "file": "docs/evidence/fragments/mapping-candidate-selection/map-run-chooses-candidates.html",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "(nit) the fragment's negative-control row names only the outside-shortlist refusal; the repair round added a second refusal (paths with a disposition) whose falsification is recorded only per test in negative_control_repair.log. One row naming both mutations would read as completely as the two guards it documents"
+    }
+  ],
+  "head_log_revision": "a7abccf8f",
+  "item_aggregate": 8,
+  "item_verdicts": {
+    "call_sites": "mapping.py:358 (_validate_choice) and workers.py:1363 (candidate_worker's caller); the node's own test files are excluded.",
+    "diff": "read commit by commit over ddd9571c7..0d3198e4b: a7abccf8f removes dead code and tightens the guard, 0d3198e4b updates the evidence fragment (1804 -> 1805, two new rows).",
+    "done_when": "the delta's own measure ('tighten the choice guard' plus the evidence fragment) is asserted by TestChoiceRefusal::test_paths_with_a_disposition_are_refused and a rewritten TestNoCandidateLogged; both reproduced red under mutation by this review.",
+    "goal": "the delta commit a7abccf8f completes the node goal's hygiene and evidence gaps left open by the prior review: dead code, a stale module docstring, the loose TargetChoice schema, and a tautological no-candidate test.",
+    "manifest": "read; it names the five commits and the gate (1805 passed, exit 0) and points its negative control at the outside-shortlist refusal at head 0d3198e4b.",
+    "write_paths": "all four delta files (mapping.py, models.py, tests/ids/test_escalated_target_choice.py, the evidence fragment) are inside the node's declared write paths; no out-of-turn edit."
+  },
+  "justifications": {
+    "durability": "Both behaviours the delta tightens now carry a guard that fails under its own regression: the paths+disposition refusal and the rewritten no_candidate test were each falsified by mutation in a scratch tree, so neither is a tautology.",
+    "evidence": "This review independently reproduced the delta: a clean scratch head runs the focused file 16 passed exit 0 (review_head_arm.log), removing the new refusal reddens test_paths_with_a_disposition_are_refused (1 failed exit 1), and removing the production no_candidate log reddens the rewritten test (1 failed exit 1). The reviewed run's own gate logs show 1794 then 1805 passed, exit 0, with no failing id.",
+    "fit": "The refusal sits in _validate_choice beside the two peer refusals, the error message names the mechanism rather than a plan, the models.py docstring is corrected in place, and the removed MappingResult has no remaining importer; ruff reports no unused import left behind.",
+    "goal_fidelity": "The delta does not re-implement the node goal, which the earlier commits landed; it closes the four items the prior review raised on those files (dead MappingResult, stale models.py docstring, loose disposition schema, tautological no-candidate test), so it faithfully completes the node it belongs to.",
+    "reuse": "The delta removes code rather than adding a parallel mechanism: it deletes the dead MappingResult dataclass and an unused import, and extends the existing _validate_choice owner with one clause instead of forking a second validator.",
+    "scope_discipline": "Every one of the four changed files is inside the node's declared write paths and nothing outside them was touched; the delta is the minimal repair of the prior findings with no drive-by edits."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent delta review of run r-20261007T005407332544-map-run-chooses-candidates (plan imas-codex:mapping-candidate-selection, section 8, node map-run-chooses-candidates).\n\nSCOPE: only the commits gained since the prior review, ddd9571c7f6659f43ab642fedd836367830942a0..0d3198e4bfe28e5c73f450ebd0cba8071f1480ab.\n  a7abccf8f refactor(mapping): clear dead mapping code and tighten the choice guard\n  0d3198e4b docs(mapping): record the repair-round evidence for the choice guard\nFour files, +65 -35: mapping.py, models.py, tests/ids/test_escalated_target_choice.py, the evidence fragment.\n\nWHAT THE DELTA DOES\n  * removes the dead IDSMetadataResult import and the dead MappingResult dataclass (its only constructor generate_mapping was deleted in the earlier round; no module imports it).\n  * corrects the models.py module docstring to name choose_targets/TargetChoiceBatch in place of the removed assign_targets/TargetAssignmentBatch step.\n  * tightens _validate_choice: a choice that names paths AND carries a disposition is now refused, matching the TargetChoice docstring and the prompt's 'set only when paths is empty'.\n  * replaces the tautological TestNoCandidateLogged (which re-emitted the production log string and asserted on it) with test_candidate_worker_skips_and_logs_no_candidate, which drives the real candidate_worker.\n\nWHAT THE PRIOR REVIEW RAISED, NOW RESOLVED\n  finding 2 (dead MappingResult + stale models.py docstring): resolved; grep over imas_codex/ and tests/ finds no remaining MappingResult reference (only ValidatedMappingResult and the unrelated TestPersistMappingResult class name).\n  finding 3 (tautological no-candidate test): resolved; the rewritten test is a real guard, verified below.\n  finding 5 (TargetChoice.disposition looser than its docstring): resolved; the converse is now refused and tested.\n\nGATE (read from the reviewed run's own logs)\n  baseline.log: 1794 passed, 5 skipped, 2 deselected, exit 0.\n  gate.log (re-run after the repair, revision a7abccf8f): 1805 passed, 5 skipped, 2 deselected, exit 0.\n  Neither log reports a FAILED or ERROR id: added_failure_count = 0, added_failure_ids = [].\n\nINDEPENDENT REPRODUCTION\n  clean scratch head (TMPDIR copy of 0d3198e4b) -> tests/ids/test_escalated_target_choice.py 16 passed, exit 0 (review_head_arm.log).\n  negative control 1: remove the new paths+disposition refusal in _validate_choice -> 1 failed, 15 passed, EXIT=1 (review_negative_control.log); the failing id is TestChoiceRefusal::test_paths_with_a_disposition_are_refused.\n  negative control 2: remove the no_candidate wlog.info in candidate_worker -> TestNoCandidateLogged::test_candidate_worker_skips_and_logs_no_candidate 1 failed, EXIT=1 (review_negative_control_nocandidate.log).\n  The clean and mutated arms differ only in the mutated module, so each red is attributable to the guard it removes.\n\nFINDINGS\n  1. progress.py:256 (follow-on, out of scope) still reads the SECTIONS cost under 'assign_targets' while the renamed step records under 'choose_targets'; carried from the prior review and still reproduces.\n  2. evidence fragment (nit, follow-on) names only the outside-shortlist negative control, not the new paths+disposition refusal.\n\nVERDICT\nThe delta is a clean, minimal repair of the prior review's in-scope findings: dead code removed, the guard tightened to match its documented schema and the prompt, and the evidence gap closed with a test that genuinely drives production. Gate green at the repaired head with zero added failures.\n",
+  "review_run_id": "r-20261007T022100849054-review-of-map-run-chooses-candidates",
+  "reviewed_base": "ddd9571c7f6659f43ab642fedd836367830942a0",
+  "reviewed_base_sha": "ddd9571c7f6659f43ab642fedd836367830942a0",
+  "reviewed_commit": "0d3198e4bfe28e5c73f450ebd0cba8071f1480ab",
+  "reviewed_head_sha": "0d3198e4bfe28e5c73f450ebd0cba8071f1480ab",
+  "reviewed_run_id": "r-20261007T005407332544-map-run-chooses-candidates",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-07T02:34:00+00:00",
+  "total": 113
+}
