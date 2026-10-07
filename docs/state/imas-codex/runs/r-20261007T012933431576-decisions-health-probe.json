@@ -1,0 +1,1410 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3336453,
+      "input_tokens_cumulative": 3336453,
+      "output_tokens": 6591,
+      "output_tokens_cumulative": 6591,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 302,
+    "files": 4,
+    "removed": 1
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 270,
+        "name": "_mock_models",
+        "path": "tests/discovery/test_base_services.py"
+      },
+      "run_function": {
+        "line": 376,
+        "name": "_mock_models",
+        "path": "tests/discovery/test_base_services.py"
+      },
+      "window_line": 376
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b2f21d6b564b3401e892091e953582f3f782eeff",
+    "11a270c024a7c1719ac04fdcff3f9d07ffdd3d80",
+    "007d979b070cfe05e63be3f646dbaa631ed5dc88"
+  ],
+  "completed_at": "2026-10-07T02:18:36.606Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-07T01:29:44Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/cli"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_base_services.py tests/discovery tests/cli",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012933431576-decisions-health-probe/logs/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.96,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T02:14:33.900802+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-07T01:29:33Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 2,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 13,
+    "mean_context": 140000,
+    "observed_at": "2026-10-07T01:29:31Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 2,
+      "aggregate_tokens_per_second": 241.822,
+      "detail": "",
+      "mean_tokens_per_second": 93.009,
+      "observed_at": "2026-10-07T01:29:31Z",
+      "runs": 2.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-07T02:18:36.606Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012933431576-decisions-health-probe/manifest.md",
+  "member": "disposable-r-20261007T012933431576-decisions-health-probe",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_base_services.py::TestLlmHealthCheckWithDecisions::test_refused_decisions_probe_names_decisions"
+    ],
+    "baseline_failure_ids": [
+      "tests/cli/test_embed_service_footprint.py::test_embed_start_forwards_explicit_gpu_count_to_the_deployer",
+      "tests/cli/test_sn_embed_preflight.py::test_run_sn_cmd_skips_embed_preflight_for_dry_run",
+      "tests/cli/test_sn_generate_cli.py::TestBackwardCompatibility::test_reset_to_drafted_dry_run"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_base_services.py::TestLlmHealthCheckWithDecisions::test_refused_decisions_probe_names_decisions"
+    ],
+    "declaration": "the refused-probe test run against a copy whose decisions probe always reports healthy exits non-zero with the panel reporting llm up as its first failure",
+    "head_failure_ids": [
+      "tests/cli/test_embed_service_footprint.py::test_embed_start_forwards_explicit_gpu_count_to_the_deployer",
+      "tests/cli/test_sn_embed_preflight.py::test_run_sn_cmd_skips_embed_preflight_for_dry_run",
+      "tests/cli/test_sn_generate_cli.py::TestBackwardCompatibility::test_reset_to_drafted_dry_run"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012933431576-decisions-health-probe/logs/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012933431576-decisions-health-probe/logs/negative-control.log",
+    "test_paths": [
+      "tests/discovery/test_base_services.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "decisions-health-probe",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1571,
+          "cached_input_tokens": 236422,
+          "input_tokens": 237995,
+          "output_tokens": 234,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 238229,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "per §25's bullet 'The code status panel's llm check also probes the decisions endpoint the relevance seat calls': the code CLI's service monitor (imas_codex/cli/discover/code.py, which today passes model_section discovery-score to the monitor in imas_codex/discovery/base/services.py) also checks the decisions endpoint the discovery-relevance seat calls, so the panel reports llm down when either the local score seat or the decisions endpoint is unreachable and names which one; the decisions check is a cheap reachability probe of the OpenRouter decisions route with the facility-discovery key (an authenticated request that costs nothing, or the API's models listing, whichever the code can make without a billed decision), never a billed decision call; tests in tests/discovery/test_base_services.py drive the healthy case, a refused decisions probe and a refused local seat through the existing HTTP seams with no live request; a copy whose decisions probe always reports healthy reddens the refused-probe test and the log is recorded; the gate exits 0 run on this allocation as: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_base_services.py tests/discovery tests/cli, with any failure attributed against the base revision; each change committed with a conventional subject and body; no write outside the declared paths, no graph write and no discover run",
+    "estimated_hours": null,
+    "goal": "Make the code status panel's llm check also probe the Jev decisions endpoint",
+    "id": "decisions-health-probe",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-07T01:29:33Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 2,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 13,
+      "mean_context": 140000,
+      "observed_at": "2026-10-07T01:29:31Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 2,
+        "aggregate_tokens_per_second": 241.822,
+        "detail": "",
+        "mean_tokens_per_second": 93.009,
+        "observed_at": "2026-10-07T01:29:31Z",
+        "runs": 2.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T012933431576-decisions-health-probe/manifest.md",
+    "negative_control": "the refused-probe test run against a copy whose decisions probe always reports healthy exits non-zero with the panel reporting llm up as its first failure",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§25",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/base/services.py",
+      "imas_codex/cli/discover/code.py",
+      "tests/discovery/test_base_services.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/decisions-health-probe.html",
+      "docs/figures/jt60sa-discovery-completion/decisions-health-probe"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2363080.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "decisions-health-probe",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-07T01:29:38.277050+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.85,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 333.652,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 533.024,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 44,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 36
+      },
+      {
+        "availability": "served",
+        "backend": "codex",
+        "budget_reason": null,
+        "burn_multiple": 1.424129717855876,
+        "congestion": null,
+        "days_to_reset": 2.822008249814815,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.6565413166208665,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 85.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "codex-astra",
+        "budget_reason": null,
+        "burn_multiple": 1.424129717855876,
+        "congestion": null,
+        "days_to_reset": 2.822008249814815,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.6565413166208665,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 85.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "codex-luna",
+        "budget_reason": null,
+        "burn_multiple": 1.424129717855876,
+        "congestion": null,
+        "days_to_reset": 2.822008249814815,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.6565413166208665,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 85.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.88,
+      "codex": 0.07,
+      "codex-astra": 0,
+      "codex-luna": 0.01,
+      "hold": 0.04
+    },
+    "rendered_token_estimate": 1282,
+    "usage": {
+      "cost": 0.000143178,
+      "input_tokens": 3409,
+      "output_tokens": 89
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.96,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "007d979b070cfe05e63be3f646dbaa631ed5dc88",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "11a270c024a7c1719ac04fdcff3f9d07ffdd3d80",
+    "reviewed_head_sha": "007d979b070cfe05e63be3f646dbaa631ed5dc88",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 113
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261007T012933431576-decisions-health-probe",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§25",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "47fcadb2-fdf4-412f-afbe-fae7a0cc7504",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 6,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 12616375,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 409.336,
+    "generated_tokens": 50223,
+    "generation_seconds": 89.136,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 72.0,
+    "machine_seconds": 320.2,
+    "peak_input_tokens": 165612,
+    "tokens_per_second": 563.44,
+    "wall_tokens_per_second": 122.69
+  },
+  "time_budget": "45m",
+  "tool_steps": 88.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2932,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-07T02:18:40Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-07T02:11:43Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261007T012933431576-decisions-health-probe",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8706,
+    "worker_pid": 1512814
+  },
+  "worker_seconds": 2903,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
