@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "deepseek",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/discover/code.py:201",
+    "imas_codex/discovery/code/workers.py:660"
+  ],
+  "completed_at": "2026-10-07T12:45:48.568Z",
+  "dispatched_at": "2026-10-07T12:37:18Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/code.py",
+      "line": "205",
+      "severity": "follow-on",
+      "text": "The done_when requires a live JT-60SA pass that leaves every content-stage ingested file with facet confidences recorded and a Cypher count; the implementation is correct but the pass is deferred, so the run does not satisfy the done_when until the coordinator sequences the pass (imas-codex discover code jt-60sa --rejudge-ingested). The node's own EVIDENCE fence forbids a discover run and any graph write other than EXPLAIN, so the worker could not perform it; this is a follow-on for the coordinator, not a defect in the landed change."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit: 8c2bf1eff adds the re-judge worker, the chunk-head rebuild, the ingested claim and the CLI flag with tests; 3f451c796 adds the evidence fragment; dd6af80ca replaces the ingested reset's OR source_filter with an AND extra_filter and updates the fragment and the reset tests.",
+    "done_when": "The done_when names a fake-seam test, a negative control, a live JT-60SA pass with a Cypher count, a below-gate report, no remote fetch and a gate exit 0; the fake-seam test, the negative control, the no-hop path and the gate exit 0 are delivered (gate.log: 75 passed), but the live pass and its Cypher count are deferred, so two bullets are unmet.",
+    "goal": "The plan goal is that ingested content-stage files are re-judged from their own stored chunks; imas_codex/discovery/code/workers.py:660 rejudge_ingested_files rebuilds each file's content head from its CodeChunks and re-asks the content arm through the existing seat.",
+    "manifest": "Read; it records commits 8c2bf1eff, 3f451c796 and dd6af80ca, the gate (75 passed EXIT=0), two negative controls and the deferred live run with its reason.",
+    "write_paths": "The manifest declares eight paths and the diff base..dd6af80ca touches exactly those eight, none outside them."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_reset.py:357 asserts the AND form and the absence of the OR form, and negative_control_revert.log shows both scope checks redden when the repair is reverted.",
+    "evidence": "gate.log exits 0 over the five code-discovery files (75 passed) and negative_control.log fires at EXIT=1, but the done_when's live-pass and Cypher-count bullets are measured nowhere.",
+    "fit": "imas_codex/discovery/base/reset.py:52 adds extra_filter in the same documented dataclass style as source_filter, and no plan or ticket label appears in names or comments.",
+    "goal_fidelity": "imas_codex/discovery/code/workers.py:660 rebuilds the content state from the file's own CodeChunks in place of a fetch, which is the re-judge the plan states.",
+    "reuse": "the re-judge calls the existing claim_files_for_scoring (graph_ops.py:474), _relevance_item (scorer.py:346) and _relevance_set_clause (scorer.py:421) instead of adding a second pipeline.",
+    "scope_discipline": "git diff --stat b8f3c9980 dd6af80ca lists only the eight paths the manifest declares, and nothing extra is carried."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The plan goal is that ingested content-stage files are re-judged from their own stored chunks; imas_codex/discovery/code/workers.py:660 rejudge_ingested_files rebuilds each file's content head from its CodeChunks and re-asks the content arm through the existing seat, which is that goal.\nVERDICT done_when: The done_when names a fake-seam test, a negative control, a live JT-60SA pass with a Cypher count, a below-gate report, no remote fetch and a gate exit 0; the fake-seam test, the negative control, the no-hop path and the gate exit 0 are delivered (gate.log: 75 passed), but the live pass and its Cypher count are deferred, so two bullets are unmet.\nVERDICT write_paths: The manifest declares eight paths and the diff base..dd6af80ca touches exactly those eight, none outside them.\nVERDICT manifest: Read; it records commits 8c2bf1eff, 3f451c796 and dd6af80ca, the gate (75 passed EXIT=0), two negative controls and the deferred live run with its reason.\nVERDICT diff: Read commit by commit: 8c2bf1eff adds the re-judge worker, the chunk-head rebuild, the ingested claim and the CLI flag with tests; 3f451c796 adds the evidence fragment; dd6af80ca replaces the ingested reset's OR source_filter with an AND extra_filter and updates the fragment and the reset tests.\nCALL_SITES: imas_codex/cli/discover/code.py:201, imas_codex/discovery/code/workers.py:660\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/code/workers.py:660 rebuilds the content state from the file's own CodeChunks in place of a fetch, which is the re-judge the plan states.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate.log exits 0 over the five code-discovery files (75 passed) and negative_control.log fires at EXIT=1, but the done_when's live-pass and Cypher-count bullets are measured nowhere.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat b8f3c9980 dd6af80ca lists only the eight paths the manifest declares, and nothing extra is carried.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_reset.py:357 asserts the AND form and the absence of the OR form, and negative_control_revert.log shows both scope checks redden when the repair is reverted.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/discovery/base/reset.py:52 adds extra_filter in the same documented dataclass style as source_filter, and no plan or ticket label appears in names or comments.\nSCORE reuse: 19\nJUSTIFICATION reuse: the re-judge calls the existing claim_files_for_scoring (graph_ops.py:474), _relevance_item (scorer.py:346) and _relevance_set_clause (scorer.py:421) instead of adding a second pipeline.\nFINDING imas_codex/cli/discover/code.py:205 follow-on: the done_when requires a live JT-60SA pass that leaves every content-stage ingested file with facet confidences recorded and a Cypher count; the implementation is correct but the pass is deferred, so the run does not satisfy the done_when until the coordinator sequences the pass.",
+  "review_run_id": "r-20261007T123708264477-review-of-ingested-rejudge-repair",
+  "reviewed_base": "b8f3c9980078fb4cfa87c8f9967b6698ab645c21",
+  "reviewed_base_sha": "b8f3c9980078fb4cfa87c8f9967b6698ab645c21",
+  "reviewed_commit": "dd6af80ca58b632831181f6a79b3efd19e2fb7c7",
+  "reviewed_head_sha": "dd6af80ca58b632831181f6a79b3efd19e2fb7c7",
+  "reviewed_run_id": "r-20261007T120247028418-ingested-rejudge",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T12:43:19Z",
+  "total": 106
+}
