@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -118,7 +118,12 @@
         <code>claim_sources_for_candidates</code> claims it.</li>
     </ul>
     <p>
-      <code>grep -rn create_signal_source imas_codex/ tests/</code> prints nothing.
+      The pass's Cypher is proven against the live database, because the default markers exclude
+      <code>graph</code> and a mocked client never executes the statement. A <code>graph</code>-marked
+      test builds a fixture facility under unique ids, removed in a <code>finally</code> block. The
+      facility has two ungrouped signals and one three-member pattern. The test asserts two one-member
+      sources and one three-member source after the first run, and no new source or edge after a
+      second run. <code>grep -rn create_signal_source imas_codex/ tests/</code> prints nothing.
     </p>
 
     <h2 id="s4">§4 — EDDB units parse</h2>
