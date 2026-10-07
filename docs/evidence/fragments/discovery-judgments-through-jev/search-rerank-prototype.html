@@ -1,0 +1,136 @@
+<section>
+  <h2 id="search-rerank-prototype">Jev rerank lifts JT-60SA code and docs retrieval</h2>
+  <p id="search-rerank-prototype-correction">
+    An earlier draft of this record ordered the embedding baseline by
+    descending rank, which is not the order the tool returns; this record
+    replaces it and every embedding figure below is the corrected one.
+  </p>
+  <p id="search-rerank-prototype-method">
+    Eighteen natural-language questions about JT-60SA — twelve answerable from
+    ingested code and six from ingested wiki and document content — were run
+    through the production search tools
+    (<code>_search_code</code> / <code>_search_docs</code> in
+    <code>imas_codex/llm/search_tools.py</code>, <code>facility="jt-60sa"</code>,
+    <code>k=30</code>) to give each question thirty candidates in the tool's own
+    hybrid order. Every candidate was hand-labelled relevant or not against the
+    question's answer sentence, from its title and chunk text; the labels and
+    the judged text are in <code>labels.json</code>. Each candidate was then
+    scored by one Jev Score (<code>POST https://openrouter.ai/api/alpha/decisions</code>,
+    model <code>typesafe/jev-1.13</code>) on a five-level scale from "unrelated
+    to the query" to "directly answers the query", the state carrying the query
+    and the candidate's path or title with the first 1500 characters of its
+    text. nDCG@10 and mean reciprocal rank are reported for the embedding order
+    and for the order by Jev score, per question and averaged.
+  </p>
+
+  <table id="search-rerank-prototype-table">
+    <thead>
+      <tr>
+        <th>query</th><th>kind</th><th>relevant /30</th>
+        <th>nDCG@10 embed</th><th>nDCG@10 Jev</th><th>nDCG@10 random</th>
+        <th>MRR embed</th><th>MRR Jev</th>
+        <th>Jev cost $</th><th>p50 s</th><th>p95 s</th>
+      </tr>
+    </thead>
+    <tbody>
+            <tr><td><code>Q01</code></td><td>code</td><td>0 <em>(no relevant candidate retrieved)</em></td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.00125</td><td>0.49</td><td>0.77</td></tr>
+      <tr><td><code>Q02</code></td><td>code</td><td>2</td><td>0.000</td><td>0.371</td><td>0.177</td><td>0.053</td><td>0.125</td><td>0.00116</td><td>0.46</td><td>0.72</td></tr>
+      <tr><td><code>Q03</code></td><td>code</td><td>2</td><td>0.307</td><td>0.307</td><td>0.000</td><td>0.333</td><td>0.333</td><td>0.00118</td><td>0.47</td><td>0.54</td></tr>
+      <tr><td><code>Q04</code></td><td>code</td><td>4</td><td>0.281</td><td>0.871</td><td>0.363</td><td>0.200</td><td>1.000</td><td>0.00122</td><td>0.46</td><td>0.87</td></tr>
+      <tr><td><code>Q05</code></td><td>code</td><td>0 <em>(no relevant candidate retrieved)</em></td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.00121</td><td>0.46</td><td>0.54</td></tr>
+      <tr><td><code>Q06</code></td><td>code</td><td>10</td><td>0.423</td><td>0.842</td><td>0.369</td><td>1.000</td><td>1.000</td><td>0.00130</td><td>0.47</td><td>1.12</td></tr>
+      <tr><td><code>Q07</code></td><td>code</td><td>4</td><td>0.151</td><td>0.532</td><td>0.130</td><td>0.200</td><td>0.500</td><td>0.00121</td><td>0.43</td><td>0.70</td></tr>
+      <tr><td><code>Q08</code></td><td>code</td><td>1</td><td>0.000</td><td>1.000</td><td>0.333</td><td>0.036</td><td>1.000</td><td>0.00118</td><td>0.45</td><td>0.66</td></tr>
+      <tr><td><code>Q09</code></td><td>code</td><td>17</td><td>0.412</td><td>0.839</td><td>0.716</td><td>0.500</td><td>1.000</td><td>0.00119</td><td>0.41</td><td>0.99</td></tr>
+      <tr><td><code>Q10</code></td><td>code</td><td>3</td><td>0.469</td><td>0.437</td><td>0.167</td><td>1.000</td><td>0.333</td><td>0.00120</td><td>0.40</td><td>1.04</td></tr>
+      <tr><td><code>Q11</code></td><td>code</td><td>3</td><td>0.235</td><td>0.432</td><td>0.636</td><td>0.333</td><td>0.500</td><td>0.00121</td><td>0.47</td><td>0.59</td></tr>
+      <tr><td><code>Q12</code></td><td>code</td><td>0 <em>(no relevant candidate retrieved)</em></td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.00120</td><td>0.49</td><td>0.80</td></tr>
+      <tr><td><code>Q13</code></td><td>docs</td><td>6</td><td>0.603</td><td>0.974</td><td>0.398</td><td>1.000</td><td>1.000</td><td>0.00071</td><td>0.50</td><td>0.91</td></tr>
+      <tr><td><code>Q14</code></td><td>docs</td><td>0 <em>(no relevant candidate retrieved)</em></td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.00072</td><td>0.45</td><td>0.75</td></tr>
+      <tr><td><code>Q15</code></td><td>docs</td><td>19</td><td>0.330</td><td>1.000</td><td>0.495</td><td>1.000</td><td>1.000</td><td>0.00072</td><td>0.43</td><td>0.79</td></tr>
+      <tr><td><code>Q16</code></td><td>docs</td><td>3</td><td>0.968</td><td>1.000</td><td>0.317</td><td>1.000</td><td>1.000</td><td>0.00085</td><td>0.44</td><td>0.57</td></tr>
+      <tr><td><code>Q17</code></td><td>docs</td><td>5</td><td>0.244</td><td>0.550</td><td>0.233</td><td>0.250</td><td>1.000</td><td>0.00068</td><td>0.41</td><td>1.13</td></tr>
+      <tr><td><code>Q18</code></td><td>docs</td><td>0 <em>(no relevant candidate retrieved)</em></td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.00075</td><td>0.44</td><td>0.78</td></tr>
+    </tbody>
+  </table>
+
+  <table id="search-rerank-prototype-averages">
+    <thead>
+      <tr><th>set</th><th>order</th><th>mean nDCG@10</th><th>mean MRR</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="3">all 18 questions</td>
+          <td>embedding</td><td>0.246</td><td>0.384</td></tr>
+      <tr><td>Jev rerank</td><td>0.508</td><td>0.544</td></tr>
+      <tr><td>random control</td><td>0.241</td><td>0.297</td></tr>
+      <tr><td rowspan="3">13 questions with a relevant candidate</td>
+          <td>embedding</td><td>0.340</td><td>0.531</td></tr>
+      <tr><td>Jev rerank</td><td>0.704</td><td>0.753</td></tr>
+      <tr><td>random control</td><td>0.334</td><td>0.411</td></tr>
+    </tbody>
+  </table>
+
+  <figure id="search-rerank-prototype-figure">
+    <img src="/imas-codex/figures/discovery-judgments-through-jev/search-rerank-prototype/ndcg10.svg"
+         alt="Per-question nDCG@10 for the embedding order and the Jev reranked order">
+    <figcaption>
+      Per-question nDCG@10. Grey is the search tool's own hybrid (embedding)
+      order; blue is the same thirty candidates ordered by Jev score. Questions
+      whose top thirty carry no relevant candidate score zero for both orders
+      (Q01, Q05, Q12, Q14, Q18).
+    </figcaption>
+  </figure>
+
+  <p id="search-rerank-prototype-result">
+    Averaged over all eighteen questions, the Jev rerank raises nDCG@10 from
+    0.246 to 0.508
+    and mean reciprocal rank from 0.384 to
+    0.544. Restricted to the 13 questions
+    with at least one relevant candidate retrieved, the rise is larger:
+    nDCG@10 0.340 →
+    0.704, MRR
+    0.531 →
+    0.753. The paired per-question difference in
+    nDCG@10 (Jev minus embedding) is
+    0.364 (95% bootstrap CI
+    [0.219, 0.517], 13 questions,
+    P(Δ≤0) = 0.000). Per question the rerank is higher on
+    11 of the 13 answerable questions, lower on 1 (Q10)
+    and equal on 1 (Q15). Five questions retrieved no relevant
+    candidate at all in the top thirty; they are a retrieval miss the rerank
+    cannot repair, and they are held in every figure above rather than dropped.
+  </p>
+
+  <p id="search-rerank-prototype-control">
+    Negative control: ordering each question's same thirty candidates by a
+    random score instead of the Jev score leaves the metric at the floor. Over
+    200 fresh random permutations the mean nDCG@10 is
+    0.207 on all questions (0.286 on the
+    answerable subset) — below the embedding order's
+    0.246 — while the Jev rerank reaches
+    0.508. An arbitrary order therefore does not
+    recover the gain, and the embedding order carries a little signal above
+    chance (0.246 vs 0.207); the
+    metric distinguishes the useful order from an arbitrary one.
+  </p>
+
+  <p id="search-rerank-prototype-cost">
+    The rerank scored 540 of 540 requested candidates, one Jev
+    Score request each, at a total transport-reported cost of
+    $0.0190. Per-question wall latency is in the table; across all
+    540 calls the per-call p50 is about 0.45 s and p95 under 1.2 s.
+  </p>
+
+  <p id="search-rerank-prototype-provenance">
+    Artifacts and the scripts that produced them are stored beside each other:
+    <code>queries.json</code> (the eighteen questions with their answer
+    sentences), <code>retrieve.py</code> → <code>candidates.json</code> (the
+    captured top-30 candidates in tool order), <code>make_labels.py</code> →
+    <code>labels.json</code> (the hand labels with the judged text),
+    <code>rerank.py</code> → <code>jev_rerank.json</code> (per-candidate Jev
+    score, cost and latency), and <code>metrics.py</code> →
+    <code>metrics.json</code> (nDCG@10, MRR, the random control and the paired
+    bootstrap). <code>plot_ndcg.py</code> renders the figure. No repository code
+    was changed; the run read live search and wrote only these artifacts.
+  </p>
+</section>
