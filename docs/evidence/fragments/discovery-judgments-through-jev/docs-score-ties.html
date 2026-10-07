@@ -1,0 +1,88 @@
+<!-- Docs-search score ties: _search_docs ordered saturated / hybrid-tied chunks
+     arbitrarily, so the facility's nearest wiki chunks dropped out of the
+     returned window. Read-only graph reads bounded by facility_id; the only
+     code change is deterministic tie-breaking plus reserved vector slots.
+     Scripts and raw output:
+     ~/.config/reckon/crew/reports/imas-codex/docs-score-ties/ -->
+<section id="docs-score-ties" data-reckon="evidence">
+  <h2 id="docs-score-ties-heading">Docs search ordered its score ties arbitrarily</h2>
+
+  <p id="docs-score-ties-intro">
+    <code>_search_docs</code> in <code>imas_codex/llm/search_tools.py</code> ranked wiki
+    chunks with <code>sorted(set(chunk_ids), key=score, reverse=True)</code> and the
+    keyword term enters unbounded, so the hybrid score ties at the same value for many
+    chunks and, where it does not, a text-only hit enters at its raw BM25 score (9 to 16,
+    far above any cosine). The tie order was the set-iteration order, and the facility's
+    nearest embeddings were outranked by keyword-only hits. Measured over the 18 §9
+    questions at the §9 label depth (k=30), with Q16 as the preservation control, using
+    the candidate labels of <code>search-rerank-prototype/labels.json</code> keyed by
+    candidate id; candidates it did not cover were labelled by the same rule and recorded
+    in <code>docs-score-ties/new_labels.json</code>.
+  </p>
+
+  <h3 id="docs-score-ties-repro-heading">The defect reproduces</h3>
+  <ul id="docs-score-ties-repro">
+    <li id="docs-score-ties-repro-q14">
+      <strong>Q14</strong> — 29 of the union's chunks clamp to exactly 1.0 and the
+      answering chunk <code>jt-60sa:use_compiler-en.html:chunk_0</code> (raw cosine
+      0.856) is among them, yet it is absent from the returned k=30 window; 26
+      BM25-only chunks (scores up to 16.0) sit above the entire clamp tie block.
+    </li>
+    <li id="docs-score-ties-repro-q18">
+      <strong>Q18</strong> — 26 chunks clamp to exactly 1.0, the answering chunk
+      <code>jt-60sa:use_login-en.html:chunk_0</code> (raw cosine 0.882) is among them,
+      and it is absent from the returned window.
+    </li>
+  </ul>
+
+  <h3 id="docs-score-ties-variants-heading">Variants, 18 §9 questions at k=30</h3>
+  <table id="docs-score-ties-variants">
+    <thead>
+      <tr><th>variant</th><th>mean nDCG@10 (18)</th><th>Q16 nDCG@10</th><th>Q14 answer rank</th><th>Q18 answer rank</th></tr>
+    </thead>
+    <tbody>
+      <tr id="docs-score-ties-row-current"><td>current order (recorded)</td><td>0.2457</td><td>0.9675</td><td>absent</td><td>absent</td></tr>
+      <tr id="docs-score-ties-row-baseline"><td>current order (re-run baseline)</td><td>0.2763</td><td>0.9675</td><td>absent</td><td>absent</td></tr>
+      <tr id="docs-score-ties-row-cos"><td>secondary sort by cosine within ties</td><td>0.2763</td><td>0.9675</td><td>absent</td><td>absent</td></tr>
+      <tr id="docs-score-ties-row-noclamp"><td>score without its 1.0 clamp</td><td>0.2633</td><td>0.9675</td><td>absent</td><td>absent</td></tr>
+      <tr id="docs-score-ties-row-reserve"><td>20 reserved vector slots, ranks 10–29</td><td>0.3672</td><td>0.9675</td><td>15</td><td>13</td></tr>
+      <tr id="docs-score-ties-row-deployed"><td>reserved slots + cosine tie-break (deployed)</td><td>0.3672</td><td>0.9675</td><td>15</td><td>13</td></tr>
+      <tr id="docs-score-ties-row-noclampreserve"><td>no clamp + reserved slots</td><td>0.4081</td><td>0.9675</td><td>15</td><td>13</td></tr>
+    </tbody>
+  </table>
+
+  <p id="docs-score-ties-read">
+    A bare cosine tie-break cannot lift the answers: they tie at 1.0, but the BM25-only
+    chunks outscore the whole tie block, so tie-breaking within it changes nothing at
+    k=30. Only a reserved-vector-slot change moves them, because the answering chunks
+    are the facility's nearest embeddings and the reservation gives them a rank
+    regardless of the keyword term. The deployed variant keeps every question's top 10
+    exactly (Q16 unchanged at 0.9675) and lifts both answers into the top 30, and its
+    tie-break makes the tie order deterministic by cosine instead of set iteration. The
+    no-clamp + reserved variant scores higher still but changes the displayed score range
+    (values above 1.0) beyond this node's goal, so it was not deployed.
+  </p>
+
+  <h3 id="docs-score-ties-gate-heading">Gate</h3>
+  <p id="docs-score-ties-gate">
+    <code>uv run --no-sync pytest -p no:cacheprovider tests/llm tests/test_imas_search_scoring ...</code>
+    (exact command and header in <code>reports/imas-codex/docs-score-ties/gate.log</code>):
+    290 passed, 15 skipped, 1 failed. The single failure,
+    <code>test_graceful_on_missing_index</code>, is pre-existing — it fails identically
+    with <code>search_tools.py</code> restored to the base revision
+    (<code>reports/imas-codex/docs-score-ties/base_arm.log</code>) because the test raises
+    a bare <code>Exception</code> while the function deliberately surfaces anything but a
+    Neo4j <code>ClientError</code>/<code>DatabaseError</code>. New test:
+    <code>test_cosine_breaks_saturated_score_ties</code>. Negative control
+    (<code>negative_control.log</code>): the same test against a copy that keeps the
+    arbitrary tie order exits 1 with a lower-cosine candidate ahead of a higher-cosine
+    one at the clamp as its first failure.
+  </p>
+
+  <h3 id="docs-score-ties-files-heading">Files</h3>
+  <ul id="docs-score-ties-files">
+    <li id="docs-score-ties-files-code"><code>imas_codex/llm/search_tools.py</code> — deterministic (score, cosine) ranking and <code>_reserve_vector_leaders</code>.</li>
+    <li id="docs-score-ties-files-test"><code>tests/llm/test_search_tools.py</code> — <code>test_cosine_breaks_saturated_score_ties</code>.</li>
+    <li id="docs-score-ties-files-scripts">Scripts and raw output: <code>reports/imas-codex/docs-score-ties/</code> (<code>docs_ties_eval.py</code>, <code>variant_metrics.json</code>, <code>new_labels.json</code>, <code>eval.log</code>, <code>gate.log</code>, <code>base_arm.log</code>, <code>negative_control.log</code>).</li>
+  </ul>
+</section>
