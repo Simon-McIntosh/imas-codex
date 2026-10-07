@@ -55,22 +55,28 @@ _DOC_SIGNAL_CAP = 16
 # ---------------------------------------------------------------------------
 
 # The rerank scores a pool larger than the k a search tool returns, so an answer
-# embedding ranks below k can still be lifted into the report. 30 is the pool a
-# sweep over 18 JT-60SA questions chose: it has the best mean nDCG@10 (0.367,
-# against 0.278 at 60, 0.287 at 100, 0.234 at 150) and the smallest per-query
-# p95 wall time (2.8 s, against 4.3 s, 6.3 s and 8.4 s), and it is the largest
-# pool the 5 s budget below scores in full. A deeper pool reaches the four
-# answers the census placed at ranks 159 to 181, but no pool the budget can
-# afford does, so pool depth is not the instrument for those.
-RERANK_POOL = 30
+# embedding ranks below k can still be lifted into the report. 60 is the pool a
+# sweep over 18 JT-60SA questions chose. Deeper pools rank the labelled answers
+# better -- labelled-only nDCG@10 is 0.478 at 60, 0.576 at 100 and 0.629 at 150 --
+# but 60 is the deepest that keeps the per-query p95 wall inside the 5 s budget
+# below: 4.4 s with 16 judgements in flight and 3.9 s with 32, against 6.7 s and
+# 8.4 s at 100 and 150. Raising the concurrency does not buy depth, because the
+# decisions endpoint slows each call as concurrency rises, so the wall stays set
+# by throughput and 48 in flight adds stalls instead. Depth is what reaches the
+# answers the census placed at ranks 159 to 181, and no pool the budget can score
+# reaches those.
+RERANK_POOL = 60
 
 # Wall-time budget for one query's rerank, sized from the prototype's ~2 s for
 # 30 candidates. A slow rerank returns the embedding order rather than delaying
 # the search.
 _RERANK_BUDGET_SECONDS = 5.0
 
-# Decisions in flight at once within one rerank batch.
-_RERANK_CONCURRENCY = 16
+# Decisions in flight at once within one rerank batch. 32 is the fastest of the
+# values measured (16, 32, 48): the endpoint slows each call as concurrency rises,
+# so the wall stays set by throughput, and 48 in flight adds stalls rather than
+# speed.
+_RERANK_CONCURRENCY = 32
 
 # The seat the code-relevance judgements already use; the rerank adds no seat.
 _RERANK_SERVICE = "facility-discovery"
