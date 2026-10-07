@@ -96,7 +96,7 @@
     [0.219, 0.517], 13 questions,
     P(Δ≤0) = 0.000). Per question the rerank is higher on
     11 of the 13 answerable questions, lower on 1 (Q10)
-    and equal on 1 (Q15). Five questions retrieved no relevant
+    and equal on 1 (Q03). Five questions retrieved no relevant
     candidate at all in the top thirty; they are a retrieval miss the rerank
     cannot repair, and they are held in every figure above rather than dropped.
   </p>
@@ -111,7 +111,11 @@
     0.508. An arbitrary order therefore does not
     recover the gain, and the embedding order carries a little signal above
     chance (0.246 vs 0.207); the
-    metric distinguishes the useful order from an arbitrary one.
+    metric distinguishes the useful order from an arbitrary one. The
+    control row of the averages table and the control column of the
+    per-question table are one fixed-seed random draw (0.241 on all
+    questions, 0.334 answerable); the 200-permutation figures above are the
+    expected value of a random order.
   </p>
 
   <p id="search-rerank-prototype-cost">
@@ -122,7 +126,8 @@
   </p>
 
   <p id="search-rerank-prototype-provenance">
-    Artifacts and the scripts that produced them are stored beside each other:
+    Artifacts and the scripts that produced them are stored beside each other in
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/</code>:
     <code>queries.json</code> (the eighteen questions with their answer
     sentences), <code>retrieve.py</code> → <code>candidates.json</code> (the
     captured top-30 candidates in tool order), <code>make_labels.py</code> →
