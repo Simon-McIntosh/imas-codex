@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;, &quot;mapping-candidate-selection#s4&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s10&quot;, &quot;mapping-candidate-selection#s11&quot;], &quot;s11&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s10&quot;], &quot;s10&quot;: [&quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;, &quot;mapping-candidate-selection#s4&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s10&quot;, &quot;mapping-candidate-selection#s11&quot;], &quot;s11&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s10&quot;], &quot;s10&quot;: [&quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s11&quot;]}">
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -580,6 +580,15 @@
       second home.
     </p>
     <p>
+      It needs only the candidate stage: <code>discover map</code> (§7) with §11's cross-IDS
+      siblings. It does not need §8's changes to <code>imas map run</code>, so it runs while
+      §8 finishes. Under the recommended defaults, with no select threshold and no floor, every
+      judged source routes <code>escalated</code>. So the 40 are stratified by their best
+      <code>same_quantity</code> band rather than by route. The selected precision and the
+      no-candidate share are then computed offline, at §3's thresholds, from the probabilities
+      stored on the candidate edges.
+    </p>
+    <p>
       It writes its evidence fragment under
       <code>docs/evidence/fragments/mapping-candidate-selection/</code>.
     </p>
@@ -775,7 +784,7 @@ carries one out-of-scope stale cost key, two small in-scope hygiene misses, one 
 documented cross-node merge-ordering dependency. added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T005407332544-map-run-chooses-candidates" data-who="reckon-build" data-when="2026-10-07T02:20:30.470Z">
-    <div class="r-comment-body"><p>The assign stage chooses a set of listed shortlist paths for each escalated source and persists a &#x27;none&#x27; verdict so it is not re-asked; gate 1805 passed exit 0, negative control 1 failed exit 1.</p></div>
+    <div class="r-comment-body"><p>The assign stage chooses a set of listed shortlist paths for each escalated source and persists a 'none' verdict so it is not re-asked; gate 1805 passed exit 0, negative control 1 failed exit 1.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261006T2316-s11-dispatch" data-who="reckon-build" data-when="2026-10-06T23:16:00Z">
     <div class="r-comment-body"><p>Dispatched <code>cross-ids-siblings</code> (run <code>r-20261006T231514344990-cross-ids-siblings</code>) with the unreviewed-plan waiver. The stored review at version 66 covers §11 as dispatched, and its one finding was answered as acted. The only uncovered unit was §8, whose version-67 edit is that finding's fix: the claim-predicate exception and the full route-count census. A review of the current content runs before §8's next node is dispatched.</p></div>
