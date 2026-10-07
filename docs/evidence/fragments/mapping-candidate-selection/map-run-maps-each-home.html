@@ -1,0 +1,34 @@
+<section>
+  <h2 id="map-run-maps-each-home">Each IDS pass maps every source from its selected edges</h2>
+  <p id="map-run-maps-each-home-summary">
+    The map stage claims, per IDS, the sources that selected a home there and
+    are not yet bound there. It builds one <code>TargetAssignment</code> per
+    selected section from the source's selected <code>MAPPING_CANDIDATE</code>
+    edges, guards each chosen <code>target_id</code> to the source's selected
+    sections, and refreshes the per-source <code>mapping_status</code> summary.
+    The retired <code>mapping_target_*</code> claim fields and
+    <code>claim_sources_for_assignment</code> are gone.
+  </p>
+  <table id="map-run-maps-each-home-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/ids tests/discovery tests/cli/test_discover_map.py tests/test_cli.py tests/core -p no:cacheprovider</code></td><td>2766 passed, 7 skipped, exit 0</td></tr>
+      <tr><td><code>grep -rnE 'mapping_target_ids|mapping_target_path|mapping_target_type|claim_sources_for_assignment' imas_codex/ tests/</code></td><td>no matches, exit 1</td></tr>
+      <tr><td><code>section_of</code> returns the IDS top-level ancestor, returns a bare IDS name unchanged and refuses an empty path</td><td><code>TestSectionOf</code></td></tr>
+            <tr><td>the assembler section filter no longer matches a sibling section sharing a name prefix</td><td><code>TestAssemblerSectionFilter::test_sibling_section_sharing_a_name_prefix_is_not_matched</code></td></tr>
+      <tr><td>a selected source is mapped from its selected edges without an assign call</td><td><code>TestMapWorkerMapsFromSelectedEdges::test_selected_source_is_mapped_from_its_selected_edges</code></td></tr>
+      <tr><td>an escalated source resolved by the assign stage maps from assignments built out of its selected edges</td><td><code>TestMapWorkerMapsFromSelectedEdges</code>, <code>TestBuildTargetAssignments</code></td></tr>
+      <tr><td>a <code>none</code> verdict leaves <code>mapping_status</code> unset while recording disposition and evidence</td><td><code>TestRecordMappingVerdict</code>, <code>TestNoPathVerdictPersisted</code></td></tr>
+      <tr><td>a source with selected edges in two IDSs is claimed by each pass; a second pass skips a bound source</td><td><code>TestMapClaimPredicate</code>, <code>TestBuildTargetAssignments::test_each_ids_pass_builds_only_its_own_sections</code></td></tr>
+      <tr><td>one source selected in two IDSs is mapped once by each IDS's pass, which prepares each IDS's own section and releases the source it finished</td><td><code>TestMapWorkerMapsEveryIdsOfOneSource</code></td></tr>
+      <tr><td>the status rule runs as Cypher: <code>refresh_mapping_status</code> writes <code>mapped</code> with no binding, <code>assigned</code> with one binding and <code>validated</code> with both; a source bound only into magnetics is still claimed by the summary pass while the magnetics pass no longer claims it; <code>has_pending_validation_work</code> selects a source the map stage marked <code>mapped</code></td><td><code>test_mapping_status_rule_against_the_live_graph</code> (<code>-m graph</code>, live Neo4j, unique fixture removed in a <code>finally</code>)</td></tr>
+      <tr><td>the validate stage writes status through the single owner, not a literal</td><td><code>TestValidateStageUsesTheSingleStatusOwner</code></td></tr>
+      <tr><td>a <code>target_id</code> outside every selected section is escalated; one inside a selected section but outside the selected nodes is kept</td><td><code>TestSectionGuard</code></td></tr>
+      <tr><td>an assignment takes its section as the node's top-level ancestor and its type from that section</td><td><code>TestBuildTargetAssignments::test_section_is_top_level_ancestor_and_type_from_section</code>, <code>TestTargetTypeFromSection</code></td></tr>
+      <tr><td>the progress display's assign line reports the cost recorded under <code>choose_targets</code></td><td><code>TestProgressAssignCost::test_sections_row_reports_the_choose_targets_cost</code></td></tr>
+      <tr><td>negative control — <code>handled</code> keyed by source id alone</td><td>2 failed, exit 1 (<code>TestMapWorkerMapsEveryIdsOfOneSource</code>)</td></tr>
+      <tr><td>negative control — target_id guard widened to accept any path in the run</td><td>1 failed, exit 1 (<code>TestSectionGuard::test_outside_every_selected_section_is_escalated</code>)</td></tr>
+      <tr><td>negative control — no-binding clause dropped from the map claim predicate</td><td>1 failed, exit 1 (<code>test_mapping_status_rule_against_the_live_graph</code>, the magnetics pass claims an already-bound source)</td></tr>
+    </tbody>
+  </table>
+</section>

@@ -1,51 +1,33 @@
 ---
 name: target_assignment
-description: Per-call context for target assignment (dynamic, changes per call)
+description: Per-call context for the escalated target choice (dynamic, changes per call)
 ---
 
-Assign the following signal sources to IDS target paths.
+Choose this signal source's target paths from its listed candidates.
 
 ## Context
 
 - **Facility**: {{ facility }}
-- **IDS**: {{ ids_name }}
 
-{% if ids_description %}
-### IDS Description
+### Signal Source
 
-{{ ids_description }}
-{% endif %}
+{{ signal_source }}
 
-### Signal Sources
+### Listed Candidates
 
-The following signal sources have been discovered for this facility.
-Each source is a set of related facility signals (e.g., all signals
-from a PF coil, or all magnetic probes in a diagnostic). The physics
-domain indicates the source's primary measurement category.
+These are the only paths you may choose from. Each is an existing candidate of
+this source, in Jev order (descending confidence). Paths marked
+`[cross-IDS sibling]` were added because they share a Data Dictionary semantic
+cluster with another candidate, possibly in a different IDS; they are legitimate
+homes. Choose every path that should hold this source's values.
 
-{{ signal_sources }}
+{{ shortlist }}
 
-### IDS Structure
+### Peers and Kin
 
-The target IDS has these structural paths. Each path includes its node type
-(structure, data, etc.) to help classify the target type. Paths with
-array-of-structures semantics are struct-array targets; leaf data paths
-are scalar targets; time-indexed containers are time-slice targets.
+Cross-facility precedent and physics-domain context:
 
-{{ imas_subtree }}
-
-### Semantic Search Results
-
-Additional context from semantic search:
-
-{{ semantic_results }}
-
-### Section Clusters
-
-These semantic clusters group related IDS paths by physics concept.
-Use these to understand which paths form physics-coherent groups:
-
-{{ section_clusters }}
+{{ context_notes }}
 
 {% if cross_facility_mappings %}
 ### Cross-Facility Precedent

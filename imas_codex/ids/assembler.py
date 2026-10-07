@@ -22,6 +22,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from imas_codex.core.paths import section_of
 from imas_codex.graph.client import GraphClient
 from imas_codex.ids.graph_ops import (
     Mapping,
@@ -181,10 +182,9 @@ class IDSAssembler:
             enrichment.update(select_enrichment_nodes(self.facility, enrich_def, gc))
 
         # Get mappings relevant to this section's target IDS path
+        section_path = f"{self.ids_name}/{section_name}"
         section_mappings = [
-            m
-            for m in mapping.bindings
-            if m.target_id.startswith(f"{self.ids_name}/{section_name}")
+            m for m in mapping.bindings if section_of(m.target_id) == section_path
         ]
 
         struct_array = getattr(ids, section_name)

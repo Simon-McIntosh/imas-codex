@@ -93,3 +93,30 @@ def normalize_imas_path(path: str) -> str:
     if "." in path and _looks_like_path(path):
         path = path.replace(".", "/")
     return path.strip("/")
+
+
+def section_of(path: str) -> str:
+    """Return the IDS top-level ancestor of an IMAS path.
+
+    The section is ``<ids>/<first segment>`` — the IDS name plus the first
+    segment of the path, e.g. ``equilibrium/time_slice`` for
+    ``equilibrium/time_slice/profiles_1d/psi``. A path carrying only a bare
+    IDS name (or one segment) is returned unchanged. An empty path is refused
+    with :class:`ValueError`, so a caller never compares against an undefined
+    section.
+
+    Examples::
+        >>> section_of("equilibrium/time_slice/profiles_1d/psi")
+        'equilibrium/time_slice'
+        >>> section_of("magnetics/flux_loop/flux/data")
+        'magnetics/flux_loop'
+        >>> section_of("summary")
+        'summary'
+    """
+    stripped = path.strip().strip("/")
+    if not stripped:
+        raise ValueError("section_of received an empty path")
+    parts = stripped.split("/")
+    if len(parts) < 2:
+        return stripped
+    return f"{parts[0]}/{parts[1]}"

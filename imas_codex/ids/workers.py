@@ -207,12 +207,6 @@ def _domain_filter(domains: list[str] | None) -> tuple[str, dict[str, Any]]:
     return "AND n.physics_domain IN $domains", {"domains": domains}
 
 
-_ASSIGNMENT_STATUS = """
-n.status = 'enriched'
-AND n.mapping_status IS NULL
-AND NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode) }
-"""
-
 _ASSIGNMENT_RETURN = """
 OPTIONAL MATCH (m:FacilitySignal)-[:MEMBER_OF]->(n)
 WITH n, count(m) AS member_count,
@@ -240,9 +234,6 @@ n.id AS id, n.group_key AS group_key,
 n.description AS description,
 n.keywords AS keywords,
 n.physics_domain AS physics_domain,
-n.mapping_target_ids AS target_ids,
-n.mapping_target_path AS target_path,
-n.mapping_target_type AS target_type,
 rep.description AS rep_description,
 rep.unit AS rep_unit,
 rep.sign_convention AS rep_sign_convention,
@@ -266,37 +257,25 @@ _MAPPING_CLAIM_FIELDS = {
 }
 
 
-def claim_sources_for_assignment(
-    facility: str,
-    domains: list[str] | None = None,
-    batch_size: int = 20,
-) -> list[dict[str, Any]]:
-    """Claim enriched sources that have no mapping_status yet."""
-    domain_filter, domain_params = _domain_filter(domains)
-    return claim_batch(
-        "SignalSource",
-        facility=facility,
-        status_predicate=_ASSIGNMENT_STATUS + domain_filter,
-        status_params=domain_params,
-        batch_size=batch_size,
-        return_fields=_ASSIGNMENT_FIELDS,
-        return_clause=_ASSIGNMENT_RETURN,
-        timeout_seconds=CLAIM_TIMEOUT_SECONDS,
-        **_MAPPING_CLAIM_FIELDS,
-    )
-
-
 def claim_sources_for_mapping(
     facility: str,
     ids_name: str,
     batch_size: int = 3,
 ) -> list[dict[str, Any]]:
-    """Claim sources where mapping_status = 'assigned' for a given IDS."""
+    """Claim sources that selected a home in ``ids_name`` and are not yet bound there.
+
+    A source is claimable by this IDS's pass while it carries a selected
+    ``MAPPING_CANDIDATE`` edge into the IDS and no ``MAPS_TO_IMAS`` binding into
+    it. A source with homes in two IDSs is therefore claimed once by each
+    IDS's pass, and a pass skips a source it has already bound.
+    """
     return claim_batch(
         "SignalSource",
         facility=facility,
         status_predicate=(
-            "n.mapping_status = 'assigned' AND n.mapping_target_ids = $ids_name"
+            "EXISTS { (n)-[c:MAPPING_CANDIDATE]->(:IMASNode) "
+            "WHERE c.route = true AND c.ids = $ids_name } "
+            "AND NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode {ids: $ids_name}) }"
         ),
         status_params={"ids_name": ids_name},
         batch_size=batch_size,
@@ -335,28 +314,87 @@ def claim_sources_for_candidates(
     )
 
 
-def set_mapping_status(source_id: str, status: str, **props: Any) -> None:
-    """Set mapping_status on a source and clear the claim."""
-    set_clauses = [
-        "sg.mapping_status = $status",
-        "sg.mapping_claimed_at = null",
-        "sg.mapping_claim_token = null",
-    ]
-    params: dict[str, Any] = {"id": source_id, "status": status}
+def record_mapping_verdict(
+    source_id: str,
+    disposition: str,
+    evidence: str,
+) -> None:
+    """Record a chosen ``none`` verdict without touching ``mapping_status``.
 
-    for key, val in props.items():
-        param_name = f"p_{key}"
-        set_clauses.append(f"sg.mapping_{key} = ${param_name}")
-        params[param_name] = val
-
+    A verdict that names no listed path still deserves its disposition and
+    reasoning recorded, so a later run neither claims nor re-asks the source.
+    ``mapping_status`` is a phase summary — assigned, mapped, validated — and
+    holds no disposition value, so a ``none`` verdict leaves it untouched.
+    """
     with GraphClient() as gc:
         gc.query(
-            f"""
-            MATCH (sg:SignalSource {{id: $id}})
-            SET {", ".join(set_clauses)}
+            """
+            MATCH (sg:SignalSource {id: $id})
+            SET sg.mapping_disposition = $disposition,
+                sg.mapping_evidence = $evidence,
+                sg.mapping_claimed_at = null,
+                sg.mapping_claim_token = null
             """,
-            **params,
+            id=source_id,
+            disposition=disposition,
+            evidence=evidence,
         )
+
+
+def refresh_mapping_status(source_id: str, ids_name: str) -> str | None:
+    """Set mapping_status for a source from its selected homes; clear its claim.
+
+    The single owner of the ``assigned``/``mapped``/``validated`` rule. Both
+    stages call it at the end of a pass and neither writes a status literal of
+    its own. ``ids_name`` names the IDS the calling pass just handled, which is
+    what separates the two stages at the same graph state:
+
+    - ``validated`` once every IDS of the source's selected
+      ``MAPPING_CANDIDATE`` edges carries a ``MAPS_TO_IMAS`` binding — written
+      by the validate stage only after an IDS persists its bindings;
+    - ``mapped`` while the pass's own IDS is one of the unbound IDSs, i.e. its
+      field mappings have been generated but its bindings are not yet written;
+      this is what ``has_pending_validation_work`` selects;
+    - ``assigned`` while some selected IDS other than this pass's own is
+      unbound, so a source mapped in two IDSs is not called validated when only
+      one of them has been validated.
+
+    ``mapping_status`` is left untouched when the source has no selected edge.
+    The claim is cleared in every case, so a finished pass releases the source
+    for the same IDS's next pass and for the other IDSs' passes.
+
+    Args:
+        source_id: ``SignalSource`` ID whose summary is refreshed.
+        ids_name: IDS the calling pass just handled.
+
+    Returns:
+        The status written, or the source's unchanged status when it has no
+        selected edge.
+    """
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sg:SignalSource {id: $id})
+            OPTIONAL MATCH (sg)-[c:MAPPING_CANDIDATE]->(:IMASNode)
+              WHERE c.route = true
+            WITH sg, [i IN collect(DISTINCT c.ids) WHERE i IS NOT NULL] AS sel_ids
+            WITH sg, sel_ids,
+                 [i IN sel_ids WHERE NOT EXISTS {
+                     (sg)-[:MAPS_TO_IMAS]->(:IMASNode {ids: i})
+                 }] AS unbound
+            SET sg.mapping_status = CASE
+                    WHEN size(sel_ids) = 0 THEN sg.mapping_status
+                    WHEN size(unbound) = 0 THEN 'validated'
+                    WHEN $ids_name IN unbound THEN 'mapped'
+                    ELSE 'assigned' END,
+                sg.mapping_claimed_at = null,
+                sg.mapping_claim_token = null
+            RETURN sg.mapping_status AS status
+            """,
+            id=source_id,
+            ids_name=ids_name,
+        )
+        return rows[0]["status"] if rows else None
 
 
 def release_mapping_claim(source_id: str) -> None:
@@ -369,26 +407,74 @@ def release_mapping_claims_batch(source_ids: list[str]) -> None:
     release_claims_batch("SignalSource", source_ids, **_MAPPING_CLAIM_FIELDS)
 
 
+def claim_sources_for_escalated(
+    facility: str,
+    ids_names: list[str] | None = None,
+    domains: list[str] | None = None,
+    batch_size: int = 20,
+) -> list[dict[str, Any]]:
+    """Claim escalated sources whose shortlist the reasoning seat must choose from.
+
+    A source is claimable while its ``candidate_route`` is ``escalated`` and it
+    carries at least one candidate the map run can target. ``ids_names``
+    restricts the claim to sources with a candidate in one of the run's target
+    IDSs. Choosing marks the picked edges ``selected`` and sets the route to
+    ``selected`` in one statement, so a chosen source drops out of this set and
+    is claimed next by the per-IDS map pass.
+    """
+    domain_filter, domain_params = _domain_filter(domains)
+    params: dict[str, Any] = dict(domain_params)
+    ids_clause = ""
+    if ids_names:
+        ids_clause = (
+            "AND EXISTS { (n)-[r:MAPPING_CANDIDATE]->(:IMASNode) "
+            "WHERE r.ids IN $ids_names } "
+        )
+        params["ids_names"] = list(ids_names)
+    return claim_batch(
+        "SignalSource",
+        facility=facility,
+        status_predicate=(
+            "n.candidate_route = 'escalated' "
+            "AND n.mapping_disposition IS NULL " + ids_clause + domain_filter
+        ),
+        status_params=params,
+        batch_size=batch_size,
+        return_fields=_ASSIGNMENT_FIELDS,
+        return_clause=_ASSIGNMENT_RETURN,
+        timeout_seconds=CLAIM_TIMEOUT_SECONDS,
+        **_MAPPING_CLAIM_FIELDS,
+    )
+
+
 def has_pending_assignment_work(
     facility: str,
     domains: list[str] | None = None,
 ) -> bool:
-    """Check if enriched sources without mapping_status exist."""
+    """Check if escalated sources with a candidate remain unselected."""
     domain_filter, domain_params = _domain_filter(domains)
     return has_pending(
         "SignalSource",
         facility=facility,
-        status_predicate=_ASSIGNMENT_STATUS + domain_filter,
+        status_predicate=(
+            "n.candidate_route = 'escalated' "
+            "AND n.mapping_disposition IS NULL "
+            "AND EXISTS { (n)-[:MAPPING_CANDIDATE]->(:IMASNode) } " + domain_filter
+        ),
         status_params=domain_params,
     )
 
 
 def has_pending_mapping_work(facility: str) -> bool:
-    """Check if assigned-but-unmapped sources exist."""
+    """Check if a selected home of any source in the facility is unbound."""
     return has_pending(
         "SignalSource",
         facility=facility,
-        status_predicate="n.mapping_status = 'assigned'",
+        status_predicate=(
+            "EXISTS { (n)-[c:MAPPING_CANDIDATE]->(ip:IMASNode) "
+            "WHERE c.route = true "
+            "AND NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode {ids: ip.ids}) } }"
+        ),
     )
 
 
@@ -425,7 +511,10 @@ def reset_mapping_state(
     params: dict[str, Any] = {"facility": facility}
     ids_filter = ""
     if ids_names:
-        ids_filter = "AND sg.mapping_target_ids IN $ids_names"
+        ids_filter = (
+            "AND EXISTS { (sg)-[:MAPPING_CANDIDATE]->(ip:IMASNode) "
+            "WHERE ip.ids IN $ids_names }"
+        )
         params["ids_names"] = ids_names
 
     with GraphClient() as gc:
@@ -437,9 +526,8 @@ def reset_mapping_state(
             SET sg.mapping_status = null,
                 sg.mapping_claimed_at = null,
                 sg.mapping_claim_token = null,
-                sg.mapping_target_ids = null,
-                sg.mapping_target_path = null,
-                sg.mapping_target_type = null
+                sg.mapping_disposition = null,
+                sg.mapping_evidence = null
             RETURN count(sg) AS cleared
             """,
             **params,
@@ -531,110 +619,128 @@ async def assign_worker(
     on_progress: Callable | None = None,
     **_kwargs,
 ) -> None:
-    """Assign sources to IMAS target paths via LLM, per-IDS batch.
+    """Choose target paths for each escalated source from its own shortlist.
 
-    For each IDS target, filters sources to those matching the IDS's
-    physics domains, then calls aassign_targets.
+    Claim loop: claims escalated sources, reads each one's candidate shortlist
+    through :func:`read_candidates`, asks the reasoning seat which listed paths
+    hold its values, and marks the picked edges selected through
+    :func:`select_candidates`, which sets the source's route to ``selected``.
+    A source the candidate stage already selected carries its marked edges and
+    is not re-asked; a ``no_candidate`` source is skipped upstream. A source
+    whose choice names no listed path has its disposition and reasoning
+    recorded as its mapping evidence, so a later run does not claim and
+    re-ask it.
     """
     wlog = WorkerLogAdapter(logger, worker_name="assign_worker")
 
-    from imas_codex.ids.mapping import aassign_targets
+    from imas_codex.ids.graph_ops import read_candidates, select_candidates
+    from imas_codex.ids.mapping import achoose_targets, escalated_shortlist
 
-    for ids_name in state.target_ids_list:
-        if state.should_stop():
-            break
+    shortlist_size = get_mapping_route_thresholds().shortlist_size
 
-        context = state.contexts.get(ids_name)
-        if not context:
-            wlog.warning("No context for %s, skipping", ids_name)
-            continue
+    # Sources whose choice was refused or that picked no path are retried on a
+    # later run, not within this one: a stable `handled` set keeps the claim
+    # loop from re-reading a source that keeps returning the same answer.
+    handled: set[str] = set()
 
-        # Filter sources to IDS-relevant physics domains
-        ids_domains = set(context.get("target_domains", []))
-        all_groups = context.get("groups", [])
-        if ids_domains:
-            groups = [g for g in all_groups if g.get("physics_domain") in ids_domains]
-        else:
-            groups = all_groups
-
-        if not groups:
-            wlog.info("No domain-matched sources for %s, skipping", ids_name)
-            continue
-
-        # Build a scoped context with only domain-matched sources
-        scoped_context = {**context, "groups": groups}
-
-        if on_progress:
-            on_progress(
-                f"assigning {ids_name} ({len(groups)} sources)",
-                state.assign_stats,
-            )
-
-        wlog.info(
-            "Assigning %d/%d sources for %s (domains=%s)",
-            len(groups),
-            len(all_groups),
-            ids_name,
-            sorted(ids_domains),
+    while not state.should_stop():
+        sources = await asyncio.to_thread(
+            claim_sources_for_escalated,
+            state.facility,
+            state.target_ids_list,
+            batch_size=1,
         )
+        sources = [s for s in sources if s["id"] not in handled]
+        if not sources:
+            state.assign_phase.record_idle()
+            if state.assign_phase.done:
+                break
+            await asyncio.sleep(2.0)
+            continue
 
-        try:
-            sections = await aassign_targets(
-                state.facility,
-                ids_name,
-                scoped_context,
-                model=state.model,
-                cost=state.cost,
-            )
-            state.assignments[ids_name] = sections
-            assigned_count = len(sections.assignments)
-            state.sources_assigned += assigned_count
-            state.assign_stats.processed += assigned_count
+        state.assign_phase.record_activity(len(sources))
 
-            # Update graph: set mapping_status='assigned' on each source
-            for a in sections.assignments:
-                await asyncio.to_thread(
-                    set_mapping_status,
-                    a.source_id,
-                    "assigned",
-                    target_ids=ids_name,
-                    target_path=a.imas_target_path,
-                    target_type=a.target_type.value,
-                )
-
-            wlog.info(
-                "Assigned %d sources for %s, cost $%.4f",
-                assigned_count,
-                ids_name,
-                state.cost.total_usd,
+        with GraphClient() as gc:
+            candidate_edges = await asyncio.to_thread(
+                read_candidates, [s["id"] for s in sources], gc
             )
 
-            if on_progress:
-                stream_items = [
-                    {
-                        "source_id": a.source_id,
-                        "target_path": a.imas_target_path,
-                        "physics_domain": next(
-                            (
-                                g.get("physics_domain", "")
-                                for g in groups
-                                if g["id"] == a.source_id
-                            ),
-                            "",
-                        ),
-                    }
-                    for a in sections.assignments
-                ]
-                on_progress(
-                    f"{assigned_count} assigned for {ids_name}",
-                    state.assign_stats,
-                    stream_items,
+            for source in sources:
+                if state.should_stop():
+                    return
+                source_id = source["id"]
+                handled.add(source_id)
+
+                shortlist = escalated_shortlist(
+                    candidate_edges.get(source_id, []), shortlist_size
+                )
+                if not shortlist:
+                    wlog.warning(
+                        "Escalated %s has no candidate to choose from, releasing",
+                        source_id,
+                    )
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+
+                try:
+                    choice = await achoose_targets(
+                        state.facility,
+                        source,
+                        shortlist,
+                        model=state.model,
+                        cost=state.cost,
+                    )
+                except Exception as e:
+                    wlog.error("Choice failed for %s: %s", source_id, e)
+                    state.assign_stats.errors += 1
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+
+                if not choice.paths:
+                    # Persist the verdict so the source is not claimed and
+                    # re-asked, and the reasoning seat not paid again, on a
+                    # later run. The disposition and its reasoning become the
+                    # source's mapping evidence; the candidate route is left
+                    # as the candidate stage wrote it.
+                    await asyncio.to_thread(
+                        record_mapping_verdict,
+                        source_id,
+                        choice.disposition.value,
+                        choice.reasoning,
+                    )
+                    state.assign_stats.processed += 1
+                    wlog.info(
+                        "No listed path for %s: disposition=%s recorded",
+                        source_id,
+                        choice.disposition.value,
+                    )
+                    continue
+
+                marked = await asyncio.to_thread(
+                    select_candidates, source_id, choice.paths, gc
+                )
+                state.sources_assigned += 1
+                state.assign_stats.processed += 1
+
+                wlog.info(
+                    "Selected %d paths for %s, cost $%.4f",
+                    marked,
+                    source_id,
+                    state.cost.total_usd,
                 )
 
-        except Exception as e:
-            wlog.error("Assignment failed for %s: %s", ids_name, e)
-            state.assign_stats.errors += 1
-            raise
+                if on_progress:
+                    on_progress(
+                        f"{source_id} -> {marked} selected",
+                        state.assign_stats,
+                        [
+                            {
+                                "source_id": source_id,
+                                "target_path": ", ".join(choice.paths),
+                                "physics_domain": source.get("physics_domain", ""),
+                            }
+                        ],
+                    )
 
     state.assign_phase.mark_done()
 
@@ -644,19 +750,27 @@ async def map_worker(
     on_progress: Callable | None = None,
     **_kwargs,
 ) -> None:
-    """Claim assigned sources and generate field-level mappings.
+    """Claim each IDS's selected sources and generate field-level mappings.
 
-    Claim loop: claims batches of assigned sources from the graph,
-    generates mappings per source, and sets mapping_status='mapped'.
+    Claim loop: for each IDS target, claims sources that selected a home there
+    and are not yet bound there, builds one :class:`TargetAssignment` per
+    selected section from their selected edges, generates a mapping per
+    section, and refreshes each source's ``mapping_status`` summary. A source
+    already handled this run is not re-claimed, so a source with selected edges
+    in two IDSs is handled once by each IDS's pass.
     """
     wlog = WorkerLogAdapter(logger, worker_name="map_worker")
 
+    from imas_codex.ids.graph_ops import read_candidates
     from imas_codex.ids.mapping import (
         _acall_llm,
         _build_messages,
         _prepare_section_context,
+        build_target_assignments,
     )
     from imas_codex.ids.models import SignalMappingBatch
+
+    handled: set[tuple[str, str]] = set()
 
     while not state.should_stop():
         found_any = False
@@ -664,20 +778,40 @@ async def map_worker(
             if state.should_stop():
                 break
 
-            sources = await asyncio.to_thread(
+            claimed = await asyncio.to_thread(
                 claim_sources_for_mapping,
                 state.facility,
                 ids_name,
                 batch_size=3,
             )
+            # ``handled`` is keyed by (IDS, source): the same source claimed by
+            # this IDS's pass is still eligible for every other IDS's pass,
+            # and the claim this pass cannot use is released at once.
+            sources = [s for s in claimed if (ids_name, s["id"]) not in handled]
+            skipped = [s["id"] for s in claimed if (ids_name, s["id"]) in handled]
+            if skipped:
+                await asyncio.to_thread(release_mapping_claims_batch, skipped)
             if not sources:
                 continue
 
             found_any = True
+            handled.update((ids_name, s["id"]) for s in sources)
             state.map_phase.record_activity(len(sources))
 
             context = state.contexts.get(ids_name, {})
-            sections = state.assignments.get(ids_name)
+
+            with GraphClient() as gc:
+                candidate_edges = await asyncio.to_thread(
+                    read_candidates, [s["id"] for s in sources], gc
+                )
+            built = build_target_assignments(
+                ids_name, [s["id"] for s in sources], candidate_edges
+            )
+            existing = state.assignments.get(ids_name)
+            if existing is None:
+                state.assignments[ids_name] = built
+            else:
+                existing.assignments.extend(built.assignments)
 
             for source in sources:
                 if state.should_stop():
@@ -685,97 +819,97 @@ async def map_worker(
                     return
 
                 source_id = source["id"]
-                target_path = source.get("target_path", "")
 
-                # Find the assignment object
-                assignment = None
-                if sections:
-                    assignment = next(
-                        (a for a in sections.assignments if a.source_id == source_id),
-                        None,
-                    )
+                # One assignment per selected section: a source with selected
+                # nodes in two sections of this IDS is mapped once per section.
+                assignments = [a for a in built.assignments if a.source_id == source_id]
 
-                if not assignment:
+                if not assignments:
                     wlog.warning(
-                        "No assignment found for %s, releasing",
+                        "No selected candidate for %s in %s, releasing",
                         source_id,
+                        ids_name,
                     )
                     await asyncio.to_thread(release_mapping_claim, source_id)
                     continue
 
-                try:
-                    prep = await asyncio.to_thread(
-                        _prepare_section_context,
-                        state.facility,
-                        ids_name,
-                        assignment,
-                        context,
-                        gc=GraphClient(),
-                        dd_version=context.get("dd_version"),
-                    )
-                    messages = _build_messages(
-                        "signal_mapping_system",
-                        prep["prompt"],
-                    )
-                    batch = await _acall_llm(
-                        messages,
-                        SignalMappingBatch,
-                        model=state.model,
-                        step_name=f"map_signals_{target_path}",
-                        cost=state.cost,
-                    )
-
-                    state.mapping_batches.setdefault(ids_name, []).append(
-                        (assignment, batch),
-                    )
-                    state.sources_mapped += 1
-                    state.bindings_total += len(batch.mappings)
-                    state.map_stats.processed += 1
-
-                    await asyncio.to_thread(
-                        set_mapping_status,
-                        source_id,
-                        "mapped",
-                    )
-
-                    wlog.info(
-                        "Mapped %s -> %s: %d bindings",
-                        source_id,
-                        target_path,
-                        len(batch.mappings),
-                    )
-
-                    if on_progress:
-                        sg = next(
-                            (
-                                g
-                                for g in context.get("groups", [])
-                                if g["id"] == source_id
-                            ),
-                            {},
+                for assignment in assignments:
+                    target_path = assignment.imas_target_path
+                    try:
+                        prep = await asyncio.to_thread(
+                            _prepare_section_context,
+                            state.facility,
+                            ids_name,
+                            assignment,
+                            context,
+                            gc=GraphClient(),
+                            dd_version=context.get("dd_version"),
                         )
-                        on_progress(
-                            f"{source_id} -> {target_path}",
-                            state.map_stats,
-                            [
-                                {
-                                    "source_id": source_id,
-                                    "target_path": target_path,
-                                    "physics_domain": sg.get("physics_domain", ""),
-                                    "bindings": len(batch.mappings),
-                                }
-                            ],
+                        messages = _build_messages(
+                            "signal_mapping_system",
+                            prep["prompt"],
+                        )
+                        batch = await _acall_llm(
+                            messages,
+                            SignalMappingBatch,
+                            model=state.model,
+                            step_name=f"map_signals_{target_path}",
+                            cost=state.cost,
                         )
 
-                except Exception as e:
-                    wlog.error("Mapping failed for %s: %s", source_id, e)
-                    await asyncio.to_thread(release_mapping_claim, source_id)
-                    state.map_stats.errors += 1
-                    raise
+                        state.mapping_batches.setdefault(ids_name, []).append(
+                            (assignment, batch),
+                        )
+                        state.sources_mapped += 1
+                        state.bindings_total += len(batch.mappings)
+                        state.map_stats.processed += 1
+
+                        await asyncio.to_thread(
+                            refresh_mapping_status, source_id, ids_name
+                        )
+
+                        wlog.info(
+                            "Mapped %s -> %s: %d bindings",
+                            source_id,
+                            target_path,
+                            len(batch.mappings),
+                        )
+
+                        if on_progress:
+                            sg = next(
+                                (
+                                    g
+                                    for g in context.get("groups", [])
+                                    if g["id"] == source_id
+                                ),
+                                {},
+                            )
+                            on_progress(
+                                f"{source_id} -> {target_path}",
+                                state.map_stats,
+                                [
+                                    {
+                                        "source_id": source_id,
+                                        "target_path": target_path,
+                                        "physics_domain": sg.get("physics_domain", ""),
+                                        "bindings": len(batch.mappings),
+                                    }
+                                ],
+                            )
+
+                    except Exception as e:
+                        wlog.error("Mapping failed for %s: %s", source_id, e)
+                        await asyncio.to_thread(release_mapping_claim, source_id)
+                        state.map_stats.errors += 1
+                        raise
 
         if not found_any:
             state.map_phase.record_idle()
-            if state.map_phase.done:
+            # Nothing left to claim: every selected source has been handled and
+            # the assign stage can add no more. Complete deterministically
+            # rather than waiting on a binding that only validation writes.
+            if state.assign_phase.done or state.map_phase.done:
+                state.map_phase.mark_done()
                 break
             await asyncio.sleep(2.0)
 
@@ -919,12 +1053,14 @@ async def validate_worker(
                     status,
                 )
 
-            # Mark sources as validated in graph
+            # Refresh each source's status through the single owner. It writes
+            # 'validated' only once every selected IDS of the source is bound,
+            # and leaves 'assigned' while another selected IDS is still unbound.
             for a, _ in batches_for_ids:
                 await asyncio.to_thread(
-                    set_mapping_status,
+                    refresh_mapping_status,
                     a.source_id,
-                    "validated",
+                    ids_name,
                 )
 
             wlog.info(
@@ -1129,6 +1265,22 @@ async def candidate_worker(
                     )
                     await asyncio.to_thread(release_mapping_claim, source_id)
                     continue
+
+                # A source with no candidate is skipped; its best path and
+                # probability are logged as the evidence for the skip.
+                if decision.decision == "no_candidate":
+                    best = max(
+                        all_judgments,
+                        key=lambda j: j.p_same_quantity,
+                        default=None,
+                    )
+                    wlog.info(
+                        "No candidate for %s: best path %s "
+                        "(p_same_quantity=%s), skipping",
+                        source_id,
+                        best.path if best else None,
+                        f"{best.p_same_quantity:.3f}" if best else None,
+                    )
 
                 records = _candidate_records(
                     all_judgments, all_candidates, set(decision.selected)
