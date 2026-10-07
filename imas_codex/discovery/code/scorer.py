@@ -30,6 +30,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from imas_codex.discovery.base.reset import (
+    CODE_RELEVANCE_FIELDS as RELEVANCE_FIELDS,
+)
 from imas_codex.graph import GraphClient
 
 logger = logging.getLogger(__name__)
@@ -53,14 +56,56 @@ SCOPE_NOULS = (
     "maps_to_imas",
 )
 
-# decision question name -> CodeFile relevance field
+# ``RELEVANCE_FIELDS`` is the registry of every relevance field a CodeFile
+# carries, owned by ``discovery/base/reset.py`` so a reset and the decision arms
+# that write these fields read the same list.  It lives there because that
+# module is imported before the code package and importing the code package
+# from ``reset.py`` would close an import cycle.
+
+
+def _relevance_field(name: str) -> str:
+    """Return ``name`` spelled by the registry, refusing an unregistered field."""
+    if name not in RELEVANCE_FIELDS:
+        raise KeyError(f"{name!r} is not a registered relevance field")
+    return name
+
+
+# decision question name -> CodeFile relevance field.  Each field is resolved
+# through the registry, so a field the reset clears and the field the decision
+# arm writes are the same string and cannot drift.
 _RELEVANCE_FIELDS = {
-    "loads_diagnostic_data": "relevance_loads",
-    "processes_diagnostic_signals": "relevance_processes",
-    "describes_machine_or_diagnostics": "relevance_describes",
-    "maps_to_imas": "relevance_imas",
-    "is_simulation": "relevance_simulation",
+    "loads_diagnostic_data": _relevance_field("relevance_loads"),
+    "processes_diagnostic_signals": _relevance_field("relevance_processes"),
+    "describes_machine_or_diagnostics": _relevance_field("relevance_describes"),
+    "maps_to_imas": _relevance_field("relevance_imas"),
+    "is_simulation": _relevance_field("relevance_simulation"),
 }
+
+# The decision arm that produced a file's stored relevance, recorded on
+# ``relevance_stage``.  ``name`` is the names arm, which sets ``triaged``;
+# ``content`` is the content arm, which admits a file to ingestion.
+RELEVANCE_STAGE_NAME = "name"
+RELEVANCE_STAGE_CONTENT = "content"
+
+
+def relevance_predicate(
+    alias: str,
+    stage: str,
+    threshold_param: str = "$min_relevance",
+) -> str:
+    """The stage-and-relevance predicate every claim and has-work site shares.
+
+    Requires *alias*'s stored relevance to come from *stage* — the arm that set
+    the file's status — and compares its ``score_composite`` against
+    *threshold_param*.  Rendered from one owner, a file's status and the
+    relevance that carried it cannot drift apart between the claim, the
+    has-work check and the count.
+    """
+    return (
+        f"{alias}.relevance_stage = {stage!r} "
+        f"AND {alias}.score_composite >= {threshold_param}"
+    )
+
 
 # The content arm's graded Score questions and the CodeFile field each fills.
 # The stored value is the Score divided by its top level, so it lies in 0-1;
@@ -359,33 +404,6 @@ def recompute_stored_composites() -> dict[str, int]:
 
 
 # ---------------------------------------------------------------------------
-# Triage models (retained for the module's public re-exports)
-# ---------------------------------------------------------------------------
-
-
-class FileTriageResult(BaseModel):
-    """Legacy per-dimension triage shape, retained for module re-exports.
-
-    The code pipeline no longer produces these; triage now asks a decisions
-    model for typed relevance judgements.  The class is kept so
-    ``imas_codex.discovery.code`` and the prompt loader keep importing cleanly
-    until the package re-exports are retired.
-    """
-
-    path: str = Field(description="The file path (echo from input)")
-    description: str = Field(
-        default="",
-        description="Brief description of what the file likely contains (1 sentence)",
-    )
-
-
-class FileTriageBatch(BaseModel):
-    """Batch of triage results (retained for module re-exports)."""
-
-    results: list[FileTriageResult]
-
-
-# ---------------------------------------------------------------------------
 # Score models (description-only; relevance comes from the decisions model)
 # ---------------------------------------------------------------------------
 
@@ -536,7 +554,7 @@ def _group_files_by_parent(
 # ---------------------------------------------------------------------------
 
 
-def apply_triage_results(
+def apply_name_relevance(
     decisions: list[dict[str, Any]],
     file_id_map: dict[str, str],
     threshold: float | None = None,

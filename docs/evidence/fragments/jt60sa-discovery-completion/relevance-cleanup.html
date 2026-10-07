@@ -1,0 +1,105 @@
+<section>
+  <h2 id="relevance-cleanup">The dead triage models are retired and the four relevance defects are closed</h2>
+
+  <p id="relevance-cleanup-dead-models">
+    The triage models the decisions route replaced are gone.
+    <code>FileTriageResult</code> and <code>FileTriageBatch</code> are removed
+    from <code>imas_codex/discovery/code/scorer.py</code>, and
+    <code>imas_codex/discovery/code/__init__.py</code> no longer re-exports
+    them or <code>apply_triage_results</code>. In
+    <code>imas_codex/llm/prompt_loader.py</code> the
+    <code>file_triage_schema</code> provider and the
+    <code>file_score_dimensions</code> provider are removed with their
+    <code>_SCHEMA_PROVIDERS</code> registrations; no prompt reads either key.
+    The legacy symbol <code>apply_triage_results</code> was <em>live</em> — its
+    only caller is <code>triage_worker</code>, which persists the names-arm
+    relevance — so retiring the name while keeping the pipeline intact meant
+    renaming the function to <code>apply_name_relevance</code> (behaviour
+    unchanged), not deleting it. <code>file_scoring_schema</code> stays: the
+    code scorer prompt still needs it.
+  </p>
+
+  <p id="relevance-cleanup-predicate">
+    The relevance-stage predicate has one owner,
+    <code>relevance_predicate(alias, stage, threshold_param)</code> beside the
+    <code>score_composite</code> comparison in
+    <code>imas_codex/discovery/code/scorer.py</code>, with the stage names
+    <code>RELEVANCE_STAGE_NAME</code> and <code>RELEVANCE_STAGE_CONTENT</code>.
+    Every claim, has-work and count site now renders it: the triage-stage
+    enrichment claim (<code>claim_files_for_enrichment</code>) and its
+    has-work check (<code>has_pending_enrich_work</code>), the
+    <code>has_pending_code_work</code> ingest predicate, the ingestion claim in
+    <code>workers.py</code>, and the <code>pending_enrich</code>,
+    <code>pending_ingest</code> and chunk-<code>embed</code> counts in
+    <code>parallel.py</code>. A file's status and the arm that set it can no
+    longer disagree between the claim, the has-work check and the count.
+  </p>
+
+  <p id="relevance-cleanup-pairing">
+    In <code>score_worker</code> each content decision is paired with its own
+    file by path rather than by position. The old
+    <code>zip(files, content_decisions)</code> shifted every later file onto
+    the wrong decision as soon as one decision failed mid-batch, so a refused
+    file could be described on another file's decision and the last file
+    dropped. <code>test_content_arm_pairs_each_description_with_its_own_file</code>
+    fails the first file's decision and asserts the two survivors are each
+    described as themselves. Run against a copy that zips files onto the
+    successful decisions again, the test exits non-zero with
+    <code>/analysis/src/refused.f</code> — a file its decision did not admit —
+    as the first described file.
+  </p>
+
+  <p id="relevance-cleanup-reset-chunks">
+    A code reset to <code>discovered</code> or <code>triaged</code> now deletes
+    the reset files' <code>CodeExample</code> and <code>CodeChunk</code> nodes
+    through a <code>post_cypher</code> on those <code>ResetSpec</code>s in
+    <code>imas_codex/discovery/base/reset.py</code>. The traversal is the one
+    <code>clear_facility_code</code> uses
+    (<code>CodeFile &lt;-FROM_FILE- CodeExample -HAS_CHUNK-&gt; CodeChunk</code>),
+    scoped to the files being reset; <code>collect()</code> drops the nulls an
+    optional match yields and <code>WITH DISTINCT n</code> keeps the trailing
+    <code>count(n)</code> a count of files rather than of deleted examples. The
+    <code>scored</code> reset, which is not below ingestion, is untouched.
+    <code>tests/discovery/test_code_reset_chunks.py</code> pins the rendered
+    Cypher.
+  </p>
+
+  <p id="relevance-cleanup-registry">
+    One registry, <code>CODE_RELEVANCE_FIELDS</code> in
+    <code>imas_codex/discovery/base/reset.py</code>, holds the relevance fields
+    a <code>CodeFile</code> carries; the code scorer reads it as
+    <code>RELEVANCE_FIELDS</code>, resolves each decision question's field
+    through it, and the <code>discovered</code> reset clears it, so the fields
+    the decision arms write and the fields a reset clears cannot drift. A field
+    the registry does not carry fails at import rather than storing a stale
+    name. It lives in <code>reset.py</code> because that module is imported
+    before the code package and importing the code package from it would close
+    an import cycle.
+  </p>
+
+  <p id="relevance-cleanup-explain">
+    Every Cypher statement this node changed was compiled with
+    <code>EXPLAIN</code> against the live graph: <strong>16 statements, 16
+    ok, 0 failed</strong>. The set covers the three graph_ops statements, the
+    six index/claim/count statements in <code>parallel.py</code>'s stats query,
+    the ingestion claim and its read-back, and both rendered reset queries.
+  </p>
+
+  <p id="relevance-cleanup-orphan-report">
+    Reported, not deleted: <strong>1,252</strong> <code>CodeFile</code> nodes
+    workstation-wide are below <code>ingested</code> yet still carry
+    <code>CodeChunk</code> nodes — tcv 826 (488 skipped, 255 scored, 75 failed,
+    8 enriched), jet 373 (340 failed, 19 enriched, 13 scored, 1 skipped) and
+    jt-60sa 53 (23 skipped, 22 scored, 8 triaged). These are the residue a
+    pre-fix reset left behind; the new cascade removes it for the files a reset
+    touches, and this count is the remaining at-rest population.
+  </p>
+
+  <figure>
+    <img src="/imas-codex/figures/jt60sa-discovery-completion/relevance-cleanup/orphaned-chunks-by-facility.svg"
+         alt="CodeFiles below ingested that still carry CodeChunks, by facility"/>
+    <figcaption>CodeFiles below <code>ingested</code> that still carry
+    CodeChunk nodes, per facility, measured 2026-10-07 before the reset cascade
+    lands for those files.</figcaption>
+  </figure>
+</section>

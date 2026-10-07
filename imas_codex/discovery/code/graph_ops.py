@@ -29,6 +29,11 @@ from imas_codex.discovery.base.claims import (
     reset_stale_claims,
     retry_on_deadlock,
 )
+from imas_codex.discovery.code.scorer import (
+    RELEVANCE_STAGE_CONTENT,
+    RELEVANCE_STAGE_NAME,
+    relevance_predicate,
+)
 from imas_codex.graph import GraphClient
 from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -412,7 +417,7 @@ def claim_files_for_enrichment(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
-              AND sf.score_composite >= $min_relevance
+              AND {relevance_predicate("sf", RELEVANCE_STAGE_NAME)}
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
               {excluded_clause}
@@ -699,7 +704,7 @@ def has_pending_enrich_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'triaged'
-              AND sf.score_composite >= $min_relevance
+              AND {relevance_predicate("sf", RELEVANCE_STAGE_NAME)}
               AND coalesce(sf.is_enriched, false) = false
               {prefix_clause}
               {excluded_clause}
@@ -739,8 +744,7 @@ def has_pending_code_work(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
-              AND sf.relevance_stage = 'content'
-              AND sf.score_composite >= $min_relevance
+              AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT)}
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}
