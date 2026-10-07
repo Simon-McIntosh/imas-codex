@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -694,6 +694,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261006T221617813366-review-of-edge-ownership" data-who="reckon-build" data-when="2026-10-06T22:24:56.665Z">
     <div class="r-comment-body"><p>Independent re-review attached to r-20261006T214555828205-edge-ownership at reviewed_base_sha 1084aceb3b1aa23032c0e5fc1072841688acc4d7 / reviewed_head_sha ec3db385757bf2a2cc308366a572c9876f86c953 covering the two commits it gained since the prior review (a99a9d93, ec3db3857) over five files — six dimensions scored over 0..20 (goal_fidelity 20, evidence 20, scope_discipline 17, durability 20, fit 20, reuse 20; total 117), both prior follow-on findings verified repaired, added_failure_count 0, one follow-on finding (the e2e mock file sits outside the reviewed node's declared write paths and is accepted by the continuation dispatch).</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T001634271791-review-of-map-context-reads-candidates" data-who="reckon-build" data-when="2026-10-07T00:28:19.751Z">
+    <div class="r-comment-body"><p>review of run r-20261007T000057100973-map-context-reads-candidates stored parsed at both granted paths, total 93/120 (goal_fidelity 14, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 17), added_failure_count 0; one blocking finding — _prepare_section_context was not repointed to the new source_candidates shape and raises AttributeError on the live map-worker path.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261006T2316-s11-dispatch" data-who="reckon-build" data-when="2026-10-06T23:16:00Z">
     <div class="r-comment-body"><p>Dispatched <code>cross-ids-siblings</code> (run <code>r-20261006T231514344990-cross-ids-siblings</code>) with the unreviewed-plan waiver. The stored review at version 66 covers §11 as dispatched, and its one finding was answered as acted. The only uncovered unit was §8, whose version-67 edit is that finding's fix: the claim-predicate exception and the full route-count census. A review of the current content runs before §8's next node is dispatched.</p></div>
