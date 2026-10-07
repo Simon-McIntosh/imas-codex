@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's after_suite gate.log (54 passed, EXIT=0) and a base arm this review ran at 8a63ba5cd (47 passed, EXIT=0) on this allocation; the reviewed manifest declares no baseline_suite arm. Added-failure set is empty: every head failure ids set is empty and the head adds seven tests, all passing.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_relevance.py tests/discovery/test_code_facet_admission.py tests/discovery/test_llm_decisions.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T104014203141-review-of-content-score-questions/after.log",
+    "revision": "b62160566b476ff0ac44ff414a9b9d682afab85e"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_relevance.py tests/discovery/test_code_facet_admission.py tests/discovery/test_llm_decisions.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T104014203141-review-of-content-score-questions/baseline.log",
+    "revision": "8a63ba5cd761af352621577aa4e2322fc1054a53"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py:score_worker",
+    "imas_codex/discovery/code/scorer.py:_relevance_item",
+    "imas_codex/discovery/code/scorer.py:build_triage_questions"
+  ],
+  "completed_at": "2026-10-07T10:48:20.367Z",
+  "dispatched_at": "2026-10-07T10:40:24Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T102558380763-content-score-questions/gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's first line names '# rev 8a63ba5cd' (the base) but the run it records is the head: it collects 54 items including test_content_arm_asks_every_content_question, which does not exist at 8a63ba5cd (base arm is 47 tests). negative-control.log carries the same base-rev header. A later reader trusting the header would read the gate as pre-change; the tested content is the head at b62160566."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/content-score-questions.html",
+      "line": "88",
+      "severity": "follow-on",
+      "text": "follow-on: the done-when requires the live check to record each facet and the grade with a confidence above zero on five files; the run's own live-check.log exits 2 with ABSENCE [('.../mgset0.f', 'relevance_grade')] because that file's grade returned confidence 0 while four of five did not. The attribution (the endpoint returned confidence 0 with a real distribution, reproduced on every call) is corroborated by the node's own raw probe (raw-one.log shows probabilities summing to 1 and \"confidence\": 0), so it is an endpoint/model matter rather than a recorder defect - but the done-when bullet is unmet as written and the fragment records it honestly rather than concealing it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/discovery/code/workers.py:score_worker, imas_codex/discovery/code/scorer.py:_relevance_item, imas_codex/discovery/code/scorer.py:build_triage_questions",
+    "diff": "I read both commits against base 8a63ba5cd: one production change in workers.py (with_content=True), one recorder guard and a small reflow in scorer.py, a parametrised refusal test, a request/persisted-facets test, and a new evidence fragment; no graph write and no discover run.",
+    "done_when": "The four done-when bullets that this node owns are met: the request test, the persisted-facets assertion, the refusal test and the reproducing negative control, with a green gate (54 passed). The fifth - the live check recording each facet and the grade with confidence above zero on five files - is met on four of five files and unmet on mgset0.f's grade.",
+    "goal": "The node asks the content stage its five Score questions (workers.py:456) and _relevance_item fails closed on an unanswered facet or grade (scorer.py:344-357); delivered, with the live-check grade-confidence caveat treated as a follow-on.",
+    "manifest": "The reviewed manifest states base 8a63ba5cd, head b62160566, the two commits, the changed paths, the gate and the negative control; it declares no baseline_suite/after_suite JSON arms, so this review supplied the base arm.",
+    "write_paths": "All five changed files lie inside the declared write paths; no out-of-scope path is touched."
+  },
+  "justifications": {
+    "durability": "the negative control genuinely reddens the request test rather than a trivial path; the recorder guard is exercised by a parametrised test over all five questions and a positive test that a complete answer records the facets; if the guard fires in the worker the batch exception path releases the claims (workers.py:638-643) so no zero is written, which is the fail-closed behaviour the plan names.",
+    "evidence": "the gate is green (54 passed, EXIT=0) and I re-ran both arms independently on this allocation: base 8a63ba5cd 47 passed EXIT=0, head b62160566 54 passed EXIT=0, so the added-failure set is empty. The negative control reproduces (mutating workers.py to build_triage_questions() makes test_content_arm_asks_every_content_question fail with 'content request omitted data_access_depth', EXIT=1). The live check is honest but exits 2: it flags the grade's confidence-0 absence on mgset0.f, which is one done-when bullet unmet; the same run's gate.log and negative-control.log headers name rev 8a63ba5cd (the base) although both ran the head content.",
+    "fit": "two conventional commits, both with substantive bodies ('fix(discovery): ask the content stage its five Score questions', 'docs(evidence): record the content-stage Score questions and their live check'), zero AI attribution lines, and mechanism names (with_content, FACET_QUESTION_FIELDS, RELEVANCE_GRADE_QUESTION, _content_top_levels) carrying no plan, sprint or ticket identifier.",
+    "goal_fidelity": "the node goal is that the content stage ask its five Score questions and refuse to persist an unasked one; score_worker now builds build_triage_questions(with_content=True) (imas_codex/discovery/code/workers.py:456) and _relevance_item raises for a content-stage answer set missing any facet question or relevance_grade (imas_codex/discovery/code/scorer.py:344-357), so both halves land. One done-when bullet is not fully met: the live check records the grade with confidence above zero on four of five files, and mgset0.f's grade returns confidence 0.",
+    "reuse": "the change reuses the existing owners: build_triage_questions(with_content=True) (scorer.py:178), the existing FACET_QUESTION_FIELDS/RELEVANCE_GRADE_QUESTION constants and _content_top_levels, and the existing apply_file_scores write path; no second question set or second recorder is forked.",
+    "scope_discipline": "the diff base..head touches five files and every one is inside the declared write paths (imas_codex/discovery/code/workers.py, imas_codex/discovery/code/scorer.py, tests/discovery/test_code_relevance.py, tests/discovery/test_code_facet_admission.py, docs/evidence/fragments/jt60sa-discovery-completion/content-score-questions.html); no out-of-scope path is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 8a63ba5cd761af352621577aa4e2322fc1054a53\nreviewed_head_sha: b62160566b476ff0ac44ff414a9b9d682afab85e\nVERDICT goal_fidelity: the node goal is that the content stage ask its five Score questions and refuse to persist an unasked one; score_worker now builds build_triage_questions(with_content=True) (imas_codex/discovery/code/workers.py:456) and _relevance_item raises for a content-stage answer set missing any facet question or relevance_grade (imas_codex/discovery/code/scorer.py:344-357), so both halves land. One done-when bullet is not fully met: the live check records the grade with confidence above zero on four of five files, and mgset0.f's grade returns confidence 0.\nVERDICT evidence: the gate is green (54 passed, EXIT=0) and I re-ran both arms independently on this allocation: base 8a63ba5cd 47 passed EXIT=0, head b62160566 54 passed EXIT=0, so the added-failure set is empty. The negative control reproduces (mutating workers.py to build_triage_questions() makes test_content_arm_asks_every_content_question fail with 'content request omitted data_access_depth', EXIT=1). The live check is honest but exits 2: it flags the grade's confidence-0 absence on mgset0.f, which is one done-when bullet unmet; the same run's gate.log and negative-control.log headers name rev 8a63ba5cd (the base) although both ran the head content.\nVERDICT scope_discipline: the diff base..head touches five files and every one is inside the declared write paths (imas_codex/discovery/code/workers.py, imas_codex/discovery/code/scorer.py, tests/discovery/test_code_relevance.py, tests/discovery/test_code_facet_admission.py, docs/evidence/fragments/jt60sa-discovery-completion/content-score-questions.html); no out-of-scope path is touched.\nVERDICT durability: the negative control genuinely reddens the request test rather than a trivial path; the recorder guard is exercised by a parametrised test over all five questions and a positive test that a complete answer records the facets; if the guard fires in the worker the batch exception path releases the claims (workers.py:638-643) so no zero is written, which is the fail-closed behaviour the plan names.\nVERDICT fit: two conventional commits, both with substantive bodies ('fix(discovery): ask the content stage its five Score questions', 'docs(evidence): record the content-stage Score questions and their live check'), zero AI attribution lines, and mechanism names (with_content, FACET_QUESTION_FIELDS, RELEVANCE_GRADE_QUESTION, _content_top_levels) carrying no plan, sprint or ticket identifier.\nVERDICT reuse: the change reuses the existing owners: build_triage_questions(with_content=True) (scorer.py:178), the existing FACET_QUESTION_FIELDS/RELEVANCE_GRADE_QUESTION constants and _content_top_levels, and the existing apply_file_scores write path; no second question set or second recorder is forked.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T102558380763-content-score-questions/gate.log:1 follow-on: the gate log's first line names '# rev 8a63ba5cd' (the base) but the run it records is the head: it collects 54 items including test_content_arm_asks_every_content_question, which does not exist at 8a63ba5cd (base arm is 47 tests). negative-control.log carries the same base-rev header. A later reader trusting the header would read the gate as pre-change; the tested content is the head at b62160566.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/content-score-questions.html:88 follow-on: the done-when requires the live check to record each facet and the grade with a confidence above zero on five files; the run's own live-check.log exits 2 with ABSENCE [('.../mgset0.f', 'relevance_grade')] because that file's grade returned confidence 0 while four of five did not. The attribution (the endpoint returned confidence 0 with a real distribution, reproduced on every call) is corroborated by the node's own raw probe (raw-one.log shows probabilities summing to 1 and \"confidence\": 0), so it is an endpoint/model matter rather than a recorder defect - but the done-when bullet is unmet as written and the fragment records it honestly rather than concealing it.\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the node goal is that the content stage ask its five Score questions and refuse to persist an unasked one; score_worker now builds build_triage_questions(with_content=True) (imas_codex/discovery/code/workers.py:456) and _relevance_item raises for a content-stage answer set missing any facet question or relevance_grade (imas_codex/discovery/code/scorer.py:344-357), so both halves land. One done-when bullet is not fully met: the live check records the grade with confidence above zero on four of five files, and mgset0.f's grade returns confidence 0.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate is green (54 passed, EXIT=0) and I re-ran both arms independently on this allocation: base 8a63ba5cd 47 passed EXIT=0, head b62160566 54 passed EXIT=0, so the added-failure set is empty. The negative control reproduces (mutating workers.py to build_triage_questions() makes test_content_arm_asks_every_content_question fail with 'content request omitted data_access_depth', EXIT=1). The live check is honest but exits 2: it flags the grade's confidence-0 absence on mgset0.f, which is one done-when bullet unmet; the same run's gate.log and negative-control.log headers name rev 8a63ba5cd (the base) although both ran the head content.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff base..head touches five files and every one is inside the declared write paths (imas_codex/discovery/code/workers.py, imas_codex/discovery/code/scorer.py, tests/discovery/test_code_relevance.py, tests/discovery/test_code_facet_admission.py, docs/evidence/fragments/jt60sa-discovery-completion/content-score-questions.html); no out-of-scope path is touched.\nSCORE durability: 18\nJUSTIFICATION durability: the negative control genuinely reddens the request test rather than a trivial path; the recorder guard is exercised by a parametrised test over all five questions and a positive test that a complete answer records the facets; if the guard fires in the worker the batch exception path releases the claims (workers.py:638-643) so no zero is written, which is the fail-closed behaviour the plan names.\nSCORE fit: 19\nJUSTIFICATION fit: two conventional commits, both with substantive bodies ('fix(discovery): ask the content stage its five Score questions', 'docs(evidence): record the content-stage Score questions and their live check'), zero AI attribution lines, and mechanism names (with_content, FACET_QUESTION_FIELDS, RELEVANCE_GRADE_QUESTION, _content_top_levels) carrying no plan, sprint or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change reuses the existing owners: build_triage_questions(with_content=True) (scorer.py:178), the existing FACET_QUESTION_FIELDS/RELEVANCE_GRADE_QUESTION constants and _content_top_levels, and the existing apply_file_scores write path; no second question set or second recorder is forked.\nFINAL: SOUND. The content stage now asks its five Score questions and the recorder fails closed on an unasked one, which is exactly the defect the section names: score_worker builds build_triage_questions(with_content=True) and _relevance_item raises for a content-stage answer set missing any facet question or relevance_grade, releasing the claim instead of writing a zero. The gate is green and I reproduced both arms independently (base 47, head 54, added-failure set empty) and the negative control (mutating score_worker to the names-arm set reddens test_content_arm_asks_every_content_question with 'content request omitted data_access_depth'). Two follow-on findings return the node to the coordinator: the gate and negative-control log headers name the base revision for runs that carried the head, and the live check's grade confidence-0 on mgset0.f leaves one done-when bullet unmet (an endpoint matter, corroborated by the node's raw probe and disclosed in the fragment).\n",
+  "review_run_id": "r-20261007T104014203141-review-of-content-score-questions",
+  "reviewed_base": "8a63ba5cd761af352621577aa4e2322fc1054a53",
+  "reviewed_base_sha": "8a63ba5cd761af352621577aa4e2322fc1054a53",
+  "reviewed_commit": "b62160566b476ff0ac44ff414a9b9d682afab85e",
+  "reviewed_head_sha": "b62160566b476ff0ac44ff414a9b9d682afab85e",
+  "reviewed_run_id": "r-20261007T102558380763-content-score-questions",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T10:47:09.760455+00:00",
+  "total": 108
+}
