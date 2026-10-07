@@ -346,9 +346,10 @@ WIKI_RESET_SPECS: dict[str, ResetSpec] = {
 # Code
 # ---------------------------------------------------------------------------
 
-# The relevance fields a CodeFile carries, in one registry: the five noul fields
-# the names arm writes, the role distribution and its confidence from the role
-# question, and the bookkeeping that records which arm wrote them.  The code
+# The relevance fields a CodeFile carries, in one registry: the five scope noul
+# fields the names arm writes, the simulation noul, the role distribution and
+# its confidence from the role question, and the bookkeeping that records
+# which arm wrote them.  The code
 # scorer imports this tuple as ``RELEVANCE_FIELDS`` and resolves the field each
 # decision question writes through it, so the fields a reset clears and the
 # fields the decision arms write cannot drift apart.  It lives here, not in
@@ -359,6 +360,7 @@ CODE_RELEVANCE_FIELDS = (
     "relevance_processes",
     "relevance_describes",
     "relevance_imas",
+    "relevance_reconstruction_db",
     "relevance_simulation",
     "relevance_role",
     "relevance_role_probs",
@@ -481,6 +483,30 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
         source_statuses=["ingested"],
         clear_fields=_CODE_REJUDGE_FIELDS,
         extra_filter="AND n.relevance_stage = 'content'",
+    ),
+    # Return the names arm's own skips to the state its claim takes, so a run
+    # under a widened scope question set re-judges exactly the files that scope
+    # may now admit.  The names claim takes a ``discovered`` file with no name
+    # relevance (``relevance_stage IS NULL``), so the target restores that
+    # status and clears the relevance fields the arm wrote, including the stage
+    # that carries the "no name relevance yet" test.  A skipped file holds no
+    # chunks, so there is no cascade.
+    #
+    # The scope is ANDed, not ORed: ``source_filter`` would widen the match to
+    # every skipped file whatever its stage or skip reason, re-triaging the whole
+    # facility's skips in one run.  ``extra_filter`` narrows the eligible status
+    # to the names arm's non-duplicate skips.  A duplicate is skipped for being
+    # content-identical to a file already admitted, and re-judging it spends a
+    # decision without changing the outcome, so the duplicate is left alone.
+    "name": ResetSpec(
+        label="CodeFile",
+        target_status="discovered",
+        source_statuses=["skipped"],
+        clear_fields=_CODE_RELEVANCE_FIELDS + ["skip_reason", "error"],
+        extra_filter=(
+            "AND n.relevance_stage = 'name' "
+            "AND NOT coalesce(n.skip_reason, '') STARTS WITH 'duplicate'"
+        ),
     ),
 }
 

@@ -1,12 +1,13 @@
 """Two-stage relevance for discovered CodeFiles, judged by a decisions model.
 
-Pass 1 (Triage): the names arm asks six typed questions about the file from
+Pass 1 (Triage): the names arm asks seven typed questions about the file from
 minimal context — parent directory description, filename, sibling names and
 the facility's data-access patterns.  A file's relevance is the largest of the
-four scope probabilities (loads, processes, describes, maps_to_imas).  Files
-whose relevance reaches the triage threshold proceed to enrichment.
+five scope probabilities (loads, processes, describes, maps_to_imas,
+reads_or_writes_reconstruction_db).  Files whose relevance reaches the triage
+threshold proceed to enrichment.
 
-Pass 2 (Score): the content arm asks the same six questions plus a graded
+Pass 2 (Score): the content arm asks the same seven questions plus a graded
 relevance Score and four facet Scores, judged from the file's preview and its
 pattern evidence.  Beside each judgement a local model writes a one-sentence
 description, and only for a file whose content relevance reaches the ingest
@@ -48,12 +49,13 @@ SCORE_DIMENSION_NAMES = [
     "score_imas_mapping",
 ]
 
-# The four scope questions. A file's relevance is the largest noul over these.
+# The five scope questions. A file's relevance is the largest noul over these.
 SCOPE_NOULS = (
     "loads_diagnostic_data",
     "processes_diagnostic_signals",
     "describes_machine_or_diagnostics",
     "maps_to_imas",
+    "reads_or_writes_reconstruction_db",
 )
 
 # ``RELEVANCE_FIELDS`` is the registry of every relevance field a CodeFile
@@ -78,6 +80,9 @@ _RELEVANCE_FIELDS = {
     "processes_diagnostic_signals": _relevance_field("relevance_processes"),
     "describes_machine_or_diagnostics": _relevance_field("relevance_describes"),
     "maps_to_imas": _relevance_field("relevance_imas"),
+    "reads_or_writes_reconstruction_db": _relevance_field(
+        "relevance_reconstruction_db"
+    ),
     "is_simulation": _relevance_field("relevance_simulation"),
 }
 
@@ -282,7 +287,7 @@ def build_triage_state(
 
 
 def scope_relevance(nouls: dict[str, float]) -> float:
-    """A file's relevance: the largest of the four scope nouls."""
+    """A file's relevance: the largest of the five scope nouls."""
     return max(float(nouls[name]) for name in SCOPE_NOULS)
 
 
@@ -353,7 +358,7 @@ def _relevance_item(
 ) -> dict[str, Any]:
     """Build the persisted relevance fields from one decision's answers.
 
-    Both arms write ``score_composite`` — the largest of the four scope
+    Both arms write ``score_composite`` — the largest of the five scope
     probabilities — so the stored relevance and the gate never drift apart.
     The content arm additionally writes the graded relevance and the four facet
     Scores, each divided by its top level, and every judgement's distribution
@@ -426,6 +431,7 @@ def _relevance_set_clause(*, include_content: bool = False) -> str:
                     sf.relevance_processes = item.relevance_processes,
                     sf.relevance_describes = item.relevance_describes,
                     sf.relevance_imas = item.relevance_imas,
+                    sf.relevance_reconstruction_db = item.relevance_reconstruction_db,
                     sf.relevance_simulation = item.relevance_simulation,
                     sf.relevance_role = item.relevance_role,
                     sf.relevance_role_probs = item.relevance_role_probs,
@@ -448,6 +454,7 @@ _STORED_SCOPE_FIELDS = {
     "processes_diagnostic_signals": "relevance_processes",
     "describes_machine_or_diagnostics": "relevance_describes",
     "maps_to_imas": "relevance_imas",
+    "reads_or_writes_reconstruction_db": "relevance_reconstruction_db",
 }
 
 
@@ -468,7 +475,7 @@ def _stored_composites(rows: list[dict[str, Any]]):
 def recompute_stored_composites() -> dict[str, int]:
     """Rewrite ``score_composite`` on every staged CodeFile from its nouls.
 
-    Both arms write ``score_composite`` as the largest of the four scope nouls,
+    Both arms write ``score_composite`` as the largest of the five scope nouls,
     so a staged file whose stored composite is not that maximum disagrees with
     the rule ``_relevance_item`` applies.  This walks every CodeFile carrying a
     ``relevance_stage`` — both the ``name`` and ``content`` arms — and rewrites
