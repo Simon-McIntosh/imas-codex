@@ -1,33 +1,52 @@
 <section id="local-llm-seats-record">
-  <h3>Every language-model seat on the JT-60SA mapping path runs locally</h3>
+  <h3>IDS mapping runs locally; cluster labelling stays put</h3>
 
   <h4 id="local-llm-seats-change">Change</h4>
   <p id="local-llm-seats-change-detail">
-    Two seats on the JT-60SA path still sent language calls to OpenRouter:
     <code>ids-mapping</code>, which the mapping engine uses for both the
     escalated set choice and the field mappings
-    (<code>imas_codex/ids/mapping.py:744</code> and <code>:772</code>), and
-    <code>cluster-labels</code>, which labels the DD clusters whose siblings
-    the candidate stage adds. Both now carry the same endpoint keys as
-    <code>discovery-describe</code> — <code>model = "local/deepseek-v4.1-flash"</code>,
-    <code>model-route = "ambix-local"</code>, <code>api-key-env = "AMBIX_API_KEY"</code>,
-    <code>endpoint-class = "local-free"</code> — so they resolve the
-    <code>ambix-local</code> route instead of the proxy. <code>ids-mapping</code>
-    also carries <code>reasoning-effort = "high"</code>, because the escalated
-    choice is reasoning work and the local model is otherwise non-thinking.
-    <code>imas map run</code> probes the <code>reasoning</code> seat at start-up
-    (<code>imas_codex/cli/map.py:450</code>) even though its calls go through
-    <code>ids-mapping</code>, so a local run checked one model and called
-    another; the start-up probe now names <code>ids-mapping</code>.
-    <code>reasoning</code> and <code>dd-enrichment</code> are unchanged — they
-    serve work outside this path and stay on OpenRouter.
+    (<code>imas_codex/ids/mapping.py:744</code> and <code>:772</code>), was the
+    one seat on the JT-60SA path still sending language calls to OpenRouter. It
+    now carries the same endpoint keys as <code>discovery-describe</code> —
+    <code>model = "local/deepseek-v4.1-flash"</code>,
+    <code>model-route = "ambix-local"</code>,
+    <code>api-key-env = "AMBIX_API_KEY"</code>,
+    <code>endpoint-class = "local-free"</code> — so it resolves the
+    <code>ambix-local</code> route, and carries
+    <code>reasoning-effort = "high"</code> because the escalated choice is
+    reasoning work and the local model is otherwise non-thinking. The seat's
+    reasoning effort was inert until <code>_call_llm</code> and
+    <code>_acall_llm</code> began forwarding
+    <code>get_reasoning_effort("ids-mapping")</code> to the call layer, the
+    pattern <code>standard_names/workers.py</code> uses with its seats.
+    <code>imas map run</code> probes the <code>reasoning</code> seat at
+    start-up (<code>imas_codex/cli/map.py:450</code>) though its calls go
+    through <code>ids-mapping</code>, so a local run checked one model and
+    called another; the start-up probe now names <code>ids-mapping</code>.
+  </p>
+  <p id="local-llm-seats-cluster-labels">
+    <code>cluster-labels</code> is deliberately left on OpenRouter. It routes
+    no call: the labelling call is <code>ClusterLabeler</code>'s, which
+    defaults to <code>get_model("dd-enrichment")</code>
+    (<code>imas_codex/clusters/labeler.py:88</code>), and both constructions
+    pass no model (<code>clusters/extractor.py:650</code>,
+    <code>graph/build_dd.py:4578</code>). <code>get_model("cluster-labels")</code>
+    is read only as the label-cache match key and as provenance
+    (<code>clusters/label_cache.py:176-191</code>, <code>:222</code>,
+    <code>:289</code>; <code>extractor.py:566</code>). Routing it locally would
+    turn every cached cluster label into a cache miss and force a full relabel
+    on the next DD cluster build, paid on OpenRouter. Cluster labels are
+    produced at DD build time, not on the JT-60SA path. Moving DD labelling
+    and enrichment local is a separate decision held for the lead; that
+    decision would relabel every cluster.
   </p>
 
   <h4 id="local-llm-seats-census">Census of model seats on the mapping path</h4>
   <p id="local-llm-seats-census-detail">
     Seats read by each command path, with the route each resolves. Every seat
     is local through the <code>ambix-local</code> router except the two Jev
-    seats, which are called through the OpenRouter decisions endpoint.
+    seats, which are called through the OpenRouter decisions endpoint, and
+    cluster labelling, which is not a call on this path.
   </p>
   <table id="local-llm-seats-census-table">
     <thead>
@@ -48,35 +67,44 @@
       <tr><td><code>discover documents</code></td><td><code>discovery-vision</code></td><td><code>discovery/documents/workers.py:397</code></td><td>local / <code>ambix-local</code></td></tr>
       <tr><td><code>discover signals</code></td><td><code>discovery-describe</code></td><td><code>discovery/signals/parallel.py:3355</code></td><td>local / <code>ambix-local</code></td></tr>
       <tr><td><code>discover map</code></td><td><code>mapping-candidates</code></td><td><code>ids/candidates.py:346</code></td><td>Jev — OpenRouter decisions</td></tr>
-      <tr><td rowspan="2"><code>imas map run</code></td><td><code>ids-mapping</code></td><td><code>ids/mapping.py:744</code>, <code>ids/metadata.py:402</code></td><td>local / <code>ambix-local</code>, reasoning-effort high</td></tr>
-      <tr><td><code>cluster-labels</code></td><td><code>clusters/label_cache.py:222</code>, <code>clusters/extractor.py:566</code></td><td>local / <code>ambix-local</code></td></tr>
-      <tr><td colspan="3">Not on the mapping path — unchanged</td><td><code>reasoning</code> <code>dd-enrichment</code> — OpenRouter</td></tr>
+      <tr><td><code>imas map run</code></td><td><code>ids-mapping</code></td><td><code>ids/mapping.py:744</code>, <code>ids/metadata.py:402</code></td><td>local / <code>ambix-local</code>, reasoning-effort high</td></tr>
+      <tr><td>DD cluster build</td><td><code>dd-enrichment</code> (the labelling call)</td><td><code>clusters/labeler.py:88</code></td><td>OpenRouter — not on this path</td></tr>
+      <tr><td colspan="3">Not on the mapping path — unchanged</td><td><code>reasoning</code>, <code>dd-enrichment</code>, <code>cluster-labels</code> — OpenRouter</td></tr>
     </tbody>
   </table>
 
   <h4 id="local-llm-seats-measure">Measure</h4>
   <p id="local-llm-seats-measure-detail">
-    <code>uv run --no-sync pytest tests/core tests/ids tests/test_cli.py -p no:cacheprovider</code>
-    exits 0 at revision 9c1e63042 with <code>PYTHONPATH</code> resolving
-    <code>imas_codex</code> to this worktree. The new settings tests assert
-    that <code>get_model('ids-mapping')</code> and
-    <code>get_model('cluster-labels')</code> resolve
-    <code>local/deepseek-v4.1-flash</code>, that both bind the
+    <code>uv run --no-sync pytest tests/core tests/ids tests/test_cli.py tests/ids/test_metadata.py -p no:cacheprovider</code>
+    exits 0 at revision 88eda87cd with <code>PYTHONPATH</code> resolving
+    <code>imas_codex</code> to this worktree (1477 passed, 7 skipped, 3
+    deselected). The settings tests assert that
+    <code>get_model("ids-mapping")</code> resolves
+    <code>local/deepseek-v4.1-flash</code> and binds the
     <code>ambix-local</code> api-base with <code>endpoint-class = "local-free"</code>,
-    that <code>get_reasoning_effort('ids-mapping')</code> is <code>"high"</code>,
-    and that <code>imas map run</code>'s discovery configuration carries
-    <code>model_section = "ids-mapping"</code> with <code>check_model</code> on.
+    that <code>get_reasoning_effort("ids-mapping")</code> is <code>"high"</code>,
+    that <code>cluster-labels</code> keeps <code>openrouter/openai/gpt-5.4</code>
+    with no local endpoint, and that <code>imas map run</code>'s discovery
+    configuration carries <code>model_section = "ids-mapping"</code> with
+    <code>check_model</code> on. The forwarding tests drive
+    <code>_call_llm</code> and <code>_acall_llm</code> with a replaced
+    call-layer seam and assert the seat's effort reaches it.
   </p>
 
   <h4 id="local-llm-seats-negative-control">Negative control</h4>
   <p id="local-llm-seats-negative-control-detail">
-    Restoring <code>ids-mapping</code> to
-    <code>model = "openrouter/openai/gpt-5.4"</code> makes the local-route test
-    fail: <code>test_seats_resolve_configured_models</code> asserts
-    <code>local/deepseek-v4.1-flash</code> and the run reports
-    <code>openrouter/openai/gpt-5.4</code>. Log at
-    <code>docs/evidence/fragments/jt60sa-imas-maps/local-llm-seats.html</code>
-    names the mutation, and the log path is carried in the manifest's
-    <code>negative_control_log</code>.
+    Two mutations, each rerun to a log. Removing the
+    <code>reasoning_effort=get_reasoning_effort("ids-mapping")</code>
+    forwarding from <code>_call_llm</code> and <code>_acall_llm</code> fails
+    <code>TestIdsMappingReasoningEffortForwarding::test_acall_llm_forwards_seat_effort</code>
+    and <code>::test_call_llm_forwards_seat_effort</code> (the forwarded effort
+    reads <code>None</code>); log at
+    <code>negative-control-a-forwarding.log</code>. Restoring
+    <code>ids-mapping</code> to <code>model = "openrouter/openai/gpt-5.4"</code>
+    fails
+    <code>TestDiscoveryFunctionSeats::test_seats_resolve_configured_models</code>
+    (it reads <code>openrouter/openai/gpt-5.4</code>); log at
+    <code>negative-control-b-local-route.log</code>. Both logs sit in the run
+    directory named by the manifest's <code>negative_control_log</code> field.
   </p>
 </section>
