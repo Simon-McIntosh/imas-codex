@@ -1,0 +1,1191 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "8a63ba5cd761af352621577aa4e2322fc1054a53",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7193366,
+      "input_tokens_cumulative": 7193366,
+      "output_tokens": 32573,
+      "output_tokens_cumulative": 32573,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 213,
+    "files": 5,
+    "removed": 9
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_name_mode_sets_name_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_docs_mode_sets_docs_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 923,
+        "name": "test_audit_covers_every_attachment_writer",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_all_values_non_empty",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 990,
+        "name": "_make_mock_state",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 439,
+        "name": "test_prompt_describes_structured_chain",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 547,
+        "name": "test_source_reset_writes_only_source_state_and_non_lifecycle_name_cache",
+        "path": "tests/standard_names/test_provenance_lifecycle.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "test_source_hint_cas_sets_only_steering_fields",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_source_hint_prompt_is_conditional_and_non_authoritative",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "_wipe",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_the_routed_consumers_no_longer_read_it",
+        "path": "tests/standard_names/test_vocab_consumers_see_operators.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 402
+    },
+    {
+      "existing_function": {
+        "line": 676,
+        "name": "test_ingest_claim_refuses_name_stage_relevance",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 612,
+        "name": "test_ingest_claims_highest_relevance_first_and_refuses_below_threshold",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 615
+    },
+    {
+      "existing_function": {
+        "line": 612,
+        "name": "test_ingest_claims_highest_relevance_first_and_refuses_below_threshold",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "test_ingest_claim_refuses_name_stage_relevance",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "window_line": 678
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "864479a4ab1268bcef65e905a768cc87a0c6b924",
+    "b62160566b476ff0ac44ff414a9b9d682afab85e"
+  ],
+  "completed_at": "2026-10-07T10:39:28.616Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-07T10:26:08Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "mgset0.f",
+    "endpoint/model",
+    "reset/re-judge"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_relevance.py tests/discovery/test_code_facet_admission.py tests/discovery/test_llm_decisions.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T102558380763-content-score-questions/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.99,
+    "at_dispatch": 0.99,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "section 30 closes at merge; section 26 re-judges with it",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T11:10:59.676990+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-07T10:25:59Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 20,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 10,
+    "mean_context": 136000,
+    "observed_at": "2026-10-07T10:25:39Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 20,
+      "aggregate_tokens_per_second": 360.573,
+      "detail": "",
+      "mean_tokens_per_second": 78.385,
+      "observed_at": "2026-10-07T10:25:39Z",
+      "runs": 4.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-07T10:39:28.616Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T102558380763-content-score-questions/manifest.md",
+  "member": "disposable-r-20261007T102558380763-content-score-questions",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_code_relevance.py::test_content_arm_asks_every_content_question"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_code_relevance.py::test_content_arm_asks_every_content_question"
+    ],
+    "declaration": "the score_worker request test run against a copy that builds build_triage_questions() exits non-zero with the facet questions absent from the request as its first failure",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T102558380763-content-score-questions/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T102558380763-content-score-questions/negative-control.log",
+    "test_paths": [
+      "tests/discovery/test_code_facet_admission.py",
+      "tests/discovery/test_code_relevance.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "content-score-questions",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1363,
+          "cached_input_tokens": 337488,
+          "input_tokens": 338853,
+          "output_tokens": 810,
+          "reasoning_output_tokens": 48,
+          "total_tokens": 339663,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "per §30: score_worker in imas_codex/discovery/code/workers.py builds its questions with build_triage_questions(with_content=True); _relevance_item in imas_codex/discovery/code/scorer.py raises on a content-stage answer set missing any of data_access_depth, signal_processing_depth, machine_description_depth, imas_mapping_depth or relevance_grade instead of writing 0; a test drives score_worker through the fake decisions seam and asserts the request carries those five questions and the persisted facet values equal the fake scores divided by their top levels; a test asserts _relevance_item refuses a content answer set missing a facet; a live check with no graph write (before any ssh call create /tmp/sshwrap/ssh as a script that execs /usr/bin/ssh -F $HOME/.ssh/config with all arguments, chmod +x it, export PATH=/tmp/sshwrap:$PATH, and require ssh -o BatchMode=yes jt-60sa hostname to succeed) runs the content arm on five JT-60SA files including /analysis/src/SAselene_v2.0_forPSRC/mgset0.f and records each facet and the grade with confidence above zero; the gate exits 0 run on this allocation as: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_relevance.py tests/discovery/test_code_facet_admission.py tests/discovery/test_llm_decisions.py; write the evidence fragment with the live check's table; commit each change with a conventional subject and body; no discover run",
+    "estimated_hours": null,
+    "goal": "Make the code content stage ask and record its five Score questions",
+    "id": "content-score-questions",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-07T10:25:59Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 20,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 10,
+      "mean_context": 136000,
+      "observed_at": "2026-10-07T10:25:39Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 20,
+        "aggregate_tokens_per_second": 360.573,
+        "detail": "",
+        "mean_tokens_per_second": 78.385,
+        "observed_at": "2026-10-07T10:25:39Z",
+        "runs": 4.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T102558380763-content-score-questions/manifest.md",
+    "negative_control": "the score_worker request test run against a copy that builds build_triage_questions() exits non-zero with the facet questions absent from the request as its first failure",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§30",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/code/workers.py",
+      "imas_codex/discovery/code/scorer.py",
+      "tests/discovery/test_code_relevance.py",
+      "tests/discovery/test_code_facet_admission.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/content-score-questions",
+      "docs/evidence/fragments/jt60sa-discovery-completion/content-score-questions.html",
+      "docs/figures/jt60sa-discovery-completion/content-score-questions"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1520584.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "content-score-questions",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-07T10:26:03.048562+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.95,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 744.308,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 938.731,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1340447.038383,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 81926,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1340447.038383,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 81926,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1340447.038383,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 81926,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 5,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 81926,
+          "headroom_pct": 64.4,
+          "peak_utilisation_p50_pct": 59.8,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 323,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 65,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 1
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 2174.477383,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 81926,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.784046465474537,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 2174.477383,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 81926,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.784046465474537,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 2174.477383,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 81926,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.784046465474537,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 5.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.96,
+      "codex": 0.01,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "hold": 0.03
+    },
+    "rendered_token_estimate": 1862,
+    "usage": {
+      "cost": 0.000195762,
+      "input_tokens": 4661,
+      "output_tokens": 89
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.99,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b62160566b476ff0ac44ff414a9b9d682afab85e",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8a63ba5cd761af352621577aa4e2322fc1054a53",
+    "reviewed_head_sha": "b62160566b476ff0ac44ff414a9b9d682afab85e",
+    "scores": {
+      "durability": 18,
+      "evidence": 14,
+      "fit": 19,
+      "goal_fidelity": 17,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 108
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261007T102558380763-content-score-questions",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§30",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "2338627a-e00e-4cc0-a891-cf0001a63131",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 4,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 7193366,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 789.778,
+    "generated_tokens": 32573,
+    "generation_seconds": 526.839,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 59.7,
+    "machine_seconds": 262.939,
+    "peak_input_tokens": 137294,
+    "tokens_per_second": 61.83,
+    "wall_tokens_per_second": 41.24
+  },
+  "time_budget": "45m",
+  "tool_steps": 71.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 800,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-07T10:39:35Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-07T10:26:13Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261007T102558380763-content-score-questions",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 4966,
+    "worker_pid": 1293919
+  },
+  "worker_seconds": 778,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
