@@ -1,76 +1,137 @@
 <section>
-  <h2 id="jt60sa-code-pass">The JT-60SA code pass is blocked before its first pass: the SSH hop does not answer</h2>
+  <h2 id="jt60sa-code-pass">The JT-60SA code pipeline drains on the resumed pass; the facet rule admits nothing</h2>
 
   <p id="jt60sa-code-pass-prerequisite">
     The node runs <code>imas-codex discover code jt-60sa</code> facility-wide in
     <code>--time 8</code> foreground passes until no triaged file waits for
     enrichment or scoring and no admitted file waits for ingest. Its named
-    precondition is that the JT-60SA hop answers before the first pass: the run
-    was to create <code>/tmp/sshwrap/ssh</code>, <code>export
-    PATH=/tmp/sshwrap:$PATH</code>, and require
-    <code>ssh -o BatchMode=yes jt-60sa hostname</code> to succeed. That required
-    check does not succeed, so no pass ran.
+    precondition is that the JT-60SA hop answers before the first pass:
+    <code>/tmp/sshwrap/ssh</code> created, <code>export
+    PATH=/tmp/sshwrap:$PATH</code>, and
+    <code>ssh -o BatchMode=yes jt-60sa hostname</code> succeeding. On the first
+    attempt the hop did not answer and no pass ran; on the resumed attempt the
+    tunnel had been restored, the precondition passed, and both passes ran to
+    completion.
   </p>
 
   <p id="jt60sa-code-pass-reproduction">
-    The wrapper was created as written and the hop tested. The connection reaches
-    the jump host and is refused on its forward to the laptop tunnel:
+    The first attempt was blocked on the jump-host forward to the laptop tunnel.
+    <code>ssh -v</code> put the failure on the jump host, not on the compute node
+    and not in the wrapper: <code>debug1: Connecting to 98dci4-srv-1003
+    [10.154.100.13] port 22 … Connection established</code>, authentication
+    succeeds, then <code>channel 0: open failed: connect failed: Connection
+    refused</code>. Nothing was listening on 2222 there — <code>ss -ltn | grep
+    :2222</code> returned no row on <code>98dci4-srv-1003</code>, <code>-1004</code>,
+    <code>-1005</code> or <code>-1006</code>. On the resumed attempt at 09:35Z the
+    probe returned <code>intr26-2</code> with exit 0 and the passes began.
   </p>
   <pre id="jt60sa-code-pass-repro-block">
-$ printf '#!/bin/sh\nexec /usr/bin/ssh -F "$HOME/.ssh/config" "$@"\n' &gt; /tmp/sshwrap/ssh &amp;&amp; chmod +x /tmp/sshwrap/ssh &amp;&amp; export PATH=/tmp/sshwrap:$PATH
+# blocked
 $ ssh -o BatchMode=yes jt-60sa hostname
-kex_exchange_identification: Connection closed by remote host
-Connection closed by UNKNOWN port 65535        # exit 255</pre>
-  <p id="jt60sa-code-pass-repro-cause">
-    <code>ssh -v</code> locates the failure on the jump host, not on the compute
-    node and not in the wrapper: <code>debug1: Connecting to 98dci4-srv-1003
-    [10.154.100.13] port 22 … Connection established</code>, authentication succeeds,
-    then <code>channel 0: open failed: connect failed: Connection refused</code>.
-    The hop chain is
-    <code>compute → 98dci4-srv-1003 → localhost:2222 (laptop) → VPN → nakasvr26.iferc.org</code>;
-    <code>laptop</code> in <code>~/.ssh/config</code> is
-    <code>HostName localhost</code>, <code>Port 2222</code>, <code>ProxyJump
-    98dci4-srv-1003</code>. Nothing is listening on 2222 there:
-    <code>ssh 98dci4-srv-1003 'ss -ltn | grep :2222'</code> returns no row, and
-    the same check on <code>98dci4-srv-1006</code>, <code>-1004</code> and
-    <code>-1005</code> returns no row. The reverse tunnel from the laptop is
-    down, so no JT-60SA host is reachable and the pass cannot start.
-  </p>
+Connection closed by UNKNOWN port 65535        # exit 255
+# resumed
+$ ssh -o BatchMode=yes jt-60sa hostname
+intr26-2                                       # exit 0</pre>
 
   <p id="jt60sa-code-pass-counts">
-    CodeFile counts at facility <code>jt-60sa</code> before the run, read from
-    the graph on the compute node:
+    CodeFile counts at facility <code>jt-60sa</code> before and after the two
+    foreground passes, both read from the graph on the compute node. The total
+    rises because the scan phase discovers files as it runs; the cohort is not
+    fixed.
   </p>
-  <table id="jt60sa-code-pass-before-table">
+  <table id="jt60sa-code-pass-before-after-table">
     <thead>
-      <tr><th>state</th><th>count</th></tr>
+      <tr><th>state</th><th>before (08:52Z)</th><th>after (10:10Z)</th></tr>
     </thead>
     <tbody>
-      <tr><td>ingested</td><td>162</td></tr>
-      <tr><td>scored</td><td>218</td></tr>
-      <tr><td>triaged</td><td>761</td></tr>
-      <tr><td>skipped</td><td>1170</td></tr>
-      <tr><td><strong>total</strong></td><td><strong>2311</strong></td></tr>
-      <tr><td>relevance_stage = content</td><td>397</td></tr>
-      <tr><td>relevance_stage = name</td><td>1914</td></tr>
-      <tr><td>CodeChunk (facility-scoped)</td><td>673</td></tr>
-      <tr><td>DataReference (jt-60sa)</td><td>0</td></tr>
+      <tr><td>ingested</td><td>162</td><td><strong>539</strong></td></tr>
+      <tr><td>scored</td><td>218</td><td>710</td></tr>
+      <tr><td>triaged</td><td>761</td><td><strong>0</strong></td></tr>
+      <tr><td>skipped</td><td>1170</td><td>1930</td></tr>
+      <tr><td>failed</td><td>0</td><td>29</td></tr>
+      <tr><td><strong>total CodeFile</strong></td><td><strong>2311</strong></td><td><strong>3208</strong></td></tr>
+      <tr><td>relevance_stage = content</td><td>397</td><td>1348</td></tr>
+      <tr><td>relevance_stage = name</td><td>1914</td><td>1860</td></tr>
+      <tr><td>CodeChunk (facility-scoped)</td><td>673</td><td>3009</td></tr>
+      <tr><td>DataReference (jt-60sa)</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
-  <p id="jt60sa-code-pass-reconciles">
-    The content stage holds 397 files: 162 ingested, 218 scored and 17 skipped —
-    the 235 the run would have reset through <code>--reset-to content</code>,
-    matching the plan's figure. The 162 ingested files carry 673 chunks. The
-    jt-60sa <code>DataReference</code> count is 0 and cannot move while no file
-    ingests; the reason is the blocked run, not the linking code.
+
+  <p id="jt60sa-code-pass-drain">
+    The pipeline drained: <strong>0 triaged files remain</strong>, so nothing
+    waits for enrichment or scoring. The reset pass
+    (<code>--reset-to content --time 8</code>) reported “0 files to reset …
+    No files to reset to ‘content’” — the 235 content files had already been
+    reset on the aborted attempt — then ran <em>482 scanned, 550 scored, 353 code
+    ingested</em>, Cost <strong>$0.13</strong>, Time 408.2s. The next pass
+    reported <em>0 scanned, 0 scored, 0 code ingested</em>, Cost $0.00, Time
+    479.6s, with the worker idle for 120 polls: the drain condition was reached.
+    Total decision spend across both passes: <strong>$0.13</strong>.
   </p>
 
-  <p id="jt60sa-code-pass-after">
-    <strong>After counts are unchanged</strong> — ingested 162, scored 218,
-    triaged 761, skipped 1170; CodeChunk 673; DataReference 0. No file was
-    re-judged, ingested or admitted by the facet rule, and no decision spend was
-    made, because the run never reached its first pass. The node is blocked on
-    the laptop reverse tunnel: when it is restored, the node resumes at the
-    <code>--reset-to content</code> pass.
+  <p id="jt60sa-code-pass-facet">
+    <strong>The facet-admission rule admits no JT-60SA file.</strong> A
+    content-stage file is admitted when its composite reaches 0.5
+    (<code>code-ingest-threshold</code>) or its strongest facet reaches 0.85
+    (<code>code-facet-admission-threshold</code>). Across the 1348 jt-60sa content
+    files the facility-wide facet maxima are data_access 0.75, signal_processing
+    0.0, machine_description 0.0, imas_mapping 0.0 — every facet sits below 0.85,
+    and only data_access is ever populated. That is not a JT-60SA-local effect:
+    over all 265,515 CodeFile nodes in the four facilities the per-facet maxima
+    are data_access 1.0, signal_processing 0.0, machine_description 0.0,
+    imas_mapping 0.0. Only the data_access facet is ever scored non-zero, so the
+    0.85 branch can fire at most on the data_access facet, and the 162 jt-60sa
+    files that carry any data_access land at 0.85 or below.
+  </p>
+  <table id="jt60sa-code-pass-facet-table">
+    <thead>
+      <tr><th>facet</th><th>jt-60sa max</th><th>all-facility max</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>score_data_access</td><td>0.75</td><td>1.0</td></tr>
+      <tr><td>score_signal_processing</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>score_machine_description</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>score_imas_mapping</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>score_composite (max)</td><td>0.96</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p id="jt60sa-code-pass-facet-cause">
+    The facet questions are present in the rendered triage template —
+    <code>build_triage_questions(with_content=True)</code> returns all four with
+    type <code>score</code> and non-zero top levels (data_access 4,
+    signal_processing 3, machine_description 3, imas_mapping 3) — so the zeros
+    come from the live content-arm answers, not from the question set. The
+    content files carry <code>score_machine_description_probs</code> as
+    <code>[0,0,0,0]</code> with confidence 0.0, i.e. the answer was recorded with
+    no distribution and score 0.
+  </p>
+
+  <p id="jt60sa-code-pass-named">
+    The two files the plan named as facet-admission prototypes were re-judged and
+    did not admit — under the content arm the rule cannot admit them, because no
+    facet is above 0.85 and the composite is below 0.5:
+  </p>
+  <table id="jt60sa-code-pass-named-table">
+    <thead>
+      <tr><th>file</th><th>status</th><th>composite</th><th>da</th><th>sp</th><th>md</th><th>im</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</td><td>scored</td><td>0.30</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC/eqgrd.f</td><td>scored</td><td>0.23</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>/analysis/src/topics_release/topics/topics/eqmain/eqgrd.f</td><td>ingested</td><td>0.54</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+    </tbody>
+  </table>
+
+  <p id="jt60sa-code-pass-datareference">
+    <strong>DataReference remains 0</strong>, and now the reason is measured
+    rather than obscured by the blocked run. DataReference nodes are produced by
+    the code-ingest path (<code>imas_codex.ingestion.pipeline.ingest_files</code>
+    → <code>ingestion/graph.py</code>) from MDSplus path and TDI-call literals in
+    ingested file content. Those nodes exist elsewhere — tcv 7472 and jet 345,
+    all <code>mdsplus_path</code> — so the mechanism runs. But no JT-60SA
+    CodeChunk carries a <code>CONTAINS_REF</code> edge (0 of 3009), so none of the
+    539 ingested JT-60SA sources contained an extractable MDSplus path literal.
+    The zero is a property of this facility’s source languages (SA Fortran
+    analysis code), not of the linking code.
   </p>
 </section>
