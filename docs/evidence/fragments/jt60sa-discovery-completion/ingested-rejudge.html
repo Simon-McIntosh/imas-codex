@@ -46,7 +46,7 @@
       <tr><td>claim (ingested re-judge selection)</td><td>reaches ingested content-stage files through the score claim</td><td>OK</td></tr>
       <tr><td>chunk read</td><td>rebuilds the content head from stored chunks, in reading order</td><td>OK</td></tr>
       <tr><td>judgment write</td><td>rewrites the facet, grade, role and composite fields in place (no <code>sf.status</code>)</td><td>OK</td></tr>
-      <tr><td>reset (ingested target)</td><td>clears the content judgment fields without moving the status</td><td>OK</td></tr>
+      <tr><td>reset (ingested target)</td><td>clears the content judgment fields without moving the status; AND-scoped to ingested content-stage files</td><td>OK</td></tr>
     </tbody>
   </table>
   <p id="ingested-rejudge-negative-control">
@@ -64,6 +64,16 @@
     <code>EXPLAIN</code> on the live graph and the same parameters the run would
     issue; all four planned, and no statement was executed and no graph write
     was made.
+  </p>
+  <p id="ingested-rejudge-scope-repair">
+    The reset's content-stage scope is an AND restriction, not an OR widening.
+    The widened form (<code>n.status IN $source_statuses OR (n.relevance_stage
+    = 'content')</code>) admits every content-stage file whatever its status, so
+    a single pass would have demoted and cleared the facility's scored, skipped
+    and triaged content-stage corpus. <code>ResetSpec.extra_filter</code> renders
+    <code>n.status IN $source_statuses AND n.relevance_stage = 'content'</code>,
+    so only ingested content-stage files are touched: the set the re-judge takes
+    and no other. Reverting that change makes the two checks that name it fail.
   </p>
   <p id="ingested-rejudge-deferred">
     Deferred: the live re-judge of the 540 JT-60SA targets is not run here. The

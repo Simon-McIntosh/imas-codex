@@ -132,7 +132,11 @@ class TestResetSpec:
         assert spec.label == "CodeFile"
         assert spec.target_status == "ingested"
         assert spec.source_statuses == ["ingested"]
-        assert spec.source_filter == "n.relevance_stage = 'content'"
+        # The content-stage scope must narrow the eligible statuses (AND), not
+        # widen them (OR): a source_filter here would admit every content-stage
+        # file whatever its status and demote the whole facility's corpus.
+        assert spec.source_filter is None
+        assert spec.extra_filter == "AND n.relevance_stage = 'content'"
         # No chunk cascade: the text being re-judged comes from the chunks.
         assert spec.post_cypher is None
         # The judgment fields go.
@@ -332,9 +336,14 @@ class TestResetToStatus:
         assert "WHERE n.status IN $source_statuses" in query
         assert "$source_statuses OR" not in query
 
-    def test_code_ingested_reset_renders_content_stage_predicate(self, reset_mod):
-        """The ingested reset ORs a content-stage predicate into the status match
-        and clears the judgment fields without moving the status."""
+    def test_code_ingested_reset_scopes_admission_to_ingested_status(self, reset_mod):
+        """The ingested reset narrows the status match with an AND.
+
+        The content-stage scope must be ANDed, so a content-stage file at any
+        other status (scored, skipped, triaged) is *not* admitted: the reset's
+        whole fault was an OR that demoted the facility's whole content-stage
+        corpus in one run.
+        """
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 4}]
 
@@ -345,9 +354,10 @@ class TestResetToStatus:
         assert count == 4
         query = mock_gc.query.call_args[0][0]
         assert "n.status = $target_status" in query
-        assert (
-            "n.status IN $source_statuses OR (n.relevance_stage = 'content')" in query
-        )
+        assert "n.status IN $source_statuses AND n.relevance_stage = 'content'" in query
+        # The OR-widening that would admit every content-stage status is absent.
+        assert "OR (n.relevance_stage" not in query
+        assert "n.status IN $source_statuses OR" not in query
         assert "n.score_data_access = null" in query
         assert "n.relevance_grade = null" in query
         # The description, the ingest stamp and the chunks are untouched.
