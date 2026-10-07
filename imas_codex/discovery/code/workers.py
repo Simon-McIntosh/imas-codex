@@ -974,17 +974,20 @@ async def code_worker(
 
     idle_log_interval = 10  # log every Nth consecutive idle poll
     # Give admitted files the claim can never reach a terminal state before the
-    # first poll, so the pass settles rather than waiting on them.
-    settled = await asyncio.to_thread(
-        _settle_unclaimable_files,
-        state.facility,
-        10000,
-        state.path_prefixes,
-    )
-    if settled:
-        logger.info(
-            "Settled %d admitted files as skipped (exceeds max_line_count)", settled
+    # first poll, so the pass settles rather than waiting on them.  Only an
+    # ingest pass settles: a scan or score pass is not the stage that owns them.
+    if not (state.scan_only or state.score_only):
+        settled = await asyncio.to_thread(
+            _settle_unclaimable_files,
+            state.facility,
+            10000,
+            state.path_prefixes,
         )
+        if settled:
+            logger.info(
+                "Settled %d admitted files as skipped (exceeds max_line_count)",
+                settled,
+            )
     consecutive_idle = 0
     batches_processed = 0
 
