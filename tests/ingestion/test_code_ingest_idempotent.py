@@ -154,3 +154,46 @@ def test_content_change_supersedes_the_stale_example(fake_graph, monkeypatch):
     assert new_id != old_id
     # The stale example is removed through the shared chunk cascade.
     assert any("DETACH DELETE" in q for q in fake_graph.queries)
+
+
+def test_all_already_ingested_batch_records_each_outcome(fake_graph, monkeypatch):
+    """A batch whose every path is already ingested still reports an outcome per path.
+
+    The dedup check short-circuits before any fetch or write runs, so the caller
+    must learn from the pipeline's own outcomes that each requested path is
+    settled — an absent outcome reads to the worker as an unrecorded claim.
+    """
+    other = "/analysis/src/mdbget.py"
+    monkeypatch.setattr(
+        "imas_codex.ingestion.pipeline._check_already_ingested",
+        lambda gc, facility, paths: ([], list(paths)),
+    )
+
+    stats = asyncio.run(ingest_files(FACILITY, [PATH, other]))
+
+    assert stats["outcomes"][PATH]["status"] == "ingested"
+    assert stats["outcomes"][PATH]["reason"] == "already ingested"
+    assert stats["outcomes"][other]["status"] == "ingested"
+    assert stats["outcomes"][other]["reason"] == "already ingested"
+    # No fetch ran, so nothing was written to the graph.
+    assert fake_graph.examples == {}
+
+
+def test_mixed_batch_records_outcomes_for_both_kinds(fake_graph, monkeypatch):
+    """A batch of an already-ingested path and a new one reports both outcomes."""
+    fresh = "/analysis/src/epics.py"
+    monkeypatch.setattr(
+        "imas_codex.ingestion.pipeline._check_already_ingested",
+        lambda gc, facility, paths: (
+            [p for p in paths if p == fresh],
+            [p for p in paths if p != fresh],
+        ),
+    )
+
+    stats = asyncio.run(ingest_files(FACILITY, [PATH, fresh]))
+
+    assert stats["outcomes"][PATH]["status"] == "ingested"
+    assert stats["outcomes"][PATH]["reason"] == "already ingested"
+    assert stats["outcomes"][fresh]["status"] == "ingested"
+    # The newly ingested path was written as an example.
+    assert len(fake_graph.examples) == 1

@@ -1,0 +1,55 @@
+<section>
+  <h2 id="already-ingested-outcome-all-already-ingested-paths-get-an-outcome">Every requested path carries an outcome, including the already-ingested ones</h2>
+  <p id="already-ingested-outcome-problem">
+    The JT-60SA code pass re-failed 29 admitted files whose examples and chunks
+    already existed. <code>ingest_files</code> in
+    <code>imas_codex/ingestion/pipeline.py</code> recorded each already-ingested
+    path's outcome in a local <code>outcomes</code> mapping, but the
+    <code>&ldquo;All files already ingested&rdquo;</code> branch — taken when every
+    requested path is already in the graph — returned <code>stats</code> before
+    <code>stats["outcomes"]</code> was ever assigned. The code ingest worker in
+    <code>imas_codex/discovery/code/workers.py</code> reads
+    <code>ingest_stats.get("outcomes", {})</code> and marks any claimed file with
+    no entry <code>failed</code> with reason
+    <code>no ingestion outcome recorded</code>, so a cleanly skipped batch was
+    reported as a batch of failures.
+  </p>
+  <p id="already-ingested-outcome-change">
+    All four exits from <code>ingest_files</code> now route through a single
+    <code>settle()</code> helper that assigns <code>stats["outcomes"]</code> and
+    the <code>failed</code> / <code>skipped_files</code> summaries derived from
+    it. Already-ingested paths carry <code>{"status": "ingested", "reason":
+    "already ingested"}</code> on both the early-return path and the mixed path,
+    so the worker marks them <code>ingested</code> rather than
+    <code>failed</code>. The fetch-failed bookkeeping was moved ahead of the
+    <code>&ldquo;No files to process&rdquo;</code> return, so a path the fetch
+    never returned is also recorded there instead of silently unrecorded.
+  </p>
+  <p id="already-ingested-outcome-evidence">
+    The defect was reproduced on the unfixed tree and quoted: there the new
+    all-already-ingested test failed with
+    <code>KeyError: 'outcomes'</code> at
+    <code>assert stats["outcomes"][PATH]["status"] == "ingested"</code>, while the
+    mixed-batch test already passed — the loss is specific to the early-return
+    path. With the change the gate
+    <code>uv run --no-sync pytest -p no:cacheprovider tests/ingestion/test_code_ingest_idempotent.py tests/discovery/test_code_ingest_settles.py tests/discovery/test_code_pipeline.py</code>
+    exits <strong>0</strong> (<strong>105 passed</strong>) on the fleet compute
+    node <code>98dci4-clu-2018</code> (run in place, no <code>srun</code>). The
+    two new tests pin the contract the worker depends on: a batch whose every path
+    is already ingested reports <code>ingested</code> /
+    <code>already ingested</code> for each requested path with nothing written to
+    the graph, and a mixed batch reports both the already-ingested path and the
+    newly written one. No discover run and no graph write were performed.
+  </p>
+  <p id="already-ingested-outcome-negative-control">
+    Negative control: the <code>&ldquo;All files already ingested&rdquo;</code>
+    early return was reverted to <code>return stats</code> in a scratch copy of
+    the package under <code>$TMPDIR</code> (an overlay that symlinks the worktree
+    except the mutated <code>pipeline.py</code>). The all-already-ingested test
+    run against that copy exits <strong>1</strong> with
+    <code>test_all_already_ingested_batch_records_each_outcome</code> failing on
+    <code>KeyError: 'outcomes'</code> — the head arm passes the same test — and
+    the run's header records the module under test resolving to the mutated copy
+    at <code>/tmp/reckon-crew-scratch/.../nc-already-ingested/imas_codex/ingestion/pipeline.py</code>.
+  </p>
+</section>
