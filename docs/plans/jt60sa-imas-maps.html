@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -396,6 +396,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T155548031301-decisions-key-test-isolation" data-who="reckon-build" data-when="2026-10-07T16:28:46.962Z">
     <div class="r-comment-body"><p>landing: the four test files listed under changed_paths now install a dummy decisions key with monkeypatch.setenv, so the twelve-file gate run with an empty OPENROUTER_API_KEY_IMAS_CODEX reports 1 failed / 208 passed / 59 skipped against 1 failed / 253 passed / 14 skipped with the key present, both arms failing only the pre-existing key-independent test_graceful_on_missing_index; evidence fragment docs/evidence/fragments/jt60sa-imas-maps/decisions-key-test-isolation.html, commit fa93ad50b.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T162921892674-review-of-decisions-key-test-isolation" data-who="reckon-build" data-when="2026-10-07T16:44:57.699Z">
+    <div class="r-comment-body"><p>landing: independent review of run r-20261007T155548031301-decisions-key-test-isolation at base c0c71ec3f / head fa93ad50b — a parsed record scoring all six dimensions 0..20 (durability 18, evidence 18, fit 20, goal_fidelity 20, reuse 19, scope_discipline 20; total 115) is stored; added_failure_count 0 against the reviewed node&#x27;s own armed pair; the seventeen-test decisions-key isolation remediation was reproduced independently (base empty-key 18 failed, head empty-key 1 failed) and the declared negative control reddened the two rerank tests.</p></div>
 </div>
 </section>
 </main>

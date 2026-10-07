@@ -1,0 +1,109 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by this review from the reviewed node's own baseline_suite and after_suite fields: both arms carry the single failure id tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index, so the set difference after-minus-baseline is empty and added_failure_count is 0 \u2014 the change adds no failure. Note the reviewed run's armed pair both ran at the head revision fa93ad50b (baseline_suite is the key-present arm, after_suite the empty-key arm), so the pair does not by itself measure the change; the change's effect is the base arm in evidence_inputs (c0c71ec3f, key absent, 18 failed) against the head arm (fa93ad50b, key absent, 1 failed). This review independently reproduced all three arms in scratch extractions under $TMPDIR (git archive of c0c71ec3f and fa93ad50b) plus the declared negative control: base empty-key 18 failed / 191 passed / 59 skipped, head empty-key 1 failed / 208 passed / 59 skipped, head key-present 1 failed / 253 passed / 14 skipped, and the negative control (test_judgment.py fixture removed) 2 failed / 8 passed. Every reviewed count matches.",
+  "after_suite": {
+    "command": "OPENROUTER_API_KEY_IMAS_CODEX= PYTHON_DOTENV_DISABLED=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T162921892674-review-of-decisions-key-test-isolation/scr/head uv run --no-sync pytest -p no:cacheprovider --basetemp=/tmp/reckon-crew-scratch/r-20261007T162921892674-review-of-decisions-key-test-isolation/scr/bt-head --no-header --tb=line -rf -rs tests/cli/test_discover_map.py tests/core/test_cli.py tests/discovery/test_enrichment_context_rerank.py tests/discovery/test_judgment.py tests/discovery/test_scanners.py tests/discovery/test_signals_pipeline.py tests/ids/test_escalated_target_choice.py tests/ingestion/test_search.py tests/llm/test_search_tools.py tests/test_imas_search_scoring.py tests/discovery/test_decisions_key_skip.py tests/ids/test_candidate_worker_key_skip.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index"
+    ],
+    "log_path": "/tmp/reckon-crew-scratch/r-20261007T162921892674-review-of-decisions-key-test-isolation/scr/logs/review_head_emptykey.log",
+    "revision": "fa93ad50b92c4a92aed083f7eeaf4919e778b823"
+  },
+  "base_log_revision": "c0c71ec3fb3b829e5712eefee455542365060143",
+  "baseline_suite": {
+    "command": "OPENROUTER_API_KEY_IMAS_CODEX= PYTHON_DOTENV_DISABLED=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T162921892674-review-of-decisions-key-test-isolation/scr/base uv run --no-sync pytest -p no:cacheprovider --basetemp=/tmp/reckon-crew-scratch/r-20261007T162921892674-review-of-decisions-key-test-isolation/scr/bt-base --no-header --tb=line -rf -rs tests/cli/test_discover_map.py tests/core/test_cli.py tests/discovery/test_enrichment_context_rerank.py tests/discovery/test_judgment.py tests/discovery/test_scanners.py tests/discovery/test_signals_pipeline.py tests/ids/test_escalated_target_choice.py tests/ingestion/test_search.py tests/llm/test_search_tools.py tests/test_imas_search_scoring.py tests/discovery/test_decisions_key_skip.py tests/ids/test_candidate_worker_key_skip.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 18,
+    "failure_ids": [
+      "tests/cli/test_discover_map.py::test_candidate_worker_writes_one_route_per_source",
+      "tests/cli/test_discover_map.py::test_candidate_worker_scopes_retrieval_to_routed_ids",
+      "tests/cli/test_discover_map.py::test_candidate_worker_ids_filter_narrows_routed_ids",
+      "tests/cli/test_discover_map.py::test_candidate_worker_adds_cluster_siblings_and_books_the_second_call",
+      "tests/cli/test_discover_map.py::test_candidate_worker_releases_when_the_cluster_judgment_fails",
+      "tests/cli/test_discover_map.py::test_cost_limit_stops_the_loop",
+      "tests/cli/test_discover_map.py::test_source_limit_bounds_the_loop",
+      "tests/discovery/test_judgment.py::test_rerank_pool_orders_by_descending_score",
+      "tests/discovery/test_judgment.py::test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails",
+      "tests/ids/test_escalated_target_choice.py::TestNoCandidateLogged::test_candidate_worker_skips_and_logs_no_candidate",
+      "tests/llm/test_search_tools.py::TestRerankCandidates::test_higher_score_ranks_first",
+      "tests/llm/test_search_tools.py::TestRerankCandidates::test_state_carries_the_locator_and_bounds_the_text",
+      "tests/llm/test_search_tools.py::TestRerankCandidates::test_a_failed_decision_keeps_the_embedding_order_and_notes_it",
+      "tests/llm/test_search_tools.py::TestRerankCandidates::test_a_candidate_unfinished_at_the_budget_keeps_its_position",
+      "tests/llm/test_search_tools.py::TestSearchToolsRerank::test_docs_report_follows_the_rerank_order",
+      "tests/llm/test_search_tools.py::TestSearchToolsRerank::test_docs_appends_a_note_when_the_rerank_fails",
+      "tests/llm/test_search_tools.py::TestSearchToolsRerank::test_code_report_follows_the_rerank_order",
+      "tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index"
+    ],
+    "log_path": "/tmp/reckon-crew-scratch/r-20261007T162921892674-review-of-decisions-key-test-isolation/scr/logs/review_base_emptykey.log",
+    "revision": "c0c71ec3fb3b829e5712eefee455542365060143"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T16:44:57.699Z",
+  "dispatched_at": "2026-10-07T16:29:34Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's armed baseline_suite/after_suite pair both ran at the head revision fa93ad50b \u2014 baseline_suite is the key-present arm (1 failed / 253 passed / 14 skipped) and after_suite the empty-key arm (1 failed / 208 passed / 59 skipped). Neither names the reviewed base c0c71ec3f, so the armed pair answers 'does the change add a failure' (0) but not 'what did the change repair'. The change's actual effect sits only in evidence_inputs: gate-emptykey-pre.log at the base (18 failed) against gate-after-emptykey.log at the head (1 failed), and gate-emptykey-pre.log carries no rev/cwd/cmd header line, so its revision claim is not readable from the log itself. Naming the base arm as baseline_suite would make the repaired-failure figure read directly from the armed pair, which is the convention the sibling review record (r-20261007T154229329439 review) follows.",
+      "type": "record-semantics"
+    },
+    {
+      "file": "manifest.md",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the two post-change gate logs the reviewed manifest cites (gate-after-emptykey.log, gate-after-keypresent.log) carry no FAILED line in pytest's short-summary section, so the failure id the manifest declares cannot be read from either log \u2014 only the progress marker (one F in tests/test_imas_search_scoring.py) and the mock traceback are present. This review reproduced the omission independently: the twelve-file arm at the head prints SKIPPED entries but no FAILED line, while running tests/test_imas_search_scoring.py alone DOES print 'FAILED tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index'. The declared id is correct (confirmed by the isolated run) but is not log-derivable, so a reader of the record cannot verify it without re-running. Cause not diagnosed here; it is pre-existing and independent of this change.",
+      "type": "record-observability"
+    }
+  ],
+  "head_log_revision": "fa93ad50b92c4a92aed083f7eeaf4919e778b823",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call sites: the diff touches only test files and one evidence fragment. No behaviour changes under imas_codex/; the change makes seventeen existing tests set their own decisions key.",
+    "diff": "Read the single commit fa93ad50b ('test(discovery): set the decisions key in tests that drive the Jev rerank'): five files, 118 insertions / 0 deletions. tests/cli/test_discover_map.py +5 (monkeypatch.setenv in the shared _patch_worker helper, covering its seven worker tests); tests/discovery/test_judgment.py +10 (a file-scoped autouse _decisions_key fixture); tests/ids/test_escalated_target_choice.py +9 (an autouse fixture inside TestNoCandidateLogged); tests/llm/test_search_tools.py +14 (two autouse fixtures, on TestRerankCandidates and TestSearchToolsRerank); docs/evidence/fragments/jt60sa-imas-maps/decisions-key-test-isolation.html +80. No production file is touched.",
+    "done_when": "The node's implied measure is that the seventeen tests which drive the Jev rerank or the candidate worker stay green when OPENROUTER_API_KEY_IMAS_CODEX is absent (the CI condition). Verified independently: at the head the twelve-file gate with the key blanked and dotenv disabled reports 1 failed / 208 passed / 59 skipped, the one failure being the key-independent, pre-existing tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index \u2014 the same single failure the key-present arm reports. At the base the same arm reports 18 failed, so the change repairs all seventeen key-dependent failures and introduces none.",
+    "goal_fidelity": "EXACT. The prior review of decisions-key-skip found that the new key-absent guard had coupled these rerank tests to the ambient key (keyless tree reddens tests/discovery/test_judgment.py::test_rerank_pool_orders_by_descending_score and ::test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails, among others). This change closes that by making each driving test install a dummy key, so the file no longer depends on the environment. The empty-key arm goes from 18 failed to 1 failed and the surviving failure is both key-independent and pre-existing at c0c71ec3f.",
+    "manifest": "status complete; commits [fa93ad50b]; changed_paths names four test files and the evidence fragment, which reconciles with the diffstat (five files, 118 insertions / 0 deletions). The record carries a baseline_suite/after_suite pair and a negative_control_log; both were independently reproduced. Its one substantive gap is that the armed pair runs entirely at the head revision, so the repaired-failure figure lives in evidence_inputs rather than in the armed fields \u2014 reported as a follow-on.",
+    "write_paths": "The reviewed orientation declares eleven test paths, one evidence fragment and a figures directory. The diff touches exactly four test files \u2014 tests/cli/test_discover_map.py, tests/discovery/test_judgment.py, tests/ids/test_escalated_target_choice.py, tests/llm/test_search_tools.py \u2014 plus docs/evidence/fragments/jt60sa-imas-maps/decisions-key-test-isolation.html. All are inside the declared set; the other declared paths were untouched because their tests were not key-dependent, and no figure was drawn (small-node rule, and the record is a tabular file/failure list)."
+  },
+  "justifications": {
+    "durability": "The change is falsifiable and this review falsified the isolation it adds in the negative direction: removing the tests/discovery/test_judgment.py fixture and running that file with the key absent reddens exactly the two rerank tests the head arm does not fail (2 failed / 8 passed, EXIT=1), while the same file at the head with the fixture is 10 passed. That shows the fixture, not the environment, is what carries those tests. Marked down from perfect because the test_discover_map.py key is set inside the shared _patch_worker helper rather than a file-scoped autouse fixture, so a future test added to that module that drives the worker without the helper would silently measure the skip again, and because the fixture idiom is duplicated verbatim across four files (no single shared fixture), which will need re-applying if more files become key-dependent.",
+    "evidence": "Independently reproduced, not read. Both reviewed revisions were extracted with git archive into $TMPDIR and every arm re-run there with module.__file__ under the scratch tree: base c0c71ec3f empty-key 18 failed / 191 passed / 59 skipped (review_base_emptykey.log), head fa93ad50b empty-key 1 failed / 208 passed / 59 skipped (review_head_emptykey.log, matching the reviewed after_suite exactly), head key-present 1 failed / 253 passed / 14 skipped (review_head_keypresent.log, matching the reviewed baseline_suite exactly), and the declared negative control 2 failed / 8 passed (review_negative_control.log). The base failure ids were enumerated authoritatively via junit XML (18 ids, base_junit.xml). Marked down because the reviewed manifest's own armed pair does not carry the base revision and the post-change gate logs omit the FAILED short-summary line, so the record's declared failure id and repaired-failure count cannot be read from the logs it cites without an independent run.",
+    "fit": "Tests-only remediation that matches the prior review's recommendation (remediation in the test files) and the \u00a78 intent that the tests keep exercising the rerank they replace. It extends the pattern already used elsewhere in the repository (a monkeypatch.setenv of the decisions key) rather than inventing a new mechanism, and it does not touch production code, so the key-absent skip behaviour decisions-key-skip landed is left exactly as reviewed.",
+    "goal_fidelity": "Exactly reproduces the intended behaviour. On this review's reproduction of the head, with the key absent the seventeen previously-red tests are green and only the pre-existing key-independent failure remains; with the key present the same single failure remains and the skip-heavy arm is no longer reached. The change adds no failure in either arm (added_failure_count 0).",
+    "reuse": "Reuses pytest's monkeypatch.setenv and the repository's existing decisions-key fixture idiom; no new helper module, no new production seam, no second spelling of the key handling. Uses the existing shared _patch_worker helper in test_discover_map.py rather than editing seven tests individually. Marked down slightly because the same three-line autouse fixture is written out four times across the files rather than shared, which is duplication a conftest-level fixture could remove.",
+    "scope_discipline": "Five files changed, every one inside the declared write paths and none of production code: four test files and the evidence fragment, 118 insertions / 0 deletions. The reviewed run's declared scope was broader (eleven test paths) but only the four carrying key-dependent tests were touched, which is the tighter reading. No file outside the declared set appears in the diff."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: seventeen key-dependent tests across tests/cli/test_discover_map.py, tests/discovery/test_judgment.py, tests/ids/test_escalated_target_choice.py and tests/llm/test_search_tools.py now install their own dummy OPENROUTER_API_KEY_IMAS_CODEX via monkeypatch.setenv, so the twelve-file gate is green with the key absent except the one pre-existing, key-independent failure \u2014 the test-isolation remediation of the decision the decisions-key-skip review found. EVIDENCE: independently reproduced at base c0c71ec3f empty-key 18 failed / 191 passed / 59 skipped and at head fa93ad50b empty-key 1 failed / 208 passed / 59 skipped (matching the reviewed after_suite) and key-present 1 failed / 253 passed / 14 skipped (matching the reviewed baseline_suite); the declared negative control (test_judgment.py fixture removed) reproduces 2 failed / 8 passed. added_failure_count 0 against the reviewed node's own armed pair (both arms carry the same single failure id test_graceful_on_missing_index). SCOPE: five files, 118 insertions / 0 deletions, all declared, no production code. DURABILITY: the fixtures are load-bearing and their removal reddens exactly the two rerank tests; the sole mark-down is that test_discover_map.py sets the key in the shared helper rather than a file-scoped fixture, and the fixture is duplicated across four files. FIT: tests-only remediation following the prior review; extends the existing setenv idiom. REUSE: reuses monkeypatch.setenv and the shared worker helper. Follow-ons: the reviewed armed pair both runs at the head revision, so the repaired-failure figure lives in evidence_inputs (base 18 \u2192 head 1) rather than in the armed fields, and gate-emptykey-pre.log carries no rev/cwd/cmd header; and the post-change gate logs omit pytest's FAILED short-summary line so the declared failure id is not readable from them (confirmed correct by an isolated run of tests/test_imas_search_scoring.py).",
+  "review_run_id": "r-20261007T162921892674-review-of-decisions-key-test-isolation",
+  "reviewed_base_sha": "c0c71ec3fb3b829e5712eefee455542365060143",
+  "reviewed_head_sha": "fa93ad50b92c4a92aed083f7eeaf4919e778b823",
+  "reviewed_run_id": "r-20261007T155548031301-decisions-key-test-isolation",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:47:00Z",
+  "total": 115
+}
