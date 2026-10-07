@@ -50,6 +50,14 @@ _FRONTED_SIGNAL_CAP = 15
 # Cap on the signal family a documentation search names beside its prose.
 _DOC_SIGNAL_CAP = 16
 
+# Number of ranks below the top 10 that a documentation search fills with the
+# closest vector matches. The hybrid keyword term is unbounded and can outscore
+# a chunk by raw BM25 magnitude, so a high-cosine chunk drops out of the cut
+# even though it is among the facility's nearest embeddings. Reserving these
+# slots keeps the displayed top 10 unchanged while guaranteeing the vector
+# leaders a place in the returned window.
+_DOC_VECTOR_RESERVE = 20
+
 
 def _neo4j_error_message(e: Exception) -> str:
     """Format Neo4j errors with helpful instructions."""
@@ -680,6 +688,27 @@ def _vector_search_data_nodes(
 # ---------------------------------------------------------------------------
 
 
+def _reserve_vector_leaders(
+    ranked: list[str],
+    vector_ids: list[str],
+    k: int,
+    reserved: int = _DOC_VECTOR_RESERVE,
+) -> list[str]:
+    """Return the ranked chunk ids with the vector leaders placed below rank 10.
+
+    The top 10 are kept exactly, so no displayed hit is displaced. Ranks 10 to
+    ``k-1`` are then filled with the facility's closest vector matches that the
+    hybrid score pushed past the cut, and the remaining ranked chunks follow.
+    ``vector_ids`` is the vector search's own order (nearest first).
+    """
+    top = ranked[:10]
+    placed = set(top)
+    leaders = [cid for cid in vector_ids if cid not in placed][:reserved]
+    filled = set(leaders)
+    rest = [cid for cid in ranked[10:] if cid not in filled]
+    return (top + leaders + rest)[:k]
+
+
 def _search_docs(
     query: str,
     facility: str,
@@ -738,6 +767,12 @@ def _search_docs(
             score_dimension=score_dimension,
         )
 
+        # The vector results arrive already ordered by cosine; keep that order
+        # and the raw cosine so a tied hybrid score can be broken by it below
+        # rather than by set-iteration order.
+        vector_ids = list(chunk_ids)
+        vector_cosine = dict(scores)
+
         # Step 1b: Text search for keyword matches (hybrid boost)
         text_chunks = _text_search_wiki_chunks(gc, query, facility, k)
         for r in text_chunks:
@@ -749,10 +784,16 @@ def _search_docs(
                 scores[cid] = text_score
                 chunk_ids.append(cid)
 
-        # Re-sort and limit to k
-        chunk_ids = sorted(
-            set(chunk_ids), key=lambda cid: scores.get(cid, 0), reverse=True
-        )[:k]
+        # Re-sort and limit to k. The hybrid score ties at the same value for
+        # many chunks, so the raw cosine breaks every tie deterministically and
+        # the vector leaders keep a place in the window even when the unbounded
+        # keyword term outranks them.
+        ranked = sorted(
+            set(chunk_ids),
+            key=lambda cid: (scores.get(cid, 0), vector_cosine.get(cid, -1.0)),
+            reverse=True,
+        )
+        chunk_ids = _reserve_vector_leaders(ranked, vector_ids, k)
 
         # Step 2: Vector search on documents/images
         document_results, document_scores = _vector_search_documents(
