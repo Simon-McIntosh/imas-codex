@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: baseline_suite and after_suite are the reviewer's two independent gate arms over the reviewed change's own test reach (three files, 105 collected each). Baseline (base tree 81c602aa with the head's test_code_ingest_idempotent.py): 1 failed, test_all_already_ingested_batch_records_each_outcome on KeyError: 'outcomes', EXIT=1 (review-gate-base.log). After (head 5c3c846a6): 0 failed, 105 passed, EXIT=0 (review-gate-head.log). Head failures minus baseline failures = none added; the change removes one failure. The reviewed run itself declares baseline_suite and after_suite null and supplies the same pair at file granularity in gate.log (105 passed) for the head and repro-unfixed.log (1 failed on the same test) for the base.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/ingestion/test_code_ingest_idempotent.py tests/discovery/test_code_ingest_settles.py tests/discovery/test_code_pipeline.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123737331087-review-of-already-ingested-outcome/review-gate-head.log",
+    "revision": "5c3c846a6a1c290b1eda60e6b0cf3c714ebf5577"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/ingestion/test_code_ingest_idempotent.py tests/discovery/test_code_ingest_settles.py tests/discovery/test_code_pipeline.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/ingestion/test_code_ingest_idempotent.py::test_all_already_ingested_batch_records_each_outcome"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123737331087-review-of-already-ingested-outcome/review-gate-base.log",
+    "revision": "81c602aafdd2d3b6f788eda6942cd03ad3eec0fa"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py:1090 (code_worker calls ingest_files(facility, remote_paths, force=False) and marks each claimed file from ingest_stats['outcomes'] at line 1101)"
+  ],
+  "completed_at": "2026-10-07T12:46:06.015Z",
+  "dispatched_at": "2026-10-07T12:37:46Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "1101",
+      "severity": "follow-on",
+      "text": "follow-on (manifest shape): the reviewed manifest's commits field is a single space-joined string \"a3d3a88c0 5c3c846a6\" rather than a JSON list of the two shas, so a reader cannot address them as a list. The work behind the field is sound (both shas resolve, 81c602aa..5c3c846a6) and the review read the two commits individually; only the field's type is off-contract."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "one production caller: imas_codex/discovery/code/workers.py:1090 (code_worker) consumes ingest_stats['outcomes'] at line 1101 and marks each claimed file from its own outcome; no other runtime caller of ingest_files exists.",
+    "diff": "read the full node 81c602aa..5c3c846a6 commit by commit: a3d3a88c0 adds the settle() helper and routes the no-pending, gated, all-already-ingested and no-files-to-process returns through it, moves the fetch-failed bookkeeping ahead of the moved no-files guard, and replaces the end-of-function assignment with settle(); 5c3c846a6 adds the evidence fragment.",
+    "done_when": "this node's in-scope measure is met and independently reproduced: the gate the change reaches exits 0 (105 passed) and a base arm reddens on the new test with KeyError: 'outcomes'. The section's Cypher/run bullets (no JT-60SA CodeFile failed for a CodeExample collision, no unclaimable content-stage file at scored) and the ordered single-writer re-ingest are operational and deferred by the node's fence to the coordinator; the 'plain create restored' control is retired by the section's own correction comment; clauses 2/3 of the numbered list land under sibling nodes.",
+    "goal": "\u00a731 clause 2 restated by the section's correction comment is 'the batch records each file's own outcome'. Delivered: ingest_files routes every return (no-pending, gated, all-already-ingested, no-files-to-process) and its fall-through through settle(), so stats['outcomes'] is always populated; already-ingested paths get {status: ingested, reason: 'already ingested'} on both the all-already-ingested and the mixed paths. The fetch-failed bookkeeping is moved ahead of the 'No files to process' return so a fetch-missing path is recorded too.",
+    "manifest": "read; status complete; commits a3d3a88c0 and 5c3c846a6; the gate the node cites is independently reproduced at review-gate-head.log (105 passed, EXIT=0) and its base condition at review-gate-base.log. baseline_suite and after_suite are declared null by the node, so its manifest carries no arm pair of its own; the node's gate.log, repro-unfixed.log and negative-control.log supply the same base/head pair at file granularity.",
+    "write_paths": "git diff base..head touches imas_codex/ingestion/pipeline.py (settle() helper + four call sites + the moved fetch-failed block), tests/ingestion/test_code_ingest_idempotent.py (two new tests) and docs/evidence/fragments/jt60sa-discovery-completion/already-ingested-outcome.html \u2014 exactly the three declared write paths, with no plan edit, no graph write and no discover run."
+  },
+  "justifications": {
+    "durability": "the guard is behavioural and fires on revert: test_all_already_ingested_batch_records_each_outcome asserts stats['outcomes'][PATH] carries status 'ingested' with reason 'already ingested' and that nothing was written (fake_graph.examples == {}), and it reddens with KeyError: 'outcomes' on the unfixed tree (review-gate-base.log, matching the node's own negative-control.log). test_mixed_batch_records_outcomes_for_both_kinds pins the mixed path. No mock substitutes the settle() logic itself.",
+    "evidence": "independently reproduced: the head gate (3 files, reviewed head 5c3c846a6) exits 0 with 105 passed (review-gate-head.log), and a base arm (base 81c602aa with the new tests) exits 1 with test_all_already_ingested_batch_records_each_outcome failing on KeyError: 'outcomes' (review-gate-base.log) \u2014 exactly the defect the fragment quotes and the reviewed run's own gate.log/repro-unfixed.log/negative-control.log show. The fragment's claims (the four settle exits, the mixed-batch test passing at base, the overlay negative control under $TMPDIR) all check out against the diff and the logs.",
+    "fit": "settle() is named by behaviour, its docstring states the mechanism (a claimed file with an absent outcome reads as unrecorded), and the comment on the fetch-failed bookkeeping states why it moved; conventional two-part commits, no plan, sprint or ticket labels in code, comments, filenames or subjects.",
+    "goal_fidelity": "the node's \u00a731 slice is the causal repair of the 29 re-failed already-ingested files: every exit of ingest_files now routes through one settle() helper that assigns stats['outcomes'], so each requested path carries its own outcome and an already-ingested path carries {status: ingested, reason: 'already ingested'} (imas_codex/ingestion/pipeline.py:366-384,430-433,483-486,664). The worker's contract (imas_codex/discovery/code/workers.py:1101-1112 reads outcomes.get(path) and marks a missing entry failed) is satisfied. The broader \u00a731 deliverables (per-file write-failure isolation, chunk-less skip, failed->scored reset) are delivered under sibling nodes and the Cypher/run half is deferred by the node's fence; this node does not overclaim them.",
+    "reuse": "settle() reuses the existing outcomes mapping and the same failed/skipped_files derivation that the end-of-function path already performed, rather than a second accounting; _check_already_ingested, _generate_example_id and the shared pipeline helpers are unchanged, and the already-ingested outcome uses the same {status, reason} shape the skipped path already used.",
+    "scope_discipline": "git diff 81c602aa..5c3c846a6 changes only imas_codex/ingestion/pipeline.py, tests/ingestion/test_code_ingest_idempotent.py and docs/evidence/fragments/jt60sa-discovery-completion/already-ingested-outcome.html \u2014 exactly the manifest's declared write paths; no plan edit, no graph write, no discover run."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a731 clause 2 restated by the section's correction comment is 'the batch records each file's own outcome'. Delivered: ingest_files routes every return (no-pending, gated, all-already-ingested, no-files-to-process) and its fall-through through settle(), so stats['outcomes'] is always populated; already-ingested paths get {status: ingested, reason: 'already ingested'} on both the all-already-ingested and the mixed paths. The fetch-failed bookkeeping is moved ahead of the 'No files to process' return so a fetch-missing path is recorded too.\nVERDICT done_when: this node's in-scope measure is met and independently reproduced: the gate the change reaches exits 0 (105 passed) and a base arm reddens on the new test with KeyError: 'outcomes'. The section's Cypher/run bullets (no JT-60SA CodeFile failed for a CodeExample collision, no unclaimable content-stage file at scored) and the ordered single-writer re-ingest are operational and deferred by the node's fence to the coordinator; the 'plain create restored' control is retired by the section's own correction comment; clauses 2/3 of the numbered list land under sibling nodes.\nVERDICT write_paths: git diff base..head touches imas_codex/ingestion/pipeline.py (settle() helper + four call sites + the moved fetch-failed block), tests/ingestion/test_code_ingest_idempotent.py (two new tests) and docs/evidence/fragments/jt60sa-discovery-completion/already-ingested-outcome.html \u2014 exactly the three declared write paths, with no plan edit, no graph write and no discover run.\nVERDICT manifest: read; status complete; commits a3d3a88c0 and 5c3c846a6; the gate the node cites is independently reproduced at review-gate-head.log (105 passed, EXIT=0) and its base condition at review-gate-base.log. baseline_suite and after_suite are declared null by the node, so its manifest carries no arm pair of its own; the node's gate.log, repro-unfixed.log and negative-control.log supply the same base/head pair at file granularity.\nVERDICT diff: read the full node 81c602aa..5c3c846a6 commit by commit: a3d3a88c0 adds the settle() helper and routes the no-pending, gated, all-already-ingested and no-files-to-process returns through it, moves the fetch-failed bookkeeping ahead of the moved no-files guard, and replaces the end-of-function assignment with settle(); 5c3c846a6 adds the evidence fragment.\nCALL_SITES: imas_codex/discovery/code/workers.py:code_worker\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the node's \u00a731 slice is the causal repair of the 29 re-failed already-ingested files: every exit of ingest_files now routes through one settle() helper that assigns stats['outcomes'], so each requested path carries its own outcome and an already-ingested path carries {status: ingested, reason: 'already ingested'} (imas_codex/ingestion/pipeline.py:366-384,430-433,483-486,664). The worker's contract (imas_codex/discovery/code/workers.py:1101-1112 reads outcomes.get(path) and marks a missing entry failed) is satisfied. The broader \u00a731 deliverables (per-file write-failure isolation, chunk-less skip, failed->scored reset) are delivered under sibling nodes and the Cypher/run half is deferred by the node's fence; this node does not overclaim them.\nSCORE evidence: 18\nJUSTIFICATION evidence: independently reproduced: the head gate (3 files, reviewed head 5c3c846a6) exits 0 with 105 passed (review-gate-head.log), and a base arm (base 81c602aa with the new tests) exits 1 with test_all_already_ingested_batch_records_each_outcome failing on KeyError: 'outcomes' (review-gate-base.log) \u2014 exactly the defect the fragment quotes and the reviewed run's own gate.log/repro-unfixed.log/negative-control.log show. The fragment's claims (the four settle exits, the mixed-batch test passing at base, the overlay negative control under $TMPDIR) all check out against the diff and the logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 81c602aa..5c3c846a6 changes only imas_codex/ingestion/pipeline.py, tests/ingestion/test_code_ingest_idempotent.py and docs/evidence/fragments/jt60sa-discovery-completion/already-ingested-outcome.html \u2014 exactly the manifest's declared write paths; no plan edit, no graph write, no discover run.\nSCORE durability: 19\nJUSTIFICATION durability: the guard is behavioural and fires on revert: test_all_already_ingested_batch_records_each_outcome asserts stats['outcomes'][PATH] carries status 'ingested' with reason 'already ingested' and that nothing was written (fake_graph.examples == {}), and it reddens with KeyError: 'outcomes' on the unfixed tree (review-gate-base.log, matching the node's own negative-control.log). test_mixed_batch_records_outcomes_for_both_kinds pins the mixed path. No mock substitutes the settle() logic itself.\nSCORE fit: 19\nJUSTIFICATION fit: settle() is named by behaviour, its docstring states the mechanism (a claimed file with an absent outcome reads as unrecorded), and the comment on the fetch-failed bookkeeping states why it moved; conventional two-part commits, no plan, sprint or ticket labels in code, comments, filenames or subjects.\nSCORE reuse: 19\nJUSTIFICATION reuse: settle() reuses the existing outcomes mapping and the same failed/skipped_files derivation that the end-of-function path already performed, rather than a second accounting; _check_already_ingested, _generate_example_id and the shared pipeline helpers are unchanged, and the already-ingested outcome uses the same {status, reason} shape the skipped path already used.\nFINDING imas_codex/discovery/code/workers.py:1101 follow-on (manifest shape): the reviewed manifest's commits field is a single space-joined string \"a3d3a88c0 5c3c846a6\" rather than a JSON list of the two shas, so a reader cannot address them as a list. The work behind the field is sound (both shas resolve, 81c602aa..5c3c846a6) and the review read the two commits individually; only the field's type is off-contract.\n",
+  "review_run_id": "r-20261007T123737331087-review-of-already-ingested-outcome",
+  "reviewed_base": "81c602aafdd2d3b6f788eda6942cd03ad3eec0fa",
+  "reviewed_base_sha": "81c602aafdd2d3b6f788eda6942cd03ad3eec0fa",
+  "reviewed_commit": "5c3c846a6a1c290b1eda60e6b0cf3c714ebf5577",
+  "reviewed_head_sha": "5c3c846a6a1c290b1eda60e6b0cf3c714ebf5577",
+  "reviewed_run_id": "r-20261007T122804423655-already-ingested-outcome",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T12:44:38.834245+00:00",
+  "total": 112
+}
