@@ -1,0 +1,40 @@
+<section>
+  <h2 id="enumerator-path-quoting-title">The directory enumerator quotes its path</h2>
+  <p id="enumerator-path-quoting-what">
+    <code>_enumerate_files_find</code> in
+    <code>imas_codex/remote/scripts/discover_files.py</code> built a
+    <code>find</code> command as a string and handed it to
+    <code>sh -c</code> with the scanned path interpolated unquoted, so a path
+    holding a space, a <code>#</code> or a shell metacharacter was mangled
+    before <code>find</code> ran. The command is now built by a
+    <code>_build_find_command</code> helper that passes the path through
+    <code>shlex.quote</code>. It is the only site in the script that builds a
+    shell command from a path: <code>_enumerate_files_fd</code>,
+    <code>_count_lines</code> and <code>_rg_count</code> already pass argv
+    lists to <code>subprocess.run</code> with no shell.
+  </p>
+  <p id="enumerator-path-quoting-evidence">
+    Reproduction before the fix: the path <code>/analysis/a b#c</code> reached
+    the shell as <code>find /analysis/a b#c …</code> and
+    <code>shlex.split</code> produced <code>['find', '/analysis/a', 'b#c',
+    …]</code> — the path split at the space. Gate
+    <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+    PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider
+    tests/remote/test_discover_files_quoting.py</code> exits
+    <strong>0</strong> at base revision <code>57a78700e</code> plus this
+    node's changes on the fleet allocation (<code>98dci4-clu-2018</code>, job
+    1277272): <strong>3 passed</strong>. The tests drive a path with a space
+    and a <code>#</code> through <code>_build_find_command</code> and through
+    the real <code>_enumerate_files_find</code> call site, asserting the
+    quoted path is one shell word, and run <code>find</code> against a
+    directory named <code>a dir#frag</code> and recover the file inside it.
+  </p>
+  <p id="enumerator-path-quoting-negative-control">
+    Negative control (<code>negative-control.log</code>): the same test file
+    run against a copy with the unquoted find interpolation restored exits
+    <code>1</code>, first failure
+    <code>test_builder_quotes_a_path_with_space_and_hash</code> with the path
+    split at the space (<code>['find', '/analysis/a', 'dir#frag', …]</code>).
+    The head arm at the same test reads <code>EXIT=0</code>.
+  </p>
+</section>

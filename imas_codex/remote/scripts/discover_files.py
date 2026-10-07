@@ -54,6 +54,7 @@ Output (JSON on stdout):
 
 import json
 import os
+import shlex
 import subprocess
 import sys
 
@@ -143,11 +144,22 @@ def _enumerate_files_fd(path, extensions, max_depth, max_files, max_file_size):
         return [], False
 
 
-def _enumerate_files_find(path, extensions, max_depth, max_files, max_file_size):
-    # type: (str, List[str], int, int, int) -> tuple
+def _build_find_command(path, extensions, max_depth, max_file_size):
+    # type: (str, List[str], int, int) -> str
     ext_predicates = " -o ".join(f'-name "*.{ext}"' for ext in extensions)
     size_filter = f"-size -{max_file_size}c" if max_file_size > 0 else ""
-    cmd = f"find {path} -maxdepth {max_depth} -type f {size_filter} \\( {ext_predicates} \\) 2>/dev/null"
+    # The scanned path reaches a shell in this fallback, so quote it: a
+    # directory or file name may carry a space or other shell metacharacter. A
+    # "#" opens a comment in a shell, and a space splits the path into two.
+    return (
+        f"find {shlex.quote(path)} -maxdepth {max_depth} -type f "
+        f"{size_filter} \\( {ext_predicates} \\) 2>/dev/null"
+    )
+
+
+def _enumerate_files_find(path, extensions, max_depth, max_files, max_file_size):
+    # type: (str, List[str], int, int, int) -> tuple
+    cmd = _build_find_command(path, extensions, max_depth, max_file_size)
     try:
         result = subprocess.run(
             ["sh", "-c", cmd],
