@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
-<meta name="plan-impl" content="0.27">
-<meta name="plan-version" content="22">
+<meta name="plan-impl" content="0.36">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -210,6 +210,7 @@
 <ul>
 <li><code>_search_code</code> and <code>_search_docs</code> rerank their top candidates through <code>call_decisions</code>, on the existing <code>discovery-relevance</code> seat, so the rerank adds no seat, with the query and each candidate's text as state.</li>
 <li>Because ranking is not a gate, a failed or slow rerank returns the embedding order unchanged and says so in the result, rather than failing the search.</li>
+<li>The rerank scores a pool larger than the 30 it returns. §12 found the code answers inside the merged pool but beyond rank 30: <code>eqgrd.f</code> at 85 of 135, and <code>shtrd.f</code> once the vector cut reaches 50. A rerank over the top 30 alone cannot reach either. The node sizes the pool, for example 100 or 150, from recall over the §9 labels against cost and wall time, and reports both.</li>
 <li>The rerank runs its candidates concurrently under a wall-time budget, sized from the measured 2 s per question. A candidate still unscored when the budget runs out keeps its embedding position.</li>
 <li>The rerank waits for the code score-stage node to merge, because that node also writes <code>imas_codex/llm/search_tools.py</code>.</li>
 </ul>
@@ -233,16 +234,12 @@
   <p class="landed-summary">Landed: <code>_search_docs</code> saturates at a 1.0 score, so the Q18 and Q14 answers, at the 2nd- and 4th-highest cosine in the facility, tie with 228 and 268 chunks and are ordered arbitrarily. Reserving 20 vector slots lifts both into the top 30 at no cost to any question's top 10, while reweighting and a saturating keyword term fail the Q16 control. Q12 and Q05 are never generated as candidates, which §12 takes. The fix for the score ties is <code>docs-score-ties</code> in §9. Reviews 90 and 91. <a href="retrieval-scoring-probe">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
     <h2 id="s12">§12 — Code search never generates two answers as candidates</h2>
-<section data-reckon="section" data-id="s12" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>§11 found two code answers that no scoring change can reach, because the tool never makes them candidates. <code>shtrd.f</code> (Q12) has cosine 0.560 and facility vector rank 49, outside a vector cut of 30. <code>eqgrd.f</code> (Q05) has cosine 0.438 and rank 442 of 907. Its single chunk is also left over from before a reset, and its file sits at scored 0.35 below the ingest gate.</p>
-<p>Node <code>code-candidate-probe</code>, evidence only. Measure, over the 12 code questions of §9 by nDCG@10 with Q16's code counterpart Q06 as the control:</p>
-<ul>
-<li>a wider vector cut (50 and 100);</li>
-<li>a bounded lexical term over routine names and identifiers;</li>
-<li>embedding the stored file description beside the chunk text.</li>
-</ul>
-<p>Report each variant's latency beside its gain. No code change and no graph write.</p>
+<section data-reckon="section" data-id="s12" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed: the two code answers are not missed at candidate generation, contrary to this section's premise. <code>eqgrd.f</code> is generated at merged rank 85 of 135 and <code>shtrd.f</code> enters the pool at a vector cut of 50; the top-30 cap discards both. Widening the cut or adding a lexical term does not help. Embedding file descriptions doubles mean nDCG@10 over the 12 code questions (0.19 to 0.42) but fails the Q06 control. The fix moves to §9's rerank, which now scores a larger pool. Review 104/120. <a href="code-candidate-probe">full record</a></p>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -305,6 +302,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20261007T050712513106-review-of-code-candidate-probe" data-who="reckon-build" data-when="2026-10-07T05:31:42.845Z">
     <div class="r-comment-body"><p>reviewed run r-20261007T042533534406-code-candidate-probe accepted with a follow-on review: 3 follow-on findings recorded (two cited evidence logs do not reproduce the reported figures; one fragment sentence overstates a mechanism the bullet below it states correctly).</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-landing-code-candidate-probe" data-who="reckon-build" data-when="2026-10-07T05:35:00Z">
+    <div class="r-comment-body"><p>Node code-candidate-probe (6916e0efa) landed; review 104/120. Three corrections are recorded in the evidence at merge. The cited variants.log uses the local-denominator nDCG, so its Q06 values do not match the table. The live rerun matches the harness order exactly on 5 questions, not 6, and q10 differs within its top 10, not only inside ties. Q05 is generated at cut 30 while Q12 enters only at cut 50. Embedding descriptions is the one large effect; its 14.6 s per query is an artifact of computing the embeddings on the fly, and a deployment would store them. It stays an experiment until it recovers Q06. impl 4/11.</p></div>
 </div>
 </section>
 </main>
