@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:45:31.311Z",
+  "dispatched_at": "2026-10-05T05:34:54Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/campaign_pricing.py:1",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite this module as the cost owner and route its decision through it, which removes a measurement work item and a duplicate implementation path.",
+      "text": "\u00a73 states \"Cost per identity \u2014 measured, not estimated: compose is free on the local seat and review is the paid axis, and the figure is dominated by quorum draws\" and the followup asks a worker to measure it, but `campaign_pricing.py` already renders the production review request for every identity and prices the complete reviewer chain (first two seats mandatory, third as worst-case escalation) with no model call \u2014 the plan would re-derive a figure an existing module computes",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/source_refresh.py:1",
+      "id": "reuse_search-2",
+      "reason": "if source-refresh already refreshes stale docs, the freshness benefit \u00a72 prices may be partly banked, which changes the threshold the plan must state.",
+      "text": "\u00a72 treats \"stale generated documentation\" as what \"regeneration is actually for\", but `source_refresh.py` already re-refines existing names when their DD source drifts (effective unit/documentation/path change steers an `axis='docs'` refine, idempotent on re-run) and the pipeline already re-refines docs without a delete-and-rebuild",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/provenance_rebuild.py:1",
+      "id": "reuse_search-3",
+      "reason": "the prerequisite plan already owns provenance recovery, so the finding sharpens the citation rather than changing the scope decision.",
+      "text": "\u00a72's residue table (\"dual-bound source with a single-producer loser\", \"recoverable link topology\", \"unresolved residue\") is the same reasoning `provenance_rebuild.py` already encodes, which replays \"the deterministic half of a fresh build against the existing names \u2014 it never regenerates names or docs\" \u2014 the plan cites none of it",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/standard_names/campaign_pricing.py:254",
+      "id": "duplicate_owner-1",
+      "reason": "extending the origin-query owner keeps one population definition and prevents the plan's census from drifting from the pricing cohort it must match.",
+      "text": "the regenerable/protected population counts are graph queries over `origin` (`AND sn.origin = 'catalog_edit'` here, alongside `coverage`/`status` in `imas_codex/cli/sn.py`), and the plan would measure them ad hoc as raw counts (`2,096`, `2,031`, `1,099`) instead of extending the owner that already queries origin for pricing",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/protection.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "naming the existing guard as the enforcement point turns \"must exclude\" from a plan assertion into an existing invariant the regenerate can lean on.",
+      "text": "\u00a73's \"Protected population ... which a regenerate must exclude rather than rebuild\" restates the protection mechanism `protection.py` already owns (`PROTECTED_FIELDS`, `filter_protected()`), which every protected-field writer already calls",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ce382202f940eaab8b365a749642c44800b0262f43d94988c5e8a9fe6b919c21",
+  "plan_slug": "sn-regeneration-decision",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053451305669-plan-review-of-sn-regeneration-decision",
+  "reviewed_blob_sha": "2a57d0791b1b94c9dfe695cdcaaf1a8890594a75",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan proposes no new module; its work is a census plus a decision, so there is no interface spreading complexity across wrappers to judge.",
+    "duplicate_owner": "a finding \u2014 the plan's \"cost per identity\" and \"regenerable/protected population\" duplicates owners `imas_codex/standard_names/campaign_pricing.py` and `imas_codex/standard_names/protection.py`, and its documentation-regeneration scope duplicates `imas_codex/standard_names/source_refresh.py`.",
+    "interface_budget": "pass \u2014 the plan adds no public definition, CLI option, MCP view or refusal family; public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 are unchanged, and the only new surface is a plan decision block (`regenerate-scope`) which is not one of the four families.",
+    "reuse_search": "a finding \u2014 the plan searched no codebase: cost-per-identity is already priced by `imas_codex/standard_names/campaign_pricing.py`, documentation regeneration by `imas_codex/standard_names/source_refresh.py`, and deterministic rebuild-vs-residue reasoning by `imas_codex/standard_names/provenance_rebuild.py`, and \u00a73 lists all of these as quantities still to be measured rather than mechanisms to extend.",
+    "thin_wrapper": "pass \u2014 the plan adds no wrapper layer over existing machinery; it either extends the pipeline (regenerate) or does not, and no thin wrapper is proposed."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.110018+00:00"
+}

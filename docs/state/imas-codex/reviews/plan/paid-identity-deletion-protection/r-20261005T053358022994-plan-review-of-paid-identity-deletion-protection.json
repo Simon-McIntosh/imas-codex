@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:46:53.108Z",
+  "dispatched_at": "2026-10-05T05:34:01Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/protection.py:156",
+      "id": "thin_wrapper-1",
+      "reason": "this is wiring inside an already-specified function, not a design gap the plan's text should carry; the plan did the depth judgement (one query in one function) correctly.",
+      "text": "`refuse_protected_automatic_deletion` fabricates `[{\"id\": name, \"status\": \"delete\"}]` dicts solely to call `filter_protected(..., protected_names=set(protected_reasons))`, then reads back the returned `protected_ids`; `filter_protected` is documented to \"strip protected editorial fields from approved items\" and its loop is a set-membership test dressed as a field filter, so a deletion refusal is wired through a function whose contract is a different operation entirely. The membership answer is already `protected_reasons`' own keys, so the delegation adds a parallel path that a future change to the field-stripping semantics could silently alter.",
+      "type": "thin_wrapper",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:81",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 req 3 rules a ceiling onto \"every automatic pass\", so the plan should name `protection.py` as the single ceiling owner rather than leaving it to be duplicated per delete site.",
+      "text": "the plan's \u00a73 requirement 3 asks for a volume ceiling on every automatic delete pass, but the ceiling exists only as `DERIVED_PARENT_CLEANUP_DELETION_LIMIT = 80`, a constant named for and enforced at one call site (`_delete_derived_parent_nodes`), while the shared owner of every deletion write \u2014 `deletion_change_cypher`/`deletion_change_params` in `provenance_lifecycle.py:148` \u2014 carries the recovery snapshot but no ceiling, and `protection.py`, which now owns `automatic_deletion_protections` and `filter_automatic_deletion_candidates`, owns no ceiling at all; extending a ceiling to a second automatic path therefore means minting a second site-specific constant. The owner to extend is `protection.py`, so the ceiling travels with the protection it bounds.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/paid-identity-deletion-protection.html#s4",
+      "id": "interface_budget-1",
+      "reason": "the section must state what it retires or merges, or why nothing can be, before its surface is added.",
+      "text": "\u00a74 (with \u00a74a) adds interface surface: a new `sn restore` command group (`imas_codex/cli/sn.py:8545`) with `compose` and `apply` subcommands, a new public artifact definition `imas-codex.archive-reconstruction.v1` (`signed_manifest.py:185`, exercised at `sn.py:8371`), and a new refusal family (relationship type outside the registry, counterpart neither live nor included, a node already present with non-identical state, per-type archive-versus-live count mismatch). The section text names none of these as retiring or merging existing surface. Against this week's figures \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 \u2014 the addition is unaccounted.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "96ba705171fcd545192f0b2aef045ebcaaa475afaca59a20129caac975af0206",
+  "plan_slug": "paid-identity-deletion-protection",
+  "plan_version": 76,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053358022994-plan-review-of-paid-identity-deletion-protection",
+  "reviewed_blob_sha": "ee844e04be1fb594ba4830de55964f00fa5c1b2d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the durable-authority query is one deep function: `automatic_deletion_protections(gc, name_ids)` at `protection.py:86` hides the whole spend/materialisation/publication-signal Cypher behind a single call returning an identity\u2192reason map, and `deletion_change_cypher` at `provenance_lifecycle.py:148` hides the snapshot-plus-edge-inventory write behind one builder. Both hide more than they expose.",
+    "duplicate_owner": "a finding \u2014 the volume ceiling is a per-site constant outside the module that now owns deletion protection.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds an `sn restore` command group, a new signed-artifact definition and a new refusal family without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the plan searches the codebase before proposing machinery: \u00a73 names `filter_protected` in `imas_codex/standard_names/protection.py` and reads its definition (correctly finding it matches `name_stage='approved'`, of which zero rows hold, so it returns the empty set); \u00a74 is preceded by the restore reuse map (`docs/evidence/paid-identity-deletion-protection/restore-reuse-map.md`) that judged the archive-reconstruction adapter the one justified piece of new machinery; the deletion-recovery material is routed through the existing `deletion_change_cypher` builder in `provenance_lifecycle.py` rather than a parallel one.",
+    "thin_wrapper": "a finding \u2014 `refuse_protected_automatic_deletion` reuses an editorial field-stripper as a set-membership predicate."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.042927+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T10:07:59.531Z",
+  "dispatched_at": "2026-10-06T09:56:56Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/cypher_property_check.py:29",
+      "id": "reuse_search-1",
+      "reason": "naming the registry owner and correcting the premise changes what the migration must touch and where the finish line (retire the row) is measured.",
+      "text": "the plan never names the property audit that produced its own subject: `_ADJUDICATED_OCCURRENCES` (lines 29\u2013192) is the mechanism that defines the \"permanent runtime-property allowance\" the plan is about, its guard is tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties, and the declared/undeclared sides it must edit live in imas_codex/schemas/facility.yaml (patterns_found:890, related_ids:2842, data_references:3326, references_imas:3333) and imas_codex/schemas/standard_name.yaml (embed_failed_at:1028). Its premise is also wrong: only `related_ids` appears in the allowance (rows 97 and 166); `embed_failed_at` appears nowhere in the file and `patterns_found` appears nowhere \u2014 its only residue is a [defect] row on the return alias `patterns_detected` at line 61 (from discovery/paths/parallel.py:629), which the plan's \"all three sit in the allowance\" claim hides",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/cypher_property_check.py:96",
+      "id": "duplicate_owner-1",
+      "reason": "two of the three properties are shared across many labels and sites, so an owner decision scoped to a single label (CodeChunk) leaves the duplicate owner standing and the plan's own census incomplete.",
+      "text": "the plan's done-when (\"the abandoned property being gone rather than merely unused\") is enforced nowhere but this owner's allowance registry, and its census of affected sites is a sample: for `related_ids` the plan names only the query at imas_codex/tools/graph_search.py:2559-2560 and the writer at imas_codex/ingestion/graph.py:85,96-97, but the same property is also written at imas_codex/ingestion/pipeline.py:95,107-109 and read at imas_codex/ingestion/search.py:25,61,80, and two [runtime] rows (cypher_property_check.py:97 and :166) must be retired or the property survives as an allowance; for `embed_failed_at` the plan frames it as \"CodeChunk.embed_failed_at\" when imas_codex/discovery/base/embed_worker.py:182-198 writes it via `_mark_embed_failed(label, \u2026)` on every description/text-embeddable label (labels from `_get_description_labels()`/`_get_text_labels()`, called at :498) and reads it generically at :93-120, and it is declared on exactly one of those labels (imas_codex/schemas/standard_name.yaml:1028) while a second StandardName writer clears it at imas_codex/standard_names/graph_ops.py:18414",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:2842",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added public definition against the 0 public_definitions figure, which forces the plan to state the retirement on the schema/allowance side rather than leaving it implicit.",
+      "text": "\u00a72 offers \"declaring the runtime property in LinkML\" as one candidate for `CodeChunk.related_ids` (and by extension `embed_failed_at`), which adds a public schema definition, and \u00a73 states the done-when; neither section names a declaration it retires or merges (e.g. retiring the `related_ids` runtime rows in cypher_property_check.py:97,166 or the CodeExample declaration at facility.yaml:2842) nor states why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e65f3d3e0d7fdd8ed1b86a8f95db7b0c7da3fdd105e9be5cbe68f65039597208",
+  "plan_slug": "sn-schema-ownership-residue",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T095648625573-plan-review-of-sn-schema-ownership-residue",
+  "reviewed_blob_sha": "0968d34ea79c073b40bbae47d5009225e58883d4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no module and hides no behaviour behind a wrapper; it is a decision record naming two candidate fixes, so there is no interface exposed or widened.",
+    "duplicate_owner": "a finding \u2014 the plan proposes retiring/replacing the runtime allowance without naming its owner (imas_codex/graph/cypher_property_check.py) or the affected property sites, so a reader cannot extend the owner and will seek a fork.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 proposes declaring an undeclared runtime property in LinkML (a new public schema definition) without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites no codebase mechanism, and its central premise (\"all three currently sit in the permanent runtime-property allowance\") misstates the contents of the one mechanism that owns that concept, imas_codex/graph/cypher_property_check.py.",
+    "thin_wrapper": "pass \u2014 the plan proposes no wrapper over existing machinery; its two options are a schema declaration and a query/relationship migration, neither of which is a forwarding layer."
+  },
+  "section_digests": {
+    "_document": "63731b0872350c362e04e1abd7fb627b0302aedc734a21e37175ed1977834a05"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.122962+00:00"
+}

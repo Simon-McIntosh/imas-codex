@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:35:28.009Z",
+  "dispatched_at": "2026-10-06T09:19:20Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/promote.py:1466",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is one new method (`comment_on_pull_request`) on `_GitHubClient`, which the plan already identified; leaving it forked drifts the two boundaries and lets the next refusal/receipt writer choose a third.",
+      "text": "the plan introduces `_pull_request_comment` (POST `/repos/{repo}/issues/{number}/comments`) and `_pull_request_call` (:1459 GET) as a fresh PR REST boundary, re-implementing the transport that `imas_codex/standard_names/catalog_release.py:58` `_GitHubClient) already owns and self-describes as \"the single pull-request boundary; every call goes over GitHub REST\" (create_pull_request :75, update_pull_request_body :104, read_pull_request_body :115); the plan's own followup (f-crs-the-refusal-reaches-the-request-itself) named that owner as the reusable transport, yet the landed path forked it. The same parallel-boundary type recurs at imas_codex/standard_names/promote.py:2013-2022 (comment/review reads through `_pull_request_call`) and, pre-existing, at imas_codex/standard_names/review_triage.py:160, so the census is three direct `github_api_call` PR boundaries beside the one declared owner.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/promote.py:1466",
+      "id": "thin_wrapper-1",
+      "reason": "the plan should say \"extend `_GitHubClient`\" or give a reason a parallel boundary is required; as written it prescribes a second API surface over the same machinery.",
+      "text": "`_pull_request_comment` adds no behaviour `_GitHubClient` could not carry; it is a three-line forwarder to `github_api_call` POST, and the plan text says only that \"the transport beneath it exists and is reusable\" without stating why the owner cannot be extended.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/promote.py:1524",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added interface surface in its own text, e.g. by folding the refusal notice through `_GitHubClient` rather than adding a second public refusal entry point.",
+      "text": "\u00a74's deliverable-three design adds the public definitions `notify_refusal_on_pull_request` and `refusal_notice_body` (:1491) and a new refusal surface on the reviewer's request, against a supplied budget of 0 public_definitions and 0 refusal_families, and the section names nothing it retires or merges nor why nothing can be.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "13dc1d650b8835c76317fccd177865059f2e355315e18ca91806f82fd49b6165",
+  "plan_slug": "catalog-review-surface",
+  "plan_version": 48,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T091911763041-plan-review-of-catalog-review-surface",
+  "reviewed_blob_sha": "cf6e7820863a30796dfc1316e3304a33b560df84",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; the whole plan wires existing machinery (mark_catalog_name_approved, undo_approval, github_api_call) behind the existing entry points, so there is no new interface to weigh against hidden behaviour.",
+    "duplicate_owner": "a finding \u2014 the plan adds a second pull-request REST boundary in promote.py beside catalog_release.py's _GitHubClient, which declares itself \"the single pull-request boundary\".",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74's deliverable three adds the public functions notify_refusal_on_pull_request and refusal_notice_body and a new refusal surface without naming anything it retires or merges, or stating why nothing can be.",
+    "reuse_search": "pass \u2014 the plan carries a reuse map (17 candidates, 17 verdicted) and a prior-art scout (44/44 citations verified) naming the traceability writer, the unwind path and the temp-neo4j substrate; the residual gap it names (the reviewer-visible refusal) is a real missing call site, not an unsearched subsystem. Line anchors have drifted since (mark_catalog_name_approved is at promote.py:1723, not :1627; undo_approval at :1645, not :1549) but every row names the symbol so it stays findable.",
+    "thin_wrapper": "a finding \u2014 the refusal write is a thin POST wrapper over github_api_call with no justification why the declared owner of the PR boundary cannot be extended."
+  },
+  "section_digests": {
+    "_document": "eb48985e8ad42725daa1d97afdddbb5b7e45f0087b690f57bbd9a4805a6f2837",
+    "s1": "ff9190812b358e74f1c94d547d6ccee04d1356d3d6599b0b92dbfe5193005a3c",
+    "s2": "07c0add73cd11f84ef34cbe369fbf9d8d1c22811361973f9cf09ebe43c5368ff",
+    "s3": "d76162bb8db3e715823d0559b36e638e4f74d8134159200da3269b513ad2c10c",
+    "s4": "b1abe85dc8293b334918f5fb7de9fd270f4fe1eac77e8dc565e485b3891d8a62",
+    "s4a": "e716be01db28d0f6c6b081f897a702cdcadc27c24a631899d30594e3c909d37a",
+    "s4b": "f5a1f2616a3d032bf656e5540ba07acc16ac71153be233b9e638410f2bbb7ff0",
+    "s4c": "cd25826e2ff16b3bc935f867a44c16fb919d44e5a846eb2dc70423aaa1616b08"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.008704+00:00"
+}

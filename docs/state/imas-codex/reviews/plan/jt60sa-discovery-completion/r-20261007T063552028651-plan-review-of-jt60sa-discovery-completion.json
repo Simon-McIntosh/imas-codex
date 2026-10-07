@@ -1,0 +1,143 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T06:51:17.438Z",
+  "dispatched_at": "2026-10-07T06:36:15Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html \u00a727 (stale-chunk-removal)",
+      "id": "duplicate_owner-1",
+      "reason": "naming reset.py:402 as the owner makes three drifting spellings one the reset spec and the backlog sweep share.",
+      "text": "the section says it removes chunks \"through the traversal clear_facility_code uses\", but that traversal already exists in two places and the one \u00a727 needs is neither of them: imas_codex/discovery/base/reset.py:402 `_CODE_CHUNK_CASCADE` is exactly this cascade scoped to a node set (rendered at reset.py:419 and :430, the reset-to-discovered/triaged specs that already delete example+chunk nodes), while imas_codex/discovery/code/scanner.py:567-584 spells it a second time inline, facility-wide and by the `facility_id` property. A third spelling, scoped to \"status not ingested\", drifts from both; \u00a727 is the backlog sweep of the cascade the reset owner already applies per file, so the change is to export/extend `_CODE_CHUNK_CASCADE` in imas_codex/discovery/base/reset.py and apply it scoped, not a third copy",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html \u00a726 (facet-admission)",
+      "id": "duplicate_owner-2",
+      "reason": "extending relevance_predicate is the difference between one content-gate owner and two that can diverge.",
+      "text": "the content-ingest gate already has one owner, `relevance_predicate` at imas_codex/discovery/code/scorer.py:91 (which already parameterises the stage and the threshold), and it is what every gate site renders today: the ingest claim imas_codex/discovery/code/workers.py:707, the pending-ingest count imas_codex/discovery/code/parallel.py:455, the pending-chunk-embed count imas_codex/discovery/code/parallel.py:503, and the has-work check imas_codex/discovery/code/graph_ops.py:747. The plan's own four gate sites are exactly those four, so the honest change is to add an optional facet clause to `relevance_predicate` so that all four keep one owner; the section's \"one owner, beside relevance_predicate\" places a second predicate beside it and leaves a future content-gate site that calls `relevance_predicate` silently facet-blind. The four facet names are likewise already owned by `SCORE_DIMENSION_NAMES` (scorer.py:44) and `FACET_QUESTION_FIELDS` (scorer.py:113) \u2014 they must be read from those, not hand-spelled",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html \u00a726 (facet-admission, Python mirror)",
+      "id": "thin_wrapper-1",
+      "reason": "the section should extend the existing Python relevance function rather than add a parallel mirror of the same rule.",
+      "text": "the plan's \"one Python function mirrors it\" reproduces an admission check that already exists in Python: `scope_relevance`/`triage_relevance` (imas_codex/discovery/code/scorer.py:223 and :228) are the Python owner of \"largest of the four scope nouls\", and the admission is already computed in Python at imas_codex/discovery/code/parallel.py and imas_codex/discovery/code/workers.py:578 (`triage_relevance(...) >= ingest_threshold`). A fresh mirror that re-states the facet list and the OR-of-facets rule alongside the Cypher predicate is two owners of one rule; the mirror should be the facet-augmented form of the existing Python relevance function, sharing `SCORE_DIMENSION_NAMES`, so the Cypher and Python arms cannot drift",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html \u00a726 (facet-rejudge)",
+      "id": "reuse_search-1",
+      "reason": "the reset spec as it stands leaves 17 skipped files unrejudged and forces a name-arm re-enrich pass the plan does not budget.",
+      "text": "the section resets the 235 not-ingested files \"to triaged through reset_to_status with a status filter\", but the cited mechanism does not match that use. `reset_to_status` (imas_codex/discovery/base/reset.py:66) takes `extra_filter` (a Cypher fragment starting with `AND`), not a status filter, and the `CodeFile` `triaged` spec (reset.py:426) has `source_statuses=[\"scored\",\"ingested\",\"enriched\"]` \u2014 it excludes `skipped`, so the 17 skipped files in the 235 the section names are not covered by that spec; and it clears `_CODE_ENRICH_FIELDS` (reset.py:363, including `is_enriched`), while the score stage's pending predicate requires `status='triaged'` AND `is_enriched = true` (imas_codex/discovery/code/parallel.py:445-447), so a plain reset-to-triaged drops the enrichment the content arm reads and forces a full name-arm re-enrichment the section does not mention. The node must either pass an `extra_filter` covering `skipped` and account for the re-enrich pass, or use a reset spec shaped for a content-only re-judge",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "943c3d5df105187f5ec00c2d6a90f290fb5edf6a4f2531c6e52e6f3fb9181d8b",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 292,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T06:53:17.855390+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-07T06:53:34.460411+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-07T06:53:50.993877+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T06:54:06.859356+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T06:53:17.855390+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T06:53:34.460411+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T06:54:06.859356+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T06:53:50.993877+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-discovery-completion.v292.json",
+  "review_run_id": "r-20261007T063552028651-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "567c39cf01cddd2d6484071e6ed85b50d2d855f3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a727 hides the cascade, the live-claim exclusion and the embed window behind one operational node, and \u00a726 hides the facet rule behind one predicate rendered at every gate site; neither spreads its logic over many small wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a727 re-spells the CodeExample/CodeChunk cascade that already exists twice, and \u00a726 splits the content-ingest gate away from relevance_predicate, its current owner.",
+    "interface_budget": "pass \u2014 the supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a726 adds only a [tool.imas-codex.discovery] threshold beside the two existing thresholds and an accessor in settings.py, \u00a727 adds no interface at all, so neither section opens a new family to account for.",
+    "reuse_search": "pass \u2014 \u00a726 names scorer.relevance_predicate and the settings threshold owner (imas_codex/settings.py get_code_...), and \u00a727 names the clear_facility_code chunk traversal, so both searched before proposing; two specifics are wrong and are raised below.",
+    "thin_wrapper": "a finding \u2014 \u00a726 adds a second admission predicate beside relevance_predicate rather than extending the owner the gate already renders at all four ingest sites."
+  },
+  "section_digests": {
+    "_document": "3199cb1e34c1545a4b406486e72cdc3b568f3f172d32f85303c48bb37d0a2e4d",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "fc1bb2477e1a80d8c55504afd13bcf03d35feec0a606e750568a331221c98565",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "c014d9c0b2fec663e1f07a721658d81f134c0c13da9253f2574652517102a7d1",
+    "s25": "41bd600cb423f188c6c9738efa78755eeea9ab876ac00bf3f079849f6ce6f15f",
+    "s26": "292eca675cb1a0a0162f691ae812af2646da630685c0bc65cdff5b6035c80415",
+    "s27": "64a7b14c6211acc66d2777596ed514233c8fc4ac322f8ad88f43a3c7f32b70b2",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T06:52:59.582336+00:00"
+}

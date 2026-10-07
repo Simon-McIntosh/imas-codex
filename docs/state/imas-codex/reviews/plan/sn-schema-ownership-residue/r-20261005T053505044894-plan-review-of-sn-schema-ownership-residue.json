@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:46:33.970Z",
+  "dispatched_at": "2026-10-05T05:35:08Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/cypher_property_check.py:57",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must name this inventory and say which rows retire on resolution, or its own measure (non-zero coverage) is satisfied while the property audit fails.",
+      "text": "the plan's \"each of the three gets an owner\" ignores that all three are already recorded in the `_ADJUDICATED_OCCURRENCES` inventory (related_ids at line 99 and embed_failed_at at line 105 under [runtime], patterns_found's predecessor patterns_detected under [defect]), and the audit fails closed on a \"stale <category> adjudication\" once the source occurrence changes, so resolving an owner without editing these rows leaves the detector red",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/embed_worker.py:152",
+      "id": "duplicate_owner-2",
+      "reason": "choosing CodeChunk as the owner leaves the same undeclared write live on every other embedding-bearing label and the plan's \"the property it stopped querying must be gone\" measure never inspects it.",
+      "text": "the plan treats embed_failed_at as one property with one owner on CodeChunk, but `_mark_embed_failed(label, ids)` interpolates the label and writes it on every text-embeddable label, and only StandardName declares it (imas_codex/schemas/standard_name.yaml:1028), so the real owner is the per-class embedding slot family (imas_codex/schemas/facility.yaml:851, 1660, 1866, 2278, 2826, 3194, 3263, 3763, 3928 with no shared mixin) rather than one label",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-schema-ownership-residue.html#\u00a71",
+      "id": "reuse_search-1",
+      "reason": "the correct owner (a shared embedding mixin, or a rename) follows from the declaration the plan did not cite, so its \"declare nothing / declare the runtime property\" fork is the wrong choice set.",
+      "text": "\u00a71 asserts embed_failed_at is \"nothing \u2014 an operational marker with no declaration\", but imas_codex/schemas/standard_name.yaml:1028 declares the same slot on StandardName, and imas_codex/standard_name/graph_ops.py:18414 writes it there, so the disagreement is a duplicate across labels, not an absence, and the plan searched neither schema it depends on",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "bb91f5c13c1f623848c6dd52cdb6725d358b41fa1c6cc97ccbc10d5b57da67f8",
+  "plan_slug": "sn-schema-ownership-residue",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053505044894-plan-review-of-sn-schema-ownership-residue",
+  "reviewed_blob_sha": "0968d34ea79c073b40bbae47d5009225e58883d4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no module is proposed; the plan is a three-property ownership decision with no new interface, so there is nothing whose depth could be shallow.",
+    "duplicate_owner": "a finding \u2014 the plan proposes to \"settle ownership\" of three properties without naming the owner to extend, and re-adjudicates rather than editing the existing ownership record at imas_codex/graph/cypher_property_check.py:57-195.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds a definition, option, view or refusal family, so nothing needs to be named as retired.",
+    "reuse_search": "a finding \u2014 the plan names no existing mechanism by file (not the audit module imas_codex/graph/cypher_property_check.py, not the schema that already declares two of the three properties, not the migration convention in imas_codex/graph/AGENTS.md), and its \u00a71 premise that embed_failed_at has \"no declaration\" is contradicted by the schema it did not cite.",
+    "thin_wrapper": "pass \u2014 no wrapper is proposed over existing machinery; the plan proposes to settle ownership and change the write/query paths in place."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.127287+00:00"
+}
