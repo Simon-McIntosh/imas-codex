@@ -50,6 +50,55 @@ _FRONTED_SIGNAL_CAP = 15
 # Cap on the signal family a documentation search names beside its prose.
 _DOC_SIGNAL_CAP = 16
 
+# ---------------------------------------------------------------------------
+# Rerank
+# ---------------------------------------------------------------------------
+
+# The rerank scores a pool larger than the k a search tool returns, so an answer
+# embedding ranks below k can still be lifted into the report. 60 is the pool a
+# sweep over 18 JT-60SA questions chose. Deeper pools rank the labelled answers
+# better -- labelled-only nDCG@10 is 0.478 at 60, 0.576 at 100 and 0.629 at 150 --
+# but 60 is the deepest that keeps the per-query p95 wall inside the 5 s budget
+# below: 4.4 s with 16 judgements in flight and 3.9 s with 32, against 6.7 s and
+# 8.4 s at 100 and 150. Raising the concurrency does not buy depth, because the
+# decisions endpoint slows each call as concurrency rises, so the wall stays set
+# by throughput and 48 in flight adds stalls instead. Depth is what reaches the
+# answers the census placed at ranks 159 to 181, and no pool the budget can score
+# reaches those.
+RERANK_POOL = 60
+
+# Wall-time budget for one query's rerank, sized from the prototype's ~2 s for
+# 30 candidates. A slow rerank returns the embedding order rather than delaying
+# the search.
+_RERANK_BUDGET_SECONDS = 5.0
+
+# Decisions in flight at once within one rerank batch. 32 is the fastest of the
+# values measured (16, 32, 48): the endpoint slows each call as concurrency rises,
+# so the wall stays set by throughput, and 48 in flight adds stalls rather than
+# speed.
+_RERANK_CONCURRENCY = 32
+
+# The seat the code-relevance judgements already use; the rerank adds no seat.
+_RERANK_SERVICE = "facility-discovery"
+
+_RERANK_QUESTION = {
+    "relevance_grade": {
+        "type": "score",
+        "instructions": (
+            "How relevant is this candidate to answering the query? Judge only "
+            "whether the candidate carries the answer, not whether it is "
+            "well written."
+        ),
+        "criteria": [
+            "unrelated to the query",
+            "mentions the topic but does not help answer the query",
+            "gives useful background that partly addresses the query",
+            "answers a substantial part of the query",
+            "directly answers the query",
+        ],
+    }
+}
+
 
 def _neo4j_error_message(e: Exception) -> str:
     """Format Neo4j errors with helpful instructions."""
@@ -65,6 +114,114 @@ def _embed(encoder: Encoder, text: str) -> list[float]:
     """Embed a single text string, returning the vector."""
     result = encoder.embed_texts([text])[0]
     return result.tolist() if hasattr(result, "tolist") else list(result)
+
+
+def _rerank_locator(candidate: dict[str, Any]) -> dict[str, str]:
+    """Name a candidate for the rerank state: its path and, when known, title."""
+    path = (
+        candidate.get("source_file")
+        or candidate.get("path")
+        or candidate.get("page_id")
+        or candidate.get("id")
+        or "unknown"
+    )
+    title = (
+        candidate.get("function_name")
+        or candidate.get("page_title")
+        or candidate.get("title")
+    )
+    locator = {"path": path}
+    if title:
+        locator["title"] = title
+    return locator
+
+
+def _rerank_state(query: str, candidate: dict[str, Any]) -> dict[str, Any]:
+    """Build the judgement state for one candidate against the query."""
+    return {
+        "query": query,
+        "candidate": {
+            "locator": _rerank_locator(candidate),
+            "text": (candidate.get("text") or "")[:1500],
+        },
+    }
+
+
+def _run_batch(coro: Any) -> Any:
+    """Run a decide_batch coroutine from the synchronous search tools.
+
+    When the caller is already inside a running event loop (an async MCP
+    handler), the batch runs in a worker thread with its own loop rather than
+    nesting event loops.
+    """
+    import asyncio as _asyncio  # local import keeps module import time low
+    import concurrent.futures as _cf
+
+    try:
+        _asyncio.get_running_loop()
+    except RuntimeError:
+        from imas_codex.cli.shutdown import safe_asyncio_run
+
+        return safe_asyncio_run(coro)
+
+    with _cf.ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(lambda: _asyncio.run(coro)).result()
+
+
+def rerank_candidates(
+    query: str,
+    candidates: list[dict[str, Any]],
+    *,
+    budget_seconds: float = _RERANK_BUDGET_SECONDS,
+    concurrency: int = _RERANK_CONCURRENCY,
+    service: str = _RERANK_SERVICE,
+    model: str | None = None,
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Reorder candidates by a Jev relevance Score; return ``(ordered, note)``.
+
+    ``candidates`` arrive in embedding order. The ordering itself is
+    ``judgment.rerank_pool``; this caller owns only the judgement state (each
+    candidate's path/title plus the first 1500 characters of its text) and the
+    discovery-relevance seat, so the rerank adds no seat. Scored candidates are
+    ranked by descending Score; a candidate whose call failed or was still
+    unscored when the wall-time budget elapsed keeps its embedding position,
+    and a wholly failed batch returns the embedding order unchanged.
+
+    ``note`` describes the fallback and is ``None`` when every candidate was
+    scored. The ordering never raises: ranking is not a gate, so a failed or
+    slow rerank returns the embedding order and says so rather than failing the
+    search.
+    """
+    if not candidates:
+        return list(candidates), None
+
+    if model is None:
+        from imas_codex.settings import get_model
+
+        model = get_model("discovery-relevance")
+
+    from imas_codex.discovery.base.judgment import rerank_pool
+
+    try:
+        return _run_batch(
+            rerank_pool(
+                query,
+                candidates,
+                state_for=_rerank_state,
+                levels=_RERANK_QUESTION["relevance_grade"]["criteria"],
+                instructions=_RERANK_QUESTION["relevance_grade"]["instructions"],
+                model=model,
+                service=service,
+                concurrency=concurrency,
+                budget_seconds=budget_seconds,
+            )
+        )
+    except Exception as exc:  # noqa: BLE001 - ranking is not a gate
+        logger.warning("rerank failed for %r: %s", query, exc)
+        return (
+            list(candidates),
+            f"rerank unavailable ({exc}); embedding order returned",
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -726,12 +883,16 @@ def _search_docs(
         return f"Error initializing search: {e}"
 
     try:
+        # The rerank scores a pool larger than k so an answer embedding ranks
+        # below k can still be lifted into the report.
+        pool = max(k, RERANK_POOL)
+
         # Step 1: Vector search on wiki chunks
         chunk_ids, scores = _vector_search_wiki_chunks(
             gc,
             embedding,
             facility,
-            k,
+            pool,
             site=site,
             physics_domain=physics_domain,
             min_score=min_score,
@@ -743,7 +904,7 @@ def _search_docs(
         vector_cosine = dict(scores)
 
         # Step 1b: Text search for keyword matches (hybrid boost)
-        text_chunks = _text_search_wiki_chunks(gc, query, facility, k)
+        text_chunks = _text_search_wiki_chunks(gc, query, facility, pool)
         for r in text_chunks:
             cid = r["id"]
             text_score = round(r["score"], 3)
@@ -753,15 +914,15 @@ def _search_docs(
                 scores[cid] = text_score
                 chunk_ids.append(cid)
 
-        # Re-sort and limit to k. The hybrid score ties at the same value for
-        # many chunks, so the raw cosine breaks every tie deterministically and
-        # the order no longer depends on set-iteration order.
+        # Re-sort and limit to the pool. The hybrid score ties at the same value
+        # for many chunks, so the raw cosine breaks every tie deterministically
+        # and the order no longer depends on set-iteration order.
         ranked = sorted(
             set(chunk_ids),
             key=lambda cid: (scores.get(cid, 0), vector_cosine.get(cid, -1.0)),
             reverse=True,
         )
-        chunk_ids = ranked[:k]
+        chunk_ids = ranked[:pool]
 
         # Step 2: Vector search on documents/images
         document_results, document_scores = _vector_search_documents(
@@ -800,10 +961,18 @@ def _search_docs(
                 if overlap > 0 and cid in scores:
                     scores[cid] = min(1.0, scores[cid] + 0.1 * overlap)
 
-        # Step 4: Format
-        return format_docs_report(
+        # Step 4: rerank the pool and keep the top k for the report
+        note: str | None = None
+        if enriched_chunks:
+            enriched_chunks, note = rerank_candidates(query, enriched_chunks)
+            enriched_chunks = enriched_chunks[:k]
+
+        report = format_docs_report(
             enriched_chunks, document_results, scores, signals=signal_rows
         )
+        if note:
+            report = f"{report}\n\n_{note}_"
+        return report
 
     except ServiceUnavailable:
         return NEO4J_NOT_RUNNING_MSG
@@ -1470,19 +1639,23 @@ def _search_code(
         return f"Error initializing search: {e}"
 
     try:
+        # The rerank scores a pool larger than k so an answer embedding ranks
+        # below k can still be lifted into the report.
+        pool = max(k, RERANK_POOL)
+
         # Step 1: Vector search on code chunks
         chunk_ids, scores = _vector_search_code_chunks(
             gc,
             embedding,
             facility,
-            k,
+            pool,
             physics_domain=physics_domain,
             min_score=min_score,
             score_dimension=score_dimension,
         )
 
         # Step 1b: Text search for keyword matches (hybrid boost)
-        text_chunks = _text_search_code_chunks(gc, query, facility, k)
+        text_chunks = _text_search_code_chunks(gc, query, facility, pool)
         for r in text_chunks:
             cid = r["id"]
             text_score = round(r["score"], 3)
@@ -1493,7 +1666,7 @@ def _search_code(
                 chunk_ids.append(cid)
 
         # Step 1c: CodeExample-level vector search (find relevant examples by description)
-        example_chunks = _vector_search_code_examples(gc, embedding, facility, k)
+        example_chunks = _vector_search_code_examples(gc, embedding, facility, pool)
         for r in example_chunks:
             cid = r["id"]
             ex_score = round(r["score"], 3)
@@ -1503,10 +1676,10 @@ def _search_code(
                 scores[cid] = ex_score
                 chunk_ids.append(cid)
 
-        # Re-sort and limit to k
+        # Re-sort and limit to the pool
         chunk_ids = sorted(
             set(chunk_ids), key=lambda cid: scores.get(cid, 0), reverse=True
-        )[:k]
+        )[:pool]
 
         if not chunk_ids:
             facility_msg = f" at {facility}" if facility else ""
@@ -1518,8 +1691,16 @@ def _search_code(
         # Step 2: Enrich with data references and directory context
         enriched = _enrich_code_chunks(gc, chunk_ids)
 
-        # Step 3: Format
-        return format_code_report(enriched, scores)
+        # Step 3: rerank the pool and keep the top k for the report
+        note: str | None = None
+        if enriched:
+            enriched, note = rerank_candidates(query, enriched)
+            enriched = enriched[:k]
+
+        report = format_code_report(enriched, scores)
+        if note:
+            report = f"{report}\n\n_{note}_"
+        return report
 
     except ServiceUnavailable:
         return NEO4J_NOT_RUNNING_MSG

@@ -448,6 +448,12 @@ def find_code(
 
     Returns code text (truncated), function name, source file, and score.
 
+    The embedding retrieves a pool larger than ``limit``, then the same
+    ``rerank_candidates`` core the search tools use reorders it, so one code
+    query returns one order through this path and through ``search_code``. A
+    failed or slow rerank leaves the embedding order, so the caller still gets
+    results.
+
     Args:
         query: Search text.
         facility: Optional facility filter.
@@ -455,10 +461,13 @@ def find_code(
         gc: GraphClient instance.
         embed_fn: Embedding function.
     """
+    from imas_codex.llm.search_tools import RERANK_POOL, rerank_candidates
+
     gc, embed_fn = _resolve(gc, embed_fn)
     embedding = embed_fn(query)
 
-    params: dict[str, Any] = {"k": limit, "embedding": embedding}
+    pool = max(limit, RERANK_POOL)
+    params: dict[str, Any] = {"k": pool, "embedding": embedding}
 
     # facility_id is registered on code_chunk_embedding, so its predicate
     # renders inside SEARCH and pre-filters the ANN cut. The CodeFile join the
@@ -486,7 +495,9 @@ def find_code(
         "ORDER BY score DESC"
     )
 
-    return gc.query(cypher, **params)
+    rows = gc.query(cypher, **params)
+    ordered, _note = rerank_candidates(query, rows)
+    return ordered[:limit]
 
 
 # ---------------------------------------------------------------------------

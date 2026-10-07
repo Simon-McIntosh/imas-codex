@@ -10,6 +10,7 @@ or the addition of new query stages (text search, hybrid merge, etc.).
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -27,6 +28,7 @@ from imas_codex.llm.search_formatters import (
 )
 from imas_codex.llm.search_tools import (
     _CHUNK_DOCUMENTS_CAP,
+    RERANK_POOL,
     _enrich_code_chunks,
     _enrich_wiki_chunks,
     _fetch,
@@ -37,6 +39,7 @@ from imas_codex.llm.search_tools import (
     _text_search_code_chunks,
     _text_search_signals,
     _text_search_wiki_chunks,
+    rerank_candidates,
 )
 
 # ---------------------------------------------------------------------------
@@ -819,8 +822,8 @@ class TestSearchDocs:
         for call in mock_gc.query.call_args_list:
             cypher = call[0][0]
             if "wiki_chunk_embedding" in cypher:
-                assert call[1]["k"] == 50, call[1]
-                assert call[1]["limit"] == 10, call[1]
+                assert call[1]["k"] == 2 * RERANK_POOL, call[1]
+                assert call[1]["limit"] == RERANK_POOL, call[1]
                 assert "LIMIT $k" in cypher
                 break
         else:
@@ -838,7 +841,7 @@ class TestSearchDocs:
         for call in mock_gc.query.call_args_list:
             cypher = call[0][0]
             if "wiki_chunk_embedding" in cypher:
-                assert call[1]["k"] == 10, call[1]
+                assert call[1]["k"] == RERANK_POOL, call[1]
                 assert "LIMIT $k" in cypher
                 break
         else:
@@ -2303,3 +2306,293 @@ class TestCodeChunkSourceResolution:
         assert render_chunk_source("node", "source_file") in cypher
         assert "source_file, node.facility_id AS source_facility" in cypher
         assert "CodeFile" not in cypher
+
+
+# ---------------------------------------------------------------------------
+# Rerank
+# ---------------------------------------------------------------------------
+
+
+def _score_answers(score: int) -> dict[str, Any]:
+    return {
+        "relevance_grade": {
+            "type": "score",
+            "score": score,
+            "probabilities": {
+                str(level): (1.0 if level == score else 0.0) for level in range(1, 6)
+            },
+            "confidence": 0.9,
+        }
+    }
+
+
+def _fake_decisions(
+    by_path: dict[str, int],
+    *,
+    cost: float = 0.001,
+    stall: tuple[str, ...] = (),
+    fail: tuple[str, ...] = (),
+) -> Any:
+    """Async stand-in for acall_decisions, keyed by the candidate's path."""
+
+    async def fake(model, state, questions, *, service=None, **_kwargs):
+        path = state["candidate"]["locator"]["path"]
+        if path in stall:
+            await asyncio.sleep(30)
+        if path in fail:
+            raise RuntimeError("the endpoint refused every attempt")
+        return _score_answers(by_path[path]), cost
+
+    return fake
+
+
+class TestRerankCandidates:
+    """The rerank reorders by Score and never fails the search it serves."""
+
+    def _candidates(self) -> list[dict[str, Any]]:
+        return [
+            {"id": "c0", "path": "alpha.py", "function_name": "alpha", "text": "A"},
+            {"id": "c1", "path": "beta.py", "function_name": "beta", "text": "B"},
+            {"id": "c2", "path": "gamma.py", "function_name": "gamma", "text": "C"},
+        ]
+
+    def test_higher_score_ranks_first(self, monkeypatch):
+        from imas_codex.discovery.base import judgment
+
+        monkeypatch.setattr(
+            judgment,
+            "acall_decisions",
+            _fake_decisions({"alpha.py": 2, "beta.py": 5, "gamma.py": 1}),
+        )
+
+        ordered, note = rerank_candidates("q", self._candidates())
+
+        assert [c["path"] for c in ordered] == ["beta.py", "alpha.py", "gamma.py"]
+        assert note is None
+
+    def test_state_carries_the_locator_and_bounds_the_text(self, monkeypatch):
+        from imas_codex.discovery.base import judgment
+
+        seen: list[dict[str, Any]] = []
+
+        async def fake(model, state, questions, *, service=None, **_kwargs):
+            seen.append(state)
+            return _score_answers(3), 0.0
+
+        monkeypatch.setattr(judgment, "acall_decisions", fake)
+
+        candidates = [
+            {
+                "id": "c0",
+                "path": "alpha.py",
+                "function_name": "alpha",
+                "text": "x" * 2000,
+            }
+        ]
+
+        rerank_candidates("how does the rerank work", candidates)
+
+        assert len(seen) == 1
+        state = seen[0]
+        assert state["query"] == "how does the rerank work"
+        assert state["candidate"]["locator"] == {
+            "path": "alpha.py",
+            "title": "alpha",
+        }
+        assert len(state["candidate"]["text"]) == 1500
+
+    def test_no_candidates_returns_an_empty_list_without_a_note(self):
+        ordered, note = rerank_candidates("q", [])
+
+        assert ordered == []
+        assert note is None
+
+    def test_a_failed_decision_keeps_the_embedding_order_and_notes_it(
+        self, monkeypatch
+    ):
+        from imas_codex.discovery.base import judgment
+
+        monkeypatch.setattr(
+            judgment,
+            "acall_decisions",
+            _fake_decisions({}, fail=("alpha.py", "beta.py", "gamma.py")),
+        )
+
+        ordered, note = rerank_candidates("q", self._candidates())
+
+        assert [c["path"] for c in ordered] == ["alpha.py", "beta.py", "gamma.py"]
+        assert note is not None
+        assert "3 of 3" in note
+        assert "embedding position" in note
+
+    def test_a_candidate_unfinished_at_the_budget_keeps_its_position(self, monkeypatch):
+        from imas_codex.discovery.base import judgment
+
+        monkeypatch.setattr(
+            judgment,
+            "acall_decisions",
+            _fake_decisions({"alpha.py": 1, "gamma.py": 5}, stall=("beta.py",)),
+        )
+
+        ordered, note = rerank_candidates("q", self._candidates(), budget_seconds=0.05)
+
+        assert [c["path"] for c in ordered] == ["gamma.py", "beta.py", "alpha.py"]
+        assert note is not None
+        assert "1 of 3" in note
+
+    def test_a_failed_batch_returns_the_embedding_order_with_a_note(self, monkeypatch):
+        from imas_codex.llm import search_tools
+
+        def boom(coro):
+            coro.close()
+            raise RuntimeError("no decisions transport")
+
+        monkeypatch.setattr(search_tools, "_run_batch", boom)
+
+        ordered, note = rerank_candidates("q", self._candidates())
+
+        assert [c["path"] for c in ordered] == ["alpha.py", "beta.py", "gamma.py"]
+        assert note is not None
+        assert "embedding order returned" in note
+
+
+class TestSearchToolsRerank:
+    """The search tools score a pool larger than k, then rerank it."""
+
+    @pytest.fixture()
+    def mock_gc(self):
+        gc = MagicMock()
+        gc.query = MagicMock(side_effect=_route_query({}))
+        return gc
+
+    @pytest.fixture()
+    def mock_encoder(self):
+        enc = MagicMock()
+        enc.embed_texts = MagicMock(return_value=[[0.1] * 1024])
+        return enc
+
+    def _wiki_handler(self, ids: list[str]) -> Any:
+        chunks = [
+            {
+                "id": cid,
+                "text": f"body {cid}",
+                "section": cid,
+                "page_title": cid,
+                "page_url": None,
+                "linked_signals": [],
+                "linked_signal_nodes": [],
+                "linked_data_nodes": [],
+                "imas_refs": [],
+            }
+            for cid in ids
+        ]
+        by_id = {chunk["id"]: chunk for chunk in chunks}
+        vector = [{"id": cid, "score": 0.9 - 0.1 * i} for i, cid in enumerate(ids)]
+
+        def handler(cypher: str, **kwargs: Any) -> list[dict[str, Any]]:
+            if "wiki_chunk_embedding" in cypher:
+                return vector
+            if "MATCH (c:WikiChunk {id: cid})" in cypher:
+                return [by_id[cid] for cid in kwargs["chunk_ids"]]
+            return []
+
+        return handler
+
+    def _code_handler(self, ids: list[str]) -> Any:
+        chunks = [
+            {
+                "id": cid,
+                "text": f"def f_{cid}():\n    pass",
+                "function_name": f"f_{cid}",
+                "source_file": f"{cid}.py",
+                "source_file_id": f"tcv:/code/{cid}.py",
+                "facility_id": "tcv",
+                "data_refs": [],
+                "directory": None,
+                "dir_description": None,
+            }
+            for cid in ids
+        ]
+        by_id = {chunk["id"]: chunk for chunk in chunks}
+        vector = [{"id": cid, "score": 0.9 - 0.1 * i} for i, cid in enumerate(ids)]
+
+        def handler(cypher: str, **kwargs: Any) -> list[dict[str, Any]]:
+            if "code_chunk_embedding" in cypher:
+                return vector
+            if "MATCH (cc:CodeChunk {id: cid})" in cypher:
+                return [by_id[cid] for cid in kwargs["chunk_ids"]]
+            return []
+
+        return handler
+
+    def test_docs_report_follows_the_rerank_order(
+        self, mock_gc, mock_encoder, monkeypatch
+    ):
+        from imas_codex.discovery.base import judgment
+
+        mock_gc.query = MagicMock(side_effect=self._wiki_handler(["c0", "c1", "c2"]))
+        monkeypatch.setattr(
+            judgment,
+            "acall_decisions",
+            _fake_decisions({"c2": 5, "c0": 3, "c1": 1}),
+        )
+
+        result = _search_docs(
+            query="equilibrium", facility="tcv", k=3, gc=mock_gc, encoder=mock_encoder
+        )
+
+        order = [result.index(f'### Page: "{cid}"') for cid in ("c2", "c0", "c1")]
+        assert order == sorted(order)
+
+    def test_docs_appends_a_note_when_the_rerank_fails(
+        self, mock_gc, mock_encoder, monkeypatch
+    ):
+        from imas_codex.discovery.base import judgment
+
+        mock_gc.query = MagicMock(side_effect=self._wiki_handler(["c0", "c1"]))
+        monkeypatch.setattr(
+            judgment,
+            "acall_decisions",
+            _fake_decisions({}, fail=("c0", "c1")),
+        )
+
+        result = _search_docs(
+            query="equilibrium", facility="tcv", k=2, gc=mock_gc, encoder=mock_encoder
+        )
+
+        assert "2 of 2" in result
+        assert result.index('### Page: "c0"') < result.index('### Page: "c1"')
+        assert "embedding position" in result
+
+    def test_code_report_follows_the_rerank_order(
+        self, mock_gc, mock_encoder, monkeypatch
+    ):
+        from imas_codex.discovery.base import judgment
+
+        mock_gc.query = MagicMock(side_effect=self._code_handler(["k0", "k1", "k2"]))
+        monkeypatch.setattr(
+            judgment,
+            "acall_decisions",
+            _fake_decisions({"k2.py": 5, "k0.py": 1, "k1.py": 3}),
+        )
+
+        result = _search_code(
+            query="equilibrium", facility="tcv", k=3, gc=mock_gc, encoder=mock_encoder
+        )
+
+        order = [result.index(f"### f_{cid} —") for cid in ("k2", "k1", "k0")]
+        assert order == sorted(order)
+
+    def test_code_report_pools_beyond_k(self, mock_gc, mock_encoder):
+        mock_gc.query = MagicMock(side_effect=self._code_handler(["k0", "k1"]))
+
+        _search_code(
+            query="equilibrium", facility="tcv", k=1, gc=mock_gc, encoder=mock_encoder
+        )
+
+        for call in mock_gc.query.call_args_list:
+            if "code_chunk_embedding" in call[0][0]:
+                assert call[1]["limit"] == RERANK_POOL, call[1]
+                break
+        else:
+            pytest.fail("No code_chunk_embedding vector search call found")
