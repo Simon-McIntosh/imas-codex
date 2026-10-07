@@ -27,6 +27,7 @@ from imas_codex.discovery.code.scorer import (
     ADMISSION_FACET_FIELDS,
     RELEVANCE_STAGE_CONTENT,
     RELEVANCE_STAGE_NAME,
+    _relevance_item,
     content_admits,
     content_facet_relevance,
     relevance_predicate,
@@ -72,6 +73,49 @@ def test_facet_below_gate_does_not_admit_a_below_composite_file():
 
     assert content_facet_relevance(answers) == pytest.approx(0.5)
     assert content_admits(answers, INGEST, FACET) is False
+
+
+# ---------------------------------------------------------------------------
+# The recorder fails closed on an unanswered content question
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "missing",
+    (
+        "data_access_depth",
+        "signal_processing_depth",
+        "machine_description_depth",
+        "imas_mapping_depth",
+        "relevance_grade",
+    ),
+)
+def test_relevance_item_refuses_a_content_answer_missing_a_question(missing):
+    """An absent content answer is refused, never recorded as a zero.
+
+    The decision layer refuses a response that omits a question it asked, so
+    this guard catches the case where the question set itself never asked:
+    building the item would otherwise divide an absent answer into a 0.
+    """
+    answers = _answers(0.75, 0.4, 0.2, 0.1)
+    del answers[missing]
+
+    with pytest.raises(ValueError, match=missing):
+        _relevance_item("cf-1", answers, stage="content", model="fake-model", cost=0.0)
+
+
+def test_relevance_item_records_a_complete_content_answer():
+    """The guard passes a full content answer and records the facets."""
+    item = _relevance_item(
+        "cf-1",
+        _answers(0.75, 0.4, 0.2, 0.1),
+        stage="content",
+        model="fake-model",
+        cost=0.0,
+    )
+
+    assert item["score_data_access"] == 1.0
+    assert item["score_machine_description"] == pytest.approx(0.6667, abs=1e-4)
 
 
 # ---------------------------------------------------------------------------

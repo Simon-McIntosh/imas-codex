@@ -117,7 +117,9 @@ def relevance_predicate(
         f"{alias}.{field} >= {facet_threshold_param}"
         for field in ADMISSION_FACET_FIELDS
     )
-    return f"{base} AND ({alias}.score_composite >= {threshold_param} OR {facet_clause})"
+    return (
+        f"{base} AND ({alias}.score_composite >= {threshold_param} OR {facet_clause})"
+    )
 
 
 # The content arm's graded Score questions and the CodeFile field each fills.
@@ -339,6 +341,20 @@ def _relevance_item(
     )
 
     if stage == "content":
+        # A content-stage answer set must carry every content question.  An
+        # absent answer is not a score of zero: it means the question was never
+        # asked, and writing it as a zero persists the absence as a judgement.
+        missing = [
+            question
+            for question in (*FACET_QUESTION_FIELDS, RELEVANCE_GRADE_QUESTION)
+            if question not in answers
+        ]
+        if missing:
+            raise ValueError(
+                f"content-stage answers for {sf_id!r} lack "
+                f"{', '.join(sorted(missing))}; the content question set "
+                "was not asked, so its answers cannot be recorded"
+            )
         top_levels = _content_top_levels()
         for question, field in FACET_QUESTION_FIELDS.items():
             answer = answers.get(question) or {}
