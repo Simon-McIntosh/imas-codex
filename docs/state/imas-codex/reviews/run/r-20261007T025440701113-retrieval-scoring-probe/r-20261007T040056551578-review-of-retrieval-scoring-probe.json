@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log (baseline_suite and after_suite are both null), so the added-failure count was not taken; no repository test covers this read-only evidence probe",
+  "backend": "local",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T04:16:39.280Z",
+  "dispatched_at": "2026-10-07T04:02:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html",
+      "line": "180",
+      "severity": "follow-on",
+      "text": "follow-on: the reserved-slot lift ranks (\"rank 14\" for Q14 and \"ranks 10, 11 and 12\" for Q18) are 0-based positions in fusion_k200.json's reserve_top30 lists - measured 1-based, use_compiler-en.html:chunk_0 sits at rank 15 and use_login-en.html chunks 4/5/0 at ranks 11/12/13 - and the Q12 column 84/140/59 is the same 0-based index (1-based 85/141/60), so every rank in the fragment reads one lower than the tool's rank as a reader counts it and lower than the sibling census, which reports the Q18 answer at deep rank 163."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "one file against base c53d0f98, +207 lines, docs-only - no code change and no graph write, as the section requires.",
+    "done_when": "the section's done_when names the burying stage per answer plus a lifting change measured over the 18 section-9 questions by nDCG@10; the fragment assigns a stage to all four answers and final_metrics_all.json measures four changes over 18 questions with Q16 as the preservation control, though Q05 and Q12 have no scoring change that lifts them (recorded as candidate-generation work).",
+    "goal": "the section goal is an evidence-only trace of how _search_code and _search_docs build and score candidates for the four buried answers; retrieval-scoring-probe.html:22-50 names for both tools the vector index and its k, the facility pre-filter, the BM25 hybrid term and the final sort.",
+    "manifest": "the reviewed manifest reads status complete and names the 18-question nDCG@10 comparison in final_metrics.py against labels.json, with the raw per-query JSON (final_metrics_all.json) and the stage/fusion logs recorded beside it.",
+    "write_paths": "the declared write paths are the node report dir, docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html and the figures dir; the single landed file is inside them and the figures path is unused."
+  },
+  "justifications": {
+    "durability": "durability 10: a docs-only evidence fragment carries no assertion, so its only guard is the re-runnable scripts under /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/retrieval-scoring-probe/, and no test fails if the reported numbers drift.",
+    "evidence": "evidence 13: the gate measures nDCG@10 over the 18 section-9 questions and its per-query result is recorded in final_metrics_all.json, but the fragment's rank figures are 0-based list positions and the fusion reimplementation reproduces the stored current order's top-30 only 14-17/30 on the docs questions (fusion_all.json reproduction), neither stated beside those numbers.",
+    "fit": "fit 18: retrieval-scoring-probe.html:5-8 follows the sibling fragment idiom (section[data-reckon=evidence], id-per-block, caption) and introduces no plan or ticket label.",
+    "goal_fidelity": "goal_fidelity 17: retrieval-scoring-probe.html:59-94 reports each answering chunk's raw cosine beside its tool rank (Q05 eqgrd.f 0.438 at facility rank 442/907), the docs 1.0 tie mass (268 and 227 chunks) and the burying stage for all four questions.",
+    "reuse": "reuse 15: the diff adds no repository code, but the report scripts re-implement the tool's merge in fusion_eval.py:40-57 and nDCG twice (fusion_eval.py:32 and final_metrics.py:30-36), capabilities imas_codex/llm/search_tools.py already owns.",
+    "scope_discipline": "scope_discipline 18: the diff adds only docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html, exactly inside the three declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the section goal is an evidence-only trace of how _search_code and _search_docs build and score candidates for the four buried answers; docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:22-50 names for both tools the vector index and its k, the facility pre-filter, the BM25 hybrid term and the final sort, verified against imas_codex/llm/search_tools.py:730-755 and 1465-1500.\nVERDICT done_when: the section's done_when names the stage burying each answer plus a lifting change measured over the 18 section-9 questions by nDCG@10; the fragment assigns a stage to all four answers (lines 66/75/84/93) and final_metrics_all.json measures four changes over 18 questions with Q16 as the preservation control, though Q05 and Q12 have no scoring change that lifts them (recorded as candidate-generation work).\nVERDICT write_paths: the declared write paths are the node report dir, the fragment HTML and the figures dir; the diff adds only docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html, inside them, and the figures path is unused.\nVERDICT manifest: the reviewed manifest reads status complete and names the 18-question nDCG@10 comparison in final_metrics.py against labels.json, with the raw per-query JSON (final_metrics_all.json) and the stage/fusion logs recorded beside it.\nVERDICT diff: one file against base c53d0f98, +207 lines, docs-only - no code change and no graph write, as the section requires.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: retrieval-scoring-probe.html:59-94 reports each answering chunk's raw cosine beside its tool rank (Q05 eqgrd.f 0.438 at facility rank 442/907), the docs 1.0 tie mass (268 and 227 chunks) and the burying stage for all four questions.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate measures nDCG@10 over the 18 section-9 questions and its total is recorded in final_metrics_all.json, but the fragment's rank figures are 0-based list positions and the fusion reimplementation reproduces the stored current order's top-30 only 14-17/30 on the docs questions, neither stated beside those numbers.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the diff adds only docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html, exactly inside the three declared write paths.\nSCORE durability: 10\nJUSTIFICATION durability: a docs-only evidence fragment carries no assertion, so its only guard is the re-runnable scripts under the report dir, and no test fails if the reported numbers drift.\nSCORE fit: 18\nJUSTIFICATION fit: retrieval-scoring-probe.html:5-8 follows the sibling fragment idiom (section[data-reckon=evidence], id-per-block, caption) and introduces no plan or ticket label.\nSCORE reuse: 15\nJUSTIFICATION reuse: the diff adds no repository code, but the report scripts re-implement the tool's merge in fusion_eval.py:40-57 and nDCG twice (fusion_eval.py:32 and final_metrics.py:30-36), capabilities imas_codex/llm/search_tools.py already owns.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html:180 follow-on: the reserved-slot lift ranks (rank 14 for Q14 and ranks 10, 11 and 12 for Q18) are 0-based positions in fusion_k200.json's reserve_top30 lists - measured 1-based, use_compiler-en.html:chunk_0 sits at rank 15 and use_login-en.html chunks 4/5/0 at ranks 11/12/13 - and the Q12 column 84/140/59 is the same 0-based index (1-based 85/141/60), so every rank reads one lower than the tool's rank and lower than the sibling census, which reports the Q18 answer at deep rank 163.\n",
+  "review_run_id": "r-20261007T040056551578-review-of-retrieval-scoring-probe",
+  "reviewed_base_sha": "c53d0f98433251842fb04c78c1f725ca5dec264f",
+  "reviewed_head_sha": "af7321fe2ad7f2d3cd43965eb6259f61f04cb8f5",
+  "reviewed_run_id": "r-20261007T025440701113-retrieval-scoring-probe",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T04:12:00+00:00",
+  "total": 91
+}

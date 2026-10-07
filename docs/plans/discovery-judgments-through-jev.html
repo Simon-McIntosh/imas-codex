@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
 <meta name="plan-impl" content="0.27">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -298,7 +298,10 @@ graph write, no discover run.</p></div>
     <div class="r-comment-body"><p>Node retrieval-scoring-probe (49aed047d, af7321fe2) landed after one resume to measure Q12's keyword term and a 50-slot reservation, and to report ranks at the tool's own depth. Reviews 90 and 91. Two caveats are recorded in the evidence. Its current-order nDCG@10 of 0.420 is not comparable with §9's 0.246: it counts 17 answerable questions and scores 303 unlabelled top-10 slots as 0. Its reserved-slot ranks and Q12 column are 0-based positions, so each reads one lower than the tool's rank. The direct fix for the score saturation, a cosine tie-break, was not measured, so <code>docs-score-ties</code> measures it against the reserved slots. impl 3/11.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261007T025440701113-retrieval-scoring-probe" data-who="reckon-build" data-when="2026-10-07T03:59:48.000Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html#retrieval-scoring-probe — ranks each of Q05/Q12/Q14/Q18 at the tool&#x27;s called depth, and measures four scoring changes over the 18 questions by nDCG@10 with Q16 as the preservation control; recommends reserved vector slots</p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/discovery-judgments-through-jev/retrieval-scoring-probe.html#retrieval-scoring-probe — ranks each of Q05/Q12/Q14/Q18 at the tool's called depth, and measures four scoring changes over the 18 questions by nDCG@10 with Q16 as the preservation control; recommends reserved vector slots</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261007T040056551578-review-of-retrieval-scoring-probe" data-who="reckon-build" data-when="2026-10-07T04:16:39.280Z">
+    <div class="r-comment-body"><p>review of r-20261007T025440701113-retrieval-scoring-probe stored at head af7321fe2 (base c53d0f98) as a parsed six-dimension record, total 91/120, with one follow-on finding on the fragment&#x27;s 0-based rank figures</p></div>
 </div>
 </section>
 </main>
