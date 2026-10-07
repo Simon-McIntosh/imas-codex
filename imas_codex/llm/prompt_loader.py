@@ -946,25 +946,6 @@ _SCHEMA_PROVIDERS: dict[str, Any] = {
 
 
 @lru_cache(maxsize=1)
-def _provide_file_score_dimensions() -> dict[str, Any]:
-    """Provide score dimensions for file scoring (all 9 dimensions)."""
-    dims = _provide_score_dimensions()["score_dimensions"]
-    # Files use all dimensions except data-only ones (modeling_data, experimental_data)
-    file_dims = {
-        "score_modeling_code",
-        "score_analysis_code",
-        "score_operations_code",
-        "score_data_access",
-        "score_workflow",
-        "score_visualization",
-        "score_documentation",
-        "score_imas",
-        "score_convention",
-    }
-    return {"score_dimensions": [d for d in dims if d["field"] in file_dims]}
-
-
-@lru_cache(maxsize=1)
 def _provide_file_scoring_schema() -> dict[str, Any]:
     """Provide FileScoreBatch Pydantic schema for LLM prompts."""
     from imas_codex.discovery.code.scorer import FileScoreBatch, FileScoreResult
@@ -975,21 +956,8 @@ def _provide_file_scoring_schema() -> dict[str, Any]:
     }
 
 
-@lru_cache(maxsize=1)
-def _provide_file_triage_schema() -> dict[str, Any]:
-    """Provide FileTriageBatch Pydantic schema for LLM prompts."""
-    from imas_codex.discovery.code.scorer import FileTriageBatch, FileTriageResult
-
-    return {
-        "file_triage_schema_example": get_pydantic_schema_json(FileTriageBatch),
-        "file_triage_schema_fields": get_pydantic_schema_description(FileTriageResult),
-    }
-
-
 # Register file scoring providers
-_SCHEMA_PROVIDERS["file_score_dimensions"] = _provide_file_score_dimensions
 _SCHEMA_PROVIDERS["file_scoring_schema"] = _provide_file_scoring_schema
-_SCHEMA_PROVIDERS["file_triage_schema"] = _provide_file_triage_schema
 
 
 def get_schema_for_prompt(

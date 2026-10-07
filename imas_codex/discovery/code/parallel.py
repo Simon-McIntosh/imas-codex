@@ -24,6 +24,11 @@ from imas_codex.discovery.base.embed_worker import (
 )
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
 from imas_codex.discovery.base.supervision import OrphanRecoverySpec
+from imas_codex.discovery.code.scorer import (
+    RELEVANCE_STAGE_CONTENT,
+    RELEVANCE_STAGE_NAME,
+    relevance_predicate,
+)
 from imas_codex.graph import GraphClient
 
 from .graph_ops import (
@@ -418,10 +423,9 @@ def get_code_discovery_stats(
 
         # Pending enrich: triaged but not enriched (above triage threshold)
         enrich_pending = gc.query(
-            """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
-            WHERE cf.status = 'triaged'
-              AND cf.score_composite >= $min_relevance
+            f"""
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            WHERE {relevance_predicate("cf", RELEVANCE_STAGE_NAME, "$min_relevance")}
               AND coalesce(cf.is_enriched, false) = false
             RETURN count(cf) AS pending
             """,
@@ -444,11 +448,14 @@ def get_code_discovery_stats(
 
         # Pending ingest: scored code files (consistent with claim filters)
         ingest_result = gc.query(
-            """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE cf.status = 'scored'
-              AND cf.relevance_stage = 'content'
-              AND cf.score_composite >= $min_ingest_relevance
+              AND {
+                relevance_predicate(
+                    "cf", RELEVANCE_STAGE_CONTENT, "$min_ingest_relevance"
+                )
+            }
               AND coalesce(cf.line_count, 0) <= 10000
             RETURN count(cf) AS pending
             """,
@@ -492,8 +499,11 @@ def get_code_discovery_stats(
             f"""
             MATCH (cc:CodeChunk)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             MATCH (cc)<-[:HAS_CHUNK]-(:CodeExample)<-[:HAS_EXAMPLE]-(cf:CodeFile)
-            WHERE cf.relevance_stage = 'content'
-              AND cf.score_composite >= $min_ingest_relevance
+            WHERE {
+                relevance_predicate(
+                    "cf", RELEVANCE_STAGE_CONTENT, "$min_ingest_relevance"
+                )
+            }
             RETURN count(cc) AS total,
                    count(cc.embedding) AS embedded,
                    count(CASE WHEN {pending_embed_predicate("cc")}

@@ -62,6 +62,36 @@ _RELEVANCE_FIELDS = {
     "is_simulation": "relevance_simulation",
 }
 
+# One registry of every relevance field a CodeFile carries, owned by
+# ``discovery/base/reset.py`` so a reset and the decision arms that write these
+# fields read the same list.  The five noul fields above must be members.
+
+# The decision arm that produced a file's stored relevance, recorded on
+# ``relevance_stage``.  ``name`` is the names arm, which sets ``triaged``;
+# ``content`` is the content arm, which admits a file to ingestion.
+RELEVANCE_STAGE_NAME = "name"
+RELEVANCE_STAGE_CONTENT = "content"
+
+
+def relevance_predicate(
+    alias: str,
+    stage: str,
+    threshold_param: str = "$min_relevance",
+) -> str:
+    """The stage-and-relevance predicate every claim and has-work site shares.
+
+    Requires *alias*'s stored relevance to come from *stage* — the arm that set
+    the file's status — and compares its ``score_composite`` against
+    *threshold_param*.  Rendered from one owner, a file's status and the
+    relevance that carried it cannot drift apart between the claim, the
+    has-work check and the count.
+    """
+    return (
+        f"{alias}.relevance_stage = {stage!r} "
+        f"AND {alias}.score_composite >= {threshold_param}"
+    )
+
+
 # The content arm's graded Score questions and the CodeFile field each fills.
 # The stored value is the Score divided by its top level, so it lies in 0-1;
 # ``relevance_grade`` keeps its own 0-4 scale.
@@ -359,33 +389,6 @@ def recompute_stored_composites() -> dict[str, int]:
 
 
 # ---------------------------------------------------------------------------
-# Triage models (retained for the module's public re-exports)
-# ---------------------------------------------------------------------------
-
-
-class FileTriageResult(BaseModel):
-    """Legacy per-dimension triage shape, retained for module re-exports.
-
-    The code pipeline no longer produces these; triage now asks a decisions
-    model for typed relevance judgements.  The class is kept so
-    ``imas_codex.discovery.code`` and the prompt loader keep importing cleanly
-    until the package re-exports are retired.
-    """
-
-    path: str = Field(description="The file path (echo from input)")
-    description: str = Field(
-        default="",
-        description="Brief description of what the file likely contains (1 sentence)",
-    )
-
-
-class FileTriageBatch(BaseModel):
-    """Batch of triage results (retained for module re-exports)."""
-
-    results: list[FileTriageResult]
-
-
-# ---------------------------------------------------------------------------
 # Score models (description-only; relevance comes from the decisions model)
 # ---------------------------------------------------------------------------
 
@@ -536,7 +539,7 @@ def _group_files_by_parent(
 # ---------------------------------------------------------------------------
 
 
-def apply_triage_results(
+def apply_name_relevance(
     decisions: list[dict[str, Any]],
     file_id_map: dict[str, str],
     threshold: float | None = None,

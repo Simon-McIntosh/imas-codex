@@ -23,19 +23,15 @@ from .scanner import scan_facility_files
 from .scorer import (
     FileScoreBatch,
     FileScoreResult,
-    FileTriageBatch,
-    FileTriageResult,
     apply_file_scores,
-    apply_triage_results,
+    apply_name_relevance,
 )
 
 __all__ = [
     "FileScoreBatch",
     "FileScoreResult",
-    "FileTriageBatch",
-    "FileTriageResult",
     "apply_file_scores",
-    "apply_triage_results",
+    "apply_name_relevance",
     "get_code_discovery_stats",
     "reset_orphaned_file_claims",
     "run_parallel_code_discovery",

@@ -249,7 +249,7 @@ async def triage_worker(
     )
     from imas_codex.discovery.code.scorer import (
         _group_files_by_parent,
-        apply_triage_results,
+        apply_name_relevance,
         build_triage_questions,
         build_triage_state,
         triage_relevance,
@@ -347,7 +347,7 @@ async def triage_worker(
         if decisions:
             try:
                 applied = await asyncio.to_thread(
-                    apply_triage_results,
+                    apply_name_relevance,
                     decisions,
                     file_id_map,
                     threshold=threshold,
@@ -561,15 +561,20 @@ async def score_worker(
 
             # The local model describes only the files whose content relevance
             # reaches the ingest threshold; the description is written after
-            # the content decision that admitted the file.
+            # the content decision that admitted the file.  Each decision is
+            # paired with its own file by path, never by position, because a
+            # failed decision drops out of ``content_decisions`` and a
+            # positional zip would shift every later file onto the wrong
+            # decision.
             ingest_threshold = get_code_ingest_threshold()
+            file_by_path = {f["path"]: f for f in files}
             described_files = []
             described_relevance: dict[str, float] = {}
-            for f, d in zip(files, content_decisions, strict=False):
+            for d in content_decisions:
                 relevance = triage_relevance(d["answers"])
                 if relevance >= ingest_threshold:
-                    described_files.append(f)
-                    described_relevance[f["path"]] = relevance
+                    described_files.append(file_by_path[d["path"]])
+                    described_relevance[d["path"]] = relevance
 
             description_cost = 0.0
             parsed_results = []
@@ -681,6 +686,10 @@ def _claim_code_files_for_ingestion(
 
     from imas_codex.config.discovery_config import build_facility_exclusion_filter
     from imas_codex.discovery.base.claims import DEFAULT_CLAIM_TIMEOUT_SECONDS
+    from imas_codex.discovery.code.scorer import (
+        RELEVANCE_STAGE_CONTENT,
+        relevance_predicate,
+    )
     from imas_codex.graph import GraphClient
     from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -695,8 +704,7 @@ def _claim_code_files_for_ingestion(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE sf.status = 'scored'
-              AND sf.relevance_stage = 'content'
-              AND sf.score_composite >= $min_relevance
+              AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT)}
               AND coalesce(sf.line_count, 0) <= $max_line_count
               {prefix_clause}
               {excluded_clause}

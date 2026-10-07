@@ -450,6 +450,46 @@ def test_content_arm_reports_batch_failures_once(monkeypatch, caplog):
     assert "2 of 2" in failures[0]
 
 
+def test_content_arm_pairs_each_description_with_its_own_file(monkeypatch):
+    """A failed decision mid-batch must not shift the files onto the wrong ones.
+
+    The first file's content decision is refused by the answer validator, so it
+    drops out of the batch's decisions while the other two survive.  Each
+    surviving decision must stay paired with its own file by path: the two
+    admitted files are described, the refused file is not, and the buggy
+    positional zip -- which would describe the refused file and drop the last
+    one -- is exactly what this asserts against.
+    """
+    refused = "/analysis/src/refused.f"
+    first = "/analysis/src/reader.f"
+    second = "/analysis/src/writer.f"
+    files = [
+        _file(refused, preview_text="bad"),
+        _file(first, preview_text="mdsopen('jt60sa', 1)"),
+        _file(second, preview_text="mdsput('jt60sa', 2)"),
+    ]
+    bad = _answers(0.9, 0.1, 0.1, 0.1)
+    bad["loads_diagnostic_data"] = {"type": "noul", "noul": 1.5}
+    answers = {
+        refused: bad,
+        first: _answers(0.9, 0.4, 0.2, 0.1),
+        second: _answers(0.8, 0.3, 0.2, 0.1),
+    }
+    graph, _, _, description_calls = _run_score(monkeypatch, files, answers)
+
+    # Only the two files whose decisions survived are described, and each is
+    # the file its own decision admitted.
+    assert description_calls == [[first, second]]
+    scored = {
+        item["id"]: item.get("score_reason")
+        for item in graph.items_for("sf.status = 'scored'")
+    }
+    assert set(scored) == {first, second}
+    assert scored[first] == "analysis helper"
+    assert scored[second] == "analysis helper"
+    assert refused not in scored, "the refused file is not scored on another's decision"
+
+
 # ---------------------------------------------------------------------------
 # Ingest claim
 # ---------------------------------------------------------------------------

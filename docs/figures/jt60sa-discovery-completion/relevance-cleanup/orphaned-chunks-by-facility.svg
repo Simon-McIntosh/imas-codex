@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="360" viewBox="0 0 1400 360" font-family="sans-serif">
+<line x1="170" y1="310" x2="170" y2="60" stroke="#333" stroke-width="1.2"/>
+<rect x="170" y="70" width="1009" height="54" fill="#3b6ea5"/>
+<text x="156" y="108.88" font-size="20" text-anchor="end" fill="#222">tcv</text>
+<text x="1191" y="108.88" font-size="20" fill="#222">826</text>
+<rect x="170" y="158" width="455" height="54" fill="#3b6ea5"/>
+<text x="156" y="196.88" font-size="20" text-anchor="end" fill="#222">jet</text>
+<text x="637" y="196.88" font-size="20" fill="#222">373</text>
+<rect x="170" y="246" width="64" height="54" fill="#3b6ea5"/>
+<text x="156" y="284.88" font-size="20" text-anchor="end" fill="#222">jt-60sa</text>
+<text x="246" y="284.88" font-size="20" fill="#222">53</text>
+<text x="170" y="44" font-size="22" fill="#222">CodeFiles below ingested carrying CodeChunks</text>
+</svg>

@@ -336,7 +336,14 @@ WIKI_RESET_SPECS: dict[str, ResetSpec] = {
 # Code
 # ---------------------------------------------------------------------------
 
-_CODE_RELEVANCE_FIELDS = [
+# The relevance fields a CodeFile carries, in one registry: the five noul fields
+# the names arm writes, the role distribution and its confidence from the role
+# question, and the bookkeeping that records which arm wrote them.  The code
+# scorer imports this tuple as ``RELEVANCE_FIELDS`` so the fields a reset clears
+# and the fields the decision arms write cannot drift apart.  It lives here, not
+# in ``code/scorer.py``, because this module is imported before the code package
+# and importing the code package from here would close an import cycle.
+CODE_RELEVANCE_FIELDS = (
     "relevance_loads",
     "relevance_processes",
     "relevance_describes",
@@ -348,7 +355,9 @@ _CODE_RELEVANCE_FIELDS = [
     "relevance_stage",
     "relevance_model",
     "triaged_at",
-]
+)
+
+_CODE_RELEVANCE_FIELDS = list(CODE_RELEVANCE_FIELDS)
 
 _CODE_ENRICH_FIELDS = [
     "is_enriched",
@@ -382,6 +391,19 @@ _CODE_SCORE_FIELDS = [
     "score_cost",
 ]
 
+# A file reset below ``ingested`` must not leave the example and chunk nodes the
+# ingestion stage wrote for it.  The traversal is the one ``clear_facility_code``
+# uses (``CodeFile <-FROM_FILE- CodeExample -HAS_CHUNK-> CodeChunk``), scoped to
+# the files this reset touches.  ``collect`` drops the nulls an optional match
+# yields for a file with no examples, so the delete never sees a null; the
+# ``DISTINCT n`` collapses the example fan-out so the trailing ``count(n)``
+# counts files, not deleted examples.
+_CODE_CHUNK_CASCADE = """OPTIONAL MATCH (n)<-[:FROM_FILE]-(ce:CodeExample)-[:HAS_CHUNK]->(cc:CodeChunk)
+WITH n, collect(ce) + collect(cc) AS doomed
+FOREACH (d IN doomed | DETACH DELETE d)
+WITH DISTINCT n"""
+
+
 CODE_RESET_SPECS: dict[str, ResetSpec] = {
     "discovered": ResetSpec(
         label="CodeFile",
@@ -393,6 +415,7 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
             + _CODE_SCORE_FIELDS
             + ["ingested_at", "skip_reason", "error", "evidence_linked"]
         ),
+        post_cypher=_CODE_CHUNK_CASCADE,
     ),
     "triaged": ResetSpec(
         label="CodeFile",
@@ -403,6 +426,7 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
             + _CODE_SCORE_FIELDS
             + ["ingested_at", "skip_reason", "error"]
         ),
+        post_cypher=_CODE_CHUNK_CASCADE,
     ),
     "scored": ResetSpec(
         label="CodeFile",
