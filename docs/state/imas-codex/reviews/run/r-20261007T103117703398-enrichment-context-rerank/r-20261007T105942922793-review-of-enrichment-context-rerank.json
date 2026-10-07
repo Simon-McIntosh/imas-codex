@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [
+    "fragment: 15 JT-60SA signal sources with code and wiki chunks chosen before and after the rerank",
+    "fragment: each chosen chunk labelled relevant or not to the source",
+    "fragment: precision at the kept count for the embedding order and for the reranked order",
+    "fragment: decision spend per source"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/enrichment-context-rerank PYTHONDONTWRITEBYTECODE=1 uv run --no-sync pytest -p no:cacheprovider tests/discovery",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T105942922793-review-of-enrichment-context-rerank/logs/gate-head.log",
+    "revision": "ee146951d10ad7e073103b72cef4667c60bfc956"
+  },
+  "baseline_suite": {
+    "command": "PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T105942922793-review-of-enrichment-context-rerank/rev-enrichment-base PYTHONDONTWRITEBYTECODE=1 /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -p no:cacheprovider tests/discovery",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T105942922793-review-of-enrichment-context-rerank/logs/gate-base.log",
+    "revision": "d9f48f26fdc9a19b92f9424cc3a9c0f3188105e6"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:enrich_worker",
+    "imas_codex/discovery/signals/parallel.py:enrich_worker"
+  ],
+  "completed_at": "2026-10-07T11:13:23.919Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "enrichment-context-rerank",
+      "recorded_at": "2026-10-07T11:13:05.751190+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "enrichment-context-rerank",
+      "recorded_at": "2026-10-07T11:13:04.803529+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-07T10:59:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-imas-maps/enrichment-context-rerank.html",
+      "line": "1",
+      "severity": "major",
+      "text": "gap: \u00a79's done-when requires the fragment to record, for 15 JT-60SA signal sources, the code and wiki chunks chosen before and after the rerank, each labelled relevant or not, with precision at the kept count for each order and the decision spend per source. The landed fragment records only the unit-test-level done-when behaviours in a pass/fail table \u2014 no 15-source set, no before/after chunks, no relevance labels, no precision figure, no per-source spend. Neither the fragment nor the run directory (grep for 'precision'/'15' returns nothing outside stream.jsonl) carries this measurement, and the manifest reports no blocker or follow-on for it. The code change itself is correct and gated; the empirical evidence half of the done-when is absent. Coordinator decision: either re-dispatch a node to produce the 15-source before/after precision and spend record, or record the requirement as dropped/waved with a reason."
+    }
+  ],
+  "item_aggregate": 4,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call sites: imas_codex/discovery/signals/parallel.py:enrich_worker (code context -> _fetch_code_chunks) and imas_codex/discovery/signals/parallel.py:enrich_worker (wiki context -> fetch_semantic_wiki_context); both spend sinks drain through charge_context_spend into state.enrich_stats.cost.",
+    "diff": "read ee146951d against base d9f48f26. Two commits: 43290a049 (feat(discovery): rerank signal-enrichment context through Jev) and ee146951d (docs(evidence): land the enrichment context rerank record), each with a conventional subject and a mechanism body, no plan identifier and no AI attribution. The first adds the rerank helper family, widens both fetches and charges the spend; the second adds the fragment.",
+    "done_when": "\u00a79's done-when has two halves. The test half holds: uv run --no-sync pytest tests/discovery exits 0 (this review re-ran it at head: 1318 passed, 0 failed, EXIT=0) with tests showing the 30-candidate pool, the rerank call with the query and each candidate's text, the Jev-order keep, the embedding-order fallback and the spend reaching the run cost. The fragment half does not hold: the fragment records none of the 15-source before/after chunks, relevance labels, precision-at-kept-count or per-source decision spend.",
+    "goal": "\u00a79's outcome \u2014 enrichment's code and wiki context fetches rerank their candidate pool through the Jev discovery-relevance seat. The diff widens both fetches to 30 candidates and routes them through judgment.rerank_pool, keeping the reranked top k and charging the decision spend to the enrichment run's cost total.",
+    "manifest": "read at head ee146951d; reports status complete, gate tests/discovery 1318 passed / 1 deselected (EXIT=0), the declared negative control EXIT=1, commits 43290a049 and ee146951d, and one follow-on (the real decision cost is discarded by rerank_pool, so the charge is an estimate). It declares no baseline_suite arm, so this review measured the pair itself.",
+    "write_paths": "the node's declared paths are imas_codex/discovery/signals/parallel.py, imas_codex/discovery/signals/scanners/wiki.py, tests/discovery/test_enrichment_context_rerank.py, the enrichment-context-rerank evidence fragment and a figures directory; every path changed, with no path touched outside them and the figures directory correctly unused."
+  },
+  "justifications": {
+    "durability": "the change is guarded and the guard is shown to fire: the bypass mutation (\u00a79's declared control) fails the Jev-order assertion, and the fallback path is exercised by test_code_fetch_falls_back_to_embedding_order_when_unordered, which drives rerank_pool returning an 'unavailable' note and asserts the embedding order survives. The widening is asserted at both fetches (test_code_context_searches_the_wider_pool asserts LIMIT 30; the wiki test asserts the index k is the pool). The spend path is exercised end to end by test_code_fetch_adds_the_rerank_spend_to_the_run_cost_total, which drives WorkerStats.cost and the spend-list drain.",
+    "evidence": "the unit-test half is solid and reproduced independently here: the new file's 5 tests pass (\u00a72..\u00a74 of the review work), the full gate `uv run --no-sync pytest tests/discovery` re-ran at head ee146951d and reported 1318 passed, 0 failed, EXIT=0 (gate-head.log, matching the reviewed run's after-suite.log), and the declared negative control reproduces \u2014 bypassing rerank_context_chunks so the fetch keeps embedding order reddens test_code_fetch_reranks_with_the_query_and_keeps_jev_order (mine: neg-control.log, 3 failed / 2 passed, EXIT=1). What is missing is the plan's own empirical measure: no before/after chunk selection, no precision at the kept count, and no per-source decision spend for 15 JT-60SA sources exist anywhere in the fragment or the run directory.",
+    "fit": "names are capability-based and mechanism-describing (CONTEXT_CANDIDATE_POOL, DECISION_COST_PER_JUDGEMENT_USD, rerank_context_chunks, charge_context_spend, _context_rerank_state, _run_coro); the module comment states why the rerank exists (embedding similarity is a weak relevance signal) without citing any plan or ticket; the test file is named for what it tests; no landed symbol or comment carries a stage label, plan id or attribution. The 'Phase 1/2/3' comments flagged in the file are pre-existing and outside this change's hunks.",
+    "goal_fidelity": "the mechanism is implemented exactly as \u00a79 names: both fetches widen to a 30-candidate pool (CONTEXT_CANDIDATE_POOL; _build_code_context_query k=30, wiki query k=CONTEXT_CANDIDATE_POOL) and pass the enrichment query plus each candidate's text to judgment.rerank_pool, keeping the reranked top k (3 for code, the caller's k for wiki). The \u00a79 evidence deliverable is missing. \u00a79's done-when requires the fragment to record, for 15 JT-60SA signal sources, the code and wiki chunks chosen before and after the rerank, each labelled relevant or not, with precision at the kept count for each order and the decision spend per source. The landed fragment (docs/evidence/fragments/jt60sa-imas-maps/enrichment-context-rerank.html) carries none of that: no 15-source set, no before/after chunks, no relevance labels, no precision figure, no per-source spend. So the code half of the done-when is faithful and the evidence half is absent.",
+    "reuse": "the rerank reuses the single shared owner judgment.rerank_pool rather than adding a second rerank, exactly as \u00a79 requires; the wiki scanner imports the shared helper and constants from the signals package at call time (deferred import) rather than duplicating the pool/rerank logic; the fallback logic lives once in rerank_context_chunks and is shared by both fetches.",
+    "scope_discipline": "the two-commit diff touches exactly four files \u2014 imas_codex/discovery/signals/parallel.py, imas_codex/discovery/signals/scanners/wiki.py, tests/discovery/test_enrichment_context_rerank.py and the evidence fragment \u2014 every one inside the node's declared write paths. The declared docs/figures path was correctly left empty (\u00a79's done-when names no figure), and no peer node's path was reached for. No out-of-scope edit to judgment.py, which is why the discarded-cost exposure is carried as a follow-on rather than fixed here."
+  },
+  "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T105942922793-review-of-enrichment-context-rerank/logs/neg-control.log",
+  "project": "imas-codex",
+  "review_run_id": "r-20261007T105942922793-review-of-enrichment-context-rerank",
+  "reviewed_base_sha": "d9f48f26fdc9a19b92f9424cc3a9c0f3188105e6",
+  "reviewed_head_sha": "ee146951d10ad7e073103b72cef4667c60bfc956",
+  "reviewed_run_id": "r-20261007T103117703398-enrichment-context-rerank",
+  "scores": {
+    "durability": 19,
+    "evidence": 12,
+    "fit": 19,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T105942922793-review-of-enrichment-context-rerank/logs/gate-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T105942922793-review-of-enrichment-context-rerank/logs/gate-base.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T105942922793-review-of-enrichment-context-rerank/logs/head-focus.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T105942922793-review-of-enrichment-context-rerank/logs/neg-control.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:11:26Z",
+  "total": 103
+}
