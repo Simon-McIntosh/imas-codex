@@ -1,0 +1,245 @@
+<section>
+  <h2 id="ingested-rejudge-pass-re-judge-of-ingested-code-files-from-stored-chunks">The JT-60SA ingested code files are re-judged from their stored chunks</h2>
+  <p id="ingested-rejudge-pass-what-this-run-did">
+    The <code>--rejudge-ingested</code> pass on <code>discover code jt-60sa</code> was run as an
+    operational pass from this worktree (<code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv</code>,
+    <code>PYTHONPATH</code> at the worktree), on compute node <code>98dci4-clu-2018</code> (job 1277272).
+    Each pass first clears the content judgment fields of the ingested content-stage files through the
+    reset owner (<code>CODE_RESET_SPECS["ingested"]</code>, AND-scoped to <code>status=ingested AND relevance_stage='content'</code>),
+    then rebuilds each file's content state from its own stored <code>CodeChunk</code> text ordered by
+    <code>start_line</code> and cut to the fetched path's 1500 characters, asks the same content question set
+    through the same seat, and rewrites the judgment fields in place through <code>_relevance_item</code>.
+    Because the reset clears all 581 files on every pass, a transient decision failure in one pass
+    leaves a file unanswered; the pass was therefore repeated until a pass left none unanswered.
+    Seven foreground passes were run; pass 7 drained (zero unanswered) so it is the recorded run below.
+  </p>
+  <p id="ingested-rejudge-pass-no-fetch">
+    No file was fetched over the JT-60SA hop. The pass never enters the scan/triage/enrich/ingest
+    pipeline stages: the trailing <code>--rejudge-ingested</code> branch returns before
+    <code>ensure_remote_environment</code> and <code>run_parallel_code_discovery</code>. The pass-7 log carries
+    <strong>zero</strong> ssh/paramiko/sftp/<code>ensure_remote</code> lines; the only matches for a hop-shaped
+    pattern are the reset/clear lines and one below-gate path whose filename contains <code>remote</code>.
+  </p>
+  <h3 id="ingested-rejudge-pass-census">Content-stage census, before and after</h3>
+  <table id="ingested-rejudge-pass-census-by-status">
+    <thead><tr><th>content-stage status</th><th>before</th><th>after</th></tr></thead><tbody>
+      <tr><td>ingested</td><td>581</td><td>581</td></tr>
+      <tr><td>scored</td><td>717</td><td>717</td></tr>
+      <tr><td>skipped</td><td>50</td><td>50</td></tr>
+    </tbody></table>
+  <p id="ingested-rejudge-pass-status-invariant">
+    Every ingested file is still <code>ingested</code> and no status moved between stages. For all 581
+    ingested content-stage files the per-file <code>HAS_CHUNK</code> count is unchanged (0 files changed),
+    the path set is identical, and no <code>CodeExample</code> or <code>CodeChunk</code> was added or removed.
+  </p>
+  <h3 id="ingested-rejudge-pass-confidence">Ingested files with a facet confidence above zero</h3>
+  <table id="ingested-rejudge-pass-confidence-above-zero">
+    <thead><tr><th>facet confidence field</th><th>before</th><th>after</th></tr></thead><tbody>
+      <tr><td><code>score_data_access_confidence</code></td><td>12</td><td>549</td></tr>
+      <tr><td><code>score_signal_processing_confidence</code></td><td>11</td><td>478</td></tr>
+      <tr><td><code>score_machine_description_confidence</code></td><td>13</td><td>553</td></tr>
+      <tr><td><code>score_imas_mapping_confidence</code></td><td>12</td><td>529</td></tr>
+      <tr><td><code>relevance_grade_confidence</code></td><td>10</td><td>523</td></tr>
+    </tbody></table>
+  <p id="ingested-rejudge-pass-answered">
+    Before the pass only 10&ndash;13 of the 581 ingested files carried any facet answer (the earlier scorer
+    left the rest reading 0 or unset). After pass 7 every one of the 581 carries a recorded composite and
+    facet answer (<code>score_composite IS NULL</code>: <strong>0</strong> files);
+    549 carry <code>score_data_access_confidence</code> above zero, and the remaining
+    32 record a confidence of 0.0, a legitimate recorded answer rather than an absent one.
+  </p>
+  <h3 id="ingested-rejudge-pass-admission">Admission not re-decided</h3>
+  <p id="ingested-rejudge-pass-below-gate-count">
+    Thresholds: ingest composite <code>0.5</code>, facet <code>0.85</code>.
+    In the final state <strong>166</strong> ingested files fall below both gates &mdash; they would no longer be
+    admitted, but they are left <code>ingested</code> and only reported. The pass-7 log printed 183 below-gate lines
+    (167 distinct paths; the extras are re-judges of files the pass re-asks within one run).
+    <strong>3</strong> files fall below the composite gate but reach the facet gate, so the facet rule
+    alone would admit them:
+  </p>
+  <ul id="ingested-rejudge-pass-facet-alone-admits">
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/nbiplt.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/rzdpset.f</code></li>
+  </ul>
+  <p id="ingested-rejudge-pass-below-gate-list">
+    The 167 distinct ingested files the pass reports as below admission (listed, not removed):
+  </p>
+  <ol id="ingested-rejudge-pass-below-gate-paths">
+    <li><code>/analysis/lib/eqdbms/eqdbget.f</code></li>
+    <li><code>/analysis/lib/eqdbms/eqdbget2m.f</code></li>
+    <li><code>/analysis/src/ECCD/v9l3/src_a2/ECEQAN.F</code></li>
+    <li><code>/analysis/src/ECCD/v9l4/ECH/ec_trace.f90</code></li>
+    <li><code>/analysis/src/ECCD/v9l4/ECH/ecmain.f90</code></li>
+    <li><code>/analysis/src/ECCD/v9l4/ECH/ecpsi.f90</code></li>
+    <li><code>/analysis/src/SAeqfame/eqaxi.f</code></li>
+    <li><code>/analysis/src/SAeqread/dskwt3.f</code></li>
+    <li><code>/analysis/src/SAeqread/dswt70.f</code></li>
+    <li><code>/analysis/src/SAeqread/eqreaf.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.bak_9912/eqoutb.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.bak_9912/prf_rj.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.bak_9912/prf_rn.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.bak_9912/prf_vl.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.old/eqmet.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.old/prf_el.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.old/prf_g1.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.old/prf_g2.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.old/prf_rn.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.old/prf_ro.f</code></li>
+    <li><code>/analysis/src/SAeqread/u_file.old/vol2phi.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/RUNTIMESERIES/TIMESERIES/main.c</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/aaopt.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/aattl.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/calc_DL.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/calc_SAabb.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/dskwt2.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqaxi.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqdbtest.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqequb.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqinpu.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqinpu96.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqoutex.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqsol.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/eqvacu3.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/findpsi.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/mgbrz.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/mgpos.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/lprb1_ex.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/lprb2_ex.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/lprb3_ex.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/mcxr_ex.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/prb_ex.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/prbplt.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/prbtrc.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/probdt.f</code></li>
+    <li><code>/analysis/src/SAselene_v2.0_forPSRC/plt/walldt.f</code></li>
+    <li><code>/analysis/src/eagle-v4.05/appli.kal.x.f/aamain.f</code></li>
+    <li><code>/analysis/src/eagle-v4.05/metaread/main.f</code></li>
+    <li><code>/analysis/src/easy-v5.01/test/category.f</code></li>
+    <li><code>/analysis/src/easy-v5.01/test/esyper.f</code></li>
+    <li><code>/analysis/src/easy-v5.01/test/table.f</code></li>
+    <li><code>/analysis/src/easy-v5.01/test/table2.f</code></li>
+    <li><code>/analysis/src/easy-v5.01/test/tablec.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_egis/egis_data_area/egis_data_opl_button_area.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_egis/egis_data_area/egis_dataline_area.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_egis/egis_data_area/egis_plantmonitor_dataline_area.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_egis/egis_plugins/jt60sa/dataline_input_params/datalineinputparams_fameanimation.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_egis/egis_setting/egis_setting.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_data_area/datalineinputparams_userfunction.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_data_area/eslice_graph_qt4mplcanvas.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_data_area/esurf_coil_information_view_area.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins/jt60u/esurf_view_heating_device_setting_area_jt60u.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqrdns/eqlst3.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/fledd.pac.20160412/eqdb_set.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/fledd.pac/fndpos.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/selene/eqind.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/selene/eqlin.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/selene/eqrcu.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/selene/eqsepb.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.14/edas_share/remote_tools/remote_db.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_egis/egis_graph_area/egis_timeslide_view.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_data_area/eslice_graph_qt4mplcanvas.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_data_area/esurf_data_opl_button_area.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_data_area/esurf_graph_qt4mplcanvas.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/eqrdns/eqlst3.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms/EQDB/eqdbio.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/chr_tool.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/fmeqdb_set.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/fmeqdblist.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/fmfile_get2.c</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/fmfile_get4.c</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/fmlist_get2.c</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/fmlist_get3.c</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/rreadc.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/inc/C/eqdblib.h</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac/eqdb.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac/eqlist_get.f</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/selene/eqlin.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/selene/eqvol.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eqread_pac_org_20170621/selene/mgfild.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/default/AdamNew.py</code></li>
+    <li><code>/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/util/Work.py</code></li>
+    <li><code>/analysis/src/getseldata_v4.2/initial.c</code></li>
+    <li><code>/analysis/src/getseldata_v4.2/outpripdrev.c</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/adam2imas/a2i_mod.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/adam2imas/set_local.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/adam2imas/wrimasa.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/ids_mod.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_get_tf.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_cp.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_cs.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_ct.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_eq.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_ml.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_sm.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_tf.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_p_init_wl.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas/imas_put_ml.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas2file/i2fout1.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas2file/rdimas_cp.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas2file/rdimas_eq.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas2file/rdimas_ml.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas2file/rdimas_tf.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/imas2file/rdimase.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/plot2imas/p2ialc.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/plot2imas/p2iset1.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/plot2imas/wrimas_eq.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/tool/plot2imas/wrimas_ml.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/cal_delp.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/chk_eqexp.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/cnoutfl.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/cntmeu.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/dprime0.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eq_expan.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eq_ini.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqcalmat.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqcntl.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqdbbfp.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqdbp.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqdsk0.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqdtio.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqedg_1d.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqedg_2d.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqgrd.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqind.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqindct.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqiniref.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqout.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqout_sonic.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqouta.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqpde.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqpde_fft.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqsol.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/eqtmset.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/erato0.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/g_eqdsk.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/inieqf.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/slctuion.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/trn2meu.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/eqmain/wrmeudas.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/fp_rat_v1l1/tae_diagnostic.f90</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/rfmain/rfcal1.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/rfmain/rfcal2.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/cal_cdi.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/eqtrn_sep.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/eqtrn_vbn.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/fixprf.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/pedwid.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/rst_hesrc.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/rst_ionden.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/trano.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/trfus.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/trinchk.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/trneo_cmyu.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/trsorx.f</code></li>
+    <li><code>/analysis/src/topics_release/topics/topics/trmain/trsvd.f</code></li>
+  </ol>
+  <h3 id="ingested-rejudge-pass-spend">Decision spend</h3>
+  <p id="ingested-rejudge-pass-spend-detail">
+    Seven passes; the final pass (the recorded run) spent <strong>$0.092</strong> over 72 batches
+    (720 judged, including re-judges). Total spend across all seven passes was <strong>$0.619</strong>
+    (pass costs $0.084, $0.093, $0.084, $0.094, $0.085, $0.087, $0.092). Decision cost is read from the
+    endpoint response usage and recorded per file through <code>score_cost</code>. The figures above are the
+    run logs' own summary lines under <code>runs/r-20261007T130327191133-ingested-rejudge-pass/</code>.
+  </p>
+</section>
