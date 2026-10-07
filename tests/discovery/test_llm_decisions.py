@@ -213,8 +213,8 @@ def _validate(answers: dict) -> None:
 def test_eight_criterion_choice_summing_low_is_accepted():
     """An eight-criterion distribution summing to 0.99 is accepted.
 
-    Each of eight probabilities rounded to two decimals can lose up to 0.005,
-    so a total a whole hundredth under 1 is within the model's rounding slack.
+    The tolerance is 0.005 per offered option, so eight options tolerate a
+    total 0.04 under 1; 0.99 is within that.
     """
     probabilities = {f"role_{i}": 0.12 for i in range(7)}
     probabilities["role_7"] = 0.15
@@ -231,10 +231,53 @@ def test_eight_criterion_choice_summing_high_is_accepted():
 
 
 def test_eight_criterion_choice_summing_to_ninety_percent_is_refused():
-    """A distribution summing to 0.90 exceeds the rounding slack and is refused."""
+    """A distribution summing to 0.90 exceeds the rounding slack and is refused.
+
+    Eight offered options tolerate only 0.04 of loss, so a tenth missing is
+    well beyond it.
+    """
     probabilities = {f"role_{i}": 0.11 for i in range(7)}
     probabilities["role_7"] = 0.13
     assert sum(probabilities.values()) == pytest.approx(0.90)
+    with pytest.raises(llm.DecisionsValidationError, match="sum to"):
+        _validate(_eight_choice(probabilities))
+
+
+EIGHTY_SEVEN_ROUTES = {f"route_{i}": f"criterion {i}" for i in range(87)}
+
+
+def test_eighty_seven_option_choice_reporting_most_options_zero_is_accepted():
+    """An 87-option distribution summing to 0.80 is accepted.
+
+    Most options report 0.00, but each may hold up to 0.004 of unrounded
+    mass, so the honest bound counts every offered option — 0.005 times 87,
+    or 0.435 — and losing three quarters of the mass to options that round to
+    zero is within it.
+    """
+    probabilities = {f"route_{i}": 0.0 for i in range(87)}
+    probabilities["route_0"] = 0.8
+    assert sum(probabilities.values()) == pytest.approx(0.80)
+    llm._validate_decisions_answers(
+        {"role": {"type": "choice", "criteria": EIGHTY_SEVEN_ROUTES}},
+        {
+            "role": {
+                "type": "choice",
+                "choice": "route_0",
+                "probabilities": probabilities,
+            }
+        },
+    )
+
+
+def test_choice_summing_below_the_offered_bound_is_refused():
+    """A distribution below 1 - 0.005 per offered option is refused.
+
+    Eight options tolerate 0.04 of loss, so 0.95 is refused even though a
+    narrower per-nonzero bound would have admitted it.
+    """
+    probabilities = {f"role_{i}": 0.12 for i in range(7)}
+    probabilities["role_7"] = 0.11
+    assert sum(probabilities.values()) == pytest.approx(0.95)
     with pytest.raises(llm.DecisionsValidationError, match="sum to"):
         _validate(_eight_choice(probabilities))
 
@@ -327,9 +370,7 @@ def _validate_score(answers: dict) -> None:
 
 def test_score_within_top_level_is_accepted():
     """A score at its top level with a normalised distribution is accepted."""
-    _validate_score(
-        _score_answer(4.0, dict(enumerate([0.1, 0.1, 0.2, 0.3, 0.3])))
-    )
+    _validate_score(_score_answer(4.0, dict(enumerate([0.1, 0.1, 0.2, 0.3, 0.3]))))
 
 
 def test_score_above_top_level_is_refused():
@@ -345,10 +386,10 @@ def test_score_below_zero_is_refused():
 
 
 def test_score_probabilities_spanning_all_levels_use_full_tolerance():
-    """Five nonzero probabilities summing to 0.99 are accepted.
+    """Five level probabilities summing to 0.99 are accepted.
 
-    The tolerance is 0.005 per nonzero probability, so five levels tolerate a
-    whole hundredth of rounding loss.
+    The tolerance is 0.005 per offered level, so five levels tolerate 0.025
+    of rounding loss.
     """
     probabilities = dict.fromkeys(range(4), 0.2)
     probabilities[4] = 0.19
@@ -356,12 +397,12 @@ def test_score_probabilities_spanning_all_levels_use_full_tolerance():
     _validate_score(_score_answer(3.0, probabilities))
 
 
-def test_score_probabilities_with_few_nonzero_reject_a_large_gap():
-    """Two nonzero probabilities summing to 0.90 are refused.
+def test_score_distribution_uses_the_offered_bound_not_the_reported_count():
+    """A score distribution summing to 0.90 over five levels is refused.
 
-    With only two nonzero probabilities the tolerance is 0.01, so a tenth
-    missing exceeds it — the tolerance scales with the number of levels that
-    carry a probability, not with the question's length.
+    Only two levels are reported nonzero, but the question offered five, so
+    the bound is 0.025 — the offered count, not the reported one — and a
+    missing tenth is beyond it.
     """
     probabilities = {0: 0.5, 1: 0.4}
     with pytest.raises(llm.DecisionsValidationError, match="sum to"):
