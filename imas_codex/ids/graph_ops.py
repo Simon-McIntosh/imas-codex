@@ -573,6 +573,125 @@ def write_candidates(
     return written
 
 
+def read_candidates(
+    source_ids: Iterable[str], gc: GraphClient
+) -> dict[str, list[dict[str, Any]]]:
+    """Read each source's MAPPING_CANDIDATE edges in Jev order.
+
+    The map stage reads its shortlist from these edges rather than
+    re-embedding every source. One query returns every requested source's
+    edges, each with its target's section — the target's IDS top-level
+    ancestor ``<ids>/<first segment>`` — and that section node's
+    ``data_type``, ``timebasepath`` and ``ndim``, which the target-type rule
+    reads. ``rank`` is the Jev order, ascending.
+
+    Args:
+        source_ids: SignalSource IDs whose candidate edges are read.
+        gc: Graph client instance.
+
+    Returns:
+        ``{source_id: [edge, ...]}``, one entry per source that has edges.
+        Each edge carries ``path``, ``rank``, ``retrieval_score``, ``ids``,
+        ``choice_probability``, ``p_same_quantity``, ``model``, ``judged_at``,
+        ``arms``, ``route``, ``documentation``, ``section``, ``data_type``,
+        ``timebasepath`` and ``ndim``.
+    """
+    ids = list(source_ids)
+    if not ids:
+        return {}
+    rows = gc.query(
+        """
+        MATCH (sg:SignalSource)-[r:MAPPING_CANDIDATE]->(ip:IMASNode)
+        WHERE sg.id IN $source_ids
+        WITH sg, r, ip, split(ip.id, '/') AS parts
+        WHERE size(parts) >= 2
+        WITH sg, r, ip, parts[0] + '/' + parts[1] AS section_id
+        OPTIONAL MATCH (sec:IMASNode {id: section_id})
+        RETURN sg.id AS source_id,
+               ip.id AS path,
+               r.rank AS rank,
+               r.retrieval_score AS retrieval_score,
+               r.ids AS ids,
+               r.choice_probability AS choice_probability,
+               r.p_same_quantity AS p_same_quantity,
+               r.model AS model,
+               r.judged_at AS judged_at,
+               r.arms AS arms,
+               r.route AS route,
+               ip.documentation AS documentation,
+               section_id AS section,
+               sec.data_type AS data_type,
+               sec.timebasepath AS timebasepath,
+               sec.ndim AS ndim
+        ORDER BY sg.id, r.rank
+        """,
+        source_ids=ids,
+    )
+    edges: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        edges.setdefault(row["source_id"], []).append(row)
+    return edges
+
+
+def select_candidates(source_id: str, paths: Iterable[str], gc: GraphClient) -> int:
+    """Mark the listed candidate edges selected and set the source's route.
+
+    All-or-nothing: the listed edges are flagged and ``candidate_route`` is set
+    to ``selected`` in one statement only when every distinct listed path has a
+    MAPPING_CANDIDATE edge. A pick that names a path with no edge, or an empty
+    list, is refused with :class:`CandidateWriteError` and writes nothing at
+    all — no edge flag and no route change — so a refused pick leaves the
+    shortlist exactly as it was. The rest of the shortlist is always left
+    unchanged, unlike :func:`write_candidates`, which deletes and rewrites
+    every edge.
+
+    Args:
+        source_id: SignalSource ID whose picked edges are marked.
+        paths: IMASNode IDs the reasoning model chose. Duplicates are
+            collapsed, preserving order.
+        gc: Graph client instance.
+
+    Returns:
+        The number of edges marked.
+
+    Raises:
+        CandidateWriteError: If ``paths`` is empty, or if any listed path has
+            no MAPPING_CANDIDATE edge.
+    """
+    seen: set[str] = set()
+    chosen = [p for p in paths if not (p in seen or seen.add(p))]
+    if not chosen:
+        raise CandidateWriteError(
+            f"select_candidates needs at least one path for {source_id}"
+        )
+    rows = gc.query(
+        """
+        MATCH (sg:SignalSource {id: $source_id})
+        OPTIONAL MATCH (sg)-[r:MAPPING_CANDIDATE]->(ip:IMASNode)
+        WHERE ip.id IN $paths
+        WITH sg, collect(r) AS rels
+        WITH sg, [x IN rels WHERE x IS NOT NULL] AS found
+        WITH sg, found, size(found) AS matched
+        FOREACH (rel IN [x IN found WHERE matched = $expected] |
+            SET rel.route = true)
+        FOREACH (rel IN [x IN found WHERE matched = $expected] |
+            SET sg.candidate_route = 'selected')
+        RETURN matched AS matched
+        """,
+        source_id=source_id,
+        paths=chosen,
+        expected=len(chosen),
+    )
+    matched = rows[0]["matched"] if rows else 0
+    if matched != len(chosen):
+        raise CandidateWriteError(
+            f"selected {matched} of {len(chosen)} MAPPING_CANDIDATE edges for "
+            f"{source_id}; a chosen path may have no candidate edge"
+        )
+    logger.info("Marked %d MAPPING_CANDIDATE edges selected for %s", matched, source_id)
+    return matched
+
+
 def write_mapping_binding(binding: Any, gc: GraphClient) -> int:
     """Write one ``SignalSource -[:MAPS_TO_IMAS]-> IMASNode`` binding.
 

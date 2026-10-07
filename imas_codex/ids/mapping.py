@@ -29,8 +29,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.ids.candidates import DEFAULT_K, retrieve_candidates
-from imas_codex.ids.graph_ops import write_mapping_binding
+from imas_codex.ids.graph_ops import read_candidates, write_mapping_binding
 from imas_codex.ids.metadata import (
     IDSMetadataResult,
     persist_metadata,
@@ -674,26 +673,20 @@ def gather_shared_context(
         pass
 
     # Per-source bridging queries, run ONCE with no IDS filter. DD candidate
-    # retrieval owns the IMAS arm, so only the wiki and code bridges are kept.
+    # retrieval owns the IMAS side, so only the wiki and code bridges are kept.
     _emit(f"wiki + code matches ({len(source_descs)} sources)")
     semantic_match_matrix: dict[str, list[dict[str, Any]]] = {}
     if source_descs and embeddings is not None:
         try:
-            matrix = compute_semantic_matches(
+            semantic_match_matrix = compute_semantic_matches(
                 source_descs,
-                "",  # No IDS filter — get matches across ALL IDS
                 gc=gc,
                 k_per_source=20,
                 include_wiki=True,
                 include_code=True,
-                dd_version=dd_version,
                 on_progress=on_progress,
                 precomputed_embeddings=embeddings,
             )
-            semantic_match_matrix = {
-                source_id: [m for m in matches if m.get("content_type") != "imas"]
-                for source_id, matches in matrix.items()
-            }
         except Exception:
             logger.debug("Semantic match matrix failed", exc_info=True)
 
@@ -762,15 +755,12 @@ def gather_ids_context(
     # Bridging matches (wiki + code) are shared across IDS targets
     semantic_match_matrix = shared.get("semantic_match_matrix", {})
 
-    # Per-source DD shortlist, each source routed to this IDS
-    _emit("retrieving candidates")
+    # Per-source shortlist, read from each source's MAPPING_CANDIDATE edges.
+    _emit("reading candidates")
     source_descs = shared["source_descs"]
-    source_candidates = retrieve_candidates(
-        dict(source_descs),
-        {source_id: [ids_name] for source_id, _ in source_descs},
+    source_candidates = read_candidates(
+        [source_id for source_id, _ in source_descs],
         gc=gc,
-        k=DEFAULT_K,
-        dd_version=dd_version,
     )
 
     # IDS-specific: existing mappings, COCOS, cross-facility, section clusters
@@ -1046,8 +1036,8 @@ def map_signals(
         cluster_context = ""
         if source_semantic:
             semantic_context = "Semantic search candidates:\n" + "\n".join(
-                f"  - {cand.hit.path} (score={cand.hit.score:.2f}): "
-                f"{cand.hit.documentation}"
+                f"  - {cand['path']} (score={cand.get('retrieval_score') or 0.0:.2f}): "
+                f"{cand.get('documentation') or ''}"
                 for cand in source_semantic
             )
 
@@ -1235,8 +1225,8 @@ def _prepare_section_context(
     cluster_context = ""
     if source_semantic:
         semantic_context = "Semantic search candidates:\n" + "\n".join(
-            f"  - {cand.hit.path} (score={cand.hit.score:.2f}): "
-            f"{cand.hit.documentation}"
+            f"  - {cand['path']} (score={cand.get('retrieval_score') or 0.0:.2f}): "
+            f"{cand.get('documentation') or ''}"
             for cand in source_semantic
         )
 
