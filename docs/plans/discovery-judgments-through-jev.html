@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
 <meta name="plan-impl" content="0.36">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -305,6 +305,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-landing-code-candidate-probe" data-who="reckon-build" data-when="2026-10-07T05:35:00Z">
     <div class="r-comment-body"><p>Node code-candidate-probe (6916e0efa) landed; review 104/120. Three corrections are recorded in the evidence at merge. The cited variants.log uses the local-denominator nDCG, so its Q06 values do not match the table. The live rerun matches the harness order exactly on 5 questions, not 6, and q10 differs within its top 10, not only inside ties. Q05 is generated at cut 30 while Q12 enters only at cut 50. Embedding descriptions is the one large effect; its 14.6 s per query is an artifact of computing the embeddings on the fly, and a deployment would store them. It stays an experiment until it recovers Q06. impl 4/11.</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261007T042533534406-code-candidate-probe" data-who="reckon-build" data-when="2026-10-07T04:55:29.522Z">
+    <div class="r-comment-body"><p>Node code-candidate-probe measured candidate generation over the 12 §9 code questions by nDCG@10 — mean 0.1898 (current cut30), 0.1817 (cut50), 0.1984 (cut100), 0.1845 (bounded lexical term), 0.4240 (CodeFile description beside chunk text) — with the Q06 control reproducing §9&#x27;s 0.423 exactly (0.4226) and both missed answers outside the top 30 in every arm, because both are already generated and ranked out (eqgrd.f via the hybrid text stage at rank 85 of 135; shtrd.f::chunk_1 entering the vector stage at cut 50 but landing at merged rank 113); no candidate-generation widening reaches them, and the one large gain (description embedding) fails the Q06 control and costs ~15 s/query.</p></div>
 </div>
 </section>
 </main>
