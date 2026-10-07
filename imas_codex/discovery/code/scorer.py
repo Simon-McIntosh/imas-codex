@@ -318,7 +318,9 @@ def recompute_stored_composites() -> dict[str, int]:
     the field with the value ``scope_relevance`` produces, reporting how many
     rows disagreed before the write and how many still do after it.
     """
-    fields = ", ".join(f"cf.{field}" for field in _STORED_SCOPE_FIELDS.values())
+    fields = ", ".join(
+        f"cf.{field} AS {field}" for field in _STORED_SCOPE_FIELDS.values()
+    )
     select = f"""
         MATCH (cf:CodeFile)
         WHERE cf.relevance_stage IS NOT NULL
