@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite/after_suite arms (manifest.md carries only tests and test_logs, and both gate logs it names were working-tree runs at the base revision), so this review ran both arms itself: base 46572d2b8 118 passed / 8 skipped (EXIT=0) and head dcf52306b 120 passed / 8 skipped (EXIT=0). added_failure_count is therefore 0 with an empty id set from arms this review produced, not from the reviewed run's own logs. The +2 head tests are the node's new pins. Note: these arms were run with the worktree .env present, so the key was set; a keyless run of the same suite REDS two existing tests, recorded as FINDING 1 with the keyless log head-nokey-existing-tests.log and the base positive control base-nokey-existing-tests.log.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T154229545965-review-of-decisions-key-skip/rev-decisions-key-skip uv run --no-sync pytest tests/discovery/test_decisions_key_skip.py tests/discovery/test_judgment.py tests/discovery/test_enrichment_context_rerank.py tests/llm/test_search_tools.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T154229545965-review-of-decisions-key-skip/head-arm.log",
+    "revision": "dcf52306b2c07b4ef8532e0feea2a2c2b00024ce"
+  },
+  "backend": "deepseek-v4.1-flash",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T154229545965-review-of-decisions-key-skip/rev-base-decisions-key-skip uv run --no-sync pytest tests/discovery/test_judgment.py tests/discovery/test_enrichment_context_rerank.py tests/llm/test_search_tools.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T154229545965-review-of-decisions-key-skip/base-arm.log",
+    "revision": "46572d2b8abd0cf3256093f9559f7129b07b92e9"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    {
+      "file": "imas_codex/ids/workers.py",
+      "line": "1189",
+      "text": "candidate_worker calls route_ids per source; a None return releases the claim (1196-1198), the same path as a transport failure."
+    },
+    {
+      "file": "imas_codex/ids/workers.py",
+      "line": "1224",
+      "text": "candidate_worker calls judge_candidates per source; a None return releases the claim (1232-1237)."
+    }
+  ],
+  "completed_at": "2026-10-07T16:05:12.757Z",
+  "dispatched_at": "2026-10-07T15:42:38Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_judgment.py",
+      "line": "173",
+      "severity": "major",
+      "text": "major: the decisions-key guard makes two pre-existing tests depend on the ambient OPENROUTER_API_KEY_IMAS_CODEX. In a .env-free tree at dcf52306b, test_rerank_pool_orders_by_descending_score reads ['f0','f1','f2'] where it expects ['f2','f0','f1'], and test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails asserts the 'kept their embedding position' note but receives 'rerank skipped: OPENROUTER_API_KEY_IMAS_CODEX not set.' (2 failed, EXIT=1; head-nokey-existing-tests.log). Both tests pass at base 46572d2b8 with no key (10 passed; base-nokey-existing-tests.log), so the dependency is introduced by this node. The reviewed gate passed only because its worktree carried the .env symlink. Remediation belongs in the test files: set the key explicitly (monkeypatch.setenv) in the two rerank tests, or patch decisions_key_present True, so the suite is green without a credential."
+    },
+    {
+      "file": "imas_codex/ids/candidates.py",
+      "line": "372",
+      "severity": "follow-on",
+      "text": "follow-on: the spec asks the candidate stage to check once before its first source; the implementation checks per call inside route_ids and judge_candidates, with a module-level latch giving the single warning. This is forced by the node's write fence (the per-source loop is candidate_worker in imas_codex/ids/workers.py, outside the declared write paths) and preserves the observable contract, so it is reported rather than treated as a defect. If a later pass is dispatched, the literal wiring belongs in workers.py candidate_worker before its source loop."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T152150418816-decisions-key-skip/manifest.md",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run recorded no baseline_suite/after_suite arms (its manifest carries tests and test_logs only, and both gate logs it names were working-tree runs at the base revision). This review therefore supplies both arms itself; added_failure_count 0 is measured from those, not from the node's own record."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "traced the sole runtime caller: imas_codex/ids/workers.py candidate_worker calls route_ids per source (line 1189) and judge_candidates per source (line 1224); a None return releases the claim exactly as a transport failure does (lines 1196-1198, 1232-1237). The rerank_pool skip is reached by the mapping pool rerank and by search_tools through the shared owner.",
+    "diff": "read the full commit: judgment.py adds decisions_key_present and decisions_key_absent_reason and a guard at the head of rerank_pool; candidates.py adds a module-level _key_absence_warned latch, judgments_available(), and a guard in route_ids and judge_candidates; a new test file pins both skips; the evidence fragment records the landing. No unrelated change.",
+    "done_when": "Independently reproduced at head dcf52306b in scratch: probe with the key cleared gives RERANK_ENTRIES 0 / note naming OPENROUTER_API_KEY_IMAS_CODEX / cost 0.0 and CAND_ENTRIES 0 over four sources with one warning; negative-control tree with the two guards removed gives RERANK_ENTRIES 3 / CAND_ENTRIES 4 and 2 failed (EXIT=1). Own arms: base 46572d2b8 118 passed, 8 skipped; head dcf52306b 120 passed, 8 skipped.",
+    "goal": "done-when met in the reviewed environment: one predicate on get_api_key, rerank_pool skips with a note naming the variable and cost 0.0, candidate stage skips with one warning and leaves every source unjudged. One documented deviation: the candidate-stage check is per-call in candidates.py rather than once in workers.py, forced by the write fence; observable behaviour matches the spec.",
+    "manifest": "read; status complete; commit dcf52306b; changed_paths match the diff; tests field records the four-file gate (120 passed, 8 skipped) and test_logs name gate.log and gate-new.log; negative_control_log present and independently reproduced. baseline_suite/after_suite are absent from the reviewed manifest, so I produced both arms myself.",
+    "write_paths": "git show --stat dcf52306b is exactly the four declared paths (215 insertions, 3 deletions); worktree clean; no plan/sprint/index mutation."
+  },
+  "justifications": {
+    "durability": "The predicate and the latch are durable in the ordinary sense (built on get_api_key, no second spelling of the variable), but the change couples two pre-existing tests to the ambient decisions key, a regression the node did not notice. With the key genuinely absent (a .env-free tree at dcf52306b), tests/discovery/test_judgment.py fails twice (FINDING 1): test_rerank_pool_orders_by_descending_score reads ['f0','f1','f2'] where it expects ['f2','f0','f1'], and test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails asserts the 'kept their embedding position' note but gets 'rerank skipped: OPENROUTER_API_KEY_IMAS_CODEX not set.'. At base 46572d2b8 both tests pass with no key, so the dependency is introduced by this node. The reviewed gate passed only because its worktree carried the .env symlink, so the key was set; a keyless checkout or CI run would fail these two existing tests. The module-global latch is also process-wide state, benign because a key-present call clears it, but state that survives between stages in one process.",
+    "evidence": "The central claim is independently reproduced at the committed head with arms I ran myself. Negative arm (scratch tree with the two guards stripped): RERANK_ENTRIES 3, CAND_ENTRIES 4, the node's own test file FAILED twice (2 failed, EXIT=1), matching the reviewed manifest's negative-control claim. The reviewed run recorded no baseline_suite/after_suite arms of its own (its manifest carries tests/test_logs only, and both its gate logs were working-tree runs at the base revision), so I produced both arms: base 46572d2b8 118 passed / 8 skipped EXIT=0; head dcf52306b 120 passed / 8 skipped EXIT=0; added_failure_count 0. Weaknesses: the reviewed run left no independent base/head gate pair, and the after-arm green depends on the ambient .env key being present (FINDING 1), so the arms I recorded are mine rather than the node's.",
+    "fit": "Names and docstrings describe the mechanism (decisions_key_present, decisions_key_absent_reason, judgments_available, 'Set once per absence of the decisions key so the stage warns a single time') and carry no plan, sprint or ticket labels; the evidence fragment is a well-formed <section data-reckon=\"evidence\"> with a stable id, an h2 and a landing paragraph naming the variable and the section cost. The only fit note is that the spec said 'one predicate' and the node added a second helper (decisions_key_absent_reason) to carry the message, which is a clean way to avoid a second env spelling, not a defect.",
+    "goal_fidelity": "The section's done-when for decisions-key-skip is met in the gate environment: judgment.decisions_key_present is built on get_api_key (llm.py); rerank_pool with the key absent makes no call and returns the embedding order, a note naming OPENROUTER_API_KEY_IMAS_CODEX and cost 0.0; and the candidate stage leaves every source unjudged after a single warning for the stage. I reproduced both skips independently in a scratch tree at the reviewed commit with the key cleared after import: RERANK_ENTRIES 0, note 'rerank skipped: OPENROUTER_API_KEY_IMAS_CODEX not set...', cost 0.0; CAND_ENTRIES 0 over four sources with exactly one warning naming the variable; four route_ids calls each returned None, the same released-for-retry state a transport failure produces. One deviation from the literal spec: the spec asks the candidate stage to check once before its first source, and the guard is instead a per-call check inside route_ids and judge_candidates backed by a module-level latch for the single warning. The manifest documents this as forced by the write fence, because the per-source loop lives in imas_codex/ids/workers.py candidate_worker, outside the declared write paths; the observable contract is preserved, so the deduction is small.",
+    "reuse": "The change builds on the existing credential reader get_api_key and the existing decisions layer call_decisions/acall_decisions; it introduces no second client, no second env spelling, and no duplicated batch logic. rerank_pool keeps its existing (ordered, note, cost) contract. The candidate-stage guard reuses the same get_api_key path through decisions_key_present, so both callers share one predicate.",
+    "scope_discipline": "git show --stat dcf52306b touches exactly the four declared paths (judgment.py, candidates.py, test_decisions_key_skip.py, the evidence fragment), 215 insertions and 3 deletions, and the worktree is clean. No plan, sprint or index state was mutated; the manifest records the scope reasoning for the one deviation rather than editing workers.py."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The done-when for decisions-key-skip is met in the reviewed environment. judgment.decisions_key_present (built on get_api_key) gates rerank_pool, which with no key makes no call and returns the embedding order, a note naming OPENROUTER_API_KEY_IMAS_CODEX and cost 0. One documented deviation: the candidate stage checks per call in candidates.py rather than once in workers.py (write fence), preserving the observable contract (zero calls, one warning, every source unjudged).\nVERDICT done_when: Independently reproduced in scratch at dcf52306b with the key cleared after import: RERANK_ENTRIES 0 / note 'rerank skipped: OPENROUTER_API_KEY_IMAS_CODEX not set...' / cost 0.0; CAND_ENTRIES 0 over four sources, one warning naming the variable; four route_ids returns None. Negative-control tree (guards removed): RERANK_ENTRIES 3 / CAND_ENTRIES 4 and 2 failed EXIT=1.\nVERDICT write_paths: git show --stat dcf52306b is exactly the four declared paths (215 insertions, 3 deletions); clean worktree; no plan/sprint/index mutation.\nVERDICT manifest: read; complete; commit dcf52306b; tests record the four-file gate; negative control present and reproduced; baseline_suite/after_suite absent so this review produced both arms.\nVERDICT diff: predicate plus helper in judgment.py, latch plus judgments_available and two guards in candidates.py, a new test file and an evidence fragment; no unrelated change; call sites are candidate_worker in workers.py, whose None-releases-the-claim path already matches a transport failure.\nCALL_SITES: imas_codex/ids/workers.py candidate_worker lines 1189/1224 (route_ids/judge_candidates), release on None at 1196-1198 and 1232-1237.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: done-when holds and both skips are independently reproduced; the single deduction is the documented per-call placement of the candidate-stage check rather than once before the source loop.\nSCORE evidence: 17\nJUSTIFICATION evidence: defect and fix are reproduced with my own base/head arms and a reproduced negative control; the reviewed run supplied no suite arms of its own and its after-arm green depends on the ambient .env key.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: exactly the four declared paths, clean tree, no plan/sprint/index mutation.\nSCORE durability: 12\nJUSTIFICATION durability: the guard silently couples two existing rerank tests to the ambient decisions key; with no key they fail (FINDING 1) where at base they pass; a keyless CI would red these tests; the latch is also process-global state.\nSCORE fit: 19\nJUSTIFICATION fit: mechanism-naming symbols and docstrings, no plan labels, well-formed evidence fragment; slightly more than the 'one predicate' spec via the absent-reason helper, a clean way to avoid a second env spelling.\nSCORE reuse: 20\nJUSTIFICATION reuse: built on get_api_key and the shared decisions layer; no second client, no second env spelling, no duplicated batch logic.\nFINDING tests/discovery/test_judgment.py:173 major: no-key tree at dcf52306b fails test_rerank_pool_orders_by_descending_score (['f0','f1','f2'] != ['f2','f0','f1']) and test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails (gets 'rerank skipped' note); both pass at base without a key; the gate passed only because the worktree .env set the key.\nFINDING imas_codex/ids/candidates.py:372 follow-on: candidate-stage check is per-call rather than once before the source loop, forced by the write fence; observable contract preserved.\nFINDING manifest.md:12 follow-on: the reviewed run recorded no baseline_suite/after_suite arms; this review supplies both.",
+  "review_run_id": "r-20261007T154229545965-review-of-decisions-key-skip",
+  "reviewed_base": "46572d2b8abd0cf3256093f9559f7129b07b92e9",
+  "reviewed_base_sha": "46572d2b8abd0cf3256093f9559f7129b07b92e9",
+  "reviewed_commit": "dcf52306b2c07b4ef8532e0feea2a2c2b00024ce",
+  "reviewed_head_sha": "dcf52306b2c07b4ef8532e0feea2a2c2b00024ce",
+  "reviewed_run_id": "r-20261007T152150418816-decisions-key-skip",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:12:00.000000+00:00",
+  "total": 106
+}

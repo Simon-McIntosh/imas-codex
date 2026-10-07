@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="61">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -362,6 +362,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T152150418816-decisions-key-skip" data-who="reckon-build" data-when="2026-10-07T15:41:41.165Z">
     <div class="r-comment-body"><p>§8 decisions-key-skip: judgment.decisions_key_present (built on get_api_key) gates the Jev calls; rerank_pool returns the embedding order with a note naming OPENROUTER_API_KEY_IMAS_CODEX and cost 0.0, and the candidate stage leaves every source unjudged after one warning for the stage; tests/discovery/test_decisions_key_skip.py pins both with the key removed and a recording transport (2 passed), gate 120 passed/8 skipped, negative control 2 failed EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T154229545965-review-of-decisions-key-skip" data-who="reckon-build" data-when="2026-10-07T16:05:12.757Z">
+    <div class="r-comment-body"><p>review stored; §8 decisions-key-skip scored 106/120. Reviewed commit dcf52306b adds judgment.decisions_key_present (built on get_api_key) g-jim; rerank_pool with no key returns the embedding order, a note naming OPENROUTER_API_KEY_IMAS_CODEX and cost 0.0; the candidate stage leaves every source unjudged after one warning. Both skips independently reproduced in scratch (0 transport entries, 1 warning); negative control with guards removed reproduces the pre-fix behaviour (3 rerank + 4 candidate entries) and reds the node&#x27;s two tests. Major finding: the guard couples two existing rerank tests to the ambient key — keyless tree at dcf52306b fails tests/discovery/test_judgment.py::test_rerank_pool_orders_by_descending_score and ::test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails, both green at base with no key; remediation in the test files.</p></div>
 </div>
 </section>
 </main>
