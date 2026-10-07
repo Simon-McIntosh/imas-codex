@@ -32,6 +32,7 @@ Output (JSON on stdout):
 
 import json
 import os
+import shlex
 import subprocess
 import sys
 from typing import Any, Dict, List
@@ -177,8 +178,10 @@ def scan_path_find(
     ext_predicates = " -o ".join(f'-name "*.{ext}"' for ext in extensions)
     # Add -size filter when max_file_size is set
     size_filter = f"-size -{max_file_size}c" if max_file_size > 0 else ""
+    # The scanned path reaches a shell in this fallback, so quote it: a
+    # directory or file name may carry shell metacharacters such as "#".
     cmd = (
-        f"find {path} -maxdepth {max_depth} -type f {size_filter} "
+        f"find {shlex.quote(path)} -maxdepth {max_depth} -type f {size_filter} "
         f"\\( {ext_predicates} \\) 2>/dev/null"
     )
 
