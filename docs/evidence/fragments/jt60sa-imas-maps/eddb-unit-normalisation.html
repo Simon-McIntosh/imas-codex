@@ -1,8 +1,10 @@
-<!-- EDDB unit-spelling normalisation: the alias file repaired so no definition reuses a name
-     or symbol pint already owns, and a base-vs-head regression guard over every DD unit string.
-     Read-only census over JT-60SA FacilitySignal.unit (bounded by facility_id) plus a fresh-process
-     registry probe. No graph write. Scripts and raw output:
-     ~/.config/reckon/crew/runs/r-20261007T061546254649-eddb-unit-normalisation/{census_units.py,census.json,units_diff.txt,units_base.tsv,units_head.tsv} -->
+<!-- EDDB unit-spelling normalisation: the alias file repaired so a definition never
+     reuses a name pint already owns and no unit symbol contains a caret. The glued
+     spellings (m2, m3, Pam3) are defined as units without a symbol, so the formatter's
+     output always re-parses to the unit the source wrote. Read-only census over
+     JT-60SA FacilitySignal.unit (bounded by facility_id), grouped by pint unit, plus a
+     fresh-process probe. No graph write. Scripts and raw output:
+     ~/.config/reckon/crew/runs/r-20261007T061546254649-eddb-unit-normalisation/{census_units.py,census.json,guard_units.py,compare_units.py,units_base.tsv,units_head.tsv,units_diff.txt} -->
 <section id="eddb-unit-normalisation" data-reckon="evidence">
   <h2 id="eddb-unit-normalisation-heading">EDDB unit spellings — parsing the catalogue's free text</h2>
 
@@ -10,45 +12,122 @@
     The EDDB catalogue writes units as human text: letter case varies
     (<code>KA</code>, <code>Mpa</code>, <code>DegC</code>), digit exponents are
     glued to the symbol (<code>m2</code>, <code>m3</code>), and products are glued
-    (<code>Pam3</code>). The alias file resolves these without claiming a name pint
-    already owns; a case variant instead uses <code>@alias</code>, which keeps the
-    original offset unit, so <code>20 degC</code>, <code>20 DegC</code> and
-    <code>20 oC</code> each convert to 293.15 K. A glued form is a new unit
-    carrying the canonical symbol, so a spelling and its native form collapse to
-    one string. A bare <code>n</code> is
-    <em>not</em> defined: it shadows the nano prefix's parse space and breaks
-    <code>count</code> itself, so the neutron-yield spellings stay unresolved with
-    a reason.
+    (<code>Pam3</code>). The alias file parses these without claiming a name pint
+    already owns; a case variant and a glued form are both defined through
+    <code>@alias</code>, so <code>20 degC</code>, <code>20 DegC</code> and
+    <code>20 oC</code> each convert to 293.15 K.
+  </p>
+
+  <p id="eddb-unit-normalisation-roundtrip">
+    Each glued spelling is a unit in its own right, defined without a symbol.
+    A symbol containing <code>^</code> is not usable: pint reads <code>^</code>
+    as the right-associative <code>**</code>, so a negative
+    power of such a unit formats as <code>m^2^-1</code>, which re-parses as
+    m<sup>2<sup>-1</sup></sup> = m<sup>0.5</sup> rather than m<sup>-2</sup>. The
+    invariant the definitions hold to is the round trip:
+    <code>normalize_unit_symbol</code> output, parsed again, must be the same
+    unit as its input — equal dimensionality and a conversion factor of exactly
+    1, the comparison <code>analyze_units</code> and the DD build already make.
+    Because equivalence, not the string, is what matters, spellings that denote
+    one unit are grouped below under that unit regardless of how they are
+    written. A bare <code>n</code> is <em>not</em> defined: it shadows the nano
+    prefix's parse space and breaks <code>count</code> itself, so the neutron
+    yield spellings stay unresolved with a reason.
   </p>
 
   <table id="eddb-unit-normalisation-census-table">
-    <caption>JT-60SA EDDB unit strings after the change: 76 distinct strings over 6298 signals — 64 normalised, 12 unresolved with count and reason</caption>
+    <caption>6298 JT-60SA signals carry 76 distinct unit
+    strings, which denote 50 distinct pint units (3954
+    signals). Equivalent spellings are grouped under one unit.</caption>
     <thead>
-      <tr><th>Unit string</th><th>Signals</th><th>Status</th><th>Canonical / reason</th></tr>
+      <tr><th>pint unit</th><th>spellings</th><th>signals</th></tr>
     </thead>
     <tbody>
-      <tr id="eddb-unit-normalisation-row-pam3"><td><code>Pam3/sec</code></td><td>10</td><td>normalised</td><td><code>m^3.Pa.s^-1</code></td></tr>
-      <tr id="eddb-unit-normalisation-row-kiloampere"><td><code>KA</code></td><td>68</td><td>normalised</td><td><code>kA</code></td></tr>
-      <tr id="eddb-unit-normalisation-row-mpa"><td><code>Mpa</code></td><td>2</td><td>normalised</td><td><code>MPa</code></td></tr>
-      <tr id="eddb-unit-normalisation-row-m3"><td><code>m3</code></td><td>4</td><td>normalised</td><td><code>m^3</code></td></tr>
-      <tr id="eddb-unit-normalisation-row-microstrain"><td><code>uST</code></td><td>480</td><td>normalised</td><td><code>uST</code> (1e-6, dimensionless)</td></tr>
-      <tr id="eddb-unit-normalisation-row-neutron-day"><td><code>n/day</code></td><td>371</td><td>unresolved</td><td><code>n</code> cannot be named without colliding with the nano prefix</td></tr>
-      <tr id="eddb-unit-normalisation-row-mpag"><td><code>MPaG</code></td><td>187</td><td>unresolved</td><td>gauge pressure, not an absolute pressure</td></tr>
-      <tr id="eddb-unit-normalisation-row-unit"><td><code>Unit</code></td><td>32</td><td>unresolved</td><td>a count of devices, not a physical unit</td></tr>
-      <tr id="eddb-unit-normalisation-row-phsrsm2"><td><code>ph/srsm2</code></td><td>20</td><td>unresolved</td><td>no pint-expressible unit</td></tr>
-      <tr id="eddb-unit-normalisation-row-m2-gap"><td><code>m-2</code> / <code>m-3</code></td><td>3 / 3</td><td>unresolved</td><td>hyphenated exponent is not a valid pint unit name</td></tr>
+      <tr id="eddb-unit-normalisation-unit-k"><td><code>K</code></td><td><code>K</code></td><td>500</td></tr>
+      <tr id="eddb-unit-normalisation-unit-ust"><td><code>uST</code></td><td><code>uST</code>, <code>ppm</code></td><td>482</td></tr>
+      <tr id="eddb-unit-normalisation-unit-a"><td><code>A</code></td><td><code>A</code>, <code>V.S</code></td><td>426</td></tr>
+      <tr id="eddb-unit-normalisation-unit-v"><td><code>V</code></td><td><code>V</code></td><td>293</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m"><td><code>m</code></td><td><code>m</code></td><td>204</td></tr>
+      <tr id="eddb-unit-normalisation-unit-mm"><td><code>mm</code></td><td><code>mm</code></td><td>187</td></tr>
+      <tr id="eddb-unit-normalisation-unit-unit"><td><code>%</code></td><td><code>%</code></td><td>181</td></tr>
+      <tr id="eddb-unit-normalisation-unit-ka"><td><code>kA</code></td><td><code>kA</code>, <code>KA</code></td><td>229</td></tr>
+      <tr id="eddb-unit-normalisation-unit-degc"><td><code>degC</code></td><td><code>degreeC</code>, <code>DegC</code>, <code>oC</code></td><td>257</td></tr>
+      <tr id="eddb-unit-normalisation-unit-kv"><td><code>kV</code></td><td><code>kV</code>, <code>KV</code></td><td>199</td></tr>
+      <tr id="eddb-unit-normalisation-unit-g-s-1"><td><code>g.s^-1</code></td><td><code>g/s</code></td><td>114</td></tr>
+      <tr id="eddb-unit-normalisation-unit-wb"><td><code>Wb</code></td><td><code>Wb</code></td><td>92</td></tr>
+      <tr id="eddb-unit-normalisation-unit-t"><td><code>T</code></td><td><code>T</code></td><td>79</td></tr>
+      <tr id="eddb-unit-normalisation-unit-ms"><td><code>ms</code></td><td><code>ms</code>, <code>msec</code></td><td>86</td></tr>
+      <tr id="eddb-unit-normalisation-unit-deg"><td><code>deg</code></td><td><code>DEG</code>, <code>degree</code></td><td>90</td></tr>
+      <tr id="eddb-unit-normalisation-unit-pa"><td><code>Pa</code></td><td><code>Pa</code></td><td>56</td></tr>
+      <tr id="eddb-unit-normalisation-unit-mw"><td><code>MW</code></td><td><code>MW</code></td><td>50</td></tr>
+      <tr id="eddb-unit-normalisation-unit-au"><td><code>au</code></td><td><code>au</code></td><td>49</td></tr>
+      <tr id="eddb-unit-normalisation-unit-c-deg"><td><code>C.deg</code></td><td><code>deg. C</code></td><td>44</td></tr>
+      <tr id="eddb-unit-normalisation-unit-kpa"><td><code>kPa</code></td><td><code>kPa</code></td><td>39</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m3-pa-s-1"><td><code>m3.Pa.s^-1</code></td><td><code>Pa*m3/s</code>, <code>Pam3/s</code>, <code>Pam3/sec</code>, <code>W</code></td><td>59</td></tr>
+      <tr id="eddb-unit-normalisation-unit-cps"><td><code>cps</code></td><td><code>cps</code>, <code>Hz</code></td><td>40</td></tr>
+      <tr id="eddb-unit-normalisation-unit-a-v-1"><td><code>A.V^-1</code></td><td><code>A/V</code></td><td>18</td></tr>
+      <tr id="eddb-unit-normalisation-unit-t-s-1"><td><code>T.s^-1</code></td><td><code>T/s</code></td><td>17</td></tr>
+      <tr id="eddb-unit-normalisation-unit-count"><td><code>count</code></td><td><code>count</code>, <code>-</code></td><td>23</td></tr>
+      <tr id="eddb-unit-normalisation-unit-ohm"><td><code>ohm</code></td><td><code>Ohm</code>, <code>ohm</code></td><td>18</td></tr>
+      <tr id="eddb-unit-normalisation-unit-ghz"><td><code>GHz</code></td><td><code>GHz</code></td><td>11</td></tr>
+      <tr id="eddb-unit-normalisation-unit-ev"><td><code>eV</code></td><td><code>eV</code></td><td>10</td></tr>
+      <tr id="eddb-unit-normalisation-unit-d"><td><code>d</code></td><td><code>day</code></td><td>9</td></tr>
+      <tr id="eddb-unit-normalisation-unit-h"><td><code>h</code></td><td><code>hour</code></td><td>9</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m3-s-1"><td><code>m3.s^-1</code></td><td><code>m3/s</code></td><td>9</td></tr>
+      <tr id="eddb-unit-normalisation-unit-min"><td><code>min</code></td><td><code>minute</code></td><td>9</td></tr>
+      <tr id="eddb-unit-normalisation-unit-month"><td><code>month</code></td><td><code>month</code></td><td>9</td></tr>
+      <tr id="eddb-unit-normalisation-unit-s"><td><code>s</code></td><td><code>sec</code></td><td>9</td></tr>
+      <tr id="eddb-unit-normalisation-unit-a"><td><code>a</code></td><td><code>year</code></td><td>9</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m3-1"><td><code>m3^-1</code></td><td><code>1/m3</code></td><td>5</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m2-1"><td><code>m2^-1</code></td><td><code>1/m2</code></td><td>4</td></tr>
+      <tr id="eddb-unit-normalisation-unit-mj"><td><code>MJ</code></td><td><code>MJ</code></td><td>4</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m3"><td><code>m3</code></td><td><code>m3</code></td><td>4</td></tr>
+      <tr id="eddb-unit-normalisation-unit-j"><td><code>J</code></td><td><code>J</code></td><td>3</td></tr>
+      <tr id="eddb-unit-normalisation-unit-pa-m-1"><td><code>Pa.m^-1</code></td><td><code>Pa/m</code></td><td>3</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m-s-1"><td><code>m.s^-1</code></td><td><code>m/s</code></td><td>3</td></tr>
+      <tr id="eddb-unit-normalisation-unit-kev"><td><code>keV</code></td><td><code>KeV</code></td><td>2</td></tr>
+      <tr id="eddb-unit-normalisation-unit-mpa"><td><code>MPa</code></td><td><code>Mpa</code></td><td>2</td></tr>
+      <tr id="eddb-unit-normalisation-unit-ev-m-1"><td><code>eV.m^-1</code></td><td><code>eV/m</code></td><td>2</td></tr>
+      <tr id="eddb-unit-normalisation-unit-m2"><td><code>m2</code></td><td><code>m2</code></td><td>2</td></tr>
+      <tr id="eddb-unit-normalisation-unit-kev-m-1"><td><code>keV.m^-1</code></td><td><code>KeV/m</code></td><td>1</td></tr>
+      <tr id="eddb-unit-normalisation-unit-t-m"><td><code>T.m</code></td><td><code>T.m</code></td><td>1</td></tr>
+      <tr id="eddb-unit-normalisation-unit-t-m2-1"><td><code>T.m2^-1</code></td><td><code>T/m2</code></td><td>1</td></tr>
+      <tr id="eddb-unit-normalisation-unit-cm-s-1"><td><code>cm.s^-1</code></td><td><code>cm/s</code></td><td>1</td></tr>
+    </tbody>
+  </table>
+
+  <table id="eddb-unit-normalisation-unresolved-table">
+    <caption>12 unit strings over 2344 signals stay
+    unresolved, each with the reason it cannot be a unit.</caption>
+    <thead>
+      <tr><th>unit string</th><th>signals</th><th>reason</th></tr>
+    </thead>
+    <tbody>
+      <tr id="eddb-unit-normalisation-unresolved-unit"><td>(empty)</td><td>1710</td><td>empty unit string</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-n-day"><td><code>n/day</code></td><td>371</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-mpag"><td><code>MPaG</code></td><td>187</td><td>gauge pressure, not an absolute pressure</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-unit"><td><code>Unit</code></td><td>32</td><td>a count of devices, not a physical unit</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-ph-srsm2"><td><code>ph/srsm2</code></td><td>20</td><td>unrecognised composite; no pint-expressible unit</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-n-shot"><td><code>n/shot</code></td><td>8</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-n-s"><td><code>n/s</code></td><td>7</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-m-2"><td><code>m-2</code></td><td>3</td><td>hyphenated exponent is not a valid pint unit name</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-m-3"><td><code>m-3</code></td><td>3</td><td>hyphenated exponent is not a valid pint unit name</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-n-3month"><td><code>n/3month</code></td><td>1</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-n-week"><td><code>n/week</code></td><td>1</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-n-year"><td><code>n/year</code></td><td>1</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
     </tbody>
   </table>
 
   <table id="eddb-unit-normalisation-regression-table">
-    <caption>Base revision vs head, normalising every distinct DD unit string (487 strings): 163 resolved at base and every one is unchanged at head; 18 strings changed, all from unresolved to a new resolution</caption>
+    <caption>Base revision vs head, normalising every distinct DD unit string (487 strings): 163 resolved
+    at base and every one still resolves to an equivalent unit; 18 strings newly resolve; none changes unit</caption>
     <thead>
       <tr><th>Outcome</th><th>Strings</th><th>Detail</th></tr>
     </thead>
     <tbody>
-      <tr id="eddb-unit-normalisation-reg-unchanged"><td>unchanged</td><td>469</td><td>includes all 163 that resolved at base — no pre-existing symbol changed</td></tr>
+      <tr id="eddb-unit-normalisation-reg-unchanged"><td>unchanged</td><td>163</td><td>every string resolved at base still resolves to an equivalent unit (compared with pint, not as strings)</td></tr>
       <tr id="eddb-unit-normalisation-reg-newly-resolved"><td>newly resolved</td><td>18</td><td><code>KA</code>, <code>KV</code>, <code>KeV</code>, <code>Mpa</code>, <code>DEG</code>, <code>DegC</code>, <code>oC</code>, <code>m2</code>, <code>m3</code>, <code>Pam3</code>, <code>uST</code> and composites built from them</td></tr>
-      <tr id="eddb-unit-normalisation-reg-regressed"><td>regressed</td><td>0</td><td>none</td></tr>
+      <tr id="eddb-unit-normalisation-reg-regressed"><td>changed unit</td><td>0</td><td>none</td></tr>
     </tbody>
   </table>
 </section>
