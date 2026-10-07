@@ -21,8 +21,8 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="71">
-<meta name="plan-modified" content="2026-10-07">
+<meta name="plan-version" content="72">
+<meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
@@ -311,6 +311,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261007T152544505853-jt60sa-candidate-run" data-who="reckon-build" data-when="2026-10-07T15:30:20.034Z">
     <div class="r-comment-body"><p>Stopped after about 150 of 2,249 JT-60SA sources were judged for USD 0.07 (about USD 0.0004 a source, 3.1 s a source), so that candidates do not run ahead of the reconstruction-database code re-judge; the run is idempotent and resumes after re-enrichment.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261007T2230-fleet-move-checkpoint" data-who="reckon-build" data-when="2026-10-07T22:30:00Z">
+    <div class="r-comment-body"><p>Checkpoint taken for the fleet move off 98dci4-clu-2018. No run of session mapping-20261006 is in flight, every node is promoted and merged, and main is pushed. §5 is held on gate g-jim-5. <code>jt60sa-discovery-completion</code> §35 (run r-20261007T162739703753-five-scope-rejudge) resumed at 22:12 UTC, with code expected to settle by about 23:45 UTC. Next step: when the JT-60SA session's "code settled" message arrives with checks (a)–(d), pass g-jim-5 and dispatch <code>jt60sa-reenrich-after-code</code> on the local lane. Then dispatch <code>jt60sa-candidate-run</code> (about USD 1). Spend so far is USD 0.81 of the USD 50 cap.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T154716614606-review-of-dd-path-search-rerank" data-who="reckon-build" data-when="2026-10-07T15:47:41Z">
     <div class="r-comment-body"><p>Stopped by the coordinator: it was reviewing dd-path-search-rerank at 743db9b52, whose measurement the resumed run is replacing with completed labels; a fresh review follows the new head.</p></div>
