@@ -1,0 +1,34 @@
+<h2 id="incremental-rejudge-summary">The ingested re-judge resets once and resumes</h2>
+
+<p id="incremental-rejudge-what-changed">The JT-60SA ingested re-judge restarted the whole set on every pass because
+<code>discover code --rejudge-ingested</code> ran the <code>ingested</code> reset over all
+ingested content-stage files on each invocation, and the re-judge worker's
+<code>attempted</code> guard broke only when a whole batch repeated — so a batch that mixed
+already-attempted files with fresh ones re-judged the attempted ones again and its count
+overstated the work (660–740 for 581 files over seven passes). The reset is now the
+explicit, once-per-request <code>--reset-to ingested</code> step, whose owner stays
+<code>reset_to_status</code>; a plain <code>--rejudge-ingested</code> invocation clears
+nothing and takes only the ingested content-stage files with no recorded answer, so a
+following pass resumes on the files a prior pass left unanswered. In the worker each
+claimed batch is filtered to the fresh files, so no file is judged twice in one pass and
+<code>rejudged</code> counts the distinct files judged. The claim's drain key is the facet
+confidence the reset clears, so the reset and the claim stay coupled.</p>
+
+<p id="incremental-rejudge-measure">Two passes over three ingested content-stage files
+with one decision failing on the first pass: the second pass judges only the failed file
+(<code>test_second_pass_judges_only_the_file_the_first_left_unanswered</code>). A batch
+that mixes an attempted file with a fresh one takes only the fresh file
+(<code>test_no_file_is_judged_twice_in_one_pass_and_count_matches</code>). The CLI tests
+assert a plain re-judge issues no reset call and that
+<code>--reset-to ingested --rejudge-ingested</code> reaches <code>reset_to_status</code>
+exactly once with the <code>ingested</code> spec.</p>
+
+<p id="incremental-rejudge-gate">Gate: <code>EXIT=0</code>, 68 passed over
+<code>test_code_ingested_rejudge.py</code>, <code>test_reset.py</code>,
+<code>test_code_relevance.py</code> and <code>test_code_ingest_settles.py</code>, run at
+<code>5eb1a5c01</code> on this allocation.</p>
+
+<p id="incremental-rejudge-negative-control">Negative control: the per-pass full reset is
+restored inside the re-judge worker and the two-pass test run against it exits non-zero
+(<code>EXIT=1</code>), the second pass re-judging all three files, which is precisely the
+first assertion that fails.</p>
