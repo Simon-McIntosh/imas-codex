@@ -1,0 +1,1594 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "289aff0821f6202a658d651b7dd2befe34312adb",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3553660,
+      "input_tokens_cumulative": 3553660,
+      "output_tokens": 17948,
+      "output_tokens_cumulative": 17948,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 112,
+    "files": 3,
+    "removed": 32
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 357
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 348,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 334,
+        "name": "_build_code_context_query",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 356
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "_get_scanner_type",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 427,
+        "name": "get_signal_scanner_type",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 433
+    },
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 869,
+        "name": "clear_facility_signals",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 888
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "query",
+        "path": "tests/standard_names/test_rename_cascade.py"
+      },
+      "run_function": {
+        "line": 1252,
+        "name": "fetch_epoch_context",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 1294
+    },
+    {
+      "existing_function": {
+        "line": 605,
+        "name": "test_static_signal_gets_all_version_check_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4823,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4869
+    },
+    {
+      "existing_function": {
+        "line": 651,
+        "name": "test_subtree_signal_gets_connection_tree_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4823,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4869
+    },
+    {
+      "existing_function": {
+        "line": 687,
+        "name": "test_tdi_function_gets_reference_shot_only",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4823,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4869
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "4d14e8b4ae80a50d3623db1582e93b10e5e499e6",
+    "f6c4c25ed1f3355db27e625ad048a5445c5766a9"
+  ],
+  "completed_at": "2026-10-07T12:40:01.814Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-07T12:32:15Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_member_identifier.py tests/discovery/test_signals_pipeline.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123205644425-member-identifier-varying-segments/gate_head.log"
+  },
+  "impl_move": {
+    "at_complete": 0.38028169014084506,
+    "at_dispatch": 0.38028169014084506,
+    "plan": "jt60sa-imas-maps",
+    "reason": "section 11 needs its regeneration node before it closes",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T13:17:06.107546+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-07T12:32:06Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 3,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 11,
+    "mean_context": 160000,
+    "observed_at": "2026-10-07T12:32:03Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 3,
+      "aggregate_tokens_per_second": 221.463,
+      "detail": "",
+      "mean_tokens_per_second": 92.276,
+      "observed_at": "2026-10-07T12:32:03Z",
+      "runs": 2.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-07T12:40:01.814Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123205644425-member-identifier-varying-segments/manifest.md",
+  "member": "disposable-r-20261007T123205644425-member-identifier-varying-segments",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_member_identifier.py::test_constant_first_run_dropped",
+      "tests/discovery/test_member_identifier.py::test_individualize_members_uses_varying_runs",
+      "tests/discovery/test_member_identifier.py::test_jt60sa_constant_shot_dropped"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_member_identifier.py::test_constant_first_run_dropped",
+      "tests/discovery/test_member_identifier.py::test_individualize_members_uses_varying_runs",
+      "tests/discovery/test_member_identifier.py::test_jt60sa_constant_shot_dropped"
+    ],
+    "declaration": "restore the positional extraction that takes the first N numeric runs of the accessor regardless of whether they vary; the JT-60SA case must then fail with 101173 in the identifier",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123205644425-member-identifier-varying-segments/negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123205644425-member-identifier-varying-segments/negative_control.log",
+    "test_paths": [
+      "tests/discovery/test_member_identifier.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "member-identifier-varying-segments",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 222,
+          "cached_input_tokens": 278772,
+          "input_tokens": 278996,
+          "output_tokens": 712,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 279708,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "tests/discovery/test_member_identifier.py pins three cases: JT-60SA accessors eddbreadTime('E101173', 'CryoCP', 'm1TAF81', t1, t2) through m1TAF86 give identifiers 81 to 86, two varying runs give 010/048, and a constant first run with a varying second run gives only the second; the negative control fails the JT-60SA case; tests/discovery/test_signals_pipeline.py and the new file pass",
+    "estimated_hours": null,
+    "goal": "Build each signal-source member identifier in imas_codex/discovery/signals/parallel.py only from the numeric accessor runs whose value differs across that source's members",
+    "id": "member-identifier-varying-segments",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-07T12:32:06Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 3,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 11,
+      "mean_context": 160000,
+      "observed_at": "2026-10-07T12:32:03Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 3,
+        "aggregate_tokens_per_second": 221.463,
+        "detail": "",
+        "mean_tokens_per_second": 92.276,
+        "observed_at": "2026-10-07T12:32:03Z",
+        "runs": 2.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T123205644425-member-identifier-varying-segments/manifest.md",
+    "negative_control": "restore the positional extraction that takes the first N numeric runs of the accessor regardless of whether they vary; the JT-60SA case must then fail with 101173 in the identifier",
+    "plan": "jt60sa-imas-maps",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§11",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/signals/parallel.py",
+      "tests/discovery/test_member_identifier.py",
+      "docs/evidence/fragments/jt60sa-imas-maps/member-identifier-varying-segments.html",
+      "docs/figures/jt60sa-imas-maps/member-identifier-varying-segments"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 956248.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "member-identifier-varying-segments",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-07T12:32:09.707635+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Lead directive this session: language and agent work stays on the local lane. A deterministic string-handling fix with exact cases named.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.505,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "jt60sa-imas-maps",
+  "plan_impl_at_dispatch": 0.38028169014084506,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f6c4c25ed1f3355db27e625ad048a5445c5766a9",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "289aff0821f6202a658d651b7dd2befe34312adb",
+    "reviewed_head_sha": "f6c4c25ed1f3355db27e625ad048a5445c5766a9",
+    "scores": {
+      "durability": 18,
+      "evidence": 16,
+      "fit": 20,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 113
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261007T123205644425-member-identifier-varying-segments",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§11",
+  "session": "mapping-20261006",
+  "session_harness": "claude",
+  "session_id": "b2efe566-d31d-4819-bc93-322603d36d38",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 4,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 3553660,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 458.354,
+    "generated_tokens": 17948,
+    "generation_seconds": 251.189,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 44.9,
+    "machine_seconds": 207.165,
+    "peak_input_tokens": 103436,
+    "tokens_per_second": 71.45,
+    "wall_tokens_per_second": 39.16
+  },
+  "time_budget": "45m",
+  "tool_steps": 44.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 466,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-07T12:40:05Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-07T12:32:19Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261007T123205644425-member-identifier-varying-segments",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2920,
+    "worker_pid": 2241458
+  },
+  "worker_seconds": 447,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
