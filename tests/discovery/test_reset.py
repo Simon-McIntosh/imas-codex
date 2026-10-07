@@ -56,6 +56,7 @@ class TestResetSpec:
 
     def test_get_valid_targets_code(self, reset_mod):
         assert reset_mod.get_valid_targets("code") == [
+            "content",
             "discovered",
             "scored",
             "triaged",
