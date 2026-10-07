@@ -297,13 +297,13 @@ _STORED_SCOPE_FIELDS = {
 def _stored_composites(rows: list[dict[str, Any]]):
     for row in rows:
         nouls = {
-            question: float(row[field] or 0.0)
+            question: float(row.get(field) or 0.0)
             for question, field in _STORED_SCOPE_FIELDS.items()
         }
         yield (
             row["id"],
             row.get("stage"),
-            float(row["stored"] or 0.0),
+            float(row.get("stored") or 0.0),
             round(scope_relevance(nouls), 4),
         )
 
