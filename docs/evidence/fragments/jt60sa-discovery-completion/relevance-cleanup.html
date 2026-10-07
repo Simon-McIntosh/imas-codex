@@ -68,11 +68,13 @@
     One registry, <code>CODE_RELEVANCE_FIELDS</code> in
     <code>imas_codex/discovery/base/reset.py</code>, holds the relevance fields
     a <code>CodeFile</code> carries; the code scorer reads it as
-    <code>RELEVANCE_FIELDS</code> and the <code>discovered</code> reset clears
-    it, so the fields the decision arms write and the fields a reset clears
-    cannot drift. It lives in <code>reset.py</code> because that module is
-    imported before the code package and importing the code package from it
-    would close an import cycle.
+    <code>RELEVANCE_FIELDS</code>, resolves each decision question's field
+    through it, and the <code>discovered</code> reset clears it, so the fields
+    the decision arms write and the fields a reset clears cannot drift. A field
+    the registry does not carry fails at import rather than storing a stale
+    name. It lives in <code>reset.py</code> because that module is imported
+    before the code package and importing the code package from it would close
+    an import cycle.
   </p>
 
   <p id="relevance-cleanup-explain">
