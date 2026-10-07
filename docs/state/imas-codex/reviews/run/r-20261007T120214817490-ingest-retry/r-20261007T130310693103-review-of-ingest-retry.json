@@ -1,0 +1,112 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest supplied no baseline_suite/after_suite arms (both null), so no base/head pair was supplied, so the added-failure count is derived from the reviewed run's own gate logs: the baseline arm is before2.log (its failed list holds 29 ids) and the after arm is after_run3.log (no failed id). No id present at the after arm is absent at the baseline arm, so added_failure_ids is empty and added_failure_count is 0. The node changed no source or test path (diff is one evidence fragment), so no test failure can be introduced by it; the four-file scored->skipped delta between the arms is not a failure (those files moved to the terminal skipped state the \u00a731 target wants).",
+  "after_suite": {
+    "added_failure_count": 0,
+    "command": "census read of JT-60SA CodeFile statuses recorded as after_run3.log (the reviewed node's gate is the scoped discover command, not a pytest suite; the reviewed manifest declares after_suite null)",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "failure_ids_note": "the last baseline id is 'jt-60sa:/analysis/src/topics_release/topics/topics/eqmain/jt60sa.f' (transcribed above); after_run3.log carries no failed list, so no added failure exists.",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T120214817490-ingest-retry/after_run3.log",
+    "revision": "fd2ef4baa3be271a04f6d16f5261d459aab4bc82"
+  },
+  "baseline_suite": {
+    "command": "census read of JT-60SA CodeFile statuses recorded as before2.log (the reviewed node's gate is the scoped discover command, not a pytest suite; the reviewed manifest declares baseline_suite null)",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 29,
+    "failure_ids": [
+      "jt-60sa:/analysis/src/easy-v5.01/kei/slc1.f",
+      "jt-60sa:/analysis/src/easy-v5.01/test/esyexp.f",
+      "jt-60sa:/analysis/src/edas2/v2.1.14/edas_share/edas_plugins/jt60sa/edas_device_function_jt60sa.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqread_main.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/fledd.pac.20160412/eqdb_io.f",
+      "jt-60sa:/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/selene/eqlin.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_main/eslice_main_workspace.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_mapping/eslice_slicetool_trn.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_plugins/jt60u/esurf_view_diagnostics_device_setting_area_jt60u.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/edas_data/Jt60u_device/OuterVessel.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/edas_data/Jt60u_device/Pin.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/edas_data/Jt60u_device/Thomson_1.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/eqdbms_fm2/fmfile_get2.c",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/selene/eqlin.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/eqread_pac_org_20170621/eqread/eqreaf.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/db/FleddTool.py",
+      "jt-60sa:/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/default/Eqdb.py",
+      "jt-60sa:/analysis/src/topics_release/topics/tool/adam2imas/a2i_mod.f",
+      "jt-60sa:/analysis/src/topics_release/topics/tool/adam2imas/a2iinp.f",
+      "jt-60sa:/analysis/src/topics_release/topics/tool/adam2imas/set_local.f90",
+      "jt-60sa:/analysis/src/topics_release/topics/tool/imas/imas_eq_mod.f90",
+      "jt-60sa:/analysis/src/topics_release/topics/tool/imas/imas_out_ml.f90",
+      "jt-60sa:/analysis/src/topics_release/topics/tool/imas/imas_out_wl.f90",
+      "jt-60sa:/analysis/src/topics_release/topics/topics/adamdt/mdbget.f",
+      "jt-60sa:/analysis/src/topics_release/topics/topics/adamdt/mdbini.f",
+      "jt-60sa:/analysis/src/topics_release/topics/topics/adamdt/setvtcx.f",
+      "jt-60sa:/analysis/src/topics_release/topics/topics/eqmain/eqedg_2d.f",
+      "jt-60sa:/analysis/src/topics_release/topics/topics/eqmain/eqindct.f",
+      "jt-60sa:/analysis/src/topics_release/topics/topics/eqmain/jt60sa.f"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T120214817490-ingest-retry/before2.log",
+    "revision": "b8f3c9980078fb4cfa87c8f9967b6698ab645c21"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T13:10:42.218Z",
+  "dispatched_at": "2026-10-07T13:03:20Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T120214817490-ingest-retry/after_run3.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on (record completeness): the fragment's before table (before2.log: skipped 1906, scored 721, ingested 552, failed 29) and after_run3.log (skipped 1910, scored 717, ingested 581, no failed) differ by four scored->skipped transitions that neither the fragment prose nor the run's logs name. The only settle line in the run directory is run2_unscoped.log:34 'Settled 2 admitted files as skipped (exceeds max_line_count)', logged at 14:19 before the before table was read at 12:51Z, so it accounts for two files already inside the before count, not the four. run3_reset_ingest.log carries no 'Settled' line. The \u00a731 targets are unaffected (failed 0, unclaimable 0 either way), but the record does not reconcile its own two arms."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T120214817490-ingest-retry/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's tests field records the gate as 'uv run --no-sync imas-codex discover code jt-60sa --reset-to scored --time 8 <29x --path-prefix> -> exit 0', carrying an unsubstituted '<29x --path-prefix>' placeholder. The literal command is recoverable from reset_args2.txt (29 --path-prefix arguments) and run3_reset_ingest.log, so the result stands, but the manifest field is not a run executable as recorded."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "not applicable \u2014 the node changes no source, so there is no call site to trace; the code it exercised (imas_codex/ingestion/pipeline.py ingest_files, imas_codex/discovery/code/workers.py batch handler) is unchanged by this node.",
+    "diff": "read the three commits in order: d69933653 adds the before table and the scoped reset result; 60b77f7f5 completes the before/after tables and records the defect the first pass exposed; fd2ef4baa records the resumed pass clearing the 29 and the negative control. Each touches only the fragment.",
+    "done_when": "Both \u00a731 operational targets are met on the arms the node itself recorded. The reset was exact ('Reset 29 CodeFile nodes to scored', matched 29). The ingest logged the fixed already-ingested path (three batches, 29 files, all 'All files already ingested') and '0 scanned, 0 scored, 29 code ingested', cost $0.00, 479.7s. The negative control I re-derived from the arms holds: 0 of the 20 sampled ingested files changed ingested_at or chunk count between before2.log and after_run3.log, with the sample returning rows as the positive control. The code-side done-when items (the three tests and the plain-create negative control) belong to the ingest-settles and already-ingested-outcome nodes, not this one.",
+    "goal": "\u00a731's operational half asks that after the run no JT-60SA CodeFile sits at failed for a CodeExample collision and no content-stage file sits at scored with composite >= 0.5 and unclaimable. Reproduced from the node's own arms: before2.log status_counts {skipped:1906, scored:721, ingested:552, failed:29}, unclaimable_scored = the two eslice files (0.80 and 0.75); after_run3.log status_counts {skipped:1910, scored:717, ingested:581} with no failed key and unclaimable_scored []. reset29_status.log: requested 29, matched 29, every row status ingested, error null, examples 1, chunks >= 1. Residual: four files move scored->skipped across the two arms with no account in the fragment or the run log.",
+    "manifest": "read; status complete; commits d69933653, 60b77f7f5, fd2ef4baa; changed_paths matches the diff. baseline_suite and after_suite are null (the node declares no pytest arms, consistent with an operational node whose gate is the discover command and the census read); the gate is recorded in tests (discover code jt-60sa --reset-to scored ...) and in the census arms on disk. Defect: the tests field contains an unsubstituted '<29x --path-prefix>' placeholder, so the recorded command is not literal.",
+    "write_paths": "git diff b8f3c9980..fd2ef4baa touches exactly docs/evidence/fragments/jt60sa-discovery-completion/ingest-retry.html (1 file, 120 insertions). No plan edit, no source or test change, no graph write beyond the status reset the done-when required."
+  },
+  "justifications": {
+    "durability": "the deliverable is a committed evidence fragment on the node's branch (three commits: d69933653, 60b77f7f5, fd2ef4baa), with the raw census and run logs retained on disk under the run directory, and the underlying product defect is fixed and merged on main (a3d3a88c0). Weaknesses: fd2ef4baa is not yet an ancestor of main (orchestrator merge is outstanding, as the manifest states), and the fragment's own two tables disagree by four files with no explanation, so a later reader cannot fully reconcile the census from the record alone.",
+    "evidence": "strong and independently reproduced. The node's own gate logs (before.log, after_run1.log, after_run2.log, before2.log, after_run3.log) are full JSON arms; run3_reset_ingest.log carries 'Reset 29 CodeFile nodes to scored', the three batch lines 'Skipping 10/10/9 already-ingested files', and '0 scanned, 0 scored, 29 code ingested / Cost: $0.00 / 479.7s'; reset29_status.log lists all 29 paths at ingested. I re-derived the node's negative control from the raw arms: the 20-file ingested_sample is identical before and after, 0 changed ingested_at or chunk count, and the point query returns rows so the zero is a real absence. Weaknesses: (a) between before2.log and after_run3.log skipped rises 1906->1910 and scored falls 721->717 (four scored->skipped the record does not mention; the only 'Settled ... as skipped' line in the whole run dir is run2_unscoped.log's 2 files, logged before the before table was taken); (b) the reviewed manifest's tests field carries an unsubstituted '<29x --path-prefix>' placeholder; (c) the fragment cites composites 0.80/0.75 where the plan \u00a731 body says 0.81/0.72 \u2014 the live arm agrees with the fragment (0.80/0.75), so the plan text is the stale side, not the node.",
+    "fit": "no source symbols or filenames are introduced; the one artifact is an evidence fragment under the plan's own fragments directory, where a '\u00a731 targets' reference is the document's legitimate subject rather than a label. The prose names the mechanism (ingest_files returning before attaching stats['outcomes']; the batch handler reading a missing outcome as a failure) rather than a ticket.",
+    "goal_fidelity": "the node's half of \u00a731 is the operational run: reset the 29 JT-60SA failed files to scored, ingest once, and leave 'no JT-60SA CodeFile at failed for a CodeExample collision, and no content-stage file at scored with a composite >= 0.5 that is not claimable'. Both targets are met in the run's own census arms: before2.log (status_counts failed=29, unclaimable_scored=2) to after_run3.log (failed absent, unclaimable_scored=[]; skipped=1910, scored=717, ingested=581). reset29_status.log shows the scoped reset matched exactly 29 and every one reads status ingested, error null, with >=1 chunk. The 29 files' 29 examples / 133 chunks are the pre-existing collision nodes carried over (the before table already counts them), so the run re-labels rather than re-creates, which is what the fixed already-ingested path is meant to do. Residual: the census moves four files scored->skipped between the before and after tables with no line in the record or its logs naming them.",
+    "reuse": "the run reuses the existing scoped reset owner and the existing fixed ingest path \u2014 'Skipping 10/10/9 already-ingested files' is the already-ingested branch recording an outcome \u2014 and the node added no second pipeline, no new command and no new code; the evidence fragment reuses the established census/run-log evidence shape.",
+    "scope_discipline": "git diff b8f3c9980..fd2ef4baa touches exactly one path, docs/evidence/fragments/jt60sa-discovery-completion/ingest-retry.html (120 insertions), inside the node's declared write paths; no source, test, plan, sprint or graph state is edited. The reviewed worktree is clean at fd2ef4baa and the operational run wrote only graph status, which the done-when asked for."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a731's operational half \u2014 no JT-60SA CodeFile at failed for a CodeExample collision, no content-stage file at scored with composite >= 0.5 unclaimable \u2014 is met on the node's own arms: before2.log {skipped:1906, scored:721, ingested:552, failed:29}, unclaimable 2; after_run3.log {skipped:1910, scored:717, ingested:581}, no failed, unclaimable []. reset29_status.log: matched 29, all ingested, chunks >= 1. Residual: four scored->skipped transitions unexplained.\nVERDICT done_when: both operational targets met; reset exact ('Reset 29 CodeFile nodes to scored'), ingest logged 'Skipping 10/10/9 already-ingested files' and '0 scanned, 0 scored, 29 code ingested' ($0.00, 479.7s); negative control re-derived: 0 of 20 sampled ingested files changed ingested_at/chunks, sample returns rows.\nVERDICT write_paths: diff b8f3c9980..fd2ef4baa is exactly docs/evidence/fragments/jt60sa-discovery-completion/ingest-retry.html (120 insertions); no source, test or plan change.\nVERDICT manifest: read; status complete; commits d69933653, 60b77f7f5, fd2ef4baa; changed_paths matches; baseline_suite/after_suite null (no pytest arms); tests field carries an unsubstituted '<29x --path-prefix>' placeholder.\nVERDICT diff: three commits add the before table + reset result, complete the before/after census, and record the resumed pass; each touches only the fragment.\nCALL_SITES: not applicable (no source change).\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: both \u00a731 operational targets measured met; residual is a four-file scored->skipped delta the record does not name.\nSCORE evidence: 15\nJUSTIFICATION evidence: full JSON census arms, run log and reset listing reproduced; 20-file negative control re-derived and holds; but the two arms disagree by four files with no account, and the manifest tests field is not a literal command.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: diff is exactly the one declared evidence path; clean worktree; no plan/sprint/graph mutation beyond the required status reset.\nSCORE durability: 17\nJUSTIFICATION durability: committed fragment plus retained raw logs on disk and the underlying fix merged on main (a3d3a88c0); head not yet merged to main, as stated; the census is not fully reconcilable from the record alone.\nSCORE fit: 19\nJUSTIFICATION fit: no new symbols or filenames; plan reference is the fragment's legitimate subject; prose names the mechanism.\nSCORE reuse: 19\nJUSTIFICATION reuse: reuses the scoped reset and the fixed already-ingested ingest path; adds no pipeline, command or code.\nFINDING after_run3.log:1 follow-on (record completeness): four scored->skipped transitions between before2.log and after_run3.log are named by neither the fragment nor the logs; the only settle line (2 files) is in run2_unscoped.log before the before table was read.\nFINDING manifest.md:1 follow-on: the tests field records the gate with an unsubstituted '<29x --path-prefix>' placeholder.",
+  "review_run_id": "r-20261007T130310693103-review-of-ingest-retry",
+  "reviewed_base": "b8f3c9980078fb4cfa87c8f9967b6698ab645c21",
+  "reviewed_base_sha": "b8f3c9980078fb4cfa87c8f9967b6698ab645c21",
+  "reviewed_commit": "fd2ef4baa3be271a04f6d16f5261d459aab4bc82",
+  "reviewed_head_sha": "fd2ef4baa3be271a04f6d16f5261d459aab4bc82",
+  "reviewed_run_id": "r-20261007T120214817490-ingest-retry",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T13:30:00+00:00",
+  "total": 108
+}
