@@ -175,9 +175,14 @@ def build_triage_state(
     return state
 
 
-def triage_relevance(answers: dict[str, Any]) -> float:
+def scope_relevance(nouls: dict[str, float]) -> float:
     """A file's relevance: the largest of the four scope nouls."""
-    return max(float(answers[name]["noul"]) for name in SCOPE_NOULS)
+    return max(float(nouls[name]) for name in SCOPE_NOULS)
+
+
+def triage_relevance(answers: dict[str, Any]) -> float:
+    """A file's relevance from one decision's answers."""
+    return scope_relevance({name: float(answers[name]["noul"]) for name in SCOPE_NOULS})
 
 
 @lru_cache(maxsize=1)
@@ -278,6 +283,77 @@ def _relevance_set_clause(*, include_content: bool = False) -> str:
                 f",\n                    sf.{field}_confidence = item.{field}_confidence"
             )
     return clause
+
+
+# stored CodeFile field -> the scope question it carries the noul for
+_STORED_SCOPE_FIELDS = {
+    "loads_diagnostic_data": "relevance_loads",
+    "processes_diagnostic_signals": "relevance_processes",
+    "describes_machine_or_diagnostics": "relevance_describes",
+    "maps_to_imas": "relevance_imas",
+}
+
+
+def _stored_composites(rows: list[dict[str, Any]]):
+    for row in rows:
+        nouls = {
+            question: float(row[field] or 0.0)
+            for question, field in _STORED_SCOPE_FIELDS.items()
+        }
+        yield (
+            row["id"],
+            row.get("stage"),
+            float(row["stored"] or 0.0),
+            round(scope_relevance(nouls), 4),
+        )
+
+
+def recompute_stored_composites() -> dict[str, int]:
+    """Rewrite ``score_composite`` on every staged CodeFile from its nouls.
+
+    Both arms write ``score_composite`` as the largest of the four scope nouls,
+    so a staged file whose stored composite is not that maximum disagrees with
+    the rule ``_relevance_item`` applies.  This walks every CodeFile carrying a
+    ``relevance_stage`` — both the ``name`` and ``content`` arms — and rewrites
+    the field with the value ``scope_relevance`` produces, reporting how many
+    rows disagreed before the write and how many still do after it.
+    """
+    fields = ", ".join(f"cf.{field}" for field in _STORED_SCOPE_FIELDS.values())
+    select = f"""
+        MATCH (cf:CodeFile)
+        WHERE cf.relevance_stage IS NOT NULL
+        RETURN cf.id AS id, cf.relevance_stage AS stage,
+               cf.score_composite AS stored, {fields}
+    """
+    with GraphClient() as gc:
+        before = list(_stored_composites(gc.query(select)))
+        updates = [
+            {"id": file_id, "composite": composite}
+            for file_id, _stage, _stored, composite in before
+        ]
+        if updates:
+            gc.query(
+                """
+                UNWIND $updates AS u
+                MATCH (cf:CodeFile {id: u.id})
+                SET cf.score_composite = u.composite
+                """,
+                updates=updates,
+            )
+        after = list(_stored_composites(gc.query(select)))
+
+    def _differ(rows) -> int:
+        return sum(
+            1 for _id, _s, stored, composite in rows if abs(stored - composite) > 1e-9
+        )
+
+    return {
+        "total": len(before),
+        "differed_before": _differ(before),
+        "differed_after": _differ(after),
+        "content": sum(1 for _id, stage, _s, _c in before if stage == "content"),
+        "name": sum(1 for _id, stage, _s, _c in before if stage == "name"),
+    }
 
 
 # ---------------------------------------------------------------------------
