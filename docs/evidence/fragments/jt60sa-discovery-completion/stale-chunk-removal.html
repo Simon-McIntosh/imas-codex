@@ -1,0 +1,55 @@
+<section>
+  <h2 id="stale-chunk-removal">Chunks of files no longer ingested are removed</h2>
+  <p id="stale-chunk-removal-result">
+    The node set is every <code>CodeFile</code> whose status is not
+    <code>ingested</code> that carries chunks through the traversal
+    <code>CodeFile &lt;-FROM_FILE- CodeExample -HAS_CHUNK-&gt; CodeChunk</code>,
+    minus any file holding a live ingest claim. The claim timeout is the shared
+    <code>DEFAULT_CLAIM_TIMEOUT_SECONDS</code> (300 s) from
+    <code>imas_codex/discovery/base/claims.py</code>, so a file whose
+    <code>claimed_at</code> is within the last 300 s is excluded — no file was
+    excluded at run time (zero live claims). Deletion renders the reset targets'
+    own cascade, <code>_CODE_CHUNK_CASCADE</code> from
+    <code>imas_codex/discovery/base/reset.py</code>, over the planned node set;
+    the traversal is not spelled anew. The ids to delete were written to
+    <code>to_delete.json</code> before any deletion, and a later code change may
+    retire the inline copy in <code>clear_facility_code</code> but that is not
+    this node's work.
+  </p>
+  <table id="stale-chunk-removal-counts">
+    <caption>Stale nodes per facility, measured before and after</caption>
+    <thead>
+      <tr><th>facility</th><th>files below ingested with chunks</th>
+      <th>CodeExamples removed</th><th>CodeChunks removed</th>
+      <th>files remaining after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>tcv</td><td>826</td><td>826</td><td>4298</td><td>0</td></tr>
+      <tr><td>jet</td><td>373</td><td>373</td><td>1202</td><td>0</td></tr>
+      <tr><td>jt-60sa</td><td>53</td><td>53</td><td>234</td><td>0</td></tr>
+      <tr><td><strong>total</strong></td><td><strong>1252</strong></td>
+      <td><strong>1252</strong></td><td><strong>5734</strong></td>
+      <td><strong>0</strong></td></tr>
+    </tbody>
+  </table>
+  <p id="stale-chunk-removal-evidence">
+    Delete ran in two bounded batches: batch 1 matched 1000 files, batch 2
+    matched 252 files (cumulative 1252), exit 0. The cascade is a
+    <code>FOREACH (d IN doomed | DETACH DELETE d)</code>, so the log's count is
+    the matched
+    file count, not a per-node count; the per-facility removed figures are
+    measured by absence instead — every one of the 1252 planned
+    <code>CodeExample</code> ids and 5734 <code>CodeChunk</code> ids no longer
+    resolves to a node (<code>confirm_removed.log</code>), against a positive
+    control of 68,709 <code>CodeExample</code> nodes still present on the label,
+    so the instrument sees the graph. The after-verify returns
+    <code>residual_non_excluded=0</code> — no file below <code>ingested</code>
+    carries a chunk apart from the listed exclusions, and none was listed.
+    Negative control: the same count run against <em>ingested</em>
+    <code>CodeFile</code>s before and after the deletion is unchanged —
+    68,587 files / 266,231 chunks — confirming the deletion touched no ingested
+    file. Scripts and logs: <code>reports/imas-codex/stale-chunk-removal/</code>
+    (plan.log, delete.log, verify_after.log, confirm_removed.log,
+    control_before.log, control_after.log, to_delete.json).
+  </p>
+</section>
