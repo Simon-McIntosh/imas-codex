@@ -296,6 +296,40 @@ class TestFindCode:
         assert "CODE_EXAMPLE_ID" not in cypher
         assert "CodeFile" not in cypher
 
+    def test_pools_beyond_the_limit(self, mock_gc, mock_embed):
+        """The embedding retrieves a pool larger than the limit."""
+        from imas_codex.llm.search_tools import RERANK_POOL
+
+        find_code(query="test", facility="tcv", limit=5, gc=mock_gc, embed_fn=mock_embed)
+
+        assert mock_gc.query.call_args[1]["k"] == RERANK_POOL
+
+    def test_reranks_the_returned_rows_to_the_limit(
+        self, mock_gc, mock_embed, monkeypatch
+    ):
+        """Rows come back in rerank order, cut to the limit."""
+        from imas_codex.discovery.base import judgment
+
+        mock_gc.query.return_value = [
+            {"text": "a", "function_name": "fa", "source_file": "a.py", "score": 0.9},
+            {"text": "b", "function_name": "fb", "source_file": "b.py", "score": 0.8},
+            {"text": "c", "function_name": "fc", "source_file": "c.py", "score": 0.7},
+        ]
+
+        async def fake(model, state, questions, *, service=None, **_kwargs):
+            score = {"a.py": 1, "b.py": 5, "c.py": 3}[
+                state["candidate"]["locator"]["path"]
+            ]
+            return {"relevance_grade": {"type": "score", "score": score}}, 0.0
+
+        monkeypatch.setattr(judgment, "acall_decisions", fake)
+
+        result = find_code(
+            query="q", facility="tcv", limit=2, gc=mock_gc, embed_fn=mock_embed
+        )
+
+        assert [row["source_file"] for row in result] == ["b.py", "c.py"]
+
 
 class TestFindDataNodes:
     """Test find_data_nodes domain query."""
