@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T03:21:38.264Z",
+  "dispatched_at": "2026-10-07T02:58:53Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/code-score-through-jev.html",
+      "line": "code-score-through-jev-answers",
+      "severity": "follow-on",
+      "text": "follow-on: the answers paragraph states the choice and score distribution tolerances are both 0.005 per nonzero probability plus 1e-9, but the code at head bounds by the number of offered options (imas_codex/discovery/base/llm.py:3323, tolerance = 0.005 times len(offered) plus 1e-9) and the same fragment's own evidence paragraph already states per-offered; a reader of the answers section takes the retired rule."
+    },
+    {
+      "file": "docs/plans/jt60sa-discovery-completion.html",
+      "line": "453",
+      "severity": "follow-on",
+      "text": "follow-on: the plan's section-25 text still mandates that the choice tolerance counts only the criteria that carry a nonzero probability, at 0.005 per nonzero probability, while the code and the evidence fragment now count every offered option; the plan record and the code disagree and the plan was not amended when the bound was reverted."
+    },
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "568",
+      "severity": "follow-on",
+      "text": "follow-on: score_worker pairs the full files list against content_decisions, which holds only the successful decisions, with zip strict false; when one content decision fails mid-batch every later file's description is attached to the wrong entry, so a failed file can be described while the last file in the batch is scored with no description. No test exercises a partial failure: the batch-failure test fails both files."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read against base 7a6371996; ten commits, the four after the prior review's head being the distribution-bound fix and three evidence edits; code, prompts, schema, tests and the fragment, no generated model staged.",
+    "done_when": "section 25 asks for a Jev decisions stage whose stored composite is the max of the file's scope nouls and whose field set is named once; the head stores score_composite plus relevance_role and relevance_stage, the four facet depth fields with probs and confidence, and relevance_grade with probs and confidence, and recompute_stored_composites reproduces every staged row's composite from its own nouls.",
+    "goal": "the node makes the Jev content relevance the single owner of a code file's score: triage.md now poses graded score questions (relevance_grade 0-4 and four facet depths) whose criteria encode the mapping goal, triage_relevance folds the answers into relevance_star fields and score_composite on CodeFile, and the retired score_* dimension fields are gone from facility.yaml; the goal is met, but the plan's own section-25 text still states a per-nonzero distribution tolerance the code no longer uses, so plan and code disagree.",
+    "manifest": "read; status complete, head 5dbcb5f55, gate exit 0 (2614 passed, 14 skipped, 5 deselected), negative_control.log shows the two score-range tests refusing; its baseline_suite and after_suite arms are absent, so the added-failure count is unmeasured.",
+    "write_paths": "the reviewed manifest declares discovery/base, discovery/code, the two code prompts, schemas/facility.yaml, llm/search_tools.py, five test files, the evidence fragment and its figure; git diff --stat 7a6371996..5dbcb5f55 changes only paths inside that set."
+  },
+  "justifications": {
+    "durability": "the offered-count tolerance bound, the content-arm write of every stage field, the describe-only-a-passing-file rule and the once-per-batch failure log are covered by new tests; the composite recompute is guarded only by a one-shot log, and the description alignment under a partial batch failure has no test, so that defect is unguarded.",
+    "evidence": "the head gate runs 2614 passed, 14 skipped, 5 deselected at 5dbcb5f55 with EXIT=0; the live-graph recompute left 0 of 2311 staged rows disagreeing with the distribution over their own nouls after a repair pass; the negative control's two range tests fail as intended; mgset0.f's two quartets are attributed to a prototype source and a live-graph source and the composite is the max of the four scope nouls; an independent read-only run of test_llm_decisions.py and test_code_relevance.py at head passes 36 with EXIT=0. The fragment's answers paragraph still states the retired tolerance.",
+    "fit": "the change follows the repo's Jev decisions idiom (graded score criteria, noul, an answer schema) and the reader switch to sf.score_composite matches the retired expression; the enums sit beside the other code-file identifiers in facility.yaml, and no plan, sprint or ticket label appears in a symbol, filename or comment.",
+    "goal_fidelity": "the stage now stores one Jev-judged relevance per file as the single owner of the score, matching the mapping goal, but the plan's section-25 tolerance text was left stating the retired per-nonzero rule, so plan and code disagree.",
+    "reuse": "triage_relevance and scope_relevance share one noul-ordering helper over a single role order, and the rendered question criteria are read once under a cache rather than duplicated; the recompute reuses the graph reader instead of re-scoring, and no second searcher or prompt is added.",
+    "scope_discipline": "every path in git diff --stat 7a6371996..5dbcb5f55 is declared in the manifest's write paths; no generated model or out-of-scope file is touched; the four tail commits are the tolerance fix and evidence edits, all inside the declared set."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node makes the Jev content relevance the single owner of a code file's score: triage.md now poses graded score questions (relevance_grade 0-4 and four facet depths) whose criteria encode the mapping goal, triage_relevance folds the answers into relevance_star fields and score_composite on CodeFile, and the retired score_* dimension fields are gone from facility.yaml; the goal is met, but the plan's own section-25 text still states a per-nonzero distribution tolerance the code no longer uses, so plan and code disagree.\nVERDICT done_when: section 25 asks for a Jev decisions stage whose stored composite is the max of the file's scope nouls and whose field set is named once; the head stores score_composite plus relevance_role and relevance_stage, the four facet depth fields with probs and confidence, and relevance_grade with probs and confidence, and recompute_stored_composites reproduces every staged row's composite from its own nouls.\nVERDICT write_paths: the reviewed manifest declares discovery/base, discovery/code, the two code prompts, schemas/facility.yaml, llm/search_tools.py, five test files, the evidence fragment and its figure; git diff --stat 7a6371996..5dbcb5f55 changes only paths inside that set.\nVERDICT manifest: read; status complete, head 5dbcb5f55, gate exit 0 (2614 passed, 14 skipped, 5 deselected), negative_control.log shows the two score-range tests refusing; its baseline_suite and after_suite arms are absent, so the added-failure count is unmeasured.\nVERDICT diff: read against base 7a6371996; ten commits, the four after the prior review's head being the distribution-bound fix and three evidence edits; code, prompts, schema, tests and the fragment, no generated model staged.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the stage now stores one Jev-judged relevance per file as the single owner of the score, matching the mapping goal, but the plan's section-25 tolerance text was left stating the retired per-nonzero rule, so plan and code disagree.\nSCORE evidence: 17\nJUSTIFICATION evidence: the head gate runs 2614 passed, 14 skipped, 5 deselected at 5dbcb5f55 with EXIT=0; the live-graph recompute left 0 of 2311 staged rows disagreeing with the distribution over their own nouls after a repair pass; the negative control's two range tests fail as intended; mgset0.f's two quartets are attributed to a prototype source and a live-graph source and the composite is the max of the four scope nouls; an independent read-only run of test_llm_decisions.py and test_code_relevance.py at head passes 36 with EXIT=0. The fragment's answers paragraph still states the retired tolerance.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --stat 7a6371996..5dbcb5f55 is declared in the manifest's write paths; no generated model or out-of-scope file is touched; the four tail commits are the tolerance fix and evidence edits, all inside the declared set.\nSCORE durability: 16\nJUSTIFICATION durability: the offered-count tolerance bound, the content-arm write of every stage field, the describe-only-a-passing-file rule and the once-per-batch failure log are covered by new tests; the composite recompute is guarded only by a one-shot log, and the description alignment under a partial batch failure has no test, so that defect is unguarded.\nSCORE fit: 18\nJUSTIFICATION fit: the change follows the repo's Jev decisions idiom (graded score criteria, noul, an answer schema) and the reader switch to sf.score_composite matches the retired expression; the enums sit beside the other code-file identifiers in facility.yaml, and no plan, sprint or ticket label appears in a symbol, filename or comment.\nSCORE reuse: 19\nJUSTIFICATION reuse: triage_relevance and scope_relevance share one noul-ordering helper over a single role order, and the rendered question criteria are read once under a cache rather than duplicated; the recompute reuses the graph reader instead of re-scoring, and no second searcher or prompt is added.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/code-score-through-jev.html:code-score-through-jev-answers follow-on: the answers paragraph states the choice and score distribution tolerances are both 0.005 per nonzero probability plus 1e-9, but the code at head bounds by the number of offered options (imas_codex/discovery/base/llm.py:3323, tolerance = 0.005 times len(offered) plus 1e-9) and the same fragment's own evidence paragraph already states per-offered; a reader of the answers section takes the retired rule.\nFINDING docs/plans/jt60sa-discovery-completion.html:453 follow-on: the plan's section-25 text still mandates that the choice tolerance counts only the criteria that carry a nonzero probability, at 0.005 per nonzero probability, while the code and the evidence fragment now count every offered option; the plan record and the code disagree and the plan was not amended when the bound was reverted.\nFINDING imas_codex/discovery/code/workers.py:568 follow-on: score_worker pairs the full files list against content_decisions, which holds only the successful decisions, with zip strict false; when one content decision fails mid-batch every later file's description is attached to the wrong entry, so a failed file can be described while the last file in the batch is scored with no description. No test exercises a partial failure: the batch-failure test fails both files.\n",
+  "review_run_id": "r-20261007T025840398463-review-of-code-score-through-jev",
+  "reviewed_base": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "reviewed_base_sha": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "reviewed_commit": "5dbcb5f55120a81cf36c737ff3b706d98b3267ea",
+  "reviewed_head": "5dbcb5f55120a81cf36c737ff3b706d98b3267ea",
+  "reviewed_head_sha": "5dbcb5f55120a81cf36c737ff3b706d98b3267ea",
+  "reviewed_run_id": "r-20261007T012913278723-code-score-through-jev",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T03:26:56.596636+00:00",
+  "total": 106
+}
