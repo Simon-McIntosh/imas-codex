@@ -1,0 +1,20 @@
+<!-- With OPENROUTER_API_KEY_IMAS_CODEX unset, no Jev decisions transport is
+     built for the pool rerank or the candidate stage. judgment.rerank_pool
+     returns the embedding order, a note naming the missing variable and a
+     zero cost; the candidate stage's routing and judgment leave every source
+     unjudged after one warning for the stage. Both are pinned by
+     tests/discovery/test_decisions_key_skip.py; the negative control removes
+     the predicate checks and shows the transport entered per source. -->
+<section id="decisions-key-skip" data-reckon="evidence">
+  <h2 id="decisions-key-skip-heading">Decisions-key skip</h2>
+  <p id="decisions-key-skip-landing">
+    <code>judgment.decisions_key_present</code>, built on
+    <code>get_api_key</code>, gates both callers of the Jev decisions endpoint.
+    <code>rerank_pool</code> returns the embedding order with a note naming the
+    missing variable and a cost of <code>0.0</code>; the candidate stage leaves
+    every source unjudged and every source is released for a later retry, with
+    a single warning for the stage. No call is made to the unconfigured
+    endpoint, so an unset key costs nothing rather than one failed request per
+    source.
+  </p>
+</section>

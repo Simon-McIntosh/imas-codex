@@ -21,7 +21,7 @@ import logging
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
-from imas_codex.discovery.base.llm import acall_decisions
+from imas_codex.discovery.base.llm import acall_decisions, get_api_key
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,36 @@ DecisionResult = tuple[dict[str, Any], float]
 # The decisions endpoint is asked for at most this many judgements at once,
 # matching the triage worker's own bound.
 _DEFAULT_CONCURRENCY = 8
+
+
+def decisions_key_present() -> bool:
+    """Whether the decisions endpoint has a configured API key.
+
+    The credential is resolved through :func:`get_api_key`, so its presence is
+    reported in one place instead of by a second reading of the environment
+    here. A caller that pays per call checks this first and skips cleanly when
+    it is false, so an unconfigured key costs no request rather than a failed
+    one.
+    """
+    try:
+        get_api_key()
+    except ValueError:
+        return False
+    return True
+
+
+def decisions_key_absent_reason() -> str | None:
+    """Why the decisions key is unusable, or ``None`` when it is present.
+
+    Returns :func:`get_api_key`'s own message, which names the missing
+    variable, so a skip note carries the credential's name without spelling it
+    a second time.
+    """
+    try:
+        get_api_key()
+    except ValueError as exc:
+        return str(exc)
+    return None
 
 
 async def decide_batch(
@@ -141,12 +171,19 @@ async def rerank_pool(
         ``(ordered, note, cost)``. ``note`` is ``None`` when every candidate
         was scored, otherwise it names how many kept their retrieval position.
         ``cost`` is the batch's summed decision cost, ``0.0`` when the whole
-        batch failed. A failed batch returns the pool in its original order
-        and says so — ranking is not a gate, so it never raises.
+        batch failed or when the decisions key is absent. A failed batch
+        returns the pool in its original order and says so — ranking is not a
+        gate, so it never raises. When the decisions key is not set the pool is
+        returned in retrieval order with a note naming the missing variable and
+        no call is made.
     """
     items = list(candidates)
     if not items:
         return [], None, 0.0
+
+    if not decisions_key_present():
+        reason = decisions_key_absent_reason() or "decisions key not set"
+        return items, f"rerank skipped: {reason}", 0.0
 
     question = {
         question_name: {

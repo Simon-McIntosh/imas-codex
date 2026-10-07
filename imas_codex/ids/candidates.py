@@ -32,6 +32,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Final
 
+from imas_codex.discovery.base.judgment import (
+    decisions_key_absent_reason,
+    decisions_key_present,
+)
 from imas_codex.discovery.base.llm import DecisionsValidationError, call_decisions
 from imas_codex.graph.dd_search import hybrid_dd_search, related_dd_search
 from imas_codex.models.constants import SearchMode
@@ -264,6 +268,33 @@ def _as_vector(embedding: object) -> list[float]:
 # source stays unjudged for a later retry, while a contract violation is raised
 # and never mistaken for a usable judgment.
 
+# Set once per absence of the decisions key so the stage warns a single time
+# rather than once per source; cleared whenever the key is present again.
+_key_absence_warned = False
+
+
+def judgments_available() -> bool:
+    """Whether the candidate stage can pay for its decisions calls.
+
+    Both entries that build a decisions request call this before they build it.
+    When the shared decisions key is absent every source is left unjudged
+    without a call — the same outcome as a transport failure — and one warning
+    naming the missing variable is logged for the stage rather than one per
+    source. When the key is present the warning latch clears, so a stage whose
+    credential has since been configured judges normally.
+    """
+    global _key_absence_warned
+    if decisions_key_present():
+        _key_absence_warned = False
+        return True
+    if not _key_absence_warned:
+        logger.warning(
+            "candidate judgments skipped: %s",
+            decisions_key_absent_reason() or "decisions key not set",
+        )
+        _key_absence_warned = True
+    return False
+
 
 def _judgment_templates() -> dict[str, Any]:
     """Render the candidate-judgment question templates from their prompt file."""
@@ -338,6 +369,8 @@ def route_ids(
         cost: Optional run cost tracker; the decisions call's reported cost is
             added to it under the ``candidate_route`` step.
     """
+    if not judgments_available():
+        return None
     criteria = _ids_criteria(gc)
     if not criteria:
         return None
@@ -417,6 +450,8 @@ def judge_candidates(
     """
     if not candidates:
         return []
+    if not judgments_available():
+        return None
     template = _judgment_templates()["same_quantity"]
     questions: dict[str, Any] = {}
     for index in range(len(candidates)):
