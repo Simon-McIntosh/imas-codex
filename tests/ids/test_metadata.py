@@ -520,7 +520,9 @@ class TestPopulateMetadata:
 
         The LLM call is mocked so the test makes no live request: with the
         ids-mapping seat routed to the local lane, an unmocked call would
-        reach a real endpoint and depend on its latency.
+        reach a real endpoint and depend on its latency. With no signals the
+        prompt carries the ``_format_signals_summary`` fallback text, and the
+        mocked response's comment lands in ``llm_fields``.
         """
         gc = MagicMock()
         gc.query.return_value = []
@@ -530,16 +532,20 @@ class TestPopulateMetadata:
             homogeneous_time=1,
         )
 
+        captured: dict[str, object] = {}
+
+        def _fake_render(name, context=None, **kwargs):
+            if name == "mapping/metadata_population":
+                captured["context"] = context
+            return "test prompt"
+
         with (
             patch(
                 "imas_codex.discovery.base.llm.call_llm_structured",
                 return_value=(mock_response, 0.0, 0),
             ),
             patch("imas_codex.settings.get_model", return_value="test-model"),
-            patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
-                return_value="test prompt",
-            ),
+            patch("imas_codex.llm.prompt_loader.render_prompt", _fake_render),
         ):
             result = populate_metadata(
                 "jet",
@@ -549,7 +555,10 @@ class TestPopulateMetadata:
                 mapped_signals=None,
             )
 
-        # Should succeed and return a result regardless
+        context = captured.get("context")
+        assert context is not None
+        assert context["mapped_signals_summary"] == "No signal mappings available."
+        assert result.llm_fields["ids_properties/comment"] == "Fallback description"
         assert isinstance(result, IDSMetadataResult)
         assert result.facility == "jet"
         assert result.ids_name == "pf_active"

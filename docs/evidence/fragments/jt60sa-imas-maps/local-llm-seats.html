@@ -93,7 +93,7 @@
 
   <h4 id="local-llm-seats-negative-control">Negative control</h4>
   <p id="local-llm-seats-negative-control-detail">
-    Two mutations, each rerun to a log. Removing the
+    Three mutations, each rerun to a log. Removing the
     <code>reasoning_effort=get_reasoning_effort("ids-mapping")</code>
     forwarding from <code>_call_llm</code> and <code>_acall_llm</code> fails
     <code>TestIdsMappingReasoningEffortForwarding::test_acall_llm_forwards_seat_effort</code>
@@ -104,7 +104,16 @@
     fails
     <code>TestDiscoveryFunctionSeats::test_seats_resolve_configured_models</code>
     (it reads <code>openrouter/openai/gpt-5.4</code>); log at
-    <code>negative-control-b-local-route.log</code>. Both logs sit in the run
-    directory named by the manifest's <code>negative_control_log</code> field.
+    <code>negative-control-b-local-route.log</code>. Removing the
+    <code>if not signals</code> branch from
+    <code>_format_signals_summary</code> fails
+    <code>TestPopulateMetadata::test_populate_no_signals_produces_fallback_description</code>,
+    which asserts the no-signals prompt carries
+    <code>"No signal mappings available."</code> and the mocked response's
+    comment lands in <code>llm_fields</code> (it raises
+    <code>TypeError: 'NoneType' object is not subscriptable</code>); log at
+    <code>negative-control-c-no-signals-branch.log</code>. The logs sit in the
+    run directory named by the manifest's <code>negative_control_log</code>
+    field.
   </p>
 </section>
