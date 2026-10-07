@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs on disk: the after_suite log (gate-88eda87cd-r2.log, 1477 passed) names no FAILED id and the baseline_suite log (negative-control-a-forwarding.log) names 2 FAILED ids, so the added set is empty. Caveat: the baseline arm is a single-test mutation rather than a whole-suite base, so the pair measures the forwarding guard, not a suite-wide before/after.",
+  "backend": "clive",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/ids/mapping.py:444",
+    "imas_codex/ids/mapping.py:466",
+    "imas_codex/ids/mapping.py:1251",
+    "imas_codex/ids/mapping.py:1302",
+    "imas_codex/ids/mapping.py:1545",
+    "imas_codex/ids/mapping.py:1626"
+  ],
+  "completed_at": "2026-10-07T10:02:37.725Z",
+  "dispatched_at": "2026-10-07T09:48:00Z",
+  "findings": [
+    {
+      "file": "tests/ids/test_metadata.py",
+      "line": "518",
+      "severity": "follow-on",
+      "text": "the test named test_populate_no_signals_produces_fallback_description now mocks call_llm_structured with a canned response and asserts only isinstance(result, IDSMetadataResult), result.facility and result.ids_name, so the fallback description its name and docstring claim is no longer asserted and the branch it guards is no longer exercised; the hermeticity fix is right but the assertion was dropped rather than kept."
+    },
+    {
+      "file": "manifest.md",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "the manifest's baseline_suite records failure_count 3 with three failure_ids, but the log_path it names (negative-control-a-forwarding.log) reports only 2 failed, so the field carries a second mutation's test into a log that does not contain it. The read-time added-failure derivation reads the log rather than this field, so the added count is unaffected, but the manifest does not reconcile with its own evidence."
+    }
+  ],
+  "gate_after_suite": {
+    "command": "PYTHONPATH=$PWD uv run --no-sync pytest tests/core tests/ids tests/test_cli.py tests/ids/test_metadata.py -p no:cacheprovider --tb=short",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T084110554429-local-llm-seats/gate-88eda87cd-r2.log",
+    "revision": "88eda87cd882b14197278888d4c312ddf05793e0"
+  },
+  "gate_baseline_suite": {
+    "command": "PYTHONPATH=$PWD uv run --no-sync pytest tests/core/test_settings.py -k TestIdsMappingReasoningEffortForwarding -p no:cacheprovider --tb=short",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/core/test_settings.py::TestIdsMappingReasoningEffortForwarding::test_acall_llm_forwards_seat_effort",
+      "tests/core/test_settings.py::TestIdsMappingReasoningEffortForwarding::test_call_llm_forwards_seat_effort"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T084110554429-local-llm-seats/negative-control-a-forwarding.log",
+    "revision": "88eda87cd with reasoning_effort forwarding removed from _call_llm and _acall_llm (working-tree mutation)"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "6 production call sites of _call_llm/_acall_llm in imas_codex/ids/mapping.py, all of which now pass the seat effort.",
+    "diff": "88eda87cd forwards the seat effort and reverts cluster-labels; 1fec69664 rewrites the census fragment; both read against b6f39b490.",
+    "done_when": "the reviewed manifest records gate-88eda87cd-r2.log at 1477 passed / EXIT=0 and the added tests assert ids-mapping local, its effort high, the forwarding and the map probe.",
+    "goal": "plan section 10 v25 names ids-mapping only; the landed change matches it and the dispatch goal sentence naming cluster-labels is stale against the plan edit 637474ac2.",
+    "manifest": "read; states base fa9bd7e75, head 1fec69664, four revisions, the gate, two negative controls and the census inputs, but its baseline_suite failure_count does not match its log.",
+    "write_paths": "delta: pyproject.toml, imas_codex/ids/mapping.py, tests/core/test_settings.py, tests/ids/test_metadata.py, the census fragment; all inside plan section 10's declared paths."
+  },
+  "justifications": {
+    "durability": "tests/core/test_settings.py:487 and :505 redden under negative control a and test_cluster_labels_keeps_openrouter_seat at :392 reddens under control b, so those guards fire; tests/ids/test_metadata.py:518 lost the fallback assertion it is named for.",
+    "evidence": "gate-88eda87cd-r2.log records 1477 passed, EXIT=0 at 88eda87cd; the manifest pairs it with negative-control logs, but the baseline arm is a single-test mutation (not a suite base) and its recorded failure_count (3) exceeds the baseline log (2).",
+    "fit": "the forwarding mirrors the standard_names/workers.py seat pattern and adds no plan or ticket label.",
+    "goal_fidelity": "the landed change matches plan section 10 v25 (ids-mapping moved, cluster-labels kept) at pyproject.toml and imas_codex/ids/mapping.py:752 and :780.",
+    "reuse": "it uses the reasoning_effort parameter already owned by imas_codex/discovery/base/llm.py:2225 and :2414, adding no parallel mechanism.",
+    "scope_discipline": "every path in the delta is inside the plan section 10 write paths; no write lands outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the plan's authoritative goal (imas-codex:jt60sa-imas-maps section 10, v25) is that only ids-mapping on the JT-60SA path moves to the ambix-local route with reasoning-effort high made effective, cluster-labels staying on OpenRouter; the dispatch goal sentence still names cluster-labels and is stale against the plan edit 637474ac2, and the landed change follows the plan.\nVERDICT done_when: the done_when is that pytest tests/core tests/ids tests/test_cli.py -p no:cacheprovider passes with ids-mapping local, effort high, its effort forwarded, and the map probe naming ids-mapping; the reviewed manifest records the gate green at 88eda87cd and the added tests assert each clause.\nVERDICT write_paths: the delta touches pyproject.toml, imas_codex/ids/mapping.py, tests/core/test_settings.py, tests/ids/test_metadata.py and the census fragment, all inside the plan section 10 write paths; nothing lands outside them.\nVERDICT manifest: read the reviewed manifest; it states base fa9bd7e75, head 1fec69664, four revisions, the gate (1477 passed, EXIT=0), two negative controls and the census inputs, though its baseline_suite field does not reconcile with the log it names.\nVERDICT diff: read 88eda87cd and 1fec69664 against b6f39b490; 88eda87cd forwards get_reasoning_effort('ids-mapping') from _call_llm and _acall_llm, reverts cluster-labels to OpenRouter, and adds the forwarding tests and a cluster-labels keep-test plus a mocked metadata test; 1fec69664 rewrites the census fragment to ids-mapping only.\nCALL_SITES: imas_codex/ids/mapping.py:444, imas_codex/ids/mapping.py:466, imas_codex/ids/mapping.py:1251, imas_codex/ids/mapping.py:1302, imas_codex/ids/mapping.py:1545, imas_codex/ids/mapping.py:1626\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the landed change matches plan section 10 v25 at pyproject.toml and imas_codex/ids/mapping.py:752 and :780; the dispatch goal sentence naming cluster-labels is stale, not a defect.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate log gate-88eda87cd-r2.log records 1477 passed, 7 skipped, EXIT=0 at 88eda87cd and the manifest carries the paired negative-control logs, though the baseline arm is a single-test mutation rather than a whole-suite base and its recorded failure_count does not match its log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the delta is inside the plan section 10 write paths and nothing extra lands.\nSCORE durability: 16\nJUSTIFICATION durability: tests/core/test_settings.py:487 and :505 redden under negative control a (forwarding removed) and test_cluster_labels_keeps_openrouter_seat at :392 reddens under control b, but tests/ids/test_metadata.py:518 no longer asserts the fallback it is named for.\nSCORE fit: 19\nJUSTIFICATION fit: the forwarding matches the standard_names/workers.py seat pattern and the names carry no plan or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change passes the existing reasoning_effort parameter owned by imas_codex/discovery/base/llm.py:2225 rather than adding a parallel mechanism.\nFINDING tests/ids/test_metadata.py:518 follow-on: the test named test_populate_no_signals_produces_fallback_description now mocks call_llm_structured with a canned response and asserts only isinstance(result, IDSMetadataResult), result.facility and result.ids_name, so the fallback description its name and docstring claim is no longer asserted and the branch it guards is no longer exercised; the hermeticity fix is right but the assertion was dropped rather than kept.\nFINDING manifest.md:18 follow-on: the manifest's baseline_suite records failure_count 3 with three failure_ids but the log_path it names (negative-control-a-forwarding.log) reports only 2 failed, so the field carries a second mutation's test into a log that does not contain it; the read-time added-failure derivation reads the log rather than this field, so the added count is unaffected, but the manifest does not reconcile with its own evidence.",
+  "review_run_id": "r-20261007T094751748702-review-of-local-llm-seats",
+  "reviewed_base": "b6f39b49058167577bb5d984d7855a506962a359",
+  "reviewed_base_sha": "b6f39b49058167577bb5d984d7855a506962a359",
+  "reviewed_commit": "1fec69664379e0e8af8eb43c80db5224624588b1",
+  "reviewed_head_sha": "1fec69664379e0e8af8eb43c80db5224624588b1",
+  "reviewed_run_id": "r-20261007T084110554429-local-llm-seats",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T09:59:32.478222+00:00",
+  "total": 106,
+  "verdict": "SOUND"
+}
