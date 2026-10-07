@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run r-20261007T105304186644-ingest-settles declares no baseline_suite and no after_suite arm (its run dir carries a single gate.log). With both arms absent there is nothing to subtract, so added_failure_count is null and added_failure_ids is empty; the reviewed node declares no red baseline and its single gate arm is green (143 passed, EXIT=0), independently reproduced at review-gate.log.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/ingestion/pipeline.py:ingest_files (calls _write_file_example per file and records each file's own outcome in stats['outcomes'])",
+    "imas_codex/discovery/code/workers.py:code_worker (calls _settle_unclaimable_files before the first poll and marks each claimed file from its outcome via _mark_files_ingested, _mark_file_skipped and _mark_file_failed)"
+  ],
+  "completed_at": "2026-10-07T12:00:16.285Z",
+  "dispatched_at": "2026-10-07T11:50:26Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/ingest-settles.html",
+      "line": "74",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's EXPLAIN count disagrees with the run's own log. It states '12 statements, 0 planning failures' (line 74), but the reviewed run's explain.log records 'planned=11 failures=0' over exactly eleven captured statements, and the repair round did not add a statement (it changed the settle query's clauses in place). The recorded artefact supports 11, not 12."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/ingest-settles.html",
+      "line": "101",
+      "severity": "follow-on",
+      "text": "follow-on: the third negative-control clause is unsupported and, as read, false. The fragment states that 'the corrected tests pass with the pipeline's example write left as the create_nodes call it replaced' (lines 99-103), and no log for that control exists (negative_control_repair.log records only controls A and B). tests/ingestion/test_code_ingest_idempotent.py:118 asserts a captured query contains 'MERGE (e:CodeExample {id: item.id})'; a create_nodes-based write issues no such query to the fake (its create_nodes does not record a query), so that test would redden on exactly the revert the fragment says it survives. The behavioural claims it carries (one example, chunks refreshed) are true, but the sentence as written is not borne by the run's evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production call sites: pipeline.ingest_files drives _write_file_example and the per-file outcome map; workers.code_worker drives _settle_unclaimable_files and the per-file status marking. No other runtime caller reaches the new helpers.",
+    "diff": "read the repair (543d3a99d..36a41f6c7) and the full node (b43fad35..36a41f6c7) commit by commit: the idempotency test loses its false plain-create premise and its fake now mirrors create_nodes' MERGE contract; _settle_unclaimable_files gains the claim's own relevance floor and exclusion clauses; the evidence fragment gains a corrected concurrent-MERGE cause and a terminal-clause section; a scope test is added.",
+    "done_when": "the three pinned behaviours (re-ingest one example + refreshed chunks, one bad file in a batch of three, chunk-less file skipped with a reason) are present and green; two negative controls fire (per-file isolation, settle scope); but the section's terminal Cypher clause is explicitly unevaluated and the plan's own 'plain create restored' negative control rests on a premise the section's correction comment retires.",
+    "goal": "make code ingestion settle every admitted file: isolate per-file failures, give a chunk-less admitted file and an oversized admitted file a terminal skipped state, name why the claim skips the two eslice files, and return a failed file to scored.",
+    "manifest": "read; status complete, gate '143 passed, exit 0' over five test files, negative_control_repair.log present (two controls fire), baseline_suite and after_suite absent.",
+    "write_paths": "read the manifest's declared paths and the range diff; the diff touches pipeline.py, workers.py, reset.py, two test files and one evidence fragment, all inside the declared write paths, with no plan edit, no graph write and no discover run."
+  },
+  "justifications": {
+    "durability": "negative_control_repair.log shows two of the guards firing on reverted changes (test_one_bad_file_does_not_fail_the_batch, test_settle_unclaimable_files_matches_the_claim_set), and test_content_change_supersedes_the_stale_example reddens if the supersede cascade is dropped; but the re-ingest test's new guard is a query-text assertion (tests/ingestion/test_code_ingest_idempotent.py:118) rather than a behavioural one, and the fragment's claim that it survives the create_nodes revert is contradicted by that assertion.",
+    "evidence": "the gate is green and independently reproduced (review-gate.log: the five changed test files, 143 passed, EXIT=0) and both repair negative controls are logged as firing; the fragment's central causal correction (concurrent-MERGE, idempotency not gained) is accurate, but two fragment claims are not borne by the run's own artefacts: the '12 statements' count against explain.log's 11, and the unlogged create_nodes negative-control outcome.",
+    "fit": "the change follows its file's idiom: helpers are named by behaviour (_settle_unclaimable_files, _mark_file_skipped, _write_file_example) and the fragment follows the sibling evidence-fragment idiom with no plan identifier; the gate commands and comments avoid plan and ticket labels.",
+    "goal_fidelity": "the section's deliverable is met where it is in scope: per-file outcomes (imas_codex/ingestion/pipeline.py:600-625), the chunk-less skip and oversized settle (imas_codex/discovery/code/workers.py:753-805, 933-949), the eslice cause (line_count 10467/10374 > 10000), and the failed->scored reset (imas_codex/discovery/base/reset.py:432-437) all land; the idempotency half is now honestly characterised as already-true rather than newly delivered, and the runnable end-state is correctly deferred to an operational node.",
+    "reuse": "_supersede_stale_example traverses the shared _CODE_CHUNK_CASCADE from imas_codex/discovery/base/reset.py rather than a second traversal; _settle_unclaimable_files reuses relevance_predicate, build_path_prefix_filter and build_facility_exclusion_filter rather than re-encoding them, and the reset reuses CODE_RESET_SPECS.",
+    "scope_discipline": "git diff b43fad35a..36a41f6c7 changes only imas_codex/ingestion/pipeline.py, imas_codex/discovery/code/workers.py, imas_codex/discovery/base/reset.py, tests/ingestion/test_code_ingest_idempotent.py, tests/discovery/test_code_ingest_settles.py and the one evidence fragment, all inside the node's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: make code ingestion settle every admitted file: isolate per-file failures, give a chunk-less admitted file and an oversized admitted file a terminal skipped state, name why the claim skips the two eslice files, and return a failed file to scored.\nVERDICT done_when: the three pinned behaviours (re-ingest one example + refreshed chunks, one bad file in a batch of three, chunk-less file skipped with a reason) are present and green; two negative controls fire; but the section's terminal Cypher clause is explicitly unevaluated and the plan's own plain-create negative control rests on a premise the section's correction comment retires.\nVERDICT write_paths: read the manifest's declared paths and the range diff; the diff touches pipeline.py, workers.py, reset.py, two test files and one evidence fragment, all inside the declared write paths, with no plan edit, no graph write and no discover run.\nVERDICT manifest: read; status complete, gate '143 passed, exit 0' over five test files, negative_control_repair.log present (two controls fire), baseline_suite and after_suite absent.\nVERDICT diff: read the repair (543d3a99d..36a41f6c7) and the full node (b43fad35..36a41f6c7) commit by commit: the idempotency test loses its false plain-create premise and its fake now mirrors create_nodes' MERGE contract; _settle_unclaimable_files gains the claim's own relevance floor and exclusion clauses; the evidence fragment gains a corrected concurrent-MERGE cause and a terminal-clause section; a scope test is added.\nCALL_SITES: imas_codex/ingestion/pipeline.py:ingest_files, imas_codex/discovery/code/workers.py:code_worker\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the section's deliverable is met where it is in scope: per-file outcomes (imas_codex/ingestion/pipeline.py:600-625), the chunk-less skip and oversized settle (imas_codex/discovery/code/workers.py:753-805), the eslice cause (line_count 10467/10374 > 10000), and the failed->scored reset (imas_codex/discovery/base/reset.py:432-437) all land.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate is green and independently reproduced (review-gate.log: 143 passed, EXIT=0) and both repair negative controls are logged as firing, but the fragment's '12 statements' (line 74) contradicts the run's explain.log ('planned=11') and its create_nodes negative-control claim (line 101) is unlogged and contradicted by the test's own assertion.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff b43fad35a..36a41f6c7 changes only pipeline.py, workers.py, reset.py, two test files and one evidence fragment, all inside the node's declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: negative_control_repair.log shows test_one_bad_file_does_not_fail_the_batch and test_settle_unclaimable_files_matches_the_claim_set firing on a revert, and the supersede test guards the cascade, but the re-ingest guard is a query-text assertion (tests/ingestion/test_code_ingest_idempotent.py:118) rather than behavioural.\nSCORE fit: 19\nJUSTIFICATION fit: helpers are named by behaviour (_settle_unclaimable_files, _mark_file_skipped, _write_file_example) and the fragment follows the sibling evidence-fragment idiom with no plan identifier.\nSCORE reuse: 19\nJUSTIFICATION reuse: _supersede_stale_example reuses the shared _CODE_CHUNK_CASCADE from imas_codex/discovery/base/reset.py and _settle_unclaimable_files reuses relevance_predicate, build_path_prefix_filter and build_facility_exclusion_filter.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/ingest-settles.html:74 follow-on: the fragment states '12 statements, 0 planning failures' but the reviewed run's explain.log records 'planned=11 failures=0' over exactly eleven captured statements, and the repair added no statement.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/ingest-settles.html:101 follow-on: the fragment claims the corrected tests pass with the example write left as create_nodes, but no log records that control and tests/ingestion/test_code_ingest_idempotent.py:118 asserts the MERGE query text a create_nodes-based write does not emit, so the claim is not borne by the evidence.\n",
+  "review_run_id": "r-20261007T115016974102-review-of-ingest-settles-repair",
+  "reviewed_base": "b43fad35aa2a79d8a564054b99c37ab943b88698",
+  "reviewed_base_sha": "b43fad35aa2a79d8a564054b99c37ab943b88698",
+  "reviewed_commit": "36a41f6c7a4aa69a1c26d888239405847148d523",
+  "reviewed_head_sha": "36a41f6c7a4aa69a1c26d888239405847148d523",
+  "reviewed_run_id": "r-20261007T105304186644-ingest-settles",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:58:24+00:00",
+  "total": 108
+}
