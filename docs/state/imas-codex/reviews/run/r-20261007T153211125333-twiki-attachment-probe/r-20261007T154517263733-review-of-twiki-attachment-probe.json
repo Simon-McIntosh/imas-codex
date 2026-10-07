@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest records no baseline_suite or after_suite arm, and the reviewed node changes no code or tests (its commit adds one evidence fragment), so no base/head suite arm exists and no added-failure set is derivable from suite logs. The node's only gate is a read-only probe of two remote hosts; I re-ran its central measures independently at the committed head and they are confirmed (graph census exact: 1049/781/548/231/2; find positive control /opt/pbs/bin/qsub; both curl -sI rc=124). added_failure_count is 0 with an empty id set because there is no suite arm to fail, not because a suite passed.",
+  "after_suite": null,
+  "backend": "deepseek-v4.1-flash",
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T15:57:28.141Z",
+  "dispatched_at": "2026-10-07T15:45:30Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T153211125333-twiki-attachment-probe/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite or after_suite arm, and the reviewed baseline_suite and after_suite fields are 'none/complete' rather than structured gate logs, so no added-failure count is derivable from the reviewed record in the ordinary suite-arm sense. The node changes no code or tests (its commit adds one evidence fragment), so there is no suite to run against its deliverable. added_failure_count is recorded as 0 with an empty id set because no suite arm exists, not because a suite passed. The node's only gate is the read-only probe, whose central measure I re-ran independently and which is confirmed (graph census exact; find positive control fires)."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/twiki-attachment-probe.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states 'ls -d /var/www/* /srv/* /opt/* /data* returns only seven /opt system directories: /var/www, /srv/* and /data* do not exist'. The /srv directory itself exists (empty, empty on nakasvr26), so 'do not exist' is precise only of the glob /srv/*, not of /srv. The operational claim (no web root and no pub tree under /srv) is correct and independently reproduced; this is a phrasing nicety, not a false finding."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/twiki-attachment-probe/remote_search.sh",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the probe scripts and raw output (graph_prefixes.py/.json, graph_ingested.py, graph_https.py, graph_urls2.py, remote_search.sh/.out) live under the operator's unversioned reports directory, not in the repository. The finding is a point-in-time reading of two remote hosts and no executable check guards it, so its durability rests entirely on that directory surviving. Inherent to a read-only external probe; recorded so the absence of a repo-side artefact is a known property rather than an omission."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "not applicable: the commit changes one evidence fragment and no code, so there is no call site to trace. The runtime paths exercised are the existing GraphClient read query and read-only ssh/find/curl host commands.",
+    "diff": "read commit c863c1d3: one new evidence-fragment section (a landing paragraph plus the graph split, the no-migration evidence, coverage 0, and the bound/residual note). No source, test or schema file is touched.",
+    "done_when": "Reproduced independently: graph census TOTAL 1049, scored_or_discovered 781, by host jt-60sa 231 / nakasvr23.iferc.org 548 / 2 external (verify_graph.out, EXIT=0); ssh positive control 'ssh -o BatchMode=yes jt-60sa hostname' -> intr26-2 (verify_ssh_roots.log); /var/www absent, /data absent, /srv empty, seven /opt system dirs; find positive control /opt/pbs/bin/qsub with three sample filenames -> 0 hits (verify_ssh_find.log); no httpd/apache2/nginx, no /etc/httpd|apache2|nginx, no *twiki*/*foswiki* tree, no pub dir; both curl -sI -> rc=124, nakasvr23 -> 157.111.10.188 (verify_curl.log).",
+    "goal": "The node's goal is to locate read-only where the JT-60SA TWiki attachments live on nakasvr26 now. Delivered: the graph split (781 scored/discovered = 548 nakasvr23.iferc.org + 231 ssh://jt-60sa + 2 external) independently reproduced, and the answer that no migrated location exists on nakasvr26 (nakasvr26 hosts no web server and no wiki; no old-to-new mapping; coverage 0). Residual: the outcome is a measured absence, which the mandate anticipates.",
+    "manifest": "read; status complete; commits c863c1d3; changed_paths match the diff; tests field records the read-only gate (ssh hostname EXIT 0; ls -d roots; bounded find 0 hits; positive control /opt/pbs/bin/qsub; graph read 781 scored/discovered); test_logs names reports/imas-codex/twiki-attachment-probe/graph_prefixes.json and remote_search.out. baseline_suite and after_suite are absent because the node changes no code or tests, so no base/head suite arm exists.",
+    "write_paths": "git show --stat c863c1d3 is exactly one file, docs/evidence/fragments/jt60sa-discovery-completion/twiki-attachment-probe.html (70 insertions); the worktree is clean at that commit; no plan edit and no sprint/index mutation."
+  },
+  "justifications": {
+    "durability": "the node lands no test, so the finding is guarded by nothing executable: it is a point-in-time reading of two remote hosts, and a future regression (or a migration that arrives later) would not be caught by any check in the repository. The scripts that produced it (graph_prefixes.py, remote_search.sh/.out) live under the unversioned reports directory rather than in the repository, so the method survives only as long as that directory does. This is inherent to a one-shot read-only external probe, not a defect of the work, but it is the weakest dimension.",
+    "evidence": "the central claim is independently reproduced at the committed head, and the instrument that produced the negative is shown to work. I re-ran the graph census (verify_graph.out: TOTAL 1049, scored_or_discovered 781, by host jt-60sa 231 / nakasvr26 nakasvr23.iferc.org 548 / 2 external), the ssh positive control (verify_ssh_roots.log: 'ssh -o BatchMode=yes jt-60sa hostname' -> intr26-2), the web-root listing (verify_ssh_roots.log: /var/www absent, /data absent, /srv present but empty, only seven /opt system dirs), the bounded find with its positive control (verify_ssh_find.log: 'find /opt -maxdepth 8 -name qsub' -> /opt/pbs/bin/qsub, three sample filenames -> zero hits), the absence of an httpd/apache2/nginx binary and of /etc/httpd|apache2|nginx, the absence of any *twiki*/*foswiki* tree or 'pub' directory under the non-home roots, and both curl -sI calls from nakasvr26 against nakasvr23 URLs (verify_curl.log: rc=124 timeout for both) with DNS resolving nakasvr23 to 157.111.10.188. The zero-hit find is a measured absence, not a blind scan, because the identical command form locates a known-present file (/opt/pbs/bin/qsub). Weakness: I re-ran three of the ten sample filenames rather than all ten; the full run's own remote_search.out records TOTAL_HITS 0 over all ten across 15 roots. A second, minor imprecision: the fragment states '/var/www, /srv/* and /data* do not exist', but the /srv directory itself exists (empty); the operational claim (no web root, no pub tree) is correct.",
+    "fit": "the deliverable is well-formed evidence HTML: one section whose id and its two child paragraph ids all begin with the node id (twiki-attachment-probe, -result, -evidence), captions naming the quantities and totals, and no plan, sprint or ticket label beyond the established evidence-fragment naming convention. It names the driving followup (f-jdc-002) as the authority for the write-off decision without editing the plan itself.",
+    "goal_fidelity": "the node's goal is to locate, read-only, where the JT-60SA TWiki attachments live on nakasvr26 now, and its done-when is the enumerated read-only probe: ssh wrapper plus positive control, group the scored/discovered Document nodes by source prefix with counts, ten sample filenames across prefixes, list the candidate web roots, run one bounded find per filename per root, check for a TWiki/Foswiki install, curl two sample old URLs, and report per prefix whether a migrated location, mapping and coverage exist. Every element is delivered. The document split is independently reproduced against the live graph: 1049 JT-60SA Documents, 781 at scored or discovered (548 nakasvr23.iferc.org, 231 ssh://jt-60sa, 2 external), matching the fragment exactly, and the fragment's internal arithmetic (535 under twiki_html/rsrc/Code + 13 under .//etc/manual = 548; 231 ssh; 2 external = 781) is exact. The answer to the question asked (where do they live now) is delivered: nowhere on nakasvr26, no mapping, coverage 0. Residual: the finding is that no location was found, which the mandate anticipates as a valid outcome.",
+    "reuse": "the node adds no product code and runs the existing GraphClient query path and existing bounded host commands unchanged. It wrote four small throwaway graph-probe scripts into its reports directory rather than into the repository, so nothing new enters the codebase; the only mild redundancy is that four separate scripts were used for what could have been one query, which is a probe convenience rather than a reuse defect.",
+    "scope_discipline": "the reviewed commit c863c1d3 changes exactly one file, docs/evidence/fragments/jt60sa-discovery-completion/twiki-attachment-probe.html (70 insertions, 0 deletions), which is the manifest's declared changed path; the reviewed worktree is clean at that commit (git status --porcelain empty modulo the provisioned .venv) and no plan, sprint or index state was mutated. The host commands are read-only (ls, find, curl -sI, ssh hostname) and stay inside the bounds the mandate names; no graph write, no discover run and no code change. Scripts and raw output were placed in the node's declared reports path."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal_fidelity: the node's goal (locate read-only where the JT-60SA TWiki attachments live on nakasvr26 now) is delivered in full; the graph split 1049 total / 781 scored-or-discovered / 548 nakasvr23 / 231 ssh / 2 external is independently reproduced and the fragment's arithmetic (535+13+231+2) is exact; the answer is that no migrated location exists on nakasvr26.\nVERDICT evidence: every central claim reproduced at head c863c1d3 -- graph census, ssh positive control (intr26-2), web-root listing (/var/www and /data absent, /srv empty), bounded find positive control (/opt/pbs/bin/qsub) with sample filenames returning 0 hits, no httpd/nginx/twiki tree, both curl -sI rc=124, nakasvr23 -> 157.111.10.188; the zero is a measured absence not a blind scan.\nVERDICT scope_discipline: commit c863c1d3 touches exactly one file (the evidence fragment, 70 insertions), clean worktree, no plan/sprint/index mutation, read-only host commands within bounds.\nVERDICT durability: one-shot read-only external probe with no test; the finding is unguarded and the method rests on the unversioned reports directory -- the weakest dimension.\nVERDICT fit: well-formed evidence HTML, element ids begin with the node id, no plan-stage labels beyond the evidence-fragment naming convention.\nVERDICT reuse: no product code added; existing GraphClient query path and bounded host commands reused; four throwaway probe scripts kept out of the repository.\nFINDING manifest.md:11 follow-on: reviewed baseline_suite/after_suite carry no suite arm and the node changes no code or tests, so added_failure_count is 0 with an empty id set by absence of a suite, not a pass; the read-only probe is the only gate and I re-ran its central measure.\nFINDING twiki-attachment-probe:1 follow-on: the fragment says '/var/www, /srv/* and /data* do not exist'; /srv itself exists but is empty, so 'do not exist' is precise only of the glob /srv/*. The operational claim (no web root, no pub tree) is correct and reproduced.\nFINDING remote_search.sh:1 follow-on: the probe scripts and raw output live in the unversioned reports directory, not the repository; the finding is an unguarded point-in-time reading of two remote hosts, so its durability rests on that directory surviving.\n",
+  "review_run_id": "r-20261007T154517263733-review-of-twiki-attachment-probe",
+  "reviewed_base": "8e163574126fde56d0007749800a524ec2aeb216",
+  "reviewed_base_sha": "8e163574126fde56d0007749800a524ec2aeb216",
+  "reviewed_commit": "c863c1d3da41567b2d315560ba884df9783487a2",
+  "reviewed_head_sha": "c863c1d3da41567b2d315560ba884df9783487a2",
+  "reviewed_run_id": "r-20261007T153211125333-twiki-attachment-probe",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:53:00.000000+00:00",
+  "total": 111
+}
