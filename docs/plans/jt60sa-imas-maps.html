@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -201,11 +201,45 @@
       current's homes, where flux-loop positions live, which IDS holds a coil current.
     </p>
     <p>
-      <strong>Node</strong> <code>dd-path-search-rerank</code>, role implement, 2.5 h, after the gate
-      below. Write paths: the DD search tool module and its tests, named at dispatch from the rerank
-      owner that section lands. <strong>Done when</strong> nDCG@10 on 15 hand-labelled mapping
-      questions is reported before and after the rerank, and the rerank is one call into the shared
-      owner.
+      Two decisions were made by the lead on 2026-10-07. First, the rerank runs by default only where
+      code and wiki search already rerank: the full and facility servers. A server started with
+      <code>--read-only</code> or <code>--dd-only</code>, which is what the public containers run, never
+      reranks, so no external query spends Jev money. Second, every Jev caller skips cleanly when
+      <code>OPENROUTER_API_KEY_IMAS_CODEX</code> is not set. Today <code>rerank_pool</code> attempts
+      every call and only then falls back. The candidate stage logs one failure for each of its
+      sources, and each source is left unjudged for a later retry.
+    </p>
+    <p>
+      <strong>Node</strong> <code>decisions-key-skip</code>, role implement, 45 min. Write paths:
+      <code>imas_codex/discovery/base/judgment.py</code>, <code>imas_codex/ids/candidates.py</code>,
+      <code>tests/discovery/test_decisions_key_skip.py</code>,
+      <code>docs/evidence/fragments/jt60sa-imas-maps/decisions-key-skip.html</code>.
+      <code>judgment.py</code> gains one predicate that reports whether the decisions key is present.
+      It is built on <code>get_api_key</code> in <code>imas_codex/discovery/base/llm.py</code> rather
+      than on a second spelling of the variable name. With no key, <code>rerank_pool</code> makes no
+      call and returns the embedding order, a note naming the missing variable, and a cost of zero. The
+      candidate stage checks once before its first source. It then logs one warning naming the
+      variable and leaves every source unjudged, exactly as a transport failure does, without a call
+      per source. <strong>Done when</strong> tests pin both skips with the variable removed from the
+      environment and a decisions transport that fails the test if it is ever called. The existing
+      judgment, enrichment-rerank and search-tools tests still pass. The negative control removes the
+      predicate check and shows the transport being called.
+    </p>
+    <p>
+      <strong>Node</strong> <code>dd-path-search-rerank</code>, role implement, 2.5 h. Write paths:
+      <code>imas_codex/tools/graph_search.py</code>, <code>imas_codex/tools/__init__.py</code>,
+      <code>imas_codex/llm/server.py</code>, <code>tests/tools/test_dd_path_search_rerank.py</code>,
+      <code>tests/tools/fixtures/dd_mapping_questions.json</code>,
+      <code>docs/evidence/fragments/jt60sa-imas-maps/dd-path-search-rerank.html</code>. The DD search
+      tool takes a rerank switch at construction. The server sets it from its mode, on unless
+      read-only, and the switch's default for direct use is off. When on, the hits pass through one
+      call to <code>rerank_candidates</code> in <code>imas_codex/llm/search_tools.py</code>, the shared
+      owner, so no second rerank is built. <strong>Done when</strong> nDCG@10 on 15 hand-labelled
+      mapping questions in the fixture is reported before and after the rerank. Examples are the
+      plasma current's homes, where flux-loop positions live, and which IDS holds a coil current.
+      Tests pin three things: a full server reranks, a read-only or DD-only server never calls the
+      rerank, and the rerank is one call into the shared owner. The existing DD search tests still
+      pass.
     </p>
 
     <section class="section-landed">
@@ -328,7 +362,7 @@
     <div class="r-comment-body"><p>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment-remainder.html — eight foreground enrich-only passes (--time 8 --cost-limit 10) took JT-60SA SignalSource enriched 953 -&gt; 2,249 of 2,249, discovered signals 3,439 -&gt; 0, failed 0; Jev rerank spend USD 0.51 (this run) / USD 0.82 (both runs) of the USD 50 cap; no source enriched without retrieved context (high 1,910 / medium 339, no empty tier)</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261007T132409054748-review-of-jt60sa-signal-enrichment-remainder" data-who="reckon-build" data-when="2026-10-07T13:36:55.602Z">
-    <div class="r-comment-body"><p>Stored the review for r-20261007T122816180096-jt60sa-signal-enrichment-remainder (operational node jt60sa-signal-enrichment-remainder, §2 of jt60sa-imas-maps): parsed record scoring all six dimensions (109/120) at reviewed_base_sha 81c602aaf / reviewed_head_sha 91020cd5b, added_failure_count 0 with added_failure_ids [] derived from the run&#x27;s own census gate arms (counts-before.log -&gt; counts-after8.log), with two follow-on findings (per-pass cost column does not sum to its stated total; the source-level context-quality figure has no retained arm).</p></div>
+    <div class="r-comment-body"><p>Stored the review for r-20261007T122816180096-jt60sa-signal-enrichment-remainder (operational node jt60sa-signal-enrichment-remainder, §2 of jt60sa-imas-maps): parsed record scoring all six dimensions (109/120) at reviewed_base_sha 81c602aaf / reviewed_head_sha 91020cd5b, added_failure_count 0 with added_failure_ids [] derived from the run's own census gate arms (counts-before.log -&gt; counts-after8.log), with two follow-on findings (per-pass cost column does not sum to its stated total; the source-level context-quality figure has no retained arm).</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261007T123205644425-member-identifier-varying-segments" data-who="reckon-build" data-when="2026-10-07T12:40:01.814Z">
     <div class="r-comment-body"><p>§11 member-identifier-varying-segments — extract_member_identifier now builds each member identifier only from the accessor's numeric runs that differ across the source's members, dropping constant runs (the JT-60SA reference shot 101173 no longer appears); tests/discovery/test_member_identifier.py pins the JT-60SA 81..86 case, the two-varying-run 010/048 case and the constant-first-run case, and tests/discovery/test_signals_pipeline.py still passes (49 passed, EXIT=0).</p></div>
