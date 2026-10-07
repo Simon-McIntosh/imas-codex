@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="jt-60sa,signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;, &quot;jt60sa-imas-maps#s3&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-imas-maps#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -60,7 +60,9 @@
       (<code>build_enrich_claimable_predicate</code>,
       <code>imas_codex/discovery/signals/parallel.py:317</code>). That is 267 representatives, whose
       enrichment <code>propagate_source_enrichment</code> copies to the 3,565 members and to each
-      source, plus the 1,969 standalone signals: 2,236 claims. It reads only the graph and the LLM,
+      source. After §3, each of the 1,969 standalone signals is the representative of its own
+      one-member source, so the same pass enriches it and marks that source enriched: 2,236 claims in
+      all. §3 therefore lands first. It reads only the graph and the LLM,
       and needs no facility access. The census categories cost about USD 1 for 764 signals, so this run
       is estimated at USD 3, under a USD 5 cap. <code>discovery-judgments-through-jev</code> later
       moves signal-enrichment judgments to Jev and re-judges stored rows from the graph. This run does
@@ -79,21 +81,44 @@
     <p>
       Every stage of the mapping pipeline keys on SignalSource: the candidate claim, the
       <code>MAPPING_CANDIDATE</code> edges and the <code>MAPS_TO_IMAS</code> bindings. A signal that
-      grouping left alone has no source, so the 1,969 standalone JT-60SA signals can never be mapped. The
-      recommended repair, under the decision below, gives each standalone enriched signal a singleton
-      SignalSource. The signal is its only member and its representative. The source is made by the
-      existing owner of SignalSource creation, <code>create_signal_source</code>
-      (<code>imas_codex/discovery/base/grouping.py:26</code>), so the mapping pipeline keeps one unit
-      and needs no change. The repair is facility-independent, and JT-60SA is where it is measured.
+      grouping left alone has no source, so the 1,969 standalone JT-60SA signals can never be mapped.
+      Sources for FacilitySignals are created by <code>detect_signal_sources</code>
+      (<code>imas_codex/discovery/signals/parallel.py:1556</code>), which runs in the signals preflight
+      and in the enrich loop. It groups signals by accessor pattern, and creates a source only for a
+      pattern with at least <code>min_instances</code> members, 3 by default. A signal whose pattern has
+      fewer is left in no source, which is how the 1,969 arise.
+    </p>
+    <p>
+      Under the decision below, <code>detect_signal_sources</code> gains a final pass. Each signal it
+      left ungrouped becomes a one-member source, keyed by the signal, with the signal as its only member
+      and its representative. The pass uses the function's own <code>MERGE</code>
+      (<code>parallel.py:1617–1650</code>), so the grouping threshold is unchanged. A pattern with two
+      members still forms no two-member group. Because the pass runs before enrichment, enrichment then
+      claims each new source's representative, and <code>propagate_source_enrichment</code> marks the
+      source enriched as it does for every source. <code>create_signal_source</code>
+      (<code>imas_codex/discovery/base/grouping.py:26</code>) has no caller anywhere, so it is deleted.
+      That is the surface retired against the extension, and it adds no new creator. The SignalNode
+      creator in <code>imas_codex/discovery/mdsplus/graph_ops.py:455</code> serves MDSplus data nodes,
+      not FacilitySignals, and is left alone. The repair is facility-independent, and JT-60SA is where
+      it is measured.
     </p>
     <p>
       <strong>Node</strong> <code>singleton-signal-sources</code>, role implement, 1.5 h. Write paths:
-      <code>imas_codex/discovery/base/grouping.py</code>,
-      <code>imas_codex/discovery/signals/parallel.py</code> and <code>tests/discovery/</code>.
+      <code>imas_codex/discovery/signals/parallel.py</code>,
+      <code>imas_codex/discovery/base/grouping.py</code> and <code>tests/discovery/</code>.
       <strong>Done when</strong> <code>uv run --no-sync pytest tests/discovery tests/ids -p no:cacheprovider</code>
-      passes with tests showing that an enriched standalone signal gains a singleton source carrying its
-      enrichment; that re-running creates none twice; and that <code>claim_sources_for_candidates</code>
-      claims the singleton. A live run then leaves no enriched JT-60SA signal outside a source.
+      passes with tests showing:
+    </p>
+    <ul>
+      <li><code>detect_signal_sources</code> gives an ungrouped discovered signal a one-member source
+        with itself as representative;</li>
+      <li>a pattern with three members still forms one three-member source;</li>
+      <li>re-running creates nothing twice;</li>
+      <li>after enrichment the one-member source reads enriched, and
+        <code>claim_sources_for_candidates</code> claims it.</li>
+    </ul>
+    <p>
+      <code>grep -rn create_signal_source imas_codex/ tests/</code> prints nothing.
     </p>
 
     <h2 id="s4">§4 — EDDB units parse</h2>
@@ -253,6 +278,11 @@
     <h4 class="r-fu-title">Enrich the JT-60SA signals</h4>
     <div class="r-fu-body">Enrichment is graph-only and unblocks the candidate run. §3 and §4 can run beside it.</div>
     <pre class="r-fu-prompt">/reckon-build jt60sa-imas-maps §2</pre>
+    </article>
+<article class="r-fu" data-id="f-jim-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-07" data-recommends-skill="/reckon-build jt60sa-imas-maps §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Give every ungrouped signal its own source</h4>
+    <div class="r-fu-body"><p>§3 lands before §2, so the enrichment pass enriches the 1,969 standalone signals as representatives of their own sources.</p></div>
+    <pre class="r-fu-prompt">/reckon-build jt60sa-imas-maps §3</pre>
     </article>
 </section>
   </main>

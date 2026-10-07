@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -82,17 +82,19 @@
       </tbody>
     </table>
     <p>
-      Access is probed through the owner every discover command already uses:
-      <code>ServiceMonitor</code> (<code>imas_codex/discovery/base/services.py:830</code>), built by
-      <code>create_service_monitor</code> (<code>:1117</code>) and reached through
-      <code>create_discovery_monitor</code> (<code>imas_codex/cli/discover/common.py:502</code>). Its
-      checks are <code>neo4j_health_check</code> (<code>:159</code>), <code>ssh_health_check</code>
-      (<code>:178</code>) and <code>wiki_auth_check</code> (<code>:200</code>). The sequence asks the
-      monitor for each stage's needs, so one owner holds facility access. A need no check covers, for
-      example the facility's declared remote environment, is added to the monitor as a check through
-      <code>probe_remote_environment</code> (<code>imas_codex/remote/tools.py:550</code>), never probed
-      beside it. Each need is checked once at start, and each SSH or tunnel need again just before its
-      stage runs, because a hop can drop mid-sequence.
+      Access is probed through the check functions every discover command already uses. They are
+      <code>neo4j_health_check</code>, <code>ssh_health_check</code> and <code>wiki_auth_check</code>
+      (<code>imas_codex/discovery/base/services.py:159, 178, 200</code>), which each stage's
+      <code>ServiceMonitor</code> runs. That monitor is built by <code>create_discovery_monitor</code>
+      (<code>imas_codex/cli/discover/common.py:502</code>) inside <code>run_discovery</code>. The
+      facility's declared remote environment keeps its owner, <code>ensure_remote_environment</code>
+      (<code>common.py:443</code>), which the SSH stages call today. The sequence calls it unchanged
+      and reads its refusal as <em>unreachable</em>, so no second probe path exists. The runner builds
+      no monitor of its own. It calls the same check functions once before each stage to decide
+      whether to invoke it, because a hop can drop mid-sequence. The stage's own monitor then guards
+      the stage while it runs, as it does now. The two are different jobs on one owner: the runner's
+      call decides whether a stage starts, and the stage's monitor pauses its workers if the facility
+      goes away mid-stage.
     </p>
     <p>
       Each stage's <em>nothing to do</em> comes from its existing predicate, and the registry names
@@ -115,11 +117,13 @@
         <code>has_pending_validation_work</code> (<code>imas_codex/ids/workers.py:386–395</code>).</li>
     </ul>
     <p>
-      Documents has its two checks only as private helpers, <code>_has_pending_image_documents</code>
-      and <code>_has_pending_image_scores</code> (<code>imas_codex/discovery/documents/pipeline.py:58,
-      74</code>). The node makes them one public <code>has_pending_work</code> in that module, which the
-      pipeline and the registry both call. That is one added public definition, which replaces two
-      private ones.
+      Documents keeps its checks as private helpers in <code>imas_codex/discovery/documents/pipeline.py</code>.
+      Its image-score check, <code>_has_pending_image_scores</code> (<code>:74</code>), duplicates the
+      public <code>has_pending_image_work</code> (<code>imas_codex/discovery/base/image.py:354</code>),
+      so it is deleted and both its call sites call the owner. Its document check,
+      <code>_has_pending_image_documents</code> (<code>:58</code>), has no public counterpart and becomes
+      the module's public <code>has_pending_work</code>, which the pipeline and the registry both call.
+      That is one public definition added and one private duplicate removed.
     </p>
     <p>
       Every stage ends in one of four outcomes, each with a reason: <em>ran</em> (counts done and
@@ -132,7 +136,6 @@
     <p>
       <strong>Node</strong> <code>sequence-stage-registry</code>, role implement, 2 h. Write paths:
       <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
-      <code>imas_codex/discovery/base/services.py</code>,
       <code>imas_codex/discovery/documents/pipeline.py</code>, <code>tests/cli/test_discover_sequence.py</code>
       and <code>tests/discovery/</code>. <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
@@ -156,10 +159,12 @@
       <code>ctx.invoke</code>. Every discover domain builds its engine inside its own command
       function and then calls <code>run_discovery</code>
       (<code>imas_codex/cli/discover/common.py:212</code>), so invoking the command is the only path
-      that reuses each stage whole, without refactoring seven commands or starting subprocesses. The
-      runner passes the shared options through: <code>--time</code> per stage, and a total
-      <code>--cost-limit</code> shared across the paid stages in proportion to their pending work, with
-      each stage's own cap never exceeded.
+      that reuses each stage whole, without refactoring seven commands or starting subprocesses.
+      <code>--cost-limit</code> and <code>--time</code> mean what they mean on every per-domain
+      command: a cap on this invocation's spend and wall-clock time. The sequence's invocation is
+      longer, so before each stage it passes the remainder, the cap minus what the earlier stages
+      spent or took, as that stage's own <code>--cost-limit</code> and <code>--time</code>. No stage can
+      exceed what is left, and no option is overloaded.
     </p>
     <p>
       A stage that raises is recorded as <em>failed</em> with its error. The runner then continues with
@@ -169,8 +174,14 @@
       table goes to the CLI log at <code>~/.local/share/imas-codex/logs/</code>.
     </p>
     <p>
-      The command adds one CLI entry and retires none. The per-domain commands stay the way to run one
-      stage with its stage-specific options, for example <code>discover signals --category</code>.
+      The command adds one CLI entry, <code>discover run FACILITY</code>, and five options:
+      <code>--dry-run</code>, <code>--only</code> and <code>--skip</code> (stage names),
+      <code>--cost-limit</code> and <code>--time</code>. The last two are the per-domain options with
+      the same meaning over a longer invocation, so the sequence adds no new concept for them. The
+      mapping stage is opted into by naming it, under the decision below, and needs no option of its
+      own. Nothing is retired. The per-domain commands stay the way to run one stage with its
+      stage-specific options, for example <code>discover signals --category</code>, which the sequence
+      does not re-declare.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h. Write paths:
@@ -183,7 +194,8 @@
       <li>stages run in registry order through <code>ctx.invoke</code> of their commands;</li>
       <li>a failing stage is reported as failed, a stage that reads its output is skipped with that
         reason, and an independent stage still runs;</li>
-      <li>the total cost cap is split across the paid stages and no stage exceeds its own cap;</li>
+      <li>each stage receives the remaining cost and time as its own <code>--cost-limit</code> and
+        <code>--time</code>, and the sequence stops invoking paid stages when nothing remains;</li>
       <li><code>--only</code> and <code>--skip</code> select stages by name;</li>
       <li>the final table lists every stage with outcome, reason, counts, cost and time.</li>
     </ul>
@@ -252,7 +264,7 @@
 <div class="r-dec" data-key="mapping-stage-default" data-choice="" data-by="" data-when="" data-recommended="opt-in" data-recommended-by="reckon-build">
     <p class="r-dec-q">Does the sequence run imas map run by default?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="opt-in">only with --through mapping</button>
+      <button class="r-opt" data-value="opt-in">only when named in --only</button>
       <button class="r-opt" data-value="default">always, under the cost cap</button>
       </p>
     <p class="r-dec-rat">The recommendation is opt-in. The mapping stage spends on the reasoning
