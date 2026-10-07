@@ -363,12 +363,33 @@ async def ingest_files(
     # rather than assuming every claimed file ingested.
     outcomes: dict[str, dict[str, Any]] = {}
 
+    def settle() -> dict[str, Any]:
+        """Return ``stats`` carrying every requested path's own outcome.
+
+        Every exit from this function routes through here.  Paths settled before
+        any fetch — already ingested, or refused by the gate — must still carry
+        an outcome, because the caller marks a claimed file from this mapping and
+        an absent entry reads as an unrecorded claim rather than as a settled one.
+        """
+        stats["outcomes"] = dict(outcomes)
+        stats["failed"] = {
+            path: outcome["reason"]
+            for path, outcome in outcomes.items()
+            if outcome["status"] == "failed"
+        }
+        stats["skipped_files"] = {
+            path: outcome["reason"]
+            for path, outcome in outcomes.items()
+            if outcome["status"] == "skipped"
+        }
+        return stats
+
     if remote_paths is None:
         query_limit = limit if limit is not None else 10000
         pending = get_pending_files(facility, limit=query_limit)
         if not pending:
             report(0, 0, "No pending files in queue")
-            return stats
+            return settle()
 
         remote_paths = [p["path"] for p in pending]
         source_file_ids = {p["path"]: p["id"] for p in pending}
@@ -389,7 +410,7 @@ async def ingest_files(
         except ValueError as e:
             logger.error("Ingestion gated: %s", e)
             report(0, 0, f"Ingestion blocked: {e}")
-            return stats
+            return settle()
 
     # Deduplication check
     paths_to_ingest = remote_paths
@@ -410,7 +431,7 @@ async def ingest_files(
 
     if not paths_to_ingest:
         report(total_files, total_files, "All files already ingested")
-        return stats
+        return settle()
 
     # Collect file content grouped by language
     files_by_language: dict[str, list[dict[str, Any]]] = {}
@@ -448,10 +469,6 @@ async def ingest_files(
             files_by_language[language] = []
         files_by_language[language].append(file_info)
 
-    if not files_by_language:
-        report(total_files, total_files, "No files to process")
-        return stats
-
     # A path the fetch never returned gets its own failed outcome, so the caller
     # does not leave it claimed and silent.
     for path in paths_to_ingest:
@@ -461,6 +478,10 @@ async def ingest_files(
             for fi in flist
         ):
             outcomes[path] = {"status": "failed", "reason": "fetch failed"}
+
+    if not files_by_language:
+        report(total_files, total_files, "No files to process")
+        return settle()
 
     # Flatten all files — process together regardless of language.
     # Previous code grouped by language and ran separate chunk→embed→write
@@ -640,17 +661,7 @@ async def ingest_files(
         processed_files += len(batch_files)
         stats["files"] = processed_files
 
-    stats["outcomes"] = outcomes
-    stats["failed"] = {
-        path: outcome["reason"]
-        for path, outcome in outcomes.items()
-        if outcome["status"] == "failed"
-    }
-    stats["skipped_files"] = {
-        path: outcome["reason"]
-        for path, outcome in outcomes.items()
-        if outcome["status"] == "skipped"
-    }
+    settle()
 
     # Final relationship linking — safety net for any relationships not
     # created in the per-batch step above (e.g. cross-batch references).
