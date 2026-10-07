@@ -390,10 +390,11 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 
 # ─── Discovery function seats ──────────────────────────────────────────────
 # One seat per discovery function so a model can be chosen per function, the
-# way the standard-names pipeline already does. The four text/vision seats run
-# on the local lane through the ambix router; cluster labelling and IDS mapping
-# stay on OpenRouter. reasoning-effort is left unset, which keeps the local
-# model's non-thinking behaviour; setting it is a one-line change per seat.
+# way the standard-names pipeline already does. The discovery function seats
+# run on the local lane through the ambix router; the two Jev seats
+# (discovery-relevance, mapping-candidates) stay on the OpenRouter decisions
+# endpoint. reasoning-effort is left unset, which keeps the local model's
+# non-thinking behaviour; setting it is a one-line change per seat.
 
 [tool.imas-codex.discovery-triage]
 # Path triage and code-file triage.
@@ -438,15 +439,26 @@ model = "typesafe/jev-1.13"
 model = "typesafe/jev-1.13"
 
 [tool.imas-codex.cluster-labels]
-# Cluster labelling. Keeps the OpenRouter model so nothing outside discovery
-# changes model. batch-size is the clusters-per-LLM-call setting that
+# Cluster labelling on the DD clusters whose sibling paths the mapping
+# candidate stage adds. Runs on the local lane through the ambix router.
+# batch-size is the clusters-per-LLM-call setting that
 # get_labeling_batch_size reads.
-model = "openrouter/openai/gpt-5.4"
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
 batch-size = 50
 
 [tool.imas-codex.ids-mapping]
-# IDS mapping and metadata enrichment.
-model = "openrouter/openai/gpt-5.4"
+# IDS mapping and metadata enrichment, used by the mapping engine for both the
+# escalated set choice and the field mappings. Runs on the local lane through
+# the ambix router. The escalated choice is reasoning work and the local model
+# is otherwise non-thinking, so reasoning-effort is raised to "high".
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
+reasoning-effort = "high"
 
 [tool.imas-codex.reasoning]
 # openrouter/ prefix — see [dd-enrichment] note above.
