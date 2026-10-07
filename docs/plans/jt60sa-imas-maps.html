@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -232,14 +232,16 @@
     <h4 class="r-gate-measure">a shared search-time Jev rerank owner exists for the code and wiki search tools</h4>
     <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
     </div>
-<div class="r-gate" data-id="g-jim-3" data-section="s9" data-gated-sections="s9" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-jim-3" data-section="s9" data-gated-sections="s9" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">the generic retrieve-wide-then-rerank core exists in imas_codex/discovery/base/judgment.py, callable without importing from imas_codex/llm/</h4>
     <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
-    </div>
-<div class="r-gate" data-id="g-jim-4" data-section="s2" data-gated-sections="s2" data-status="open" data-verdict="">
+    <a class="r-gate-evidence" href="Merge 52c0e44fb on main: rerank_pool lives in imas_codex/discovery/base/judgment.py, whose only project import is imas_codex.discovery.base.llm; signals enrichment and llm/search_tools.py both call it.">Evidence</a>
+</div>
+<div class="r-gate" data-id="g-jim-4" data-section="s2" data-gated-sections="s2" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">node jt60sa-code-pass (run r-20261007T084429281839) is promoted and merged to main, with no JT-60SA CodeFile left at triaged</h4>
     <p class="r-gate-required-evidence">docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-code-pass.html</p>
-    </div>
+    <a class="r-gate-evidence" href="Run r-20261007T084429281839 promoted; commit 653e34bdd is an ancestor of main. Graph census after the pass: CodeFile scored 723, ingested 552, failed 29, triaged 0.">Evidence</a>
+</div>
 </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
