@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="65">
+<meta name="plan-version" content="66">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -211,6 +211,22 @@
       Tests pin three things: a full server reranks, a read-only or DD-only server never calls the
       rerank, and the rerank is one call into the shared owner. The existing DD search tests still
       pass.
+    </p>
+    <p>
+      <strong>Node</strong> <code>dd-search-rerank-note</code>, role implement, 30 min. Write paths:
+      <code>imas_codex/tools/graph_search.py</code>, <code>imas_codex/llm/search_formatters.py</code>,
+      <code>tests/tools/test_dd_path_search_rerank.py</code>,
+      <code>docs/evidence/fragments/jt60sa-imas-maps/dd-search-rerank-note.html</code>.
+      <code>_rerank_dd_hits</code> drops the note that <code>rerank_candidates</code> returns. So a
+      caller of <code>search_dd_paths</code> cannot tell a rerank that ran from one that fell back to
+      embedding order, either because the decisions key is absent or because the time budget elapsed.
+      The note goes on the result summary as <code>rerank_note</code>.
+      <code>format_search_dd_report</code> then prints it beneath the hits, as the code and wiki
+      reports already do. The two server-mode tests also count <code>rerank_candidates</code> calls
+      rather than reading the switch. <strong>Done when</strong> tests pin that a skipped rerank, with
+      the key removed, leaves the note in the summary and in the formatted report, that a completed
+      rerank leaves neither, and that a read-only or DD-only server makes zero
+      <code>rerank_candidates</code> calls.
     </p>
 
     <section class="section-landed">
