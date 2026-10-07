@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run is not an armed test role and its manifest carries baseline_suite: null and after_suite: null, so it names no base/after gate logs and no added-failure count could be derived; the measure is unmeasured rather than zero.",
+  "base_log_revision": null,
+  "completed_at": "2026-10-07T08:19:18.220Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "both durability findings were corrected in the committed record at merge: the 78 host-only paths are listed and the live chunk count is dated to the reviewed head",
+      "recorded_at": "2026-10-07T08:19:06.342080+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-07T08:04:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/getseldata-onhost-grep.html",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "the done-when asks the fragment to 'name every file on the host the graph does not hold', but the fragment names the 78 host-only files only by category with examples (object files, archives, executables, .i stubs, test fixtures, Makefiles, one dated backup) and points the reader to compare.txt in the reports directory outside the repository for the full list. A reader of the committed record cannot see the 78-path set without the out-of-repo file; either the fragment should list them (compact, one code block) or the raw list should be committed beside it."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/getseldata-onhost-grep.html",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "the '13 chunks at jt-60sa whose text carries the arrays' figure is a live-graph count written into durable evidence with no revision or timestamp beside it. It already reads 12 in a re-run after the sibling stale-chunk-removal graphs changed the graph. Recording the count against the reviewed head sha (4b95b52a) or calling it indicative of a point in time would keep the durable number reconcilable with the live graph."
+    }
+  ],
+  "head_log_revision": null,
+  "item_verdicts": {
+    "done_when": "every item holds: sshwrap positive control (intr26-2), all-extension host listing (93), case-insensitive grep for the three tokens (0), host-vs-graph compare naming the host-only set (78 in the raw log, summarised in the fragment).",
+    "goal": "the node's goal (does any getseldata file the scanner missed name JLOOP/JTPRB/JNPRB) is answered at the head: 0 of 93 host files, with the arrays located in SELENE/SAeqread/edas2, all graph-held; \u00a714's done-when fallback arm ('records that the source fills them elsewhere') is met.",
+    "manifest": "read; status complete, head 4b95b52a8, base ca66c8986, negative_control_log 'none: write paths reach no test path' with the declared eddbreadTime mutation recorded in the fragment; baseline_suite and after_suite read none: not an armed role, so added_failure_count is unmeasured.",
+    "write_paths": "the commit changes only the declared fragment; the granted reports dir holds the raw evidence; the granted figure path is unused."
+  },
+  "justifications": {
+    "durability": "the evidence is a fragment with no regression guard: no test under tests/ or imas_codex/ references the fragment or its anchor, so the 93/15/78 counts can be edited without a gate firing, and the count of array-mentioning chunks is a live-graph value that has already moved from 13 to 12 within the hour under a sibling node's landing. The core negative (getseldata does not name the arrays) is a host fact that is stable, but it too is unguarded. This is the expected durability of an evidence node, not a defect, but it is low.",
+    "evidence": "the core claim reproduces independently: I re-ran the host reads through the same wrapper and got hostname intr26-2 (positive control, exit 0), find -type f = 93 files, grep -rniE 'jloop|jtprb|jnprb' exit 1 (0 lines), and the negative-control token eddbreadTime found (33 lines plus binary matches in geteddb.o, libeddbaccess.a, three eddbaccess.ex), so a present token is seen and the zero for the arrays is a real absence. The graph arm reproduces too: I re-ran graph_query.py at the head and got GRAPH_FILE_COUNT=15 with the same 15 paths, and the host-only count 78 and graph-only 0 follow. One drift, benign: the reviewed run recorded 13 CodeChunks mentioning the arrays; my re-run of graph_chunk_tokens.py now returns 12 (18 matching lines vs 19), which the concurrently landed stale-chunk-removal changes ('remove the chunks of code files no longer ingested') explain as graph movement, not a node error. Every value in the fragment's count table is reachable from the cited raw logs.",
+    "fit": "the fragment follows the repository's evidence-fragment idiom: a single <section> with a node-prefixed h2 id (getseldata-onhost-grep) and node-prefixed element ids, a compact measure/value table with caption, explicit negative-control and positive-control paragraphs, and a statement of where the arrays actually live. No plan, sprint or ticket label appears in the committed file; it is committed to the section's fragment path and the landing line is in the manifest, not the plan.",
+    "goal_fidelity": "the node's goal was to check on the host whether any getseldata file the scanner missed names JLOOP JTPRB or JNPRB, and to satisfy \u00a714's done-when fallback ('or the run records that the source fills them elsewhere'). The fragment answers it exactly: 0 of 93 host files under /analysis/src/getseldata_v4.2 mention any of the three arrays, the arrays are shown to live in SELENE's routines (SAselene eqadj.f/eqouta.f/mgfild.f/fercor.f/eqvacu.f/nllsqf.f/eqvacu3.f), SAeqread's eqvacu.f and edas2's Eqread.py, all graph-held, so no getseldata file fills them. This is consistent with \u00a714's own statement that JLOOP/JTPRB/JNPRB in SELENE are grid-cell indices, not a channel map.",
+    "reuse": "the node adds no product code and duplicates nothing: it reads the graph through the existing GraphClient and the host through the sanctioned ssh wrapper, and its only new artifacts are small read-only probe scripts in the granted reports directory. The fragment reuses the section's existing evidence-fragment shape rather than inventing one.",
+    "scope_discipline": "git show --stat 4b95b52a8 changes exactly one file, docs/evidence/fragments/jt60sa-discovery-completion/getseldata-onhost-grep.html (81 insertions), the one declared in-repo write path; the figure path docs/figures/jt60sa-discovery-completion/getseldata-onhost-grep was granted but correctly left unwritten (the result is a table, and the envelope forbids an image of a table). The run's other outputs live in the granted reports directory outside the repo. No graph write, no code change, no discover run, as the fence required."
+  },
+  "negative_control_applied": "not required: the reviewed node's write paths reach no test path and its manifest declares 'none'. Its declared host-grep mutation (the token eddbreadTime, present in graph chunks under getseldata) was applied and I reproduced it: eddbreadTime is found in geteddb.c/geteddbt.c and eddbaccess.h:120 on the host, so the procedure sees a known-present token and the zero for the three arrays is a real absence.",
+  "plan_slug": "jt60sa-discovery-completion",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the node checks on the host whether any getseldata file the scanner missed names JLOOP JTPRB or JNPRB and records where the arrays live; 0 of 93 host files under /analysis/src/getseldata_v4.2 mention any of the three, and the arrays are in SAselene, SAeqread and edas2 (all graph-held), satisfying the section's done-when fallback.\nSCORE evidence: 18\nJUSTIFICATION evidence: reproduced independently - hostname intr26-2 (positive control, exit 0), 93 files, grep for the three arrays exit 1 (0 lines), control token eddbreadTime found (33 lines plus binary matches); graph re-run gives 15 CodeFile rows and 78 host-only / 0 graph-only. The array-mentioning chunk count now reads 12 (18 lines) against the recorded 13 (19), explained by the sibling stale-chunk-removal landing removing chunks between the runs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 4b95b52a8 changes exactly one file, the declared fragment (81 insertions); the granted figure path is unused and no graph write, code change or discover run was made.\nSCORE durability: 6\nJUSTIFICATION durability: no test references the fragment or its counts, and the array-chunk count is an unstamped live-graph value that has already moved 13 to 12 within the hour; the host fact is stable but unguarded.\nSCORE fit: 19\nJUSTIFICATION fit: the fragment follows the evidence-fragment idiom with a node-prefixed section and table, explicit controls, project-absolute method references, and no plan or ticket label in the committed file.\nSCORE reuse: 20\nJUSTIFICATION reuse: no product code added; the node reads the graph through GraphClient and the host through the sanctioned wrapper, and its only new artifacts are small read-only probes in the granted reports directory.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/getseldata-onhost-grep.html:22 the done-when asks the fragment to name every host-only file, but it names the 78 by category with examples only and defers the full set to compare.txt outside the repository, so the committed record cannot be checked against the 78-path set without the out-of-repo file.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/getseldata-onhost-grep.html:36 the 13-chunk array-mention count is a live-graph value written into durable evidence with no revision stamp; it already reads 12 in a re-run after the graph changed.\n",
+  "review_run_id": "r-20261007T080445299498-review-of-getseldata-onhost-grep",
+  "reviewed_base_sha": "ca66c8986eb1044bee66d2e739bd131c00071f3f",
+  "reviewed_commit": "4b95b52a81a4cdd4b48910f6728d564c4ddef050",
+  "reviewed_head_sha": "4b95b52a81a4cdd4b48910f6728d564c4ddef050",
+  "reviewed_run_id": "r-20261007T071728811964-getseldata-onhost-grep",
+  "scores": {
+    "durability": 6,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "s14",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T08:22:00+00:00",
+  "total": 102
+}
