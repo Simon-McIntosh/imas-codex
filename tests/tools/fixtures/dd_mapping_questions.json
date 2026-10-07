@@ -1,0 +1,264 @@
+{
+  "description": "Hand-labelled mapping questions. Grade 3 = a DD path that stores the queried quantity itself, in any IDS; grade 2 = a reference or setpoint of it (pulse_schedule control, a constraint); grade 1 = a closely related quantity. Grade-3 and grade-2 sets are enumerated exhaustively from the live graph by path name, with paths that store a different object's quantity demoted. k=10.",
+  "k": 10,
+  "questions": [
+    {
+      "id": "plasma_current",
+      "query": "plasma current",
+      "relevant": {
+        "core_profiles/global_quantities/ip": 3,
+        "equilibrium/time_slice/global_quantities/ip": 3,
+        "magnetics/ip": 3,
+        "magnetics/method/ip": 3,
+        "plasma_initiation/global_quantities/ip": 3,
+        "plasma_profiles/global_quantities/ip": 3,
+        "summary/disruption/decay_times/ip": 3,
+        "summary/global_quantities/ip": 3,
+        "equilibrium/time_slice/constraints/ip": 2,
+        "pulse_schedule/flux_control/ip": 2,
+        "core_profiles/profiles_1d/j_phi": 1,
+        "equilibrium/time_slice/profiles_1d/j_phi": 1,
+        "plasma_profiles/profiles_1d/j_phi": 1,
+        "summary/global_quantities/current_ohm": 1
+      }
+    },
+    {
+      "id": "plasma_volume",
+      "query": "total plasma volume",
+      "relevant": {
+        "core_instant_changes/change/profiles_1d/grid/volume": 3,
+        "core_profiles/profiles_1d/grid/volume": 3,
+        "core_sources/source/profiles_1d/grid/volume": 3,
+        "core_transport/model/profiles_1d/grid_d/volume": 3,
+        "core_transport/model/profiles_1d/grid_flux/volume": 3,
+        "core_transport/model/profiles_1d/grid_v/volume": 3,
+        "disruption/profiles_1d/grid/volume": 3,
+        "distribution_sources/source/profiles_1d/grid/volume": 3,
+        "distributions/distribution/profiles_1d/grid/volume": 3,
+        "distributions/distribution/profiles_2d/grid/volume": 3,
+        "edge_profiles/profiles_1d/grid/volume": 3,
+        "equilibrium/time_slice/global_quantities/volume": 3,
+        "equilibrium/time_slice/profiles_1d/volume": 3,
+        "plasma_profiles/profiles_1d/grid/volume": 3,
+        "plasma_sources/source/profiles_1d/grid/volume": 3,
+        "plasma_transport/model/profiles_1d/grid_d/volume": 3,
+        "plasma_transport/model/profiles_1d/grid_flux/volume": 3,
+        "plasma_transport/model/profiles_1d/grid_v/volume": 3,
+        "radiation/process/profiles_1d/grid/volume": 3,
+        "runaway_electrons/profiles_1d/grid/volume": 3,
+        "sawteeth/profiles_1d/grid/volume": 3,
+        "summary/global_quantities/volume": 3,
+        "transport_solver_numerics/derivatives_1d/grid/volume": 3,
+        "transport_solver_numerics/solver_1d/grid/volume": 3,
+        "waves/coherent_wave/profiles_1d/grid/volume": 3,
+        "waves/coherent_wave/profiles_2d/grid/volume": 3,
+        "equilibrium/time_slice/global_quantities/area": 1,
+        "equilibrium/time_slice/profiles_1d/area": 1,
+        "ferritic/object/volume": 1,
+        "spi/injector/fragment/volume": 1
+      }
+    },
+    {
+      "id": "stored_energy",
+      "query": "stored magnetic energy of the plasma",
+      "relevant": {
+        "edge_profiles/ggd_fast/energy_thermal": 3,
+        "equilibrium/time_slice/global_quantities/energy_mhd": 3,
+        "plasma_profiles/ggd_fast/energy_thermal": 3,
+        "summary/disruption/decay_times/energy_thermal": 3,
+        "summary/global_quantities/energy_mhd": 3,
+        "summary/global_quantities/energy_thermal": 3,
+        "summary/global_quantities/energy_total": 3,
+        "calorimetry/group/component/energy_total": 1
+      }
+    },
+    {
+      "id": "electron_temperature",
+      "query": "electron temperature profile",
+      "relevant": {
+        "core_instant_changes/change/profiles_1d/electrons/temperature": 3,
+        "core_instant_changes/change/profiles_1d/electrons/temperature_fit/measured": 3,
+        "core_profiles/profiles_1d/electrons/temperature": 3,
+        "core_profiles/profiles_1d/electrons/temperature_fit/measured": 3,
+        "edge_profiles/ggd/electrons/temperature": 3,
+        "edge_profiles/ggd_fast/electrons/temperature": 3,
+        "edge_profiles/profiles_1d/electrons/temperature": 3,
+        "edge_profiles/profiles_1d/electrons/temperature_fit/measured": 3,
+        "mhd/ggd/electrons/temperature": 3,
+        "plasma_profiles/ggd/electrons/temperature": 3,
+        "plasma_profiles/ggd_fast/electrons/temperature": 3,
+        "plasma_profiles/profiles_1d/electrons/temperature": 3,
+        "plasma_profiles/profiles_1d/electrons/temperature_fit/measured": 3,
+        "turbulence/profiles_2d/electrons/temperature": 3,
+        "core_profiles/profiles_1d/electrons/temperature_fit": 1,
+        "edge_profiles/profiles_1d/electrons/temperature_fit": 1,
+        "plasma_profiles/profiles_1d/electrons/temperature_fit": 1
+      }
+    },
+    {
+      "id": "electron_density",
+      "query": "electron density profile",
+      "relevant": {
+        "core_instant_changes/change/profiles_1d/electrons/density": 3,
+        "core_profiles/profiles_1d/electrons/density": 3,
+        "edge_profiles/ggd/electrons/density": 3,
+        "edge_profiles/ggd_fast/electrons/density": 3,
+        "edge_profiles/profiles_1d/electrons/density": 3,
+        "plasma_profiles/ggd/electrons/density": 3,
+        "plasma_profiles/ggd_fast/electrons/density": 3,
+        "plasma_profiles/profiles_1d/electrons/density": 3,
+        "turbulence/profiles_2d/electrons/density": 3,
+        "core_profiles/profiles_1d/electrons/density_fit": 1
+      }
+    },
+    {
+      "id": "ion_temperature",
+      "query": "ion temperature profile",
+      "relevant": {
+        "core_instant_changes/change/profiles_1d/ion/temperature": 3,
+        "core_profiles/profiles_1d/ion/temperature": 3,
+        "core_profiles/profiles_2d/ion/temperature": 3,
+        "edge_profiles/ggd/ion/temperature": 3,
+        "edge_profiles/ggd_fast/ion/temperature": 3,
+        "edge_profiles/profiles_1d/ion/temperature": 3,
+        "plasma_profiles/ggd/ion/temperature": 3,
+        "plasma_profiles/ggd_fast/ion/temperature": 3,
+        "plasma_profiles/profiles_1d/ion/temperature": 3,
+        "plasma_profiles/profiles_2d/ion/temperature": 3,
+        "turbulence/profiles_2d/ion/temperature": 3,
+        "core_profiles/profiles_1d/ion/density": 1,
+        "plasma_profiles/profiles_1d/ion/density": 1
+      }
+    },
+    {
+      "id": "safety_factor",
+      "query": "safety factor q profile",
+      "relevant": {
+        "core_instant_changes/change/profiles_1d/q": 3,
+        "core_profiles/profiles_1d/q": 3,
+        "edge_profiles/profiles_1d/q": 3,
+        "equilibrium/time_slice/profiles_1d/q": 3,
+        "plasma_profiles/profiles_1d/q": 3,
+        "sawteeth/profiles_1d/q": 3,
+        "equilibrium/time_slice/global_quantities/q_95": 1,
+        "equilibrium/time_slice/global_quantities/q_axis": 1,
+        "equilibrium/time_slice/global_quantities/q_min": 1,
+        "summary/global_quantities/q_95": 1
+      }
+    },
+    {
+      "id": "poloidal_flux_profile",
+      "query": "poloidal magnetic flux profile",
+      "relevant": {
+        "equilibrium/time_slice/profiles_1d/psi": 3,
+        "equilibrium/time_slice/global_quantities/psi_axis": 1,
+        "equilibrium/time_slice/global_quantities/psi_boundary": 1,
+        "equilibrium/time_slice/global_quantities/psi_magnetic_axis": 1,
+        "equilibrium/time_slice/profiles_1d/phi": 1,
+        "sawteeth/profiles_1d/phi": 1
+      }
+    },
+    {
+      "id": "boundary_outline",
+      "query": "plasma boundary outline coordinates",
+      "relevant": {
+        "equilibrium/time_slice/boundary/outline/r": 3,
+        "equilibrium/time_slice/boundary/outline/z": 3,
+        "equilibrium/time_slice/boundary/outline": 1
+      }
+    },
+    {
+      "id": "flux_loop_positions",
+      "query": "flux loop positions",
+      "relevant": {
+        "magnetics/flux_loop/position/r": 3,
+        "magnetics/flux_loop/position/z": 3,
+        "magnetics/flux_loop/flux": 1,
+        "magnetics/flux_loop/position": 1
+      }
+    },
+    {
+      "id": "flux_loop_voltage",
+      "query": "flux loop measured voltage",
+      "relevant": {
+        "magnetics/flux_loop/voltage": 3,
+        "magnetics/flux_loop/flux": 1
+      }
+    },
+    {
+      "id": "poloidal_field_probe",
+      "query": "poloidal magnetic field probe location",
+      "relevant": {
+        "magnetics/b_field_pol_probe/position/r": 3,
+        "magnetics/b_field_pol_probe/position/z": 3,
+        "magnetics/b_field_pol_probe/field": 1,
+        "magnetics/b_field_pol_probe/position": 1
+      }
+    },
+    {
+      "id": "coil_current",
+      "query": "poloidal field coil current",
+      "relevant": {
+        "coils_non_axisymmetric/coil/current": 3,
+        "pf_active/coil/current": 3,
+        "pf_passive/loop/current": 3,
+        "pulse_schedule/pf_active/coil/current": 3,
+        "tf/coil/current": 3,
+        "coils_non_axisymmetric/coil/resistance": 1,
+        "pf_active/circuit/current": 1,
+        "pf_active/coil/resistance": 1,
+        "tf/coil/resistance": 1
+      }
+    },
+    {
+      "id": "toroidal_field_on_axis",
+      "query": "toroidal magnetic field on the magnetic axis",
+      "relevant": {
+        "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi": 3,
+        "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor": 3,
+        "summary/local/magnetic_axis/b_field_phi": 3,
+        "summary/local/magnetic_axis/b_field_tor": 3,
+        "core_instant_changes/vacuum_toroidal_field/b0": 2,
+        "core_profiles/vacuum_toroidal_field/b0": 2,
+        "core_sources/vacuum_toroidal_field/b0": 2,
+        "core_transport/vacuum_toroidal_field/b0": 2,
+        "disruption/vacuum_toroidal_field/b0": 2,
+        "distribution_sources/vacuum_toroidal_field/b0": 2,
+        "distributions/vacuum_toroidal_field/b0": 2,
+        "edge_profiles/vacuum_toroidal_field/b0": 2,
+        "equilibrium/vacuum_toroidal_field/b0": 2,
+        "mhd_linear/vacuum_toroidal_field/b0": 2,
+        "ntms/vacuum_toroidal_field/b0": 2,
+        "plasma_profiles/vacuum_toroidal_field/b0": 2,
+        "plasma_sources/vacuum_toroidal_field/b0": 2,
+        "plasma_transport/vacuum_toroidal_field/b0": 2,
+        "radiation/vacuum_toroidal_field/b0": 2,
+        "runaway_electrons/vacuum_toroidal_field/b0": 2,
+        "sawteeth/vacuum_toroidal_field/b0": 2,
+        "transport_solver_numerics/vacuum_toroidal_field/b0": 2,
+        "waves/vacuum_toroidal_field/b0": 2,
+        "equilibrium/time_slice/profiles_2d/b_field_tor": 1
+      }
+    },
+    {
+      "id": "magnetic_axis_position",
+      "query": "position of the magnetic axis",
+      "relevant": {
+        "distribution_sources/magnetic_axis/r": 3,
+        "distribution_sources/magnetic_axis/z": 3,
+        "distributions/magnetic_axis/r": 3,
+        "distributions/magnetic_axis/z": 3,
+        "equilibrium/time_slice/global_quantities/magnetic_axis/r": 3,
+        "equilibrium/time_slice/global_quantities/magnetic_axis/z": 3,
+        "waves/magnetic_axis/r": 3,
+        "waves/magnetic_axis/z": 3,
+        "pulse_schedule/position_control/magnetic_axis/r": 2,
+        "pulse_schedule/position_control/magnetic_axis/z": 2,
+        "core_profiles/profiles_1d/grid/psi_magnetic_axis": 1,
+        "edge_profiles/profiles_1d/grid/psi_magnetic_axis": 1,
+        "plasma_profiles/profiles_1d/grid/psi_magnetic_axis": 1,
+        "summary/global_quantities/r0": 1
+      }
+    }
+  ]
+}
