@@ -1,0 +1,89 @@
+<!-- JT-60SA signal enrichment (remainder): eight foreground passes of
+     `imas-codex discover signals jt-60sa --enrich-only --time 8 --cost-limit 10`
+     against the live graph, run in the mapping-20261006 worktree at base
+     81c602aaf. Completes §2: every one of the 2,249 JT-60SA SignalSources now
+     reads enriched (953 -> 2,249) and no representative signal remains
+     discovered. Counts and logs:
+     ~/.config/reckon/crew/runs/r-20261007T122816180096-jt60sa-signal-enrichment-remainder/
+     {counts.py,counts-before.log,counts-after1..8.log,pass1..8.log,context_quality.py,source_cq.py,context-quality.log} -->
+<section id="jt60sa-signal-enrichment-remainder" data-reckon="evidence">
+  <h2 id="jt60sa-signal-enrichment-remainder-heading">JT-60SA signal enrichment — remainder of the passes</h2>
+
+  <p id="jt60sa-signal-enrichment-remainder-intro">
+    This node continues the enrichment left unfinished at the prior run's
+    50-minute stop (953 of 2,249 sources enriched, 1,256 signals claimable).
+    Each pass ran
+    <code>imas-codex discover signals jt-60sa --enrich-only --time 8 --cost-limit 10</code>
+    in the foreground against the live graph. Enrichment language calls run on
+    the local <code>discovery-describe</code> seat
+    (<code>local/deepseek-v4.1-flash</code> via the ambix-local router) at
+    <code>$0.0000</code>; the cost each pass reports is the Jev rerank of the
+    retrieved code and wiki context. The pass's preflight needed no new source
+    creation (2,249 sources already existed), and no facility access beyond the
+    remote-embedding and LLM endpoints.
+  </p>
+
+  <table id="jt60sa-signal-enrichment-remainder-counts">
+    <caption>SignalSource and FacilitySignal state before and after this node's passes</caption>
+    <thead>
+      <tr><th>measure</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>SignalSource total</td><td>2,249</td><td>2,249</td></tr>
+      <tr><td>SignalSource enriched</td><td>953</td><td>2,249</td></tr>
+      <tr><td>SignalSource not enriched</td><td>1,296</td><td>0</td></tr>
+      <tr><td>FacilitySignal total</td><td>6,298</td><td>6,298</td></tr>
+      <tr><td>FacilitySignal discovered</td><td>3,439</td><td>0</td></tr>
+      <tr><td>FacilitySignal enriched</td><td>0</td><td>3</td></tr>
+      <tr><td>FacilitySignal checked</td><td>2,859</td><td>6,295</td></tr>
+      <tr><td>FacilitySignal failed</td><td>0</td><td>0</td></tr>
+      <tr><td>claimable signals (standalone / representative, unclaimed)</td><td>1,256</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <table id="jt60sa-signal-enrichment-remainder-passes">
+    <caption>Per pass: enriched signals, checked signals, Jev rerank cost, CLI-reported wall time</caption>
+    <thead>
+      <tr><th>pass</th><th>enriched</th><th>checked</th><th>cost (USD)</th><th>time (s)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>805</td><td>507</td><td>0.08</td><td>507.2</td></tr>
+      <tr><td>2</td><td>915</td><td>1,045</td><td>0.08</td><td>518.5</td></tr>
+      <tr><td>3</td><td>1,702</td><td>1,104</td><td>0.08</td><td>515.5</td></tr>
+      <tr><td>4</td><td>1,003</td><td>687</td><td>0.08</td><td>512.4</td></tr>
+      <tr><td>5</td><td>627</td><td>531</td><td>0.07</td><td>394.9</td></tr>
+      <tr><td>6</td><td>0</td><td>0</td><td>0.00</td><td>2.7</td></tr>
+      <tr><td>7</td><td>0</td><td>0</td><td>0.00</td><td>2.6</td></tr>
+      <tr><td>8</td><td>109</td><td>80</td><td>0.04</td><td>99.0</td></tr>
+      <tr><td><strong>total</strong></td><td><strong>5,161</strong></td><td><strong>3,954</strong></td><td><strong>0.51</strong></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p id="jt60sa-signal-enrichment-remainder-cost">
+    Jev rerank decision spend for the eight passes totals <strong>USD 0.51</strong>,
+    against the plan's <strong>USD 50</strong> cap and the USD 10 per-pass cap;
+    in all, the two runs together spent USD 0.82. Local enrichment calls were
+    free. No pass reached either cap: passes 1–5 each stopped on their 8-minute
+    time limit with work still claimable, passes 6 and 7 found nothing claimable,
+    and pass 8 finished in 99&nbsp;s.
+  </p>
+
+  <p id="jt60sa-signal-enrichment-remainder-context">
+    No source was enriched with no retrieved context: every enriched signal
+    carries <code>context_quality</code> <code>high</code> (5,305) or
+    <code>medium</code> (993), and the enriched-source distribution via each
+    source's representative signal is <code>high</code> 1,910 /
+    <code>medium</code> 339, with no empty tier.
+  </p>
+
+  <p id="jt60sa-signal-enrichment-remainder-completion">
+    Enrichment is <strong>complete</strong>: all 2,249 JT-60SA SignalSources read
+    enriched, no standalone or representative signal remains discovered
+    (<code>discovered</code> = 0), and nothing is in a failed state
+    (<code>failed</code> = 0). The last 20 sources had their representative
+    signals claimed during pass 5 and left unenriched when that pass hit its
+    time limit; the claim's 300&nbsp;s TTL expired, and pass 8's preflight
+    released the stale claims and enriched them, leaving the graph with no
+    remainder.
+  </p>
+</section>
