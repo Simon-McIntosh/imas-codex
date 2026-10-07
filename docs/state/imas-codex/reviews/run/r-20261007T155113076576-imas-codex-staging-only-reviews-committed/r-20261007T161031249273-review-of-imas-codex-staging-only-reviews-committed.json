@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T16:25:06.936Z",
+  "dispatched_at": "2026-10-07T16:10:39Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155113076576-imas-codex-staging-only-reviews-committed/manifest.md",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: the brief's census asks for the list of records to import as the dry run's own output, but census-1.log prints only the full store inventory; the records-to-import figure comes from a bespoke to_import.py driver importing the script's private _plan(). The figure is reconciled by write.log's 'imported: 2' so the measurement holds, but the census the brief names was not produced by the named command alone."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit 2f98cc41f against base c05818cf9 - two files added, 125 insertions, 0 deletions; both are parsed imas-codex review records (status parsed, six scores, base/head shas) whose content matches the host-store sources beside the three times keys the import script adds.",
+    "done_when": "the manifest records census-1.log (dry run), write.log (--write imported: 2, already present: 304, refused: 0, quarantined: 0) and census-2.log (second dry run: records to import: 0, delivered reports without a record: 0, refused: 0); its tests line records EXIT=0; commit 2f98cc41f 'feat(state): import imas-codex staging-only review records' bodies the counts (306 recognised, 2 not yet committed, 304 present, 0 refused).",
+    "goal": "the node goal is that imas-codex's staging-only reviews are committed into its review tree in one explicit-path commit after a census listing them; commit 2f98cc41f adds docs/state/imas-codex/reviews/run/ records by explicit path, and the census listed two run reviews (the goal's wording names plan reviews, of which the census found none).",
+    "manifest": "read; status complete; commits 2f98cc41f; changed_paths match the diff; artifacts name census-1.log, write.log and census-2.log with the byte counts; evidence_inputs states the census found no plan reviews and that the to-import figure is computed by to_import.py against the script's own _plan().",
+    "write_paths": "the run declares docs/state/imas-codex/reviews; git diff --name-status c05818cf9..2f98cc41f lists exactly two added JSON files under that path and nothing else."
+  },
+  "justifications": {
+    "durability": "the change is data and lands no test; the regression check is the idempotent second dry run (census-2.log 'dry run: nothing written'), which detects a re-import but no repository test fails if the committed records are deleted.",
+    "evidence": "the done_when's dry-run measure is recorded at census-2.log ('records to import: 0' and 'delivered reports without a record: 0, refused: 0') and the write run at write.log ('imported: 2, already present: 304, refused: 0'), both read.",
+    "fit": "the two added files follow the existing committed-tree idiom docs/state/imas-codex/reviews/run/<reviewed-run>/<review-run>.json and commit 2f98cc41f is a conventional feat(state) commit with a body carrying the counts.",
+    "goal_fidelity": "commit 2f98cc41f commits the two records the census listed into docs/state/imas-codex/reviews/run/ in one explicit-path commit, though the goal's phrase 'plan reviews' describes neither of the two landed run reviews (the census found no plan reviews, which the brief allows for a non-reckon project).",
+    "reuse": "the run adds no definition and forks no capability; it invokes reckon's existing scripts/import_host_reviews.py against the existing committed review store.",
+    "scope_discipline": "git diff --name-status c05818cf9..2f98cc41f lists exactly the two JSON records under docs/state/imas-codex/reviews/, the sole declared write path, and no other file."
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: c05818cf96bd68cdfcec51c958342bb6b08c8b28\nreviewed_head_sha: 2f98cc41fa39ffe89e6ae52c309ea20c1b5b3dbf\nVERDICT goal: the node goal is that imas-codex's staging-only reviews are committed into its review tree in one explicit-path commit after a census listing them; commit 2f98cc41f adds docs/state/imas-codex/reviews/run/ records by explicit path, and the census listed two run reviews (the goal's wording names plan reviews, of which the census found none).\nVERDICT done_when: the manifest records census-1.log (dry run), write.log (--write imported: 2, already present: 304, refused: 0, quarantined: 0) and census-2.log (second dry run: records to import: 0, delivered reports without a record: 0, refused: 0); its tests line records EXIT=0; commit 2f98cc41f 'feat(state): import imas-codex staging-only review records' bodies the counts (306 recognised, 2 not yet committed, 304 present, 0 refused).\nVERDICT write_paths: the run declares docs/state/imas-codex/reviews; git diff --name-status c05818cf9..2f98cc41f lists exactly two added JSON files under that path and nothing else.\nVERDICT manifest: read; status complete; commits 2f98cc41f; changed_paths match the diff; artifacts name census-1.log, write.log and census-2.log with the byte counts; evidence_inputs states the census found no plan reviews and that the to-import figure is computed by to_import.py against the script's own _plan().\nVERDICT diff: read commit 2f98cc41f against base c05818cf9 - two files added, 125 insertions, 0 deletions; both are parsed imas-codex review records (status parsed, six scores, base/head shas) whose content matches the host-store sources beside the three times keys the import script adds.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: commit 2f98cc41f commits the two records the census listed into docs/state/imas-codex/reviews/run/ in one explicit-path commit, though the goal's phrase 'plan reviews' describes neither of the two landed run reviews (the census found no plan reviews, which the brief allows for a non-reckon project).\nSCORE evidence: 19\nJUSTIFICATION evidence: the done_when's dry-run measure is recorded at census-2.log ('records to import: 0' and 'delivered reports without a record: 0, refused: 0') and the write run at write.log ('imported: 2, already present: 304, refused: 0'), both read.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status c05818cf9..2f98cc41f lists exactly the two JSON records under docs/state/imas-codex/reviews/, the sole declared write path, and no other file.\nSCORE durability: 10\nJUSTIFICATION durability: the change is data and lands no test; the regression check is the idempotent second dry run (census-2.log 'dry run: nothing written'), which detects a re-import but no repository test fails if the committed records are deleted.\nSCORE fit: 19\nJUSTIFICATION fit: the two added files follow the existing committed-tree idiom docs/state/imas-codex/reviews/run/<reviewed-run>/<review-run>.json and commit 2f98cc41f is a conventional feat(state) commit with a body carrying the counts.\nSCORE reuse: 20\nJUSTIFICATION reuse: the run adds no definition and forks no capability; it invokes reckon's existing scripts/import_host_reviews.py against the existing committed review store.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155113076576-imas-codex-staging-only-reviews-committed/manifest.md:31 follow-on: the brief's census asks for the list of records to import as the dry run's own output, but census-1.log prints only the full store inventory; the records-to-import figure comes from a bespoke to_import.py driver importing the script's private _plan(). The figure is reconciled by write.log's 'imported: 2' so the measurement holds, but the census the brief names was not produced by the named command alone.",
+  "review_run_id": "r-20261007T161031249273-review-of-imas-codex-staging-only-reviews-committed",
+  "reviewed_base_sha": "c05818cf96bd68cdfcec51c958342bb6b08c8b28",
+  "reviewed_head_sha": "2f98cc41fa39ffe89e6ae52c309ea20c1b5b3dbf",
+  "reviewed_run_id": "r-20261007T155113076576-imas-codex-staging-only-reviews-committed",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 10,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:22:29.958770+00:00",
+  "total": 106
+}
