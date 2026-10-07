@@ -22,7 +22,7 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -63,18 +63,18 @@
     <table>
       <thead><tr><th>Pipeline</th><th>Call (response model)</th><th>Judgments today</th><th>Jev form</th></tr></thead>
       <tbody>
-        <tr><td>paths, triage</td><td><code>TriageBatch</code> in <code>discovery/paths/scorer.py</code></td><td>11 purpose scores, <code>path_purpose</code>, <code>physics_domain</code>, <code>should_expand</code>, <code>should_enrich</code></td><td>scope Nouls as the gate, facet Scores, a Noul each for expand and enrich, purpose as a Choice, domain as Nouls per label</td></tr>
-        <tr><td>paths, score</td><td><code>ScoreBatch</code> in <code>discovery/paths/parallel.py</code></td><td>the same, plus <code>new_score</code></td><td>the same forms, from the enriched evidence</td></tr>
-        <tr><td>wiki pages</td><td><code>WikiScoreBatch</code> in <code>discovery/wiki/scoring.py</code></td><td>6 content scores, <code>page_purpose</code>, <code>physics_domain</code>, <code>should_ingest</code></td><td>an ingest Noul as the gate, facet Scores, purpose as a Choice</td></tr>
-        <tr><td>documents</td><td><code>DocumentScoreBatch</code> in <code>discovery/wiki/scoring.py</code></td><td>as for wiki pages</td><td>as for wiki pages</td></tr>
-        <tr><td>images</td><td><code>ImageScoreBatch</code> in <code>discovery/base/image.py</code></td><td>the same scores and decisions, plus OCR text and diagrams</td><td>the vision model keeps the caption, OCR and diagram; Jev decides from that text</td></tr>
+        <tr><td>paths, triage</td><td><code>TriageBatch</code> in <code>discovery/paths/models.py</code></td><td>11 purpose scores, <code>path_purpose</code>, <code>physics_domain</code>, <code>should_expand</code>, <code>should_enrich</code></td><td>scope Nouls as the gate, facet Scores, a Noul each for expand and enrich, purpose as a Choice, domain as Nouls per label</td></tr>
+        <tr><td>paths, score</td><td><code>ScoreBatch</code> in <code>discovery/paths/models.py</code></td><td>the same, plus <code>new_score</code></td><td>the same forms, from the enriched evidence</td></tr>
+        <tr><td>wiki pages</td><td><code>WikiScoreBatch</code> in <code>discovery/wiki/models.py</code></td><td>6 content scores, <code>page_purpose</code>, <code>physics_domain</code>, <code>should_ingest</code></td><td>an ingest Noul as the gate, facet Scores, purpose as a Choice</td></tr>
+        <tr><td>documents</td><td><code>DocumentScoreBatch</code> in <code>discovery/wiki/models.py</code></td><td>as for wiki pages</td><td>as for wiki pages</td></tr>
+        <tr><td>images</td><td><code>ImageScoreBatch</code> in <code>discovery/wiki/models.py</code></td><td>the same scores and decisions, plus OCR text and diagrams</td><td>the vision model keeps the caption, OCR and diagram; Jev decides from that text</td></tr>
         <tr><td>signal enrichment</td><td><code>SignalEnrichmentBatch</code> in <code>discovery/signals/parallel.py</code></td><td><code>physics_domain</code>, <code>diagnostic</code>, <code>context_quality</code>, beside the generated name and description</td><td>domain as Nouls per label, diagnostic and context quality as Choices, and a Noul that the description is supported by its source context</td></tr>
         <tr><td>DD domain classifier</td><td><code>DomainBatchResult</code> in <code>graph/dd_domain_classifier.py</code></td><td><code>physics_domain</code> per DD path</td><td>Nouls per label, with the single label kept where the schema requires one</td></tr>
       </tbody>
     </table>
     <p>Out of scope here: the code pipeline, owned by §25 of JT-60SA Discovery Completion, and IMAS mapping, owned by the mapping-candidate-selection plan. That plan rewrites <code>imas_codex/ids/mapping.py</code> and <code>imas_codex/ids/workers.py</code>, and no node of this plan writes those files.</p>
 
-    <h2 id="s3">§3 — A graph-only re-judge mode</h2>
+    <h2 id="s3">§3 — One judge function, and stale judgments as claimable work</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>Most stored rows carry the text Jev needs, so re-judging them needs no facility traffic. Counted on 2026-10-07:</p>
     <table>
@@ -88,10 +88,19 @@
       </tbody>
     </table>
     <p>At the measured $0.0001 and 0.4 s per call, re-judging every row with stored text costs about $55–60 and about 8 hours at a concurrency of 8.</p>
-    <p>The node adds one re-judge driver beside each pipeline's claim functions. It builds the Jev state from stored fields only, writes the judgment fields, and records the model and stage, through the <code>call_decisions</code> layer that §25 landed. A file whose stored text is missing is left for the pipeline's own fetch. A failed decision leaves the row untouched.</p>
+    <p>Re-judging extends the owners that already exist and adds no driver for any pipeline.</p>
+    <ul>
+      <li><strong>One judge function.</strong> It goes in a new module, <code>imas_codex/discovery/base/judgment.py</code>. It takes a batch of rows, a state builder, a question builder and an applier. It runs <code>acall_decisions</code> under a concurrency bound, books the cost, applies the answers, and leaves a row unjudged when its decision fails. The code pipeline's two arms are extracted into it from <code>code/workers.py</code> and <code>code/scorer.py</code> (<code>build_triage_questions</code>, <code>build_triage_state</code> and their content-arm counterparts) and become its first two callers. Each later pipeline supplies only its own three functions (§4–§6).</li>
+      <li><strong>A stale judgment is claimable work.</strong> Each pipeline's own judgment claim also admits a row that is past judgment when its stored judgment model differs from the seat's model and its judgment text is stored. Rows that have never been judged are claimed first. Scoping comes from the run's facility and <code>--path-prefix</code>, as for any claim, and spend is bounded by the run's existing cost limit. A future model change therefore re-judges through an ordinary run.</li>
+      <li><strong>The applier never moves a row backwards.</strong> An ingested row keeps its status, chunks and embeddings, and only its judgment fields change. A skipped row that is now admitted moves to its pipeline's admitted status and enters the normal fetch. An admitted row not yet ingested that is now skipped moves to skipped.</li>
+      <li><strong>Why not <code>--reset-to</code>.</strong> The reset owner in <code>imas_codex/discovery/base/reset.py</code> keeps its meaning, which is full reprocessing from a stage. Its targets clear ingest fields, for example <code>ingested_at</code> and <code>chunk_count</code> on wiki pages, so re-judging through them would re-fetch and re-embed rows that are already ingested.</li>
+    </ul>
+    <p>Interface account: one public function and one module added, and the code pipeline's inline decision loops retired. No CLI option, no seat and no driver.</p>
     <p>Done when:</p>
     <ul>
-      <li>The driver re-judges a scoped prefix of one facility with no SSH call. A test asserts that the remote executor is never invoked.</li>
+      <li>A scoped code run re-judges rows whose stored judgment model differs from the seat's with no SSH call, and a test asserts that the remote executor is never invoked. Never-judged rows are claimed before stale ones.</li>
+      <li>An ingested row keeps its status and chunks through a re-judge.</li>
+      <li>No inline decision loop remains in <code>code/workers.py</code>: both arms run through the judge function.</li>
       <li>It writes the same fields the pipeline's own judgment writes.</li>
       <li>Its spend is recorded.</li>
     </ul>
@@ -138,7 +147,7 @@
 
     <h2 id="s7">§7 — Re-judge the stored rows</h2>
 <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>After §3–§6 land, the re-judge driver runs once per facility and pipeline over the stored rows:</p>
+    <p>After §3–§6 land, each pipeline's own run re-judges its stored rows once per facility through §3's stale-judgment claim:</p>
     <ul>
       <li>JT-60SA first, then TCV, JET and ITER;</li>
       <li>each run scoped and bounded, in foreground passes;</li>
@@ -175,7 +184,7 @@
 </ul>
 <p><strong>Deploy</strong> (node <code>search-rerank</code>), only if the prototype shows a gain:</p>
 <ul>
-<li><code>_search_code</code> and <code>_search_docs</code> rerank their top candidates through <code>call_decisions</code>, on a seat named for the rerank, with the query and each candidate's text as state.</li>
+<li><code>_search_code</code> and <code>_search_docs</code> rerank their top candidates through <code>call_decisions</code>, on the existing <code>discovery-relevance</code> seat, so the rerank adds no seat, with the query and each candidate's text as state.</li>
 <li>Because ranking is not a gate, a failed or slow rerank returns the embedding order unchanged and says so in the result, rather than failing the search.</li>
 <li>The rerank waits for the code score-stage node to merge, because that node also writes <code>imas_codex/llm/search_tools.py</code>.</li>
 </ul>
@@ -187,9 +196,15 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-djj-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-djj-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-07" data-recommends-skill="" data-resolved-at="2026-10-07T01:20:37+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Build the graph-only re-judge mode</h4>
     <div class="r-fu-body"><p>§3 is the shared foundation. The pipeline sections reuse its driver for their own re-judging.</p></div>
+    <pre class="r-fu-prompt">/reckon-build discovery-judgments-through-jev §3</pre>
+    <p class="r-fu-outcome">Superseded by f-djj-002. The design review replaced the per-pipeline re-judge driver with one judge function and a stale-judgment claim.</p>
+    </article>
+<article class="r-fu" data-id="f-djj-002" data-status="open" data-written-by="reckon-build" data-written-at="2026-10-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the judge function and the stale-judgment claim</h4>
+    <div class="r-fu-body"><p>§3 is the shared foundation. The pipeline sections supply its three functions and gain re-judging through their own claims.</p></div>
     <pre class="r-fu-prompt">/reckon-build discovery-judgments-through-jev §3</pre>
     </article>
 </section>
