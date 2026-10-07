@@ -61,16 +61,22 @@
     <code>mgset0.f</code> (<code>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</code>)
     is judged by the content arm with a
     <code>machine_description_depth</code> Score of <strong>2.64 of 3</strong>
-    (0.88 once divided by its top level) — the file carries sensor positions or
-    channel maps — yet its scope nouls are loads 0.23, processes 0.37, describes
-    <strong>0.39</strong>, IMAS 0.05, so <code>score_composite</code> is 0.39.
-    The ingest gate reads that composite against <code>code-ingest-threshold</code>
-    (0.50), so <code>mgset0.f</code> is <strong>not</strong> carried: the high
-    machine-description facet never enters the test. The answer to the design
-    review question is therefore <em>no</em> — a facet with a strong reading does
-    not by itself admit a file, because the gate reads the composite alone, and
-    that is the intended coupling: a file enters ingestion on the strength of a
-    direct measured-data or machine-description role, not on a supporting facet.
+    (0.88 once divided by its top level) in the prototype file
+    <code>/home/ITER/mcintos/.cache/imas-codex-jev/jev_score_results.json</code>
+    — the file carries sensor positions or channel maps. Its scope nouls come
+    from two places and agree that it is not carried: the prototype file holds
+    loads 0.12, processes 0.28, describes <strong>0.48</strong>, IMAS 0.04, a
+    composite of <strong>0.48</strong>; the live graph's stored
+    <code>relevance_*</code> fields hold loads 0.23, processes 0.37, describes
+    <strong>0.39</strong>, IMAS 0.05, a composite of <strong>0.39</strong>. Both
+    composites sit below the <code>code-ingest-threshold</code> (0.50), so
+    <code>mgset0.f</code> is <strong>not</strong> carried under either reading
+    and the high machine-description facet never enters the test. The answer to
+    the design review question is therefore <em>no</em> — a facet with a strong
+    reading does not by itself admit a file, because the gate reads the
+    composite alone, and that is the intended coupling: a file enters ingestion
+    on the strength of a direct measured-data or machine-description role, not
+    on a supporting facet.
   </p>
   <figure>
     <img src="/jt60sa-discovery-completion/figures/code-score-through-jev/score-composite-and-facets.svg"
