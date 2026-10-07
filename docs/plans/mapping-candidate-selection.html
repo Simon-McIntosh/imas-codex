@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="85">
+<meta name="plan-version" content="86">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -810,6 +810,9 @@ documented cross-node merge-ordering dependency. added_failure_count 0.</p></div
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261006T234211542380-review-of-cross-ids-siblings" data-who="reckon-build" data-when="2026-10-06T23:53:52.291Z">
     <div class="r-comment-body"><p>§11 cross-ids-siblings reviewed at base e01cc63dc / head fe4ff84ec: independent verdict scores all six dimensions 20 (total 120), item_aggregate 6, call_site_count 3, one follow-on finding (workers.py:1011 default arms=[] bypasses the _candidate_arms refusal on the producer path), added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-20261007T0231-s9-run-dispatch" data-who="reckon-build" data-when="2026-10-07T02:31:00Z">
+    <div class="r-comment-body"><p>Dispatched <code>jet-candidate-run</code> (run <code>r-20261007T023034511813-jet-candidate-run</code>) with the unreviewed-plan waiver. No plan review can dispatch while a reckon-project run (<code>report-less-review-attempts-are-removed</code>) holds a claim on the whole plan-review reports directory. The node changes no product code: it runs the landed candidate stage (§7 and §11) over JET under a cumulative $10 cap and writes one evidence fragment. A plan review of §9's new text runs when the claim clears, before <code>jet-candidate-audit</code> is dispatched. It runs now, in parallel with §8's last node, because it needs nothing from §8 and takes an estimated two to three hours. The §8 node waits for a peer run's claim on <code>facility.yaml</code>.</p></div>
 </div>
 </section>
 </main>
