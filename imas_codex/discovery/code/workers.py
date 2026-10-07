@@ -449,7 +449,11 @@ async def score_worker(
 
     model = get_model("discovery-score")
     relevance_model = get_model("discovery-relevance")
-    questions = build_triage_questions()
+    # The content arm judges a file's content relevance from its preview text,
+    # so it must ask the content question set: the graded relevance and the
+    # four facet depths.  The names-arm question set omits all five, and a
+    # response to a set that never asked them carries no answer to record.
+    questions = build_triage_questions(with_content=True)
     try:
         facility_config = get_facility(state.facility)
     except Exception as exc:  # noqa: BLE001 - absent facility block is data, not a crash

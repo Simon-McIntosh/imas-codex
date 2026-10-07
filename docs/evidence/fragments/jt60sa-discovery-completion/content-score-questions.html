@@ -1,0 +1,105 @@
+<section>
+  <h2 id="content-score-questions">The code content stage asks its five Score questions and refuses to record an unasked one</h2>
+  <p id="content-score-questions-change">
+    <code>score_worker</code> in <code>imas_codex/discovery/code/workers.py</code>
+    sent the file preview in the decision state but built its questions with
+    <code>build_triage_questions()</code>, the names-arm set, so the decisions
+    call never asked the graded relevance or the four facet depths. The
+    recorder read each absent answer through <code>answers.get(question) or
+    {}</code> and persisted it as a score of 0 with an all-zero distribution,
+    which is why no content-stage CodeFile ever carried a facet. The call now
+    asks the content question set, <code>build_triage_questions(with_content=True)</code>,
+    which <code>_content_top_levels</code> already reads.
+  </p>
+  <p id="content-score-questions-guard">
+    <code>_relevance_item</code> in <code>imas_codex/discovery/code/scorer.py</code>
+    fails closed: a content-stage answer set missing any of the four facet
+    questions or <code>relevance_grade</code> raises a <code>ValueError</code>
+    rather than being written as a zero. The decision layer already refuses a
+    response that omits a question it asked, so this guard catches only a
+    question set that never asked.
+  </p>
+  <table id="content-score-questions-live">
+    <thead>
+      <tr>
+        <th>file</th>
+        <th>data access</th>
+        <th>signal processing</th>
+        <th>machine description</th>
+        <th>imas mapping</th>
+        <th>relevance grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</td>
+        <td>0.06 @ 0.96</td>
+        <td>0.27 @ 0.74</td>
+        <td>2.66 @ 0.67</td>
+        <td>0.00 @ 1.00</td>
+        <td>1.81 @ 0.00</td>
+      </tr>
+      <tr>
+        <td>/analysis/src/SAselene_v2.0_forPSRC/aaopt.f</td>
+        <td>0.12 @ 0.91</td>
+        <td>0.08 @ 0.91</td>
+        <td>0.27 @ 0.75</td>
+        <td>0.00 @ 1.00</td>
+        <td>1.05 @ 0.43</td>
+      </tr>
+      <tr>
+        <td>/analysis/src/SAselene_v2.0_forPSRC/eqind.f</td>
+        <td>0.01 @ 1.00</td>
+        <td>0.61 @ 0.41</td>
+        <td>0.71 @ 0.47</td>
+        <td>0.00 @ 1.00</td>
+        <td>0.40 @ 0.68</td>
+      </tr>
+      <tr>
+        <td>/analysis/src/SAselene_v2.0_forPSRC/calc_DV.f</td>
+        <td>0.09 @ 0.93</td>
+        <td>0.21 @ 0.80</td>
+        <td>1.29 @ 0.54</td>
+        <td>0.00 @ 1.00</td>
+        <td>2.25 @ 0.21</td>
+      </tr>
+      <tr>
+        <td>/analysis/src/SAselene_v2.0_forPSRC/eqvacl.f</td>
+        <td>0.02 @ 0.99</td>
+        <td>0.19 @ 0.80</td>
+        <td>1.36 @ 0.09</td>
+        <td>0.00 @ 1.00</td>
+        <td>1.06 @ 0.10</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="content-score-questions-live-note">
+    Cells are <em>Score @ confidence</em> from one live content-arm decisions
+    call per file on the <code>discovery-relevance</code> seat
+    (<code>service=facility-discovery</code>), with no graph write and no
+    discover run. The content arm now records every facet and the grade. Four
+    facets carry confidence above zero on every file; the grade carries
+    confidence above zero on four of the five, and on
+    <code>mgset0.f</code> the endpoint returned a real grade distribution
+    (probabilities summing to 1, score 1.81) with <code>confidence: 0</code>.
+    That zero is the endpoint's own answer, reproduced on every call across
+    five attempts, not a value the recorder fabricated; it is recorded as a
+    finding rather than concealed. <code>imas_mapping</code> reads 0.00 with
+    confidence 1.00 on all five sampled files, which is the model's answer that
+    this analysis directory does not map to IMAS.
+  </p>
+  <p id="content-score-questions-checks">
+    A test drives <code>score_worker</code> through the fake decisions seam and
+    asserts the request carries the four facet questions and
+    <code>relevance_grade</code> and that the persisted facets are the fake
+    answers divided by their top levels. A parametrised test asserts
+    <code>_relevance_item</code> refuses a content-stage answer set missing any
+    one of the five questions. The negative control rebuilds
+    <code>score_worker</code> with <code>build_triage_questions()</code>: the
+    request test then fails with <code>content request omitted
+    data_access_depth</code>. The gate ran
+    <code>tests/discovery/test_code_relevance.py</code>,
+    <code>tests/discovery/test_code_facet_admission.py</code> and
+    <code>tests/discovery/test_llm_decisions.py</code> and exited 0.
+  </p>
+</section>

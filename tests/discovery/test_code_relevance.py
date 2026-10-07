@@ -167,8 +167,10 @@ class _CapturingGraph:
         return out
 
 
-def _post_by_path(answers_by_path: dict):
+def _post_by_path(answers_by_path: dict, requests: list | None = None):
     async def fake_post(headers, body, timeout):
+        if requests is not None:
+            requests.append(body)
         path = body["state"]["file"]["path"]
         return _FakeResponse(_payload(answers_by_path[path]))
 
@@ -259,12 +261,14 @@ def _run_triage(monkeypatch, files, answers_by_path, *, released=None):
     return graph, released, state, seen
 
 
-def _run_score(monkeypatch, files, answers_by_path):
+def _run_score(monkeypatch, files, answers_by_path, *, requests: list | None = None):
     graph = _CapturingGraph()
     released: list[str] = []
     description_calls: list[list[str]] = []
     _stub_common(monkeypatch, list(files))
-    monkeypatch.setattr(llm, "_apost_decisions", _post_by_path(answers_by_path))
+    monkeypatch.setattr(
+        llm, "_apost_decisions", _post_by_path(answers_by_path, requests)
+    )
 
     def fake_description(**kwargs):
         # The user prompt names the files the local model was asked to
@@ -377,6 +381,40 @@ def test_content_arm_marks_scored_with_content_relevance(monkeypatch):
     assert scored_items[0]["relevance_stage"] == "content"
     assert scored_items[0]["relevance_loads"] == 0.75
     assert scored_items[0]["score_reason"] == "analysis helper"
+
+
+def test_content_arm_asks_every_content_question(monkeypatch):
+    """The content request carries the facet questions and the grade.
+
+    The content arm sends the file text, so it must ask the questions that
+    read it.  A request built from the names-arm question set omits all five,
+    and the persisted facet values then come from answers never asked for.
+    """
+    path = "/analysis/src/reader.f"
+    files = [_file(path, preview_text="mdsopen('jt60sa', 12345)")]
+    answers = {path: _answers(0.75, 0.4, 0.2, 0.1)}
+    requests: list = []
+    graph, _, _, _ = _run_score(monkeypatch, files, answers, requests=requests)
+
+    assert requests, "the content arm issued a decisions request"
+    asked = requests[0]["questions"]
+    for question in (
+        "data_access_depth",
+        "signal_processing_depth",
+        "machine_description_depth",
+        "imas_mapping_depth",
+        "relevance_grade",
+    ):
+        assert question in asked, f"content request omitted {question}"
+
+    # The persisted facet values are the fake answers divided by their top
+    # levels (data access 4, the other three 3).
+    (item,) = graph.items_for("sf.status = 'scored'")
+    assert item["score_data_access"] == 1.0
+    assert item["score_signal_processing"] == 1.0
+    assert item["score_machine_description"] == pytest.approx(0.6667, abs=1e-4)
+    assert item["score_imas_mapping"] == pytest.approx(0.3333, abs=1e-4)
+    assert item["relevance_grade"] == 3.0
 
 
 def test_content_arm_writes_every_stage_field(monkeypatch):
@@ -546,10 +584,7 @@ class _IngestStub:
                 and (not require_stage or r.get("relevance_stage") == "content")
                 and (
                     _relevance(r) >= kwargs["min_relevance"]
-                    or (
-                        facet_gate is not None
-                        and _facet(r) >= facet_gate
-                    )
+                    or (facet_gate is not None and _facet(r) >= facet_gate)
                 )
                 and r.get("line_count", 0) <= kwargs["max_line_count"]
             ]
