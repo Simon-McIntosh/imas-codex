@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
 <meta name="plan-impl" content="0.13">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -94,6 +94,7 @@
     <ul>
       <li><strong>One judge function.</strong> It goes in a new module, <code>imas_codex/discovery/base/judgment.py</code>. It takes a batch of rows, a state builder, a question builder and an applier. It runs <code>acall_decisions</code> under a concurrency bound, books the cost, applies the answers, and leaves a row unjudged when its decision fails. The code pipeline's two arms are extracted into it from <code>code/workers.py</code> and <code>code/scorer.py</code> (<code>build_triage_questions</code>, <code>build_triage_state</code> and their content-arm counterparts) and become its first two callers. Each later pipeline supplies only its own three functions (§4–§6).</li>
       <li><strong>A stale judgment is claimable work.</strong> Each pipeline's own judgment claim also admits a row that is past judgment when its stored judgment model differs from the seat's model and its judgment text is stored. Rows that have never been judged are claimed first. Scoping comes from the run's facility and <code>--path-prefix</code>, as for any claim, and spend is bounded by the run's existing cost limit. A future model change therefore re-judges through an ordinary run.</li>
+      <li><strong>One owner for the claim.</strong> The stale-judgment predicate and the never-judged-first order are written once, in <code>claim_batch</code> (<code>imas_codex/discovery/base/claims.py</code>), which gains an ordering hook beside its <code>status_predicate</code>. The code pipeline's two judgment claims (<code>claim_files_for_triage</code> and <code>claim_files_for_scoring</code> in <code>code/graph_ops.py</code>) move onto it here, and each later pipeline's judgment claims move onto it in its own section. The pending counters that count the same state (<code>code/parallel.py</code>) read the same predicate, so counts and claims agree. The reset field registries (<code>_CODE_RELEVANCE_FIELDS</code> in <code>discovery/base/reset.py</code> and <code>_RELEVANCE_FIELDS</code> in <code>code/scorer.py</code>) carry every judgment field, the stored distributions included.</li>
       <li><strong>The applier never moves a row backwards.</strong> An ingested row keeps its status, chunks and embeddings, and only its judgment fields change. A skipped row that is now admitted moves to its pipeline's admitted status and enters the normal fetch. An admitted row not yet ingested that is now skipped moves to skipped.</li>
       <li><strong>Why not <code>--reset-to</code>.</strong> The reset owner in <code>imas_codex/discovery/base/reset.py</code> keeps its meaning, which is full reprocessing from a stage. Its targets clear ingest fields, for example <code>ingested_at</code> and <code>chunk_count</code> on wiki pages, so re-judging through them would re-fetch and re-embed rows that are already ingested.</li>
     </ul>
@@ -135,6 +136,7 @@
       <li>The prototype's AUC on a labelled page sample is recorded.</li>
       <li>The daily-report question is answered from a raw page.</li>
     </ul>
+    <p>Interface account: the wiki and document pipelines supply §3's three functions and move their judgment claims onto <code>claim_batch</code>. They retire their language-model scoring calls, the score fields of <code>WikiScoreBatch</code> and <code>DocumentScoreBatch</code>, and the scores and decisions of <code>ImageScoreBatch</code>, whose vision model keeps only the caption, OCR and diagram text.</p>
 
     <h2 id="s6">§6 — Signal enrichment and DD domain classifications through Jev</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -146,6 +148,7 @@
     </ul>
     <p>The DD domain classifier becomes the same physics-domain judgment over DD paths.</p>
     <p>Done when both deploy behind a prototype that measures agreement with a labelled sample, with the change against the current assignments reported.</p>
+    <p>Interface account: signal enrichment supplies §3's three functions for its classifications and retires those classification fields from its language-model response model. The DD domain classifier's language-model call retires for the same physics-domain judgment.</p>
 
     <h2 id="s7">§7 — Re-judge the stored rows</h2>
 <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
