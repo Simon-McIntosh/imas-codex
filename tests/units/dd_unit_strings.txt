@@ -1,0 +1,487 @@
+%
+% in power
+-
+1
+1/m2
+1/m3
+A
+A.W^-1
+A.m^-1
+A.m^-2
+A.s^-1
+A/V
+A^-1.T
+A^-1.T.m^-1
+A^-1.V
+A^-2.N
+A^2.0.s
+Angstrom
+Beam attenuation[(time)x(path)x(energy)]
+C
+C charge-exchange[(time)x(path)x(energy)],m^{2}
+C.V^-1
+CX WL, pix
+Celsius
+D charge-exchange[(time)x(path)x(energy)],m^{2}
+D ion ionization[(time)x(path)x(energy)],m^{2}
+DEG
+DNB times,sec
+DegC
+Delta CX WL, pix
+Delta FWHM, pix
+Delta Position, pix
+Delta Ti, eV
+Delta ni, m-3
+Delta rho TCV from DNB attenuation
+Delta vi, km/sec
+Delta waveLength, A
+Delta zeff
+Elecron ionization[(time)x(path)x(energy)],m^{2}
+F
+FWHM, pix
+GHz
+H
+H.m^-1
+Hz
+Intensity, a.u.
+J
+J.m^-3
+K
+KA
+KV
+K^-1.V
+KeV
+KeV/m
+Liuqe times,sec
+MJ
+MPaG
+MW
+MeV
+Mpa
+Ms
+Mvar
+N
+N.m
+N.m^-2
+N.m^-3
+Ni, m-3
+Ohm
+Pa
+Pa*m3/s
+Pa.Wb^-1
+Pa.m^3.s^-1
+Pa/m
+Pam3/s
+Pam3/sec
+Position, pix
+Rad
+SigmaNL[(time)x(path)x(energy)],m^{2}
+Spectra ErroBars, photons
+Spectra, photons
+Stoping cross-section[(time)x(path)x(energy)],m^{2}
+Sv
+T
+T.m
+T.m^2
+T.m^4
+T/m2
+T/s
+TS density[(time)x(path)],m^{-3}
+TS temperature[(time)x(path)],eV
+TS times,sec
+T^-1.m.s^-1
+T^-1.m^-1.rad
+T^-2
+T^2
+T^2.Wb^-1.m^2
+Ti, eV
+Time, sec
+Unit
+V
+V.S
+V.W^-1
+V.deg^-1
+V.m^-1
+V.s^-1
+VA
+V^-1
+V^-1.eV
+V^-1.mbar
+V_{POL}, km/sec
+V_{TOR}, km/sec
+Var1
+Var2
+Var3
+Var4
+Var5
+Var6
+Var7
+Var8
+Vi, km/sec
+Vs
+Vs/m^3
+W
+W.m^-2
+W.m^-2.sr
+W.m^-2.sr^-1
+W.m^-3
+W.s^-1
+WaveLength, A
+Wb
+Wb.m^-1
+Wb.m^-2
+Wb^-1.m^2
+Wb^-1.m^3
+Wb^2.m^-2
+Wb^2.m^-4
+Zeff
+Zeff times,sec
+Zeff[(time)x(path)]
+["     ","rad/m","m/rad","     "]
+["A","A","V","A"]
+["A","A","V","T"]
+["V    ","V/W  ","V/W^2","V/W^3"]
+["V"," "]
+["V","V"]
+["V/A","   ","   "]
+["V/deg","V/deg"]
+["V/s","V/s"]
+["W"," "]
+["W","V","A","A"," "]
+["W","V","V","A","T"," "]
+["deg      ","deg/Ohm  ","deg/Ohm^2","deg/Ohm^3"]
+["deg","deg"]
+["deg/s","deg/s"]
+["kW     ","kW/kV  ","kW/kV^2","kW/kV^3"]
+["m   ","m/Hz","    ","1/Hz"]
+["m  ","m  ","deg"]
+["particles/s","1/V        ","           "]
+["s  ","s  ","s  ","s  ","s  ","deg","deg","   "]
+["s","s","s","s","s","V","V"," "]
+["s","s","s","s","s","W","W"," "]
+["s","s","s","s","s","m","m"," "]
+[UNITS_OF(\LAU_ROT_V_OFFSET_D01), UNITS_OF(\LAU_ROT_V_SLOPE_D01)]
+[UNITS_OF(\LIM_LAU_ROT_D01:PHI_MIN), UNITS_OF(\LIM_LAU_ROT_D01:PHI_MAX)]
+[UNITS_OF(\LIM_MIR_D01:TH_MIN), UNITS_OF(\LIM_MIR_D01:TH_MAX)]
+[UNITS_OF(\MIR_V_OFFSET_D01), UNITS_OF(\MIR_V_SLOPE_D01)]
+[UNITS_OF(\PCS::DESIGN_MOU_01:ONE), UNITS_OF(\PCS::DESIGN_MOU_01:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_02:ONE), UNITS_OF(\PCS::DESIGN_MOU_02:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_03:ONE), UNITS_OF(\PCS::DESIGN_MOU_03:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_04:ONE), UNITS_OF(\PCS::DESIGN_MOU_04:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_05:ONE), UNITS_OF(\PCS::DESIGN_MOU_05:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_06:ONE), UNITS_OF(\PCS::DESIGN_MOU_06:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_07:ONE), UNITS_OF(\PCS::DESIGN_MOU_07:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_08:ONE), UNITS_OF(\PCS::DESIGN_MOU_08:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_09:ONE), UNITS_OF(\PCS::DESIGN_MOU_09:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_10:ONE), UNITS_OF(\PCS::DESIGN_MOU_10:TWO)]
+[UNITS_OF(\PCS::DESIGN_MOU_11:ONE), UNITS_OF(\PCS::DESIGN_MOU_11:TWO)]
+[UNITS_OF(\PCS::LAU_ROT_V_OFFSET_01), UNITS_OF(\PCS::LAU_ROT_V_SLOPE_01)]
+[UNITS_OF(\PCS::LAU_ROT_V_OFFSET_02), UNITS_OF(\PCS::LAU_ROT_V_SLOPE_02)]
+[UNITS_OF(\PCS::LAU_ROT_V_OFFSET_03), UNITS_OF(\PCS::LAU_ROT_V_SLOPE_03)]
+[UNITS_OF(\PCS::LAU_ROT_V_OFFSET_04), UNITS_OF(\PCS::LAU_ROT_V_SLOPE_04)]
+[UNITS_OF(\PCS::LAU_ROT_V_OFFSET_05), UNITS_OF(\PCS::LAU_ROT_V_SLOPE_05)]
+[UNITS_OF(\PCS::LAU_ROT_V_OFFSET_06), UNITS_OF(\PCS::LAU_ROT_V_SLOPE_06)]
+[UNITS_OF(\PCS::LIM_ANODE_07:VMIN), UNITS_OF(\PCS::LIM_ANODE_07:VMAX)]
+[UNITS_OF(\PCS::LIM_ANODE_08:VMIN), UNITS_OF(\PCS::LIM_ANODE_08:VMAX)]
+[UNITS_OF(\PCS::LIM_ANODE_09:VMIN), UNITS_OF(\PCS::LIM_ANODE_09:VMAX)]
+[UNITS_OF(\PCS::LIM_ANODE_10:VMIN), UNITS_OF(\PCS::LIM_ANODE_10:VMAX)]
+[UNITS_OF(\PCS::LIM_ANODE_11:VMIN), UNITS_OF(\PCS::LIM_ANODE_11:VMAX)]
+[UNITS_OF(\PCS::LIM_BODY_01:VMIN), UNITS_OF(\PCS::LIM_BODY_01:VMAX)]
+[UNITS_OF(\PCS::LIM_BODY_02:VMIN), UNITS_OF(\PCS::LIM_BODY_02:VMAX)]
+[UNITS_OF(\PCS::LIM_BODY_03:VMIN), UNITS_OF(\PCS::LIM_BODY_03:VMAX)]
+[UNITS_OF(\PCS::LIM_BODY_04:VMIN), UNITS_OF(\PCS::LIM_BODY_04:VMAX)]
+[UNITS_OF(\PCS::LIM_BODY_05:VMIN), UNITS_OF(\PCS::LIM_BODY_05:VMAX)]
+[UNITS_OF(\PCS::LIM_BODY_06:VMIN), UNITS_OF(\PCS::LIM_BODY_06:VMAX)]
+[UNITS_OF(\PCS::LIM_FP_01:AMIN), UNITS_OF(\PCS::LIM_FP_01:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_02:AMIN), UNITS_OF(\PCS::LIM_FP_02:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_03:AMIN), UNITS_OF(\PCS::LIM_FP_03:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_04:AMIN), UNITS_OF(\PCS::LIM_FP_04:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_05:AMIN), UNITS_OF(\PCS::LIM_FP_05:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_06:AMIN), UNITS_OF(\PCS::LIM_FP_06:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_07:AMIN), UNITS_OF(\PCS::LIM_FP_07:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_08:AMIN), UNITS_OF(\PCS::LIM_FP_08:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_09:AMIN), UNITS_OF(\PCS::LIM_FP_09:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_10:AMIN), UNITS_OF(\PCS::LIM_FP_10:AMAX)]
+[UNITS_OF(\PCS::LIM_FP_11:AMIN), UNITS_OF(\PCS::LIM_FP_11:AMAX)]
+[UNITS_OF(\PCS::LIM_LAU_ROT_01:PHI_MIN), UNITS_OF(\PCS::LIM_LAU_ROT_01:PHI_MAX)]
+[UNITS_OF(\PCS::LIM_LAU_ROT_02:PHI_MIN), UNITS_OF(\PCS::LIM_LAU_ROT_02:PHI_MAX)]
+[UNITS_OF(\PCS::LIM_LAU_ROT_03:PHI_MIN), UNITS_OF(\PCS::LIM_LAU_ROT_03:PHI_MAX)]
+[UNITS_OF(\PCS::LIM_LAU_ROT_04:PHI_MIN), UNITS_OF(\PCS::LIM_LAU_ROT_04:PHI_MAX)]
+[UNITS_OF(\PCS::LIM_LAU_ROT_05:PHI_MIN), UNITS_OF(\PCS::LIM_LAU_ROT_05:PHI_MAX)]
+[UNITS_OF(\PCS::LIM_LAU_ROT_06:PHI_MIN), UNITS_OF(\PCS::LIM_LAU_ROT_06:PHI_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_01:TH_MIN), UNITS_OF(\PCS::LIM_MIR_01:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_02:TH_MIN), UNITS_OF(\PCS::LIM_MIR_02:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_03:TH_MIN), UNITS_OF(\PCS::LIM_MIR_03:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_04:TH_MIN), UNITS_OF(\PCS::LIM_MIR_04:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_05:TH_MIN), UNITS_OF(\PCS::LIM_MIR_05:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_06:TH_MIN), UNITS_OF(\PCS::LIM_MIR_06:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_10:TH_MIN), UNITS_OF(\PCS::LIM_MIR_10:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_11:TH_MIN), UNITS_OF(\PCS::LIM_MIR_11:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_ROT_07:TH_MIN), UNITS_OF(\PCS::LIM_MIR_ROT_07:TH_MAX)]
+[UNITS_OF(\PCS::LIM_MIR_TRANS_07:VMIN), UNITS_OF(\PCS::LIM_MIR_TRANS_07:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_01:VMIN), UNITS_OF(\PCS::LIM_MOU_01:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_02:VMIN), UNITS_OF(\PCS::LIM_MOU_02:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_03:VMIN), UNITS_OF(\PCS::LIM_MOU_03:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_04:VMIN), UNITS_OF(\PCS::LIM_MOU_04:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_05:VMIN), UNITS_OF(\PCS::LIM_MOU_05:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_06:VMIN), UNITS_OF(\PCS::LIM_MOU_06:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_07:VMIN), UNITS_OF(\PCS::LIM_MOU_07:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_08:VMIN), UNITS_OF(\PCS::LIM_MOU_08:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_09:VMIN), UNITS_OF(\PCS::LIM_MOU_09:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_10:VMIN), UNITS_OF(\PCS::LIM_MOU_10:VMAX)]
+[UNITS_OF(\PCS::LIM_MOU_11:VMIN), UNITS_OF(\PCS::LIM_MOU_11:VMAX)]
+[UNITS_OF(\PCS::LIM_NBI_1:PMIN), UNITS_OF(\PCS::LIM_NBI_1:PMAX)]
+[UNITS_OF(\PCS::LIM_NBI_2:PMIN), UNITS_OF(\PCS::LIM_NBI_2:PMAX)]
+[UNITS_OF(\PCS::LIM_RHVPS_A:VMIN), UNITS_OF(\PCS::LIM_RHVPS_A:VMAX)]
+[UNITS_OF(\PCS::LIM_RHVPS_B:VMIN), UNITS_OF(\PCS::LIM_RHVPS_B:VMAX)]
+[UNITS_OF(\PCS::LIM_RHVPS_C:VMIN), UNITS_OF(\PCS::LIM_RHVPS_C:VMAX)]
+[UNITS_OF(\PCS::MIR_ROT_V_OFFSET_07), UNITS_OF(\PCS::MIR_ROT_V_SLOPE_07)]
+[UNITS_OF(\PCS::MIR_TRANS_V_OFFSET_07), UNITS_OF(\PCS::MIR_TRANS_V_SLOPE_07)]
+[UNITS_OF(\PCS::MIR_V_OFFSET_01), UNITS_OF(\PCS::MIR_V_SLOPE_01)]
+[UNITS_OF(\PCS::MIR_V_OFFSET_02), UNITS_OF(\PCS::MIR_V_SLOPE_02)]
+[UNITS_OF(\PCS::MIR_V_OFFSET_03), UNITS_OF(\PCS::MIR_V_SLOPE_03)]
+[UNITS_OF(\PCS::MIR_V_OFFSET_04), UNITS_OF(\PCS::MIR_V_SLOPE_04)]
+[UNITS_OF(\PCS::MIR_V_OFFSET_05), UNITS_OF(\PCS::MIR_V_SLOPE_05)]
+[UNITS_OF(\PCS::MIR_V_OFFSET_06), UNITS_OF(\PCS::MIR_V_SLOPE_06)]
+[UNITS_OF(\PCS::MOU_A_01), UNITS_OF(\PCS::MOU_B_01)]
+[UNITS_OF(\PCS::MOU_A_02), UNITS_OF(\PCS::MOU_B_02)]
+[UNITS_OF(\PCS::MOU_A_03), UNITS_OF(\PCS::MOU_B_03)]
+[UNITS_OF(\PCS::MOU_A_04), UNITS_OF(\PCS::MOU_B_04)]
+[UNITS_OF(\PCS::MOU_A_05), UNITS_OF(\PCS::MOU_B_05)]
+[UNITS_OF(\PCS::MOU_A_06), UNITS_OF(\PCS::MOU_B_06)]
+[UNITS_OF(\PCS::MOU_A_07), UNITS_OF(\PCS::MOU_B_07)]
+[UNITS_OF(\PCS::MOU_A_08), UNITS_OF(\PCS::MOU_B_08)]
+[UNITS_OF(\PCS::MOU_A_09), UNITS_OF(\PCS::MOU_B_09)]
+[UNITS_OF(\PCS::MOU_A_10), UNITS_OF(\PCS::MOU_B_10)]
+[UNITS_OF(\PCS::MOU_A_11), UNITS_OF(\PCS::MOU_B_11)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_01), UNITS_OF(\PCS::MOU_V_SLOPE_01)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_02), UNITS_OF(\PCS::MOU_V_SLOPE_02)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_03), UNITS_OF(\PCS::MOU_V_SLOPE_03)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_04), UNITS_OF(\PCS::MOU_V_SLOPE_04)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_05), UNITS_OF(\PCS::MOU_V_SLOPE_05)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_06), UNITS_OF(\PCS::MOU_V_SLOPE_06)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_07), UNITS_OF(\PCS::MOU_V_SLOPE_07)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_08), UNITS_OF(\PCS::MOU_V_SLOPE_08)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_09), UNITS_OF(\PCS::MOU_V_SLOPE_09)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_10), UNITS_OF(\PCS::MOU_V_SLOPE_10)]
+[UNITS_OF(\PCS::MOU_V_OFFSET_11), UNITS_OF(\PCS::MOU_V_SLOPE_11)]
+[Ws]
+[["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]]
+[["A    ","A    ","A    ","A    "], ["A/V  ","A/V  ","A/V  ","A/V  "], ["A/V^2","A/V^2","A/V^2","A/V^2"], ["A/V^3","A/V^3","A/V^3","A/V^3"]]
+[["T/A ","T/As","T/A ","T/As"], ["T/A ","T/As","T/A ","T/As"], ["T/A ","T/As","T/A ","T/As"], ["T/A ","T/As","T/A ","T/As"]]
+[["kW     ","kW/kV  ","kW/kV^2","kW/kV^3"], ["kW/kV  ","kW/kV^2","kW/kV^3","kW/kV^4"], ["kW/kV^2","kW/kV^3","kW/kV^4","kW/kV^5"], ["kW/kV^3","kW/kV^4","kW/kV^5","kW/kV^6"]]
+[[["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]]]
+[[[["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]]], [[["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]]], [[["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]]], [[["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]], [["     ","     ","     ","     "], ["1/V  ","1/V  ","1/V  ","1/V  "], ["1/V^2","1/V^2","1/V^2","1/V^2"], ["1/V^3","1/V^3","1/V^3","1/V^3"]]]]
+[arb.]
+[ph_source_CXline/s/m^2/sr]
+\PCS::GAS_FEEDFOR_001:UNITS
+\PCS::GAS_FEEDFOR_002:UNITS
+\PCS::GAS_FEEDFOR_003:UNITS
+\PCS::GAS_FEEDFOR_004:UNITS
+\PCS::GAS_FEEDFOR_005:UNITS
+\PCS::GAS_FEEDFOR_006:UNITS
+\PCS::GAS_FEEDFOR_007:UNITS
+\PCS::GAS_FEEDFOR_008:UNITS
+\PCS::GAS_FEEDFOR_009:UNITS
+\PCS::GAS_FEEDFOR_010:UNITS
+\PCS::GAS_FEEDFOR_011:UNITS
+\PCS::GAS_FEEDFOR_012:UNITS
+\PCS::GAS_FEEDFOR_013:UNITS
+\PCS::GAS_FEEDFOR_014:UNITS
+\PCS::GAS_FEEDFOR_015:UNITS
+\PCS::GAS_FEEDFOR_016:UNITS
+\PCS::GAS_FEEDFOR_017:UNITS
+\PCS::GAS_FEEDFOR_018:UNITS
+\PCS::GAS_FEEDFOR_019:UNITS
+\PCS::GAS_FEEDFOR_020:UNITS
+\PCS::GAS_REF_001:UNITS
+\PCS::GAS_REF_001:UNITS[DATA(\PCS::GAS_CTRL_001)]
+\PCS::GAS_REF_002:UNITS
+\PCS::GAS_REF_002:UNITS[DATA(\PCS::GAS_CTRL_002)]
+\PCS::GAS_REF_003:UNITS
+\PCS::GAS_REF_003:UNITS[DATA(\PCS::GAS_CTRL_003)]
+\PCS::GAS_REF_004:UNITS
+\PCS::GAS_REF_004:UNITS[DATA(\PCS::GAS_CTRL_004)]
+\PCS::GAS_REF_005:UNITS
+\PCS::GAS_REF_005:UNITS[DATA(\PCS::GAS_CTRL_005)]
+\PCS::GAS_REF_006:UNITS
+\PCS::GAS_REF_006:UNITS[DATA(\PCS::GAS_CTRL_006)]
+\PCS::GAS_REF_007:UNITS
+\PCS::GAS_REF_007:UNITS[DATA(\PCS::GAS_CTRL_007)]
+\PCS::GAS_REF_008:UNITS
+\PCS::GAS_REF_008:UNITS[DATA(\PCS::GAS_CTRL_008)]
+\PCS::GAS_REF_009:UNITS
+\PCS::GAS_REF_009:UNITS[DATA(\PCS::GAS_CTRL_009)]
+\PCS::GAS_REF_010:UNITS
+\PCS::GAS_REF_010:UNITS[DATA(\PCS::GAS_CTRL_010)]
+\PCS::GAS_REF_011:UNITS
+\PCS::GAS_REF_011:UNITS[DATA(\PCS::GAS_CTRL_011)]
+\PCS::GAS_REF_012:UNITS
+\PCS::GAS_REF_012:UNITS[DATA(\PCS::GAS_CTRL_012)]
+\PCS::GAS_REF_013:UNITS
+\PCS::GAS_REF_013:UNITS[DATA(\PCS::GAS_CTRL_013)]
+\PCS::GAS_REF_014:UNITS
+\PCS::GAS_REF_014:UNITS[DATA(\PCS::GAS_CTRL_014)]
+\PCS::GAS_REF_015:UNITS
+\PCS::GAS_REF_015:UNITS[DATA(\PCS::GAS_CTRL_015)]
+\PCS::GAS_REF_016:UNITS
+\PCS::GAS_REF_016:UNITS[DATA(\PCS::GAS_CTRL_016)]
+\PCS::GAS_REF_017:UNITS
+\PCS::GAS_REF_017:UNITS[DATA(\PCS::GAS_CTRL_017)]
+\PCS::GAS_REF_018:UNITS
+\PCS::GAS_REF_018:UNITS[DATA(\PCS::GAS_CTRL_018)]
+\PCS::GAS_REF_019:UNITS
+\PCS::GAS_REF_019:UNITS[DATA(\PCS::GAS_CTRL_019)]
+\PCS::GAS_REF_020:UNITS
+\PCS::GAS_REF_020:UNITS[DATA(\PCS::GAS_CTRL_020)]
+\RESULTS::HIR:ALPHA_BOTTOM:UNITS
+\RESULTS::HIR:ALPHA_TOP:UNITS
+\RESULTS::HIR:DR_US:UNITS
+\RESULTS::HIR:D_TILE:UNITS
+\RESULTS::HIR:PHI:UNITS
+\RESULTS::HIR:POWER:UNITS
+\RESULTS::HIR:QPAR:UNITS
+\RESULTS::HIR:QPARUP:UNITS
+\RESULTS::HIR:QPERP:UNITS
+\RESULTS::HIR:R:UNITS
+\RESULTS::HIR:TEMP:UNITS
+\RESULTS::HIR:TIME:UNITS
+\RESULTS::HIR:XSURFACE:UNITS
+\RESULTS::HIR:Z:UNITS
+\RESULTS::VIR_F:ALPHA_BOTTOM:UNITS
+\RESULTS::VIR_F:ALPHA_TOP:UNITS
+\RESULTS::VIR_F:DR_US:UNITS
+\RESULTS::VIR_F:D_TILE:UNITS
+\RESULTS::VIR_F:PHI:UNITS
+\RESULTS::VIR_F:POWER:UNITS
+\RESULTS::VIR_F:QPAR:UNITS
+\RESULTS::VIR_F:QPARUP:UNITS
+\RESULTS::VIR_F:QPERP:UNITS
+\RESULTS::VIR_F:R:UNITS
+\RESULTS::VIR_F:TEMP:UNITS
+\RESULTS::VIR_F:TIME:UNITS
+\RESULTS::VIR_F:XSURFACE:UNITS
+\RESULTS::VIR_F:Z:UNITS
+\RESULTS::VIR_T:ALPHA_BOTTOM:UNITS
+\RESULTS::VIR_T:ALPHA_TOP:UNITS
+\RESULTS::VIR_T:DR_US:UNITS
+\RESULTS::VIR_T:D_TILE:UNITS
+\RESULTS::VIR_T:PHI:UNITS
+\RESULTS::VIR_T:POWER:UNITS
+\RESULTS::VIR_T:QPAR:UNITS
+\RESULTS::VIR_T:QPARUP:UNITS
+\RESULTS::VIR_T:QPERP:UNITS
+\RESULTS::VIR_T:R:UNITS
+\RESULTS::VIR_T:TEMP:UNITS
+\RESULTS::VIR_T:TIME:UNITS
+\RESULTS::VIR_T:XSURFACE:UNITS
+\RESULTS::VIR_T:Z:UNITS
+\rho_{TCV}
+atm
+au
+cm/s
+count
+count.s^-1
+cps
+cps.m^2.s
+ct
+ct.s^-1
+dB
+dBm
+day
+deg
+deg. C
+deg.s^-1
+degree
+degreeC
+e
+eV
+eV/m
+g/s
+gr
+gyrotron
+hour
+kA
+kN
+kNm
+kPa
+kV
+kW
+ke
+keV
+kg.m.s^-1
+kg.m^-1.s^-1
+kg.m^-1.s^-2
+kg.m^-3
+kg.m^2.s^-2
+kg.s^-1
+l.mbar.s^-1
+l.min^-1
+m
+m-2
+m-3
+m.ohm
+m.s^-1
+m.s^-2
+m.sr
+m/s
+m2
+m3
+m3/s
+m^-1
+m^-1.ohm^-1
+m^-1.s^-1
+m^-2
+m^-2.rad^-1
+m^-2.s^-1
+m^-2.s^-1.sr^-1
+m^-3
+m^-3.nC
+m^-3.s^-1
+m^-3.s^-1.sr^-1
+m^-3.sr^-1
+m^-4
+m^-6.s^2
+m^-6.s^3
+m^2
+m^2.0.s^-1
+m^2.s^-1
+m^2.sr
+m^3
+mb
+min
+minute
+mm
+month
+ms
+msec
+n/3month
+n/day
+n/s
+n/shot
+n/week
+n/year
+oC
+ohm
+path along DCD,m
+ph/srsm2
+pixel
+ppm
+rad
+rad.s^-1
+rho TCV from DNB attenuation
+rpm
+s
+s^-1
+s^-1.0.T
+s^-2
+sec
+sr
+u
+uA
+uST
+um
+unit_error
+year
+°C
+µs
