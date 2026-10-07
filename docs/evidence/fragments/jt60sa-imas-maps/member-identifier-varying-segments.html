@@ -1,0 +1,20 @@
+<section id="member-identifier-varying-segments-record">
+  <h3>Member names carry only the segments that vary</h3>
+  <p id="member-identifier-varying-segments-landing">
+    <code>extract_member_identifier</code> built the member identifier from the
+    first N numeric runs of the accessor, where N was the count of <code>NNN</code>
+    in the group key, so it was blind to which runs actually differ between
+    members. A JT-60SA accessor carries the reference shot, so every identifier
+    began with <code>101173</code> (e.g. <code>101173/81</code>). The identifier
+    is now built only from the numeric runs whose value differs across the
+    source's members; a constant run belongs to the group and is dropped, and
+    several varying runs still join with <code>/</code>.
+    <code>individualize_members</code> passes the member accessor set through, so
+    the varying positions come from the source's own members rather than from a
+    positional count. Delivered in
+    <code>imas_codex/discovery/signals/parallel.py</code> with
+    <code>tests/discovery/test_member_identifier.py</code> pinning the three
+    cases and <code>tests/discovery/test_signals_pipeline.py</code> still green
+    (<code>49 passed</code>, EXIT=0).
+  </p>
+</section>
