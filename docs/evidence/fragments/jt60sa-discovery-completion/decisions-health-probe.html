@@ -1,0 +1,62 @@
+<section>
+  <h2 id="decisions-health-probe">The code panel's llm row probes the decisions route as well as the score seat</h2>
+  <p id="decisions-health-probe-result">
+    <code>imas_codex/discovery/base/services.py</code> gains
+    <code>decisions_health_check(service="facility-discovery")</code>, a cheap
+    reachability probe of the OpenRouter decisions route. It resolves the
+    credential with <code>get_api_key_for_service(service)</code> and sends a
+    single authenticated <code>GET</code> to
+    <code>https://openrouter.ai/api/v1/key</code> — the key-info endpoint on the
+    origin parsed from <code>DECISIONS_ENDPOINT</code>, so the probe follows the
+    route if the host moves. The request carries no model, state or questions, so
+    the decisions endpoint is never asked to judge anything and no decision is
+    billed; a 200 is healthy, a refused connection or timeout is
+    <code>endpoint refused</code>/<code>endpoint timeout</code>, and 401/403 is
+    <code>auth refused</code>. Because the probe reaches the OpenRouter
+    <em>origin's</em> key-info endpoint and not the <code>/api/alpha/decisions</code>
+    path itself, it covers reachability of the origin and validity of the
+    credential, not the presence of the alpha route: a removed decisions path on
+    a live origin would still read up. That is the cheap probe the constraint
+    allows — any request that exercised the alpha path itself would be a billed
+    decision. A second function,
+    <code>llm_health_check_with_decisions(section, service)</code>, runs the
+    existing <code>llm_health_check(section)</code> first and returns
+    <code>score (...)</code> when that seat is down, otherwise probes the
+    decisions route and returns <code>decisions (...)</code> when it is down —
+    so the row names which of the two endpoints is unreachable.
+  </p>
+  <p id="decisions-health-probe-wiring">
+    <code>imas_codex/cli/discover/code.py</code> builds its monitor with
+    <code>check_model=False</code> and registers
+    <code>llm_health_check_with_decisions("discovery-score")</code> under the
+    <code>llm</code> name through <code>extra_service_checks</code>, preserving
+    the 60 s poll interval and non-critical gating the single-seat check used.
+    The row therefore stays down when either the local score seat or the
+    decisions route is unreachable; the other discovery CLIs are unchanged.
+  </p>
+  <p id="decisions-health-probe-evidence">
+    Gate <code>uv run --no-sync pytest -p no:cacheprovider
+    tests/discovery/test_base_services.py tests/discovery tests/cli</code> exits
+    <strong>1</strong> with <strong>1495 passed, 3 failed</strong> on this
+    allocation (<code>98dci4-clu-2018</code>, base revision
+    <code>7a63719</code>). The three failures —
+    <code>test_embed_service_footprint.py::test_embed_start_forwards_explicit_gpu_count_to_the_deployer</code>,
+    <code>test_sn_embed_preflight.py::test_run_sn_cmd_skips_embed_preflight_for_dry_run</code>
+    and
+    <code>test_sn_generate_cli.py::TestBackwardCompatibility::test_reset_to_drafted_dry_run</code>
+    — are 30 s <code>pytest-timeout</code> expiries in the embed/SN CLI surface
+    and reproduce identically against a <code>git archive</code> of the base
+    revision (<code>base-arm.log</code>: same 3 failed, module under test at the
+    base tree path), so they are pre-existing and none is added by this change.
+    <code>tests/discovery/test_base_services.py</code> alone passes 22/22.
+  </p>
+  <p id="decisions-health-probe-negative-control">
+    Negative control (log <code>negative-control.log</code>): with
+    <code>decisions_health_check</code> mutated to always
+    <code>return True, "ok"</code>, the refused-decisions test
+    <code>TestLlmHealthCheckWithDecisions::test_refused_decisions_probe_names_decisions</code>
+    fails on its first assertion, <code>assert healthy is False</code>
+    (<code>assert True is False</code> — the panel reports llm up), and the run
+    exits non-zero. The same test passes on the gate revision.
+  </p>
+</section>
