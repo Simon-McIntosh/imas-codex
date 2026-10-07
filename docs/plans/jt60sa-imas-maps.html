@@ -21,9 +21,9 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -76,57 +76,12 @@
       fragment records the spend against the cap. The run uses foreground passes of <code>--time 8</code>.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
     <h2 id="s3">§3 — Every signal reaches the map</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      Every stage of the mapping pipeline keys on SignalSource: the candidate claim, the
-      <code>MAPPING_CANDIDATE</code> edges and the <code>MAPS_TO_IMAS</code> bindings. A signal that
-      grouping left alone has no source, so the 1,969 standalone JT-60SA signals can never be mapped.
-      Sources for FacilitySignals are created by <code>detect_signal_sources</code>
-      (<code>imas_codex/discovery/signals/parallel.py:1556</code>), which runs in the signals preflight
-      and in the enrich loop. It groups signals by accessor pattern, and creates a source only for a
-      pattern with at least <code>min_instances</code> members, 3 by default. A signal whose pattern has
-      fewer is left in no source, which is how the 1,969 arise.
-    </p>
-    <p>
-      Under the decision below, <code>detect_signal_sources</code> gains a final pass. Each signal it
-      left ungrouped becomes a one-member source, keyed by the signal, with the signal as its only member
-      and its representative. The pass uses the function's own <code>MERGE</code>
-      (<code>parallel.py:1617–1650</code>), so the grouping threshold is unchanged. A pattern with two
-      members still forms no two-member group. Because the pass runs before enrichment, enrichment then
-      claims each new source's representative, and <code>propagate_source_enrichment</code> marks the
-      source enriched as it does for every source. <code>create_signal_source</code>
-      (<code>imas_codex/discovery/base/grouping.py:26</code>) has no caller anywhere, so it is deleted.
-      That is the surface retired against the extension, and it adds no new creator. The SignalNode
-      creator in <code>imas_codex/discovery/mdsplus/graph_ops.py:455</code> serves MDSplus data nodes,
-      not FacilitySignals, and is left alone. The repair is facility-independent, and JT-60SA is where
-      it is measured.
-    </p>
-    <p>
-      <strong>Node</strong> <code>singleton-signal-sources</code>, role implement, 1.5 h. Write paths:
-      <code>imas_codex/discovery/signals/parallel.py</code>,
-      <code>imas_codex/discovery/base/grouping.py</code> and <code>tests/discovery/</code>.
-      <strong>Done when</strong> <code>uv run --no-sync pytest tests/discovery tests/ids -p no:cacheprovider</code>
-      passes with tests showing:
-    </p>
-    <ul>
-      <li><code>detect_signal_sources</code> gives an ungrouped discovered signal a one-member source
-        with itself as representative;</li>
-      <li>a pattern with three members still forms one three-member source;</li>
-      <li>re-running creates nothing twice;</li>
-      <li>after enrichment the one-member source reads enriched, and
-        <code>claim_sources_for_candidates</code> claims it.</li>
-    </ul>
-    <p>
-      The pass's Cypher is proven against the live database, because the default markers exclude
-      <code>graph</code> and a mocked client never executes the statement. A <code>graph</code>-marked
-      test builds a fixture facility under unique ids, removed in a <code>finally</code> block. The
-      facility has two ungrouped signals and one three-member pattern. The test asserts two one-member
-      sources and one three-member source after the first run, and no new source or edge after a
-      second run. <code>grep -rnw create_signal_source imas_codex/ tests/</code> prints nothing. The
-      check uses a word boundary because the unrelated MDSplus creator
-      <code>detect_and_create_signal_sources</code> contains the name as a substring.
-    </p>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Merged at <code>beb620e1b</code>. Every ungrouped signal gets a one-member source through <code>detect_signal_sources</code>' own MERGE, and <code>create_signal_source</code> is deleted. The gate passed with 1773 tests, a live graph round trip and two negative controls, and review scored 111/120. For JT-60SA that is 1,969 new sources, none of them channel-like. <a href="s3">full record</a></p>
+</section>
 
     <h2 id="s4">§4 — EDDB units parse</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -284,10 +239,11 @@
     <div class="r-fu-body">Enrichment is graph-only and unblocks the candidate run. §3 and §4 can run beside it.</div>
     <pre class="r-fu-prompt">/reckon-build jt60sa-imas-maps §2</pre>
     </article>
-<article class="r-fu" data-id="f-jim-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-07" data-recommends-skill="/reckon-build jt60sa-imas-maps §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-jim-002" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-07" data-recommends-skill="/reckon-build jt60sa-imas-maps §3" data-resolved-at="2026-10-07T07:33:00+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Give every ungrouped signal its own source</h4>
     <div class="r-fu-body"><p>§3 lands before §2, so the enrichment pass enriches the 1,969 standalone signals as representatives of their own sources.</p></div>
     <pre class="r-fu-prompt">/reckon-build jt60sa-imas-maps §3</pre>
+    <p class="r-fu-outcome">Landed as §3 at beb620e1b: detect_signal_sources gives every ungrouped discovered signal a one-member SignalSource through its own MERGE. Proven on the live graph, and review scored 111/120. 1,969 JT-60SA signals receive sources at the next signals preflight.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

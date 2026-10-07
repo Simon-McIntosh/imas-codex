@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="jt60sa-imas-maps-landed">
+  <meta name="plan-title" content="JT-60SA IMAS Maps — landed record">
+  <meta name="plan-summary" content="Closure synthesis for JT-60SA IMAS Maps: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="jt60sa-imas-maps">
+  <meta name="plan-verdict" content="qualified">
+  <title>JT-60SA IMAS Maps — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>JT-60SA IMAS Maps — landed record</h1>
+  <p>Closure synthesis for JT-60SA IMAS Maps: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s3">
+    <h2>§3 — every signal reaches the map</h2>
+    <p>Merged to main at <code>beb620e1b</code>, from node <code>singleton-signal-sources</code> (commits <code>b90e7fd27</code>, <code>1b8457bbf</code> and <code>c3df10965</code>). <code>detect_signal_sources</code> gains a final pass. Each discovered signal that the grouping threshold leaves ungrouped becomes a one-member <code>SignalSource</code> keyed by its accessor, or by its id when it has no accessor, with itself as representative. The pass writes through the function's own <code>MERGE</code>, so the three-member threshold for shared groups is unchanged. <code>create_signal_source</code>, which had no caller, is deleted.</p><p><strong>Verification.</strong> The default gate passed with 1773 tests. A <code>graph</code>-marked round trip on live Neo4j checked a fixture facility with three ungrouped signals, one of them channel-like, and one three-member pattern. The first run produced four sources (member counts 1, 1, 1 and 3) and six <code>MEMBER_OF</code> edges, and a second run wrote nothing. The channel-like signal is now claimed for enrichment. An enriched one-member source reads enriched, and <code>claim_sources_for_candidates</code> returns it. Two negative controls failed as required: skipping ungrouped signals, and dropping the null-accessor fallback. The independent review scored 111/120 with no added failures, and its four follow-ons were folded into the node.</p><p><strong>Measured for JT-60SA.</strong> 1,969 discovered signals have no source today, and none matches the channel-element patterns enrichment bulk-skips. The pass therefore adds 1,969 representatives to enrichment and changes no skip decision. It takes effect the next time the signals preflight runs, which is the §2 enrichment run.</p><p><strong>Carried forward.</strong> The query selects only discovered signals with no source. A signal that arrives alone in a later scan, for a pattern that is already a group, becomes its own one-member source and does not join that group. That is correct, because it reaches the map either way. It costs one extra candidate judgment per such signal.</p>
+  </section>
+
+</main>
+</body>
+</html>
