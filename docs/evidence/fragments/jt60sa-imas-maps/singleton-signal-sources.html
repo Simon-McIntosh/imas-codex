@@ -1,0 +1,35 @@
+<section id="singleton-signal-sources-record">
+  <h3>One-member sources for signals grouping leaves ungrouped</h3>
+
+  <h4 id="singleton-signal-sources-change">Change</h4>
+  <p id="singleton-signal-sources-change-detail">
+    <code>detect_signal_sources</code> created a <code>SignalSource</code> only for an
+    accessor pattern with at least <code>min_instances</code> members. A signal in a
+    smaller pattern carried no source, and every mapping stage keys on a
+    <code>SignalSource</code>, so such a signal could never be mapped. The function
+    now runs a final pass: each signal the threshold leaves ungrouped becomes a
+    one-member source keyed by the signal itself, with the signal as its
+    representative, created through the function's own <code>MERGE</code> so the
+    threshold is unchanged. The unused <code>create_signal_source</code> in
+    <code>imas_codex/discovery/base/grouping.py</code>, which had no caller, is
+    deleted; detection now owns source creation.
+  </p>
+
+  <h4 id="singleton-signal-sources-measure">Measure</h4>
+  <p id="singleton-signal-sources-measure-detail">
+    <code>uv run --no-sync pytest tests/discovery tests/ids -p no:cacheprovider</code>
+    exits 0 — 1772 passed, 5 skipped, 4 deselected. New unit tests assert a lone
+    signal forms a one-member source with itself as representative, and that a
+    sub-threshold pattern forms no shared group. The live <code>-m graph</code> test
+    builds a fixture facility of two ungrouped signals and one three-member pattern,
+    asserts two one-member sources and one three-member source after the first run
+    and no new source or edge after a second, then enriches a one-member source and
+    shows <code>claim_sources_for_candidates</code> claims it — 1 passed.
+  </p>
+
+  <h4 id="singleton-signal-sources-negative-control">Negative control</h4>
+  <p id="singleton-signal-sources-negative-control-detail">
+    With the final pass made to skip ungrouped signals, the one-member source tests
+    are the ones that fail: 4 failed, EXIT=1.
+  </p>
+</section>
