@@ -1,0 +1,983 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "d8b53774894fd28f2361328db12a4aaee8b48967",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3874483,
+      "input_tokens_cumulative": 3874483,
+      "output_tokens": 10383,
+      "output_tokens_cumulative": 10383,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1017,
+    "files": 11,
+    "removed": 164
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 294,
+        "name": "test_comma_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 283,
+        "name": "test_space_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 287
+    },
+    {
+      "existing_function": {
+        "line": 304,
+        "name": "test_mixed_notation_multi_path",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 283,
+        "name": "test_space_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 286
+    },
+    {
+      "existing_function": {
+        "line": 330,
+        "name": "test_json_array_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 283,
+        "name": "test_space_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 287
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_space_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 294,
+        "name": "test_comma_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 297
+    },
+    {
+      "existing_function": {
+        "line": 330,
+        "name": "test_json_array_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 294,
+        "name": "test_comma_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 296
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_space_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 304,
+        "name": "test_mixed_notation_multi_path",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 308
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_space_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "test_json_array_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 333
+    },
+    {
+      "existing_function": {
+        "line": 294,
+        "name": "test_comma_separated_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "test_json_array_dot_paths",
+        "path": "tests/core/test_paths.py"
+      },
+      "window_line": 332
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "_run",
+        "path": "tests/ids/test_escalated_target_choice.py"
+      },
+      "run_function": {
+        "line": 197,
+        "name": "_run",
+        "path": "tests/ids/test_escalated_target_choice.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "_run",
+        "path": "tests/ids/test_escalated_target_choice.py"
+      },
+      "run_function": {
+        "line": 311,
+        "name": "_run",
+        "path": "tests/ids/test_escalated_target_choice.py"
+      },
+      "window_line": 327
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_each_ids_pass_builds_only_its_own_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "test_two_sections_in_one_ids_give_two_assignments",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 116
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "test_two_sections_in_one_ids_give_two_assignments",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 116
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_two_sections_in_one_ids_give_two_assignments",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_each_ids_pass_builds_only_its_own_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_each_ids_pass_builds_only_its_own_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "sample_section_assignment",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1025,
+        "name": "test_same_source_multiple_targets",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 1147,
+        "name": "test_identity_transform_unit_mismatch",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 1199,
+        "name": "test_sign_flip_path_no_cocos",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "test_batch_with_unassigned",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 840,
+        "name": "test_system_content_identical_across_sections",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 911,
+        "name": "test_user_prompt_includes_version_not_found_and_no_change_context",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 978,
+        "name": "test_messages_have_system_role",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 169,
+        "name": "_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "sample_field_batch",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 182,
+        "name": "_batch",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_inside_section_outside_selected_node_is_kept",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 207,
+        "name": "test_outside_every_selected_section_is_escalated",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 208
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_outside_every_selected_section_is_escalated",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 233,
+        "name": "test_inside_section_outside_selected_node_is_kept",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 234
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 258,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 284
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_two_sections_in_one_ids_give_two_assignments",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 315,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 325
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_each_ids_pass_builds_only_its_own_sections",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 315,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 325
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 315,
+        "name": "_run",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "window_line": 350
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "c4e3bf1b3146d8d89f395328d7e591b2c23d9ce8",
+    "7018c00526d5b0600ebc39a962df4486524bccf1",
+    "214a8bcc3abc4966e805bd70545e699f382acc8a",
+    "95245d59e4bea1c69826e2330cfc39528981e7af"
+  ],
+  "completed_at": "2026-10-07T05:44:45.758Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-07T03:26:44Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/ids",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest tests/ids tests/discovery tests/cli/test_discover_map.py tests/test_cli.py tests/core -p no:cacheprovider",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032632014854-map-run-maps-each-home/gate_repair2.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8260869565217391,
+    "plan": "mapping-candidate-selection",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-07T04:26:32.526229+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-07T03:26:32Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 2,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 11,
+    "mean_context": 150000,
+    "observed_at": "2026-10-07T03:26:30Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 2,
+      "aggregate_tokens_per_second": 451.14,
+      "detail": "",
+      "mean_tokens_per_second": 90.228,
+      "observed_at": "2026-10-07T03:26:30Z",
+      "runs": 5.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-07T05:44:45.758Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032632014854-map-run-maps-each-home/manifest.md",
+  "member": "disposable-r-20261007T032632014854-map-run-maps-each-home",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/ids/test_map_each_home.py::TestMapWorkerMapsEveryIdsOfOneSource::test_each_ids_pass_prepares_its_own_section",
+      "tests/ids/test_map_each_home.py::TestMapWorkerMapsEveryIdsOfOneSource::test_each_pass_releases_the_source_it_finished",
+      "tests/ids/test_map_each_home.py::TestSectionGuard::test_outside_every_selected_section_is_escalated",
+      "tests/ids/test_map_each_home.py::test_mapping_status_rule_against_the_live_graph"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/ids/test_map_each_home.py::TestMapWorkerMapsEveryIdsOfOneSource::test_each_ids_pass_prepares_its_own_section",
+      "tests/ids/test_map_each_home.py::TestMapWorkerMapsEveryIdsOfOneSource::test_each_pass_releases_the_source_it_finished",
+      "tests/ids/test_map_each_home.py::TestSectionGuard::test_outside_every_selected_section_is_escalated",
+      "tests/ids/test_map_each_home.py::test_mapping_status_rule_against_the_live_graph"
+    ],
+    "declaration": "widen the target_id guard to accept any path in the same IDS; the test that escalates a target_id outside every selected section must fail",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032632014854-map-run-maps-each-home/negative_control_repair2.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032632014854-map-run-maps-each-home/negative_control_repair2.log",
+    "test_paths": [
+      "tests/core/",
+      "tests/ids/"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "map-run-maps-each-home",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 301,
+          "cached_input_tokens": 195711,
+          "input_tokens": 196014,
+          "output_tokens": 1213,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 197227,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "after PYTHONPATH=$PWD uv run --no-sync build-models --force in the worktree, uv run --no-sync pytest tests/ids tests/discovery tests/cli/test_discover_map.py tests/test_cli.py tests/core -p no:cacheprovider exits 0 with tests showing that section_of returns the IDS top-level ancestor, returns a bare IDS name unchanged and refuses an empty path, assembler.py's section filter no longer matches a sibling section sharing a name prefix, a selected source is mapped without an assign call, an escalated source the assign stage resolved is mapped in the same run from assignments built out of its selected edges, a none verdict leaves mapping_status unset while recording mapping_disposition and mapping_evidence, a source with selected edges in magnetics and summary is claimed by each IDS pass and bound in both while a second magnetics pass skips it, mapping_status reads mapped only after every IDS of the source's selected edges is bound, a target_id outside every selected section of that IDS is escalated while one inside a selected section but outside the selected nodes is kept, an assignment built from a picked node takes the node's top-level ancestor as its section and its type from that section (time-indexed array time_slice, other array struct_array, 0-D scalar), and the progress display's assign line reports the cost recorded under choose_targets; and grep -rn 'mapping_target_ids\\|mapping_target_path\\|mapping_target_type\\|claim_sources_for_assignment' imas_codex/ tests/ prints nothing",
+    "estimated_hours": null,
+    "goal": "Make each IDS pass of imas map run map every source from its selected candidate edges",
+    "id": "map-run-maps-each-home",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-07T03:26:32Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 2,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 11,
+      "mean_context": 150000,
+      "observed_at": "2026-10-07T03:26:30Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 2,
+        "aggregate_tokens_per_second": 451.14,
+        "detail": "",
+        "mean_tokens_per_second": 90.228,
+        "observed_at": "2026-10-07T03:26:30Z",
+        "runs": 5.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032632014854-map-run-maps-each-home/manifest.md",
+    "negative_control": "widen the target_id guard to accept any path in the same IDS; the test that escalates a target_id outside every selected section must fail",
+    "plan": "mapping-candidate-selection",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§8",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/ids/workers.py",
+      "imas_codex/ids/mapping.py",
+      "imas_codex/ids/models.py",
+      "imas_codex/schemas/facility.yaml",
+      "imas_codex/core/paths.py",
+      "imas_codex/ids/validation.py",
+      "imas_codex/ids/assembler.py",
+      "imas_codex/ids/progress.py",
+      "tests/core/",
+      "tests/ids/",
+      "docs/evidence/fragments/mapping-candidate-selection/map-run-maps-each-home.html",
+      "docs/figures/mapping-candidate-selection/map-run-maps-each-home"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2996849.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "map-run-maps-each-home",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-07T03:26:38.783428+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.9,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 587.952,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1593.915,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 49,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 12
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0.04,
+      "clive": 0.92,
+      "codex": 0.01,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "hold": 0.03
+    },
+    "rendered_token_estimate": 1249,
+    "usage": {
+      "cost": 0.000133728,
+      "input_tokens": 3184,
+      "output_tokens": 89
+    }
+  },
+  "plan": "mapping-candidate-selection",
+  "plan_impl_at_dispatch": 0.8260869565217391,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "95245d59e4bea1c69826e2330cfc39528981e7af",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "review_waiver": {
+    "reason": "7018c0052 was independently reviewed at 114/120 (record .at-7018c00); the only change after it is the one live-graph skip assertion that review requested plus one evidence-fragment line (214a8bcc3, 95245d59e, 11 lines), read by the coordinator, with its negative control (drop the no-binding clause) failing on that assertion in negative_control_repair2.log"
+  },
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261007T032632014854-map-run-maps-each-home",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§8",
+  "session": "mapping-20261006",
+  "session_harness": "claude",
+  "session_id": "5da00fbf-a5e0-4d3a-99cd-b491f7b11539",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 30,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 37035036,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 672.106,
+    "generated_tokens": 158160,
+    "generation_seconds": 388.771,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.5,
+    "machine_seconds": 283.335,
+    "peak_input_tokens": 178281,
+    "tokens_per_second": 406.82,
+    "wall_tokens_per_second": 235.32
+  },
+  "time_budget": "60m",
+  "tool_steps": 187.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 8281,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-07T05:44:48Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-07T05:33:29Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261007T032632014854-map-run-maps-each-home",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 22671,
+    "worker_pid": 2701814
+  },
+  "worker_seconds": 8253,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
