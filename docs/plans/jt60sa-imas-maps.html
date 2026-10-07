@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -232,10 +232,11 @@
     <h4 class="r-gate-measure">imas map run chooses a set of homes for each escalated source and maps each source into every IDS of its selected candidate edges</h4>
     <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
     </div>
-<div class="r-gate" data-id="g-jim-2" data-section="s8" data-gated-sections="s8" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-jim-2" data-section="s8" data-gated-sections="s8" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">a shared search-time Jev rerank owner exists for the code and wiki search tools</h4>
     <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
-    </div>
+    <a class="r-gate-evidence" href="Merge 8a63ba5cd on main: rerank_candidates in imas_codex/llm/search_tools.py (RERANK_POOL = 60) is the shared search-time Jev rerank, called by code and wiki search and built on judgment.rerank_pool; discovery-judgments-through-jev section 9 is done.">Evidence</a>
+</div>
 <div class="r-gate" data-id="g-jim-3" data-section="s9" data-gated-sections="s9" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">the generic retrieve-wide-then-rerank core exists in imas_codex/discovery/base/judgment.py, callable without importing from imas_codex/llm/</h4>
     <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
@@ -327,7 +328,7 @@
     <div class="r-comment-body"><p>§11 member-identifier-varying-segments — extract_member_identifier now builds each member identifier only from the accessor's numeric runs that differ across the source's members, dropping constant runs (the JT-60SA reference shot 101173 no longer appears); tests/discovery/test_member_identifier.py pins the JT-60SA 81..86 case, the two-varying-run 010/048 case and the constant-first-run case, and tests/discovery/test_signals_pipeline.py still passes (49 passed, EXIT=0).</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261007T124038267181-review-of-member-identifier-varying-segments" data-who="reckon-build" data-when="2026-10-07T12:59:06.075Z">
-    <div class="r-comment-body"><p>§11 member-identifier-varying-segments reviewed — verdict passed on the reviewed work: extract_member_identifier now keeps only the accessor runs that vary across a source&#x27;s members (constant JT-60SA shot 101173 dropped, 81..86; two varying runs still join 010/048); head 49 passed EXIT=0, base 45 passed EXIT=0, negative control fires 4 failed EXIT=1; total 113/120; two follow-ons recorded (mislabeled gate-log revision header; an unreachable untested all-constant branch).</p></div>
+    <div class="r-comment-body"><p>§11 member-identifier-varying-segments reviewed — verdict passed on the reviewed work: extract_member_identifier now keeps only the accessor runs that vary across a source's members (constant JT-60SA shot 101173 dropped, 81..86; two varying runs still join 010/048); head 49 passed EXIT=0, base 45 passed EXIT=0, negative control fires 4 failed EXIT=1; total 113/120; two follow-ons recorded (mislabeled gate-log revision header; an unreachable untested all-constant branch).</p></div>
 </div>
 </section>
 </main>
