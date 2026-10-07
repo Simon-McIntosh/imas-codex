@@ -44,6 +44,7 @@ def _answers(
     reconstruction_db: float = 0.0,
     role: str = "diagnostic_data_access",
     facets: tuple[float, float, float, float] = (4.0, 3.0, 2.0, 1.0),
+    data_access_confidence: float = 0.9,
 ) -> dict:
     """Answer set with the scope nouls set positionally.
 
@@ -85,7 +86,7 @@ def _answers(
                 "type": "score",
                 "score": data_score,
                 "probabilities": {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 1.0},
-                "confidence": 0.9,
+                "confidence": data_access_confidence,
             },
             "signal_processing_depth": {
                 "type": "score",
@@ -384,8 +385,11 @@ def test_rejudge_claim_selects_ingested_content_stage_files(monkeypatch):
 
     assert "sf.status = 'ingested'" in query
     assert "sf.relevance_stage = 'content'" in query
-    # The drain key: a file with a recorded facet answer is not re-claimed.
-    assert "coalesce(sf.score_data_access_confidence, 0.0) = 0.0" in query
+    # The drain key is the *absence* of a facet answer: the reset leaves the
+    # field null and the writer sets it to the answer's confidence, so a
+    # coalesce to 0.0 would re-claim a file whose real answer was 0.0 forever.
+    assert "sf.score_data_access_confidence IS NULL" in query
+    assert "coalesce(sf.score_data_access_confidence" not in query
     assert "sf.status = 'triaged'" not in query
 
 
@@ -433,8 +437,9 @@ class _MemoryRejudge:
     content-stage file's *recorded answer*, and the judgment write records one.
     The claim is stubbed against this same state, so a second pass sees exactly
     the files the first left unanswered.  ``confidence`` stands for the facet
-    confidence the claim drains on; a file whose decision fails never has it
-    written, so it stays claimable.
+    confidence the claim drains on and is ``None`` when no answer is recorded --
+    the state the reset leaves and the state a written 0.0 answer must be told
+    apart from, since a genuine 0.0 is a recorded answer.
     """
 
     def __init__(self, files: list[tuple[str, list[dict]]]):
@@ -442,7 +447,7 @@ class _MemoryRejudge:
             path: {
                 "id": path,
                 "path": path,
-                "confidence": 0.0,
+                "confidence": None,
                 "claimed": False,
                 "chunks": chunks,
             }
@@ -462,12 +467,13 @@ class _MemoryRejudge:
         text = " ".join(cypher.split())
         self.queries.append(text)
         if "n.status = $target_status" in text and "reset_count" in text:
-            # reset_to_status: clear the recorded answer wherever one is set.
+            # reset_to_status: clear the recorded answer wherever one is set,
+            # leaving the field *absent* (``None``), not 0.0.
             self.reset_calls += 1
             cleared = 0
             for f in self.files.values():
-                if f["confidence"] != 0.0:
-                    f["confidence"] = 0.0
+                if f["confidence"] is not None:
+                    f["confidence"] = None
                     cleared += 1
                 f["claimed"] = False
             return [{"reset_count": cleared}]
@@ -488,19 +494,38 @@ class _MemoryRejudge:
             for item in kwargs["items"]:
                 f = self.files.get(item["id"])
                 if f is not None:
-                    f["confidence"] = item.get("score_data_access_confidence", 0.0)
+                    f["confidence"] = item.get("score_data_access_confidence")
                     f["claimed"] = False
             return []
         return []
 
     def claim(self, facility, limit=100, path_prefixes=None, *, ingested_rejudge=False):
-        """The claim's own selection: ingested content-stage files with no
-        recorded answer, which is what makes a later pass resume."""
+        """The claim's own selection, mirroring the production drain key.
+
+        Reads ``ingested_rejudge_selection`` and applies the same predicate the
+        production claim does, so this harness fails wherever the claim it
+        stands in for fails: absence of the facet confidence when the clause
+        tests ``IS NULL``, a coalesced zero when it does not.  A file whose
+        answer recorded a genuine 0.0 is therefore answered under the ``IS NULL``
+        form and unanswered under the ``coalesce`` form.
+        """
         if not ingested_rejudge:
             return []
+        from imas_codex.discovery.code.graph_ops import ingested_rejudge_selection
+
+        clause = ingested_rejudge_selection()
+        drains_on_absence = "IS NULL" in clause
+
+        def unanswered(f: dict) -> bool:
+            return (
+                f["confidence"] is None
+                if drains_on_absence
+                else (f["confidence"] or 0.0) == 0.0
+            )
+
         out: list[dict] = []
         for f in self.files.values():
-            if f["confidence"] == 0.0 and not f["claimed"] and len(out) < limit:
+            if unanswered(f) and not f["claimed"] and len(out) < limit:
                 f["claimed"] = True
                 out.append(_file(f["id"]))
         return out
@@ -619,6 +644,31 @@ def test_no_file_is_judged_twice_in_one_pass_and_count_matches(monkeypatch):
     assert len(judged) == len(set(judged)), f"a file was judged twice: {judged}"
     assert set(judged) == set(paths)
     assert results[0]["rejudged"] == 2
+
+
+def test_zero_confidence_answer_is_not_reclaimed_on_the_next_pass(monkeypatch):
+    """A file whose answer recorded a genuine 0.0 confidence is answered.
+
+    The reset leaves the facet-confidence field *absent*, so absence -- not a
+    coalesced zero, which a real 0.0 answer also satisfies -- marks a file as
+    unanswered.  A file whose decision succeeded with data-access confidence
+    0.0 is therefore drained: the next pass does not take it.  Under the
+    ``coalesce(..., 0.0) = 0.0`` form the file is re-claimed on every pass.
+    """
+    paths = ["/analysis/src/zero.f", "/analysis/src/some.f"]
+    memory = _MemoryRejudge([(p, [{"start_line": 1, "text": "x\n"}]) for p in paths])
+    answers = {
+        paths[0]: _answers(0.75, 0.4, 0.2, 0.1, data_access_confidence=0.0),
+        paths[1]: _answers(0.75, 0.4, 0.2, 0.1),
+    }
+
+    results, per_pass = _drive_passes(monkeypatch, memory, answers, passes=2)
+
+    assert set(per_pass[0]) == set(paths)
+    assert results[0]["rejudged"] == 2
+    # The 0.0-confidence file recorded an answer, so the second pass takes none.
+    assert per_pass[1] == []
+    assert results[1]["rejudged"] == 0
 
 
 # ---------------------------------------------------------------------------
