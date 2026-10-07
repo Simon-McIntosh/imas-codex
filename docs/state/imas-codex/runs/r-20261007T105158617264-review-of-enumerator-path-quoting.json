@@ -541,6 +541,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "b43fad35aa2a79d8a564054b99c37ab943b88698",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 90807230,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261007T105158617264-review-of-enumerator-path-quoting",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 90807230,
+        "path": "/tmp/reckon-crew-scratch/r-20261007T105158617264-review-of-enumerator-path-quoting"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/review-of-enumerator-path-quoting",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
