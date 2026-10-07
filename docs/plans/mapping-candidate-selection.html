@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -697,6 +697,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T001634271791-review-of-map-context-reads-candidates" data-who="reckon-build" data-when="2026-10-07T00:28:19.751Z">
     <div class="r-comment-body"><p>review of run r-20261007T000057100973-map-context-reads-candidates stored parsed at both granted paths, total 93/120 (goal_fidelity 14, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 17), added_failure_count 0; one blocking finding — _prepare_section_context was not repointed to the new source_candidates shape and raises AttributeError on the live map-worker path.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20261007T0052-s8-context-audit" data-who="reckon-build" data-when="2026-10-07T00:52:00Z">
+    <div class="r-comment-body"><p>Node <code>map-context-reads-candidates</code> (commits <code>5370d74db</code>, <code>b043480ff</code>, <code>4e84f1c7c</code>, <code>c2c05d431</code>) landed. It added <code>read_candidates</code> and <code>select_candidates</code> in <code>graph_ops.py</code>; <code>gather_ids_context</code> now reads shortlists from candidate edges; the bridge's DD arm and its dead parameters are gone; the route count has one owner; and the arms lookup is strict. The section stays open for <code>map-run-chooses-candidates</code> and <code>map-run-maps-each-home</code>. It went back twice. The first independent review (93 of 120) found a blocking crash: <code>_prepare_section_context</code> still read <code>cand.hit.path</code> from the old <code>Candidate</code> shape, so every live map run would have failed on its first source. My audit had also found that <code>select_candidates</code> flagged found edges before refusing a partial pick, and marked an empty pick selected. After the repair, the live round-trip test could not tell the fixed Cypher from the old one, so it now tries a refused partial pick before any success; with the guard reverted it fails, flagging the third edge. Final gate 534 passed. The live graph test passed, and its negative control failed as required. The second review scored 111 of 120 with no added failures; its follow-on, that the default gate proves all-or-nothing only by statement text, is inherent to the excluded <code>graph</code> marker and is covered by the live log.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261006T2316-s11-dispatch" data-who="reckon-build" data-when="2026-10-06T23:16:00Z">
     <div class="r-comment-body"><p>Dispatched <code>cross-ids-siblings</code> (run <code>r-20261006T231514344990-cross-ids-siblings</code>) with the unreviewed-plan waiver. The stored review at version 66 covers §11 as dispatched, and its one finding was answered as acted. The only uncovered unit was §8, whose version-67 edit is that finding's fix: the claim-predicate exception and the full route-count census. A review of the current content runs before §8's next node is dispatched.</p></div>
