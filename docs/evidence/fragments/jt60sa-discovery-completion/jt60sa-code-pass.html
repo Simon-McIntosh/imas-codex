@@ -1,0 +1,154 @@
+<section>
+  <h2 id="jt60sa-code-pass">The JT-60SA code pipeline drains on the resumed pass; the facet rule admits nothing</h2>
+
+  <p id="jt60sa-code-pass-prerequisite">
+    The node runs <code>imas-codex discover code jt-60sa</code> facility-wide in
+    <code>--time 8</code> foreground passes until no triaged file waits for
+    enrichment or scoring and no admitted file waits for ingest. Its named
+    precondition is that the JT-60SA hop answers before the first pass:
+    <code>/tmp/sshwrap/ssh</code> created, <code>export
+    PATH=/tmp/sshwrap:$PATH</code>, and
+    <code>ssh -o BatchMode=yes jt-60sa hostname</code> succeeding. On the first
+    attempt the hop did not answer and no pass ran; on the resumed attempt the
+    tunnel had been restored, the precondition passed, and both passes ran to
+    completion.
+  </p>
+
+  <p id="jt60sa-code-pass-reproduction">
+    The first attempt was blocked on the jump-host forward to the laptop tunnel.
+    <code>ssh -v</code> put the failure on the jump host, not on the compute node
+    and not in the wrapper: <code>debug1: Connecting to 98dci4-srv-1003
+    [10.154.100.13] port 22 … Connection established</code>, authentication
+    succeeds, then <code>channel 0: open failed: connect failed: Connection
+    refused</code>. Nothing was listening on 2222 there — <code>ss -ltn | grep
+    :2222</code> returned no row on <code>98dci4-srv-1003</code>, <code>-1004</code>,
+    <code>-1005</code> or <code>-1006</code>. On the resumed attempt at 09:35Z the
+    probe returned <code>intr26-2</code> with exit 0 and the passes began.
+  </p>
+  <pre id="jt60sa-code-pass-repro-block">
+# blocked
+$ ssh -o BatchMode=yes jt-60sa hostname
+Connection closed by UNKNOWN port 65535        # exit 255
+# resumed
+$ ssh -o BatchMode=yes jt-60sa hostname
+intr26-2                                       # exit 0</pre>
+
+  <p id="jt60sa-code-pass-counts">
+    CodeFile counts at facility <code>jt-60sa</code> before and after the two
+    foreground passes, both read from the graph on the compute node. The total
+    rises because the scan phase discovers files as it runs; the cohort is not
+    fixed.
+  </p>
+  <table id="jt60sa-code-pass-before-after-table">
+    <thead>
+      <tr><th>state</th><th>before (08:52Z)</th><th>after (10:10Z)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ingested</td><td>162</td><td><strong>539</strong></td></tr>
+      <tr><td>scored</td><td>218</td><td>710</td></tr>
+      <tr><td>triaged</td><td>761</td><td><strong>0</strong></td></tr>
+      <tr><td>skipped</td><td>1170</td><td>1930</td></tr>
+      <tr><td>failed</td><td>0</td><td>29</td></tr>
+      <tr><td><strong>total CodeFile</strong></td><td><strong>2311</strong></td><td><strong>3208</strong></td></tr>
+      <tr><td>relevance_stage = content</td><td>397</td><td>1348</td></tr>
+      <tr><td>relevance_stage = name</td><td>1914</td><td>1860</td></tr>
+      <tr><td>CodeChunk (facility-scoped)</td><td>673</td><td>3009</td></tr>
+      <tr><td>DataReference (jt-60sa)</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <p id="jt60sa-code-pass-drain">
+    The pipeline drained: <strong>0 triaged files remain</strong>, so nothing
+    waits for enrichment or scoring. Two executions of this node ran
+    concurrently (see below), so every command appears twice in the shared
+    facility log and the two summaries are not additive. The first
+    <code>--reset-to content --time 8</code> pass cleared the 235 content files
+    and reported <em>415 scanned, 630 scored, 344 code ingested</em>, Cost
+    <strong>$0.11</strong>, Time 425.8s. The concurrent twin then found the queue
+    already reset (0 files to reset) and reported <em>482 scanned, 550 scored,
+    353 code ingested</em>, Cost <strong>$0.13</strong>, Time 408.2s. Both drain
+    passes reported <em>0 scanned, 0 scored, 0 code ingested</em>, Cost $0.00,
+    Time 479.6s: the drain condition was reached. Total decision spend across
+    both executions: <strong>$0.24</strong>.
+  </p>
+
+  <p id="jt60sa-code-pass-concurrency">
+    <strong>Two executions of this node ran from 09:34Z to 10:13Z.</strong> The
+    run record holds two launches twelve seconds apart — this session at
+    09:34:30Z and <code>attempt-2</code> at 09:34:42Z
+    (<code>worker_pid 608258</code>, terminated by SIGTERM at 10:13:17Z, a process
+    distinct from this session's own) — both bound to
+    <code>r-20261007T084429281839-jt60sa-code-pass</code> and the same worktree.
+    The facility log carries both: line 25366 reset 235 files at 11:36:47 beside
+    line 25485 reset 0 at 11:37:07, and the two drain starts at 11:50:46 and
+    11:51:50. This doubled the decision spend to $0.24 and raced two writers on
+    one write path. It is a dispatch defect, not a pipeline one, and is raised as
+    a follow-on.
+  </p>
+
+  <p id="jt60sa-code-pass-facet">
+    <strong>The facet-admission rule admits no JT-60SA file.</strong> A
+    content-stage file is admitted when its composite reaches 0.5
+    (<code>code-ingest-threshold</code>) or its strongest facet reaches 0.85
+    (<code>code-facet-admission-threshold</code>). Across the 1348 jt-60sa content
+    files the facility-wide facet maxima are data_access 0.75, signal_processing
+    0.0, machine_description 0.0, imas_mapping 0.0 — every facet sits below 0.85,
+    and only data_access is ever populated. That is not a JT-60SA-local effect:
+    over all 265,515 CodeFile nodes in the four facilities the per-facet maxima
+    are data_access 1.0, signal_processing 0.0, machine_description 0.0,
+    imas_mapping 0.0. Only the data_access facet is ever scored non-zero, so the
+    0.85 branch can fire at most on the data_access facet, and the 162 jt-60sa
+    files that carry any data_access land at 0.85 or below.
+  </p>
+  <table id="jt60sa-code-pass-facet-table">
+    <thead>
+      <tr><th>facet</th><th>jt-60sa max</th><th>all-facility max</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>score_data_access</td><td>0.75</td><td>1.0</td></tr>
+      <tr><td>score_signal_processing</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>score_machine_description</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>score_imas_mapping</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>score_composite (max)</td><td>0.96</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p id="jt60sa-code-pass-facet-cause">
+    The facet questions are present in the rendered triage template —
+    <code>build_triage_questions(with_content=True)</code> returns all four with
+    type <code>score</code> and non-zero top levels (data_access 4,
+    signal_processing 3, machine_description 3, imas_mapping 3) — so the zeros
+    come from the live content-arm answers, not from the question set. The
+    content files carry <code>score_machine_description_probs</code> as
+    <code>[0,0,0,0]</code> with confidence 0.0, i.e. the answer was recorded with
+    no distribution and score 0.
+  </p>
+
+  <p id="jt60sa-code-pass-named">
+    The two files the plan named as facet-admission prototypes were re-judged and
+    did not admit — under the content arm the rule cannot admit them, because no
+    facet is above 0.85 and the composite is below 0.5:
+  </p>
+  <table id="jt60sa-code-pass-named-table">
+    <thead>
+      <tr><th>file</th><th>status</th><th>composite</th><th>da</th><th>sp</th><th>md</th><th>im</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</td><td>scored</td><td>0.30</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC/eqgrd.f</td><td>scored</td><td>0.23</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+      <tr><td>/analysis/src/topics_release/topics/topics/eqmain/eqgrd.f</td><td>ingested</td><td>0.54</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+    </tbody>
+  </table>
+
+  <p id="jt60sa-code-pass-datareference">
+    <strong>DataReference remains 0</strong>, and now the reason is measured
+    rather than obscured by the blocked run. DataReference nodes are produced by
+    the code-ingest path (<code>imas_codex.ingestion.pipeline.ingest_files</code>
+    → <code>ingestion/graph.py</code>) from MDSplus path and TDI-call literals in
+    ingested file content. Those nodes exist elsewhere — tcv 7472 and jet 345,
+    all <code>mdsplus_path</code> — so the mechanism runs. But no JT-60SA
+    CodeChunk carries a <code>CONTAINS_REF</code> edge (0 of 3009), so none of the
+    539 ingested JT-60SA sources contained an extractable MDSplus path literal.
+    The zero is a property of this facility’s source languages (SA Fortran
+    analysis code), not of the linking code.
+  </p>
+</section>
