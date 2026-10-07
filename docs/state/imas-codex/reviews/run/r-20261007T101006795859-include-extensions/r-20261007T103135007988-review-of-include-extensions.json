@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest declares no baseline_suite or after_suite arm (both keys empty), so this review measured the pair itself: head arm is the reviewed run's own gate-head.log (99 passed, EXIT=0 at 258d1831e) and base arm at 6b47ac50a over tests/discovery/test_code_pipeline.py (91 passed, EXIT=0, gate-base.log). Zero failures in either arm, so zero added; the paired set difference is empty.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_include_extensions.py tests/discovery/test_code_pipeline.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T101006795859-include-extensions/gate-head.log",
+    "revision": "258d1831e1fef3af5a7c7eb92b19e2540b02f559"
+  },
+  "baseline_suite": {
+    "command": "env -C <base-scratch> PYTHONPATH=<base-scratch> PYTHONDONTWRITEBYTECODE=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -p no:cacheprovider tests/discovery/test_code_pipeline.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T103135007988-review-of-include-extensions/gate-base.log",
+    "revision": "6b47ac50a935523cd8be8597f3ac84f2c5a62322"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/code/scanner.py:_get_extensions_list",
+    "imas_codex/ingestion/readers/remote.py:detect_language",
+    "imas_codex/ingestion/readers/remote.py:_fetch_sequential",
+    "imas_codex/ingestion/readers/remote.py:_fetch_batch_tar",
+    "imas_codex/remote/scripts/scan_files.py:scan_path_find"
+  ],
+  "completed_at": "2026-10-07T10:42:08.365Z",
+  "dispatched_at": "2026-10-07T10:31:43Z",
+  "findings": [
+    {
+      "file": "imas_codex/remote/scripts/discover_files.py",
+      "line": "150",
+      "severity": "follow-on",
+      "text": "follow-on: the same unquoted `find {path}` interpolation the node fixed at scan_files.py:181 survives here and reaches a shell through subprocess.run([\"sh\",\"-c\",cmd]), so a #-named JT-60SA include routed to this enumerator would be silently mangled; it is outside the node's declared write scope and is recorded as a follow-on."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against 6b47ac50a; two commits (258d1831e adds the extensions and the quoting fix plus tests, 77893f172 adds the evidence fragment), conventional subjects with mechanism bodies, no plan identifier and no AI attribution.",
+    "done_when": "\u00a728's done-when names a scanner-list/detect_language test, a both-fetch-builder quoting test on /analysis/src/client_eqdbms.EQ32.Rev1/inc/F/#AAA.bf, a negative control that reddens without .bf, and a gate exit 0; gate-head.log records EXIT=0 with 99 passed and negative-control.log records EXIT=1 with the extension-list test red.",
+    "goal": "the node's goal is \u00a728's outcome \u2014 Fortran include files (.bf, .inc) reach the code scanner; the diff adds both to EXTENSION_TO_LANGUAGE at imas_codex/ingestion/readers/remote.py:41 and to the fortran entry of imas_codex/config/patterns/file_types.yaml:18, so both extension lists name them.",
+    "manifest": "read at head 77893f172; it reports status complete, the 99-passed gate and the EXIT=1 negative control, and records the discover_files.py:150 sibling defect as a follow-on outside its write scope.",
+    "write_paths": "the node's declared paths are imas_codex/ingestion/readers/remote.py, imas_codex/config/patterns/file_types.yaml, imas_codex/remote/scripts/scan_files.py, tests/discovery/test_code_include_extensions.py and the include-extensions evidence fragment; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "the extension-list assertion at tests/discovery/test_code_include_extensions.py:55 is proven to fail under the regression by negative-control.log (map without .bf, EXIT=1), and tests/discovery/test_code_include_extensions.py:120 asserts the find builder's quoted form, which reddens if shlex.quote is dropped there.",
+    "evidence": "the done-when's gate exit is recorded at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T101006795859-include-extensions/gate-head.log (EXIT=0, 99 passed at 258d1831e) and the negative-control refusal at negative-control.log (EXIT=1), though the reviewed manifest declares no baseline_suite/after_suite arm, so this review supplied the base arm.",
+    "fit": "the new test module is capability-named and its comments state the shell-comment mechanism at imas_codex/remote/scripts/scan_files.py:180, with no plan label or attribution in any landed name or comment.",
+    "goal_fidelity": "the diff adds .bf/.inc at both owners (imas_codex/ingestion/readers/remote.py:41, imas_codex/config/patterns/file_types.yaml:18) and quotes the scanned path at imas_codex/remote/scripts/scan_files.py:181, matching \u00a728; the sibling unquoted site at imas_codex/remote/scripts/discover_files.py:150 is left untouched only because it is outside the node's write scope.",
+    "reuse": "the change extends the two existing owners of the extension lists in place \u2014 imas_codex/ingestion/readers/remote.py:41 and imas_codex/config/patterns/file_types.yaml:18 \u2014 and forks no capability, matching \u00a728's instruction not to merge the lists.",
+    "scope_discipline": "all five changed files sit inside the declared write paths, and the identical unquoted interpolation at imas_codex/remote/scripts/discover_files.py:150 was left alone rather than reached for outside scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is \u00a728's outcome \u2014 Fortran include files (.bf, .inc) reach the code scanner; the diff adds both to EXTENSION_TO_LANGUAGE at imas_codex/ingestion/readers/remote.py:41 and to the fortran entry of imas_codex/config/patterns/file_types.yaml:18, so both extension lists name them.\nVERDICT done_when: \u00a728's done-when names a scanner-list/detect_language test, a both-fetch-builder quoting test on /analysis/src/client_eqdbms.EQ32.Rev1/inc/F/#AAA.bf, a negative control that reddens without .bf, and a gate exit 0; gate-head.log records EXIT=0 with 99 passed and negative-control.log records EXIT=1 with the extension-list test red.\nVERDICT write_paths: the node's declared paths are imas_codex/ingestion/readers/remote.py, imas_codex/config/patterns/file_types.yaml, imas_codex/remote/scripts/scan_files.py, tests/discovery/test_code_include_extensions.py and the include-extensions evidence fragment; every path in the diff is inside them.\nVERDICT manifest: read at head 77893f172; it reports status complete, the 99-passed gate and the EXIT=1 negative control, and records the discover_files.py:150 sibling defect as a follow-on outside its write scope.\nVERDICT diff: read commit by commit against 6b47ac50a; two commits (258d1831e adds the extensions and the quoting fix plus tests, 77893f172 adds the evidence fragment), conventional subjects with mechanism bodies, no plan identifier and no AI attribution.\nCALL_SITES: imas_codex/discovery/code/scanner.py:_get_extensions_list, imas_codex/ingestion/readers/remote.py:detect_language, imas_codex/ingestion/readers/remote.py:_fetch_sequential, imas_codex/ingestion/readers/remote.py:_fetch_batch_tar, imas_codex/remote/scripts/scan_files.py:scan_path_find\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the diff adds .bf/.inc at both owners (imas_codex/ingestion/readers/remote.py:41, imas_codex/config/patterns/file_types.yaml:18) and quotes the scanned path at imas_codex/remote/scripts/scan_files.py:181, matching \u00a728; the sibling unquoted site at imas_codex/remote/scripts/discover_files.py:150 is left untouched only because it is outside the node's write scope.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done-when's gate exit is recorded at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T101006795859-include-extensions/gate-head.log (EXIT=0, 99 passed at 258d1831e) and the negative-control refusal at negative-control.log (EXIT=1), though the reviewed manifest declares no baseline_suite/after_suite arm, so this review supplied the base arm.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all five changed files sit inside the declared write paths, and the identical unquoted interpolation at imas_codex/remote/scripts/discover_files.py:150 was left alone rather than reached for outside scope.\nSCORE durability: 18\nJUSTIFICATION durability: the extension-list assertion at tests/discovery/test_code_include_extensions.py:55 is proven to fail under the regression by negative-control.log (map without .bf, EXIT=1), and tests/discovery/test_code_include_extensions.py:120 asserts the find builder's quoted form, which reddens if shlex.quote is dropped there.\nSCORE fit: 18\nJUSTIFICATION fit: the new test module is capability-named and its comments state the shell-comment mechanism at imas_codex/remote/scripts/scan_files.py:180, with no plan label or attribution in any landed name or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the two existing owners of the extension lists in place \u2014 imas_codex/ingestion/readers/remote.py:41 and imas_codex/config/patterns/file_types.yaml:18 \u2014 and forks no capability, matching \u00a728's instruction not to merge the lists.\nFINDING imas_codex/remote/scripts/discover_files.py:150 follow-on: the same unquoted `find {path}` interpolation the node fixed at scan_files.py:181 survives here and reaches a shell through subprocess.run([\"sh\",\"-c\",cmd]), so a #-named JT-60SA include routed to this enumerator would be silently mangled; it is outside the node's declared write scope and is recorded as a follow-on.",
+  "review_run_id": "r-20261007T103135007988-review-of-include-extensions",
+  "reviewed_base": "6b47ac50a935523cd8be8597f3ac84f2c5a62322",
+  "reviewed_base_sha": "6b47ac50a935523cd8be8597f3ac84f2c5a62322",
+  "reviewed_commit": "77893f172bf9806aefe037129b3bd3fd265ee45e",
+  "reviewed_head_sha": "77893f172bf9806aefe037129b3bd3fd265ee45e",
+  "reviewed_run_id": "r-20261007T101006795859-include-extensions",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T10:40:31.676366+00:00",
+  "total": 112
+}
