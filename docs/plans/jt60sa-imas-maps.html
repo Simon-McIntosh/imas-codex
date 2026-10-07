@@ -21,9 +21,9 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -107,39 +107,12 @@
   <p class="landed-summary">Merged at <code>beb620e1b</code>. Every ungrouped signal gets a one-member source through <code>detect_signal_sources</code>' own MERGE, and <code>create_signal_source</code> is deleted. The gate passed with 1773 tests, a live graph round trip and two negative controls, and review scored 111/120. For JT-60SA that is 1,969 new sources, none of them channel-like. <a href="s3">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
     <h2 id="s4">§4 — EDDB units parse</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      The map stage writes unit conversions, and it reads each source's unit to do so. EDDB stores
-      units as free text. 1,482 JT-60SA signals carry a unit <code>normalize_unit_symbol</code>
-      (<code>imas_codex/units/__init__.py:96</code>) cannot parse, among them <code>uST</code> (480),
-      <code>n/day</code> (371), <code>MPaG</code> (187), <code>KA</code>, <code>DEG</code>,
-      <code>DegC</code>, <code>oC</code>, <code>KV</code> and the <code>Pa*m3/s</code> family.
-      <code>jt60sa-discovery-completion</code> parked this as followup <code>f-jdc-004</code>
-      because it belongs to DD binding, and this plan adopts it.
-    </p>
-    <p>
-      A FacilitySignal carries its unit as a string. The schema gives it no <code>HAS_UNIT</code>
-      relationship; only SignalNode has one. The map stage reads the representative's unit string
-      and parses it through the same pint registry: the claim projects <code>rep.unit</code>, and
-      <code>analyze_units</code> (<code>imas_codex/ids/tools.py:167</code>) compares it with the IMAS
-      field's unit. So the repair is a parse, not a link. The JT-60SA spellings are added to
-      <code>imas_codex/units/data_dictionary_unit_aliases.txt</code>, the one alias file the registry
-      loads (<code>imas_codex/units/__init__.py:48</code>). That file already carries per-source
-      spellings, including case-sensitive MDSplus aliases, so it stays the single owner, and every
-      path parses the same spelling the same way. A spelling that names no physical unit is listed as
-      unresolved with its count, never guessed. <code>Unit</code> is one such spelling; gauge pressure
-      (<code>MPaG</code>) is another, because it is not an absolute pressure.
-    </p>
-    <p>
-      <strong>Node</strong> <code>eddb-unit-normalisation</code>, role implement, 2 h. Write paths:
-      <code>imas_codex/units/data_dictionary_unit_aliases.txt</code> and <code>tests/units/</code>.
-      <strong>Done when</strong> <code>uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider</code>
-      passes. Tests show <code>normalize_unit_symbol</code> parsing each added spelling, and
-      <code>analyze_units</code> finding <code>KA</code> compatible with <code>A</code> at factor
-      1000. A live census shows each of the 76 JT-60SA unit strings either normalised or listed as
-      unresolved with its count and reason.
-    </p>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Merged at <code>c9f9e3052</code>. EDDB spellings parse and compare through the shared pint registry. Celsius keeps its offset, glued exponents round-trip exactly, <code>deg. C</code> reads as Celsius, and <code>V.S</code> is left unresolved. The gate passed with 892 tests, all 415 graph Unit ids are unchanged, and reviews scored 112 to 114 out of 120. <a href="s4">full record</a></p>
+</section>
 
     <h2 id="s5">§5 — Candidates for every JT-60SA source</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -296,7 +269,7 @@
     <div class="r-comment-body"><p>review-of-eddb-unit-normalisation (incremental): parsed review of r-20261007T061546254649-eddb-unit-normalisation over the commits gained since its prior review, and stored at the pinned head a8998c5a4; scores goal_fidelity 19 / evidence 18 / scope_discipline 19 / durability 19 / fit 18 / reuse 19 = 112; added_failure_count 0 derived from the reviewed run's own baseline_suite/after_suite logs and reproduced as 526 (base 09ff452ee) and 891 (head) passed; no functional defect in the code, two documentation follow-ons (the evidence fragment's intro misstates glued forms as @alias-defined; "deg. C" normalises to coulomb*degree rather than Celsius).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261007T061546254649-eddb-unit-normalisation" data-who="reckon-build" data-when="2026-10-07T09:46:03.844Z">
-    <div class="r-comment-body"><p>a6102f2f1 defines m2, m3 and Pam3 as units without a symbol (the previous symbol &#x27;m2&#x27; made a negative power format as &#x27;m^2^-1&#x27;, which re-parses to a different unit). a8998c5a4 regroups the census by pint unit. c38e99b97 adds the separator-bearing Celsius handling and leaves the ambiguous &#x27;V.S&#x27; unresolved. Comparison of every DD unit string is by pint equivalence, not string equality.</p></div>
+    <div class="r-comment-body"><p>a6102f2f1 defines m2, m3 and Pam3 as units without a symbol (the previous symbol 'm2' made a negative power format as 'm^2^-1', which re-parses to a different unit). a8998c5a4 regroups the census by pint unit. c38e99b97 adds the separator-bearing Celsius handling and leaves the ambiguous 'V.S' unresolved. Comparison of every DD unit string is by pint equivalence, not string equality.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261007T091146945195-review-of-local-llm-seats" data-who="reckon-build" data-when="2026-10-07T09:29:33.370Z">
     <div class="r-comment-body"><p>review-of-local-llm-seats: independent review of r-20261007T084110554429-local-llm-seats stored, SOUND at 102/120 (goal_fidelity 16, evidence 14, scope_discipline 19, durability 15, fit 19, reuse 19); the ids-mapping half of the seat move is real and gate-green, the cluster-labels half routes no call.</p></div>
