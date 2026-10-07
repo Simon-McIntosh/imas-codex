@@ -38,6 +38,8 @@ EXTENSION_TO_LANGUAGE = {
     ".f90": "fortran",
     ".f": "fortran",
     ".for": "fortran",
+    ".bf": "fortran",
+    ".inc": "fortran",
     ".F90": "fortran",
     ".F": "fortran",
     ".pro": "idl",
