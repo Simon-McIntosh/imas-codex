@@ -4,9 +4,10 @@
     With the content question set now asked, a single <code>--reset-to
     content</code> pass re-judged the 780 JT-60SA content-stage files that were
     at <code>scored</code> or <code>skipped</code> and left the 539
-    <code>ingested</code> and 29 <code>failed</code> untouched. Every facet
-    confidence, zero on all 1,348 content-stage files before the pass, now
-    carries a real answer on the re-judged files. The pipeline drained in one
+    <code>ingested</code> and 29 <code>failed</code> untouched. Before the pass
+    no content-stage file stored a facet answer: confidences read 0, or were
+    unset on 162 of the ingested files. Every re-judged file now carries a real
+    answer. The pipeline drained in one
     pass: a confirming <code>--time 8</code> pass reported no work
     (<code>0 scanned, 0 scored, 0 code ingested, Cost $0.00</code>).
   </p>
@@ -57,7 +58,10 @@
     admitted on its composite 0.54 and is <code>ingested</code>.
   </p>
   <p id="facet-rejudge-ingested">
-    Thirteen files were newly ingested, two by the facet rule
+    Thirteen files were newly ingested, between 10:53:09Z and 10:56:16Z (a live
+    query at review confirms all thirteen; the <code>newly_ingested</code> list in
+    <code>after_final.json</code> is empty because its filter compared the UTC
+    <code>ingested_at</code> against a local-clock prefix), two by the facet rule
     (<code>mgset0.f</code>, <code>prbplt.f</code>) and eleven on composite at or
     above 0.5:
     <code>edas_eslice2/eslice_data_area/eslice_custom_classes_matplotlib.py</code>
