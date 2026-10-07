@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/discovery/test_code_reset_chunks.py::test_code_reset_clear_fields_come_from_the_scorer_registry"
+  ],
+  "added_failures_note": "The reviewed run's manifest names no baseline_suite/after_suite fields, so the count was derived by reproducing the reviewed run's own gate command at its base 8e08eeaa7 (1673 passed, 0 failed, EXIT=0) and at its head f22a7e4c6 (1 failed, 1677 passed, EXIT=1); both arm logs are named under baseline_suite/after_suite in this review run's manifest. Because the reviewed manifest carries no suite fields, the production read path annotates this record as unmeasured.",
+  "base_log_revision": "8e08eeaa7fc129ed6c8b76e7d0c551a47966948e",
+  "call_site_count": 8,
+  "call_sites": [
+    "imas_codex/discovery/code/graph_ops.py:420",
+    "imas_codex/discovery/code/graph_ops.py:707",
+    "imas_codex/discovery/code/graph_ops.py:747",
+    "imas_codex/discovery/code/parallel.py:428",
+    "imas_codex/discovery/code/parallel.py:455",
+    "imas_codex/discovery/code/parallel.py:503",
+    "imas_codex/discovery/code/workers.py:707",
+    "imas_codex/discovery/code/workers.py:350"
+  ],
+  "completed_at": "2026-10-07T05:00:44.001Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "relevance-cleanup",
+      "recorded_at": "2026-10-07T04:53:04.907796+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "relevance-cleanup",
+      "recorded_at": "2026-10-07T04:53:05.565533+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-07T04:13:32Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/scorer.py",
+      "line": "57",
+      "severity": "blocking",
+      "text": "the scorer defines no RELEVANCE_FIELDS and never imports CODE_RELEVANCE_FIELDS, so the node's own registry guard tests/discovery/test_code_reset_chunks.py:86 raises AttributeError and the declared gate exits 1 at f22a7e4c6; item 5 is not implemented."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032915768279-relevance-cleanup/manifest.md",
+      "line": "8",
+      "severity": "blocking",
+      "text": "the manifest records '1678 passed ... EXIT=0' for the named gate, but that gate exits 1 (1 failed, 1677 passed) at the committed head f22a7e4c6, so the recorded result is not reproducible."
+    },
+    {
+      "file": "imas_codex/discovery/code/scorer.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "the comment asserts a single registry 'owned by discovery/base/reset.py', but the file contains no such import, leaving a comment describing a mechanism the code lacks."
+    },
+    {
+      "file": "imas_codex/discovery/base/reset.py",
+      "line": "342",
+      "severity": "follow-on",
+      "text": "the comment 'The code scorer imports this tuple as RELEVANCE_FIELDS' is false; imas_codex/discovery/code/scorer.py contains no such import, so the recorded import contract is unfulfilled."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032915768279-relevance-cleanup/manifest.md",
+      "line": "8",
+      "severity": "follow-on",
+      "text": "the manifest names no baseline_suite or after_suite gate logs, so the added failure cannot be attributed against the base by the production read path and read_review reports the count as unmeasured."
+    }
+  ],
+  "head_log_revision": "f22a7e4c62851869111f11eb968a961ed940c77a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 8 production call sites",
+    "diff": "read commit f22a7e4c6 commit by commit against 8e08eeaa7: 11 files, +345/-90, all in scope; the change adds a registry consumer that is never imported.",
+    "done_when": "the done-when names the cleanup list and a gate that exits 0 with failures attributed against the base; the manifest claims EXIT=0 but the gate at f22a7e4c6 exits 1 and no base/head logs were recorded.",
+    "goal": "read the node goal (retire dead triage models and close four relevance defects) against the diff; items 1-4 land but item 5's registry is unwired at imas_codex/discovery/code/scorer.py:57.",
+    "manifest": "read the reviewed run's manifest.md; it states a green gate and asserts a single registry, but imas_codex/discovery/code/scorer.py has no RELEVANCE_FIELDS and the gate is red at head.",
+    "write_paths": "read the 13 declared write paths; all 11 files in git diff --stat 8e08eeaa7 f22a7e4c6 are inside them."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_code_relevance.py adds a pairing assertion that reddens on the restored zip(files, decisions) defect, but the item-5 guard tests/discovery/test_code_reset_chunks.py:86 is left failing at the committed head.",
+    "evidence": "the reviewed manifest records '1678 passed ... EXIT=0', but the named gate at f22a7e4c6 exits 1 with tests/discovery/test_code_reset_chunks.py::test_code_reset_clear_fields_come_from_the_scorer_registry failing.",
+    "fit": "imas_codex/discovery/code/scorer.py:65 and imas_codex/discovery/base/reset.py:342 each carry a comment asserting an import the code does not contain.",
+    "goal_fidelity": "imas_codex/discovery/code/scorer.py:57 leaves the item-5 registry unwired (the scorer exposes no RELEVANCE_FIELDS), so only four of the five declared cleanup items are closed.",
+    "reuse": "imas_codex/discovery/base/reset.py:346 adds CODE_RELEVANCE_FIELDS as the registry owner while imas_codex/discovery/code/scorer.py:57 keeps a second list (_RELEVANCE_FIELDS) that is not derived from it.",
+    "scope_discipline": "every one of the 11 files in git diff --stat 8e08eeaa7 f22a7e4c6 lies inside the node's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal (retire dead triage models and close four relevance defects) against the diff; items 1-4 land but item 5's registry is unwired at imas_codex/discovery/code/scorer.py:57.\nVERDICT done_when: the done-when names the cleanup list and a gate that exits 0 with failures attributed against the base; the manifest claims EXIT=0 but the gate at f22a7e4c6 exits 1 and no base/head logs were recorded.\nVERDICT write_paths: read the 13 declared write paths; all 11 files in git diff --stat 8e08eeaa7 f22a7e4c6 are inside them.\nVERDICT manifest: read the reviewed run's manifest.md; it states a green gate and asserts a single registry, but imas_codex/discovery/code/scorer.py has no RELEVANCE_FIELDS and the gate is red at head.\nVERDICT diff: read commit f22a7e4c6 commit by commit against 8e08eeaa7: 11 files, +345/-90, all in scope; the change adds a registry consumer that is never imported.\nCALL_SITES: imas_codex/discovery/code/graph_ops.py:420, imas_codex/discovery/code/graph_ops.py:707, imas_codex/discovery/code/graph_ops.py:747, imas_codex/discovery/code/parallel.py:428, imas_codex/discovery/code/parallel.py:455, imas_codex/discovery/code/parallel.py:503, imas_codex/discovery/code/workers.py:707, imas_codex/discovery/code/workers.py:350\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: imas_codex/discovery/code/scorer.py:57 leaves the item-5 registry unwired (the scorer exposes no RELEVANCE_FIELDS), so only four of the five declared cleanup items are closed.\nSCORE evidence: 4\nJUSTIFICATION evidence: the reviewed manifest records '1678 passed ... EXIT=0', but the named gate at f22a7e4c6 exits 1 with tests/discovery/test_code_reset_chunks.py::test_code_reset_clear_fields_come_from_the_scorer_registry failing.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the 11 files in git diff --stat 8e08eeaa7 f22a7e4c6 lies inside the node's declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: tests/discovery/test_code_relevance.py adds a pairing assertion that reddens on the restored zip(files, decisions) defect, but the item-5 guard tests/discovery/test_code_reset_chunks.py:86 is left failing at the committed head.\nSCORE fit: 12\nJUSTIFICATION fit: imas_codex/discovery/code/scorer.py:65 and imas_codex/discovery/base/reset.py:342 each carry a comment asserting an import the code does not contain.\nSCORE reuse: 6\nJUSTIFICATION reuse: imas_codex/discovery/base/reset.py:346 adds CODE_RELEVANCE_FIELDS as the registry owner while imas_codex/discovery/code/scorer.py:57 keeps a second list (_RELEVANCE_FIELDS) that is not derived from it.\nFINDING imas_codex/discovery/code/scorer.py:57 blocking: the scorer defines no RELEVANCE_FIELDS and never imports CODE_RELEVANCE_FIELDS, so the node's own registry guard tests/discovery/test_code_reset_chunks.py:86 raises AttributeError and the declared gate exits 1 at f22a7e4c6; item 5 is not implemented.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032915768279-relevance-cleanup/manifest.md:8 blocking: the manifest records '1678 passed ... EXIT=0' for the named gate, but that gate exits 1 (1 failed, 1677 passed) at the committed head f22a7e4c6, so the recorded result is not reproducible.\nFINDING imas_codex/discovery/code/scorer.py:65 follow-on: the comment asserts a single registry 'owned by discovery/base/reset.py', but the file contains no such import, leaving a comment describing a mechanism the code lacks.\nFINDING imas_codex/discovery/base/reset.py:342 follow-on: the comment 'The code scorer imports this tuple as RELEVANCE_FIELDS' is false; imas_codex/discovery/code/scorer.py contains no such import, so the recorded import contract is unfulfilled.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032915768279-relevance-cleanup/manifest.md:8 follow-on: the manifest names no baseline_suite or after_suite gate logs, so the added failure cannot be attributed against the base by the production read path and read_review reports the count as unmeasured.",
+  "review_run_id": "r-20261007T041308644075-review-of-relevance-cleanup",
+  "reviewed_base_sha": "8e08eeaa7fc129ed6c8b76e7d0c551a47966948e",
+  "reviewed_head_sha": "f22a7e4c62851869111f11eb968a961ed940c77a",
+  "reviewed_run_id": "r-20261007T032915768279-relevance-cleanup",
+  "scores": {
+    "durability": 12,
+    "evidence": 4,
+    "fit": 12,
+    "goal_fidelity": 13,
+    "reuse": 6,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T06:50:00+00:00",
+  "total": 67
+}
