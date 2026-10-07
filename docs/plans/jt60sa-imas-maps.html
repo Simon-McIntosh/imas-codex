@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="jt-60sa,signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-imas-maps#s3&quot;, &quot;jt60sa-imas-maps#s9&quot;, &quot;jt60sa-discovery-completion#s26&quot;], &quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;jt60sa-imas-maps#s10&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-imas-maps#s3&quot;, &quot;jt60sa-imas-maps#s9&quot;], &quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;jt60sa-imas-maps#s10&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="35">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -81,9 +81,14 @@
         and 1,170 skipped. No <code>DataReference</code> exists, so the code context is semantic only.
         The scan-worker crash on an unscored path is fixed on main (<code>5401e28d7</code>). Since the
         relevance rework, only trial runs have run, and each was stopped deliberately. The full pass is
-        owned by <code>jt60sa-discovery-completion</code> §26, as node <code>jt60sa-code-pass</code>,
-        which runs after the facet re-judge. This section runs once no JT-60SA CodeFile waits at
-        <code>triaged</code> or <code>scored</code> for a decision.</li>
+        owned by <code>jt60sa-discovery-completion</code> §26, as node <code>jt60sa-code-pass</code>
+        (run <code>r-20261007T084429281839</code>). That node finished on 2026-10-07. Triaged files went
+        from 761 to 0, ingested files from 162 to 539, and CodeChunks number 3,009.
+        <code>DataReference</code> stays 0 because JT-60SA sources carry no MDSplus path literals. This
+        section waits for that node to merge (gate <code>g-jim-4</code>), not for §26 to close. §26 stays
+        open for a facet re-judge that rewrites only the CodeFile facet fields and
+        <code>relevance_grade</code>. Enrichment never reads those fields, and the re-judge only adds
+        chunks.</li>
       <li><strong>Enrichment's context is reranked by Jev.</strong> <code>_fetch_code_chunks</code>
         (<code>imas_codex/discovery/signals/parallel.py:216</code>, vector top 3 at a 0.45 floor) and
         <code>fetch_semantic_wiki_context</code>
@@ -220,6 +225,10 @@
 <div class="r-gate" data-id="g-jim-3" data-section="s9" data-gated-sections="s9" data-status="open" data-verdict="">
     <h4 class="r-gate-measure">the generic retrieve-wide-then-rerank core exists in imas_codex/discovery/base/judgment.py, callable without importing from imas_codex/llm/</h4>
     <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
+    </div>
+<div class="r-gate" data-id="g-jim-4" data-section="s2" data-gated-sections="s2" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">node jt60sa-code-pass (run r-20261007T084429281839) is promoted and merged to main, with no JT-60SA CodeFile left at triaged</h4>
+    <p class="r-gate-required-evidence">docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-code-pass.html</p>
     </div>
 </section>
 
