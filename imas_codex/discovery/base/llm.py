@@ -3293,7 +3293,9 @@ def _validate_decisions_answers(
 
     ``noul`` probabilities must lie in [0, 1]; a ``choice`` selection must be
     one of the offered criteria, its probability distribution must cover only
-    those criteria and sum to 1 within 0.01, and any confidence must lie in
+    those criteria and sum to 1 within the rounding slack of its offered
+    criteria (0.005 per criterion, since the model rounds each probability to
+    two decimals, plus 1e-9 for float error), and any confidence must lie in
     [0, 1]. Any violation raises :class:`DecisionsValidationError`.
     """
     for name, question in questions.items():
@@ -3341,7 +3343,11 @@ def _validate_decisions_answers(
                         "outside [0, 1]"
                     )
                 total += float(probability)
-            if abs(total - 1.0) > 0.01:
+            # The model rounds each offered probability to two decimals, so a
+            # distribution over N criteria may legitimately sum to 1 +/- N/200;
+            # the 1e-9 absorbs float accumulation error.
+            tolerance = 0.005 * len(criteria) + 1e-9
+            if abs(total - 1.0) > tolerance:
                 raise DecisionsValidationError(
                     f"decision {name!r} probabilities sum to {total:.4f}, not 1"
                 )
