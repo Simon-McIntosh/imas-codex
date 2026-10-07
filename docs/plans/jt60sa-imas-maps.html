@@ -21,9 +21,9 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="51">
+<meta name="plan-version" content="52">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -52,65 +52,12 @@
       the order the pipeline needs them, then run the candidate stage and the map.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
     <h2 id="s2">§2 — Enrich the JT-60SA signals</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>
-      Run <code>imas-codex discover signals jt-60sa --enrich-only</code> from the ITER host. Enrichment
-      claims only standalone signals and the representatives of SignalSources
-      (<code>build_enrich_claimable_predicate</code>,
-      <code>imas_codex/discovery/signals/parallel.py:317</code>). That is 267 representatives, whose
-      enrichment <code>propagate_source_enrichment</code> copies to the 3,565 members and to each
-      source. After §3, each of the 1,969 standalone signals is the representative of its own
-      one-member source, so the same pass enriches it and marks that source enriched: 2,236 claims in
-      all. §3 therefore lands first. It reads only the graph and the LLM,
-      and needs no facility access. Under §10's ruling, enrichment's language calls run on the local
-      <code>discovery-describe</code> seat at no charge. The paid calls are §9's Jev reranks of each
-      source's code and wiki context: about 50 candidates per source at the measured USD 0.000035
-      per judgment, so roughly USD 4 for 2,236 sources, within the plan's USD 50 cap. <code>discovery-judgments-through-jev</code> later
-      moves signal-enrichment judgments to Jev and re-judges stored rows from the graph. This run does
-      not wait for that move.
-    </p>
-    <p>
-      <strong>Held, by the lead's ruling of 2026-10-07, until two things are true.</strong>
-      Enrichment grounds each description on code and wiki context. A run against thin or poorly
-      ranked context writes descriptions that a later re-enrichment would pay for again.
-    </p>
-    <ul>
-      <li><strong>The JT-60SA code pass is complete.</strong> Measured on 2026-10-07, 162
-        CodeFiles were ingested (673 chunks), 218 scored but not ingested, 761 triaged but not scored,
-        and 1,170 skipped. No <code>DataReference</code> exists, so the code context is semantic only.
-        The scan-worker crash on an unscored path is fixed on main (<code>5401e28d7</code>). Since the
-        relevance rework, only trial runs have run, and each was stopped deliberately. The full pass is
-        owned by <code>jt60sa-discovery-completion</code> §26, as node <code>jt60sa-code-pass</code>
-        (run <code>r-20261007T084429281839</code>). That node finished on 2026-10-07. Triaged files went
-        from 761 to 0, ingested files from 162 to 539, and CodeChunks number 3,009.
-        <code>DataReference</code> stays 0 because JT-60SA sources carry no MDSplus path literals. This
-        section waits for that node to merge (gate <code>g-jim-4</code>), not for §26 to close. §26 stays
-        open for a facet re-judge that rewrites only the CodeFile facet fields and
-        <code>relevance_grade</code>. Enrichment never reads those fields, and the re-judge only adds
-        chunks.</li>
-      <li><strong>Enrichment's context is reranked by Jev.</strong> <code>_fetch_code_chunks</code>
-        (<code>imas_codex/discovery/signals/parallel.py:216</code>, vector top 3 at a 0.45 floor) and
-        <code>fetch_semantic_wiki_context</code>
-        (<code>imas_codex/discovery/signals/scanners/wiki.py:266</code>, top 3 to 5 at a 0.35 to 0.4
-        floor) take embedding order as relevance. <code>discovery-judgments-through-jev</code> §9
-        measured that order at nDCG@10 0.246 against 0.509 after a Jev rerank, but §9 covers only the
-        search tools. §9 of this plan wires both enrichment fetches through that rerank owner.</li>
-    </ul>
-    <p>
-      <strong>Node</strong> <code>jt60sa-signal-enrichment</code>, role implement, 1 h. Write path:
-      <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment.html</code>.
-      <strong>Done when</strong> no standalone or representative JT-60SA signal remains discovered,
-      except failures the fragment lists with their error. Every JT-60SA SignalSource reads enriched.
-      That is the 280 grouped sources plus the one-member sources §3's pass creates at this run's
-      preflight, about 2,249 in all; the fragment gives the counts before and after. The fragment
-      records the spend against the cap: language calls on the local <code>discovery-describe</code>
-      seat cost nothing, and the Jev rerank's real decision cost is reported separately. It also records
-      how many sources were enriched with no retrieved context. Each pass runs
-      <code>imas-codex discover signals jt-60sa --enrich-only --time 8 --cost-limit 10</code> in the
-      foreground until no claimable signal remains. The USD 10 per-pass cap sits inside the plan's USD
-      50.
-    </p>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">All 2,249 JT-60SA signal sources are enriched, after the preflight created one-member sources for the 1,969 ungrouped signals. No signal is left discovered or failed. Language calls were local; the Jev context rerank cost USD 0.74 of the USD 50 cap. <a href="s2">full record</a></p>
+</section>
 
     <section class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
