@@ -562,6 +562,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "ea8afc67cc7a2774d20092f2259d639903096a42",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 60476,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261007T152544505853-jt60sa-candidate-run",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 60476,
+        "path": "/tmp/reckon-crew-scratch/r-20261007T152544505853-jt60sa-candidate-run"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "ea8afc67cc7a2774d20092f2259d639903096a42",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/jt60sa-candidate-run",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-07T15:30:20.034Z",
+            "session_id": "12d06071-ba61-4dd6-965f-6282fe9cbec6",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/jt60sa-candidate-run"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 12d06071-ba61-4dd6-965f-6282fe9cbec6"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-07T15:30:20.034Z",
+      "session_id": "12d06071-ba61-4dd6-965f-6282fe9cbec6",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/jt60sa-candidate-run"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 12d06071-ba61-4dd6-965f-6282fe9cbec6"
+  },
   "resume_remedy": {
     "command": "reckon crew resume --run r-20261007T152544505853-jt60sa-candidate-run --advice continue",
     "session_id": "12d06071-ba61-4dd6-965f-6282fe9cbec6",
