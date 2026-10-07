@@ -1,0 +1,124 @@
+<section>
+  <h2 id="five-scope-rejudge-overview">Five-scope re-judge of JT-60SA code blocked on the facility hop</h2>
+  <p id="five-scope-rejudge-overview-result">
+    The §35 re-judge could not run: its required positive control,
+    <code>ssh -o BatchMode=yes jt-60sa hostname</code>, fails. The workstation
+    reaches the <code>laptop</code> jump host, which serves its reverse tunnel
+    to the login node, but the laptop's IFERC SSL-VPN is down, so neither
+    <code>nakasvr26.iferc.org</code> (the current primary) nor
+    <code>nakasvr23.iferc.org</code> accepts a TCP connection on port 22. The
+    <code>discover code</code> SCAN stage enumerates files over that hop, so no
+    name-, content- or ingested-stage re-judge could be driven and no "after"
+    census exists. The before-census below was captured from the knowledge
+    graph, which needs no facility hop, and is the state a resumed run starts
+    from. Decision spend is <strong>USD 0</strong>: no discovery invocation
+    reached a decision seat.
+  </p>
+  <p id="five-scope-rejudge-blocker">
+    <strong>Blocker (exact unmet condition).</strong> With the fence wrapper in
+    place (<code>/tmp/sshwrap/ssh</code> execs
+    <code>/usr/bin/ssh -F "$HOME/.ssh/config"</code>, <code>chmod +x</code>,
+    <code>PATH=/tmp/sshwrap:$PATH</code>), four boundedly reproduced attempts at
+    16:34:36, 16:34:51, 16:35:11 and 16:39:47Z each returned
+    <code>Connection timed out during banner exchange</code>. The
+    <code>laptop</code> hop itself is healthy — <code>ssh laptop hostname</code>
+    returns <code>FR-IWL-MCINTOS1</code> — but from inside it
+    <code>getent hosts</code> resolves both IFERC names to
+    <code>157.111.x.x</code> and a bounded <code>/dev/tcp</code> connect to port
+    22 times out on both. No <code>openvpn</code> or other VPN process is
+    running on the laptop; only <code>autossh</code> (the reverse tunnel) is
+    present. No alternative route is configured: the private facility notes
+    record that SOCKS5 proxying was removed from JT-60SA on 2026-01-29 and that
+    the VPN is "often unreachable from external networks".
+  </p>
+</section>
+<section>
+  <h2 id="five-scope-rejudge-before">Before-census, 2026-10-07 ~16:45 UTC</h2>
+  <p id="five-scope-rejudge-before-codefiles">
+    CodeFiles at facility <code>jt-60sa</code>, by <code>status</code> and
+    <code>relevance_stage</code> (graph query over
+    <code>CodeFile</code> where <code>facility_id='jt-60sa'</code>):
+  </p>
+  <table id="five-scope-rejudge-before-table">
+    <thead>
+      <tr><th>status</th><th>stage</th><th>CodeFiles</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ingested</td><td>content</td><td>581</td></tr>
+      <tr><td>scored</td><td>content</td><td>717</td></tr>
+      <tr><td>skipped</td><td>content</td><td>50</td></tr>
+      <tr><td>skipped</td><td>name</td><td>1860</td></tr>
+      <tr><td><strong>total</strong></td><td></td><td><strong>3208</strong></td></tr>
+    </tbody>
+  </table>
+  <p id="five-scope-rejudge-before-chunks">
+    CodeChunk nodes for <code>jt-60sa</code>: <strong>3050</strong>. The value is
+    confirmed by two independent paths — <code>CodeChunk.facility_id='jt-60sa'</code>
+    and <code>CodeFile-[:HAS_EXAMPLE]-&gt;CodeExample-[:HAS_CHUNK]-&gt;CodeChunk</code>
+    — and the instrument is shown to see chunks present: the graph holds
+    <strong>269010</strong> CodeChunk nodes in total, all hung off
+    <code>CodeExample</code>. A first query that joined
+    <code>CodeFile-[:HAS_CHUNK]-&gt;CodeChunk</code> directly returned 0; that
+    relationship does not exist for code files and the zero was a property of
+    the query, not of the graph.
+  </p>
+  <p id="five-scope-rejudge-before-eqdb">
+    The EQDB set under <code>/analysis/src/client_eqdbms.EQ32.Rev1</code>:
+    <strong>48 CodeFiles, every one at status <code>skipped</code>, then every
+    one at stage <code>name</code></strong>, and <strong>0 CodeChunks</strong>.
+    Scores are uniformly low — composite 0.08–0.30, and
+    <code>relevance_reconstruction_db</code> null on all 48 — so the new
+    reconstruction-db noul has admitted nothing here in the before state. The
+    set is two trees: <code>eqdbms/EQDB/</code> (the EQDB read/write Fortran) and
+    <code>eqtrace/</code> (a spline/ODE trace library whose files score high on
+    <code>relevance_simulation</code> — 0.81–0.87 — but low on composite). No
+    file at facility <code>jt-60sa</code> carries
+    <code>relevance_reconstruction_db &gt;= 0.5</code> before the run.
+  </p>
+  <p id="five-scope-rejudge-before-incf">
+    The <code>.bf</code> field-list includes under
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code> are
+    <strong>not listed as CodeFiles at all</strong>: facility <code>jt-60sa</code>
+    holds <strong>0</strong> CodeFiles whose path ends <code>.bf</code>. The
+    directory is known to the path table but its files were never enumerated —
+    <code>FacilityPath /analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code> is at
+    status <code>scored</code>, and the sibling
+    <code>inc/F_1025</code> and <code>inc/F_129</code> are at
+    <code>triaged</code>. This is exactly the §35 item-4 gap: the includes are
+    missing from the before census and must be re-opened by prefix and judged.
+  </p>
+  <p id="five-scope-rejudge-before-search">
+    The §14 search criterion could not be run: <code>_search_code</code> reads
+    the graph and would report only the before state, and the criterion's
+    subject — a chunk from a file carrying the EQDBMS field list — has no chunk
+    to find because the <code>.bf</code> includes are unlisted and the EQDB
+    Fortran carries no chunk. This is deferred to the resumed run.
+  </p>
+</section>
+<section>
+  <h2 id="five-scope-rejudge-resume">Resume plan</h2>
+  <p id="five-scope-rejudge-resume-steps">
+    The hop is the sole gate. Once <code>ssh -o BatchMode=yes jt-60sa hostname</code>
+    succeeds, run from this worktree with
+    <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv</code>
+    and <code>PYTHONPATH=$PWD</code>, single-writer, <code>--cost-limit 3</code>
+    on every invocation, stopping if summed decision spend reaches USD 10:
+    (1) <code>discover code jt-60sa --reset-to name --time 8</code>, then repeat
+    <code>discover code jt-60sa --time 8</code> until no file waits at
+    <code>triaged</code> and no admitted content-stage file waits for ingest;
+    (2) <code>discover code jt-60sa --reset-to content --time 8</code> once,
+    then drain; (3) <code>discover code jt-60sa --reset-to ingested
+    --rejudge-ingested --time 8</code> once, then
+    <code>discover code jt-60sa --rejudge-ingested --time 8</code> until no
+    ingested content-stage file lacks a recorded answer; (4) if the scan skips
+    <code>inc/F</code> because its FacilityPath is marked scanned, re-open it
+    with <code>--path-prefix /analysis/src/client_eqdbms.EQ32.Rev1/inc/F</code>
+    and run one more pass. Then re-run the census, list newly admitted files at
+    <code>relevance_reconstruction_db &gt;= 0.5</code> with composite, naming the
+    EQDB set and includes, list any newly admitted file at
+    <code>relevance_simulation &gt;= 0.5</code> whose admitting noul is
+    reconstruction-db, list ingested files now below both gates, run
+    <code>_search_code('EQDBMS record layout', facility='jt-60sa')</code> once,
+    and report summed decision spend.
+  </p>
+</section>
