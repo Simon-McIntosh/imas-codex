@@ -68,6 +68,153 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# --- Enrichment context relevance rerank ---------------------------------
+#
+# The enrichment prompt keeps only a handful of retrieved chunks, and embedding
+# similarity alone is a weak relevance signal. Retrieval searches a wider pool
+# and the relevance rerank reorders it, so the prompt keeps the chunks the judge
+# found most useful rather than the nearest embeddings. The same rerank serves
+# the code-chunk and wiki-chunk fetches.
+
+# Candidates retrieved before reranking. Only the fetch's own keep count
+# survives into the prompt.
+CONTEXT_CANDIDATE_POOL = 30
+
+# Wall-time budget for one context rerank. A slow rerank returns the embedding
+# order rather than delaying enrichment.
+_CONTEXT_RERANK_BUDGET_SECONDS = 5.0
+
+# Judgements in flight at once within one context rerank.
+_CONTEXT_RERANK_CONCURRENCY = 32
+
+# The seat the discovery-relevance reranks already use; the enrichment rerank
+# adds no seat.
+_CONTEXT_RERANK_SERVICE = "facility-discovery"
+
+_CONTEXT_RERANK_QUESTION = {
+    "relevance_grade": {
+        "type": "score",
+        "instructions": (
+            "How useful is this context chunk for describing the signal source? "
+            "Judge only whether the chunk carries information about the source, "
+            "not whether it is well written."
+        ),
+        "criteria": [
+            "unrelated to the signal source",
+            "mentions the topic but does not describe the source",
+            "gives useful background that partly describes the source",
+            "describes a substantial part of the source",
+            "directly describes the signal source",
+        ],
+    }
+}
+
+
+def _context_rerank_state(kind: str):
+    """Build the judge state for one context candidate.
+
+    The judge sees the enrichment query and the candidate's locator plus text.
+    ``kind`` selects the locator: a wiki chunk's page title, or a code chunk's
+    source path.
+    """
+
+    def state_for(query_text: str, chunk: dict) -> dict:
+        if kind == "wiki":
+            locator = chunk.get("page_title", "")
+        else:
+            locator = chunk.get("source_path", "")
+        return {
+            "query": query_text,
+            "candidate": {
+                "locator": locator,
+                "text": chunk.get("text", "")[:1500],
+            },
+        }
+
+    return state_for
+
+
+def _run_coro(coro):
+    """Run a coroutine from synchronous fetch code.
+
+    The fetches run inside ``asyncio.to_thread`` (or are called directly in
+    tests), so there is usually no running loop and the coroutine runs on a
+    fresh one. When a loop is already running, the coroutine runs in a worker
+    thread rather than nesting loops.
+    """
+    import concurrent.futures
+
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        from imas_codex.cli.shutdown import safe_asyncio_run
+
+        return safe_asyncio_run(coro)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(asyncio.run, coro).result()
+
+
+def rerank_context_chunks(
+    query_text: str,
+    chunks: list[dict[str, str]],
+    *,
+    keep: int,
+    kind: str,
+    spend: list[float] | None = None,
+) -> list[dict[str, str]]:
+    """Reorder enrichment context candidates by Jev relevance, keeping ``keep``.
+
+    The ordering is ``judgment.rerank_pool``'s: scored candidates rank by
+    descending score and an unscored one keeps its embedding position, so a
+    failed or partial rerank never drops what the retrieval returned. A wholly
+    failed batch keeps the embedding order and logs why — ranking is not a
+    gate, so enrichment never stops for want of a ranking.
+
+    The rerank's decision cost, returned by ``rerank_pool``, is appended to
+    ``spend`` when a sink is given, so the caller can add it to its run's cost
+    total. A batch the decision service could not serve returns ``0.0``.
+    """
+    if not chunks:
+        return []
+
+    from imas_codex.discovery.base.judgment import rerank_pool
+    from imas_codex.settings import get_model
+
+    question = _CONTEXT_RERANK_QUESTION["relevance_grade"]
+    try:
+        ordered, note, cost = _run_coro(
+            rerank_pool(
+                query_text,
+                chunks,
+                state_for=_context_rerank_state(kind),
+                levels=question["criteria"],
+                instructions=question["instructions"],
+                model=get_model("discovery-relevance"),
+                service=_CONTEXT_RERANK_SERVICE,
+                concurrency=_CONTEXT_RERANK_CONCURRENCY,
+                budget_seconds=_CONTEXT_RERANK_BUDGET_SECONDS,
+            )
+        )
+    except Exception as exc:  # noqa: BLE001 - ranking is not a gate
+        logger.warning("Context rerank unavailable for %r: %s", query_text, exc)
+        return list(chunks)[:keep]
+
+    if note:
+        logger.info("Context rerank incomplete for %r: %s", query_text, note)
+    if spend is not None:
+        spend.append(cost)
+    return list(ordered)[:keep]
+
+
+def charge_context_spend(stats, spend: list[float]) -> float:
+    """Add a context rerank's decision spend to a run's cost total."""
+    total = sum(spend)
+    spend.clear()
+    if total:
+        stats.cost += total
+    return total
+
 
 def _facility_scanner_config(facility_config: dict, scanner_type: str) -> dict:
     """Build a scanner's config with the facility remote environment merged in.
@@ -183,7 +330,7 @@ def build_device_xml_context_query(
     return " ".join(term for term in base_terms if term)
 
 
-def _build_code_context_query() -> str:
+def _build_code_context_query(k: int = CONTEXT_CANDIDATE_POOL) -> str:
     """CYPHER for the code-context semantic lookup in signal enrichment.
 
     The facility predicate is rendered inside ``SEARCH``: ``code_chunk_embedding``
@@ -192,13 +339,14 @@ def _build_code_context_query() -> str:
     candidate set that a small facility's chunks would not survive. The source
     path the enrichment prompt renders resolves through the owning CodeExample's
     ``HAS_CHUNK`` edge, rendered by ``render_chunk_source`` so this reader shares
-    the one resolution every other chunk reader uses.
+    the one resolution every other chunk reader uses. ``k`` is the candidate
+    pool the rerank consumes, wider than what the prompt keeps.
     """
     search_block = build_vector_search(
         "code_chunk_embedding",
         "CodeChunk",
         prefilter_clauses=["node.facility_id = $facility"],
-        k="3",
+        k=str(k),
         node_alias="node",
     )
     return (
@@ -213,8 +361,19 @@ def _build_code_context_query() -> str:
     )
 
 
-def _fetch_code_chunks(facility: str, query_text: str) -> list[dict[str, str]]:
+def _fetch_code_chunks(
+    facility: str,
+    query_text: str,
+    *,
+    keep: int = 3,
+    spend: list[float] | None = None,
+) -> list[dict[str, str]]:
     """Run the code-context vector lookup for one query text.
+
+    Retrieves :data:`CONTEXT_CANDIDATE_POOL` candidates above the score floor,
+    reranks them by Jev relevance with ``query_text`` as the query, and keeps
+    the top ``keep`` in the reranked order. ``spend``, when given, receives the
+    rerank's decision spend.
 
     Returns an empty list only when the ``code_chunk_embedding`` vector index is
     absent, which is the one condition under which signal enrichment can proceed
@@ -252,7 +411,11 @@ def _fetch_code_chunks(facility: str, query_text: str) -> list[dict[str, str]]:
                         "language": row.get("language", ""),
                     }
                 )
-            return chunks
+            if not chunks:
+                return []
+            return rerank_context_chunks(
+                query_text, chunks, keep=keep, kind="code", spend=spend
+            )
     except ClientError as e:
         if getattr(e, "code", None) != "Neo.ClientError.Schema.IndexNotFound":
             raise
@@ -3527,9 +3690,16 @@ async def enrich_worker(
         query = (
             f"{facility} sign conventions coordinate systems COCOS toroidal poloidal"
         )
+        spend: list[float] = []
         chunks = await asyncio.to_thread(
-            fetch_semantic_wiki_context, facility, query, k=5, min_score=0.35
+            fetch_semantic_wiki_context,
+            facility,
+            query,
+            k=5,
+            min_score=0.35,
+            spend=spend,
         )
+        charge_context_spend(state.enrich_stats, spend)
         cache[cache_key] = chunks
         if chunks:
             logger.info(
@@ -3595,9 +3765,16 @@ async def enrich_worker(
             cache[group_key] = []
             return []
 
+        spend: list[float] = []
         chunks = await asyncio.to_thread(
-            fetch_semantic_wiki_context, facility, query, k=3, min_score=0.4
+            fetch_semantic_wiki_context,
+            facility,
+            query,
+            k=3,
+            min_score=0.4,
+            spend=spend,
         )
+        charge_context_spend(state.enrich_stats, spend)
         cache[group_key] = chunks
         return chunks
 
@@ -3638,7 +3815,11 @@ async def enrich_worker(
             code_context_cache[group_key] = []
             return []
 
-        chunks = await asyncio.to_thread(_fetch_code_chunks, state.facility, query_text)
+        spend: list[float] = []
+        chunks = await asyncio.to_thread(
+            _fetch_code_chunks, state.facility, query_text, spend=spend
+        )
+        charge_context_spend(state.enrich_stats, spend)
         code_context_cache[group_key] = chunks
         return chunks
 

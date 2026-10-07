@@ -203,7 +203,7 @@ def rerank_candidates(
     from imas_codex.discovery.base.judgment import rerank_pool
 
     try:
-        return _run_batch(
+        ordered, note, cost = _run_batch(
             rerank_pool(
                 query,
                 candidates,
@@ -222,6 +222,9 @@ def rerank_candidates(
             list(candidates),
             f"rerank unavailable ({exc}); embedding order returned",
         )
+
+    logger.debug("rerank cost for %r: $%.6f", query, cost)
+    return ordered, note
 
 
 # ---------------------------------------------------------------------------

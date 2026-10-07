@@ -173,11 +173,11 @@ def _state_for(query: str, candidate: dict) -> dict:
 async def test_rerank_pool_orders_by_descending_score(monkeypatch):
     async def fake(model, state, questions, *, service, **_kwargs):
         score = {"f0": 3, "f1": 1, "f2": 5}[state["candidate"]["locator"]["path"]]
-        return _answers(score), 0.0
+        return _answers(score), 0.05
 
     monkeypatch.setattr(judgment, "acall_decisions", fake)
 
-    ordered, note = await judgment.rerank_pool(
+    ordered, note, cost = await judgment.rerank_pool(
         "q",
         _pool(3),
         state_for=_state_for,
@@ -189,6 +189,8 @@ async def test_rerank_pool_orders_by_descending_score(monkeypatch):
 
     assert [candidate["path"] for candidate in ordered] == ["f2", "f0", "f1"]
     assert note is None
+    # the batch cost is the summed per-candidate cost the fake returned
+    assert cost == pytest.approx(0.15)
 
 
 async def test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails(
@@ -199,7 +201,7 @@ async def test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails(
 
     monkeypatch.setattr(judgment, "acall_decisions", fake)
 
-    ordered, note = await judgment.rerank_pool(
+    ordered, note, cost = await judgment.rerank_pool(
         "q",
         _pool(3),
         state_for=_state_for,
@@ -212,10 +214,12 @@ async def test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails(
 
     assert [candidate["path"] for candidate in ordered] == ["f0", "f1", "f2"]
     assert note is not None and "kept their embedding position" in note
+    # a wholly failed batch costs nothing
+    assert cost == 0.0
 
 
 async def test_rerank_pool_of_nothing_returns_nothing():
-    ordered, note = await judgment.rerank_pool(
+    ordered, note, cost = await judgment.rerank_pool(
         "q",
         [],
         state_for=_state_for,
@@ -227,6 +231,7 @@ async def test_rerank_pool_of_nothing_returns_nothing():
 
     assert ordered == []
     assert note is None
+    assert cost == 0.0
 
 
 def test_judgment_imports_nothing_from_the_llm_package():

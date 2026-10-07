@@ -268,6 +268,8 @@ def fetch_semantic_wiki_context(
     query_text: str,
     k: int = 5,
     min_score: float = 0.4,
+    *,
+    spend: list[float] | None = None,
 ) -> list[dict[str, str]]:
     """Fetch semantically relevant wiki chunks for signal enrichment.
 
@@ -277,16 +279,26 @@ def fetch_semantic_wiki_context(
     coordinate systems, units, and diagnostic descriptions that don't
     contain explicit MDSplus paths.
 
+    Retrieves ``CONTEXT_CANDIDATE_POOL`` candidates above ``min_score``,
+    reranks them by Jev relevance with ``query_text`` as the query, and keeps
+    the top ``k`` in the reranked order. ``spend``, when given, receives the
+    rerank's decision spend so the caller can add it to its run's cost total.
+
     Args:
         facility: Facility ID to scope results.
         query_text: Natural language query describing the signals being enriched.
         k: Number of results to return.
         min_score: Minimum similarity score threshold.
+        spend: Optional sink for the rerank's decision spend.
 
     Returns:
         List of dicts with keys: content, page_title, conventions, units.
         Content is truncated to 500 chars to stay within prompt budget.
     """
+    from imas_codex.discovery.signals.parallel import (
+        CONTEXT_CANDIDATE_POOL,
+        rerank_context_chunks,
+    )
     from imas_codex.embeddings.config import EncoderConfig
     from imas_codex.embeddings.encoder import Encoder
 
@@ -326,7 +338,7 @@ def fetch_semantic_wiki_context(
                        score
                 ORDER BY score DESC
                 """,
-                k=k,
+                k=CONTEXT_CANDIDATE_POOL,
                 embedding=embedding,
                 facility=facility,
                 min_score=min_score,
@@ -346,7 +358,11 @@ def fetch_semantic_wiki_context(
                         "score": row.get("score", 0.0),
                     }
                 )
-            return chunks
+            if not chunks:
+                return []
+            return rerank_context_chunks(
+                query_text, chunks, keep=k, kind="wiki", spend=spend
+            )
     except Exception as e:
         logger.warning("Semantic wiki search failed for %s: %s", facility, e)
         return []
