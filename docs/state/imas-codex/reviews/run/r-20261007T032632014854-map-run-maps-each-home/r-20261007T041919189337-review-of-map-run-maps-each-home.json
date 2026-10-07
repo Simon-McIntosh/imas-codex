@@ -14,13 +14,6 @@
     "imas_codex/ids/validation.py:841"
   ],
   "completed_at": "2026-10-07T04:38:06.549Z",
-  "dimension_dispositions": {
-    "goal_fidelity": {
-      "kind": "folded",
-      "node": "map-run-maps-each-home",
-      "recorded_at": "2026-10-07T04:31:06.346928+00:00"
-    }
-  },
   "dispatched_at": "2026-10-07T04:19:32Z",
   "findings": [
     {
