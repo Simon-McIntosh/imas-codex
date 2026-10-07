@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest (imas-codex code-score-through-jev) declares no baseline_suite and no after_suite object, so no armed pair exists to difference, and its single gate log (gate.log, EXIT=0, 2612 passed) reports no failing test id at head. With the head arm's failure set empty the added set is empty for any baseline, so the count is 0 and no id is carried rather than a count left unmeasured.",
+  "base_log_revision": null,
+  "call_site_count": 8,
+  "call_sites": [
+    "imas_codex/discovery/base/llm.py:_validate_decisions_answers",
+    "imas_codex/discovery/code/workers.py:score_worker",
+    "imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion",
+    "imas_codex/discovery/code/graph_ops.py",
+    "imas_codex/discovery/code/parallel.py",
+    "imas_codex/discovery/base/reset.py",
+    "imas_codex/llm/search_tools.py:_search_code",
+    "imas_codex/graph/models.py:CodeFile"
+  ],
+  "completed_at": "2026-10-07T02:47:29.380Z",
+  "dispatched_at": "2026-10-07T02:25:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/code-score-through-jev.html",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: the mgset0 paragraph reports the scope nouls as loads 0.23, processes 0.37, describes 0.39, IMAS 0.05 and score_composite 0.39, but the prototype file the done_when names, /home/ITER/mcintos/.cache/imas-codex-jev/jev_score_results.json, holds 0.12, 0.28, 0.48 and 0.04 for that file, so the composite the prototype supports is 0.48; the reported quartet is the live graph's stored relevance_loads, relevance_processes, relevance_describes and relevance_imas. The not-carried conclusion holds under either value, but the provenance the sentence attributes is wrong."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/code-score-through-jev.html",
+      "line": "52",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment says the negative control's other twenty-one tests stay green, but negative_control.log records collected 23 items with 21 deselected and 2 selected, so those tests were never run in that arm; their greenness is established by gate.log instead, and the sentence credits the control with a measurement it did not make."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 8 production call site(s)",
+    "diff": "read commit by commit against base 7a6371996ac1e679e3c70bbfabd803866697d764: score-answer validation at the decisions seam, the content-arm facet and grade write with score_composite as the one stored owner, the composite recompute with its two read fixes, and the evidence fragment; every hunk stays inside the declared paths.",
+    "done_when": "the done_when names the gate command, the negative control, the content-arm field write and the one live recompute; gate.log records 2612 passed, 14 skipped, 5 deselected at EXIT=0 and recompute.log records 0 of 2,311 rows disagreeing with the max of their nouls after repair.",
+    "goal": "the node's goal is to make every code score number a Jev judgement and retire the LLM scorer; the diff retires the nine CodeFile score fields and file_category in imas_codex/schemas/facility.yaml, writes score_composite from the decisions arms' scope nouls in imas_codex/discovery/code/scorer.py, and reduces imas_codex/llm/prompts/code/scorer.md to a description-only response.",
+    "manifest": "read; it records the six commit shas, the gate totals with the log names it cites, and the recompute numbers, and its landing line names the evidence fragment.",
+    "write_paths": "the manifest declares eighteen exclusive paths; the diff's fifteen changed paths lie inside them and no changed path lies outside, with imas_codex/discovery/code/__init__.py, tests/llm/test_prompt_schema_coverage.py and tests/graph/test_cypher_property_check.py declared but unmodified."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_llm_decisions.py:test_score_above_top_level_is_refused reddens when the score-range check is removed, as negative_control.log records, and the added assertions each name an independent out-of-range, unknown-level or out-of-[0,1] input rather than the value under test.",
+    "evidence": "gate.log's last line reads 2612 passed, 14 skipped, 5 deselected with EXIT=0 and negative_control.log records the red arm, but the fragment's mgset0 nouls are the live graph's stored values rather than the prototype file the done_when names, and its negative-control sentence claims a fact that log does not measure.",
+    "fit": "the new helpers follow the surrounding style in imas_codex/discovery/base/llm.py:3289 and imas_codex/discovery/code/scorer.py, and carry no plan, ticket or version identifier in any symbol, comment or filename.",
+    "goal_fidelity": "imas_codex/discovery/code/scorer.py:_relevance_item writes score_composite as the arm's scope relevance and imas_codex/llm/prompts/code/scorer.md is reduced to a description-only response, which is the goal's retirement of the local scorer.",
+    "reuse": "_validate_distribution in imas_codex/discovery/base/llm.py:3289 is extracted from the choice branch and shared by both branches, and a capability search over imas_codex/discovery and imas_codex/llm found no other owner of a scope-noul maximum for the code pipeline.",
+    "scope_discipline": "every changed path is inside the manifest's declared exclusive write paths, and no change touches imas_codex/discovery/base/scoring.py or imas_codex/ids/ which the done_when fences out."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make every code score number a Jev judgement and retire the LLM scorer; the diff retires the nine CodeFile score fields and file_category in imas_codex/schemas/facility.yaml, writes score_composite from the decisions arms' scope nouls in imas_codex/discovery/code/scorer.py, and reduces imas_codex/llm/prompts/code/scorer.md to a description-only response.\nVERDICT done_when: the done_when names the gate command, the negative control, the content-arm field write and the one live recompute; gate.log records 2612 passed, 14 skipped, 5 deselected at EXIT=0 and recompute.log records 0 of 2,311 rows disagreeing with the max of their nouls after repair.\nVERDICT write_paths: the manifest declares eighteen exclusive paths; the diff's fifteen changed paths lie inside them and no changed path lies outside, with imas_codex/discovery/code/__init__.py, tests/llm/test_prompt_schema_coverage.py and tests/graph/test_cypher_property_check.py declared but unmodified.\nVERDICT manifest: read; it records the six commit shas, the gate totals with the log names it cites, and the recompute numbers, and its landing line names the evidence fragment.\nVERDICT diff: read commit by commit against base 7a6371996ac1e679e3c70bbfabd803866697d764: score-answer validation at the decisions seam, the content-arm facet and grade write with score_composite as the one stored owner, the composite recompute with its two read fixes, and the evidence fragment; every hunk stays inside the declared paths.\nCALL_SITES: imas_codex/discovery/base/llm.py:_validate_decisions_answers, imas_codex/discovery/code/workers.py:score_worker, imas_codex/discovery/code/workers.py:_claim_code_files_for_ingestion, imas_codex/discovery/code/graph_ops.py, imas_codex/discovery/code/parallel.py, imas_codex/discovery/base/reset.py, imas_codex/llm/search_tools.py:_search_code, imas_codex/graph/models.py:CodeFile\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/code/scorer.py:_relevance_item writes score_composite as the arm's scope relevance and imas_codex/llm/prompts/code/scorer.md is reduced to a description-only response, which is the goal's retirement of the local scorer.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate.log's last line reads 2612 passed, 14 skipped, 5 deselected with EXIT=0 and negative_control.log records the red arm, but the fragment's mgset0 nouls are the live graph's stored values rather than the prototype file the done_when names, and its negative-control sentence claims a fact that log does not measure.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path is inside the manifest's declared exclusive write paths, and no change touches imas_codex/discovery/base/scoring.py or imas_codex/ids/ which the done_when fences out.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_llm_decisions.py:test_score_above_top_level_is_refused reddens when the score-range check is removed, as negative_control.log records, and the added assertions each name an independent out-of-range, unknown-level or out-of-[0,1] input rather than the value under test.\nSCORE fit: 18\nJUSTIFICATION fit: the new helpers follow the surrounding style in imas_codex/discovery/base/llm.py:3289 and imas_codex/discovery/code/scorer.py, and carry no plan, ticket or version identifier in any symbol, comment or filename.\nSCORE reuse: 20\nJUSTIFICATION reuse: _validate_distribution in imas_codex/discovery/base/llm.py:3289 is extracted from the choice branch and shared by both branches, and a capability search over imas_codex/discovery and imas_codex/llm found no other owner of a scope-noul maximum for the code pipeline.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/code-score-through-jev.html:65 follow-on: the mgset0 paragraph reports the scope nouls as loads 0.23, processes 0.37, describes 0.39, IMAS 0.05 and score_composite 0.39, but the prototype file the done_when names, /home/ITER/mcintos/.cache/imas-codex-jev/jev_score_results.json, holds 0.12, 0.28, 0.48 and 0.04 for that file, so the composite the prototype supports is 0.48; the reported quartet is the live graph's stored relevance_loads, relevance_processes, relevance_describes and relevance_imas. The not-carried conclusion holds under either value, but the provenance the sentence attributes is wrong.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/code-score-through-jev.html:52 follow-on: the fragment says the negative control's other twenty-one tests stay green, but negative_control.log records collected 23 items with 21 deselected and 2 selected, so those tests were never run in that arm; their greenness is established by gate.log instead, and the sentence credits the control with a measurement it did not make.\n",
+  "review_run_id": "r-20261007T022459546923-review-of-code-score-through-jev",
+  "reviewed_base_sha": "7a6371996ac1e679e3c70bbfabd803866697d764",
+  "reviewed_head_sha": "ee7d34f5c9ab2b1aada7e8dc02de9bd1e6f5cc91",
+  "reviewed_run_id": "r-20261007T012913278723-code-score-through-jev",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-07T02:46:28.117626+00:00",
+  "total": 108
+}
