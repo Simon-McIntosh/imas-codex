@@ -1,7 +1,7 @@
 <!-- Search rerank: the shared pool-rerank core, and the pool size it runs at.
      Judgements are live Jev Score calls over the JT-60SA question set. Scripts and
      raw output:
-     ~/.config/reckon/crew/reports/imas-codex/search-rerank/{pool_sweep.py,table.py,sweep.json,sweep_calls.json,embedding_baseline.py,embedding_baseline.json,retime_live.py,retime_c32.json,retime_c48.json,sweep_concurrency.log)  gate.log,  negative_control.log
+     ~/.config/reckon/crew/reports/imas-codex/search-rerank/{pool_sweep.py,table.py,sweep.json,sweep_calls.json,embedding_baseline.py,embedding_baseline.json,retime_live.py,retime_c32.json,retime_c48.json,sweep_concurrency.log,gate.log,negative_control.log}
      Labels: ~/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/labels.json,
      plus the four census answers from the retrieval-miss census in the same reports tree. -->
 <section id="search-rerank" data-reckon="evidence">
@@ -104,9 +104,11 @@
     only pool within 0.02 of the best labelled-only nDCG@10 (0.6529 at 150) is 150 itself. Latency,
     not the ranking, is what rules the deep pools out. Meeting the 5 s budget by raising the
     concurrency was tested live, and the decisions endpoint refuses to be sped up: at 48 judgements
-    in flight the seat's per-call p50 rises from 1.0 s to 1.6 s and every pool's wall p95 passes 8 s,
-    so the endpoint's throughput, not the in-flight bound, sets the floor. The measured per-query
-    wall p95 is:
+    in flight the seat's per-call p50 rises from 1.0 s to 1.6 s, so the endpoint's throughput, not the
+    in-flight bound, sets the floor. In the live re-timing at 48 in flight one stalled query set every
+    pool's wall p95 at 8.3 s or more, pool 30 included; the replay table below models no stall, so it
+    shows pool 30 at 3.49 s there. The live re-timing at 32 in flight gives p95 3.2 s, 3.6 s, 5.7 s and
+    6.9 s at pools 30, 60, 100 and 150, within 0.5 s of the replay. The replayed per-query wall p95 is:
   </p>
 
   <table id="search-rerank-pool-latency">
