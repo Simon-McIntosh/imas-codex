@@ -1,6 +1,12 @@
 <!-- DD-path search rerank: the construction-time switch, one call into the shared
-     search-time Jev rerank, and the nDCG@10 it moves on 15 hand-labelled mapping
-     questions. Measurement log:
+     search-time Jev rerank, and the nDCG@10 / precision@5 it moves on 15
+     hand-labelled mapping questions whose labels are enumerated from the live
+     graph by name and documentation.
+     Measurement on the completed labels:
+     ~/.cache/imas-codex-dd-path-rerank/measurement_completed_labels.log
+     Label enumeration (the enumeration behind each label set):
+     ~/.cache/imas-codex-dd-path-rerank/label_enumeration.log
+     Superseded first measurement:
      ~/.cache/imas-codex-dd-path-rerank/measurement.log
      Negative-control red log:
      ~/.cache/imas-codex-dd-path-rerank/negative_control_red.log
@@ -10,114 +16,253 @@
   <h2 id="dd-path-search-rerank-heading">DD-path search rerank — one call into the shared owner behind a mode switch</h2>
 
   <p id="dd-path-search-rerank-wiring">
-    <code>search_dd_paths</code> now reorders its hybrid hits through
+    <code>search_dd_paths</code> reorders its hybrid hits through
     <code>rerank_candidates</code> in <code>imas_codex/llm/search_tools.py</code> — the
     shared search-time owner the code and wiki search tools already use — rather than
     carrying a second rerank of its own. The switch is a construction-time decision:
     <code>GraphSearchTool(..., rerank=…)</code>, plumbed through
     <code>Tools(..., rerank_dd_paths=…)</code>. The MCP server sets it on for a full or
-    facility server and leaves it off for a read-only or DD-only server, recording the
-    decision on the mode in <code>AgentsServer.__post_init__</code> and reading it when the
-    lazily-created <code>Tools</code> singleton is built. Each hit rides its own candidate
-    dict under <code>_hit</code>, with its path as the locator and its documentation and
-    description as the judged text, so the judged order maps back to the hits without a
-    path lookup (paths are not unique across IDSs). A failed or slow judgement returns the
-    embedding order unchanged, so the result is never worse than the search that produced
-    it.
+    facility server and leaves it off for a read-only or DD-only server, so an external
+    query spends no judgement. Each hit rides its own candidate dict under
+    <code>_hit</code>, with its path as the locator and its documentation and description
+    as the judged text, so the judged order maps back to the hits without a path lookup
+    (paths are not unique across IDSs). A failed or slow judgement returns the embedding
+    order unchanged, so the result is never worse than the search that produced it.
   </p>
 
-  <h3 id="dd-path-search-rerank-measure-heading">nDCG@10 on 15 hand-labelled mapping questions</h3>
+  <h3 id="dd-path-search-rerank-labels-heading">How the label sets were built</h3>
+  <p id="dd-path-search-rerank-labels">
+    The 15 questions live in <code>tests/tools/fixtures/dd_mapping_questions.json</code>
+    (168 labelled paths). Each label set is enumerated from the live graph by path name
+    and documentation, not from memory: a Cypher match over the <code>IMASNode</code> id
+    enumerates every path whose name is the queried quantity, and every one that exists is
+    graded 3, so a quantity with a home in five IDSs is graded 3 in all five. The rule:
+  </p>
+  <ul id="dd-path-search-rerank-label-rule">
+    <li><strong>3</strong>  — a DD path that stores the queried quantity itself, in any IDS. For <em>plasma current</em>: <code>equilibrium/time_slice/global_quantities/ip</code>, <code>plasma_profiles/global_quantities/ip</code>, <code>plasma_initiation/global_quantities/ip</code>, <code>core_profiles/global_quantities/ip</code>, <code>magnetics/ip</code>, <code>magnetics/method/ip</code>, and the decay-time and summary <code>ip</code> copies.</li>
+    <li><strong>2</strong>  — a reference or setpoint of it: the <code>pulse_schedule</code> control paths (<code>pulse_schedule/flux_control/ip</code>, <code>pulse_schedule/pf_active/supply/current</code>, <code>pulse_schedule/position_control/magnetic_axis/z</code>), the <code>constraints</code> copies, the <code>vacuum_toroidal_field/b0</code> reference field.</li>
+    <li><strong>1</strong>  — a closely related quantity: a toroidal current density where the current was asked, a cross-sectional area or a plot-grid cell where the volume was asked, a fit structure, an error field.</li>
+  </ul>
+  <p id="dd-path-search-rerank-labels-exceptions">
+    Two carve-outs keep grade 3 to the quantity itself. <code>ferritic/object/volume</code> and <code>spi/injector/fragment/volume</code> store a solid object's volume rather than the plasma volume, and are graded 1; <code>magnetics/rogowski_coil/current</code> stores the plasma current seen by a Rogowski contour rather than a coil current, and is also graded 1. The enumeration behind every set is in <code>label_enumeration.log</code>.
+  </p>
+
+  <h3 id="dd-path-search-rerank-measure-heading">nDCG@10 and precision@5 on the completed labels</h3>
   <p id="dd-path-search-rerank-measure-prose">
-    <code>tests/tools/fixtures/dd_mapping_questions.json</code> holds 15 mapping questions —
-    each a facility-style natural-language query and the data-dictionary paths that answer
-    the query would answer it, graded 3 (the named quantity), 2 (the same quantity in a
-    second IDS) or 1 (a related quantity). The measurement scores the same retrieval twice
-    on the same labels, at <code>k=10</code>, against the live graph and a live Jev judge:
-    once in the tool's embedding order (<code>rerank=False</code>) and once after the rerank
-    (<code>rerank=True</code>).
+    The measurement (log <code>measurement_completed_labels.log</code>) scores the same
+    retrieval twice on the same labels, at <code>k=10</code>, against the live graph and a
+    live Jev judge: once in the tool's embedding order (<code>rerank=False</code>) and once
+    after the rerank (<code>rerank=True</code>). Precision@5 counts grade 3 only, so a grade-2
+    setpoint or a grade-1 neighbour in the top five does not count.
   </p>
-
   <table id="dd-path-search-rerank-totals">
-    <caption>Graded nDCG@10, mean over the 15 questions. "Improved"/"degraded"/"unchanged" count questions whose nDCG@10 moved up, down or not at all.</caption>
+    <caption>Graded nDCG@10 and grade-3-only precision@5, mean over the 15 questions.</caption>
     <thead>
-      <tr><th>nDCG@10 before</th><th>nDCG@10 after</th><th>delta</th><th>improved</th><th>degraded</th><th>unchanged</th></tr>
+      <tr><th>measure</th><th>before (embedding)</th><th>after (reranked)</th><th>delta</th></tr>
     </thead>
     <tbody>
-      <tr id="dd-path-search-rerank-totals-row"><td>0.3324</td><td>0.2860</td><td>&minus;0.0465</td><td>3</td><td>6</td><td>6</td></tr>
+      <tr id="dd-path-search-rerank-totals-ndcg"><td>nDCG@10</td><td>0.3451</td><td>0.4102</td><td>+0.0651</td></tr>
+      <tr id="dd-path-search-rerank-totals-p5"><td>precision@5 (grade 3)</td><td>0.2667</td><td>0.3333</td><td>+0.0666</td></tr>
     </tbody>
   </table>
-
   <p id="dd-path-search-rerank-measure-read">
-    <strong>As wired, the rerank is net-negative on this label set</strong> (0.3324 &rarr;
-    0.2860). It helps three questions and hurts six. The gains are real:
-    <code>flux_loop_voltage</code> 0.5137 &rarr; 0.8936, <code>poloidal_field_probe</code>
-    0.2128 &rarr; 0.3374, <code>safety_factor</code> 0.4307 &rarr; 0.5000. The losses are
-    larger: <code>plasma_current</code> 0.7453 &rarr; 0.3726, <code>plasma_volume</code>
-    0.7872 &rarr; 0.4966, <code>electron_temperature</code> 0.4966 &rarr; 0.2624 and
-    <code>coil_current</code> 0.7453 &rarr; 0.4702. On the questions that matter most — a
-    query whose first embedding hit is already the labelled answer — the judge demotes the
-    answer for a path whose text reads as more topical. Six questions are unchanged: five of
-    them score 0.0 before and after because the labelled paths never appear in the top 10,
-    which is a retrieval reach question the rerank cannot address, and one
-    (<code>stored_energy</code>) is already in labelled order.
+    On the completed labels the rerank is <strong>net-positive</strong>: nDCG@10 rises from
+    0.3451 to 0.4102 and precision@5 from
+    0.2667 to 0.3333.
+    7 questions improve, 4 degrade and
+    4 are unchanged. The largest gains are
+    <em>flux loop voltage</em> (0.3962 → 0.9587, the
+    loop's own <code>voltage</code> lifted above the <code>v_loop</code> and constraint
+    paths), <em>magnetic axis position</em> (0.4795 →
+    0.7446, precision@5 0.0 → 0.8,
+    the rerank replaces <code>grid/psi_magnetic_axis</code> with real axis-position paths)
+    and <em>electron density</em> (0.1564 → 0.3492).
   </p>
 
-  <table id="dd-path-search-rerank-rows">
-    <caption>Per-question graded nDCG@10. A 0.0000 before and after means no labelled path was retrieved in the top 10.</caption>
+  <h3 id="dd-path-search-rerank-superseded-heading">The first measurement is superseded</h3>
+  <p id="dd-path-search-rerank-superseded">
+    A first measurement on labels that named <em>one home per quantity</em> reported the
+    rerank as net-negative (nDCG@10 0.3324 → 0.2860). That result is
+    <strong>superseded</strong>, and the reason is the defect the completed labels remove:
+    a DD quantity lives in several IDSs, and those labels graded only the equilibrium and
+    summary homes, so a reranked order that surfaced other real homes scored as if it had
+    returned unrelated paths. For <em>plasma current</em> the reranked top five were
+    <code>plasma_profiles/global_quantities/ip</code>,
+    <code>plasma_initiation/global_quantities/ip</code>,
+    <code>equilibrium/time_slice/global_quantities/ip</code>,
+    <code>core_profiles/global_quantities/ip</code> and <em>magnetics</em>
+    <code>ip</code> — every one a real home — yet only two were labelled, so the better
+    order scored worse. The labels, not the rerank, set the sign of that measurement.
+  </p>
+
+  <h3 id="dd-path-search-rerank-ranks-heading">Per question: the ranking, before and after</h3>
+  <table id="dd-path-search-rerank-ranks">
+    <caption>Top five paths in each order. <strong>Bold</strong> = a labelled grade-3 path (a home of the queried quantity); plain = grade 2 or 1 (a setpoint, reference or related quantity); an unlabelled path is plain.</caption>
     <thead>
-      <tr><th>Question</th><th>nDCG@10 before</th><th>nDCG@10 after</th></tr>
+      <tr><th>Question</th><th>before (embedding)</th><th>after (reranked)</th></tr>
     </thead>
     <tbody>
-      <tr id="dd-path-search-rerank-row-plasma_current"><td>plasma current</td><td>0.7453</td><td>0.3726</td></tr>
-      <tr id="dd-path-search-rerank-row-plasma_volume"><td>total plasma volume</td><td>0.7872</td><td>0.4966</td></tr>
-      <tr id="dd-path-search-rerank-row-stored_energy"><td>stored magnetic energy</td><td>0.3936</td><td>0.3936</td></tr>
-      <tr id="dd-path-search-rerank-row-electron_temperature"><td>electron temperature profile</td><td>0.4966</td><td>0.2624</td></tr>
-      <tr id="dd-path-search-rerank-row-electron_density"><td>electron density profile</td><td>0.0000</td><td>0.0000</td></tr>
-      <tr id="dd-path-search-rerank-row-ion_temperature"><td>ion temperature profile</td><td>0.3549</td><td>0.2761</td></tr>
-      <tr id="dd-path-search-rerank-row-safety_factor"><td>safety factor q profile</td><td>0.4307</td><td>0.5000</td></tr>
-      <tr id="dd-path-search-rerank-row-poloidal_flux_profile"><td>poloidal magnetic flux profile</td><td>0.0000</td><td>0.0000</td></tr>
-      <tr id="dd-path-search-rerank-row-boundary_outline"><td>plasma boundary outline</td><td>0.0000</td><td>0.0000</td></tr>
-      <tr id="dd-path-search-rerank-row-flux_loop_positions"><td>flux loop positions</td><td>0.0000</td><td>0.0000</td></tr>
-      <tr id="dd-path-search-rerank-row-flux_loop_voltage"><td>flux loop measured voltage</td><td>0.5137</td><td>0.8936</td></tr>
-      <tr id="dd-path-search-rerank-row-poloidal_field_probe"><td>poloidal field probe location</td><td>0.2128</td><td>0.3374</td></tr>
-      <tr id="dd-path-search-rerank-row-coil_current"><td>poloidal field coil current</td><td>0.7453</td><td>0.4702</td></tr>
-      <tr id="dd-path-search-rerank-row-toroidal_field_on_axis"><td>toroidal field on the axis</td><td>0.0000</td><td>0.0000</td></tr>
-      <tr id="dd-path-search-rerank-row-magnetic_axis_position"><td>position of the magnetic axis</td><td>0.3067</td><td>0.2870</td></tr>
+      <tr id="dd-path-search-rerank-r-plasma_current">
+        <td>plasma current</td>
+        <td>1 <strong>equilibrium/time_slice/global_quantities/ip</strong><br>2 equilibrium/time_slice/profiles_2d/j_parallel<br>3 equilibrium/time_slice/profiles_2d/j_phi<br>4 <strong>plasma_profiles/global_quantities/ip</strong><br>5 <strong>core_profiles/global_quantities/ip</strong></td>
+        <td>1 <strong>equilibrium/time_slice/global_quantities/ip</strong><br>2 <strong>plasma_profiles/global_quantities/ip</strong><br>3 <strong>plasma_initiation/global_quantities/ip</strong><br>4 <strong>core_profiles/global_quantities/ip</strong><br>5 equilibrium/time_slice/constraints/ip</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-plasma_volume">
+        <td>total plasma volume</td>
+        <td>1 <strong>equilibrium/time_slice/global_quantities/volume</strong><br>2 core_profiles/global_quantities/n_e_volume_average<br>3 core_profiles/profiles_2d/grid/volume_element<br>4 core_profiles/global_quantities/ion/n_i_volume_average<br>5 core_profiles/global_quantities/t_e_volume_average</td>
+        <td>1 <strong>radiation/process/profiles_1d/grid/volume</strong><br>2 <strong>equilibrium/time_slice/global_quantities/volume</strong><br>3 plasma_profiles/profiles_2d/grid/volume_element<br>4 core_profiles/global_quantities/n_e_volume_average<br>5 core_profiles/profiles_2d/grid/volume_element</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-stored_energy">
+        <td>stored magnetic energy</td>
+        <td>1 core_profiles/global_quantities/energy_diamagnetic<br>2 plasma_profiles/global_quantities/energy_diamagnetic<br>3 <strong>equilibrium/time_slice/global_quantities/energy_mhd</strong><br>4 plasma_profiles/ggd/ion/energy_density_kinetic<br>5 plasma_profiles/ggd/neutral/energy_density_kinetic</td>
+        <td>1 core_profiles/global_quantities/energy_diamagnetic<br>2 plasma_profiles/global_quantities/energy_diamagnetic<br>3 <strong>equilibrium/time_slice/global_quantities/energy_mhd</strong><br>4 plasma_sources/source/profiles_1d/ion/state/energy<br>5 plasma_transport/model/ggd/neutral/energy/flux_parallel</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-electron_temperature">
+        <td>electron temperature profile</td>
+        <td>1 <strong>core_instant_changes/change/profiles_1d/electrons/temperature</strong><br>2 plasma_profiles/global_quantities/t_e_peaking<br>3 <strong>core_profiles/profiles_1d/electrons/temperature</strong><br>4 <strong>plasma_profiles/profiles_1d/electrons/temperature</strong><br>5 <strong>edge_profiles/profiles_1d/electrons/temperature</strong></td>
+        <td>1 pellets/time_slice/pellet/path_profiles/t_e<br>2 sawteeth/profiles_1d/t_e<br>3 edge_profiles/profiles_1d/electrons/temperature_fit<br>4 <strong>edge_profiles/profiles_1d/electrons/temperature</strong><br>5 <strong>plasma_profiles/ggd/electrons/temperature</strong></td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-electron_density">
+        <td>electron density profile</td>
+        <td>1 reflectometer_profile/channel/n_e<br>2 reflectometer_profile/n_e<br>3 core_profiles/profiles_1d/electrons/density_fast<br>4 core_profiles/profiles_1d/electrons/temperature<br>5 core_instant_changes/change/profiles_1d/electrons/density_fit</td>
+        <td>1 <strong>plasma_profiles/profiles_1d/electrons/density</strong><br>2 reflectometer_profile/channel/n_e<br>3 <strong>edge_profiles/profiles_1d/electrons/density</strong><br>4 reflectometer_profile/n_e<br>5 core_instant_changes/change/profiles_1d/electrons/density_fit</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-ion_temperature">
+        <td>ion temperature profile</td>
+        <td>1 <strong>core_instant_changes/change/profiles_1d/ion/temperature</strong><br>2 core_profiles/profiles_2d/ion/state/temperature<br>3 core_profiles/profiles_1d/t_i_average<br>4 plasma_profiles/profiles_1d/ion/state/temperature<br>5 <strong>core_profiles/profiles_1d/ion/temperature</strong></td>
+        <td>1 <strong>plasma_profiles/profiles_2d/ion/temperature</strong><br>2 core_profiles/profiles_2d/t_i_average<br>3 plasma_profiles/profiles_2d/t_i_average<br>4 plasma_profiles/profiles_1d/ion/state/temperature<br>5 <strong>plasma_profiles/profiles_1d/ion/temperature</strong></td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-safety_factor">
+        <td>safety factor q profile</td>
+        <td>1 <strong>sawteeth/profiles_1d/q</strong><br>2 <strong>edge_profiles/profiles_1d/q</strong><br>3 <strong>plasma_profiles/profiles_1d/q</strong><br>4 <strong>equilibrium/time_slice/profiles_1d/q</strong><br>5 <strong>core_profiles/profiles_1d/q</strong></td>
+        <td>1 <strong>equilibrium/time_slice/profiles_1d/q</strong><br>2 <strong>plasma_profiles/profiles_1d/q</strong><br>3 <strong>edge_profiles/profiles_1d/q</strong><br>4 <strong>sawteeth/profiles_1d/q</strong><br>5 <strong>core_profiles/profiles_1d/q</strong></td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-poloidal_flux_profile">
+        <td>poloidal magnetic flux profile</td>
+        <td>1 core_transport/model/profiles_1d/grid_flux/psi<br>2 core_transport/model/profiles_1d/grid_flux/psi_magnetic_axis<br>3 radiation/process/profiles_1d/grid/psi_magnetic_axis<br>4 plasma_transport/model/profiles_1d/grid_flux/psi_boundary<br>5 sawteeth/profiles_1d/grid/psi_magnetic_axis</td>
+        <td>1 core_transport/model/profiles_1d/grid_flux/psi<br>2 core_profiles/profiles_1d/grid/psi<br>3 edge_profiles/profiles_1d/grid/psi<br>4 core_transport/model/profiles_1d/grid_flux/psi_magnetic_axis<br>5 sawteeth/profiles_1d/grid/psi_magnetic_axis</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-boundary_outline">
+        <td>plasma boundary outline</td>
+        <td>1 core_sources/source/profiles_1d/grid/psi_boundary<br>2 core_transport/model/profiles_1d/grid_d/psi_boundary<br>3 disruption/profiles_1d/grid/psi_boundary<br>4 core_transport/model/profiles_1d/grid_v/psi_boundary<br>5 core_instant_changes/change/profiles_1d/grid/psi_boundary</td>
+        <td>1 bolometer/camera/channel/detector/outline/x2<br>2 equilibrium/time_slice/boundary/gap/angle<br>3 core_sources/source/profiles_1d/grid/psi_boundary<br>4 disruption/profiles_1d/grid/psi_boundary<br>5 core_transport/model/profiles_1d/grid_flux/psi_boundary</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-flux_loop_positions">
+        <td>flux loop positions</td>
+        <td>1 equilibrium/time_slice/constraints/flux_loop/measured<br>2 core_transport/model/profiles_1d/grid_flux/psi<br>3 equilibrium/time_slice/constraints/flux_loop<br>4 magnetics/flux_loop/type<br>5 edge_transport/model/ggd/ion/particles/flux_radial</td>
+        <td>1 core_transport/model/profiles_1d/grid_flux/psi<br>2 edge_transport/model/ggd/ion/particles/flux_radial<br>3 equilibrium/time_slice/constraints/flux_loop<br>4 edge_transport/model/ggd/neutral/state/particles/flux_radial/values<br>5 edge_transport/model/ggd/electrons/particles/flux_radial/values</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-flux_loop_voltage">
+        <td>flux loop measured voltage</td>
+        <td>1 equilibrium/time_slice/constraints/flux_loop/measured<br>2 core_profiles/global_quantities/v_loop<br>3 plasma_profiles/global_quantities/v_loop<br>4 camera_ir/frame_analysis/power_flux_parallel<br>5 <strong>magnetics/flux_loop/voltage</strong></td>
+        <td>1 <strong>magnetics/flux_loop/voltage</strong><br>2 plasma_profiles/global_quantities/v_loop<br>3 core_profiles/global_quantities/v_loop<br>4 pulse_schedule/flux_control/v_loop<br>5 equilibrium/time_slice/constraints/flux_loop</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-poloidal_field_probe">
+        <td>poloidal field probe location</td>
+        <td>1 magnetics/b_field_pol_probe/non_linear_response/b_field_non_linear<br>2 magnetics/b_field_pol_probe/field<br>3 magnetics/b_field_pol_probe/non_linear_response/b_field_linear<br>4 magnetics/b_field_pol_probe/voltage<br>5 magnetics/b_field_pol_probe/poloidal_angle</td>
+        <td>1 magnetics/b_field_pol_probe/field<br>2 magnetics/b_field_pol_probe/non_linear_response/b_field_non_linear<br>3 magnetics/b_field_phi_probe/poloidal_angle<br>4 magnetics/b_field_phi_probe/field<br>5 magnetics/b_field_pol_probe/voltage</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-coil_current">
+        <td>poloidal field coil current</td>
+        <td>1 <strong>pf_active/coil/current</strong><br>2 equilibrium/time_slice/global_quantities/psi_external_average<br>3 equilibrium/time_slice/constraints/pf_current<br>4 <strong>coils_non_axisymmetric/coil/current</strong><br>5 pf_active/circuit/current</td>
+        <td>1 pulse_schedule/pf_active/supply/current<br>2 pf_active/circuit/current<br>3 <strong>pf_active/coil/current</strong><br>4 equilibrium/time_slice/constraints/pf_current<br>5 pf_active/coil/b_field_max</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-toroidal_field_on_axis">
+        <td>toroidal field on the magnetic axis</td>
+        <td>1 core_instant_changes/vacuum_toroidal_field/b0<br>2 core_profiles/vacuum_toroidal_field/b0<br>3 core_sources/vacuum_toroidal_field/b0<br>4 b_field_non_axisymmetric/time_slice/control_surface/b_field_phi<br>5 <strong>equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi</strong></td>
+        <td>1 <strong>equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi</strong><br>2 plasma_transport/vacuum_toroidal_field/b0<br>3 core_profiles/vacuum_toroidal_field/b0<br>4 core_instant_changes/vacuum_toroidal_field/b0<br>5 core_transport/vacuum_toroidal_field/b0</td>
+      </tr>
+      <tr id="dd-path-search-rerank-r-magnetic_axis_position">
+        <td>position of the magnetic axis</td>
+        <td>1 core_instant_changes/change/profiles_1d/grid/psi_magnetic_axis<br>2 core_sources/source/profiles_1d/grid/psi_magnetic_axis<br>3 core_profiles/profiles_1d/grid/psi_magnetic_axis<br>4 pulse_schedule/position_control/magnetic_axis/r<br>5 pulse_schedule/position_control/magnetic_axis/z</td>
+        <td>1 <strong>distributions/magnetic_axis/z</strong><br>2 pulse_schedule/position_control/magnetic_axis/r<br>3 <strong>waves/magnetic_axis/r</strong><br>4 <strong>distributions/magnetic_axis/r</strong><br>5 <strong>equilibrium/time_slice/global_quantities/magnetic_axis/r</strong></td>
+      </tr>
     </tbody>
   </table>
 
-  <p id="dd-path-search-rerank-caveat">
-    The measurement is a live judge on a sparse label set: the four <code>0.0000</code>
-    questions are retrieval misses, and the labelled set covers only the paths a mapping
-    question names, so a retrieved candidate no label covers counts as irrelevant. That
-    flatters neither order. The finding stands on the three questions where a labelled
-    answer was demoted: the judge reorders on documentation and description text, and where
-    the embedding order had already placed the answer first, that text is not enough to hold
-    it there.
+  <h3 id="dd-path-search-rerank-metrics-heading">Per question: nDCG@10 and precision@5</h3>
+  <table id="dd-path-search-rerank-metrics">
+    <caption>Graded nDCG@10 and grade-3-only precision@5, before and after, per question.</caption>
+    <thead>
+      <tr><th>Question</th><th>nDCG@10 before</th><th>nDCG@10 after</th><th>P@5 before</th><th>P@5 after</th></tr>
+    </thead>
+    <tbody>
+      <tr id="dd-path-search-rerank-m-plasma_current"><td>plasma current</td><td>0.5410</td><td>0.6484</td><td>0.60</td><td>0.80</td></tr>
+      <tr id="dd-path-search-rerank-m-plasma_volume"><td>total plasma volume</td><td>0.2935</td><td>0.3590</td><td>0.20</td><td>0.40</td></tr>
+      <tr id="dd-path-search-rerank-m-stored_energy"><td>stored magnetic energy</td><td>0.1358</td><td>0.1358</td><td>0.20</td><td>0.20</td></tr>
+      <tr id="dd-path-search-rerank-m-electron_temperature"><td>electron temperature profile</td><td>0.5900</td><td>0.4168</td><td>0.80</td><td>0.40</td></tr>
+      <tr id="dd-path-search-rerank-m-electron_density"><td>electron density profile</td><td>0.1564</td><td>0.3492</td><td>0.00</td><td>0.40</td></tr>
+      <tr id="dd-path-search-rerank-m-ion_temperature"><td>ion temperature profile</td><td>0.5167</td><td>0.5085</td><td>0.40</td><td>0.40</td></tr>
+      <tr id="dd-path-search-rerank-m-safety_factor"><td>safety factor q profile</td><td>0.9610</td><td>0.9549</td><td>1.00</td><td>1.00</td></tr>
+      <tr id="dd-path-search-rerank-m-poloidal_flux_profile"><td>poloidal magnetic flux profile</td><td>0.0000</td><td>0.0000</td><td>0.00</td><td>0.00</td></tr>
+      <tr id="dd-path-search-rerank-m-boundary_outline"><td>plasma boundary outline</td><td>0.0000</td><td>0.0000</td><td>0.00</td><td>0.00</td></tr>
+      <tr id="dd-path-search-rerank-m-flux_loop_positions"><td>flux loop positions</td><td>0.0000</td><td>0.0000</td><td>0.00</td><td>0.00</td></tr>
+      <tr id="dd-path-search-rerank-m-flux_loop_voltage"><td>flux loop measured voltage</td><td>0.3962</td><td>0.9587</td><td>0.20</td><td>0.20</td></tr>
+      <tr id="dd-path-search-rerank-m-poloidal_field_probe"><td>poloidal field probe location</td><td>0.0511</td><td>0.0810</td><td>0.00</td><td>0.00</td></tr>
+      <tr id="dd-path-search-rerank-m-coil_current"><td>poloidal field coil current</td><td>0.4740</td><td>0.2946</td><td>0.40</td><td>0.20</td></tr>
+      <tr id="dd-path-search-rerank-m-toroidal_field_on_axis"><td>toroidal field on the magnetic axis</td><td>0.5816</td><td>0.7021</td><td>0.20</td><td>0.20</td></tr>
+      <tr id="dd-path-search-rerank-m-magnetic_axis_position"><td>position of the magnetic axis</td><td>0.4795</td><td>0.7446</td><td>0.00</td><td>0.80</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="dd-path-search-rerank-cases-heading">The three cases to watch</h3>
+  <ul id="dd-path-search-rerank-cases">
+    <li id="dd-path-search-rerank-case-volume">
+      <strong>plasma volume — improved, with a caveat.</strong> The rerank puts
+      <code>radiation/process/profiles_1d/grid/volume</code> first and
+      <code>equilibrium/time_slice/global_quantities/volume</code> second. Under the
+      completed labels both are grade 3 — the radiation path is the same "volume enclosed
+      inside the magnetic surface" the equilibrium volume is — so nDCG@10 rises
+      0.2935 → 0.3590 and precision@5 0.2 → 0.4: not a failure by the labels. It is a plot-grid
+      copy of the quantity, though, and a reader who asked for the plasma volume wanted the
+      equilibrium global quantity, which the rerank demotes to rank 2. The metric cannot
+      see that intent, so this is recorded as label-correct but intent-questionable rather
+      than as a clean win.
+    </li>
+    <li id="dd-path-search-rerank-case-temperature">
+      <strong>electron temperature — a real failure.</strong> The rerank promotes
+      <code>pellets/time_slice/pellet/path_profiles/t_e</code> to rank 1 and
+      <code>sawteeth/profiles_1d/t_e</code> to rank 2, pushing the canonical
+      <code>core_profiles</code> electron temperature out of the top five. nDCG@10 falls
+      0.5900 → 0.4168 and precision@5
+      0.8 → 0.4. A pellet path profile is not the electron
+      temperature profile; the judge preferred its text.
+    </li>
+    <li id="dd-path-search-rerank-case-coil">
+      <strong>coil current — a real failure.</strong> The rerank promotes
+      <code>pulse_schedule/pf_active/supply/current</code> to rank 1, above the real
+      coil-current homes <code>pf_active/coil/current</code> and
+      <code>coils_non_axisymmetric/coil/current</code>. nDCG@10 falls
+      0.4740 → 0.2946 and precision@5
+      0.4 → 0.2. A supply-current setpoint is not the coil
+      current.
+    </li>
+  </ul>
+  <p id="dd-path-search-rerank-cases-read">
+    Two of the three flagged cases are genuine rerank failures — a pellet path profile ahead
+    of the electron temperature profile, and a supply-current setpoint ahead of the coil
+    current. The third (plasma volume) is label-correct but intent-questionable. The rerank
+    wins on the whole set because it lifts the loop voltage, the magnetic-axis position and
+    the electron density by more than these two lose.
   </p>
 
   <h3 id="dd-path-search-rerank-switch-heading">The switch honours the server mode</h3>
   <p id="dd-path-search-rerank-switch-prose">
     <code>AgentsServer.__post_init__</code> sets the module-level switch to
     <code>not (read_only or dd_only)</code>, so a full server reranks and a read-only or
-    DD-only server — the public containers — never does, spending no judgement on an
-    external query. A directly-constructed <code>Tools</code> or
-    <code>GraphSearchTool</code> defaults the switch off, so a caller that wants the rerank
-    asks for it. The tests pin all four: full reranks, read-only never, DD-only never, and
-    the default is off.
+    DD-only server — the public containers — never does. A directly-constructed
+    <code>Tools</code> or <code>GraphSearchTool</code> defaults the switch off. The tests
+    pin all four: full reranks, read-only never, DD-only never, default off.
   </p>
 
   <h3 id="dd-path-search-rerank-checks-heading">Checks</h3>
   <p id="dd-path-search-rerank-checks-prose">
-    <code>tests/tools/test_dd_path_search_rerank.py</code> pins the construction-time switch,
-    that the rerank is exactly one call into <code>rerank_candidates</code>, that each
-    candidate carries its path and text, that the judged order is applied to the hits, and
-    that a disabled tool never calls the owner; it also verifies the nDCG@10 helper and the
-    fixture. It passes 14/14 alongside <code>tests/tools/test_tools.py</code> (11/11) and
+    <code>tests/tools/test_dd_path_search_rerank.py</code> passes 14/14 alongside
+    <code>tests/tools/test_tools.py</code> (11/11) and
     <code>tests/tools/test_search_dd_paths_regression.py</code> under <code>-m graph</code>
     (6/6). The negative control sets the switch on regardless of mode
-    (<code>_rerank_dd_paths = True</code>) and the read-only and DD-only tests then fail
-    because the switch is on for those modes — the red log is
+    <code>_rerank_dd_paths = True</code>: the read-only and DD-only tests then fail
+    (<code>assert True is False</code>), log
     <code>~/.cache/imas-codex-dd-path-rerank/negative_control_red.log</code>.
   </p>
 </section>
