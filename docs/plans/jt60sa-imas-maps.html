@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -322,6 +322,9 @@
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261007T132458025035-jt60sa-member-reindividualize" data-who="reckon-build" data-when="2026-10-07T13:37:57.630Z">
     <div class="r-comment-body"><p>reset members_described=false on all 2,249 JT-60SA SignalSources and ran one enrich-only signals pass, which individualized 3,772 members across 280 multi-member sources; the count of JT-60SA FacilitySignal names or descriptions containing 101173 fell from 3,565 to 0 (log: signals-pass.log, EXIT=0 at 346.1 s).</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261007T151847243217-review-of-jt60sa-member-reindividualize" data-who="reckon-build" data-when="2026-10-07T15:25:37.438Z">
+    <div class="r-comment-body"><p>reviewed run r-20261007T132458025035-jt60sa-member-reindividualize at head 8fd27af13 (base 839b5a5c): parsed review record stored, verdict passed, total 111/120 over 6 dimensions; independently reproduced the done-when census ANY_HITS 0 of 6,298 JT-60SA FacilitySignals with a positive control.</p></div>
 </div>
 </section>
 </main>

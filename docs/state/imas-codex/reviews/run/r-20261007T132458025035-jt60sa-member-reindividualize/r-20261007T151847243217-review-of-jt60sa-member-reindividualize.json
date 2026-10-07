@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest's baseline_suite and after_suite are empty, and the reviewed node changes no code or tests (its commit adds one evidence fragment), so no base/head suite arm exists and no added-failure set is derivable from suite logs. The node's only gate is a graph census over JT-60SA FacilitySignals; I re-ran it independently at the committed head and it returns ANY_HITS 0 of 6,298 with a positive control of 6,298 non-empty names (914 containing 'Cryo'). added_failure_count is 0 with an empty id set because there is no suite arm to fail, not because a suite passed.",
+  "after_suite": null,
+  "backend": "deepseek-v4.1-flash",
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T15:25:37.438Z",
+  "dispatched_at": "2026-10-07T15:18:59Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T132458025035-jt60sa-member-reindividualize/manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's baseline_suite and after_suite are empty, and the node changes no code or tests, so no base/head suite arm exists and no added-failure count is derivable from the reviewed record. The node's only gate is the graph census, which I re-ran independently and which is green (ANY_HITS 0). added_failure_count is therefore 0 with an empty id set, not because a suite passed but because there is no suite to run against this node's deliverable. Recorded so the empty arms are a known property of a data-mutation node rather than an omitted measurement."
+    },
+    {
+      "file": "jt60sa-member-reindividualize.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the 'before' census figure 3,565 cannot be re-measured after the fix, because the node mutated the graph in place and the fixed code regenerates names on demand. The pre-state is preserved only as the node's own capture (the run scratch before.json and the fragment's 'before' column), so the before/after pair rests on the node's record rather than on an independent pre-arm. The 'after' half is independently reproduced (review-census.log), which is the half the done-when measures."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-imas-maps/jt60sa-member-reindividualize.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the orientation write paths declared a figures dir (docs/figures/jt60sa-imas-maps/jt60sa-member-reindividualize) but the commit produces no figure. The section's evidence is a census table and a name table, and the plan requires no figure for this node, so this is a declared-but-unused path rather than a missing deliverable."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "not applicable: the commit changes one evidence fragment and no code, so there is no call site to trace. The runtime path exercised is the existing imas-codex discover signals --enrich-only entry point, whose individualization step calls the sibling node's extract_member_identifier.",
+    "diff": "read commit 8fd27af13: a single new section appended to the evidence fragment, carrying the landing paragraph, the before/after census table and the five before/after name pairs. No source, test or schema file is touched.",
+    "done_when": "Reproduced independently at head 8fd27af13: census over facility_id 'jt-60sa' returns TOTAL 6298, NAME_HITS 0, DESC_HITS 0, ANY_HITS 0 (review-census.log, EXIT=0); positive control 6298 non-empty names / 914 'Cryo' (review-check.log); the five captured member ids re-read as Cryo Cold Box 01 Outlet Temperature 81..85, matching the fragment, none containing 101173. SignalSource state: 2,249 total, 280 members_described=true, 1,969 false, 0 null.",
+    "goal": "The section's done-when for jt60sa-member-reindividualize is 'no JT-60SA FacilitySignal name or description contains 101173', with the fragment recording the count before and after and five regenerated member names beside the ones they replace. Delivered: the fragment carries a before/after census table and a five-row name table, and my independent census returns ANY_HITS 0 of 6,298. Residual: one orientation write path (a figures dir) was declared but unused; the plan requires no figure here.",
+    "manifest": "read; status complete; commit 8fd27af13; changed_paths match the diff; tests field records the enrich-only pass (EXIT=0, 3772 members updated) then the census returning any_hits=0; test_logs names signals-pass.log, whose tail shows 'Individualization complete for jt-60sa: 3772 members updated' and 'Time: 346.1s'. baseline_suite and after_suite are null: the node adds no code or tests, so no base/head suite arm exists and its only gate is the graph census, which I re-ran independently.",
+    "write_paths": "git show --stat 8fd27af13 touches exactly docs/evidence/fragments/jt60sa-imas-maps/jt60sa-member-reindividualize.html (1 file, 55 insertions); the worktree is clean at that commit; no plan edit and no sprint/index mutation. The graph mutation was the node's mandate."
+  },
+  "justifications": {
+    "durability": "the node is a one-shot data regeneration: it lands no test, so the graph state it produces (names free of the constant shot) is guarded only indirectly, by the sibling fix's tests for extract_member_identifier in tests/discovery/test_member_identifier.py. Nothing would catch a future regression that reintroduced the shot into JT-60SA member names except re-running the census; the fragment preserves the measurement but is not an executable check. This is inherent to a data-mutation node, not a defect of the work, but it is the weakest dimension.",
+    "evidence": "the central claim is independently reproduced at the committed head: my own census over facility_id 'jt-60sa' returns ANY_HITS 0, and a positive control confirms the instrument sees known-present data (6,298 non-empty names, 914 of them containing 'Cryo'), so the zero is a measured absence rather than a blind scan. The five regenerated member ids were re-read from the graph and match the fragment's 'after' column exactly, each now '81'..'85' with no shot. Weaknesses: the reviewed manifest left baseline_suite and after_suite empty and the node changes no code or tests, so no base/head suite arm exists; the 'before' figure 3,565 is historical and cannot be re-measured after the in-place graph mutation, so the before/after pair rests on the node's own capture (preserved under the run scratch and reproduced in the fragment).",
+    "fit": "the deliverable is evidence HTML, a well-formed section with stable ids and captions that state the quantity, the unit of comparison and the total; symbols and ids carry no plan, sprint or ticket label beyond the established evidence-fragment naming convention (the fragment is named for its node, as its sibling member-identifier-varying-segments.html is). The census table names its state rows 'before reset' and 'after pass' rather than plan stages.",
+    "goal_fidelity": "the section's done-when for this node is that no JT-60SA FacilitySignal name or description contains 101173, with the fragment recording the count before and after and five regenerated member names beside the names they replace. Reproduced independently against the live graph: of 6,298 JT-60SA FacilitySignals, name hits 0, description hits 0, any hits 0 (review-census.log). The fragment (docs/evidence/fragments/jt60sa-imas-maps/jt60sa-member-reindividualize.html) carries the before/after census table (3,565/3,547/3,565 -> 0) and a five-row before/after name table whose 'after' names I re-read from the graph and found identical (Cryo Cold Box 01 Outlet Temperature 81..85). The pass log records 3,772 members individualized across 280 multi-member sources, EXIT=0 in 346.1 s. Residual: an orientation write path (docs/figures/jt60sa-imas-maps/jt60sa-member-reindividualize) was declared but produced no figure; the plan requires none for this node, so the path was unused rather than a missing deliverable.",
+    "reuse": "the node adds no code and runs the existing pipeline unchanged: it resets members_described on the existing SignalSource nodes and invokes the existing imas-codex discover signals ... --enrich-only path, whose individualize_source_descriptions re-derives member names through the already-fixed extract_member_identifier. No second grouping pass, script module or duplicate query was introduced; the pre/post census and the before/after sample both read the existing FacilitySignal nodes.",
+    "scope_discipline": "the reviewed commit 8fd27af13 changes exactly one file, docs/evidence/fragments/jt60sa-imas-maps/jt60sa-member-reindividualize.html (55 insertions, 0 deletions), which is the manifest's declared changed path; the worktree is clean at that commit and no plan, sprint or index state was mutated. The graph writes (members_described reset and member re-individualization) are the node's explicit mandate in the section, executed from the main checkout rather than patched into the worktree."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The section's done-when is that no JT-60SA FacilitySignal name or description contains 101173, with the fragment recording the count before and after and five regenerated names beside the ones they replace. Delivered and independently reproduced: census ANY_HITS 0 of 6,298; the five names read back as Cryo Cold Box 01 Outlet Temperature 81..85, matching the fragment. Residual: one declared figures path was unused (no figure required).\nVERDICT done_when: Reproduced at head 8fd27af13: census TOTAL 6298 NAME_HITS 0 DESC_HITS 0 ANY_HITS 0 (review-census.log); positive control 6298 named / 914 'Cryo' (review-check.log); five member ids re-read matching the fragment; SignalSource 2,249 total, 280 true, 1,969 false, 0 null.\nVERDICT write_paths: git show --stat 8fd27af13 is exactly one file, the evidence fragment (55 insertions); clean worktree; no plan/sprint/index mutation; the graph write was the node's mandate.\nVERDICT manifest: read; complete; commit 8fd27af13; tests record the enrich-only pass (EXIT=0, 3772 members updated) then the census returning any_hits=0; baseline_suite/after_suite null because the node adds no code or tests.\nVERDICT diff: one evidence-fragment section appended (landing paragraph, census table, five before/after name pairs); no source, test or schema change.\nCALL_SITES: none (evidence-only commit; runtime path is the existing discover signals --enrich-only entry point)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the done-when holds (any hits 0) and the fragment records the before/after census and five name pairs, all independently reproduced; the only residual is an unused declared figures path.\nSCORE evidence: 17\nJUSTIFICATION evidence: the after-state is independently reproduced with a positive control and the five names match; but the before figure is historical, un-re-measurable after the in-place mutation, and the manifest supplied no suite arms (no code or tests changed).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the commit touches exactly the one declared fragment path with a clean tree and no plan, sprint or index mutation; the graph writes are the node's explicit mandate.\nSCORE durability: 15\nJUSTIFICATION durability: a one-shot data regeneration with no test of its own; the produced state is guarded only indirectly by the sibling fix's extract_member_identifier tests, and only a re-run of the census would catch a regression.\nSCORE fit: 20\nJUSTIFICATION fit: well-formed evidence HTML with captions naming the quantity and total, and no plan-stage labels beyond the established evidence-fragment naming convention.\nSCORE reuse: 20\nJUSTIFICATION reuse: no new code; the node resets existing SignalSource state and runs the existing enrich-only pipeline, reusing the fixed extract_member_identifier rather than a second pass.\nFINDING manifest.md:10 follow-on: baseline_suite/after_suite empty and no code or tests changed, so no suite arm exists; the node's gate is the graph census, independently re-run green (ANY_HITS 0) -> added_failure_count 0.\nFINDING jt60sa-member-reindividualize:1 follow-on: the 'before' figure 3,565 is un-re-measurable after the in-place mutation; only the 'after' half the done-when measures is independently reproduced.\nFINDING docs/evidence/fragments/jt60sa-imas-maps/jt60sa-member-reindividualize.html:1 follow-on: the declared figures path produced no figure; the plan requires none for this node, so it is an unused declared path, not a missing deliverable.",
+  "review_run_id": "r-20261007T151847243217-review-of-jt60sa-member-reindividualize",
+  "reviewed_base": "839b5a5c3e4916e6daf99962fbbf83d22d8b9657",
+  "reviewed_base_sha": "839b5a5c3e4916e6daf99962fbbf83d22d8b9657",
+  "reviewed_commit": "8fd27af13353661132b6fce175b9615e9931d722",
+  "reviewed_head_sha": "8fd27af13353661132b6fce175b9615e9931d722",
+  "reviewed_run_id": "r-20261007T132458025035-jt60sa-member-reindividualize",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:40:00.000000+00:00",
+  "total": 111
+}
