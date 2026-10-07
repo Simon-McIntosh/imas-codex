@@ -1,0 +1,78 @@
+<section>
+  <h2 id="ingested-rejudge">JT-60SA ingested files can be re-judged from their stored chunks</h2>
+  <p id="ingested-rejudge-result">
+    The content arm now re-judges a code file from the text it already carries
+    in the graph. A file sitting at <code>ingested</code> with a content-stage
+    relevance and no recorded facet answer is put back in front of the same
+    content question set, through the same seat, but its state is rebuilt from
+    its own stored <code>CodeChunk</code> text — joined in reading order
+    (<code>start_line</code>) and cut to the same 1500 characters the fetched
+    path uses — instead of a remote fetch. The judgment fields are rewritten in
+    place; the file's status, its <code>CodeExample</code> and its chunks are
+    left as they are. Admission is not re-decided: a file whose new composite
+    and facets both fall below their gates stays <code>ingested</code> and is
+    reported. The path is reached through the existing reset owner
+    (<code>CODE_RESET_SPECS["ingested"]</code> plus <code>--rejudge-ingested</code>)
+    and the existing score claim; no second pipeline was added.
+  </p>
+  <svg id="ingested-rejudge-targets-figure" viewBox="0 0 900 230" width="900" height="230" role="img" aria-label="JT-60SA content-stage ingested files: 552 total, 540 without a recorded facet answer, 12 with one">
+    <text x="0" y="22" font-size="20" fill="#333">JT-60SA content-stage files at ingested, by facet answer</text>
+    <g font-size="20">
+      <text x="0" y="78" fill="#333">ingested (content stage)</text>
+      <rect x="330" y="60" width="540" height="26" fill="#4c72b0"/>
+      <text x="884" y="78" text-anchor="end" fill="#fff">552</text>
+      <text x="0" y="128" fill="#333">no facet answer yet (targets)</text>
+      <rect x="330" y="110" width="528" height="26" fill="#c44e52"/>
+      <text x="852" y="128" text-anchor="end" fill="#fff">540</text>
+      <text x="0" y="178" fill="#333">facet answer recorded</text>
+      <rect x="330" y="160" width="12" height="26" fill="#55a868"/>
+      <text x="350" y="178" fill="#333">12</text>
+    </g>
+  </svg>
+  <p id="ingested-rejudge-counts">
+    A bounded read of the live graph (<code>jt-60sa</code>, one facility-scoped
+    count) puts 552 JT-60SA files at <code>ingested</code> with a content-stage
+    relevance, of which <strong>540</strong> still carry no facet answer — the
+    rows a re-judge pass takes. The claim's drain key is exactly that absence:
+    <code>coalesce(sf.score_data_access_confidence, 0.0) = 0.0</code>, so a file
+    the pass has judged drops out of the claim: later passes take the remainder.
+  </p>
+  <table id="ingested-rejudge-explain">
+    <caption>EXPLAIN of every changed Cypher statement, against the live graph</caption>
+    <thead>
+      <tr><th>statement</th><th>role</th><th>EXPLAIN</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>claim (ingested re-judge selection)</td><td>reaches ingested content-stage files through the score claim</td><td>OK</td></tr>
+      <tr><td>chunk read</td><td>rebuilds the content head from stored chunks, in reading order</td><td>OK</td></tr>
+      <tr><td>judgment write</td><td>rewrites the facet, grade, role and composite fields in place (no <code>sf.status</code>)</td><td>OK</td></tr>
+      <tr><td>reset (ingested target)</td><td>clears the content judgment fields without moving the status</td><td>OK</td></tr>
+    </tbody>
+  </table>
+  <p id="ingested-rejudge-negative-control">
+    Negative control: the request-state test run against a copy whose state
+    builder returns an empty chunk head exits non-zero,<code>EXIT=1</code>, with
+    <em>chunk text absent from the request state</em> as its first failure — so
+    the test that proves the chunk text reaches the content arm fails when the
+    chunk text is removed.
+  </p>
+  <p id="ingested-rejudge-evidence">
+    Gate: <code>tests/discovery/test_code_ingested_rejudge.py</code>,
+    <code>test_code_relevance.py</code>, <code>test_code_facet_admission.py</code>,
+    <code>test_code_ingest_settles.py</code> and <code>test_reset.py</code> — 75
+    passed, exit 0. Every changed Cypher statement was planned with
+    <code>EXPLAIN</code> on the live graph and the same parameters the run would
+    issue; all four planned, and no statement was executed and no graph write
+    was made.
+  </p>
+  <p id="ingested-rejudge-deferred">
+    Deferred: the live re-judge of the 540 JT-60SA targets is not run here. The
+    evidence fence for this node permits no discover run and no graph write
+    other than <code>EXPLAIN</code>, and the plan gates the run on a merge that
+    has not landed. The pass is a single
+    <code>imas-codex discover code jt-60sa --rejudge-ingested</code>; the reset
+    it opens with scopes to <code>relevance_stage = 'content'</code> at
+    <code>ingested</code>, so the 12 files that already carry an answer are not
+    re-asked and the pass reports the files that would no longer be admitted.
+  </p>
+</section>
