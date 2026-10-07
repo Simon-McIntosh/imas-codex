@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline_suite (revision 3d470b24e, command in the run manifest, log baseline_suite.log): 1673 passed, 0 failed, EXIT=0. after_suite (revision f4c0df4f9, log after_suite.log): 1678 passed, 0 failed, EXIT=0. I also re-ran the same gate at the reviewed head 156d39a1f in the reviewed worktree (log gate.log): 1678 passed, 12 skipped, 5 deselected, EXIT=0, 0 failed. No failure id present at the head arm is absent from the base arm.",
+  "base_log_revision": "3d470b24ef359c745b1c4a5a4f8c0b6c2f0d5ff8",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/discovery/code/graph_ops.py:420",
+    "imas_codex/discovery/code/graph_ops.py:707",
+    "imas_codex/discovery/code/graph_ops.py:747",
+    "imas_codex/discovery/code/parallel.py:428",
+    "imas_codex/discovery/code/parallel.py:455",
+    "imas_codex/discovery/code/parallel.py:503",
+    "imas_codex/discovery/code/workers.py:707"
+  ],
+  "completed_at": "2026-10-07T05:30:33.946Z",
+  "dispatched_at": "2026-10-07T05:07:03Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_code_reset_chunks.py",
+      "line": "85",
+      "severity": "follow-on",
+      "text": "the guard pins the relevance registry as disjoint from CODE_RESET_SPECS['triaged'].clear_fields, but a file reset to 'triaged' from 'scored'/'ingested' keeps relevance_stage='content' while _CODE_SCORE_FIELDS clears score_composite, so it satisfies neither the enrichment claim (needs relevance_stage='name' and score_composite >= threshold, graph_ops.py:420) nor the triage claim (needs status='discovered' and relevance_stage IS NULL, graph_ops.py:322) nor the score claim (needs is_enriched=true, graph_ops.py:507); reset-to-triaged appears to leave a file claimed by nothing. The clear lists predate this node (unchanged in diff 8e08eeaa7..156d39a1f), so this is a pre-existing coherence gap the node's new assertion now codifies rather than an introduction; the plan does not settle reset-to-triaged semantics."
+    },
+    {
+      "file": "tests/discovery/test_code_reset_chunks.py",
+      "line": "86",
+      "severity": "nit",
+      "text": "set(scorer.RELEVANCE_FIELDS) == set(reset_module.CODE_RELEVANCE_FIELDS) cannot fail: scorer.RELEVANCE_FIELDS is the same tuple object imported from reset (scorer.py:33-35), so this assertion adds no drift guard beyond the meaningful subset/isdisjoint checks above it. The real drift guard is the import-time KeyError in _relevance_field (scorer.py:66-70), which does fire on an unregistered field."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032915768279-relevance-cleanup/manifest.md",
+      "line": "80",
+      "severity": "nit",
+      "text": "after_suite.revision is f4c0df4f9 and baseline_suite.revision is 3d470b24e, neither of which is the reviewed head 156d39a1f nor the run's declared orientation_base_* (base_sha 8e08eeaa7). The head commit 156d39a1f and the fix commit f4c0df4f9 differ from the declared base only by non-code commits, so the gate measured the right code; but the recorded revisions do not name the head that was reviewed, and the evidence fragment is the only artefact updated at the head commit. I confirmed green by re-running the gate at 156d39a1f."
+    }
+  ],
+  "head_log_revision": "156d39a1fb5fb04fc1c1f6512fadb587f57519a3",
+  "item_aggregate": 7,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call sites of relevance_predicate (3 graph_ops, 3 parallel, 1 workers); each site passes its threshold parameter ($min_relevance or $min_ingest_relevance), so no predicate renders against an unbound Cypher parameter",
+    "diff": "read commit f22a7e4c6 then f4c0df4f9 and 156d39a1f against base 8e08eeaa7: 11 files, +369/-96, all inside the declared write paths; the second commit wires the registry consumer (CODE_RELEVANCE_FIELDS imported as RELEVANCE_FIELDS at scorer.py:33-35) that the first review found missing",
+    "done_when": "the node's five cleanup items are implemented and the named gate exits 0 at the reviewed head with base arms green; the item-5 registry guard tests/discovery/test_code_reset_chunks.py:86 now passes",
+    "goal": "read the node goal (retire the code pipeline's dead triage models and close four relevance defects) against the diff; all five items land: dead triage models retired, one relevance-stage predicate, path-paired descriptions, reset chunk cascade, and one relevance-field registry",
+    "manifest": "read the reviewed run's manifest.md; it now carries baseline_suite and after_suite gate logs and a negative_control_log the prior review found absent; item 5's registry is wired at scorer.py:33",
+    "write_paths": "read the 13 declared write paths; every path in git diff --stat 8e08eeaa7 156d39a1f is inside them"
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_code_relevance.py adds test_content_arm_pairs_each_description_with_its_own_file, which the reviewed negative_control.reddens to EXIT=1 on the zip() defect without touching code under test; tests/discovery/test_code_reset_chunks.py pins the reset cascade Cypher and the registry membership",
+    "evidence": "the reviewed manifest now records baseline_suite (1673 passed, 0 failed) and after_suite (1678 passed, 0 failed) with revisions, literal commands and log paths, and a negative_control_log whose first failure is the declared pairing assertion; I reproduced the gate green at the head 156d39a1f (1678 passed, 0 failed, EXIT=0)",
+    "fit": "the two comment assertions the prior review flagged as false are now true: the scorer imports the reset registry (scorer.py:33-35) and resolves each decision field through it (scorer.py:66-82); reset.py:342 states the same contract",
+    "goal_fidelity": "all five cleanup items are closed and the item-5 registry that left the prior head red is wired; apply_triage_results was retired as a name (renamed to apply_name_relevance) rather than deleted, disclosed and necessary (it is the live names-arm persistence path the triage worker calls)",
+    "reuse": "CODE_RELEVANCE_FIELDS in discovery/base/reset.py is the single registry and scorer.RELEVANCE_FIELDS is that same tuple; relevance_predicate is the single rendering of the stage+threshold comparison at all 7 claim/has-work/count sites",
+    "scope_discipline": "every path in the full diff 8e08eeaa7..156d39a1f lies inside the node's 13 declared write paths; no plan HTML, plan meta, imas_codex/schemas/facility.yaml or graph write was made"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal (retire the code pipeline's dead triage models and close four relevance defects) against the diff; all five items land: dead triage models retired, one relevance-stage predicate, path-paired descriptions, reset chunk cascade, and one relevance-field registry.\nVERDICT done_when: the node's five cleanup items are implemented and the named gate exits 0 at the reviewed head with base arms green; the item-5 registry guard tests/discovery/test_code_reset_chunks.py:86 now passes.\nVERDICT write_paths: read the 13 declared write paths; every path in git diff --stat 8e08eeaa7 156d39a1f is inside them.\nVERDICT manifest: read the reviewed run's manifest.md; it now carries baseline_suite and after_suite gate logs and a negative_control_log the prior review found absent; item 5's registry is wired at scorer.py:33.\nVERDICT diff: read commit f22a7e4c6 then f4c0df4f9 and 156d39a1f against base 8e08eeaa7: 11 files, +369/-96, all inside the declared write paths; the second commit wires the registry consumer (CODE_RELEVANCE_FIELDS imported as RELEVANCE_FIELDS at scorer.py:33-35) that the first review found missing.\nCALL_SITES: imas_codex/discovery/code/graph_ops.py:420, imas_codex/discovery/code/graph_ops.py:707, imas_codex/discovery/code/graph_ops.py:747, imas_codex/discovery/code/parallel.py:428, imas_codex/discovery/code/parallel.py:455, imas_codex/discovery/code/parallel.py:503, imas_codex/discovery/code/workers.py:707\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all five cleanup items are closed and the item-5 registry that left the prior head red is wired; apply_triage_results was retired as a name (renamed to apply_name_relevance) rather than deleted, disclosed and necessary (it is the live names-arm persistence path the triage worker calls).\nSCORE evidence: 18\nJUSTIFICATION evidence: the reviewed manifest now records baseline_suite (1673 passed, 0 failed) and after_suite (1678 passed, 0 failed) with revisions, literal commands and log paths, and a negative_control_log whose first failure is the declared pairing assertion; I reproduced the gate green at the head 156d39a1f (1678 passed, 0 failed, EXIT=0).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the full diff 8e08eeaa7..156d39a1f lies inside the node's 13 declared write paths; no plan HTML, plan meta, imas_codex/schemas/facility.yaml or graph write was made.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_code_relevance.py adds test_content_arm_pairs_each_description_with_its_own_file, which the reviewed negative_control.log reddens to EXIT=1 on the restored zip() defect without touching code under test; tests/discovery/test_code_reset_chunks.py pins the reset-cascade Cypher and the registry membership.\nSCORE fit: 18\nJUSTIFICATION fit: the two comment assertions the prior review flagged as false are now true: the scorer imports the reset registry as RELEVANCE_FIELDS (scorer.py:33-35) and resolves each decision field through it (scorer.py:66-82); reset.py:342 states the same contract.\nSCORE reuse: 18\nJUSTIFICATION reuse: CODE_RELEVANCE_FIELDS in discovery/base/reset.py is the single registry and scorer.RELEVANCE_FIELDS is that same tuple; relevance_predicate is the single rendering of the stage+threshold comparison at all 7 claim/has-work/count sites.\nFINDING tests/discovery/test_code_reset_chunks.py:85 follow-on: the guard pins the relevance registry as disjoint from CODE_RESET_SPECS['triaged'].clear_fields, but a file reset to 'triaged' from 'scored'/'ingested' keeps relevance_stage='content' while _CODE_SCORE_FIELDS clears score_composite, so it satisfies neither the enrichment claim (needs relevance_stage='name' and score_composite >= threshold, graph_ops.py:420) nor the triaged claim (needs status='discovered' and relevance_stage IS NULL, graph_ops.py:322) nor the score claim (needs is_enriched=true, graph_ops.py:507).\nFINDING tests/discovery/test_code_reset_chunks.py:86 nit: set(scorer.RELEVANCE_FIELDS) == set(reset_module.CODE_RELEVANCE_FIELDS) cannot fail because scorer.RELEVANCE_FIELDS is the same tuple imported from reset (scorer.py:33-35); the real guard is the import-time KeyError in _relevance_field.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T032915768279-relevance-cleanup/manifest.md:80 nit: after_suite.revision f4c0df4f9 and baseline_suite.revision 3d470b24e are neither the reviewed head 156d39a1f nor the declared base 8e08eeaa7; the gate measured the right code but the recorded revisions do not name the reviewed head.\n",
+  "review_run_id": "r-20261007T050648847021-review-of-relevance-cleanup",
+  "reviewed_base_sha": "8e08eeaa7fc129ed6c8b76e7d0c551a47966948e",
+  "reviewed_head_sha": "156d39a1fb5fb04fc1c1f6512fadb587f57519a3",
+  "reviewed_run_id": "r-20261007T032915768279-relevance-cleanup",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:20:00+00:00",
+  "total": 110
+}
