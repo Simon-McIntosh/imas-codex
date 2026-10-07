@@ -138,6 +138,17 @@
       cannot cost an existing hit.
     </li>
   </ul>
+  <p id="retrieval-scoring-probe-comparability">
+    Two reading notes, added at merge. First, the current-order nDCG@10 here (0.420) is not
+    comparable with the 0.246 of the §9 rerank prototype. This probe re-ran the search, counts 17
+    questions as answerable because the retrieval-miss census located answers for Q05, Q12, Q14
+    and Q18, and scores the 303 unlabelled top-10 slots its variants bring in as 0, a lower bound
+    that weighs against the reweighting variants. Their failure of the Q16 control stands
+    regardless, because that control tracks known-relevant chunks. Second, the reserved-slot lift
+    ranks and the Q12 column are 0-based positions, so each reads one lower than the rank a reader
+    counts: Q14 lands at 15, Q18 at 11 to 13, and Q12 at 85, 141 and 60.
+  </p>
+
   <p id="retrieval-scoring-probe-change-label">
     New candidates a change introduces are labelled by the same rule as
     <code>labels.json</code> (is the candidate the answer named by
