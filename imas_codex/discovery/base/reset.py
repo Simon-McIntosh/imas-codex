@@ -404,6 +404,18 @@ WITH n, collect(ce) + collect(cc) AS doomed
 FOREACH (d IN doomed | DETACH DELETE d)
 WITH DISTINCT n"""
 
+# The content-arm judgment fields a re-judge rewrites, in place on a file that
+# stays ``ingested``.  ``score_reason`` is left out — it is the local model's
+# one-sentence description, not a content judgment, and the re-judge writes no
+# description, so clearing it would drop a description the file keeps.
+# ``scored_at`` and ``score_cost`` are left out too: they are bookkeeping the
+# re-judge does not replace, so the original scoring time and spend survive.
+_CODE_REJUDGE_FIELDS = [
+    field
+    for field in _CODE_SCORE_FIELDS
+    if field not in ("score_reason", "scored_at", "score_cost")
+]
+
 
 CODE_RESET_SPECS: dict[str, ResetSpec] = {
     "discovered": ResetSpec(
@@ -441,6 +453,18 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
         source_statuses=["scored"],
         clear_fields=_CODE_SCORE_FIELDS + ["skip_reason"],
         source_filter="n.relevance_stage = 'content' AND n.status = 'skipped'",
+    ),
+    # Clear an ingested content-stage file's judgment fields without moving its
+    # status, its example or its chunks: the text the re-judge needs already
+    # lives in the graph as CodeChunks, so the file is put back in front of the
+    # content arm in place rather than sent through scoring's own reset, which
+    # would re-fetch and re-ingest it over the facility hop.
+    "ingested": ResetSpec(
+        label="CodeFile",
+        target_status="ingested",
+        source_statuses=["ingested"],
+        clear_fields=_CODE_REJUDGE_FIELDS,
+        source_filter="n.relevance_stage = 'content'",
     ),
 }
 

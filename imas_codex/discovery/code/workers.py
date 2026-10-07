@@ -653,6 +653,154 @@ async def score_worker(
 
 
 # ============================================================================
+# Re-judge worker (ingested files, from stored chunks)
+# ============================================================================
+
+
+async def rejudge_ingested_files(
+    facility: str,
+    *,
+    path_prefixes: list[str] | None = None,
+    batch_size: int = 10,
+    concurrency: int = 8,
+    cost_limit: int | float | None = None,
+    on_progress: Callable | None = None,
+) -> dict[str, Any]:
+    """Re-judge ingested content-stage CodeFiles from their stored chunk text.
+
+    The files this pass takes sit at ``status='ingested'`` with
+    ``relevance_stage='content'`` and no recorded facet answer: their text is
+    already in the graph as CodeChunks, so the pass rebuilds each file's content
+    state from those chunks -- ordered by reading position and cut to the same
+    length the fetched path uses -- and asks the content arm the same question
+    set through the same seat.  The judgment fields are written back through the
+    score arm's writer; the file's status, its CodeExample and its chunks are
+    left as they are.  No file is fetched over the facility hop, and admission
+    is not re-decided: a file whose new composite and facets both fall below
+    their gates stays ``ingested`` and is reported.
+
+    Returns a dict with ``rejudged``, the ``below_gate`` paths, the decision
+    ``cost`` and the number of ``batches``.
+    """
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.llm import acall_decisions
+    from imas_codex.discovery.code.graph_ops import (
+        claim_files_for_scoring,
+        fetch_file_chunk_text,
+        release_file_score_claims,
+    )
+    from imas_codex.discovery.code.scorer import (
+        apply_ingested_rejudge,
+        build_triage_questions,
+        build_triage_state,
+        chunk_content_head,
+    )
+    from imas_codex.settings import get_model
+
+    model = get_model("discovery-relevance")
+    questions = build_triage_questions(with_content=True)
+    try:
+        facility_config = get_facility(facility)
+    except Exception as exc:  # noqa: BLE001 - absent facility block is data, not a crash
+        logger.warning("rejudge_ingested_files: facility config unavailable: %s", exc)
+        facility_config = {}
+
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def judge(state_row: dict[str, Any]):
+        async with semaphore:
+            return await acall_decisions(
+                model, state_row, questions, service="facility-discovery"
+            )
+
+    rejudged = 0
+    below_gate: list[str] = []
+    spend = 0.0
+    batches = 0
+    attempted: set[str] = set()
+
+    while batch := await asyncio.to_thread(
+        claim_files_for_scoring,
+        facility,
+        limit=batch_size,
+        path_prefixes=path_prefixes,
+        ingested_rejudge=True,
+    ):
+        file_id_map = {f["path"]: f["id"] for f in batch}
+        batch_ids = [f["id"] for f in batch]
+        # A decision that failed leaves its file eligible for the same claim, so
+        # stop once a batch brings back only files this run already attempted:
+        # each file is judged at most once per run rather than looping on a
+        # refusal.
+        if set(batch_ids) <= attempted:
+            await asyncio.to_thread(release_file_score_claims, batch_ids)
+            break
+        attempted.update(batch_ids)
+        batches += 1
+
+        chunks_by_file = await asyncio.to_thread(fetch_file_chunk_text, batch_ids)
+        states = [
+            build_triage_state(
+                f,
+                facility,
+                facility_config,
+                with_content=True,
+                content_head=chunk_content_head(chunks_by_file.get(f["id"], [])),
+            )
+            for f in batch
+        ]
+
+        results = await asyncio.gather(
+            *(judge(s) for s in states), return_exceptions=True
+        )
+
+        decisions: list[dict[str, Any]] = []
+        failed = 0
+        for f, res in zip(batch, results, strict=True):
+            if isinstance(res, BaseException):
+                logger.warning("re-judge decision failed for %s: %s", f["path"], res)
+                failed += 1
+                continue
+            answers, cost = res
+            decisions.append(
+                {"path": f["path"], "answers": answers, "model": model, "cost": cost}
+            )
+
+        batch_cost = sum(d["cost"] for d in decisions)
+        spend += batch_cost
+
+        if decisions:
+            applied = await asyncio.to_thread(
+                apply_ingested_rejudge, decisions, file_id_map, batch_cost
+            )
+            rejudged += applied["rejudged"]
+            below_gate.extend(applied["below_gate"])
+
+        await asyncio.to_thread(release_file_score_claims, batch_ids)
+
+        if on_progress:
+            on_progress(
+                f"re-judged {rejudged} ingested files "
+                f"({failed} failed this batch, ${spend:.3f})"
+            )
+
+        if cost_limit is not None and spend >= cost_limit:
+            logger.info(
+                "re-judge stopped at the cost limit ($%.3f >= $%.3f)",
+                spend,
+                cost_limit,
+            )
+            break
+
+    return {
+        "rejudged": rejudged,
+        "below_gate": below_gate,
+        "cost": spend,
+        "batches": batches,
+    }
+
+
+# ============================================================================
 # Code Worker (ingestion)
 # ============================================================================
 

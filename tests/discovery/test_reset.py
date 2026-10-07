@@ -58,6 +58,7 @@ class TestResetSpec:
         assert reset_mod.get_valid_targets("code") == [
             "content",
             "discovered",
+            "ingested",
             "scored",
             "triaged",
         ]
@@ -123,6 +124,28 @@ class TestResetSpec:
         assert spec.source_filter is not None
         assert "n.status = 'discovered'" in spec.source_filter
         assert "n.triage_composite IS NOT NULL" in spec.source_filter
+
+    def test_code_ingested_reset_keeps_status_and_ingest_artifacts(self, reset_mod):
+        """The ingested target re-judges in place: the status, the stage and the
+        ingest artifacts survive; only the content judgment fields are cleared."""
+        spec = reset_mod.CODE_RESET_SPECS["ingested"]
+        assert spec.label == "CodeFile"
+        assert spec.target_status == "ingested"
+        assert spec.source_statuses == ["ingested"]
+        assert spec.source_filter == "n.relevance_stage = 'content'"
+        # No chunk cascade: the text being re-judged comes from the chunks.
+        assert spec.post_cypher is None
+        # The judgment fields go.
+        assert "score_composite" in spec.clear_fields
+        assert "score_data_access" in spec.clear_fields
+        assert "score_data_access_confidence" in spec.clear_fields
+        assert "relevance_grade" in spec.clear_fields
+        # The description, the ingest stamp and the stage stay.
+        assert "score_reason" not in spec.clear_fields
+        assert "scored_at" not in spec.clear_fields
+        assert "score_cost" not in spec.clear_fields
+        assert "ingested_at" not in spec.clear_fields
+        assert "relevance_stage" not in spec.clear_fields
 
 
 # ─── reset_to_status tests ──────────────────────────────────────────────
@@ -308,3 +331,29 @@ class TestResetToStatus:
         query = mock_gc.query.call_args[0][0]
         assert "WHERE n.status IN $source_statuses" in query
         assert "$source_statuses OR" not in query
+
+    def test_code_ingested_reset_renders_content_stage_predicate(self, reset_mod):
+        """The ingested reset ORs a content-stage predicate into the status match
+        and clears the judgment fields without moving the status."""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 4}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.CODE_RESET_SPECS["ingested"]
+            count = reset_mod.reset_to_status(spec, "jt-60sa")
+
+        assert count == 4
+        query = mock_gc.query.call_args[0][0]
+        assert "n.status = $target_status" in query
+        assert (
+            "n.status IN $source_statuses OR (n.relevance_stage = 'content')" in query
+        )
+        assert "n.score_data_access = null" in query
+        assert "n.relevance_grade = null" in query
+        # The description, the ingest stamp and the chunks are untouched.
+        assert "n.score_reason = null" not in query
+        assert "n.ingested_at = null" not in query
+        assert "CodeChunk" not in query
+        params = mock_gc.query.call_args[1]
+        assert params["target_status"] == "ingested"
+        assert params["source_statuses"] == ["ingested"]

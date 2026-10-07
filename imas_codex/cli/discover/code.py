@@ -109,6 +109,18 @@ logger = logging.getLogger(__name__)
     default=None,
     help="Files per triage LLM call (default: 50). Tune for cost vs quality.",
 )
+@click.option(
+    "--rejudge-ingested",
+    is_flag=True,
+    default=False,
+    help=(
+        "Re-judge content-stage files already at 'ingested' from their stored "
+        "chunk text — no file is fetched over the facility hop. Clears their "
+        "content judgment fields, then asks the content arm the same questions "
+        "through the same seat and rewrites the answer in place, leaving status, "
+        "example and chunks untouched."
+    ),
+)
 @reset_to_option("code")
 def code(
     facility: str,
@@ -128,6 +140,7 @@ def code(
     verbose: bool,
     rescan: bool,
     triage_batch_size: int | None,
+    rejudge_ingested: bool,
     reset_to: str | None = None,
 ) -> None:
     """Discover and ingest source code from scored facility paths.
@@ -177,6 +190,39 @@ def code(
     except Exception as e:
         log_print(f"[red]Error loading facility config: {e}[/red]")
         raise SystemExit(1) from e
+
+    if rejudge_ingested:
+        # A re-judge reads the file's text from its stored CodeChunks, so it
+        # needs neither the facility hop nor the scan/triage/enrich stages:
+        # it clears the ingested files' content judgment fields through the
+        # reset owner and rewrites the answer in place.
+        from imas_codex.cli.shutdown import safe_asyncio_run
+        from imas_codex.discovery.base.reset import CODE_RESET_SPECS, reset_to_status
+        from imas_codex.discovery.code.workers import rejudge_ingested_files
+
+        prefixes = list(path_prefixes) or None
+        cleared = reset_to_status(
+            CODE_RESET_SPECS["ingested"], facility, path_prefixes=prefixes
+        )
+        log_print(
+            f"[yellow]Cleared the content judgment of {cleared} ingested "
+            "file(s) for re-judging[/yellow]"
+        )
+        result = safe_asyncio_run(
+            rejudge_ingested_files(
+                facility, path_prefixes=prefixes, cost_limit=cost_limit
+            )
+        )
+        log_print(
+            f"\n  [green]{result['rejudged']} ingested file(s) re-judged, "
+            f"{len(result['below_gate'])} below the admission gates[/green]"
+        )
+        log_print(
+            f"  [dim]Cost: ${result['cost']:.3f}, batches: {result['batches']}[/dim]"
+        )
+        for path in result["below_gate"]:
+            log_print(f"  [dim]below gate: {path}[/dim]")
+        return
 
     ssh_host = facility_config.get("ssh_host")
     if not ssh_host:
