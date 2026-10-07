@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -393,6 +393,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T160947563148-review-of-dd-path-search-rerank" data-who="reckon-build" data-when="2026-10-07T16:28:56.665Z">
     <div class="r-comment-body"><p>review stored for r-20261007T152205646783-dd-path-search-rerank at head 786814e41 — §8 dd-path-search-rerank scored 111/120, status parsed; change extends the shared rerank owner correctly; three follow-ons (record omits baseline/after arms; the fallback note is dropped; the server-mode tests pin the switch not the call).</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261007T155548031301-decisions-key-test-isolation" data-who="reckon-build" data-when="2026-10-07T16:28:46.962Z">
+    <div class="r-comment-body"><p>landing: the four test files listed under changed_paths now install a dummy decisions key with monkeypatch.setenv, so the twelve-file gate run with an empty OPENROUTER_API_KEY_IMAS_CODEX reports 1 failed / 208 passed / 59 skipped against 1 failed / 253 passed / 14 skipped with the key present, both arms failing only the pre-existing key-independent test_graceful_on_missing_index; evidence fragment docs/evidence/fragments/jt60sa-imas-maps/decisions-key-test-isolation.html, commit fa93ad50b.</p></div>
 </div>
 </section>
 </main>
