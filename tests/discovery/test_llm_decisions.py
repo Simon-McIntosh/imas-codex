@@ -191,6 +191,54 @@ def test_probabilities_not_summing_to_one_is_refused(monkeypatch):
         llm.call_decisions(MODEL, {}, QUESTIONS, service=SERVICE, max_retries=1)
 
 
+EIGHT_ROLES = {f"role_{i}": f"criterion {i}" for i in range(8)}
+
+
+def _eight_choice(probabilities: dict[str, float]) -> dict:
+    return {
+        "role": {
+            "type": "choice",
+            "choice": "role_0",
+            "probabilities": probabilities,
+        }
+    }
+
+
+def _validate(answers: dict) -> None:
+    llm._validate_decisions_answers(
+        {"role": {"type": "choice", "criteria": EIGHT_ROLES}}, answers
+    )
+
+
+def test_eight_criterion_choice_summing_low_is_accepted():
+    """An eight-criterion distribution summing to 0.99 is accepted.
+
+    Each of eight probabilities rounded to two decimals can lose up to 0.005,
+    so a total a whole hundredth under 1 is within the model's rounding slack.
+    """
+    probabilities = {f"role_{i}": 0.12 for i in range(7)}
+    probabilities["role_7"] = 0.15
+    assert sum(probabilities.values()) == pytest.approx(0.99)
+    _validate(_eight_choice(probabilities))
+
+
+def test_eight_criterion_choice_summing_high_is_accepted():
+    """An eight-criterion distribution summing to 1.03 is accepted."""
+    probabilities = {f"role_{i}": 0.12 for i in range(7)}
+    probabilities["role_7"] = 0.19
+    assert sum(probabilities.values()) == pytest.approx(1.03)
+    _validate(_eight_choice(probabilities))
+
+
+def test_eight_criterion_choice_summing_to_ninety_percent_is_refused():
+    """A distribution summing to 0.90 exceeds the rounding slack and is refused."""
+    probabilities = {f"role_{i}": 0.11 for i in range(7)}
+    probabilities["role_7"] = 0.13
+    assert sum(probabilities.values()) == pytest.approx(0.90)
+    with pytest.raises(llm.DecisionsValidationError, match="sum to"):
+        _validate(_eight_choice(probabilities))
+
+
 def test_confidence_outside_unit_interval_is_refused(monkeypatch):
     """A choice confidence outside [0, 1] is refused."""
     bad = _good_answers()

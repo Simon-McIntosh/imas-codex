@@ -247,13 +247,66 @@ class TestLlmDeepHealthCheck:
 class TestLlmHealthCheckUsesReadiness:
     """Verify llm_health_check uses readiness probe, not /health."""
 
+    @patch("imas_codex.settings.is_explicit_free_local_endpoint", return_value=False)
     @patch("imas_codex.discovery.base.services._probe_litellm_readiness")
     @patch("imas_codex.discovery.base.services._probe_litellm_proxy")
     @patch("imas_codex.settings.get_llm_location", return_value="iter")
-    def test_calls_readiness_not_proxy(self, mock_loc, mock_proxy, mock_readiness):
+    def test_calls_readiness_not_proxy(
+        self, mock_loc, mock_proxy, mock_readiness, mock_free
+    ):
         from imas_codex.discovery.base.services import llm_health_check
 
         mock_readiness.return_value = (True, "iter")
         llm_health_check("discovery-score")
         mock_readiness.assert_called_once_with("iter")
         mock_proxy.assert_not_called()
+
+
+class TestLlmHealthCheckLocalFreeEndpoint:
+    """A local-free seat is probed at its own endpoint, not the proxy."""
+
+    API_BASE = "http://test-router:18802/v1"
+
+    def _mock_models(self, models):
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = json.dumps({"data": models}).encode()
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = MagicMock(return_value=False)
+        return mock_resp
+
+    @patch("imas_codex.settings.get_model_config")
+    @patch("imas_codex.settings.is_explicit_free_local_endpoint", return_value=True)
+    @patch("imas_codex.discovery.base.services._probe_litellm_readiness")
+    @patch("urllib.request.urlopen")
+    def test_probes_models_listing_not_proxy(
+        self, mock_urlopen, mock_readiness, mock_free, mock_config
+    ):
+        """The models listing of the seat's api-base is probed, proxy untouched."""
+        from imas_codex.discovery.base.services import llm_health_check
+
+        mock_config.return_value = {"model": "local/x", "api_base": self.API_BASE}
+        mock_urlopen.return_value = self._mock_models([{"id": "local/x"}])
+
+        healthy, _ = llm_health_check("discovery-score")
+
+        assert healthy is True
+        mock_readiness.assert_not_called()
+        req = mock_urlopen.call_args[0][0]
+        assert req.full_url == f"{self.API_BASE}/models"
+        assert mock_urlopen.call_args.kwargs["timeout"] == 10
+
+    @patch("imas_codex.settings.get_model_config")
+    @patch("imas_codex.settings.is_explicit_free_local_endpoint", return_value=True)
+    @patch("urllib.request.urlopen")
+    def test_unreachable_endpoint_is_unhealthy(
+        self, mock_urlopen, mock_free, mock_config
+    ):
+        from imas_codex.discovery.base.services import llm_health_check
+
+        mock_config.return_value = {"model": "local/x", "api_base": self.API_BASE}
+        mock_urlopen.side_effect = urllib.error.URLError("Connection refused")
+
+        healthy, detail = llm_health_check("discovery-score")
+
+        assert healthy is False
+        assert "refused" in detail

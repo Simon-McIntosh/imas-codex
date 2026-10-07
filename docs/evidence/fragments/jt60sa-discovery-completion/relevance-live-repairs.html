@@ -1,0 +1,98 @@
+<section>
+  <h2 id="relevance-live-repairs">Three defects the live code run exposed in the relevance path are repaired</h2>
+  <p id="relevance-live-repairs-summary">
+    A live JT-60SA code run surfaced three defects on the relevance path
+    deployed by §25 — a decisions validator that refused legitimate answers, a
+    scan progress line that killed the scan on an unscored path, and a status
+    panel that reported the llm down while every code-discovery model call was
+    in fact served. Each defect was reproduced before it was repaired, each
+    repair carries a test, and all three are gated together on this allocation.
+  </p>
+
+  <h3 id="relevance-live-repairs-tolerance">The decisions probability tolerance now scales with the criterion count</h3>
+  <p id="relevance-live-repairs-tolerance-repro">
+    <code>_validate_decisions_answers</code> in
+    <code>imas_codex/discovery/base/llm.py</code> refused a choice whose
+    probabilities summed to 1 outside a fixed tolerance of 0.01. Jev rounds
+    each offered probability to two decimals, so an eight-criterion
+    distribution can legitimately sum to 0.99 or 1.03 — up to 0.005 of rounding
+    error per criterion. Reproduced before repair: an eight-criterion choice
+    summing to exactly 0.99 was refused with
+    <code>decision 'role' probabilities sum to 0.9900, not 1</code>.
+  </p>
+  <p id="relevance-live-repairs-tolerance-fix">
+    The tolerance is now <code>0.005 * len(criteria) + 1e-9</code>. Fine in
+    <code>tests/discovery/test_llm_decisions.py</code>: an eight-way choice
+    summing to 0.99 and one summing to 1.03 are accepted, and one summing to
+    0.90 is refused. The two-criterion refusal that previously used a 0.7 sum
+    still holds, because its slack is 0.01.
+  </p>
+
+  <h3 id="relevance-live-repairs-progress">An unscored path renders as a placeholder, not a crash</h3>
+  <p id="relevance-live-repairs-progress-repro">
+    <code>scan_worker</code> in <code>imas_codex/discovery/code/workers.py</code>
+    built its progress line with
+    <code>f"{p.get('score', 0):.2f}"</code>. A FacilityPath admitted by
+    <code>--min-score 0</code> carries no score, and <code>.get('score', 0)</code>
+    returns the stored <code>None</code> rather than the default, so
+    <code>str.format</code> raised
+    <code>TypeError: unsupported format string passed to NoneType.__format__</code>
+    and killed the scan. Reproduced before repair against a path dict carrying
+    <code>"score": None</code>.
+  </p>
+  <p id="relevance-live-repairs-progress-fix">
+    The score is rendered through <code>_render_score</code>, which returns
+    <code>"-"</code> for any non-numeric value, and the line construction is
+    extracted into <code>_scan_progress_message</code> so it can be driven
+    directly. <code>tests/discovery/test_code_scan_progress.py</code> builds the
+    message from all-unscored paths and from a mixed batch, and checks a boolean
+    is not formatted as a number.
+  </p>
+
+  <h3 id="relevance-live-repairs-health">A local-free seat is probed at its own endpoint</h3>
+  <p id="relevance-live-repairs-health-repro">
+    The code status panel reported llm down because
+    <code>llm_health_check</code> in
+    <code>imas_codex/discovery/base/services.py</code> probed the LiteLLM proxy
+    readiness whenever <code>[llm].location</code> is not local, while every
+    code-discovery model call goes direct to the ambix router on an
+    <code>endpoint-class = "local-free"</code> seat. The proxy is not on that
+    path, so its readiness says nothing about whether the model answers.
+  </p>
+  <p id="relevance-live-repairs-health-fix">
+    For a seat whose model is an explicit free local endpoint, the check now
+    sends <code>GET</code> to the models listing of that seat's resolved
+    api-base with a 10&#160;s timeout, reading the api-base through
+    <code>get_model_config</code> (which resolves the named route) rather than a
+    literal. For <code>discovery-score</code> that route is
+    <code>ambix-local</code>, so the probe is
+    <code>GET http://98dci4-gpu-0003:18802/v1/models</code>.
+    <code>imas_codex/cli/discover/code.py</code> passes
+    <code>model_section="discovery-score"</code>, the seat its model calls
+    actually use, replacing <code>discovery-score</code>'s predecessor value.
+    <code>tests/discovery/test_base_services.py</code> replaces the HTTP call
+    and asserts the models URL is built from the configured api-base with a
+    10&#160;s timeout, that the proxy readiness probe is not called, and that an
+    unreachable endpoint reads unhealthy.
+  </p>
+
+  <h3 id="relevance-live-repairs-evidence">Evidence</h3>
+  <p id="relevance-live-repairs-gate">
+    Gate <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+    PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery
+    tests/core tests/llm</code> exits <strong>0</strong> — 2471 passed, 11
+    skipped, 5 deselected — run on this allocation
+    (<code>98dci4-clu-2018</code>, job 1277272). The log header records
+    <code>imas_codex.discovery.base.llm</code> resolving to the worktree copy and
+    the run's cwd. No live decisions request, no graph write and no discover run
+    was made.
+  </p>
+  <p id="relevance-live-repairs-negative-control">
+    Negative control (log recorded): the eight-criterion 0.99 acceptance test
+    run against a scratch copy of the package whose tolerance is restored to the
+    fixed <code>0.01</code> fails with
+    <code>decision 'role' probabilities sum to 0.9900, not 1</code> (exit 1) —
+    the head arm passes the same test. The reproduction confirms the repaired
+    tolerance, not its absence, is what admits the answer.
+  </p>
+</section>

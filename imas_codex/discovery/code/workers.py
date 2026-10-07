@@ -27,6 +27,24 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _render_score(value: Any) -> str:
+    """Render a path score for the progress line, or ``-`` when unscored.
+
+    A claimed FacilityPath may carry no score at all (``--min-score 0`` admits
+    unscored paths), so a ``None`` must render as a placeholder rather than
+    reaching ``str.format``.
+    """
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        return "-"
+    return f"{float(value):.2f}"
+
+
+def _scan_progress_message(paths: list[dict[str, Any]]) -> str:
+    """Build the scan progress line, rendering unscored paths as ``-``."""
+    scores = [_render_score(path.get("score")) for path in paths]
+    return f"scanning {len(paths)} paths (scores: {', '.join(scores[:3])}...)"
+
+
 # ============================================================================
 # Scan Worker
 # ============================================================================
@@ -86,12 +104,7 @@ async def scan_worker(
         path_list = [p["path"] for p in paths]
 
         if on_progress:
-            scores = [f"{p.get('score', 0):.2f}" for p in paths]
-            on_progress(
-                f"scanning {len(paths)} paths (scores: {', '.join(scores[:3])}...)",
-                state.scan_stats,
-                None,
-            )
+            on_progress(_scan_progress_message(paths), state.scan_stats, None)
 
         try:
             # Single SSH call for the entire batch
