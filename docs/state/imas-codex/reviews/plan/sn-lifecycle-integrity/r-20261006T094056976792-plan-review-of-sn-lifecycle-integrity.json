@@ -1,0 +1,75 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:56:25.943Z",
+  "dispatched_at": "2026-10-06T09:41:09Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/export.py:1242",
+      "id": "reuse_search-1",
+      "reason": "the section must be rewritten against the code (or marked historical), because as written it dispatches a node to build an export gate that exists.",
+      "text": "\u00a72 opens \"`export.py:1242` writes `\\\"status\\\": \\\"active\\\"` as a literal\", but at HEAD line 1242 appends the `bound_adjacent` gate issue and the status assignment is `node[\\\"status\\\"] if \\\"status\\\" in node else \\\"active\\\"` at export.py:1575, behind the pre-existing gate registry `GATE_CATALOG_STATUS` (export.py:184) and the `null_catalog_status` refusal (export.py:2918) \u2014 so the section describes a defect that is already closed and proposes a gate the file already owns; a reader cannot tell which part of \u00a72 is still to do",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:11405",
+      "id": "reuse_search-2",
+      "reason": "naming the owners that already exist converts three \"add a mechanism\" rows into \"extend this classifier / reuse this writer\", which is a different and smaller node.",
+      "text": "\u00a75's rows 1\u20133 propose recording a failure reason, a cap disposition and a fit-artifact category as new work, but the owners are already present and unnamed by the design section: `CAP_PARKED_DISPOSITIONS` (graph_ops.py:11405), `classify_parked_source` (graph_ops.py:11431), `record_parked_dispositions` (graph_ops.py:11519) and `_require_failure_reason` (graph_ops.py:10562)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/loop.py:1621",
+      "id": "duplicate_owner-1",
+      "reason": "an author who is shown the existing reconcile owner extends it in place; without it the node forks a second maintenance path for the same axis (the plan's own \u00a73 thesis, applied to its own implementation).",
+      "text": "\u00a76 and the re-homing decision place each \u00a72\u2013\u00a75 treatment as a maintenance function \"called from the same sequence\", but the design sections never name that sequence's owner `_global_maintenance_call` (loop.py:1621), and three of the treatments already have owners there \u2014 `reconcile_catalog_status` (graph_ops.py:14266), `reconcile_constraint_fit_artifacts` (graph_ops.py:14135) and `reconcile_catalog_edit_origins` (graph_ops.py:13875)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/graph_ops.py:14266",
+      "id": "duplicate_owner-2",
+      "reason": "naming the lineage-reconcile owner turns a bespoke six-module migration into a reuse of the existing reconcile step.",
+      "text": "the successor-scalar retirement (still open, \u00a75 row 4) is described as a \"six-module field removal with a 2163-row migration\" with no named owner for the lineage re-derivation it depends on, while `reconcile_provenance` (graph_ops.py:13797) and `reconcile_standard_name_sources` (graph_ops.py:12769) already write the edge families the readers would be repointed to",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:2918",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added surface in its own text (retire a gate/refusal or state why none can be), which is the rule this plan's \u00a75a already applies to `updated_at` but not to the checks it adds.",
+      "text": "\u00a72 adds a refusal member (`null_catalog_status`) and \u00a75a adds a public definition (`audit_standard_name_touch`) with the week's budget at public_definitions 0 / refusal_families 0, and neither section states what it retires or merges, or why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c61192e0b60bdc2ee149a97f049681abc72ddd2309bccc33b47a06d347df85bd",
+  "plan_slug": "sn-lifecycle-integrity",
+  "plan_version": 161,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T094056976792-plan-review-of-sn-lifecycle-integrity",
+  "reviewed_blob_sha": "2e00751484bcf208746e69be265b14064c233851",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; every mechanism is placed in an existing owner (`imas_codex/standard_names/export.py`, `imas_codex/graph/cypher_property_check.py`, `imas_codex/standard_names/graph_ops.py`), and the one substantial new routine, the static touch-checker, hides a per-alias parse behind one function.",
+    "duplicate_owner": "a finding \u2014 \u00a75's treatments are re-homed as `reconcile_*` maintenance steps in `run_sn_pools`, but the design sections never name the sequence owner or the reconcile functions that already implement three of the five footgun rows.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a refusal (`null_catalog_status`, `export.py:2918`) and \u00a75a adds a public definition (`audit_standard_name_touch`, `cypher_property_check.py:611`) without either section's text naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a72 states its defect at `export.py:1242`, and no such write exists at that line; the machinery \u00a72, \u00a74 and \u00a75a propose is already present in modules the sections do not name, so the design reads as new work over an owned surface.",
+    "thin_wrapper": "pass \u2014 the two candidate wrappers (`record_catalog_import_provenance` over `guard_catalog_write_payloads`, and the `reconcile_*` treatment functions over `_global_maintenance_call`) each carry the section's stated reason why the existing mechanism cannot be extended: the allow-list shape and the scope/bypass pairing."
+  },
+  "section_digests": {
+    "_document": "0c9fd278b60010900adac37682795c91fa6f9daba86fffcce0d949f0eb9a8216",
+    "s1": "44c450a6456b1ec0a237ddecdfcd7b7e4de35f67fee1603e96cd9fa50c40f032",
+    "s2": "5e53b7ed7179339c8f32b3ca474f54b91f9f43178f4be9a7038b861bd5bbf1a7",
+    "s3": "b5d5e31288bd52d5b41ed065910fb7b970db4a3217ec9f485cd832ffaca0901b",
+    "s4": "43019628a340ae9c059e6a9d8ec8f9d4b756c64433dd0aecf54c03854a3efb38",
+    "s5": "952d369c0597b2407ff789774ec0d83fca5710f7e85cfa3ff6e5f94f792ac3e1",
+    "s5a": "f017619b87e06f50d8d10e52e174048b0ae333e9e6b950fa3cc5729db86b3a7d",
+    "s6": "dd9c35c1689a06f27635bcd6ac04f5aa08dfdd46f7e98c66bce9f1aeb4219d65"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.089370+00:00"
+}

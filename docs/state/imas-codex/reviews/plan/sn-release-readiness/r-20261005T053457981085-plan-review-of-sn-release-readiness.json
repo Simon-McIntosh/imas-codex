@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:53:11.467Z",
+  "dispatched_at": "2026-10-05T05:35:01Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/catalog_release.py:1703",
+      "id": "duplicate_owner-1",
+      "reason": "the release leg already reads the export report's candidate/published/exclusion values, the two forms agree, and the plan's design does not rest on where the residue is computed, so extending export.py to publish the residue and having catalog_release.py read it is a cleanup the plan need not carry.",
+      "text": "_record_* accounting recomputes accounting_residue = candidate_count \u2212 published_count \u2212 len(exclusions) that the export report already computes and serializes at export.py:480, so the same arithmetic has two implementations and a change to one can silently disagree with the other",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:1313",
+      "id": "interface_budget-1",
+      "reason": "the sections must account for the added refusal surface in their own text (name the retired/merged family, or state why the new refusal cannot fold into the existing gate refusal), which changes how the nodes are written.",
+      "text": "the sections that add refusal surface (the \u00a72a import refusal and the \u00a73 exclusion-accounting refusal) state that they extend existing gates but do not name, in their own text, any refusal family they retire or merge, against a supplied refusal_families figure of 0",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a84247ae3ef11eeca631b159fcd268d43915d832d36ec0a3a9ad287a87fb2f4e",
+  "plan_slug": "sn-release-readiness",
+  "plan_version": 176,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053457981085-plan-review-of-sn-release-readiness",
+  "reviewed_blob_sha": "64fae59f18c3400dbb749a94b1c6649c458074b1",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the exclusion ledger hides the whole accounting in one gate and one record type: _run_exclusion_accounting_gate (export.py:1313) sits behind the existing GateResult bundle, and ExclusionRecord/report (export.py:299, :375) carries per-reason identities and the emitted+exclusions=N arithmetic. The interface added is one gate and one record shape, not a spread of counters.",
+    "duplicate_owner": "a finding \u2014 the release rehearsal re-derives the accounting residue that the export report already serializes, so one arithmetic has two owners.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72a (\"refused rather than logged\") and \u00a73 (\"a refusal, not a warning\") each add a refusal path and the section text names no refusal path it retires or merges.",
+    "reuse_search": "pass \u2014 every mechanism the plan proposes names and extends an on-disk owner rather than rebuilding it: the exclusion ledger extends the existing gates A/B/C in imas_codex/standard_names/export.py:1313 and _fetch_candidates (export.py:512); the import guard extends protection.PROTECTED_FIELDS (protection.py:26); the structural authority record reuses graph_ops._persist_structural_authority (parents.py:507); the age-aware claim preflight sources defaults.DEFAULT_ORPHAN_SWEEP_TIMEOUT_S (defaults.py:64); the per-pool abandon extends the existing stall watchdog in pools.py. No subsystem is added without a cited search.",
+    "thin_wrapper": "pass \u2014 the plan adds no thin forwarding layer over existing machinery. Its import change turns the ad-hoc catalog import into a proposal routed through the existing sn edit review path (edit.py), and the \u00a74 lineage decision retires behaviour rather than wrapping it: _fetch_deprecation_stubs (export.py:1695) now returns [] (supersession lineage is graph-internal), so an emitted surface was removed, not added."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.118423+00:00"
+}

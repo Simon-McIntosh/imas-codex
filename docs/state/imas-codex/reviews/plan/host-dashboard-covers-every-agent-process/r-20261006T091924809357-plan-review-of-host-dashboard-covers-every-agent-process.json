@@ -1,0 +1,75 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:32:26.717Z",
+  "dispatched_at": "2026-10-06T09:19:33Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/host-dashboard-covers-every-agent-process.html#s5",
+      "id": "reuse_search-1",
+      "reason": "the plan should state whether it extends the locations/executor owners or why it cannot, before a worker re-derives node resolution and remote sampling.",
+      "text": "\u00a75 resolves the interactive fleet node by a new path and samples it remotely, and \u00a72 samples two nodes, without citing `imas_codex/remote/locations.py` (whose module docstring declares it \"the single source of truth for how to reach any remote service\" and \"the single owner of SLURM service-node discovery\") or `imas_codex/remote/executor.py::run_python_script` \u2014 the repo AGENTS.md rule \"never inline SSH subprocess calls \u2014 use run_python_script() / async_run_python_script() from imas_codex.remote.executor\" is not acknowledged",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/host-dashboard-covers-every-agent-process.html#s2",
+      "id": "deep_module-1",
+      "reason": "without a named module boundary the author cannot show the depth is hidden behind a small interface rather than spread across many display/flag helpers.",
+      "text": "the design has no module/interface statement: \u00a72 (sampling loop, cgroup CPU, per-process deltas, D-state share, stat latency), \u00a73 attribution and role inference, \u00a74 orphan/long-running flags, and \u00a76 JSON-lines record plus report all land in the one existing `imas_codex/cli/host.py`, so the substantial behaviour has no interface smaller than the sum of its helpers",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/plan-review-of-host-dashboard-covers-every-agent-process/imas_codex/cli/host.py:364",
+      "id": "duplicate_owner-1",
+      "reason": "naming `executor.py` as the owner to extend turns new remote sampling into one reusable script path instead of seven-plus parallel ssh call sites.",
+      "text": "the plan extends `host.py`'s inline-`ssh` remote-reading path instead of extending the shared owner `imas_codex/remote/executor.py`; the census of inline-`subprocess.run([\"ssh\", ...])` sites the plan builds on is `host.py:364` (`_discover_login_nodes_direct`), `host.py:427` (`_discover_via_gateway._probe_node`), `host.py:527` (`_query_node`), `host.py:791` (`_kill_control_sockets`), `host.py:888` (`_ssh_to_node`), `host.py:1480` (`host_status`) and `host.py:1771` (`host_kill`), and \u00a72/\u00a73/\u00a75 add more remote reads to that set",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/plan-review-of-host-dashboard-covers-every-agent-process/imas_codex/discovery/base/services.py:384",
+      "id": "duplicate_owner-2",
+      "reason": "the section should name which existing load reader it extends and whether the duplicate is retired.",
+      "text": "\u00a72 keeps a load-average figure but does not consolidate the two readers that already exist: `discovery/base/services.py::_get_host_load` (reads `/proc/loadavg` and `os.cpu_count()`) and `cli/host.py::_get_load_info` (`_format_load_row` divides `os.getloadavg()[0]` by `cpu_count`), so a third reading of the same counter is implied rather than an extension of one owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/host-dashboard-covers-every-agent-process.html#s6",
+      "id": "interface_budget-1",
+      "reason": "with a 0 cli_options budget the section must account for the command and option it adds, by naming what it retires or why nothing can be.",
+      "text": "\u00a76 adds a new subcommand `imas-codex host report` with a `--since` option (cli_options +1) and new public figure functions (public_definitions +1) while this week's supplied budgets are all 0, and the section names no CLI option or view it retires or merges \u2014 it only says it reads imas-ambix's recorder rather than adding a scraper",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ea6de4249214b673c793db3298dc322ef7c11d3f9a713470eeb750f4307b6bea",
+  "plan_slug": "host-dashboard-covers-every-agent-process",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261006T091924809357-plan-review-of-host-dashboard-covers-every-agent-process",
+  "reviewed_blob_sha": "29f202fcbd12dd0d0a20386e0ac3632baff2961c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the plan puts metric sampling, ownership attribution, flags, the JSON-lines record and the report into the existing 1788-line `imas_codex/cli/host.py` command group without naming any module boundary or interface that hides that behaviour, so the new depth is spread across \u00a72\u2013\u00a76 without an owner interface.",
+    "duplicate_owner": "a finding \u2014 the plan re-implements remote node reading by extending `host.py`'s inline-`ssh` path rather than extending `imas_codex/remote/executor.py`, and keeps a second load-average reader beside `imas_codex/discovery/base/services.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 adds the `imas-codex host report` command and its `--since` option without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites `imas_codex/cli/host.py` and imas-ambix's `fsload.py`/`serve-telemetry-spine`, but proposes heavy remote sampling (\u00a72 stat probes and 2 Hz process sampling, \u00a73/\u00a75 process tables) and fleet-node resolution (\u00a75) without citing `imas_codex/remote/executor.py` (the canonical remote-run owner) or `imas_codex/remote/locations.py` (the declared single owner of SLURM service-node discovery).",
+    "thin_wrapper": "pass \u2014 the plan reshapes `host kill` in place and extends the existing `host` group rather than wrapping it, and \u00a76 explicitly declines to add a second GPU scraper, reading imas-ambix's recorder instead."
+  },
+  "section_digests": {
+    "_document": "988a6f40cc8a8fc98f5f84553d1ee8fd8e5565c0d3495278183176ad60214fa9",
+    "s1": "7c34d0a0b0cb37dbb2dfa2d079d9b24f456556cccf92eb0173ab858328c270c7",
+    "s2": "a2c34597e667cf834cdbc0fa18528f3a0787c878cc65ca1170bd408e47108b21",
+    "s3": "0e4dec200b447b37f4a369f1e40f2737c93ef46d6204ef03f38b406de72928dd",
+    "s4": "61e5117ea3eee6e6b76a8f43656922da696c15a0ec7e49930164ec4e30ccb5cc",
+    "s5": "502990e1f3273aa87905ad6f94c77b8ae1256d63a1bab0c2bf76e8b3ea1affec",
+    "s6": "749cdd618187d2a0c5ae33858a3ce546d55929c611897f9b95078e6f8ce3f7dc",
+    "s7": "4efaa502435f67c67525d1325dfdca7acfba9389975b076ea287d3c97056f001"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.021664+00:00"
+}

@@ -1,0 +1,34 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T05:46:36.716Z",
+  "dispatched_at": "2026-10-05T05:33:35Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/promote.py:1466",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a74 design should name `_GitHubClient` (catalog_release.py:58) as the owner to extend and route the refusal comment through it, so the package keeps one authority for pull-request writes instead of two that can drift in auth, error shape and retry posture.",
+      "text": "the fold-back refusal is posted via a new `_pull_request_comment` that delegates to `imas_codex.graph.ghcr.github_api_call`, creating a second pull-request REST write path beside `_GitHubClient` in imas_codex/standard_names/catalog_release.py:58, whose own docstring declares it \"The single pull-request boundary; every call goes over GitHub REST\" and which already owns the write direction (`create_pull_request` at :74, `update_pull_request_body`), with a second error renderer (`github_error_detail`) beside that module's `_rest_error_detail`; a reviewer-facing write should extend that owner with a comment method, not fork a parallel boundary",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "603536c383a508b7bb8383171e6d14b328bb2fb23b5447b3bb0fd08a18a0f53e",
+  "plan_slug": "catalog-review-surface",
+  "plan_version": 48,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261005T053328498535-plan-review-of-catalog-review-surface",
+  "reviewed_blob_sha": "cf6e7820863a30796dfc1316e3304a33b560df84",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the remaining deliverable is wiring over existing machinery, not a new module; `notify_refusal_on_pull_request` (promote.py:1524) hides URL parsing, notice rendering and transport-failure handling behind one boolean return, and the traceability path reuses the dedicated writer at promote.py:1627 rather than adding a parallel one.",
+    "duplicate_owner": "a finding \u2014 the deliverable-three write posts onto the pull request through a second REST boundary in `promote.py` rather than extending the boundary the package already declares as authoritative, `_GitHubClient` in `imas_codex/standard_names/catalog_release.py`.",
+    "interface_budget": "pass \u2014 supplied figures public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the design adds no CLI option, no MCP view and no public entry point beyond two module-level helpers in `promote.py`, so no section adds to any of the four families without accounting for it. (The already-landed refusal-notice helpers `refusal_notice_body`/`notify_refusal_on_pull_request` are the only named public additions and both live inside the one section whose text states it is closing the sole missing capability; no section retires anything because nothing in these families is added.)",
+    "reuse_search": "pass \u2014 the plan carries two reuse maps (17 candidates, 17 verdicts, \u00a74a; and 13 capability rows, 44/44 citations verified at base, \u00a74) and the claims check out: `_require_matching_graph_target` (imas_codex/cli/graph/data.py:155) is genuinely reused by all three destructive callers (data.py:663 load, :1405 clear, registry.py:1163 pull), and the approval/traceability writers it names (`mark_catalog_name_approved`, `undo_approval`) exist and are extended rather than rebuilt.",
+    "thin_wrapper": "pass \u2014 the one new wrapper, `_pull_request_comment` (promote.py:1466), is justified in the section text (\u00a74 comment c-20260917-providers-for-the-remaining-deliverables): the plan states exactly one capability lacks a provider and that the transport beneath it is reusable, so the wrapper is a named, minimal seam over `github_api_call` rather than an unjustified layer. Its width problem is a duplicate-ownership problem, reported below."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:56:25.013300+00:00"
+}

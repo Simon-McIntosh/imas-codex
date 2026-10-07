@@ -1,0 +1,86 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T06:50:58.463Z",
+  "dispatched_at": "2026-10-07T06:36:34Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/judgment.py",
+      "id": "duplicate_owner-1",
+      "reason": "if \u00a79 supplies \u00a73's state/question/applier functions to the judge module rather than a parallel loop, \u00a73's \"one public function\" account becomes true and search gains cost booking for free; if it must bypass, \u00a79 has to say why the non-gate failure policy cannot be expressed as the applier, otherwise \u00a73's interface claim is false.",
+      "text": "\u00a79 (\"`_search_code` and `_search_docs` rerank their top candidates through `call_decisions`\") builds a third concurrency-bounded decision loop outside the single judge function \u00a73 introduces; that module is specified at \u00a73 to \"run acall_decisions under a concurrency bound, book the cost, apply the answers, and leave a row unjudged when its decision fails\", and \u00a73's interface account claims \"one public function and one module added\" covering every caller. The census of such loops today is two, both in the code pipeline that \u00a73 extracts: `imas_codex/discovery/code/workers.py:268-274` (`asyncio.Semaphore(concurrency)` around `acall_decisions`) and `imas_codex/discovery/code/workers.py:449-461` (the content/scoring arm); \u00a79's rerank would be the third, and its per-candidate failure fallback (embedding order) and unbooked spend are a re-specification of behaviour the judge function already owns. The existing precedent for a Jev-scored rerank over a retrieved candidate pool is `imas_codex/ids/candidates.py:277` (`_call_judgment`, wrapping `call_decisions` with fail-soft transport handling and cost booking), out of this plan's scope by \u00a72 but the shape \u00a79's rerank is re-deriving.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/search_tools.py:1429",
+      "id": "deep_module-1",
+      "reason": "naming one rerank module (candidates in, ordered candidates out, one fallback path) that both search tools call is the difference between one deep module and two shallow wrappers, and it is the only way the two search paths cannot drift (e.g. one gets the budget honoured and the other does not).",
+      "text": "\u00a79 names two call sites (`_search_docs` at `imas_codex/llm/search_tools.py:683` and `_search_code` at `:1429`) but no single rerank function or module, so the pool sizing (\"for example 100 or 150, from recall over the \u00a79 labels\"), the concurrent execution under a wall-time budget, the \"still unscored when the budget runs out keeps its embedding position\" rule and the \"failed or slow rerank returns the embedding order unchanged and says so in the result\" rule are each specified once in prose and must be implemented twice over the same `call_decisions` machinery. The two functions are independent query pipelines in a 1744-line module and share no ordering helper today (`grep '^def '` shows no common rank/reorder step), so the plan as written adds the same substantial behaviour to each.",
+      "type": "deep_module",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "52fe509dc54d009fae428c637aee8f065df2377a9718934b9528f4b5aacbfe37",
+  "plan_slug": "discovery-judgments-through-jev",
+  "plan_version": 28,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-07T06:54:13.400481+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "deep_module-1",
+      "reason": "",
+      "when": "2026-10-07T06:54:15.866653+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T06:54:15.866653+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T06:54:13.400481+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-discovery-judgments-through-jev.v28.json",
+  "review_run_id": "r-20261007T063621575590-plan-review-of-discovery-judgments-through-jev",
+  "reviewed_blob_sha": "cbcf1ae67614525bea590d92345782ea2a85873c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a79 adds the same rerank (pool sizing, concurrency, wall-time budget, embedding-order fallback) to two separate search functions without naming one shared module that both call.",
+    "duplicate_owner": "a finding \u2014 \u00a79 reranks by calling `call_decisions` directly, rebuilding the concurrency-bounded decision loop and per-item failure policy that \u00a73's judge module already owns, and \u00a79's bypass is unaccounted-for in \u00a73's interface account.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a79 adds no seat (stated) and adds to none of the four families, so the retire-or-merge rule does not bind.",
+    "reuse_search": "pass \u2014 \u00a79 reuses the shared `call_decisions` layer (`imas_codex/discovery/base/llm.py:3479`, async at `:3543`) and the existing `discovery-relevance` seat (`imas_codex/settings.py:181`, `typesafe/jev-1.13`), and extends `_search_code`/`_search_docs` in place rather than building a second client.",
+    "thin_wrapper": "pass \u2014 \u00a79 does not wrap an existing mechanism it declines to extend; it adds new ranking behaviour beside the code-assembled `score_composite` and says why the two answer different questions."
+  },
+  "section_digests": {
+    "_document": "0f95ea8f1eb298f9bf106cfadcf390c9b11200fd75efb6b4726cd67c616e7a51",
+    "s1": "e6ed0dfe853f3f242923d7b9bca83fb125586f4f1620d4a6becb8392c02c5fe7",
+    "s10": "90c0038b2e3ee1f52a792eaf54834086ddeceb46b160ae70554db5fdb5bf8de1",
+    "s11": "64c3adbcbcb984ce3247ada0491a64d7ffee9b6d6a6a09b35e47fe9925d4090e",
+    "s12": "23574d65acadb53959590a337a85547278ce3be1d3defd4fb37757608100ef48",
+    "s2": "3954043ce6681dd06ada6f055e557149c56b5a63b9ce7d9598401861d4607af1",
+    "s3": "fa306884aa2bda3edc0149312192f343e11b62a970c388e60d147c82abec8146",
+    "s4": "ec02f698f7539ba44cea1235ecc63eafc4f6401062cff4d0eaf6781b80bf4485",
+    "s5": "30921946c9fad0b75ae7d952e90b33b69f003a24aeff996838a5667f54877b2e",
+    "s6": "597594c4c02e7635ea02376655d175f85a55bc27850abada9847438b56c7faf3",
+    "s7": "65815dcec23706975640bf842758839232a604a86ca763c940b639b3af0dae0e",
+    "s8": "2995253050e0a467fb6eff3f70e71e0d3abf78c06d05b28020695df8f311e85a",
+    "s9": "c5143e4a03cecd6512f0005b4e31379283fa86849d8654467c42e7678bc683a0"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T06:54:09.941768+00:00"
+}

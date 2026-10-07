@@ -1,0 +1,122 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-07T07:13:32.370Z",
+  "dispatched_at": "2026-10-07T06:58:07Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html:320",
+      "id": "reuse_search-1",
+      "reason": "the section must name `FACET_QUESTION_FIELDS` and `_content_top_levels` as the owner to extend, or the implementer reads answers through the wrong key list.",
+      "text": "\u00a726 says \"The Python side is the facet-aware form of the existing `triage_relevance`, sharing `SCORE_DIMENSION_NAMES`\", but `triage_relevance` (imas_codex/discovery/code/scorer.py:228) reads `answers[name][\"noul\"]` over `SCOPE_NOULS`, and the content-arm facet answers carry a `score` key with no `noul` (verified in the prototype's own `/home/ITER/mcintos/.cache/imas-codex-jev/jev_score_results.json`: `data_access_depth` = `{type, score, probabilities, confidence}`) \u2014 so a Python facet-relevance built on that form over `SCORE_DIMENSION_NAMES` reads a key that does not exist, and the value it needs is `score / top_level` taken through `FACET_QUESTION_FIELDS` (:113) and `_content_top_levels` (:233), which is exactly how `_relevance_item` (:286-290) already does it; `score_worker` calls the mirror at imas_codex/discovery/code/workers.py:574 to decide descriptions, so the defect lands on a live path",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html:332",
+      "id": "thin_wrapper-1",
+      "reason": "the section must state the fragment is parameterised by its owner or drop the chunk-level exclusion, since as written its two bullets cannot both hold.",
+      "text": "\u00a727 requires the node to \"exclude ... any chunk embedded in the last two hours\" while also claiming it \"renders the existing `_CODE_CHUNK_CASCADE` ... it never spells the traversal a third time\", but that fragment (imas_codex/discovery/base/reset.py:402) fixes its traversal as `(n)<-[:FROM_FILE]-(ce:CodeExample)-[:HAS_CHUNK]->(cc:CodeChunk)` and offers no hook for a per-chunk predicate, so a two-hour filter on `cc.embedded_at` cannot be applied to the rendered text \u2014 the node must either spell a modified copy (the third spelling the section forbids) or the owner must gain an optional chunk predicate, which the section does not say",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/jt60sa-discovery-completion.html:319",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added surface in its own text \u2014 what it retires or merges, or why nothing can be \u2014 as the rubric requires of any section that adds to these families.",
+      "text": "\u00a726 adds a new discovery setting `code-facet-admission-threshold` in `[tool.imas-codex.discovery]` with a new accessor in `imas_codex/settings.py` (beside `get_code_ingest_threshold`, :1051) and a new `content` entry in `CODE_RESET_SPECS` (imas_codex/discovery/base/reset.py:408), which `reset_to_option` (imas_codex/cli/discover/common.py:78-91) turns into a new accepted value of the `--reset-to` Choice \u2014 three additions to the public surface, and not the sizes the supplied budget recorded: public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the section names nothing it retires or merges",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c8363f069c3f60f4d0a698e8a678bb4c9d2f498113f787bd35db76ef2bd38424",
+  "plan_slug": "jt60sa-discovery-completion",
+  "plan_version": 293,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-07T07:15:43.652532+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-07T07:16:01.339887+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-07T07:16:18.090910+00:00"
+    }
+  ],
+  "responses": {
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T07:16:18.090910+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T07:15:43.652532+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "jt60sa-20261005",
+      "reason": "",
+      "when": "2026-10-07T07:16:01.339887+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-jt60sa-discovery-completion.v293.json",
+  "review_run_id": "r-20261007T065743742477-plan-review-of-jt60sa-discovery-completion",
+  "reviewed_blob_sha": "91d3f10e8d0cf619937f97fb614270cf5607bd54",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a726 extends existing owners (`relevance_predicate`, `CODE_RESET_SPECS`, `settings.py`) rather than adding a module, and \u00a727 reuses the shared cascade, so neither adds surface without hiding behaviour.",
+    "duplicate_owner": "pass \u2014 the facet clause is placed in `relevance_predicate` (scorer.py:91), the one content-gate owner, and \u00a727 reuses `_CODE_CHUNK_CASCADE` (reset.py:402) rather than forking it.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a726 adds a new setting (`code-facet-admission-threshold`), a new `settings.py` accessor and a new `CODE_RESET_SPECS` target (which widens the `--reset-to` Choice) without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a726's Python mirror names `triage_relevance`/`SCORE_DIMENSION_NAMES` as the machinery to extend, but the owner that already reads a facet answer is `FACET_QUESTION_FIELDS` (imas_codex/discovery/code/scorer.py:113) with `_content_top_levels` (:233); `triage_relevance` (:228) reads a `noul` key the facet answers do not carry.",
+    "thin_wrapper": "a finding \u2014 \u00a727's chunk-level two-hour exclusion cannot ride on the shared `_CODE_CHUNK_CASCADE` verbatim, so it needs the owner extended rather than rendered as claimed."
+  },
+  "section_digests": {
+    "_document": "3199cb1e34c1545a4b406486e72cdc3b568f3f172d32f85303c48bb37d0a2e4d",
+    "s1": "3a21ede531d2eca31205a210368c4c73ce297737303f6f7e2b4e267671aaedf3",
+    "s10": "44b4fd0b439e7df430332c80fa3da5e1790ed07e06a2caf2fe983c292d4ce439",
+    "s11": "cde9a852cb923e48c3bbe4cb5f1f02353a548d2e2f1c88f30934b6d24f5096a3",
+    "s12": "580a7488ed585227127cff858212f92fcc88694e269d7ed6215a681eb35cb666",
+    "s13": "204e2da5dae27b9fa75f59e06b6430b6905d3469c2b78f172cbebe8524f6f71d",
+    "s14": "fc1bb2477e1a80d8c55504afd13bcf03d35feec0a606e750568a331221c98565",
+    "s15": "fe54420088b1fa8134c5fb33c79fd3a5bc8459a0375b3431c5af1575576a55e8",
+    "s16": "adbbf533118a871f8e2361ebce6c41e4c416928b46a3e7b39ffb682c3266abb6",
+    "s17": "6ad87a58386f0bd194d60da21edada68e5775b6f086f3526e8b4839529621210",
+    "s18": "9bd55b14f13dd9bdfd88f1a2376ff3999da0da45244d8e02754795cca06da75d",
+    "s19": "7fe286d847223f00a1880af15d903929c00ce710c9d83bb8d21999c236533a91",
+    "s2": "68f0ae0cf20bf85ae20df7938f5eb4321c8a29a9d5818138b9a1841aa31bf914",
+    "s20": "b8529d844477f92abf9584eff04da04da17c85b409b48dc41e20436f1b6bc1fe",
+    "s21": "ee31cf93f0b9c063eda3e2d86d37c8b9903cbce1a1aec415adf40732fd6d1d3f",
+    "s22": "84b7d3441e73a80f8baf57679053bfd732e9aba489c5c166579236beab87dcaa",
+    "s23": "3d94996bf8261cf795d9a29234625dc8ac7e90445e52d04fc72af3f757449435",
+    "s24": "c014d9c0b2fec663e1f07a721658d81f134c0c13da9253f2574652517102a7d1",
+    "s25": "41bd600cb423f188c6c9738efa78755eeea9ab876ac00bf3f079849f6ce6f15f",
+    "s26": "17133ef679a725caa24b2ac8f60f83d074edf86068b29776ae7bf1c170d5f2f6",
+    "s27": "225bfd030d165a7490393b084bebb437172a552d480b54523007596879109319",
+    "s3": "6b5e8ccaabf7a1d09bec18ccb3bf6d4a59443a0f8b95e23b8b1496c834acc56b",
+    "s4": "509ea51135f63d10ef3df049d104de81268cb05466ccd2913ea84d14cd12870a",
+    "s5": "c2b110403dbbde7d558489fb24dfd48d26781d4b58698508b71b0b5a4f58f63e",
+    "s6": "8beb372baefcd9b524ab9f5b6bac1646dab7a66d7b60c5cdb30c96ed80544c0d",
+    "s7": "e689106d935c3cf1462acd7a76d8718adb0bba178614d80a8c821bf283edad04",
+    "s8": "65c8ef8e499ba2e3771e3a6126236c816d5e94b0e7a46bc811089b22d7c09ba2",
+    "s9": "cb534e36cc5c53c6479beef23c458c4e381a1b3084d042806ecf5060473df522"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T07:15:24.457149+00:00"
+}
