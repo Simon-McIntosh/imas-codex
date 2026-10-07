@@ -53,6 +53,35 @@ with importlib.resources.as_file(
     unit_registry.load_definitions(str(resource_path))
 
 
+def units_are_equivalent(first: str | None, second: str | None) -> bool:
+    """Whether two unit spellings denote exactly the same unit.
+
+    The comparison is pint's, never string equality: both spellings must parse
+    through the shared ``unit_registry`` (so alias-file spellings resolve),
+    carry the same dimensionality, and describe a conversion factor of exactly
+    1. This is the same reading ``analyze_units`` and ``build_dd._units_changed``
+    make, so one helper keeps the tests and the census from each re-deriving it.
+    A spelling that does not parse is equivalent to nothing.
+
+    Args:
+        first: A unit spelling, typically ``normalize_unit_symbol`` output.
+        second: The spelling to compare it against.
+
+    Returns:
+        True when both parse and denote one unit, False otherwise.
+    """
+    if not first or not second:
+        return False
+    try:
+        quantity = unit_registry.Quantity(1.0, first)
+        other = unit_registry.Quantity(1.0, second)
+        if quantity.dimensionality != other.dimensionality:
+            return False
+        return quantity.to(second).magnitude == 1
+    except Exception:
+        return False
+
+
 # Dimensionless markers. The IMAS DD writes "-" for a dimensionless quantity
 # (imas-python returns it verbatim); "1" and "dimensionless" are equivalent
 # spellings. These are a REAL unit — the canonical dimensionless unit "1" — not
@@ -143,15 +172,17 @@ def normalize_unit_symbol(raw: str) -> str | None:
         logger.debug("imas_standard_names could not canonicalise unit '%s'", raw)
 
     # Fallback: pint, for units the canonical vocabulary does not cover. Keeps
-    # a DD-only unit resolvable rather than dropping it.
+    # a DD-only unit resolvable rather than dropping it. The formatter output
+    # is returned as-is: it re-parses to exactly the unit raw denotes, which is
+    # the only property downstream code needs (see ``units_are_equivalent``).
     try:
         parsed = unit_registry.parse_expression(raw)
         compact = f"{parsed.units:~U}"
-        compact = compact.replace("Ω", "ohm")
-        return compact
     except Exception:
         logger.debug("Could not normalize unit '%s'", raw)
         return None
+
+    return compact.replace("Ω", "ohm")
 
 
 def resolve_dd_unit(dd_path: str, raw: str | None) -> str | None:
