@@ -256,3 +256,86 @@ class TestNoCandidateLogged:
         assert "jet:s1" in caplog.text
         assert "magnetics/other" not in caplog.text
         assert "0.410" in caplog.text
+
+
+class TestNoPathVerdictPersisted:
+    """A 'none' choice is paid once: its verdict is persisted, not released."""
+
+    def _state(self):
+        from imas_codex.ids.workers import MappingDiscoveryState
+
+        state = MappingDiscoveryState(facility="jet", target_ids_list=["magnetics"])
+        state.assign_phase = MagicMock(done=True)
+        return state
+
+    def _run(self, disposition):
+        import asyncio
+
+        from imas_codex.ids.models import TargetChoice
+        from imas_codex.ids.workers import assign_worker
+
+        source = {"id": "jet:coil:1", "physics_domain": "magnetics"}
+        edges = {"jet:coil:1": [_edge("magnetics/ip", 1)]}
+        gc = MagicMock()
+        choice = TargetChoice(
+            source_id="jet:coil:1",
+            paths=[],
+            disposition=disposition,
+            confidence=0.3,
+            reasoning="no IMAS node carries this value",
+        )
+        with (
+            patch(
+                "imas_codex.ids.workers.claim_sources_for_escalated",
+                return_value=[source],
+            ),
+            patch("imas_codex.ids.workers.GraphClient") as mock_gc_cls,
+            patch("imas_codex.ids.graph_ops.read_candidates", return_value=edges),
+            patch("imas_codex.ids.graph_ops.select_candidates") as mock_select,
+            patch("imas_codex.ids.mapping.achoose_targets", return_value=choice),
+            patch("imas_codex.ids.workers.set_mapping_status") as mock_status,
+            patch("imas_codex.ids.workers.release_mapping_claim") as mock_release,
+        ):
+            mock_gc_cls.return_value.__enter__.return_value = gc
+            asyncio.run(assign_worker(self._state()))
+        return mock_status, mock_select, mock_release
+
+    def test_none_choice_persists_disposition_and_evidence(self):
+        from imas_codex.ids.models import MappingDisposition
+
+        mock_status, mock_select, mock_release = self._run(
+            MappingDisposition.NO_IMAS_EQUIVALENT
+        )
+        mock_status.assert_called_once()
+        args, kwargs = mock_status.call_args
+        assert args[0] == "jet:coil:1"
+        assert args[1] == "no_imas_equivalent"
+        assert kwargs["disposition"] == "no_imas_equivalent"
+        assert kwargs["evidence"] == "no IMAS node carries this value"
+        mock_select.assert_not_called()
+        mock_release.assert_not_called()
+
+
+class TestDecidedSourceNotReclaimed:
+    def test_claim_predicate_excludes_decided_sources(self):
+        from imas_codex.ids.workers import claim_sources_for_escalated
+
+        with patch("imas_codex.ids.workers.claim_batch", return_value=[]) as mock_claim:
+            claim_sources_for_escalated("jet", ["magnetics"])
+        predicate = mock_claim.call_args.kwargs["status_predicate"]
+        assert "n.candidate_route = 'escalated'" in predicate
+        assert "n.mapping_disposition IS NULL" in predicate
+
+
+class TestResetClearsVerdict:
+    def test_reset_nulls_disposition_and_evidence(self):
+        from imas_codex.ids.workers import reset_mapping_state
+
+        gc = MagicMock()
+        gc.query.return_value = [{"cleared": 0}]
+        with patch("imas_codex.ids.workers.GraphClient") as mock_cls:
+            mock_cls.return_value.__enter__.return_value = gc
+            reset_mapping_state("jet")
+        query = gc.query.call_args[0][0]
+        assert "sg.mapping_disposition = null" in query
+        assert "sg.mapping_evidence = null" in query

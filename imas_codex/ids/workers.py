@@ -397,7 +397,8 @@ def claim_sources_for_escalated(
         "SignalSource",
         facility=facility,
         status_predicate=(
-            "n.candidate_route = 'escalated' " + ids_clause + domain_filter
+            "n.candidate_route = 'escalated' "
+            "AND n.mapping_disposition IS NULL " + ids_clause + domain_filter
         ),
         status_params=params,
         batch_size=batch_size,
@@ -419,6 +420,7 @@ def has_pending_assignment_work(
         facility=facility,
         status_predicate=(
             "n.candidate_route = 'escalated' "
+            "AND n.mapping_disposition IS NULL "
             "AND EXISTS { (n)-[:MAPPING_CANDIDATE]->(:IMASNode) } " + domain_filter
         ),
         status_params=domain_params,
@@ -481,7 +483,9 @@ def reset_mapping_state(
                 sg.mapping_claim_token = null,
                 sg.mapping_target_ids = null,
                 sg.mapping_target_path = null,
-                sg.mapping_target_type = null
+                sg.mapping_target_type = null,
+                sg.mapping_disposition = null,
+                sg.mapping_evidence = null
             RETURN count(sg) AS cleared
             """,
             **params,
@@ -580,7 +584,10 @@ async def assign_worker(
     hold its values, and marks the picked edges selected through
     :func:`select_candidates`, which sets the source's route to ``selected``.
     A source the candidate stage already selected carries its marked edges and
-    is not re-asked; a ``no_candidate`` source is skipped upstream.
+    is not re-asked; a ``no_candidate`` source is skipped upstream. A source
+    whose choice names no listed path has its disposition and reasoning
+    recorded as its mapping evidence, so a later run does not claim and
+    re-ask it.
     """
     wlog = WorkerLogAdapter(logger, worker_name="assign_worker")
 
@@ -648,12 +655,24 @@ async def assign_worker(
                     continue
 
                 if not choice.paths:
-                    wlog.info(
-                        "No listed path for %s (disposition=%s)",
+                    # Persist the verdict so the source is not claimed and
+                    # re-asked, and the reasoning seat not paid again, on a
+                    # later run. The disposition and its reasoning become the
+                    # source's mapping evidence; the candidate route is left
+                    # as the candidate stage wrote it.
+                    await asyncio.to_thread(
+                        set_mapping_status,
                         source_id,
-                        choice.disposition,
+                        choice.disposition.value,
+                        disposition=choice.disposition.value,
+                        evidence=choice.reasoning,
                     )
-                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    state.assign_stats.processed += 1
+                    wlog.info(
+                        "No listed path for %s: disposition=%s recorded",
+                        source_id,
+                        choice.disposition.value,
+                    )
                     continue
 
                 marked = await asyncio.to_thread(
