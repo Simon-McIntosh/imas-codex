@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run r-20261007T071706899381-stale-chunk-removal is an operational graph write and declares no baseline_suite or after_suite (both empty in its manifest.md), so there are no reviewed gate-log failure sets to difference; added_failure_count is therefore 0 with an empty id list rather than a measured zero. The reviewed node's own tests field records the operational arms it ran (plan/delete/verify/control, all EXIT=0). I did not substitute a suite run of my own for the missing arms.",
+  "base_log_revision": null,
+  "completed_at": "2026-10-07T07:54:06.323Z",
+  "dispatched_at": "2026-10-07T07:38:01Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/stale-chunk-removal/stale_chunk_removal.py",
+      "line": "134",
+      "severity": "follow-on",
+      "text": "The mid-ingest protection the plan relies on is enforced at planning time, not at deletion time. PLAN_INCLUDED excludes a file whose n.claimed_at is within DEFAULT_CLAIM_TIMEOUT_SECONDS (300 s) and freezes the surviving ids into to_delete.json; cmd_delete then deletes exactly that frozen list about 2 minutes later without re-evaluating the claim predicate. A CodeFile that acquires a live ingest claim between plan and delete would still have its freshly written CodeExample/CodeChunk deleted, the outcome the plan's 'excludes any file holding a live claim, so a file mid-ingest keeps its new chunks' intends to prevent. No file was excluded at run time (to_delete.json exclusions == {}, plan 09:26 vs delete 09:28), so no harm occurred here; a re-run of cmd_delete from a stale to_delete.json inherits the same gap. One-line fix: re-apply the PLAN_INCLUDED claim predicate inside DELETE_CYPHER."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/stale-chunk-removal/stale_chunk_removal.py",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "The implemented node set is 'CodeFile whose status <> ingested AND carries a chunk' (CARRIES EXISTS), but plan section 27 reads 'deletes the CodeExample and CodeChunk nodes of every CodeFile whose status is not ingested'. A file below ingested whose CodeFile <-FROM_FILE CodeExample carries no CodeChunk is outside the node set, and the cascade itself only reaches examples through HAS_CHUNK, so such a chunk-less stale CodeExample survives. I measured exactly one: jet CodeFile jet:/home/dvanees/Local_BIS_n_Exp_BIS_MATLAB/Local_BIS_n_exp_BIS_July2013ManyCasesVersion.m (status failed) retains CodeExample jet:Local_BIS_n_exp_BIS_July2013ManyCasesVersion:9583765e with zero chunks (probe ORPHAN_EXAMPLES = 1 file / 1 example, ATTACHED shows 0 chunks). The plan's stated done-when is chunk-focused ('no file below ingested carries a chunk') and is met, so this is a residual of the prose scope, not a done-when failure."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/stale-chunk-removal.html",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "The fragment's 'CodeExamples deleted' column (826/373/53) reproduces the planned code_example_ids lengths from to_delete.json, and the delete log's files=N is count(n) of matched CodeFiles (DELETE_CYPHER returns count(n), and the cascade is a FOREACH DETACH DELETE that returns no per-node count), so neither is a measured count of deleted CodeExample nodes. The chunk removal is independently confirmed by the residual verify (my re-run: RESIDUAL [] with the CONTROL arm reading 68587 files / 266231 chunks, so the instrument sees the graph), but the example-deleted count is inferred from the plan, not observed. The file also has no trailing newline."
+    }
+  ],
+  "head_log_revision": null,
+  "item_verdicts": {
+    "diff": "read the reviewed base ca66c8986 and head 80e12f4e1 in the reviewed worktree: 1 file changed, +47, the evidence fragment only; the operational write itself lives in the reports directory outside git",
+    "done_when": "independently re-measured on the live graph: my own residual query returns RESIDUAL [] (zero CodeFiles below ingested still carrying a chunk), and the positive-control arm reads 68587 ingested files / 266231 chunks so the empty result is a measured absence rather than a blind instrument; the before/after per-facility counts are recorded in plan.log and the fragment table",
+    "goal": "read plan section 27 (remove the CodeExample/CodeChunk nodes of CodeFiles no longer ingested) against the reviewed run; the run planned 1252 files (tcv 826, jet 373, jt-60sa 53) carrying 5734 chunks, deleted them in two bounded batches of 1000 and 252, and its after-verify reports residual_non_excluded=0",
+    "manifest": "read the reviewed run's manifest.md; it carries status complete, the four operational arms and their log paths, to_delete.json, a control arm and the follow-on naming the inline clear_facility_code copy",
+    "write_paths": "read the reviewed run's declared write paths (reports dir, docs/evidence fragment, docs/figures); the only committed change is docs/evidence/fragments/jt60sa-discovery-completion/stale-chunk-removal.html (+47), inside them"
+  },
+  "justifications": {
+    "durability": "the change is a persisted graph mutation, so it survives by construction and I re-confirmed it minutes after the run (RESIDUAL empty, ingested control unchanged); durability is scored a little below full because the operational script and to_delete.json are not committed to the repo and the mid-ingest exclusion is sampled once at plan time rather than re-checked at delete time",
+    "evidence": "the run records plan/delete/verify/control logs, writes to_delete.json before any deletion, and carries a genuine negative control (ingested-file chunk counts identical before and after: 68587 files / 266231 chunks); the logs prove the instrument sees the graph (control reads non-zero) so the empty residual is trustworthy; the weakness is that the example-deleted counts are plan-time inferred rather than measured",
+    "fit": "the deletion renders the reset targets' own _CODE_CHUNK_CASCADE from imas_codex/discovery/base/reset.py over the planned node set, and uses the shared DEFAULT_CLAIM_TIMEOUT_SECONDS (300 s) from imas_codex/discovery/base/claims.py, both as section 27 directs; it does not spell the traversal a third time",
+    "goal_fidelity": "section 27's stated done-when is met - no file below ingested carries a chunk (my residual probe returns empty against the live graph, control non-empty), and the before/after per-facility counts are recorded; the only gap is the plan's broader prose ('every CodeFile whose status is not ingested') versus the chunk-gated node set, which leaves one chunk-less stale example (recorded as a follow-on, not a done-when failure)",
+    "reuse": "verified _CODE_CHUNK_CASCADE exists at imas_codex/discovery/base/reset.py:402 and is the same cascade the CODE_RESET_SPECS discovered/triaged targets apply, imported unchanged by the script; DEFAULT_CLAIM_TIMEOUT_SECONDS resolves to 300 at imas_codex/discovery/base/claims.py:50, so no claim constant was re-labelled",
+    "scope_discipline": "the only committed path is the evidence fragment, inside the declared write paths; no plan HTML, plan meta, facility YAML or source was modified; the reviewed run explicitly defers the clear_facility_code duplicate-traversal retirement to a later node and names it as a follow-on rather than touching it"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read plan section 27 against the reviewed run r-20261007T071706899381-stale-chunk-removal; it planned 1252 files (tcv 826, jet 373, jt-60sa 53) carrying 5734 chunks and deleted them in two bounded batches (1000+252) EXIT=0.\nVERDICT done_when: independently re-measured on the live graph - my residual query returns [] (zero files below ingested carrying a chunk) while the positive-control arm reads 68587 ingested files / 266231 chunks, so the empty result comes from an instrument shown to see the graph; before/after per-facility counts are recorded.\nVERDICT write_paths: the only committed change is docs/evidence/fragments/jt60sa-discovery-completion/stale-chunk-removal.html (+47), inside the declared write paths; no plan, meta, YAML or source changed.\nVERDICT manifest: read the reviewed manifest.md; it records status complete, the plan/delete/verify/control arms with log paths, to_delete.json, and the inline clear_facility_code follow-on.\nVERDICT diff: base ca66c8986 to head 80e12f4e1, 1 file changed +47, the evidence fragment only; the operational write lives in the reports directory outside git.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: section 27's chunk-focused done-when is met (residual 0, confirmed) but the plan prose 'every CodeFile whose status is not ingested' is broader than the chunk-gated node set, leaving one chunk-less stale example (follow-on).\nSCORE evidence: 18\nJUSTIFICATION evidence: plan/delete/verify/control logs and a to_delete.json written before deletion; the control is a real negative control (ingested counts identical before/after) and the instrument is proven to see the graph; the example-deleted counts are plan-time inferred rather than measured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: only the evidence fragment is committed and it is inside the declared write paths; the deferred inline-traversal retirement is named as a follow-on; nothing outside scope was touched.\nSCORE durability: 17\nJUSTIFICATION durability: it is a persisted graph mutation, re-confirmed minutes later, but the script and id list are uncommitted and the mid-ingest claim exclusion is sampled at plan time only, not re-checked at delete time.\nSCORE fit: 18\nJUSTIFICATION fit: renders the reset targets' own _CODE_CHUNK_CASCADE (reset.py:402) over the planned node set and uses the shared DEFAULT_CLAIM_TIMEOUT_SECONDS (claims.py:50 = 300 s), exactly as section 27 directs.\nSCORE reuse: 18\nJUSTIFICATION reuse: _CODE_CHUNK_CASCADE is imported unchanged and is the same cascade CODE_RESET_SPECS applies; no traversal or claim constant was re-spelled.\nFINDING reports/imas-codex/stale-chunk-removal/stale_chunk_removal.py:134 follow-on: the mid-ingest claim exclusion is enforced in cmd_plan and frozen into to_delete.json, so cmd_delete deletes that frozen list about 2 min later without re-evaluating claimed_at; a file claimed in that window would lose its new chunks, and a re-run from a stale to_delete.json inherits the gap. One-line fix: re-apply the PLAN_INCLUDED claim predicate inside DELETE_CYPHER.\nFINDING reports/imas-codex/stale-chunk-removal/stale_chunk_removal.py:18 follow-on: the node set is gated on CARRIES (a chunk present) but section 27 reads 'every CodeFile whose status is not ingested', so a chunk-less stale CodeExample survives; measured exactly one, jet CodeFile .../Local_BIS_n_exp_BIS_July2013ManyCasesVersion.m (status failed) retaining CodeExample jet:Local_BIS_n_exp_BIS_July2013ManyCasesVersion:9583765e with 0 chunks.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/stale-chunk-removal.html:33 follow-on: the 'CodeExamples deleted' column reproduces the planned code_example_ids lengths and the delete log's files=N is count(n) of matched CodeFiles (the FOREACH cascade returns no per-node count), so the example-deletion figures are inferred, not observed; the chunk removal is independently confirmed by the residual verify; the file has no trailing newline.\n",
+  "review_run_id": "r-20261007T073749636269-review-of-stale-chunk-removal",
+  "reviewed_base_sha": "ca66c8986eb1044bee66d2e739bd131c00071f3f",
+  "reviewed_head_sha": "80e12f4e1037819c940e3a49503b1fff241a507e",
+  "reviewed_run_id": "r-20261007T071706899381-stale-chunk-removal",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T07:48:00+00:00",
+  "total": 108
+}
