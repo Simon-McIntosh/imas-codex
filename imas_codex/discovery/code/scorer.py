@@ -30,6 +30,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from imas_codex.discovery.base.reset import (
+    CODE_RELEVANCE_FIELDS as RELEVANCE_FIELDS,
+)
 from imas_codex.graph import GraphClient
 
 logger = logging.getLogger(__name__)
@@ -53,18 +56,30 @@ SCOPE_NOULS = (
     "maps_to_imas",
 )
 
-# decision question name -> CodeFile relevance field
-_RELEVANCE_FIELDS = {
-    "loads_diagnostic_data": "relevance_loads",
-    "processes_diagnostic_signals": "relevance_processes",
-    "describes_machine_or_diagnostics": "relevance_describes",
-    "maps_to_imas": "relevance_imas",
-    "is_simulation": "relevance_simulation",
-}
+# ``RELEVANCE_FIELDS`` is the registry of every relevance field a CodeFile
+# carries, owned by ``discovery/base/reset.py`` so a reset and the decision arms
+# that write these fields read the same list.  It lives there because that
+# module is imported before the code package and importing the code package
+# from ``reset.py`` would close an import cycle.
 
-# One registry of every relevance field a CodeFile carries, owned by
-# ``discovery/base/reset.py`` so a reset and the decision arms that write these
-# fields read the same list.  The five noul fields above must be members.
+
+def _relevance_field(name: str) -> str:
+    """Return ``name`` spelled by the registry, refusing an unregistered field."""
+    if name not in RELEVANCE_FIELDS:
+        raise KeyError(f"{name!r} is not a registered relevance field")
+    return name
+
+
+# decision question name -> CodeFile relevance field.  Each field is resolved
+# through the registry, so a field the reset clears and the field the decision
+# arm writes are the same string and cannot drift.
+_RELEVANCE_FIELDS = {
+    "loads_diagnostic_data": _relevance_field("relevance_loads"),
+    "processes_diagnostic_signals": _relevance_field("relevance_processes"),
+    "describes_machine_or_diagnostics": _relevance_field("relevance_describes"),
+    "maps_to_imas": _relevance_field("relevance_imas"),
+    "is_simulation": _relevance_field("relevance_simulation"),
+}
 
 # The decision arm that produced a file's stored relevance, recorded on
 # ``relevance_stage``.  ``name`` is the names arm, which sets ``triaged``;

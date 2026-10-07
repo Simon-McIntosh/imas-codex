@@ -339,9 +339,10 @@ WIKI_RESET_SPECS: dict[str, ResetSpec] = {
 # The relevance fields a CodeFile carries, in one registry: the five noul fields
 # the names arm writes, the role distribution and its confidence from the role
 # question, and the bookkeeping that records which arm wrote them.  The code
-# scorer imports this tuple as ``RELEVANCE_FIELDS`` so the fields a reset clears
-# and the fields the decision arms write cannot drift apart.  It lives here, not
-# in ``code/scorer.py``, because this module is imported before the code package
+# scorer imports this tuple as ``RELEVANCE_FIELDS`` and resolves the field each
+# decision question writes through it, so the fields a reset clears and the
+# fields the decision arms write cannot drift apart.  It lives here, not in
+# ``code/scorer.py``, because this module is imported before the code package
 # and importing the code package from here would close an import cycle.
 CODE_RELEVANCE_FIELDS = (
     "relevance_loads",
