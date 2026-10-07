@@ -10,11 +10,12 @@
     The EDDB catalogue writes units as human text: letter case varies
     (<code>KA</code>, <code>Mpa</code>, <code>DegC</code>), digit exponents are
     glued to the symbol (<code>m2</code>, <code>m3</code>), and products are glued
-    (<code>Pam3</code>). The alias file now resolves these without claiming a name
-    instead use <code>@alias</code>: a case variant keeps the original offset unit,
-    so <code>20 degC</code>, <code>20 DegC</code> and <code>20 oC</code> each convert
-    to 293.15 K. A glued form is a new unit carrying the canonical symbol, so a
-    spelling and its native form collapse to one string. A bare <code>n</code> is
+    (<code>Pam3</code>). The alias file resolves these without claiming a name pint
+    already owns; a case variant instead uses <code>@alias</code>, which keeps the
+    original offset unit, so <code>20 degC</code>, <code>20 DegC</code> and
+    <code>20 oC</code> each convert to 293.15 K. A glued form is a new unit
+    carrying the canonical symbol, so a spelling and its native form collapse to
+    one string. A bare <code>n</code> is
     <em>not</em> defined: it shadows the nano prefix's parse space and breaks
     <code>count</code> itself, so the neutron-yield spellings stay unresolved with
     a reason.
