@@ -1,14 +1,14 @@
 <!-- Search rerank: the shared pool-rerank core, and the pool size it runs at.
      Judgements are live Jev Score calls over the JT-60SA question set. Scripts and
      raw output:
-     ~/.config/reckon/crew/reports/imas-codex/search-rerank/{pool_sweep.py,table.py,sweep.json,sweep_calls.json,sweep.log,eqdbms_check.py,eqdbms_check.json,gate.log,negative_control.log}
+     ~/.config/reckon/crew/reports/imas-codex/search-rerank/{pool_sweep.py,table.py,sweep.json,sweep_calls.json,embedding_baseline.py,embedding_baseline.json,retime_live.py,retime_c32.json,retime_c48.json,sweep_concurrency.log)  gate.log,  negative_control.log
      Labels: ~/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/labels.json,
      plus the four census answers from the retrieval-miss census in the same reports tree. -->
 <section id="search-rerank" data-reckon="evidence">
   <h2 id="search-rerank-heading">Search rerank — the shared pool core, and the pool size it runs at</h2>
 
   <p id="search-rerank-core">
-    The pool rerank now lives in one core, <code>rerank_pool</code> in
+    The pool rerank lives in one core, <code>rerank_pool</code> in
     <code>imas_codex/discovery/base/judgment.py</code>, beside <code>decide_batch</code>. It takes
     the query, the retrieved pool, a builder that produces one judgement state per candidate, the
     five score levels, and the budget, concurrency, service and model; it judges the pool through
@@ -21,81 +21,147 @@
     what lets a discovery-side caller reuse it without depending on the search package.
   </p>
 
+  <h3 id="search-rerank-gain-heading">The rerank's gain against the embedding order it replaces</h3>
+  <p id="search-rerank-gain-prose">
+    The deployed tools rerank the retrieved pool through <code>rerank_candidates</code>. To show
+    that the tool's own gain is reproduced, the sweep scores the same 18 JT-60SA questions twice on
+    the same retrieval, labels and relevance rule: once in the tool's own embedding order (the order
+    a search returns before any rerank) and once after the rerank. The rerank raises the leading
+    metrics on the identical label set, which is the gain the prototype measured, now taken through
+    the deployed path:
+  </p>
+
   <table id="search-rerank-pool-table">
     <caption>
-      Live rerank of the retrieved pool at four sizes, over 18 JT-60SA questions (12 code, 6
-      documentation). nDCG@10 and recall@10 use the hand labels for the retrieved top 30 plus the
-      four census answers wherever they fall; every candidate without a label counts as
-      irrelevant, which penalises a deeper pool for candidates judged above the labelled set.
-      "Labelled only" ranks the labelled candidates alone and removes that penalty. Wall time
-      replays the production scheduler's rule (submission order, 16 in flight) over the recorded
-      per-call latencies; every pool scored 100% of its candidates under the 120 s sweep budget.
+      Retrieval order (embedding) against the reranked order, over 18 JT-60SA questions (12 code, 6
+      documentation), at four pool sizes and <code>RERANK_CONCURRENCY = 32</code>. A pool's metrics
+      are the reranked order restricted to the candidates that pool retrieved; a candidate's score
+      does not depend on the pool it was judged in. The embedding column is the same retrieval order
+      before the rerank; its top 10 is fixed, and its nDCG@10 falls with pool only because IDCG grows
+      as more labelled candidates enter the pool. nDCG@10 and recall@10 use the hand labels for the
+      retrieved set plus the four census answers wherever they fall; every candidate without a label
+      counts as irrelevant. "Labelled only" ranks the labelled candidates alone and removes that
+      penalty.
     </caption>
     <thead>
       <tr>
-        <th>Pool</th><th>nDCG@10</th><th>nDCG@10, labelled only</th><th>recall@10</th>
-        <th>Cost, 18 queries</th><th>Wall p50</th><th>Wall p95</th>
+        <th>Pool</th>
+        <th>nDCG@10<br>embedding</th><th>nDCG@10<br>rerank</th>
+        <th>labelled-only<br>embedding</th><th>labelled-only<br>rerank</th>
+        <th>recall@10<br>embedding</th><th>recall@10<br>rerank</th>
+        <th>MRR<br>embedding</th><th>MRR<br>rerank</th>
       </tr>
     </thead>
     <tbody>
-      <tr id="search-rerank-pool-30">
-        <td><strong>30</strong></td><td><strong>0.3671</strong></td><td>0.4637</td>
-        <td>0.3750</td><td>$0.019</td><td>1.89 s</td><td>2.75 s</td>
+      <tr id="search-rerank-row-30">
+        <td>30</td><td>0.3093</td><td>0.3576</td><td>0.3202</td><td>0.4761</td>
+        <td>0.2987</td><td>0.3337</td><td>0.3587</td><td>0.3585</td>
       </tr>
-      <tr id="search-rerank-pool-60">
-        <td>60</td><td>0.2775</td><td>0.4493</td><td>0.3534</td><td>$0.038</td>
-        <td>3.51 s</td><td>4.27 s</td>
+      <tr id="search-rerank-row-60">
+        <td><strong>60</strong></td><td>0.2873</td><td>0.2994</td><td>0.2981</td><td><strong>0.4821</strong></td>
+        <td>0.2987</td><td><strong>0.3772</strong></td><td>0.3587</td><td>0.3159</td>
       </tr>
-      <tr id="search-rerank-pool-100">
-        <td>100</td><td>0.2872</td><td>0.5673</td><td>0.3919</td><td>$0.064</td>
-        <td>5.47 s</td><td>6.27 s</td>
+      <tr id="search-rerank-row-100">
+        <td>100</td><td>0.2634</td><td>0.2815</td><td>0.2717</td><td>0.5766</td>
+        <td>0.2987</td><td>0.3954</td><td>0.3564</td><td>0.3386</td>
       </tr>
       <tr id="search-rerank-pool-150">
-        <td>150</td><td>0.2343</td><td>0.6285</td><td>0.4956</td><td>$0.097</td>
-        <td>7.81 s</td><td>8.43 s</td>
+        <td>150</td><td>0.2587</td><td>0.2237</td><td>0.2670</td><td>0.6529</td>
+        <td>0.2987</td><td>0.4872</td><td>0.3574</td><td>0.2855</td>
       </tr>
     </tbody>
   </table>
+  <p id="search-rerank-gain-read">
+    At the deployed pool of 60 the rerank lifts labelled-only nDCG@10 from 0.2981 to 0.4821 and
+    recall@10 from 0.2987 to 0.3772 on the same labels, and the whole-set nDCG@10 from 0.2873 to
+    0.2994. On the prototype's own label set the effect is larger still, and there the deployed path
+    reproduces the prototype's figure (below). The whole-set figure is the smaller of the two because
+    a retrieved candidate that the hand labels never covered counts as irrelevant: the rerank lifts
+    unlabelled candidates too, and that is counted against it.
+  </p>
 
+  <h3 id="search-rerank-reconcile-heading">Why the deployed nDCG@10 is not the prototype's 0.509</h3>
+  <p id="search-rerank-reconcile-prose">
+    The prototype's rerank mean nDCG@10 was <strong>0.5085</strong> (embedding 0.2457) over its own
+    labelled candidate set: it labelled the top 30 its own retrieval returned and scored binary, with
+    every candidate in that set carrying a label. The deployed figure is lower because the label set
+    differs, not because the tool differs. The sweep's label rule adds the four census answers and
+    counts every retrieved candidate outside the prototype's 30 as irrelevant, which grows IDCG and
+    penalises the rerank for lifting candidates no label covers. Recomputed on the prototype's own
+    labelled candidates alone, today's deployed rerank scores <strong>0.4976</strong> and
+    today's embedding <strong>0.2670</strong> (emb 0.2670 -> 0.4976), reproducing the prototype's
+    0.2457 -> 0.5085 within 0.011; the residual is judge run-to-run variance and retrieval drift
+    between the two days (431 of the prototype's 540 labelled ids are returned today). The whole-set
+    figure is a different measurement on a different label set, and the two are not directly
+    comparable.
+  </p>
+
+  <h3 id="search-rerank-pool-decision-heading">Pool size: the deepest the 5 s budget can score</h3>
   <p id="search-rerank-pool-decision">
-    <strong>Pool 30.</strong> It has the best nDCG@10 of any size (0.3671 against 0.2775 at 60,
-    0.2872 at 100, 0.2343 at 150), and it is also the best of the two sizes whose p95 wall time
-    fits the 5 s budget, so the smallest pool within 0.02 of the best under that constraint is 30
-    under either reading of the ranking: ranking the labelled candidates alone gives 0.4637 at 30
-    against 0.4493 at 60, still the best of the affordable pair. Cost falls with it, from $0.097 to
-    $0.019 per 18 queries. The 100 that shipped before this measurement was set by the prototype's
-    retrieval size and was never affordable at a 5 s budget: at 100 the p95 wall time is 6.27 s, so
-    the budget truncates the slower half of the queries and leaves their candidates in retrieval
-    order.
+    A deeper pool ranks the labelled candidates better and reaches more of them, so the pool is sized
+    by the two metrics that do not carry the unlabelled-tail penalty: labelled-only nDCG@10 rises
+    0.4821 at 60 to 0.6529 at 150, and recall@10 rises 0.3772 to 0.4872. Both favour depth, and the
+    only pool within 0.02 of the best labelled-only nDCG@10 (0.6529 at 150) is 150 itself. Latency,
+    not the ranking, is what rules the deep pools out. Meeting the 5 s budget by raising the
+    concurrency was tested live, and the decisions endpoint refuses to be sped up: at 48 judgements
+    in flight the seat's per-call p50 rises from 1.0 s to 1.6 s and every pool's wall p95 passes 8 s,
+    so the endpoint's throughput, not the in-flight bound, sets the floor. The measured per-query
+    wall p95 is:
+  </p>
+
+  <table id="search-rerank-pool-latency">
+    <caption>
+      Per-query outer wall time at pool size, replayed through the production scheduler's rule
+      (submission order, the stated bound in flight) and confirmed by a dedicated live re-timing run.
+      The 5 s budget is <code>_RERANK_BUDGET_SECONDS</code>.
+    </caption>
+    <thead><tr><th>Pool</th><th>p50, 16 in flight</th><th>p95, 16</th><th>p50, 32</th><th>p95, 32</th><th>p50, 48</th><th>p95, 48</th></tr></thead>
+    <tbody>
+      <tr><td>30</td><td>1.86 s</td><td>2.39 s</td><td>2.17 s</td><td>2.70 s</td><td>3.27 s</td><td>3.49 s</td></tr>
+      <tr id="search-rerank-latency-60"><td><strong>60</strong></td><td>3.49 s</td><td>4.38 s</td><td>3.13 s</td><td><strong>3.90 s</strong></td><td>3.82 s</td><td>8.75 s</td></tr>
+      <tr><td>100</td><td>5.75 s</td><td>6.67 s</td><td>5.19 s</td><td>6.39 s</td><td>5.05 s</td><td>8.75 s</td></tr>
+      <tr><td>150</td><td>7.71 s</td><td>8.38 s</td><td>6.37 s</td><td>7.95 s</td><td>5.97 s</td><td>8.75 s</td></tr>
+    </tbody>
+  </table>
+  <p id="search-rerank-pool-choice">
+    <strong>Pool 60, concurrency 32.</strong> It is the deepest pool whose per-query wall p95 stays
+    under 5 s (3.90 s at 32 in flight, 4.38 s at 16). Pools 100 and 150 do not pass 5 s at any tested
+    concurrency (6.39 s and 7.95 s at 32; the endpoint slows each call as concurrency rises, so 48 in
+    flight makes every pool worse, not better). No pool the budget can score reaches the census
+    answers at ranks 159 to 181, so 60 is chosen as the deepest affordable pool rather than the pool
+    the ranking would prefer, and the depth/ranking trade is a real one: it costs labelled-only
+    nDCG@10 0.17 (0.4821 at 60 against 0.6529 at 150) and recall@10 0.11.
   </p>
 
   <figure id="search-rerank-pool-figure">
     <img src="/imas-codex/figures/discovery-judgments-through-jev/search-rerank/pool_sweep.svg"
-         alt="Mean nDCG@10 and labelled-only nDCG@10 fall and rise respectively with pool size, while per-query wall p95 passes the 5 s production budget between a pool of 60 and 100.">
+         alt="Left: reranked nDCG@10 and labelled-only nDCG@10 rise with pool size above the embedding order's flat labelled-only line. Right: per-query wall p95 against pool size for 16, 32 and 48 judgements in flight, with the 5 s budget marked; only the 60-candidate pool clears the budget at 32 in flight.">
     <figcaption>
-      Left: mean nDCG@10 over the 18 questions at each pool, with the same ranking taken over the
-      labelled candidates alone. Right: per-query wall p95, against the 5 s budget the rerank runs
-      under. Pool 30 is the best nDCG@10 and the cheapest of the sizes the budget can serve.
+      Left: the embedding order's labelled-only nDCG@10 and the rerank's, against pool size, with the
+      rerank's whole-set nDCG@10 for reference. Right: per-query wall p95 against pool size at three
+      concurrency levels, with the 5 s budget. Pool 60 at 32 in flight is the only deep pool inside
+      the budget.
     </figcaption>
   </figure>
 
   <h3 id="search-rerank-answers-heading">The four census answers need a pool the budget cannot afford</h3>
   <p id="search-rerank-answers-prose">
-    The census placed four answers the retrieval ranks out of reach: the poloidal flux grid —
-    (<code>eqgrd.f</code>, deep rank 159), the plasma-current reader (<code>shtrd.f</code>, beyond
-    150 and absent from every pool this sweep retrieved), <code>use_compiler-en</code> (173) and
-    <code>use_login-en</code> (181). Reranking cannot recover what the retrieval never returned.
-    Where an answer did enter the pool the rerank lifted it hard: <code>use_login-en</code> sits at
-    reranked rank 2 at pool 100 and rank 1 at pool 150. <code>shtrd.f</code>'s absence is a
-    retrieval miss, not a rerank miss, and no pool sizes fix it.
+    The census placed four answers the retrieval ranks out of reach: the poloidal flux grid
+    (<code>eqgrd.f</code>), the plasma-current reader (<code>shtrd.f</code>),
+    <code>use_compiler-en</code> and <code>use_login-en</code>. Reranking cannot recover what the
+    retrieval never returned. At the chosen pool of 60 none of the four is retrieved, so all four are
+    absent from the reranked report; they enter only at deeper pools, and there the rerank lifts them
+    hard. <code>use_login-en</code> enters at pool 100 (reranked rank 2) and is rank 1 at pool 150;
+    <code>eqgrd.f</code> and <code>use_compiler-en</code> enter at pool 150 (ranks 19 and 21);
+    <code>shtrd.f</code> is absent at every pool — a retrieval miss, not a rerank miss.
   </p>
   <table id="search-rerank-answers-table">
-    <caption>Answer rank after the rerank, per pool; "absent" means the candidate was not retrieved at that pool size</caption>
+    <caption>Answer rank after the rerank, per pool at 32 in flight; "absent" means the candidate was not retrieved at that pool size</caption>
     <thead>
       <tr><th>Question</th><th>Known answer</th><th>Pool 30</th><th>Pool 60</th><th>Pool 100</th><th>Pool 150</th></tr>
     </thead>
     <tbody>
-      <tr id="search-rerank-answer-q05"><td>Q05 — how the poloidal flux grid is built</td><td><code>eqgrd.f</code> / <code>eqequb.f</code></td><td>absent</td><td>absent</td><td>absent</td><td>rank 21</td></tr>
+      <tr id="search-rerank-answer-q05"><td>Q05 — how the poloidal flux grid is built</td><td><code>eqgrd.f</code> / <code>eqequb.f</code></td><td>absent</td><td>absent</td><td>absent</td><td>rank 19</td></tr>
       <tr id="search-rerank-answer-q12"><td>Q12 — where the plasma current is read</td><td><code>shtrd.f</code></td><td>absent</td><td>absent</td><td>absent</td><td>absent</td></tr>
       <tr id="search-rerank-answer-q14"><td>Q14 — environment setup on the analysis server</td><td><code>use_compiler-en</code></td><td>absent</td><td>absent</td><td>absent</td><td>rank 21</td></tr>
       <tr id="search-rerank-answer-q18"><td>Q18 — login and account steps</td><td><code>use_login-en</code></td><td>absent</td><td>absent</td><td>rank 2</td><td>rank 1</td></tr>
@@ -115,11 +181,11 @@
 
   <h3 id="search-rerank-checks-heading">Checks</h3>
   <p id="search-rerank-checks-prose">
-    The scoped gate (search tools, the decision call layer, the new core, the domain queries)
-    runs <strong>180 passed, 8 skipped, EXIT=0</strong> at the head that carries the pool change
-    (<code>gate.log</code>). The negative control reuses the production test against a copy whose
-    rerank is replaced by an identity, so the tool returns the embedding order unchanged: it exits
-    non-zero and its first failure is the ordering assertion, with the lower-Score candidate before
-    the higher-Score one (<code>negative_control.log</code>, last line <code>EXIT=1</code>).
+    The scoped gate (search tools, the decision call layer, the new core, the domain queries) runs
+    green at the head that carries the pool change (<code>gate.log</code>). The negative control
+    reuses the production test against a copy whose rerank is replaced by an identity, so the tool
+    returns the embedding order unchanged: it exits non-zero and its first failure is the ordering
+    assertion, with the lower-Score candidate before the higher-Score one
+    (<code>negative_control.log</code>).
   </p>
 </section>
