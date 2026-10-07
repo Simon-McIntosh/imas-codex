@@ -21,9 +21,9 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="70">
+<meta name="plan-version" content="71">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -161,73 +161,12 @@
       listed.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
     <h2 id="s8">§8 — Jev rerank in DD-path search</h2>
-<section data-reckon="section" data-id="s8" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>
-      The candidate stage already reranks DD paths with Jev for each source. The
-      <code>search_dd_paths</code> tool, which a person uses to check or correct a binding, does not.
-      <code>discovery-judgments-through-jev</code> §9 is building a search-time Jev rerank for code and
-      wiki search; its prototype raised nDCG@10 from 0.25 to 0.51. The DD-path tool reuses that rerank
-      owner and does not build a second one. Its own measure uses mapping questions: the plasma
-      current's homes, where flux-loop positions live, which IDS holds a coil current.
-    </p>
-    <p>
-      Two decisions were made by the lead on 2026-10-07. First, the rerank runs by default only where
-      code and wiki search already rerank: the full and facility servers. A server started with
-      <code>--read-only</code> or <code>--dd-only</code>, which is what the public containers run, never
-      reranks, so no external query spends Jev money. Second, every Jev caller skips cleanly when
-      <code>OPENROUTER_API_KEY_IMAS_CODEX</code> is not set. Today <code>rerank_pool</code> attempts
-      every call and only then falls back. The candidate stage logs one failure for each of its
-      sources, and each source is left unjudged for a later retry.
-    </p>
-    <p>
-      <strong>Node</strong> <code>decisions-key-skip</code>, role implement, 45 min. Write paths:
-      <code>imas_codex/discovery/base/judgment.py</code>, <code>imas_codex/ids/candidates.py</code>,
-      <code>tests/discovery/test_decisions_key_skip.py</code>,
-      <code>docs/evidence/fragments/jt60sa-imas-maps/decisions-key-skip.html</code>.
-      <code>judgment.py</code> gains one predicate that reports whether the decisions key is present.
-      It is built on <code>get_api_key</code> in <code>imas_codex/discovery/base/llm.py</code> rather
-      than on a second spelling of the variable name. With no key, <code>rerank_pool</code> makes no
-      call and returns the embedding order, a note naming the missing variable, and a cost of zero. The
-      candidate stage checks once before its first source. It then logs one warning naming the
-      variable and leaves every source unjudged, exactly as a transport failure does, without a call
-      per source. <strong>Done when</strong> tests pin both skips with the variable removed from the
-      environment and a decisions transport that fails the test if it is ever called. The existing
-      judgment, enrichment-rerank and search-tools tests still pass. The negative control removes the
-      predicate check and shows the transport being called.
-    </p>
-    <p>
-      <strong>Node</strong> <code>dd-path-search-rerank</code>, role implement, 2.5 h. Write paths:
-      <code>imas_codex/tools/graph_search.py</code>, <code>imas_codex/tools/__init__.py</code>,
-      <code>imas_codex/llm/server.py</code>, <code>tests/tools/test_dd_path_search_rerank.py</code>,
-      <code>tests/tools/fixtures/dd_mapping_questions.json</code>,
-      <code>docs/evidence/fragments/jt60sa-imas-maps/dd-path-search-rerank.html</code>. The DD search
-      tool takes a rerank switch at construction. The server sets it from its mode, on unless
-      read-only, and the switch's default for direct use is off. When on, the hits pass through one
-      call to <code>rerank_candidates</code> in <code>imas_codex/llm/search_tools.py</code>, the shared
-      owner, so no second rerank is built. <strong>Done when</strong> nDCG@10 on 15 hand-labelled
-      mapping questions in the fixture is reported before and after the rerank. Examples are the
-      plasma current's homes, where flux-loop positions live, and which IDS holds a coil current.
-      Tests pin three things: a full server reranks, a read-only or DD-only server never calls the
-      rerank, and the rerank is one call into the shared owner. The existing DD search tests still
-      pass.
-    </p>
-    <p>
-      <strong>Node</strong> <code>dd-search-rerank-note</code>, role implement, 30 min. Write paths:
-      <code>imas_codex/tools/graph_search.py</code>, <code>imas_codex/llm/search_formatters.py</code>,
-      <code>tests/tools/test_dd_path_search_rerank.py</code>,
-      <code>docs/evidence/fragments/jt60sa-imas-maps/dd-search-rerank-note.html</code>.
-      <code>_rerank_dd_hits</code> drops the note that <code>rerank_candidates</code> returns. So a
-      caller of <code>search_dd_paths</code> cannot tell a rerank that ran from one that fell back to
-      embedding order, either because the decisions key is absent or because the time budget elapsed.
-      The note goes on the result summary as <code>rerank_note</code>.
-      <code>format_search_dd_report</code> then prints it beneath the hits, as the code and wiki
-      reports already do. The two server-mode tests also count <code>rerank_candidates</code> calls
-      rather than reading the switch. <strong>Done when</strong> tests pin that a skipped rerank, with
-      the key removed, leaves the note in the summary and in the formatted report, that a completed
-      rerank leaves neither, and that a read-only or DD-only server makes zero
-      <code>rerank_candidates</code> calls.
-    </p>
+<section data-reckon="section" data-id="s8" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">DD-path search reranks through the shared Jev owner on full and facility servers only, lifting nDCG@10 from 0.345 to 0.410 on completed labels, and reports when it fell back. Every Jev caller now skips cleanly without the OpenRouter key. <a href="s8">full record</a></p>
+</section>
 
     <section class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
@@ -404,7 +343,7 @@
     <div class="r-comment-body"><p>dd-search-rerank-note — _rerank_dd_hits returns the rerank_candidates note and search_dd_paths puts it on the result summary as rerank_note, printed beneath the hits by format_search_dd_report; gate tests/tools/test_dd_path_search_rerank.py + tests/tools/test_tools.py 27 passed EXIT=0, negative control 1 failed EXIT=1.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261007T164051199743-review-of-dd-search-rerank-note" data-who="reckon-build" data-when="2026-10-07T16:56:52.075Z">
-    <div class="r-comment-body"><p>review of dd-search-rerank-note (r-20261007T163030363738) stored at head 54c5a3f66 — §8 dd-search-rerank-note scored 116/120, status parsed; the note rerank_candidates returns now reaches SearchPathsResult.summary[&quot;rerank_note&quot;] and the formatted DD report; two follow-ons (record omits baseline/after arms; a pre-existing live-graph gate test flaked once under contention).</p></div>
+    <div class="r-comment-body"><p>review of dd-search-rerank-note (r-20261007T163030363738) stored at head 54c5a3f66 — §8 dd-search-rerank-note scored 116/120, status parsed; the note rerank_candidates returns now reaches SearchPathsResult.summary["rerank_note"] and the formatted DD report; two follow-ons (record omits baseline/after arms; a pre-existing live-graph gate test flaked once under contention).</p></div>
 </div>
 </section>
 </main>
