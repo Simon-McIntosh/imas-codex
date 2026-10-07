@@ -113,7 +113,7 @@ async def rerank_pool(
     question_name: str = "relevance_grade",
     concurrency: int = _DEFAULT_CONCURRENCY,
     budget_seconds: float | None = None,
-) -> tuple[list[Mapping[str, Any]], str | None]:
+) -> tuple[list[Mapping[str, Any]], str | None, float]:
     """Reorder a candidate pool by a graded judgement, keeping order on failure.
 
     The pool is a retrieval's own order (nearest embedding first). Each
