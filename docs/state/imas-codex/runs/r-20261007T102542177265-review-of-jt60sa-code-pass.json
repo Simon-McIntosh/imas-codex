@@ -539,6 +539,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "8a63ba5cd761af352621577aa4e2322fc1054a53",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 755,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261007T102542177265-review-of-jt60sa-code-pass",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 755,
+        "path": "/tmp/reckon-crew-scratch/r-20261007T102542177265-review-of-jt60sa-code-pass"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/review-of-jt60sa-code-pass",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
