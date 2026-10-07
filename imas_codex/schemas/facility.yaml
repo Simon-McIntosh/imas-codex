@@ -492,6 +492,40 @@ enums:
       other:
         description: Other file types
 
+  CodeRelevanceRole:
+    description: >-
+      The role a code file plays for facility-to-IMAS mapping. The fixed order
+      of the permissible values is the order relevance_role_probs follows.
+    permissible_values:
+      diagnostic_data_access:
+        description: Reads or retrieves measured diagnostic or shot data from a facility data system
+      signal_processing:
+        description: Calibrates, corrects, fits or analyses measured signals
+      machine_description:
+        description: >-
+          Sensor positions, lines of sight, coil, vessel or limiter geometry,
+          channel maps, calibration constants or signal conventions
+      imas_mapping:
+        description: Maps facility data to or from IMAS IDSs
+      simulation_or_solver:
+        description: Predictive simulation or physics-solver internals
+      visualization:
+        description: Plots or displays data
+      control_or_operations:
+        description: Real-time control, plant operation or hardware configuration
+      infrastructure_or_utility:
+        description: >-
+          Build files, tests, generic utilities, vendored libraries,
+          data-system internals
+
+  CodeRelevanceStage:
+    description: Which decision arm produced a CodeFile's stored relevance.
+    permissible_values:
+      name:
+        description: The names arm judged the file from its path and parent context
+      content:
+        description: The content arm judged the file from its evidence and preview
+
   DocumentSourceType:
     description: >-
       How a document was discovered. Determines fetch strategy
@@ -2961,35 +2995,77 @@ classes:
         range: datetime
       score_composite:
         description: >-
-          Composite interest score (0.0-1.0, max of per-dimension scores).
+          Jev content relevance (0.0-1.0): the largest of the four scope
+          probabilities from the file's relevance decision. Written by both
+          decision arms and the one stored owner of a file's relevance.
         range: float
         required: true
         annotations:
           required_after: scored
-      # Per-dimension scores (LLM-assigned, 0.0-1.0 each)
-      score_modeling_code:
-        description: Score for forward modeling/simulation code
-        range: float
-      score_analysis_code:
-        description: Score for experimental analysis code
-        range: float
-      score_operations_code:
-        description: Score for real-time operations code
-        range: float
+      # Jev content-relevance facets, each the answered level divided by its
+      # top level. The content arm writes them; score_data_access is the
+      # data-access facet.
       score_data_access:
-        description: Score for data access tools
+        description: >-
+          Jev data-access facet (0.0-1.0): the data-access-depth level divided
+          by its top level.
         range: float
-      score_workflow:
-        description: Score for orchestration and batch processing
+      score_signal_processing:
+        description: >-
+          Jev signal-processing facet (0.0-1.0): the signal-processing-depth
+          level divided by its top level.
         range: float
-      score_visualization:
-        description: Score for plotting and rendering tools
+      score_machine_description:
+        description: >-
+          Jev machine-description facet (0.0-1.0): the machine-description-depth
+          level divided by its top level.
         range: float
-      score_imas:
-        description: Score for IMAS relevance
+      score_imas_mapping:
+        description: >-
+          Jev IMAS-mapping facet (0.0-1.0): the IMAS-mapping-depth level divided
+          by its top level.
         range: float
-      score_convention:
-        description: Score for COCOS convention handling
+      relevance_grade:
+        description: >-
+          Jev content relevance grade (0-4) from the content arm's relevance
+          question.
+        range: float
+      # Each Score field carries its answer distribution ordered by level index
+      # and the answer's confidence.
+      relevance_grade_probs:
+        description: Relevance-grade probabilities, ordered by level index
+        range: float
+        multivalued: true
+      relevance_grade_confidence:
+        description: Confidence of the relevance-grade answer
+        range: float
+      score_data_access_probs:
+        description: Data-access facet probabilities, ordered by level index
+        range: float
+        multivalued: true
+      score_data_access_confidence:
+        description: Confidence of the data-access facet answer
+        range: float
+      score_signal_processing_probs:
+        description: Signal-processing facet probabilities, ordered by level index
+        range: float
+        multivalued: true
+      score_signal_processing_confidence:
+        description: Confidence of the signal-processing facet answer
+        range: float
+      score_machine_description_probs:
+        description: Machine-description facet probabilities, ordered by level index
+        range: float
+        multivalued: true
+      score_machine_description_confidence:
+        description: Confidence of the machine-description facet answer
+        range: float
+      score_imas_mapping_probs:
+        description: IMAS-mapping facet probabilities, ordered by level index
+        range: float
+        multivalued: true
+      score_imas_mapping_confidence:
+        description: Confidence of the IMAS-mapping facet answer
         range: float
       score_reason:
         description: Brief LLM explanation for the assigned scores
@@ -3014,8 +3090,19 @@ classes:
         range: float
       relevance_role:
         description: The role the decisions model chose for the CodeFile
+        range: CodeRelevanceRole
+      relevance_role_probs:
+        description: >-
+          Role-choice probabilities, aligned to the fixed order of
+          CodeRelevanceRole
+        range: float
+        multivalued: true
+      relevance_role_confidence:
+        description: Confidence of the role-choice answer
+        range: float
       relevance_stage:
-        description: Which arm produced the stored relevance, "name" or "content"
+        description: Which arm produced the stored relevance
+        range: CodeRelevanceStage
       relevance_model:
         description: The decisions model that produced the stored relevance
       triaged_at:
@@ -3066,17 +3153,11 @@ classes:
       evidence_linked:
         description: Whether evidence node has been linked to this file
         range: boolean
-      file_category:
-        description: "[DEPRECATED] Category of file (use node types instead)"
-        range: FileCategory
       ingested_at:
         description: When file content was ingested
         range: datetime
       preview_text:
         description: Extracted text preview for scoring context
-      score_documentation:
-        description: Score for documentation value (0.0-1.0)
-        range: float
       skip_reason:
         description: One-line reason why this file was skipped during triage or scoring
       # Processing metadata

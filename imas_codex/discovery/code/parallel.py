@@ -359,7 +359,6 @@ def get_code_discovery_stats(
         min_ingest_relevance: Minimum content relevance for ingest/embed
             pending counts.  Defaults to ``get_code_ingest_threshold()``.
     """
-    from imas_codex.discovery.code.scorer import CODE_RELEVANCE_EXPR
     from imas_codex.settings import get_code_ingest_threshold, get_code_triage_threshold
 
     if min_relevance is None:
@@ -419,10 +418,10 @@ def get_code_discovery_stats(
 
         # Pending enrich: triaged but not enriched (above triage threshold)
         enrich_pending = gc.query(
-            f"""
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            """
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
             WHERE cf.status = 'triaged'
-              AND {CODE_RELEVANCE_EXPR} >= $min_relevance
+              AND cf.score_composite >= $min_relevance
               AND coalesce(cf.is_enriched, false) = false
             RETURN count(cf) AS pending
             """,
@@ -445,11 +444,11 @@ def get_code_discovery_stats(
 
         # Pending ingest: scored code files (consistent with claim filters)
         ingest_result = gc.query(
-            f"""
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            """
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
             WHERE cf.status = 'scored'
               AND cf.relevance_stage = 'content'
-              AND {CODE_RELEVANCE_EXPR} >= $min_ingest_relevance
+              AND cf.score_composite >= $min_ingest_relevance
               AND coalesce(cf.line_count, 0) <= 10000
             RETURN count(cf) AS pending
             """,
@@ -494,7 +493,7 @@ def get_code_discovery_stats(
             MATCH (cc:CodeChunk)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             MATCH (cc)<-[:HAS_CHUNK]-(:CodeExample)<-[:HAS_EXAMPLE]-(cf:CodeFile)
             WHERE cf.relevance_stage = 'content'
-              AND {CODE_RELEVANCE_EXPR} >= $min_ingest_relevance
+              AND cf.score_composite >= $min_ingest_relevance
             RETURN count(cc) AS total,
                    count(cc.embedding) AS embedded,
                    count(CASE WHEN {pending_embed_predicate("cc")}

@@ -6,6 +6,60 @@ dynamic: true
 ---
 
 {
+{% if with_content %}
+  "relevance_grade": {
+    "type": "score",
+    "instructions": "How much does the source file at `file.path` matter to someone mapping this facility's diagnostic signals, machine description and data access into IMAS?",
+    "criteria": [
+      "Unrelated: generic utilities, vendored libraries, build or test scaffolding, or physics simulation with no measured inputs.",
+      "Peripheral: plotting, GUI or file-format helpers that only pass diagnostic data through without interpreting it.",
+      "Supporting: facility-specific code that touches measured data or the machine description indirectly, such as wrappers, configuration or output writers.",
+      "Direct: reads measured diagnostic or shot data from a facility data system, processes measured signals, or carries sensor and machine geometry.",
+      "Core: the primary reader, processor or definition for a diagnostic or for the machine description, which a mapper would have to read to get the mapping right."
+    ]
+  },
+  "data_access_depth": {
+    "type": "score",
+    "instructions": "How deeply does the source file at `file.path` access the facility's measured-data systems?",
+    "criteria": [
+      "No access to measured data.",
+      "Mentions or configures a data system without reading data.",
+      "Reads measured data through a higher-level wrapper.",
+      "Calls the facility data-system API directly to read signals or shot records.",
+      "Implements or declares the data-access interface itself."
+    ]
+  },
+  "signal_processing_depth": {
+    "type": "score",
+    "instructions": "How much does the source file at `file.path` transform measured diagnostic signals?",
+    "criteria": [
+      "No processing of measured signals.",
+      "Trivial handling such as unit scaling or copying.",
+      "Filtering, calibration or correction of measured signals.",
+      "Fitting, inversion or reconstruction constrained by measured signals."
+    ]
+  },
+  "machine_description_depth": {
+    "type": "score",
+    "instructions": "How much of this facility's machine or diagnostic description does the source file at `file.path` carry?",
+    "criteria": [
+      "None.",
+      "Refers to geometry or channel maps defined elsewhere.",
+      "Reads sensor positions, coil or vessel geometry, or channel maps from an input file.",
+      "Defines sensor positions, lines of sight, coil, limiter or vessel geometry, channel maps or calibration constants itself."
+    ]
+  },
+  "imas_mapping_depth": {
+    "type": "score",
+    "instructions": "How directly does the source file at `file.path` map this facility's data to or from IMAS?",
+    "criteria": [
+      "No IMAS involvement, or only a generic copy of an IMAS or ITM access library.",
+      "Uses IMAS types inside another code without mapping facility data.",
+      "Fills or reads IMAS IDS fields for this facility's data.",
+      "Defines a facility-specific mapping table between local signals and IMAS paths."
+    ]
+  },
+{% endif %}
   "loads_diagnostic_data": {
     "type": "noul",
     "instructions": [

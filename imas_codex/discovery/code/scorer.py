@@ -1,18 +1,23 @@
-"""Two-stage scoring for discovered CodeFiles.
+"""Two-stage relevance for discovered CodeFiles, judged by a decisions model.
 
-Pass 1 (Triage): a decisions model answers six typed questions about the file
-from minimal context — parent directory description, filename, sibling names
-and the facility's data-access patterns.  A file's relevance is the largest of
-the four scope probabilities (loads, processes, describes, maps_to_imas).
-Files whose relevance reaches the triage threshold proceed to enrichment.
+Pass 1 (Triage): the names arm asks six typed questions about the file from
+minimal context — parent directory description, filename, sibling names and
+the facility's data-access patterns.  A file's relevance is the largest of the
+four scope probabilities (loads, processes, describes, maps_to_imas).  Files
+whose relevance reaches the triage threshold proceed to enrichment.
 
-Pass 2 (Score): the content scorer's LLM call still writes descriptions and
-search facets from enrichment evidence, and a content-arm decision records the
-file's content relevance.  Ingest admits a scored file whose content relevance
-reaches the ingest threshold.
+Pass 2 (Score): the content arm asks the same six questions plus a graded
+relevance Score and four facet Scores, judged from the file's preview and its
+pattern evidence.  Beside each judgement a local model writes a one-sentence
+description, and only for a file whose content relevance reaches the ingest
+threshold.  Ingest admits a scored file whose content relevance reaches the
+ingest threshold.
 
-Both decision arms share the same eight relevance fields and the persistence
-helper below; the stage field records which arm produced the stored values.
+``score_composite`` is the one stored owner of a file's relevance: both arms
+write it as the largest of the four scope probabilities of that decision.  The
+names arm records it with ``relevance_stage='name'`` and the content arm
+overwrites it with ``relevance_stage='content'``.  The stage field records
+which arm produced the stored values.
 
 Lifecycle: discovered → triaged → (enrich) → scored → ingested | skipped
 """
@@ -20,25 +25,25 @@ Lifecycle: discovered → triaged → (enrich) → scored → ingested | skipped
 from __future__ import annotations
 
 import logging
-import time
+from functools import lru_cache
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.scoring import (
-    CODE_SCORE_DIMENSIONS,
-    CodeScoreFields,
-    max_composite,
-)
 from imas_codex.graph import GraphClient
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Score dimensions — canonical list from shared scoring module
+# Score dimensions — the four Jev code facets stored on CodeFile
 # ---------------------------------------------------------------------------
 
-SCORE_DIMENSION_NAMES = CODE_SCORE_DIMENSIONS
+SCORE_DIMENSION_NAMES = [
+    "score_data_access",
+    "score_signal_processing",
+    "score_machine_description",
+    "score_imas_mapping",
+]
 
 # The four scope questions. A file's relevance is the largest noul over these.
 SCOPE_NOULS = (
@@ -57,15 +62,45 @@ _RELEVANCE_FIELDS = {
     "is_simulation": "relevance_simulation",
 }
 
-# The Cypher that reads a CodeFile's relevance as the max of the four scope
-# fields.  Shared so the triage threshold, the ingest threshold and the
-# highest-relevance-first ordering all measure the same quantity.
-CODE_RELEVANCE_EXPR = (
-    "reduce(max = 0.0, x IN "
-    "[sf.relevance_loads, sf.relevance_processes, "
-    "sf.relevance_describes, sf.relevance_imas] "
-    "| CASE WHEN coalesce(x, 0.0) > max THEN x ELSE max END)"
+# The content arm's graded Score questions and the CodeFile field each fills.
+# The stored value is the Score divided by its top level, so it lies in 0-1;
+# ``relevance_grade`` keeps its own 0-4 scale.
+FACET_QUESTION_FIELDS = {
+    "data_access_depth": "score_data_access",
+    "signal_processing_depth": "score_signal_processing",
+    "machine_description_depth": "score_machine_description",
+    "imas_mapping_depth": "score_imas_mapping",
+}
+RELEVANCE_GRADE_QUESTION = "relevance_grade"
+
+# The role enum's fixed order. ``relevance_role_probs`` follows it, so a
+# reader can compare two files' role distributions index by index.
+RELEVANCE_ROLE_ORDER = (
+    "diagnostic_data_access",
+    "signal_processing",
+    "machine_description",
+    "imas_mapping",
+    "simulation_or_solver",
+    "visualization",
+    "control_or_operations",
+    "infrastructure_or_utility",
 )
+
+
+def _ordered_probs(probabilities: Any, keys: Any) -> list[float]:
+    """A distribution as a list of floats ordered by *keys*.
+
+    Missing levels read as 0.0, so the stored list always covers every offered
+    level in the schema's fixed order however sparsely the model answered.
+    """
+    source = probabilities if isinstance(probabilities, dict) else {}
+    out: list[float] = []
+    for key in keys:
+        value = source.get(key)
+        if value is None:
+            value = source.get(str(key), 0.0)
+        out.append(round(float(value or 0.0), 4))
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -73,18 +108,20 @@ CODE_RELEVANCE_EXPR = (
 # ---------------------------------------------------------------------------
 
 
-def build_triage_questions() -> dict[str, Any]:
+def build_triage_questions(with_content: bool = False) -> dict[str, Any]:
     """Render the decisions questions template into a questions mapping.
 
-    The six questions and their wording are declared in
+    The questions and their wording are declared in
     ``imas_codex/llm/prompts/code/triage.md`` and rendered through
-    :func:`render_prompt`; this loads the rendered JSON body.
+    :func:`render_prompt`.  The names arm takes the six identity questions;
+    the content arm additionally takes the graded relevance Score and the four
+    facet Scores.
     """
     import json
 
     from imas_codex.llm.prompt_loader import render_prompt
 
-    return json.loads(render_prompt("code/triage", {}))
+    return json.loads(render_prompt("code/triage", {"with_content": with_content}))
 
 
 def facility_relevance_block(facility_id: str, facility_config: dict) -> dict[str, Any]:
@@ -115,7 +152,8 @@ def build_triage_state(
 
     Carries the facility block plus the file's path, language, directory,
     directory description and sibling names.  The content arm additionally
-    carries ``content_head`` — the first 1500 characters of the file preview.
+    carries ``content_head`` — the first 1500 characters of the file preview —
+    and the file's pattern evidence.
     """
     state: dict[str, Any] = {
         "facility": facility_relevance_block(facility_id, facility_config),
@@ -129,12 +167,37 @@ def build_triage_state(
     }
     if with_content:
         state["file"]["content_head"] = (file_row.get("preview_text") or "")[:1500]
+        state["file"]["pattern_evidence"] = {
+            "categories": file_row.get("pattern_categories"),
+            "total_matches": file_row.get("total_pattern_matches"),
+            "line_count": file_row.get("line_count"),
+        }
     return state
 
 
-def triage_relevance(answers: dict[str, Any]) -> float:
+def scope_relevance(nouls: dict[str, float]) -> float:
     """A file's relevance: the largest of the four scope nouls."""
-    return max(float(answers[name]["noul"]) for name in SCOPE_NOULS)
+    return max(float(nouls[name]) for name in SCOPE_NOULS)
+
+
+def triage_relevance(answers: dict[str, Any]) -> float:
+    """A file's relevance from one decision's answers."""
+    return scope_relevance({name: float(answers[name]["noul"]) for name in SCOPE_NOULS})
+
+
+@lru_cache(maxsize=1)
+def _content_top_levels() -> dict[str, int]:
+    """The highest level index the content arm offers per Score question.
+
+    Read from the rendered questions template so the stored facet value is
+    always divided by the level count the model was actually shown.
+    """
+    questions = build_triage_questions(with_content=True)
+    return {
+        name: max(len(question.get("criteria") or []) - 1, 0)
+        for name, question in questions.items()
+        if question.get("type") == "score"
+    }
 
 
 def _relevance_item(
@@ -145,10 +208,18 @@ def _relevance_item(
     model: str | None,
     cost: float,
 ) -> dict[str, Any]:
-    """Build the persisted relevance fields from one decision's answers."""
+    """Build the persisted relevance fields from one decision's answers.
+
+    Both arms write ``score_composite`` — the largest of the four scope
+    probabilities — so the stored relevance and the gate never drift apart.
+    The content arm additionally writes the graded relevance and the four facet
+    Scores, each divided by its top level, and every judgement's distribution
+    and confidence beside its value.
+    """
     item: dict[str, Any] = {
         "id": sf_id,
         "score_cost": cost,
+        "score_composite": round(triage_relevance(answers), 4),
         "relevance_stage": stage,
         "relevance_model": model or "",
         "relevance_role": (answers.get("role") or {}).get("choice") or "",
@@ -156,121 +227,135 @@ def _relevance_item(
     for question, field in _RELEVANCE_FIELDS.items():
         answer = answers.get(question) or {}
         item[field] = round(float(answer.get("noul", 0.0)), 4)
+
+    role = answers.get("role") or {}
+    item["relevance_role_probs"] = _ordered_probs(
+        role.get("probabilities"), RELEVANCE_ROLE_ORDER
+    )
+    item["relevance_role_confidence"] = round(
+        float(role.get("confidence", 0.0) or 0.0), 4
+    )
+
+    if stage == "content":
+        top_levels = _content_top_levels()
+        for question, field in FACET_QUESTION_FIELDS.items():
+            answer = answers.get(question) or {}
+            top = top_levels.get(question, 0)
+            score = float(answer.get("score", 0.0) or 0.0)
+            item[field] = round(score / top, 4) if top > 0 else 0.0
+            item[f"{field}_probs"] = _ordered_probs(
+                answer.get("probabilities"), range(top + 1)
+            )
+            item[f"{field}_confidence"] = round(
+                float(answer.get("confidence", 0.0) or 0.0), 4
+            )
+        grade = answers.get(RELEVANCE_GRADE_QUESTION) or {}
+        grade_top = top_levels.get(RELEVANCE_GRADE_QUESTION, 0)
+        item["relevance_grade"] = round(float(grade.get("score", 0.0) or 0.0), 4)
+        item["relevance_grade_probs"] = _ordered_probs(
+            grade.get("probabilities"), range(grade_top + 1)
+        )
+        item["relevance_grade_confidence"] = round(
+            float(grade.get("confidence", 0.0) or 0.0), 4
+        )
     return item
 
 
-def _relevance_set_clause() -> str:
+def _relevance_set_clause(*, include_content: bool = False) -> str:
     """The Cypher ``SET`` fragment writing every relevance field from an item."""
-    return """,
+    clause = """,
+                    sf.score_composite = item.score_composite,
                     sf.relevance_loads = item.relevance_loads,
                     sf.relevance_processes = item.relevance_processes,
                     sf.relevance_describes = item.relevance_describes,
                     sf.relevance_imas = item.relevance_imas,
                     sf.relevance_simulation = item.relevance_simulation,
                     sf.relevance_role = item.relevance_role,
+                    sf.relevance_role_probs = item.relevance_role_probs,
+                    sf.relevance_role_confidence = item.relevance_role_confidence,
                     sf.relevance_stage = item.relevance_stage,
                     sf.relevance_model = item.relevance_model"""
+    if include_content:
+        for field in (*FACET_QUESTION_FIELDS.values(), "relevance_grade"):
+            clause += (
+                f",\n                    sf.{field} = item.{field}"
+                f",\n                    sf.{field}_probs = item.{field}_probs"
+                f",\n                    sf.{field}_confidence = item.{field}_confidence"
+            )
+    return clause
 
 
-# ---------------------------------------------------------------------------
-# Dynamic calibration (same architecture as paths/frontier.py)
-# ---------------------------------------------------------------------------
+# stored CodeFile field -> the scope question it carries the noul for
+_STORED_SCOPE_FIELDS = {
+    "loads_diagnostic_data": "relevance_loads",
+    "processes_diagnostic_signals": "relevance_processes",
+    "describes_machine_or_diagnostics": "relevance_describes",
+    "maps_to_imas": "relevance_imas",
+}
 
-_calibration_cache: dict[str, tuple[float, dict]] = {}
-_CALIBRATION_TTL_SECONDS = 300.0  # 5 minutes — matches LLM provider ephemeral cache TTL
+
+def _stored_composites(rows: list[dict[str, Any]]):
+    for row in rows:
+        nouls = {
+            question: float(row.get(field) or 0.0)
+            for question, field in _STORED_SCOPE_FIELDS.items()
+        }
+        yield (
+            row["id"],
+            row.get("stage"),
+            float(row.get("stored") or 0.0),
+            round(scope_relevance(nouls), 4),
+        )
 
 
-def sample_code_dimension_calibration(
-    facility: str | None = None,
-    per_level: int = 3,
-) -> dict[str, dict[str, list[dict[str, Any]]]]:
-    """Sample calibration examples per score dimension at 5 levels.
+def recompute_stored_composites() -> dict[str, int]:
+    """Rewrite ``score_composite`` on every staged CodeFile from its nouls.
 
-    Draws ``score_*`` from scored-only CodeFiles (the cohort that passed triage
-    and enrichment), so scoring calibrates among peers.  Cached with a 5-minute
-    TTL — stable within a batch, evolving over time.
-
-    Returns:
-        Nested dict: dimension -> level -> list of examples.
-        Each example: path, facility, score, purpose, description.
+    Both arms write ``score_composite`` as the largest of the four scope nouls,
+    so a staged file whose stored composite is not that maximum disagrees with
+    the rule ``_relevance_item`` applies.  This walks every CodeFile carrying a
+    ``relevance_stage`` — both the ``name`` and ``content`` arms — and rewrites
+    the field with the value ``scope_relevance`` produces, reporting how many
+    rows disagreed before the write and how many still do after it.
     """
-    global _calibration_cache  # noqa: PLW0603
-
-    cache_key = f"score:{facility}:{per_level}"
-    now = time.monotonic()
-
-    if cache_key in _calibration_cache:
-        cached_time, cached_data = _calibration_cache[cache_key]
-        if (now - cached_time) < _CALIBRATION_TTL_SECONDS:
-            return cached_data
-
-    samples = _fetch_code_dimension_calibration(facility, per_level)
-    _calibration_cache[cache_key] = (now, samples)
-    return samples
-
-
-def _fetch_code_dimension_calibration(
-    facility: str | None,
-    per_level: int,
-) -> dict[str, dict[str, list[dict[str, Any]]]]:
-    """Fetch dimension calibration from scored CodeFile nodes (uncached)."""
-    status_clause = "cf.status IN ['scored', 'ingested']"
-
-    buckets: list[tuple[str, float, float]] = [
-        ("lowest", 0.0, 0.15),
-        ("low", 0.10, 0.30),
-        ("medium", 0.40, 0.60),
-        ("high", 0.70, 0.90),
-        ("highest", 0.90, 1.01),
-    ]
-
-    samples: dict[str, dict[str, list[dict[str, Any]]]] = {}
-
+    fields = ", ".join(
+        f"cf.{field} AS {field}" for field in _STORED_SCOPE_FIELDS.values()
+    )
+    select = f"""
+        MATCH (cf:CodeFile)
+        WHERE cf.relevance_stage IS NOT NULL
+        RETURN cf.id AS id, cf.relevance_stage AS stage,
+               cf.score_composite AS stored, {fields}
+    """
     with GraphClient() as gc:
-        for dim, graph_prop in zip(
-            SCORE_DIMENSION_NAMES, SCORE_DIMENSION_NAMES, strict=True
-        ):
-            samples[dim] = {}
+        before = list(_stored_composites(gc.query(select)))
+        updates = [
+            {"id": file_id, "composite": composite}
+            for file_id, _stage, _stored, composite in before
+        ]
+        if updates:
+            gc.query(
+                """
+                UNWIND $updates AS u
+                MATCH (cf:CodeFile {id: u.id})
+                SET cf.score_composite = u.composite
+                """,
+                updates=updates,
+            )
+        after = list(_stored_composites(gc.query(select)))
 
-            for level_name, min_score, max_score in buckets:
-                target = (min_score + max_score) / 2
-                result = gc.query(
-                    f"""
-                    MATCH (cf:CodeFile)
-                    WHERE {status_clause}
-                        AND cf.{graph_prop} >= $min_score
-                        AND cf.{graph_prop} < $max_score
-                        AND cf.{graph_prop} IS NOT NULL
-                    RETURN cf.path AS path,
-                           cf.facility_id AS facility,
-                           cf.{graph_prop} AS score,
-                           cf.score_reason AS description
-                    ORDER BY
-                        CASE WHEN cf.facility_id = $facility
-                             THEN 0 ELSE 1 END,
-                        abs(cf.{graph_prop} - $target) ASC,
-                        cf.id ASC
-                    LIMIT $limit
-                    """,
-                    min_score=min_score,
-                    max_score=max_score,
-                    target=target,
-                    facility=facility or "",
-                    limit=per_level,
-                )
+    def _differ(rows) -> int:
+        return sum(
+            1 for _id, _s, stored, composite in rows if abs(stored - composite) > 1e-9
+        )
 
-                samples[dim][level_name] = [
-                    {
-                        "path": r["path"],
-                        "facility": r["facility"],
-                        "score": round(r["score"], 2),
-                        "purpose": "code file",
-                        "description": r["description"] or "",
-                    }
-                    for r in result
-                ]
-
-    return samples
+    return {
+        "total": len(before),
+        "differed_before": _differ(before),
+        "differed_after": _differ(after),
+        "content": sum(1 for _id, stage, _s, _c in before if stage == "content"),
+        "name": sum(1 for _id, stage, _s, _c in before if stage == "name"),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -278,13 +363,13 @@ def _fetch_code_dimension_calibration(
 # ---------------------------------------------------------------------------
 
 
-class FileTriageResult(CodeScoreFields):
-    """Per-dimension scoring result shape, retained for module re-exports.
+class FileTriageResult(BaseModel):
+    """Legacy per-dimension triage shape, retained for module re-exports.
 
     The code pipeline no longer produces these; triage now asks a decisions
     model for typed relevance judgements.  The class is kept so
-    ``imas_codex.discovery.code`` keeps importing cleanly until the package
-    re-created exports are retired.
+    ``imas_codex.discovery.code`` and the prompt loader keep importing cleanly
+    until the package re-exports are retired.
     """
 
     path: str = Field(description="The file path (echo from input)")
@@ -292,11 +377,6 @@ class FileTriageResult(CodeScoreFields):
         default="",
         description="Brief description of what the file likely contains (1 sentence)",
     )
-
-    @property
-    def triage_composite(self) -> float:
-        """Composite = max of all dimension scores."""
-        return max_composite(self.get_score_dict())
 
 
 class FileTriageBatch(BaseModel):
@@ -306,33 +386,27 @@ class FileTriageBatch(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Score models (full scoring with enrichment evidence)
+# Score models (description-only; relevance comes from the decisions model)
 # ---------------------------------------------------------------------------
 
 
-class FileScoreResult(CodeScoreFields):
-    """Full scoring result with enrichment evidence.
+class FileScoreResult(BaseModel):
+    """Description-only score result.
 
-    Inherits 9 score dimensions from CodeScoreFields.
+    The file's relevance and facet values come from the content-arm decision,
+    not from this response; the local model writes only the one-sentence
+    description, and only for a file the content decision admitted.
     """
 
     path: str = Field(description="The file path (echo from input)")
-    file_category: str = Field(
-        description="code, document, notebook, config, data, or other"
-    )
     description: str = Field(
         default="",
         description="Brief summary of what the file likely contains (1 sentence)",
     )
 
-    @property
-    def score_composite(self) -> float:
-        """Composite = max of all dimension scores."""
-        return max_composite(self.get_score_dict())
-
 
 class FileScoreBatch(BaseModel):
-    """Batch of file scoring results from LLM."""
+    """Batch of file descriptions from the local model."""
 
     results: list[FileScoreResult]
 
@@ -346,29 +420,19 @@ def _build_score_system_prompt(
     facility: str | None = None,
     focus: str | None = None,
 ) -> str:
-    """Build scorer system prompt with dimension calibration."""
+    """Build the description-only system prompt for the local model."""
     from imas_codex.llm.prompt_loader import render_prompt
 
     context: dict[str, Any] = {}
     if focus:
         context["focus"] = focus
 
-    dimension_calibration = sample_code_dimension_calibration(
-        facility=facility, per_level=5
-    )
-    has_calibration = any(
-        any(examples for examples in dim_levels.values())
-        for dim_levels in dimension_calibration.values()
-    )
-    if has_calibration:
-        context["dimension_calibration"] = dimension_calibration
-
     return render_prompt("code/scorer", context)
 
 
 def _build_score_user_prompt(file_groups: list[dict[str, Any]]) -> str:
-    """Build scorer user prompt -- enrichment evidence + preview text."""
-    lines = ["Score these files using their enrichment evidence and content preview.\n"]
+    """Build the description-only user prompt — evidence + preview text."""
+    lines = ["Describe these files using their evidence and content preview.\n"]
 
     for i, group in enumerate(file_groups, 1):
         parent_path = group.get("parent_path", "unknown")
@@ -576,17 +640,21 @@ def apply_file_scores(
     batch_cost: float = 0.0,
     content_cost: float = 0.0,
 ) -> dict[str, int]:
-    """Persist a batch's score fields together with its content relevance.
+    """Persist a batch's content relevance together with its descriptions.
 
-    A file reaches ``scored`` only when its content decision succeeded: the
-    dimension scores, the description and the content-arm relevance fields are
+    A file reaches ``scored`` when its content decision succeeded: the
+    content-arm relevance and facet fields, the description and the status are
     one write.  The ingest claim requires ``relevance_stage='content'``, so
     admitting a file on a name-arm relevance or a stale status is not possible.
     A file whose content decision failed is left at its prior status and
     unclaimed, so a later score pass reclaims and retries it.
 
+    The local model writes a description only for a file whose content
+    relevance reaches the ingest threshold, so ``results`` covers that subset;
+    every file with a successful content decision is still marked ``scored``.
+
     Args:
-        results: Score results from LLM.
+        results: Description-only score results from the local model.
         file_id_map: Mapping from path to CodeFile ID.
         content_decisions: One dict per file whose content decision succeeded,
             with ``path``, ``answers``, ``model`` and ``cost`` keys.
@@ -599,43 +667,28 @@ def apply_file_scores(
         Dict with ``scored`` and ``deferred`` counts.  A deferred file is one
         whose content decision failed and was left for a later pass.
     """
-    decision_by_path = {d["path"]: d for d in content_decisions}
+    description_by_path = {r.path: r.description for r in results}
 
-    matched = [r for r in results if file_id_map.get(r.path)]
-    scored_count = sum(1 for r in matched if r.path in decision_by_path)
+    matched = [d for d in content_decisions if file_id_map.get(d["path"])]
+    scored_count = len(matched)
     score_cost_per_file = batch_cost / scored_count if scored_count > 0 else 0.0
     content_cost_per_file = content_cost / scored_count if scored_count > 0 else 0.0
 
     scored_items = []
-    for result in matched:
-        decision = decision_by_path.get(result.path)
-        if decision is None:
-            continue
-        sf_id = file_id_map[result.path]
+    for decision in matched:
+        sf_id = file_id_map[decision["path"]]
         item = _relevance_item(
             sf_id,
             decision["answers"],
             stage="content",
             model=decision.get("model"),
-            cost=0.0,
+            cost=score_cost_per_file + content_cost_per_file,
         )
-        item["score_cost"] = score_cost_per_file + content_cost_per_file
-        item["score_composite"] = round(result.score_composite, 4)
-        item["score_reason"] = result.description
-        item["file_category"] = result.file_category
-        item["score_modeling_code"] = result.score_modeling_code
-        item["score_analysis_code"] = result.score_analysis_code
-        item["score_operations_code"] = result.score_operations_code
-        item["score_data_access"] = result.score_data_access
-        item["score_workflow"] = result.score_workflow
-        item["score_visualization"] = result.score_visualization
-        item["score_documentation"] = result.score_documentation
-        item["score_imas"] = result.score_imas
-        item["score_convention"] = result.score_convention
+        item["score_reason"] = description_by_path.get(decision["path"], "")
         scored_items.append(item)
 
     if scored_items:
-        set_clause = _relevance_set_clause()
+        set_clause = _relevance_set_clause(include_content=True)
         with GraphClient() as gc:
             gc.query(
                 f"""
@@ -643,18 +696,7 @@ def apply_file_scores(
                 MATCH (sf:CodeFile {{id: item.id}})
                 SET sf.status = 'scored',
                     sf.score_cost = coalesce(sf.score_cost, 0) + item.score_cost,
-                    sf.score_composite = item.score_composite,
-                    sf.score_reason = item.score_reason,
-                    sf.file_category = item.file_category,
-                    sf.score_modeling_code = item.score_modeling_code,
-                    sf.score_analysis_code = item.score_analysis_code,
-                    sf.score_operations_code = item.score_operations_code{set_clause},
-                    sf.score_data_access = item.score_data_access,
-                    sf.score_workflow = item.score_workflow,
-                    sf.score_visualization = item.score_visualization,
-                    sf.score_documentation = item.score_documentation,
-                    sf.score_imas = item.score_imas,
-                    sf.score_convention = item.score_convention,
+                    sf.score_reason = coalesce(item.score_reason, sf.score_reason){set_clause},
                     sf.scored_at = datetime(),
                     sf.claimed_at = null
                 """,
@@ -663,5 +705,5 @@ def apply_file_scores(
 
     return {
         "scored": len(scored_items),
-        "deferred": len(matched) - len(scored_items),
+        "deferred": len(content_decisions) - len(scored_items),
     }

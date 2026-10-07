@@ -1440,10 +1440,9 @@ def _search_code(
         physics_domain: Filter code by FacilityPath physics domain.
         min_score: Minimum score threshold for score_dimension.
         score_dimension: Score dimension to filter on (default: score_composite).
-            Valid code dimensions: score_modeling_code, score_analysis_code,
-            score_operations_code, score_data_access, score_workflow,
-            score_visualization, score_documentation, score_imas,
-            score_convention, score_composite.
+            Valid code dimensions: score_composite (Jev content relevance),
+            score_data_access, score_signal_processing,
+            score_machine_description, score_imas_mapping.
     """
     try:
         if gc is None:

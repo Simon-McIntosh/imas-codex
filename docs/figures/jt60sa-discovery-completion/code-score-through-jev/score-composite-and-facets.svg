@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="560" viewBox="0 0 1400 560" font-family="sans-serif">
+  <rect width="1400" height="560" fill="white"/>
+
+  <!-- Row 1: what the content arm writes and what the gate reads -->
+  <g font-size="22" fill="#111">
+    <text x="40" y="44">content arm writes</text>
+    <text x="640" y="44">one stored owner</text>
+    <text x="1000" y="44">ingest gate reads</text>
+  </g>
+
+  <g fill="none" stroke="#333" stroke-width="2">
+    <rect x="40" y="70" width="440" height="150"/>
+
+    <rect x="640" y="96" width="250" height="70"/>
+    <rect x="980" y="96" width="380" height="70"/>
+  </g>
+
+  <g font-size="19" fill="#111">
+    <text x="60" y="98">four scope nouls (decision answers)</text>
+    <text x="60" y="126" font-size="18" fill="#555">loads · processes · describes · IMAS</text>
+    <text x="60" y="158" fill="#0a5">four facet Scores  +  relevance_grade</text>
+    <text x="60" y="180" font-size="18" fill="#555">data access · signal processing · machine description · IMAS mapping</text>
+    <text x="60" y="204" font-size="18" fill="#555">each stored ÷ its top level; grade kept 0–4</text>
+
+    <text x="660" y="124">score_composite</text>
+    <text x="660" y="146" font-size="18" fill="#555">= max of the four scope nouls</text>
+
+    <text x="1000" y="124">composite ≥ 0.50</text>
+    <text x="1000" y="146" font-size="18" fill="#555">a facet never enters this test</text>
+  </g>
+
+  <g fill="none" stroke="#333" stroke-width="2" marker-end="url(#a)">
+    <path d="M480 145 L640 130"/>
+    <path d="M890 131 L980 131"/>
+  </g>
+
+  <!-- Row 2: mgset0.f worked example -->
+  <g font-size="22" fill="#111">
+    <text x="40" y="292">worked example — mgset0.f carries geometry the facets see</text>
+  </g>
+  <text x="40" y="320" font-size="18" fill="#555">/analysis/src/SAselene_v2.0_forPSRC/mgset0.f · relevance_stage = content</text>
+
+  <!-- noul bars -->
+  <g font-size="18" fill="#555">
+    <text x="40" y="368">loads 0.23</text>
+    <text x="40" y="400">processes 0.37</text>
+    <text x="40" y="432">describes 0.39</text>
+    <text x="40" y="464">IMAS 0.05</text>
+  </g>
+  <g fill="none" stroke="#888" stroke-width="1">
+    <path d="M200 360 L200 476"/>
+  </g>
+  <g fill="#333">
+    <rect x="200" y="352" width="69" height="14"/>
+    <rect x="200" y="384" width="111" height="14"/>
+    <rect x="200" y="416" width="117" height="14"/>
+    <rect x="200" y="448" width="15" height="14"/>
+  </g>
+
+  <!-- composite bar and facet bar -->
+  <g fill="none" stroke="#333" stroke-width="2" marker-end="url(#a)">
+    <path d="M470 400 L560 400"/>
+  </g>
+  <text x="478" y="390" font-size="18" fill="#333">max</text>
+
+  <g font-size="19" fill="#111">
+    <text x="580" y="368">score_composite 0.39</text>
+    <text x="580" y="436">machine_description facet 2.64 / 3 = 0.88</text>
+  </g>
+  <g fill="#333">
+    <rect x="580" y="380" width="156" height="16"/>
+  </g>
+  <g fill="#0a5">
+    <rect x="580" y="448" width="352" height="16"/>
+  </g>
+  <!-- ingest threshold at 0.50 on the composite scale -->
+  <g fill="none" stroke="#b00" stroke-width="1.2" stroke-dasharray="4 3">
+    <path d="M780 336 L780 500"/>
+  </g>
+  <text x="790" y="356" font-size="18" fill="#b00">ingest threshold 0.50</text>
+  <text x="580" y="524" font-size="18" fill="#b00">composite 0.39 &lt; 0.50 → not carried; the high machine-description facet never enters the gate</text>
+
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#333"/>
+    </marker>
+  </defs>
+</svg>

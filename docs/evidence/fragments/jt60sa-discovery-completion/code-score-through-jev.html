@@ -1,0 +1,112 @@
+<section>
+  <h2 id="code-score-through-jev">Every code score number is a Jev judgement, and the LLM scorer is retired</h2>
+  <p id="code-score-through-jev-result">
+    The code score stage no longer asks a local model for numbers. The model
+    that once produced eleven relevance dimensions is gone: <code>CodeFile</code>
+    loses its nine score fields and <code>file_category</code>, and a file's
+    relevance now comes from the same decisions model the triage stage calls.
+    Both arms write <code>score_composite</code> — the largest of the four scope
+    nouls the names arm already judged — so the stored relevance and the ingest
+    gate can never drift; <code>CODE_RELEVANCE_EXPR</code> and its Cypher
+    <code>max()</code> retire, and its nine readers compare against
+    <code>score_composite</code> directly. The content arm additionally asks a
+    graded <code>relevance_grade</code> (0–4) and four facet Scores — data
+    access, signal processing, machine description and IMAS mapping — from the
+    file's preview and its pattern evidence, and stores each facet divided by
+    its own top level, every judgement's distribution and confidence beside its
+    value, and the eight-role distribution in the enum's fixed order.
+    <code>imas_codex/discovery/base/scoring.py</code> is untouched and the code
+    package stops importing <code>CODE_SCORE_DIMENSIONS</code>;
+    <code>SCORE_DIMENSION_NAMES</code> becomes the four facets.
+  </p>
+  <p id="code-score-through-jev-answers">
+    Every answer shape the decisions seam admits is now validated.
+    <code>_validate_decisions_answers</code> refuses a <code>score</code> outside
+    <code>[0, top level]</code>, a distribution whose probabilities do not sum to
+    one over the levels the question offered, and a confidence outside
+    <code>[0, 1]</code>; the choice and score distribution tolerances are both
+    <code>0.005 per nonzero probability plus 1e-9</code>. The guard fires before
+    any retry: a malformed score answer is a contract violation, not a transport
+    fault. The score-stage prompt <code>code/scorer.md</code> is reduced to a
+    description-only response — the local model writes a one-sentence summary and
+    nothing else — and <code>score_worker</code> calls it only for a file whose
+    content relevance reaches <code>code-ingest-threshold</code>, after the
+    content decision has been made. Routine progress (idle polls, claimed files,
+    batch summaries, start and stop) logs at INFO or DEBUG rather than WARNING,
+    and per-file decision failures are reported once per batch as a count with
+    the first reason, so a healthy run is no longer painted red.
+  </p>
+  <p id="code-score-through-jev-evidence">
+    Gate (exit <strong>0</strong>, <span id="code-score-through-jev-gate-totals">2614 passed, 14 skipped, 5 deselected</span>,
+    on the fleet compute allocation):
+    <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+    PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery
+    tests/core tests/llm tests/ingestion tests/graph/test_cypher_property_check.py
+    tests/graph/test_generated_model_currency.py tests/graph/test_schema_context.py</code>.
+    Negative control (log recorded at
+    <code>negative_control.log</code>): in a scratch copy with the
+    <code>score</code> range check removed from
+    <code>_validate_decisions_answers</code>, the control arm ran only the two
+    score-range tests (<code>test_score_above_top_level_is_refused</code> and
+    <code>test_score_below_zero_is_refused</code>) and both fail, with 23
+    deselected, exiting <strong>1</strong>; the remaining tests' passing is
+    shown by <code>gate.log</code>, not by this arm. The distribution
+    tolerance is 0.005 per offered option — the number of criteria or score
+    levels the question offered — not per option reported nonzero: an option
+    whose true probability is 0.004 is reported as 0.00 while still holding
+    that mass, so an 87-option route choice can honestly lose a quarter of its
+    total to options that round to zero, and the honest bound counts every
+    offered option. The live graph write recomputed
+    <code>score_composite</code> from each staged file's stored nouls through
+    <code>scope_relevance</code>, the same maximum the arms' writer uses: of
+    2,311 CodeFiles carrying a <code>relevance_stage</code> (397 content, 1,914
+    name), <strong>0</strong> disagreed with the max of their nouls afterwards.
+  </p>
+  <p id="code-score-through-jev-mgset0">
+    Evidence fragment — does any facet carry a file the composite does not?
+    <code>mgset0.f</code> (<code>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</code>)
+    is judged by the content arm with a
+    <code>machine_description_depth</code> Score of <strong>2.64 of 3</strong>
+    (0.88 once divided by its top level) in the prototype file
+    <code>/home/ITER/mcintos/.cache/imas-codex-jev/jev_score_results.json</code>
+    — the file carries sensor positions or channel maps. Its scope nouls come
+    from two places and agree that it is not carried: the prototype file holds
+    loads 0.12, processes 0.28, describes <strong>0.48</strong>, IMAS 0.04, a
+    composite of <strong>0.48</strong>; the live graph's stored
+    <code>relevance_*</code> fields hold loads 0.23, processes 0.37, describes
+    <strong>0.39</strong>, IMAS 0.05, a composite of <strong>0.39</strong>. Both
+    composites sit below the <code>code-ingest-threshold</code> (0.50), so
+    <code>mgset0.f</code> is <strong>not</strong> carried under either reading
+    and the high machine-description facet never enters the test. The answer to
+    the design review question is therefore <em>no</em> — a facet with a strong
+    reading does not by itself admit a file, because the gate reads the
+    composite alone, and that is the intended coupling: a file enters ingestion
+    on the strength of a direct measured-data or machine-description role, not
+    on a supporting facet.
+  </p>
+  <figure>
+    <img src="/jt60sa-discovery-completion/figures/code-score-through-jev/score-composite-and-facets.svg"
+         alt="the content arm writes the four scope nouls, four facet Scores and a graded relevance; score_composite is the max of the four nouls; the ingest gate reads only the composite, so mgset0.f at 0.39 with a machine-description facet of 2.64 of 3 is not carried"/>
+    <figcaption>One stored owner. The content arm records the four facet Scores
+      and the graded relevance beside <code>score_composite</code>, but the
+      ingest gate reads only the composite — so <code>mgset0.f</code>, whose
+      machine-description facet is high, is admitted or refused on its 0.39
+      composite and not on that facet.</figcaption>
+  </figure>
+  <p id="code-score-through-jev-caveat">
+    Landing commits: <code>f9798ad7c</code> (score-answer validation),
+    <code>3ef3f896b</code> (content-arm fields and the one composite owner),
+    <code>c0c8cc099</code> (composite recompute),
+    <code>12e9b5d0d</code> and <code>67d026f0d</code> (its two read fixes). The
+    recompute ran in three passes: the first wrote a zero composite to every
+    staged row because an unaliased Cypher <code>RETURN</code> expression comes
+    back under its own text, so the nouls read as absent; the second pass read a
+    missing noul as zero and still wrote wrong values; the third aliases every
+    returned field and restored each row to its true max. The stored nouls were
+    never touched, so the repair is complete and verified — 0 of 2,311 rows now
+    disagree with the max of their nouls — but the field was transiently wrong on
+    the live graph between the first and third passes, and that is recorded here
+    rather than hidden. The node is not closed: landing and the driving followup
+    are the coordinator's.
+  </p>
+</section>
