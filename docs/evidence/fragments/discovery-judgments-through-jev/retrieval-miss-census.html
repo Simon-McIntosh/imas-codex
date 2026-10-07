@@ -1,0 +1,101 @@
+<!-- Retrieval-miss census: why five JT-60SA search questions retrieved no relevant candidate.
+     Read-only graph census (bounded by facility_id) plus a fallback read of the facility tree over ssh.
+     No code change, no graph write, no discover run. Scripts and raw query output:
+     ~/.config/reckon/crew/reports/imas-codex/retrieval-miss-census/{census,deep_search,chunk_state,list_selene,page_detail}.{py,out} -->
+<section id="retrieval-miss-census" data-reckon="evidence">
+  <h2 id="retrieval-miss-census-heading">Retrieval-miss census — Q01, Q05, Q12, Q14, Q18</h2>
+
+  <p id="retrieval-miss-census-intro">
+    The §9 rerank prototype left five of eighteen JT-60SA questions with no relevant
+    candidate in the top 30, which a rerank cannot repair. This census locates the file
+    or page that answers each and classifies the miss as exactly one of: never discovered;
+    discovered but skipped by a judgment; ingested but not chunked or embedded; ingested
+    and embedded but ranked below 30 (rank from a deeper <code>_search_code</code> /
+    <code>_search_docs</code> call of up to 200 candidates). Every answering artifact is
+    present in the graph at facility <code>jt-60sa</code>; no ssh fallback was needed
+    beyond reading file bodies to confirm which routine carries the answer.
+  </p>
+
+  <table id="retrieval-miss-census-table">
+    <caption>Census of the five retrieval misses</caption>
+    <thead>
+      <tr>
+        <th>Question</th>
+        <th>Answering artifact</th>
+        <th>Class</th>
+        <th>Graph evidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="retrieval-miss-census-q01">
+        <td>Q01 — Where are the flux loop positions defined?</td>
+        <td><code>/analysis/src/SAselene_v2.0_forPSRC/mgset0.f</code></td>
+        <td>skipped-by-judgment</td>
+        <td>CodeFile <code>mgset0.f</code>: status <code>scored</code>, <code>ingested_at</code> null, <code>score_composite</code> 0.39, <code>relevance_describes</code> 0.39, <code>relevance_loads</code> 0.23, <code>relevance_simulation</code> 0.79, <code>relevance_stage</code> <code>content</code>, 0 CodeChunks. The file carries the flux-loop position defaults as <code>DATA</code> arrays (<code>RPSLPM</code>/<code>ZPSLPM</code>, the "FX-LOOP" set, cold/hot by thermal energy). The ingested sibling <code>mgpos.f</code> (the MGPOS mesh-lookup routine) was retrieved at deep rank 24 but carries only a mesh lookup, not the positions.</td>
+      </tr>
+      <tr id="retrieval-miss-census-q05">
+        <td>Q05 — How is the poloidal flux grid built in SELENE?</td>
+        <td><code>/analysis/src/SAselene_v2.0_forPSRC/eqgrd.f</code></td>
+        <td>ingested-and-embedded-but-ranked-below-30</td>
+        <td>CodeFile <code>eqgrd.f</code> (<code>SUBROUTINE EQGRD</code>) builds the grid <code>RG</code>/<code>ZG</code>/<code>DR</code>/<code>DZ</code> from the mesh bounds and geometry; it has one embedded CodeChunk (<code>embedded_at</code> 2026-10-06T11:08:32Z) and does not appear in the top 200 for Q05. The Grad-Shafranov solver <code>eqequb.f</code> (which solves <code>L(PSI)=RCU</code>) is embedded (5 chunks) and appears at deep rank 159.</td>
+      </tr>
+      <tr id="retrieval-miss-census-q12">
+        <td>Q12 — Which routine reads the plasma current into the magnetics common block?</td>
+        <td><code>/analysis/src/SAselene_v2.0_forPSRC/shtrd.f</code></td>
+        <td>ingested-and-embedded-but-ranked-below-30</td>
+        <td><code>shtrd.f</code> (<code>SUBROUTINE SHTRD</code>) includes the magnetics common block <code>#MAG</code> and reads the input namelist carrying <code>TCUR</code> (plasma current) and the measured magnetics <code>RPOST</code>/<code>ZPOST</code>/<code>RPOSLP</code>/<code>ZPOSLP</code>; it has 2 embedded CodeChunks (<code>embedded_at</code> 2026-10-07T00:02:37Z) and does not appear in the top 200 for Q12. The sibling input reader <code>eqinpu96.f</code> (which assigns <code>TCUR = nlist96_%TCUR</code>, ingested 0.55) and the field loader <code>mgset0.f</code>/<code>mgprc.f</code> (0 chunks, scored 0.39/0.44) also share this read; none ranked in the top 200.</td>
+      </tr>
+      <tr id="retrieval-miss-census-q14">
+        <td>Q14 — How do you set up the environment on the JT-60SA data analysis server?</td>
+        <td><code>jt-60sa:use_compiler-en.html</code> (WikiPage "JT-60SA Data Analysis Server (nakasvr23)")</td>
+        <td>ingested-and-embedded-but-ranked-below-30</td>
+        <td>WikiPage <code>use_compiler-en.html</code>: status <code>ingested</code>, <code>should_ingest</code> true, <code>score_composite</code> 0.8; its body states "the setup for environment is needed to use it". Embedded and returned at deep rank 181 (score 1.0). The routed pages <code>DataAnalysis</code> (0.95, skipped <code>insufficient_content</code>) and <code>Intro</code> (0.72, skipped <code>insufficient_content</code>) were discovered but not ingested.</td>
+      </tr>
+      <tr id="retrieval-miss-census-q18">
+        <td>Q18 — What are the login and account steps for the JT-60SA analysis server?</td>
+        <td><code>jt-60sa:use_login-en.html</code> (WikiPage "JT-60SA Data Analysis Server (nakasvr23)")</td>
+        <td>ingested-and-embedded-but-ranked-below-30</td>
+        <td>WikiPage <code>use_login-en.html</code>: status <code>ingested</code>, <code>should_ingest</code> true, <code>score_composite</code> 0.7; its body is "Basic of Login and Setups" (username/password rules). Embedded and returned at deep rank 163 (score 1.0). The account/login routing pages <code>NewUsers</code> (skipped "Low technical value") and <code>JT60SAIntegratedAnalysis</code> (status <code>skipped</code>) were discovered but not ingested.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="retrieval-miss-census-repairs-heading">Repair each class needs</h3>
+  <ul id="retrieval-miss-census-repairs">
+    <li id="retrieval-miss-census-repair-skipped">
+      <strong>skipped-by-judgment</strong> (Q01): needs a gate change. <code>mgset0.f</code>
+      scored <code>relevance_describes</code> <em>0.39</em>, below the 0.5 ingest gate, though it is the
+      only file carrying the flux-loop position defaults. A graded-facet admission rule that
+      admits a file whose strongest facet is a machine-description match, or a lowered gate for
+      description-carrying files, would ingest it. No such ingestion is possible today from the
+      0.39 composite.
+    </li>
+    <li id="retrieval-miss-census-repair-ranked">
+      <strong>ingested-and-embedded-but-ranked-below-30</strong> (Q05, Q12, Q14, Q18): needs a
+      retrieval change. All four answering artifacts are present in the embedded corpus
+      (<code>eqgrd.f</code> chunk embedded, <code>shtrd.f</code> 2 chunks embedded, and the two
+      <code>nakasvr23</code> pages ingested) yet none reaches the top 30 — the code answers fall
+      below rank 159/200 and the doc answers sit at ranks 163–181 with a floor score of 1.0.
+      This is the class the §9 candidate review already observed: the embedding order carries
+      little signal above chance within the top 30, so the repair is a retrieval change
+      (rerank / hybrid weighting) rather than an ingestion or discovery step.
+    </li>
+    <li id="retrieval-miss-census-repair-none">
+      <strong>never-discovered</strong> and <strong>ingested-but-not-chunked-or-embedded</strong>:
+      no miss fell in either class. Every answering artifact was discovered into the graph, and
+      each was either embedded (Q05, Q12, Q14, Q18) or skipped before ingest (Q01).
+    </li>
+  </ul>
+
+  <h3 id="retrieval-miss-census-mgset0-heading">mgset0.f — the Q01 gate case</h3>
+  <p id="retrieval-miss-census-mgset0-note">
+    <code>mgset0.f</code> status <code>scored</code>; stored <code>score_composite</code> 0.39 with
+    <code>relevance_describes</code> 0.39, <code>relevance_loads</code> 0.23,
+    <code>relevance_simulation</code> 0.79, <code>relevance_role</code> <code>simulation_or_solver</code>,
+    <code>ingested_at</code> null, 0 CodeChunks. It is <em>not ingested</em>. The scored relevance
+    (<code>relevance_stage</code> <code>content</code>, model <code>typesafe/jev-1.13</code>) is 0.39,
+    below the 0.5 ingest gate, which is why the file that defines the flux-loop positions never
+    entered the searchable corpus. The §10 hypothesis that mgset0.f carries the Q01 answer and
+    was skipped by a judgment is confirmed.
+  </p>
+</section>
