@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed implement record carries no baseline_suite/after_suite arm pair, so the required added-failure figure is derived here from two arms this review ran in scratch extractions under $TMPDIR: base at 1096edf46 (106 passed, EXIT=0, review_base.log) and head at 605e53059 (112 passed, EXIT=0, review_head.log), both over the reviewed node's own gate files (tests/wiki/test_graph_ops_unit.py, test_workers.py, test_pipeline.py). The head arm reproduces the reviewed gate exactly (112 passed, 1 deselected, EXIT=0). Both arms ran to their summary line and neither has a failing id, so the set difference is empty and added_failure_count is 0. The reviewed gate covers the wiki test files, which is the set the change reaches: a grep of tests/ for mark_document_failed, mark_document_deferred, and discovery.documents returns only tests/wiki files, so tests/discovery carries no test for this change (the reviewed run's own 1899-passed flip measure over tests/wiki+tests/discovery is a broad sweep, not a reachable gate).",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T165525744038-review-of-document-status-fail-closed/head uv run --no-sync --directory /tmp/reckon-crew-scratch/r-20261007T165525744038-review-of-document-status-fail-closed/head pytest -p no:cacheprovider tests/wiki/test_graph_ops_unit.py tests/wiki/test_workers.py tests/wiki/test_pipeline.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T165525744038-review-of-document-status-fail-closed/logs/review_head.log",
+    "revision": "605e5305966c07a895e61f17025b4c9a2791c891"
+  },
+  "base_log_revision": "1096edf46310d7423d29a7c72616755c6ef5832d",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T165525744038-review-of-document-status-fail-closed/base uv run --no-sync --directory /tmp/reckon-crew-scratch/r-20261007T165525744038-review-of-document-status-fail-closed/base pytest -p no:cacheprovider tests/wiki/test_graph_ops_unit.py tests/wiki/test_workers.py tests/wiki/test_pipeline.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T165525744038-review-of-document-status-fail-closed/logs/review_base.log",
+    "revision": "1096edf46310d7423d29a7c72616755c6ef5832d"
+  },
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/wiki/graph_ops.py:1616 defer_failed_documents -> mark_document_deferred (wrapped: logs and re-raises; deferred += 1 runs only after the write returns)",
+    "imas_codex/discovery/wiki/graph_ops.py:1966/1968 mark_document_failed_or_deferred -> mark_document_deferred / mark_document_failed (no local try/except; the writer's raise propagates)",
+    "imas_codex/discovery/wiki/workers.py:778 and :787 docs_worker deferral sites -> mark_document_deferred (wrapped: logs and re-raises)",
+    "imas_codex/discovery/wiki/workers.py:838 docs_worker error handler -> mark_document_failed_or_deferred (NOT wrapped: propagates with no log)",
+    "imas_codex/discovery/wiki/workers.py:1105 docs_score_worker -> mark_document_failed (wrapped: logs and re-raises)",
+    "imas_codex/discovery/documents/workers.py:258 image failed-id loop -> mark_document_failed_or_deferred (NOT wrapped: propagates and aborts the remaining failed_ids); imas_codex/discovery/documents/workers.py:80 _mark_document_failed is a separate local writer, unaffected"
+  ],
+  "completed_at": "2026-10-07T17:10:31.630Z",
+  "dispatched_at": "2026-10-07T16:55:35Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/wiki/workers.py",
+      "line": "838",
+      "severity": "follow-on",
+      "text": "follow-on: docs_worker's error handler calls mark_document_failed_or_deferred at 838-843 unwrapped, the third call site of the now-raising writer in the very file the node edited. Its two siblings at 778/787 (mark_document_deferred) were wrapped to log and re-raise; this one propagates with no log. Fail-closed is preserved (the failure still surfaces), so this is not a swallowed-write defect, but the commit message and the evidence fragment both claim 'the callers handle it explicitly' / 'the callers handle it' and that is not true for this site. No test covers it: the run added none to tests/wiki/test_workers.py and none is pre-existing.",
+      "type": "blast-radius"
+    },
+    {
+      "file": "imas_codex/discovery/documents/workers.py",
+      "line": "258",
+      "severity": "follow-on",
+      "text": "follow-on: mark_document_failed_or_deferred, imported from imas_codex.discovery.wiki.graph_ops, is called in the image failed-id loop and is not wrapped. Under the old swallow the call warned and the loop continued; now it raises and aborts the remaining failed_ids of the batch. This is a behaviour change in a module outside the node's declared write scope (nothing here was edited), unacknowledged in the commit message and untested \u2014 no test in tests/ imports discovery.documents or the changed symbols. Plan \u00a737 named only defer_failed_documents and the two wiki/workers sites, so this caller was not in the node's enumeration. Not a defect in the wiki change itself; flagging the unenumerated blast radius so a follow-on can decide whether the image loop should count-and-continue rather than abort.",
+      "type": "blast-radius"
+    }
+  ],
+  "head_log_revision": "605e5305966c07a895e61f17025b4c9a2791c891",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "durability": "The three writers are falsified by mutation in both the declared and an independent direction. Declared control: restoring the except-and-warn in mark_document_deferred reds test_mark_document_deferred_raises_when_write_fails (1 failed, 5 passed, EXIT=1) \u2014 reproduced here. Independent mutation this review applied: wrapping mark_document_failed_or_deferred's dispatch in a swallowing try/except reds both propagation tests (test_failed_or_deferred_propagates_deferred_write_failure and ..._failed_write_failure; 2 failed, 4 passed, EXIT=1). The positive direction is held by the gate: every normal-flow test that marks a document deferred or failed now exercises the raising writers and stays green (112 passed). Marked down because the caller-level re-raise is only tested for defer_failed_documents and the pipeline; the two remaining callers (wiki/workers.py:838, documents/workers.py:258) carry no test.",
+    "evidence": "Independently reproduced, not read. The reviewed head 605e53059 was extracted with git archive into $TMPDIR and its declared gate re-run with the run resolved in the scratch tree: 112 passed, 1 deselected, EXIT=0 (review_head.log), matching the reviewed gate exactly. The base arm at 1096edf46 gives 106 passed EXIT=0 (review_base.log), the 6-test delta being the new TestDocumentStatusWriterFailClosed class and test_status_write_failure_propagates; added_failure_count is 0. The reviewed declared negative control reproduces (swallow restored in mark_document_deferred -> 1 failed EXIT=1, neg1.log), and an independent dispatcher mutation also reds the new tests (neg2.log). Marked down because the reviewed record carries no baseline/after arm pair (reconstructed here) and because the commit message and fragment overstate caller handling for the two unhandled sites.",
+    "fit": "Extends the existing writers rather than adding a second mechanism: the swallow is removed from mark_document_failed, mark_document_deferred and (by propagation) mark_document_failed_or_deferred, and each named caller handles the raise. No new predicate, no new store. The mechanism is exactly the plan's 'make a status write fail closed: it raises, and every caller handles that'.",
+    "goal_fidelity": "EXACT against the four done-when clauses, each pinned and verified at the reviewed head: a test drives each status writer against a raising graph client and asserts the failure surfaces (TestDocumentStatusWriterFailClosed: deferred, failed, and both failed_or_deferred branches); the callers' tests pass (112 passed EXIT=0); the negative control, the swallow restored, fails that test (1 failed EXIT=1, reproduced); the gate over the wiki test files the change reaches exits 0. The plan's change statement also says 'every caller handles that' and two call sites do not, so not a clean 20.",
+    "manifest": "status complete; commits [605e53059]; changed_paths lists exactly the six files the commit touches (graph_ops.py, workers.py, pipeline.py, test_graph_ops_unit.py, test_pipeline.py, the evidence fragment) and no path outside them; the commit range 1096edf46..605e53059 contains the single commit. The gate command, the 112-passed figure and the declared negative control in the record all reproduce exactly. The one record gap is the absent baseline_suite/after_suite arm pair, reconstructed by this review.",
+    "reuse": "Reuses GraphClient and classify_document_deferral unchanged; the three writers keep their query text verbatim and only drop the try/except wrapper. defer_failed_documents counts landed writes by keeping deferred += 1 after the call rather than adding a second counter. No duplicated predicate, no new dependency.",
+    "scope_discipline": "Changed exactly the six declared files; diffstat 239 insertions / 46 deletions; no path outside the declared set and no edit to the shared checkout. The unhandled documents/workers.py call site is reachable through the shared writer but was not edited, which is the correct scope boundary for this node; it is flagged as a follow-on."
+  },
+  "justifications": {
+    "durability": "Two independent mutations red the new tests and the gate pins the success paths; marked down only for the two untested caller sites.",
+    "evidence": "Head gate, base arm, declared negative control and an independent mutation all reproduced in scratch; marked down for the record's missing arms and the overstated caller claim.",
+    "fit": "Removes the swallow in place; no second mechanism.",
+    "goal_fidelity": "All four done-when clauses pinned and verified; the plan's 'every caller handles that' is not fully met.",
+    "reuse": "GraphClient and classify_document_deferral reused unchanged; no duplication.",
+    "scope_discipline": "Six declared files, 239/46; the reachable-but-untouched documents/workers.py caller is correctly left out of scope and flagged."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: mark_document_failed, mark_document_deferred and mark_document_failed_or_deferred in imas_codex/discovery/wiki/graph_ops.py no longer swallow a failed graph write \u2014 they raise; defer_failed_documents counts only landed writes and re-raises, and the named wiki/pipeline callers log and re-raise. \u00a737's done-when, met. EVIDENCE: head gate independently re-run 112 passed EXIT=0 in a scratch extraction at 605e53059, matching the reviewed gate; base arm at 1096edf46 106 passed EXIT=0, added_failure_count 0; declared negative control reproduces (swallow restored -> 1 failed EXIT=1) and an independent dispatcher mutation reds both propagation tests (2 failed EXIT=1). SCOPE: six declared files, 239/46; no path outside the set. DURABILITY: writers falsified by mutation both ways; two caller sites untested. FIT: extends the existing writers, no second mechanism. REUSE: GraphClient and classify_document_deferral unchanged. Follow-ons: two callers of the now-raising writer were left unhandled \u2014 imas_codex/discovery/wiki/workers.py:838 (unwrapped, in the file the node edited, no test) and imas_codex/discovery/documents/workers.py:258 (unwrapped; the image failed-id loop now aborts instead of warning-and-continuing; no test).",
+  "review_run_id": "r-20261007T165525744038-review-of-document-status-fail-closed",
+  "reviewed_base_sha": "1096edf46310d7423d29a7c72616755c6ef5832d",
+  "reviewed_head_sha": "605e5305966c07a895e61f17025b4c9a2791c891",
+  "reviewed_run_id": "r-20261007T164304781659-document-status-fail-closed",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T17:08:58Z",
+  "total": 114
+}
