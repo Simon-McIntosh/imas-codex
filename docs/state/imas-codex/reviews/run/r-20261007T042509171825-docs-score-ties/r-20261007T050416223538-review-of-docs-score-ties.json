@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own two gate logs (reports/imas-codex/docs-score-ties/base_primary.log absent; used base_arm.log as the base arm and gate.log as the head arm, the pair the reviewed manifest names under test_logs and failure_attribution): reckon.crew.review.added_failures_from_gate_logs(base_arm.log, gate.log) = (0, []). Both arms report the same single failure tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index, so nothing was added. NOTE: the reviewed manifest left its canonical baseline_suite and after_suite fields null, so the read-time annotation annotate_review_of_run reads the count as unmeasured; the count above was taken by hand from the same two logs the manifest names.",
+  "backend": "local",
+  "blockers": "none",
+  "completed_at": "2026-10-07T05:33:28.101Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "docs-score-ties",
+      "recorded_at": "2026-10-07T05:24:54.145559+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-07T05:05:03Z",
+  "evidence_inputs": "the reviewed manifest left baseline_suite and after_suite null, so the store's read-time annotate_review_of_run reads added_failure_count as unmeasured even though both arms exist; the two arms are reports/imas-codex/docs-score-ties/base_arm.log (base, search_tools.py restored to 4b65489e) and gate.log (head), added_failures_from_gate_logs = (0, []). The gate.log header records revision 4b65489e (the change was uncommitted when the gate ran at 4b65489e), so the head log's header does not by itself distinguish base and head. The eval's docs-question reproduction against search-rerank-prototype/candidates.json is 11-25/30. The deploy node search-rerank consumes the top 30 this change reorders, so the reviewed run's candidate window is a direct input to it.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html",
+      "line": "45",
+      "severity": "blocking",
+      "text": "blocking: evidence: the mean nDCG@10 comparison that selects and justifies the deployed variant is invalid. docs_ties_eval.py:58-64 copies the prototype's ndcg_at_10, whose ideal set (idcg) is sorted over the SAME ordered list it scores, so when a variant changes which chunks are in the 30-list the denominator changes with it. The reserve20/reserve20_cos variants swap every rank 10-29 for vector leaders while pinning the top 10, so the displayed top 10 for every question is bit-identical to the baseline (verified across all 18: baseline_top30[:10] == reserve20_top30[:10]) and DCG@10 is therefore identical - measured q06 DCG@10 1.9200 in both arms, q09 1.8740 both, q15 1.5000 both - while the reported ndcg rises only because relevant documents leave the 30-window and shrink IDCG (q06 IDCG 4.5436->2.1309 as nrel in the window falls 10->3; q09 4.5436->2.5616 as 16->4; q15 2.9485->2.1309 as 5->3). The headline gain 0.2763->0.3672 measures the ideal pool shrinking, not a ranking gain; on the two docs questions where it matters the deployed change still leaves Q14 and Q18 nDCG@10 at 0.0000 (their answers land at ranks 15 and 13, outside the k=10 the metric reads). The real, defensible effect the change delivers is the answers entering the k=30 window, which the fragment also states; the nDCG@10 figure the fragment leads with does not support the deployed variant."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html",
+      "line": "42",
+      "severity": "blocking",
+      "text": "blocking: evidence: the eval's own reimplemented baseline does not reproduce the stored prototype order on the docs questions it is meant to measure. variant_metrics.json reproduction shows overlap_top30 of 11/30 (q13), 14/30 (q18), 15/30 (q14), 16/30 (q15), 17/30 (q17), 25/30 (q16) for the docs questions, against 29-30/30 for every code question. docs_ties_eval.py:97-117 calls the tool's own stage functions but re-derives the merge in merge_score() (docs_ties_eval.py:67-85), and on the docs path - which is exactly the path the change targets and where the 1.0 tie mass lives - that reimplementation diverges from the tool on up to 19 of 30 positions. Every nDCG, answer-rank and variant number is computed on that non-reproducing order, so the measurement is not shown to describe the tool it claims to measure. The 18-question mean is also computed with the reserve applied to the 13 code questions although the deployed change is _search_docs only, mixing a change that is not deployed into the headline mean."
+    },
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "704",
+      "severity": "follow-on",
+      "text": "follow-on: durability: the load-bearing half of the change is untested. The added test test_cosine_breaks_saturated_score_ties uses n=8 chunks at k=30, so _reserve_vector_leaders never reserves a slot (its top-10 path alone runs) - the test exercises only the (score, cosine) sort key. _reserve_vector_leaders (search_tools.py:691-711), which is what actually lifts Q14/Q18 into the window and what removes the baseline's ranks 10-29, has no test: nothing asserts that the top 10 is preserved, that a vector leader outside the top 10 is promoted to rank 10, or that no chunk is duplicated. The cosine tie-break the test does cover is, by the node's own fragment (line 60), the part that 'cannot lift the answers'. A mutation that drops the reserve entirely would keep the suite green."
+    },
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "691",
+      "severity": "follow-on",
+      "text": "follow-on: goal: _reserve_vector_leaders replaces every rank 10-29 of the hybrid order with the facility's vector leaders, dropping hybrid-ranked chunks that the keyword term promoted. On docs questions this trades relevant documents out of the window (q15 nrel in the 30-list 5->3) against the answers it brings in (q14 0->1, q18 0->3). The plan's selection rule ('keeps Q16 and lifts the most answers into the top 30') ties at two answers for reserve20_cos, reserve20 and noclamp_reserve, and the node deployed reserve20_cos (mean 0.3672) over noclamp_reserve (mean 0.4081), which keeps Q16 at 0.9675 and lifts the same two answers; the node's stated reason (the clamp keeps the displayed score range) is a reasonable display argument but is not the measured criterion. This is a judgement call to surface, not a defect to fix here."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html",
+      "line": "81",
+      "severity": "follow-on",
+      "text": "follow-on: fit: the fragment's Files list cites reports/imas-codex/docs-score-ties/new_labels.json, which does not exist - the report directory holds base_arm.log, debug_q14.py, docs_ties_eval.py, eval.log, gate.log, negative_control.log, run_eval.py, run_negative_control.py and variant_metrics.json only; the new labels are embedded under the new_labels key of variant_metrics.json (top-level key 'new_labels'), as docs_ties_eval.py:240 writes them. A later reader following the cited path finds nothing."
+    }
+  ],
+  "follow_ons": "the reviewed manifest should carry its baseline_suite and after_suite fields so the added-failure annotation is measured at read time rather than by hand; the docs_ties_eval.py ndcg_at_10 copies the prototype's pool-relative ideal and needs a fixed relevance pool before it can compare variants that change the candidate set; the eval's docs-path merge should be replaced by a call to _search_docs so the numbers describe the tool; _reserve_vector_leaders needs a test.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "two commits against base 4b65489e: a 49-line change to _search_docs plus a helper and a 59-line test, and the evidence fragment; the head content carries the change (_reserve_vector_leaders, _DOC_VECTOR_RESERVE present at f7eea5c1, absent at 4b65489e).",
+    "done_when": "the done-when asks to measure four variants over the node's change, keep Q16 and lift the most answers into the top 30, with a test that clamp ties come back cosine-ordered; all four variants are measured and recorded in variant_metrics.json, Q16 stays 0.9675, Q14/Q18 answers enter at ranks 15 and 13, and the test exists; the selection criterion is not discriminating (three variants tie on Q16 and on two lifted answers) and the metric the node used to choose among them is the invalid one above.",
+    "goal": "the node's goal is to stop _search_docs ordering its saturated score ties arbitrarily; the diff makes the sort key (score, raw cosine) deterministic in _search_docs (search_tools.py:787-796) with a test, and the negative control confirms the test fails when the tie-break is removed; the reserve is the \u00a79 mechanism, but the numeric justification for the deployed variant rests on the invalid nDCG comparison above.",
+    "manifest": "the manifest reads status complete, names commits 2f187eea and f7eea5c1 and the three gate logs; it records added_failure_count implicitly via failure_attribution but leaves the canonical baseline_suite and after_suite fields null, so the store's read-time annotation reads the added-failure count as unmeasured.",
+    "write_paths": "the declared write paths are search_tools.py, tests/llm/test_search_tools.py, the node report dir, the fragment and the figures dir; the diff touches only imas_codex/llm/search_tools.py, tests/llm/test_search_tools.py and docs/evidence/fragments/discovery-judgments-through-jev/docs-score-ties.html, all inside them, with no change to _search_code, no graph write and no discover run."
+  },
+  "justifications": {
+    "durability": "durability 12: a real test with a real negative control exists for the deterministic tie-break, but the reserve behaviour that produces the claimed effect is untested and could regress silently.",
+    "evidence": "evidence 9: raw per-query output, logs, a valid negative control and a base arm are recorded, but the headline metric is invalid as a cross-variant comparison, the eval does not reproduce the tool on the docs path (11-25/30), and the 18-question mean mixes in a non-deployed change.",
+    "fit": "fit 17: the change follows \u00a79's idiom, names the helper and constants by mechanism, carries no plan or ticket label, and the fragment follows its sibling's structure; one cited file does not exist.",
+    "goal_fidelity": "goal_fidelity 15: the literal goal and the test are delivered, but the variant selection the plan prescribes is justified by a metric that does not measure ranking, and the deployed variant is not the one the (broken) metric would pick.",
+    "reuse": "reuse 15: the eval calls the tool's own stage functions, but copies the prototype's ndcg_at_10 into a comparison it does not hold for and reimplements the merge in merge_score rather than exercising _search_docs.",
+    "scope_discipline": "scope_discipline 19: only _search_docs is changed, _search_code is untouched as required, no graph write, no discover run, and every landed path is inside the declared set."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the goal and the cosine tie-break test are delivered, but the deployed variant is justified by a metric that does not measure ranking, and the metric would pick a different variant (noclamp_reserve 0.4081).\nSCORE evidence: 9\nJUSTIFICATION evidence: raw output, logs, a valid negative control and a base arm exist, but the headline nDCG@10 comparison is invalid (DCG@10 identical across variants, gain is IDCG shrinking), the eval reproduces the tool on docs questions only 11-25/30, and the 18-question mean mixes a docs-only change into code questions.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: only _search_docs changed, no _search_code, no graph write, no discover run, all paths inside the declared set.\nSCORE durability: 12\nJUSTIFICATION durability: the tie-break is tested with a negative control, but _reserve_vector_leaders is untested.\nSCORE fit: 17\nJUSTIFICATION fit: follows the \u00a79 idiom, mechanism-named symbols, no plan labels; one cited file missing.\nSCORE reuse: 15\nJUSTIFICATION reuse: reuses the tool's stage functions but copies the prototype's nDCG and reimplements the merge.\n",
+  "review_run_id": "r-20261007T050416223538-review-of-docs-score-ties",
+  "reviewed_base_sha": "4b65489eb4b9c7f8c7273e1e1a5abecd9a145bc0",
+  "reviewed_head_sha": "f7eea5c18508ee1cb89a5a4e1b89b2f07f42c2f7",
+  "reviewed_run_id": "r-20261007T042509171825-docs-score-ties",
+  "scores": {
+    "durability": 12,
+    "evidence": 9,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:20:00+00:00",
+  "total": 87
+}
