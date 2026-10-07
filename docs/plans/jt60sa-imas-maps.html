@@ -21,6 +21,10 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-07">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+<meta name="plan-sprint" content="S17">
 </head>
 <body>
   <main class="plan-doc">
@@ -205,55 +209,48 @@
     </p>
 
     <section data-reckon="gates" id="gates" class="r-gates">
-      <h2><span class="sec">§</span> Evidence gates</h2>
-      <div class="r-gate" data-id="g-jim-1" data-section="s7" data-gated-sections="s7"
-           data-status="open" data-verdict="">
-        <h4 class="r-gate-measure">imas map run chooses a set of homes for each escalated source and maps each source into every IDS of its selected candidate edges</h4>
-        <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
-      </div>
-      <div class="r-gate" data-id="g-jim-2" data-section="s8" data-gated-sections="s8"
-           data-status="open" data-verdict="">
-        <h4 class="r-gate-measure">a shared search-time Jev rerank owner exists for the code and wiki search tools</h4>
-        <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-jim-1" data-section="s7" data-gated-sections="s7" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">imas map run chooses a set of homes for each escalated source and maps each source into every IDS of its selected candidate edges</h4>
+    <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
+    </div>
+<div class="r-gate" data-id="g-jim-2" data-section="s8" data-gated-sections="s8" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">a shared search-time Jev rerank owner exists for the code and wiki search tools</h4>
+    <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
+    </div>
+</section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="standalone-signals" data-choice="" data-by="" data-when=""
-           data-recommended="singleton-source" data-recommended-by="reckon-build">
-        <p class="r-dec-q">How does a signal in no SignalSource reach the mapping pipeline?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="singleton-source">a singleton SignalSource per standalone signal</button>
-          <button class="r-opt" data-value="claim-signals">the mapping stages also claim FacilitySignals</button>
-        </p>
-        <p class="r-dec-rat">The recommendation is a singleton source. Every mapping stage, edge and
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="standalone-signals" data-choice="" data-by="" data-when="" data-recommended="singleton-source" data-recommended-by="reckon-build">
+    <p class="r-dec-q">How does a signal in no SignalSource reach the mapping pipeline?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="singleton-source">a singleton SignalSource per standalone signal</button>
+      <button class="r-opt" data-value="claim-signals">the mapping stages also claim FacilitySignals</button>
+      </p>
+    <p class="r-dec-rat">The recommendation is a singleton source. Every mapping stage, edge and
           claim keys on SignalSource. A singleton keeps one unit of mapping, while claiming signals
           directly would need two units through every stage.</p>
-      </div>
-      <div class="r-dec" data-key="jt60sa-activation" data-choice="" data-by="" data-when=""
-           data-recommended="after-audit" data-recommended-by="reckon-build">
-        <p class="r-dec-q">When are JT-60SA mappings activated?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="after-audit">after the §7 audit, per IDS</button>
-          <button class="r-opt" data-value="on-validation">as soon as validation passes</button>
-        </p>
-        <p class="r-dec-rat">The recommendation is after the audit, per IDS. Validation checks that a
+    </div>
+<div class="r-dec" data-key="jt60sa-activation" data-choice="" data-by="" data-when="" data-recommended="after-audit" data-recommended-by="reckon-build">
+    <p class="r-dec-q">When are JT-60SA mappings activated?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="after-audit">after the §7 audit, per IDS</button>
+      <button class="r-opt" data-value="on-validation">as soon as validation passes</button>
+      </p>
+    <p class="r-dec-rat">The recommendation is after the audit, per IDS. Validation checks that a
           binding executes, not that it chose the right home.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-jim-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="general"
-               data-written-by="reckon-create" data-written-at="2026-10-07"
-               data-recommends-skill="/reckon-build jt60sa-imas-maps §2">
-        <h4 class="r-fu-title">Enrich the JT-60SA signals</h4>
-        <div class="r-fu-body">Enrichment is graph-only and unblocks the candidate run. §3 and §4 can run beside it.</div>
-        <pre class="r-fu-prompt">/reckon-build jt60sa-imas-maps §2</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-jim-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-07" data-recommends-skill="/reckon-build jt60sa-imas-maps §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Enrich the JT-60SA signals</h4>
+    <div class="r-fu-body">Enrichment is graph-only and unblocks the candidate run. §3 and §4 can run beside it.</div>
+    <pre class="r-fu-prompt">/reckon-build jt60sa-imas-maps §2</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
