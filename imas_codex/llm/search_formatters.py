@@ -1268,6 +1268,15 @@ def format_search_dd_report(result: Any, cluster_result: Any | None = None) -> s
 
             parts.append("")
 
+        # A rerank that fell back to embedding order (missing decisions key or
+        # an elapsed budget) leaves a note on the summary; print it beneath the
+        # hits so a reader can tell a fallback from a completed rerank.
+        summary = _get_value(result, "summary", {}) or {}
+        rerank_note = summary.get("rerank_note")
+        if rerank_note:
+            parts.append(f"> Rerank: {rerank_note}")
+            parts.append("")
+
     cluster_hits = _get_value(cluster_result, "clusters", []) if cluster_result else []
     if cluster_result and cluster_hits:
         parts.append(format_cluster_report(cluster_result))
