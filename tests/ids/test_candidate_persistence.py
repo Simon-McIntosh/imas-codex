@@ -17,6 +17,8 @@ import pytest
 from imas_codex.ids.graph_ops import (
     CandidateWriteError,
     clear_candidates,
+    read_candidates,
+    select_candidates,
     write_candidates,
 )
 
@@ -233,6 +235,134 @@ class TestClearCandidates:
         assert clear_candidates("jet", gc) == {"edges_removed": 0, "routes_reset": 0}
 
 
+class TestReadCandidates:
+    def test_groups_rows_by_source_and_keeps_section_fields(self):
+        gc = _gc_returning(
+            [
+                {
+                    "source_id": "jet:PF:r",
+                    "path": "equilibrium/time_slice/profiles_1d/psi",
+                    "rank": 1,
+                    "section": "equilibrium/time_slice",
+                    "data_type": "STRUCT_ARRAY",
+                    "timebasepath": "time",
+                    "ndim": 2,
+                },
+                {
+                    "source_id": "jet:PF:z",
+                    "path": "magnetics/flux_loop/flux",
+                    "rank": 1,
+                    "section": "magnetics/flux_loop",
+                    "data_type": "STRUCTURE",
+                    "timebasepath": None,
+                    "ndim": 0,
+                },
+            ]
+        )
+
+        edges = read_candidates(["jet:PF:r", "jet:PF:z"], gc)
+
+        assert set(edges) == {"jet:PF:r", "jet:PF:z"}
+        psi = edges["jet:PF:r"][0]
+        assert psi["path"] == "equilibrium/time_slice/profiles_1d/psi"
+        assert psi["section"] == "equilibrium/time_slice"
+        assert psi["data_type"] == "STRUCT_ARRAY"
+        assert psi["timebasepath"] == "time"
+        assert psi["ndim"] == 2
+        assert edges["jet:PF:z"][0]["data_type"] == "STRUCTURE"
+
+    def test_reads_in_jev_order_and_derives_the_section(self):
+        gc = _gc_returning([])
+
+        read_candidates(["jet:PF:r"], gc)
+
+        statement = _normalised(gc)
+        assert "ORDER BY sg.id, r.rank" in statement
+        assert "parts[0] + '/' + parts[1] AS section_id" in statement
+        assert gc.query.call_args.kwargs["source_ids"] == ["jet:PF:r"]
+
+    def test_no_source_ids_skips_the_query(self):
+        gc = _gc_returning([])
+
+        assert read_candidates([], gc) == {}
+        assert gc.query.call_count == 0
+
+
+class TestSelectCandidates:
+    def test_marks_listed_edges_and_sets_the_route(self):
+        gc = _gc_returning([{"matched": 2}])
+
+        marked = select_candidates(
+            "jet:PF:r",
+            ["equilibrium/time_slice/profiles_1d/psi", "summary/ip"],
+            gc,
+        )
+
+        assert marked == 2
+        statement = _normalised(gc)
+        assert "FOREACH (rel IN found | SET rel.route = true)" in statement
+        assert "WHEN matched = $expected THEN 'selected'" in statement
+        kwargs = gc.query.call_args.kwargs
+        assert kwargs["source_id"] == "jet:PF:r"
+        assert kwargs["paths"] == [
+            "equilibrium/time_slice/profiles_1d/psi",
+            "summary/ip",
+        ]
+        assert kwargs["expected"] == 2
+
+    def test_a_path_with_no_edge_is_refused(self):
+        gc = _gc_returning([{"matched": 1}])
+
+        with pytest.raises(CandidateWriteError):
+            select_candidates(
+                "jet:PF:r",
+                ["equilibrium/time_slice/profiles_1d/psi", "summary/missing"],
+                gc,
+            )
+
+
+class TestCandidateRecordsStrict:
+    def test_a_judgment_without_a_candidate_is_refused(self):
+        from imas_codex.ids.workers import _candidate_records
+
+        candidate = MagicMock()
+        candidate.hit.path = "equilibrium/time_slice/profiles_1d/psi"
+        candidate.hit.score = 0.9
+        candidate.hit.ids_name = "equilibrium"
+        candidate.arms = frozenset({"equilibrium"})
+
+        judgment = MagicMock()
+        judgment.path = "summary/missing"
+        judgment.p_same_quantity = 0.5
+        judgment.model = "jev-1.13"
+        judgment.judged_at = "2026-10-06T00:00:00Z"
+
+        with pytest.raises(CandidateWriteError):
+            _candidate_records([judgment], [candidate], set())
+
+    def test_a_matched_judgment_records_the_candidate_arms(self):
+        from imas_codex.ids.workers import _candidate_records
+
+        candidate = MagicMock()
+        candidate.hit.path = "equilibrium/time_slice/profiles_1d/psi"
+        candidate.hit.score = 0.9
+        candidate.hit.ids_name = "equilibrium"
+        candidate.arms = frozenset({"equilibrium"})
+
+        judgment = MagicMock()
+        judgment.path = "equilibrium/time_slice/profiles_1d/psi"
+        judgment.p_same_quantity = 0.5
+        judgment.model = "jev-1.13"
+        judgment.judged_at = "2026-10-06T00:00:00Z"
+
+        records = _candidate_records(
+            [judgment], [candidate], {"equilibrium/time_slice/profiles_1d/psi"}
+        )
+
+        assert records[0]["arms"] == ["equilibrium"]
+        assert records[0]["route"] is True
+
+
 # =============================================================================
 # Live-database test
 # =============================================================================
@@ -423,3 +553,74 @@ def test_write_and_clear_candidates_round_trip():
         )
         assert residue[0]["sources"] == 0
         assert residue[0]["edges"] == 0
+
+
+@pytest.mark.graph
+def test_read_and_select_candidates_round_trip():
+    """Read a source's edges in Jev order and mark a two-IDS pick."""
+    from imas_codex.graph.client import GraphClient
+
+    marker = uuid.uuid4().hex[:12]
+    facility = f"pytest-read-candidates-{marker}"
+    source_id = f"{facility}:fixture:source"
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            "MATCH (n:IMASNode) RETURN n.id AS id, n.ids AS ids ORDER BY n.id"
+        )
+        by_ids: dict[str, str] = {}
+        for row in rows:
+            by_ids.setdefault(row["ids"], row["id"])
+        ids_names = sorted(by_ids)
+        assert len(ids_names) >= 2, "live graph needs two IDSs"
+        first, second = by_ids[ids_names[0]], by_ids[ids_names[1]]
+        third = next(
+            row["id"]
+            for row in rows
+            if row["ids"] == ids_names[0] and row["id"] != first
+        )
+
+        gc.query(
+            """
+            MERGE (sg:SignalSource {id: $source_id})
+            SET sg.facility_id = $facility,
+                sg.group_key = 'fixture:source',
+                sg.status = 'enriched'
+            """,
+            source_id=source_id,
+            facility=facility,
+        )
+        try:
+            judgments = [
+                {"path": first, "rank": 1, "ids": ids_names[0], "arms": []},
+                {"path": second, "rank": 2, "ids": ids_names[1], "arms": []},
+                {"path": third, "rank": 3, "ids": ids_names[0], "arms": []},
+            ]
+            assert write_candidates(source_id, judgments, "escalated", gc) == 3
+
+            edges = read_candidates([source_id], gc)[source_id]
+            assert [e["path"] for e in edges] == [first, second, third]
+            assert edges[0]["section"] == "/".join(first.split("/")[:2])
+            assert edges[0]["data_type"] is not None
+
+            # A pick spanning two IDSs marks exactly those edges.
+            assert select_candidates(source_id, [first, second], gc) == 2
+            after = {
+                e["path"]: e["route"]
+                for e in read_candidates([source_id], gc)[source_id]
+            }
+            assert after == {first: True, second: True, third: False}
+            route = gc.query(
+                "MATCH (sg:SignalSource {id: $source_id}) "
+                "RETURN sg.candidate_route AS route",
+                source_id=source_id,
+            )
+            assert route[0]["route"] == "selected"
+
+            with pytest.raises(CandidateWriteError):
+                select_candidates(source_id, [first, "no/such/candidate"], gc)
+        finally:
+            gc.query(
+                "MATCH (sg:SignalSource {id: $source_id}) DETACH DELETE sg",
+                source_id=source_id,
+            )

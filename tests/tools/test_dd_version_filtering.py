@@ -429,47 +429,6 @@ class TestListPathsQuery:
 
 
 # ============================================================================
-# Legacy dd_version in ids/tools.py
-# ============================================================================
-
-
-class TestSemanticMatchDDVersion:
-    """Verify compute_semantic_matches uses relationship-based version filtering."""
-
-    def test_dd_version_uses_introduced_in(self):
-        """compute_semantic_matches should use INTRODUCED_IN, not n.dd_version."""
-        import numpy as np
-
-        from imas_codex.ids.tools import compute_semantic_matches
-
-        mock_gc = MagicMock()
-        mock_gc.__enter__ = MagicMock(return_value=mock_gc)
-        mock_gc.__exit__ = MagicMock(return_value=False)
-        mock_gc.query.return_value = [
-            {
-                "id": "equilibrium/time_slice/profiles_1d/psi",
-                "doc": "Poloidal flux",
-                "score": 0.9,
-            }
-        ]
-
-        with patch("imas_codex.ids.tools.GraphClient", return_value=mock_gc):
-            compute_semantic_matches(
-                source_descriptions=[("src1", "some description")],
-                target_ids_name="equilibrium",
-                gc=mock_gc,
-                dd_version=4,
-                precomputed_embeddings=[np.zeros(384)],
-            )
-
-        # The per-thread GraphClient calls tgc.query with the constructed cypher
-        assert mock_gc.query.call_count >= 1
-        cypher = mock_gc.query.call_args_list[0][0][0]
-        assert "INTRODUCED_IN" in cypher
-        assert "n.dd_version" not in cypher
-
-
-# ============================================================================
 # Legacy dd_version in cli/imas_dd.py
 # ============================================================================
 

@@ -52,7 +52,7 @@ from imas_codex.ids.candidates import (
     route,
     route_ids,
 )
-from imas_codex.ids.graph_ops import write_candidates
+from imas_codex.ids.graph_ops import CandidateWriteError, write_candidates
 from imas_codex.ids.mapping import PipelineCost
 from imas_codex.settings import get_mapping_route_thresholds
 
@@ -415,36 +415,6 @@ def has_pending_candidate_work(
         ),
         status_params=domain_params,
     )
-
-
-def count_candidates_by_route(facility: str) -> dict[str, int]:
-    """Count signal sources grouped by candidate_route."""
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            MATCH (sg:SignalSource {facility_id: $facility})
-            WHERE sg.status = 'enriched'
-            RETURN coalesce(sg.candidate_route, 'pending') AS route,
-                   count(sg) AS cnt
-            """,
-            facility=facility,
-        )
-        return {r["route"]: r["cnt"] for r in result}
-
-
-def count_sources_by_mapping_status(facility: str) -> dict[str, int]:
-    """Count signal sources grouped by mapping_status."""
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            MATCH (sg:SignalSource {facility_id: $facility})
-            WHERE sg.status = 'enriched'
-            RETURN coalesce(sg.mapping_status, 'pending') AS status,
-                   count(sg) AS cnt
-            """,
-            facility=facility,
-        )
-        return {r["status"]: r["cnt"] for r in result}
 
 
 def reset_mapping_state(
@@ -983,7 +953,9 @@ def _candidate_records(
     Records are ranked in Jev order (descending ``p_same_quantity``); the
     retrieval score and IDS are read back from the matching candidate, and its
     retrieval arms are emitted so a sibling can be told from a retrieval hit.
-    A record is routed when its path is in ``selected``.
+    A record is routed when its path is in ``selected``. A judgment whose path
+    matches no retrieved candidate is refused, rather than written with empty
+    arms, which would bypass ``write_candidates``' refusal of absent arms.
     """
     score_by_path = {
         candidate.hit.path: (candidate.hit.score, candidate.hit.ids_name)
@@ -997,7 +969,11 @@ def _candidate_records(
     )
     records: list[dict[str, Any]] = []
     for rank, judgment in enumerate(ordered, start=1):
-        score, ids_name = score_by_path.get(judgment.path, (None, None))
+        if judgment.path not in score_by_path:
+            raise CandidateWriteError(
+                f"judgment path {judgment.path!r} has no retrieved candidate"
+            )
+        score, ids_name = score_by_path[judgment.path]
         records.append(
             {
                 "path": judgment.path,
@@ -1008,7 +984,7 @@ def _candidate_records(
                 "model": judgment.model,
                 "judged_at": judgment.judged_at,
                 "route": judgment.path in selected,
-                "arms": arms_by_path.get(judgment.path, []),
+                "arms": arms_by_path[judgment.path],
             }
         )
     return records

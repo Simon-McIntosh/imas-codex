@@ -112,7 +112,14 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0, expand=
     def fake_retrieve(sources, ids_by_source, *, gc, k=20, dd_version=None):
         captured.setdefault("ids_by_source", {}).update(ids_by_source)
         return {
-            sid: ([_Candidate(f"{ids[0]}/field", 0.7, arms={ids[0]})] if ids else [])
+            sid: (
+                [
+                    _Candidate(f"{ids[0]}/field{i}", 0.7, arms={ids[0]})
+                    for i in range(len(_SCORES[sid]))
+                ]
+                if ids
+                else []
+            )
             for sid, ids in ids_by_source.items()
         }
 
@@ -120,8 +127,8 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0, expand=
         if cost is not None and add_cost:
             cost.add("candidate_judgment", add_cost, 0)
         return [
-            _judgment(f"{source['id']}/p{i}", p)
-            for i, p in enumerate(_SCORES[source["id"]])
+            _judgment(candidate.hit.path, p)
+            for candidate, p in zip(candidates, _SCORES[source["id"]], strict=False)
         ]
 
     def fake_expand(
@@ -360,7 +367,7 @@ def test_map_command_builds_the_engine_state(monkeypatch, command_env, caplog):
 def test_status_domain_map_prints_route_counts(monkeypatch):
     monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.ids.workers.count_candidates_by_route",
+        "imas_codex.ids.graph_ops.count_candidates_by_route",
         lambda facility: {"selected": 2, "escalated": 3, "pending": 5},
     )
 
@@ -374,7 +381,7 @@ def test_status_domain_map_prints_route_counts(monkeypatch):
 
 def test_clear_domain_map_removes_candidates(monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.ids.workers.count_candidates_by_route",
+        "imas_codex.ids.graph_ops.count_candidates_by_route",
         lambda facility: {"selected": 2, "pending": 5},
     )
     monkeypatch.setattr(

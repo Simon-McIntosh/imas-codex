@@ -20,7 +20,6 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
-from imas_codex.core.node_categories import SEARCHABLE_CATEGORIES
 from imas_codex.graph.client import GraphClient
 
 logger = logging.getLogger(__name__)
@@ -782,9 +781,8 @@ def compute_semantic_matches(
     """Compute semantic match vectors between sources and targets.
 
     For each source, embeds its description and searches against:
-    1. imas_node_embedding (primary: target IMAS fields)
-    2. wiki_chunk_embedding (bridging: domain documentation)
-    3. code_chunk_embedding (bridging: data access patterns)
+    1. wiki_chunk_embedding (bridging: domain documentation)
+    2. code_chunk_embedding (bridging: data access patterns)
 
     Uses batch embedding for efficiency — all source descriptions are
     embedded in a single encoder call.  Per-source vector queries run
@@ -823,38 +821,6 @@ def compute_semantic_matches(
 
         embeddings = encoder.embed_texts(texts)
 
-    # Pre-compute shared Cypher fragments
-    imas_search_where = ["n.node_category IN $searchable_categories"]
-    imas_extra_params: dict[str, Any] = {
-        "searchable_categories": list(SEARCHABLE_CATEGORIES),
-    }
-    if target_ids_name:
-        imas_search_where.append("n.id STARTS WITH $ids_prefix")
-        imas_extra_params["ids_prefix"] = f"{target_ids_name}/"
-
-    dd_version_join = ""
-    if dd_version is not None:
-        dd_version_join = (
-            "MATCH (n)-[:INTRODUCED_IN]->(iv:DDVersion) "
-            "WHERE toInteger(split(iv.id, '.')[0]) <= $dd_version "
-        )
-        imas_extra_params["dd_version"] = dd_version
-
-    _imas_search_where_str = " AND ".join(imas_search_where)
-    imas_cypher = (
-        "CYPHER 25\n"
-        "MATCH (n:IMASNode)\n"
-        "SEARCH n IN (\n"
-        "  VECTOR INDEX imas_node_embedding\n"
-        "  FOR $embedding\n"
-        "  LIMIT $k\n"
-        ") SCORE AS score\n"
-        f"WHERE {_imas_search_where_str}\n"
-        f"WITH n, score {dd_version_join}"
-        "RETURN n.id AS id, n.documentation AS doc, score "
-        "ORDER BY score DESC LIMIT $limit"
-    )
-
     def _search_one(idx: int) -> tuple[str, list[dict[str, Any]]]:
         """Run all vector searches for a single source (thread-safe)."""
         source_id = source_ids[idx]
@@ -867,29 +833,7 @@ def compute_semantic_matches(
 
         # Each thread gets its own GraphClient connection
         with GraphClient() as tgc:
-            # 1. IMAS node embeddings (primary)
-            try:
-                imas_params = {
-                    "k": k_per_source * 2,
-                    "embedding": embedding,
-                    "limit": k_per_source,
-                    **imas_extra_params,
-                }
-                imas_hits = tgc.query(imas_cypher, **imas_params)
-                for h in imas_hits:
-                    doc = h.get("doc") or ""
-                    matches.append(
-                        {
-                            "target_id": h["id"],
-                            "score": round(h["score"], 3),
-                            "content_type": "imas",
-                            "excerpt": doc[:200] + "..." if len(doc) > 200 else doc,
-                        }
-                    )
-            except Exception:
-                logger.debug("IMAS vector search failed for %s", source_id)
-
-            # 2. Wiki chunk embeddings (bridging)
+            # 1. Wiki chunk embeddings (bridging)
             if include_wiki:
                 try:
                     wiki_hits = tgc.query(
@@ -922,7 +866,7 @@ def compute_semantic_matches(
                 except Exception:
                     logger.debug("Wiki vector search failed for %s", source_id)
 
-            # 3. Code chunk embeddings (bridging)
+            # 2. Code chunk embeddings (bridging)
             if include_code:
                 try:
                     code_hits = tgc.query(

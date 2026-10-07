@@ -193,19 +193,27 @@ def test_one_encoder_call_embeds_a_batch(monkeypatch):
     assert _FakeEncoder.calls[0] == ["coil current one", "coil current two"]
 
 
-def test_gather_ids_context_builds_candidates_via_retrieval(monkeypatch):
+def test_gather_ids_context_reads_candidates_from_edges(monkeypatch):
+    """The IDS context reads each source's shortlist from its candidate edges.
+
+    Retrieval is no longer called here: the shortlist comes from the stored
+    MAPPING_CANDIDATE edges through ``read_candidates``.
+    """
+    import imas_codex.ids.candidates as candidates_mod
     import imas_codex.ids.mapping as mapping
 
-    sentinel = {"src-1": ["candidate-sentinel"]}
+    sentinel = {"src-1": [{"path": "equilibrium/time_slice/time"}]}
     captured: dict = {}
 
-    def fake_retrieve(sources, ids_by_source, *, gc, k, dd_version):
-        captured["sources"] = dict(sources)
-        captured["ids_by_source"] = dict(ids_by_source)
-        captured["k"] = k
+    def fake_read(source_ids, *args, **kwargs):
+        captured["source_ids"] = list(source_ids)
         return sentinel
 
-    monkeypatch.setattr(mapping, "retrieve_candidates", fake_retrieve)
+    def fail_retrieve(*args, **kwargs):
+        raise AssertionError("gather_ids_context must not call retrieve_candidates")
+
+    monkeypatch.setattr(mapping, "read_candidates", fake_read)
+    monkeypatch.setattr(candidates_mod, "retrieve_candidates", fail_retrieve)
     monkeypatch.setattr(mapping, "fetch_imas_subtree", lambda *a, **k: [])
     monkeypatch.setattr(mapping, "search_imas_semantic", lambda *a, **k: [])
     monkeypatch.setattr(mapping, "search_existing_mappings", lambda *a, **k: {})
@@ -225,9 +233,7 @@ def test_gather_ids_context_builds_candidates_via_retrieval(monkeypatch):
     ctx = mapping.gather_ids_context("jet", "equilibrium", shared, gc=object())
 
     assert ctx["source_candidates"] is sentinel
-    assert captured["ids_by_source"] == {"src-1": ["equilibrium"]}
-    assert captured["sources"] == {"src-1": "plasma current"}
-    assert captured["k"] == 20
+    assert captured["source_ids"] == ["src-1"]
 
 
 def test_mapping_module_no_longer_imports_cluster_searcher():

@@ -81,7 +81,7 @@ def discover():
 
 def _print_candidate_status(facility: str, use_rich: bool) -> None:
     """Print the candidate-route counts for a facility."""
-    from imas_codex.ids.workers import count_candidates_by_route
+    from imas_codex.ids.graph_ops import count_candidates_by_route
 
     counts = count_candidates_by_route(facility)
     if not counts:
@@ -158,7 +158,7 @@ def discover_status(facility: str, as_json: bool, domain: str | None) -> None:
                 output["code"] = file_stats
 
             if domain is None or domain == "map":
-                from imas_codex.ids.workers import count_candidates_by_route
+                from imas_codex.ids.graph_ops import count_candidates_by_route
 
                 output["map"] = count_candidates_by_route(facility)
 
@@ -277,7 +277,7 @@ def discover_clear(facility: str, force: bool, domain: str | None) -> None:
         # Map domain (candidate routes)
         if domain is None or domain == "map":
             from imas_codex.cli.discover.map import clear_facility_candidates
-            from imas_codex.ids.workers import count_candidates_by_route
+            from imas_codex.ids.graph_ops import count_candidates_by_route
 
             route_counts = count_candidates_by_route(facility)
             judged = sum(
