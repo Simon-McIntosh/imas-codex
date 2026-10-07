@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -66,8 +66,29 @@
       and needs no facility access. The census categories cost about USD 1 for 764 signals, so this run
       is estimated at USD 3, under a USD 5 cap. <code>discovery-judgments-through-jev</code> later
       moves signal-enrichment judgments to Jev and re-judges stored rows from the graph. This run does
-      not wait for it.
+      not wait for that move.
     </p>
+    <p>
+      <strong>Held, by the lead's ruling of 2026-10-07, until two things are true.</strong>
+      Enrichment grounds each description on code and wiki context. A run against thin or poorly
+      ranked context writes descriptions that a later re-enrichment would pay for again.
+    </p>
+    <ul>
+      <li><strong>The JT-60SA code pass is complete.</strong> Measured on 2026-10-07, 162
+        CodeFiles were ingested (673 chunks), 218 scored but not ingested, 761 triaged but not scored,
+        and 1,170 skipped. No <code>DataReference</code> exists, so the code context is semantic only.
+        The scan-worker crash on an unscored path is fixed on main (<code>5401e28d7</code>). Since the
+        relevance rework, only trial runs have run, and each was stopped deliberately. The section runs
+        once no JT-60SA CodeFile waits at <code>triaged</code> or <code>scored</code> for a decision.</li>
+      <li><strong>Enrichment's context is reranked by Jev.</strong> <code>_fetch_code_chunks</code>
+        (<code>imas_codex/discovery/signals/parallel.py:216</code>, vector top 3 at a 0.45 floor) and
+        <code>fetch_semantic_wiki_context</code>
+        (<code>imas_codex/discovery/signals/scanners/wiki.py:266</code>, top 3 to 5 at a 0.35 to 0.4
+        floor) take embedding order as relevance. <code>discovery-judgments-through-jev</code> §9
+        measured that order at nDCG@10 0.246 against 0.509 after a Jev rerank, but §9 covers only the
+        search tools. The enrichment fetches retrieve wide and keep the Jev-ranked top, through §9's
+        rerank owner. Which plan carries that wiring is being settled with the S16 session.</li>
+    </ul>
     <p>
       <strong>Node</strong> <code>jt60sa-signal-enrichment</code>, role implement, 1 h. Write path:
       <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment.html</code>.
