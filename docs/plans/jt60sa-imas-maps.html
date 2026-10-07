@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -44,7 +44,6 @@
         <tr><td>Discovered signals in no SignalSource</td><td>1,969</td></tr>
         <tr><td>Sources with a candidate route; MAPS_TO_IMAS edges</td><td>0; 0</td></tr>
         <tr><td>Distinct unit strings; signals whose unit normalises; signals whose unit does not</td><td>76; 3,106; 1,482</td></tr>
-        <tr><td>Signals linked to a Unit node</td><td>0</td></tr>
       </tbody>
     </table>
     <p>
@@ -97,33 +96,38 @@
       claims the singleton. A live run then leaves no enriched JT-60SA signal outside a source.
     </p>
 
-    <h2 id="s4">§4 — EDDB units reach Unit nodes</h2>
+    <h2 id="s4">§4 — EDDB units parse</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       The map stage writes unit conversions, and it reads each source's unit to do so. EDDB stores
       units as free text. 1,482 JT-60SA signals carry a unit <code>normalize_unit_symbol</code>
       (<code>imas_codex/units/__init__.py:96</code>) cannot parse, among them <code>uST</code> (480),
       <code>n/day</code> (371), <code>MPaG</code> (187), <code>KA</code>, <code>DEG</code>,
-      <code>DegC</code>, <code>oC</code>, <code>KV</code> and the <code>Pa*m3/s</code> family. No
-      JT-60SA signal is linked to a Unit node. <code>jt60sa-discovery-completion</code> parked this as
-      followup <code>f-jdc-004</code> because it belongs to DD binding, and this plan adopts it.
+      <code>DegC</code>, <code>oC</code>, <code>KV</code> and the <code>Pa*m3/s</code> family.
+      <code>jt60sa-discovery-completion</code> parked this as followup <code>f-jdc-004</code>
+      because it belongs to DD binding, and this plan adopts it.
     </p>
     <p>
-      Facility spellings join the pint definitions the normaliser already loads, in a facility-unit
-      alias file beside <code>data_dictionary_unit_aliases.txt</code>. That keeps one parser and one
-      definition mechanism. A spelling that names no physical unit is listed as unresolved with its
-      count, never guessed. <code>Unit</code> is one such spelling; gauge pressure (<code>MPaG</code>)
-      is another, because it is not an absolute pressure. EDAS signals are then linked to Unit nodes
-      the way the MDSplus path links its signals.
+      A FacilitySignal carries its unit as a string. The schema gives it no <code>HAS_UNIT</code>
+      relationship; only SignalNode has one. The map stage reads the representative's unit string
+      and parses it through the same pint registry: the claim projects <code>rep.unit</code>, and
+      <code>analyze_units</code> (<code>imas_codex/ids/tools.py:167</code>) compares it with the IMAS
+      field's unit. So the repair is a parse, not a link. The JT-60SA spellings are added to
+      <code>imas_codex/units/data_dictionary_unit_aliases.txt</code>, the one alias file the registry
+      loads (<code>imas_codex/units/__init__.py:48</code>). That file already carries per-source
+      spellings, including case-sensitive MDSplus aliases, so it stays the single owner, and every
+      path parses the same spelling the same way. A spelling that names no physical unit is listed as
+      unresolved with its count, never guessed. <code>Unit</code> is one such spelling; gauge pressure
+      (<code>MPaG</code>) is another, because it is not an absolute pressure.
     </p>
     <p>
       <strong>Node</strong> <code>eddb-unit-normalisation</code>, role implement, 2 h. Write paths:
-      <code>imas_codex/units/</code>, <code>imas_codex/discovery/signals/</code> and
-      <code>tests/units/</code>. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/units tests/discovery -p no:cacheprovider</code> passes, and
-      a live census shows each of the 76 JT-60SA unit strings either normalised or listed as
-      unresolved with its count and reason. Every signal with a normalised unit has a
-      <code>HAS_UNIT</code> edge.
+      <code>imas_codex/units/data_dictionary_unit_aliases.txt</code> and <code>tests/units/</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider</code>
+      passes. Tests show <code>normalize_unit_symbol</code> parsing each added spelling, and
+      <code>analyze_units</code> finding <code>KA</code> compatible with <code>A</code> at factor
+      1000. A live census shows each of the 76 JT-60SA unit strings either normalised or listed as
+      unresolved with its count and reason.
     </p>
 
     <h2 id="s5">§5 — Candidates for every JT-60SA source</h2>
