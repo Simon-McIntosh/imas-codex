@@ -334,24 +334,23 @@ class TestNoPathVerdictPersisted:
             patch("imas_codex.ids.graph_ops.select_candidates") as mock_select,
             patch("imas_codex.ids.mapping.achoose_targets", return_value=choice),
             patch("imas_codex.ids.workers.set_mapping_status") as mock_status,
+            patch("imas_codex.ids.workers.record_mapping_verdict") as mock_verdict,
             patch("imas_codex.ids.workers.release_mapping_claim") as mock_release,
         ):
             mock_gc_cls.return_value.__enter__.return_value = gc
             asyncio.run(assign_worker(self._state()))
-        return mock_status, mock_select, mock_release
+        return mock_status, mock_verdict, mock_select, mock_release
 
     def test_none_choice_persists_disposition_and_evidence(self):
         from imas_codex.ids.models import MappingDisposition
 
-        mock_status, mock_select, mock_release = self._run(
+        mock_status, mock_verdict, mock_select, mock_release = self._run(
             MappingDisposition.NO_IMAS_EQUIVALENT
         )
-        mock_status.assert_called_once()
-        args, kwargs = mock_status.call_args
-        assert args[0] == "jet:coil:1"
-        assert args[1] == "no_imas_equivalent"
-        assert kwargs["disposition"] == "no_imas_equivalent"
-        assert kwargs["evidence"] == "no IMAS node carries this value"
+        mock_verdict.assert_called_once_with(
+            "jet:coil:1", "no_imas_equivalent", "no IMAS node carries this value"
+        )
+        mock_status.assert_not_called()
         mock_select.assert_not_called()
         mock_release.assert_not_called()
 

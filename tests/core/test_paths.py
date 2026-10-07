@@ -5,8 +5,38 @@ import pytest
 from imas_codex.core.paths import (
     _looks_like_path,
     normalize_imas_path,
+    section_of,
     strip_path_annotations,
 )
+
+
+class TestSectionOf:
+    """Tests for section_of."""
+
+    def test_returns_ids_top_level_ancestor(self):
+        assert (
+            section_of("equilibrium/time_slice/profiles_1d/psi")
+            == "equilibrium/time_slice"
+        )
+        assert section_of("magnetics/flux_loop/flux/data") == "magnetics/flux_loop"
+
+    def test_bare_ids_name_unchanged(self):
+        assert section_of("summary") == "summary"
+
+    def test_empty_path_refused(self):
+        with pytest.raises(ValueError):
+            section_of("")
+        with pytest.raises(ValueError):
+            section_of("   ")
+
+    def test_sibling_prefix_is_not_a_section_match(self):
+        # A sibling section sharing a name prefix has its own section.
+        assert section_of("equilibrium/time_slice_extra/psi") == (
+            "equilibrium/time_slice_extra"
+        )
+        assert section_of("equilibrium/time_slice_extra/psi") != section_of(
+            "equilibrium/time_slice/psi"
+        )
 
 
 class TestStripPathAnnotations:

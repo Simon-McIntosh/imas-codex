@@ -1976,12 +1976,6 @@ classes:
           Mapping pipeline state machine status. Tracks progress through
           assignment → mapping → validation phases.
         range: MappingPipelineStatus
-      mapping_target_ids:
-        description: Target IDS name assigned for mapping (e.g., "magnetics", "pf_active")
-      mapping_target_path:
-        description: Full IMAS path being mapped to (e.g., "magnetics/flux_loop/flux/data")
-      mapping_target_type:
-        description: IMAS node data type being mapped to
       candidate_route:
         description: >-
           Route the candidate stage reached for this source: selected,

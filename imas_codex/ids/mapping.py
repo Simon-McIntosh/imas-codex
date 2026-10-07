@@ -23,6 +23,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+from imas_codex.core.paths import section_of
 from imas_codex.graph.client import GraphClient
 from imas_codex.ids.candidates import CLUSTER_ARM
 from imas_codex.ids.graph_ops import (
@@ -35,7 +36,9 @@ from imas_codex.ids.models import (
     AssemblyConfig,
     AssemblyPattern,
     EscalationFlag,
+    EscalationSeverity,
     SignalMappingBatch,
+    TargetAssignment,
     TargetAssignmentBatch,
     TargetChoice,
     TargetChoiceBatch,
@@ -262,6 +265,69 @@ def escalated_shortlist(
     seen = {e["path"] for e in picked}
     picked.extend(e for e in siblings if e["path"] not in seen)
     return picked
+
+
+def _target_type_from_section(edge: dict[str, Any]) -> str:
+    """Classify an assignment's target type from its section node's fields.
+
+    The section is the picked node's IDS top-level ancestor, which
+    ``read_candidates`` carries as ``section`` along with that section node's
+    ``data_type``, ``timebasepath`` and ``ndim``. A ``STRUCT_ARRAY`` carrying a
+    ``timebasepath`` is a ``time_slice``; any other ``STRUCT_ARRAY`` is a
+    ``struct_array``; a node with ``ndim`` 0 is a ``scalar``; anything else is
+    a ``profile``.
+    """
+    data_type = str(edge.get("data_type") or "").upper()
+    if data_type == "STRUCT_ARRAY":
+        return (
+            TargetType.TIME_SLICE.value
+            if edge.get("timebasepath")
+            else TargetType.STRUCT_ARRAY.value
+        )
+    if edge.get("ndim") == 0:
+        return TargetType.SCALAR.value
+    return TargetType.PROFILE.value
+
+
+def build_target_assignments(
+    ids_name: str,
+    source_ids: list[str],
+    candidate_edges: dict[str, list[dict[str, Any]]],
+) -> TargetAssignmentBatch:
+    """Build a batch of target assignments from each source's selected edges.
+
+    For each claimed source, every selected ``MAPPING_CANDIDATE`` edge into
+    ``ids_name`` is grouped by its section (the picked node's IDS top-level
+    ancestor). One :class:`TargetAssignment` is built per section: its
+    ``imas_target_path`` is the section and its ``target_type`` is derived from
+    the section node's fields by :func:`_target_type_from_section`. A source
+    with selected nodes in two sections of one IDS therefore gets two
+    assignments.
+    """
+    by_section: dict[str, TargetAssignment] = {}
+    for source_id in source_ids:
+        sections: dict[str, dict[str, Any]] = {}
+        for edge in candidate_edges.get(source_id, []):
+            if edge.get("route") is not True or edge.get("ids") != ids_name:
+                continue
+            section = edge.get("section") or section_of(edge["path"])
+            sections.setdefault(section, edge)
+        for section, edge in sections.items():
+            prob = edge.get("choice_probability")
+            if prob is None:
+                prob = edge.get("p_same_quantity")
+            confidence = min(1.0, max(0.0, float(prob))) if prob is not None else 0.0
+            by_section[f"{source_id}\x00{section}"] = TargetAssignment(
+                source_id=source_id,
+                imas_target_path=section,
+                target_type=_target_type_from_section(edge),
+                confidence=confidence,
+                reasoning=f"selected candidate {edge['path']}",
+            )
+    return TargetAssignmentBatch(
+        ids_name=ids_name,
+        assignments=list(by_section.values()),
+    )
 
 
 def _format_shortlist(edges: list[dict[str, Any]]) -> str:
@@ -1606,6 +1672,38 @@ def validate_mappings(
             )
         all_unmapped.extend(batch.unmapped)
         all_escalations.extend(batch.escalations)
+
+    # Section guard: every target_id must lie inside the section of one of the
+    # source's selected candidates in this IDS. The guard is at section level,
+    # not node level: the map stage chooses the fields inside a section, and a
+    # Jev-ranked node is often a sibling of the field a signal fills, so a
+    # binding inside a selected section but outside the selected nodes is kept.
+    allowed_sections: dict[str, set[str]] = {}
+    for assignment in sections.assignments:
+        allowed_sections.setdefault(assignment.source_id, set()).add(
+            assignment.imas_target_path
+        )
+    guarded_bindings: list[ValidatedSignalMapping] = []
+    for binding in all_bindings:
+        source_sections = allowed_sections.get(binding.source_id)
+        if (
+            source_sections is not None
+            and section_of(binding.target_id) not in source_sections
+        ):
+            all_escalations.append(
+                EscalationFlag(
+                    source_id=binding.source_id,
+                    target_id=binding.target_id,
+                    severity=EscalationSeverity.ERROR,
+                    reason=(
+                        f"target_id {binding.target_id} lies outside every selected "
+                        f"section of {binding.source_id} in {ids_name}"
+                    ),
+                )
+            )
+            continue
+        guarded_bindings.append(binding)
+    all_bindings = guarded_bindings
 
     # Run programmatic validation
     from imas_codex.ids.tools import get_sign_flip_paths

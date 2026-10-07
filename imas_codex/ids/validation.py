@@ -18,6 +18,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from imas_codex.core.paths import section_of
 from imas_codex.graph.client import GraphClient
 from imas_codex.ids.models import EscalationFlag, EscalationSeverity
 from imas_codex.ids.tools import analyze_units, check_dd_paths
@@ -837,9 +838,7 @@ def validate_mapping_e2e(
     section_signals: dict[str, list[dict]] = {}
     for b in bindings:
         target = b.get("target_id", "")
-        # Derive section from target path (first two path segments)
-        parts = target.split("/")
-        section = "/".join(parts[:2]) if len(parts) >= 2 else ids_name
+        section = section_of(target) if target else ids_name
         section_signals.setdefault(section, []).append(
             {
                 "id": b.get("source_id", ""),

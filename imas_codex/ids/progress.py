@@ -253,7 +253,7 @@ class MappingProgressDisplay(BaseProgressDisplay):
                 completed=s.sections_assigned,
                 total=max(s.sections_total, s.sections_assigned, 1),
                 is_complete=sections_done,
-                cost=s.cost.steps.get("assign_targets"),
+                cost=s.cost.steps.get("choose_targets"),
                 primary_text=asg.source_id if asg else "",
                 physics_domain=asg.physics_domain if asg else "",
                 description=(
