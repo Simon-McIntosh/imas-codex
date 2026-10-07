@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="84">
+<meta name="plan-version" content="85">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -571,13 +571,29 @@
     <h2 id="s9">§9 — First JET run, audited</h2>
 <section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
+      The section is two nodes, run in order: the run, then the audit of what it wrote.
+    </p>
+    <p>
       <strong>Node</strong> <code>jet-candidate-run</code>, role implement. It runs
       <code>imas-codex discover map jet</code> over all enriched JET sources on the fleet
-      allocation, in foreground passes of <code>--time 8</code>, under a $10 cap. It then
-      audits 40 sources drawn fresh: none from the §3 set, and stratified by route. Each is
-      labelled for every DD home it has, in any IDS, without seeing the route. Unlike §3, the
-      IDS is not fixed first: §3's labels hold one IDS per source, so they cannot score a
-      second home.
+      allocation, in foreground passes of <code>--time 8</code>, under a $10 cap
+      (<code>--cost-limit 10</code>). The engine runs one candidate worker that judges one
+      source at a time, which is IDS routing, three DD searches, a Jev judgment, the §11
+      sibling expansion and its second judgment. At an estimated three to four seconds a
+      source, the 2,288 sources take two to three hours. The claim loop is idempotent, so the
+      node is resumed until the run finishes, and each resume runs passes up to its own
+      60-minute budget. It writes
+      <code>docs/evidence/fragments/mapping-candidate-selection/jet-candidate-run.html</code>.
+      <strong>Done when</strong> no enriched JET source is left without a
+      <code>candidate_route</code>, except sources whose judgment failed, each listed with its
+      error. The fragment states the route counts, the total cost against the cap, the
+      wall-clock time and the measured seconds per source.
+    </p>
+    <p>
+      <strong>Node</strong> <code>jet-candidate-audit</code>, role implement, after the run. It
+      audits 40 sources drawn fresh: none from the §3 set. Each is labelled for every DD home it
+      has, in any IDS, without seeing the route. Unlike §3, the IDS is not fixed first: §3's
+      labels hold one IDS per source, so they cannot score a second home.
     </p>
     <p>
       It needs only the candidate stage: <code>discover map</code> (§7) with §11's cross-IDS
@@ -589,10 +605,10 @@
       stored on the candidate edges.
     </p>
     <p>
-      It writes its evidence fragment under
-      <code>docs/evidence/fragments/mapping-candidate-selection/</code>.
+      It writes its evidence fragment
+      <code>docs/evidence/fragments/mapping-candidate-selection/jet-candidate-audit.html</code>.
     </p>
-    <p><strong>Done when</strong> the fragment states:</p>
+    <p><strong>Done when</strong> the audit fragment states:</p>
     <ul>
       <li>the route counts, and the total cost against the cap;</li>
       <li>the audited section-level precision of <code>selected</code>, and the audited
