@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -166,6 +166,7 @@
       <li><strong>Search reranking</strong> is now §9.</li>
       <li><strong>Fork detection:</strong> a Noul over two files' names and previews, asking whether they are copies of one code, to collapse the personal copies that make up 99.7% of TCV's scored backlog.</li>
       <li><strong>Selection instead of generation:</strong> Choices over candidate units, sign conventions or COCOS values drawn from the graph, wherever a pipeline asks a language model to write one of a known set.</li>
+      <li><strong>Signal search reranking:</strong> <code>_search_signals</code> is the third ranked search entry point. Its candidates are signal descriptions, not code or page text, so it needs its own measurement before it adopts <code>rerank_candidates</code>.</li>
       <li><strong>Standard-name review:</strong> rubric dimensions as Scores, compared against the current reviewers. This is evaluated only, because review needs written reasons that Jev does not produce.</li>
     </ul>
 
@@ -209,6 +210,7 @@
 <p><strong>Deploy</strong> (node <code>search-rerank</code>), after <code>docs-score-ties</code>, since both write <code>search_tools.py</code>:</p>
 <ul>
 <li>The rerank is one function, <code>rerank_candidates</code>, in <code>imas_codex/llm/search_tools.py</code>, which both <code>_search_code</code> and <code>_search_docs</code> call. It scores through <code>decide_batch</code> in <code>imas_codex/discovery/base/judgment.py</code>, the batch decision core. <code>decide_batch</code> applies the concurrency bound and the wall-time budget, totals the cost, and returns a failed or unscored item as None. This node creates that module with that one function; §3 builds the judge-and-apply function on it, so the plan has one decision loop.</li>
+<li><code>find_code</code> in <code>imas_codex/graph/domain_queries.py</code>, the REPL's code search over the same <code>code_chunk_embedding</code> index, calls <code>rerank_candidates</code> too, so one code query returns one order through either path.</li>
 <li><code>_search_code</code> and <code>_search_docs</code> rerank their top candidates through <code>rerank_candidates</code>, on the existing <code>discovery-relevance</code> seat, so the rerank adds no seat, with the query and each candidate's text as state.</li>
 <li>Because ranking is not a gate, a failed or slow rerank returns the embedding order unchanged and says so in the result, rather than failing the search.</li>
 <li>The rerank scores a pool larger than the 30 it returns. §12 found the code answers inside the merged pool but beyond rank 30: <code>eqgrd.f</code> at 85 of 135, and <code>shtrd.f</code> once the vector cut reaches 50. A rerank over the top 30 alone cannot reach either. The node sizes the pool, for example 100 or 150, from recall over the §9 labels against cost and wall time, and reports both.</li>
