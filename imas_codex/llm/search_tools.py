@@ -55,10 +55,14 @@ _DOC_SIGNAL_CAP = 16
 # ---------------------------------------------------------------------------
 
 # The rerank scores a pool larger than the k a search tool returns, so an answer
-# embedding ranks below k can still be lifted into the report. The value carries
-# the pool the prototype scored at, and the sweep that would set it from nDCG@10
-# and p95 wall time against acceptance targets has not been run on this branch.
-RERANK_POOL = 100
+# embedding ranks below k can still be lifted into the report. 30 is the pool a
+# sweep over 18 JT-60SA questions chose: it has the best mean nDCG@10 (0.367,
+# against 0.278 at 60, 0.287 at 100, 0.234 at 150) and the smallest per-query
+# p95 wall time (2.8 s, against 4.3 s, 6.3 s and 8.4 s), and it is the largest
+# pool the 5 s budget below scores in full. A deeper pool reaches the four
+# answers the census placed at ranks 159 to 181, but no pool the budget can
+# afford does, so pool depth is not the instrument for those.
+RERANK_POOL = 30
 
 # Wall-time budget for one query's rerank, sized from the prototype's ~2 s for
 # 30 candidates. A slow rerank returns the embedding order rather than delaying
