@@ -70,8 +70,9 @@ class TestSettingsFunctions:
 
     # Sections that intentionally use a LOCAL model (free, served on a
     # dedicated client) and are therefore EXEMPT from the openrouter/ prefix
-    # guard: the locally routed compose and parent-enrichment seats, the four
-    # discovery function seats, plus the local embedding model.
+    # guard: the locally routed compose and parent-enrichment seats, the
+    # four text/vision discovery function seats, IDS mapping, plus the local
+    # embedding model.
     _LOCAL_MODEL_SECTIONS = frozenset(
         {
             "sn-compose",
@@ -81,6 +82,7 @@ class TestSettingsFunctions:
             "discovery-score",
             "discovery-describe",
             "discovery-vision",
+            "ids-mapping",
         }
     )
 
@@ -329,8 +331,12 @@ class TestGraphSettings:
 class TestDiscoveryFunctionSeats:
     """Discovery reads one model seat per function.
 
-    The four text/vision seats run on the local lane through the ambix router;
-    cluster labelling and IDS mapping keep the OpenRouter model.
+    The four text/vision seats and IDS mapping run on the local lane through
+    the ambix router. Cluster labelling keeps the OpenRouter model — its
+    labelling call is the ``dd-enrichment`` seat's, and this seat is only the
+    label-cache match key and provenance — and the two Jev seats
+    (discovery-relevance, mapping-candidates) stay on the OpenRouter decisions
+    endpoint.
     """
 
     DISCOVERY_SEATS = (
@@ -338,6 +344,7 @@ class TestDiscoveryFunctionSeats:
         "discovery-score",
         "discovery-describe",
         "discovery-vision",
+        "ids-mapping",
     )
 
     def test_seats_resolve_configured_models(self, monkeypatch):
@@ -348,10 +355,6 @@ class TestDiscoveryFunctionSeats:
             monkeypatch.delenv(settings._MODEL_ENV_VARS[seat], raising=False)
             assert settings.get_model(seat) == "local/deepseek-v4.1-flash"
 
-        for seat in ("cluster-labels", "ids-mapping"):
-            monkeypatch.delenv(settings._MODEL_ENV_VARS[seat], raising=False)
-            assert settings.get_model(seat) == "openrouter/openai/gpt-5.4"
-
     def test_seats_honour_environment_override(self, monkeypatch):
         """A seat's model is overridable through its environment variable."""
         settings._load_pyproject_settings.cache_clear()
@@ -360,7 +363,7 @@ class TestDiscoveryFunctionSeats:
         assert settings.get_model("discovery-score") == "test-score-model"
 
     def test_discovery_seats_register_local_endpoint(self):
-        """The four discovery seats bind their model to the ambix-local route."""
+        """The discovery seats bind their model to the ambix-local route."""
         settings._load_pyproject_settings.cache_clear()
         settings.register_model_endpoints()
 
@@ -381,10 +384,122 @@ class TestDiscoveryFunctionSeats:
             assert endpoint["endpoint_class"] == "local-free"
             assert settings.is_explicit_free_local_endpoint(model)
 
-    def test_labels_and_mapping_seats_have_no_local_endpoint(self):
-        """Cluster labelling and IDS mapping keep default proxy routing."""
+    def test_ids_mapping_carries_high_reasoning_effort(self):
+        """IDS mapping raises reasoning effort for the escalated choice."""
+        settings._load_pyproject_settings.cache_clear()
+        assert settings.get_reasoning_effort("ids-mapping") == "high"
+
+    def test_cluster_labels_keeps_openrouter_seat(self):
+        """Cluster labelling stays on the OpenRouter model.
+
+        Its labelling call is the ``dd-enrichment`` seat's, and this seat is
+        read only as the label-cache match key and provenance, so moving it
+        local would miss the whole label cache on the next DD build.
+        """
         settings._load_pyproject_settings.cache_clear()
         settings.register_model_endpoints()
 
-        for seat in ("cluster-labels", "ids-mapping"):
-            assert settings.get_model_endpoint(settings.get_model(seat)) is None
+        model = settings.get_model("cluster-labels")
+        assert model == "openrouter/openai/gpt-5.4"
+        assert settings.get_model_endpoint(model) is None
+
+
+class TestMapRunModelSeat:
+    """The map run command's start-up model check probes the seat it calls.
+
+    ``imas map run``'s LLM calls go through the ``ids-mapping`` seat, so its
+    service monitor must probe that seat, not the unrelated ``reasoning``
+    seat.
+    """
+
+    def test_map_run_model_check_names_ids_mapping(self, monkeypatch):
+        from unittest.mock import MagicMock
+
+        import imas_codex.cli.discover.common as common
+        import imas_codex.cli.map as map_mod
+        import imas_codex.discovery.base.facility as facility_mod
+        import imas_codex.ids.progress as progress_mod
+
+        captured: dict[str, object] = {}
+
+        monkeypatch.setattr(
+            facility_mod,
+            "get_facility",
+            lambda name: {"id": name, "wiki_sites": []},
+        )
+        monkeypatch.setattr(progress_mod, "MappingProgressDisplay", MagicMock())
+
+        def _fake_run_discovery(config, async_main):
+            captured["model_section"] = config.model_section
+            captured["check_model"] = config.check_model
+            return {}
+
+        monkeypatch.setattr(common, "run_discovery", _fake_run_discovery)
+
+        results = map_mod._run_rich_mode(
+            facility="test",
+            ids_names=["equilibrium"],
+            targets=[{"ids_name": "equilibrium"}],
+            model=None,
+            dd_version=None,
+            cost_limit=0.0,
+            dry_run=True,
+            no_activate=True,
+            clear=False,
+            deadline=None,
+            verbose=False,
+            console=None,
+            log_print=lambda *a, **k: None,
+        )
+
+        assert captured["check_model"] is True
+        assert captured["model_section"] == "ids-mapping"
+        assert results == []
+
+
+class TestIdsMappingReasoningEffortForwarding:
+    """The ids-mapping seat's reasoning effort reaches the LLM call layer.
+
+    The seat's ``reasoning-effort`` is inert unless the mapping helpers pass
+    it: the call layer only sets the field when a caller supplies it.
+    """
+
+    def test_acall_llm_forwards_seat_effort(self, monkeypatch):
+        import asyncio
+
+        import imas_codex.discovery.base.llm as llm_mod
+        import imas_codex.ids.mapping as mapping
+
+        captured: dict[str, object] = {}
+
+        async def _fake(model, messages, response_model, **kwargs):
+            captured["model"] = model
+            captured["reasoning_effort"] = kwargs.get("reasoning_effort")
+            return ("ok", 0.0, 0)
+
+        monkeypatch.setattr(llm_mod, "acall_llm_structured", _fake)
+
+        result = asyncio.run(
+            mapping._acall_llm([{"role": "user", "content": "x"}], object)
+        )
+
+        assert result == "ok"
+        assert captured["reasoning_effort"] == "high"
+
+    def test_call_llm_forwards_seat_effort(self, monkeypatch):
+        import imas_codex.discovery.base.llm as llm_mod
+        import imas_codex.ids.mapping as mapping
+
+        captured: dict[str, object] = {}
+
+        def _fake(model, messages, response_model, **kwargs):
+            captured["model"] = model
+            captured["reasoning_effort"] = kwargs.get("reasoning_effort")
+            return ("ok", 0.0, 0)
+
+        monkeypatch.setattr(llm_mod, "call_llm_structured", _fake)
+
+        result = mapping._call_llm([{"role": "user", "content": "x"}], object)
+
+        assert result == "ok"
+        assert captured["reasoning_effort"] == "high"

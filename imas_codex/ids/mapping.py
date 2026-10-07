@@ -63,7 +63,7 @@ from imas_codex.ids.tools import (
     search_existing_mappings,
     search_imas_semantic,
 )
-from imas_codex.settings import get_model
+from imas_codex.settings import get_model, get_reasoning_effort
 
 logger = logging.getLogger(__name__)
 
@@ -749,6 +749,7 @@ def _call_llm(
         messages,
         response_model,
         service="imas-mapping",
+        reasoning_effort=get_reasoning_effort("ids-mapping"),
     )
 
     if cost:
@@ -777,6 +778,7 @@ async def _acall_llm(
         messages,
         response_model,
         service="imas-mapping",
+        reasoning_effort=get_reasoning_effort("ids-mapping"),
     )
 
     if cost:

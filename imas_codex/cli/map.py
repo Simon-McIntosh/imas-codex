@@ -447,7 +447,7 @@ def _run_rich_mode(
         check_embed=True,
         check_ssh=False,
         check_model=True,
-        model_section="reasoning",
+        model_section="ids-mapping",
         verbose=verbose,
     )
 
