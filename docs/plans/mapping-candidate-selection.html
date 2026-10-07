@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="79">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -331,10 +331,24 @@
         section. The escalated choice call therefore returns only listed paths, or
         <code>none</code> with a disposition. It no longer returns a <code>TargetType</code>,
         and its response model in <code>imas_codex/ids/models.py</code> changes with the
-        prompts. Public definitions stay level across §8: <code>read_candidates</code> and
+        prompts. Public definitions rise by one across §8: <code>read_candidates</code> and
         <code>select_candidates</code> are added, <code>count_sources_by_mapping_status</code>
         and the <code>workers.py</code> copy of <code>count_candidates_by_route</code> are
-        deleted, and the target-type rule is private.</li>
+        deleted, and the target-type rule is private. The one addition is
+        <code>section_of(path)</code> in <code>imas_codex/core/paths.py</code>, beside
+        <code>normalize_imas_path</code>. It merges three copies of one rule: the
+        <code>parts[0] + '/' + parts[1]</code> derivation in <code>read_candidates</code>
+        (<code>imas_codex/ids/graph_ops.py:608</code>), the re-derivation in
+        <code>imas_codex/ids/validation.py:842</code>, and the prefix test in
+        <code>imas_codex/ids/assembler.py:187</code>. That prefix test also matches a sibling
+        section whose name merely begins with the same text.</li>
+      <li><strong>One owner for a path's section.</strong> <code>section_of(path)</code>
+        returns <code>&lt;ids&gt;/&lt;first segment&gt;</code>. §8's guard and target-type
+        rule call it, <code>validation.py</code> calls it in place of its re-derivation, and
+        <code>assembler.py</code> compares <code>section_of(m.target_id)</code> with the
+        section in place of its prefix test. <code>read_candidates</code> computes the section
+        inside Cypher and cannot call Python, so its expression stays, and a test asserts it
+        agrees with <code>section_of</code> on every returned edge.</li>
       <li><strong>One owner for the edge.</strong> The <code>MAPS_TO_IMAS</code> delete in
         <code>_clear_mapping</code> (<code>imas_codex/cli/map.py:657–666</code>), the only
         delete site of that edge, moves into <code>graph_ops.py</code> beside the write
@@ -501,11 +515,16 @@
         <ul>
           <li>Write paths: <code>imas_codex/ids/workers.py</code>,
             <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/ids/models.py</code>,
-            <code>imas_codex/schemas/facility.yaml</code> and <code>tests/ids/</code>.</li>
+            <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/core/paths.py</code>,
+            <code>imas_codex/ids/validation.py</code>, <code>imas_codex/ids/assembler.py</code>,
+            <code>tests/core/</code> and <code>tests/ids/</code>.</li>
           <li><strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/discovery
-            tests/cli/test_discover_map.py tests/test_cli.py -p no:cacheprovider</code> passes,
-            with tests showing:
+            tests/cli/test_discover_map.py tests/test_cli.py tests/core -p no:cacheprovider</code>
+            passes, with tests showing:
             <ul>
+              <li><code>section_of</code> returns the IDS top-level ancestor, and
+                <code>assembler.py</code>'s section filter no longer matches a sibling section
+                that shares a name prefix;</li>
               <li>a selected source is mapped without an assign call;</li>
               <li>an escalated source the assign stage resolved is mapped in the same run, from
                 assignments built out of its selected edges;</li>
