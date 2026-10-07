@@ -22,7 +22,13 @@ import logging
 import pytest
 
 from imas_codex.discovery.base import llm
-from imas_codex.discovery.code.scorer import FileScoreBatch, FileScoreResult
+from imas_codex.discovery.code.scorer import (
+    SCOPE_NOULS,
+    FileScoreBatch,
+    FileScoreResult,
+    build_triage_questions,
+    scope_relevance,
+)
 from imas_codex.discovery.code.state import FileDiscoveryState
 
 FACILITY = "jt-60sa"
@@ -32,6 +38,7 @@ SCOPE = (
     "processes_diagnostic_signals",
     "describes_machine_or_diagnostics",
     "maps_to_imas",
+    "reads_or_writes_reconstruction_db",
 )
 
 
@@ -43,6 +50,7 @@ def _relevance(row: dict) -> float:
             "relevance_processes",
             "relevance_describes",
             "relevance_imas",
+            "relevance_reconstruction_db",
         )
     )
 
@@ -62,22 +70,27 @@ def _facet(row: dict) -> float:
 
 def _answers(
     *nouls: float,
+    reconstruction_db: float = 0.0,
     role: str = "diagnostic_data_access",
     facets: tuple[float, float, float, float] = (4.0, 3.0, 2.0, 1.0),
 ) -> dict:
-    """Answer set with the four scope nouls set positionally.
+    """Answer set with the scope nouls set positionally.
 
-    Carries the content arm's graded relevance and four facet Scores as well;
-    the names arm's question set has no score questions, so its validator
-    ignores them.  The facet Scores are independent of the scope nouls, so a
-    file whose composite is weak can still carry a strong facet, which is what
-    the admission clause reads.  *facets* sets the raw Scores for (data access,
-    signal processing, machine description, imas mapping).
+    The four positional nouls fill the first four scope questions; the
+    reconstruction-database noul is the fifth and is set by keyword, so a
+    caller that passes the four legacy nouls still answers every scope
+    question.  Carries the content arm's graded relevance and four facet Scores
+    as well; the names arm's question set has no score questions, so its
+    validator ignores them.  The facet Scores are independent of the scope
+    nouls, so a file whose composite is weak can still carry a strong facet,
+    which is what the admission clause reads.  *facets* sets the raw Scores for
+    (data access, signal processing, machine description, imas mapping).
     """
     data_score, signal_score, machine_score, imas_score = facets
+    values = (*nouls, reconstruction_db)
     out = {
         name: {"type": "noul", "noul": value}
-        for name, value in zip(SCOPE, nouls, strict=True)
+        for name, value in zip(SCOPE, values, strict=True)
     }
     out["is_simulation"] = {"type": "noul", "noul": 0.05}
     other = (
@@ -361,6 +374,65 @@ def test_names_arm_validation_failure_leaves_file_untouched(monkeypatch):
     assert graph.queries == [], "a refused decision must not touch the graph"
     assert released == [path], "a refused decision must release the claim"
     assert state.triage_stats.processed == 0
+
+
+# ---------------------------------------------------------------------------
+# Scope question set
+# ---------------------------------------------------------------------------
+
+
+def test_scope_question_set_has_five_nouls_in_both_arms():
+    """The names and content arms both ask the five reconstruction scope nouls.
+
+    The scope questions are shared by the two arms, so a noul missing from the
+    shared block would be absent from both: assert the question set renders
+    with every scope noul in the names arm (``with_content=False``) as well as
+    the content arm.
+    """
+    names = build_triage_questions(with_content=False)
+    content = build_triage_questions(with_content=True)
+
+    assert set(SCOPE_NOULS) == {
+        "loads_diagnostic_data",
+        "processes_diagnostic_signals",
+        "describes_machine_or_diagnostics",
+        "maps_to_imas",
+        "reads_or_writes_reconstruction_db",
+    }
+    for questions in (names, content):
+        for question in SCOPE_NOULS:
+            assert question in questions, f"{question} missing from an arm"
+        assert questions["reads_or_writes_reconstruction_db"]["type"] == "noul"
+
+
+def test_composite_is_the_largest_of_five_nouls():
+    """A reconstruction-database noul alone can carry a file over the gate."""
+    nouls = {
+        "loads_diagnostic_data": 0.1,
+        "processes_diagnostic_signals": 0.15,
+        "describes_machine_or_diagnostics": 0.2,
+        "maps_to_imas": 0.05,
+        "reads_or_writes_reconstruction_db": 0.85,
+    }
+    assert scope_relevance(nouls) == 0.85
+
+
+def test_names_arm_writes_the_reconstruction_db_field(monkeypatch):
+    """A file read by the new noul is triaged and carries its field."""
+    path = "/analysis/src/eqrd13.f"
+    files = [_file(path)]
+    answers = {
+        path: _answers(0.1, 0.1, 0.2, 0.1, reconstruction_db=0.85),
+    }
+    graph, _, _, seen = _run_triage(monkeypatch, files, answers)
+
+    (item,) = graph.items_for("sf.status = 'triaged'")
+    assert item["id"] == path
+    assert item["relevance_reconstruction_db"] == 0.85
+    # The composite is the largest of the five, so the new noul alone carries
+    # the file over the 0.4 triage threshold.
+    assert item["score_composite"] == 0.85
+    assert seen["results"][0]["skipped"] is False
 
 
 # ---------------------------------------------------------------------------

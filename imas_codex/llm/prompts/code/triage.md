@@ -110,6 +110,19 @@ dynamic: true
       "false": "it does not"
     }
   },
+  "reads_or_writes_reconstruction_db": {
+    "type": "noul",
+    "instructions": [
+      "Does the source file at `file.path` read or write the result records of an equilibrium or plasma-reconstruction database?",
+      "In scope: the reader, writer or interface that loads or stores reconstruction-result records — for example the EQDBMS `EQDBGET` interface, the `eqrdNN` readers, the `eqwtNN` writers and the `_BF` field-list includes that name the stored fields — and equivalent facility database access code.",
+      "Out of scope: computing or solving the reconstruction itself. A solver whose inputs are model parameters rather than stored result records is a simulation and is marked by the simulation question, not this one.",
+      "Reading a reconstruction result (for example a stored equilibrium or q-profile) to use it as an input to analysis or mapping is in scope and is not the same as computing it."
+    ],
+    "criteria": {
+      "true": "the file reads or writes equilibrium or plasma-reconstruction result database records, or declares the interface that does",
+      "false": "the file does not read or write reconstruction-result records"
+    }
+  },
   "is_simulation": {
     "type": "noul",
     "instructions": [

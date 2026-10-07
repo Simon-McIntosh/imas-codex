@@ -214,3 +214,30 @@ def test_prompt_carries_generated_example_verbatim(prompt_name):
         f"prompt {prompt_name!r} does not contain the generated example for "
         f"{model_name} verbatim"
     )
+
+
+# The scope questions the code/triage decisions prompt must carry in both arms.
+TRIAGE_SCOPE_NOULS = (
+    "loads_diagnostic_data",
+    "processes_diagnostic_signals",
+    "describes_machine_or_diagnostics",
+    "maps_to_imas",
+    "reads_or_writes_reconstruction_db",
+)
+
+
+@pytest.mark.parametrize("with_content", [False, True])
+def test_code_triage_asks_every_scope_question_in_both_arms(with_content):
+    """The triage prompt carries the five scope nouls in both arms.
+
+    The content arm adds the graded and facet Scores; the scope questions are
+    shared, so a noul dropped from the shared block is absent from both arms.
+    Rendering with each arm and requiring every scope question pins that.
+    """
+    rendered = prompt_loader.render_prompt(
+        "code/triage", {"with_content": with_content}
+    )
+    for question in TRIAGE_SCOPE_NOULS:
+        assert f'"{question}"' in rendered, (
+            f"code/triage (with_content={with_content}) omitted {question}"
+        )

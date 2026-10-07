@@ -59,6 +59,7 @@ class TestResetSpec:
             "content",
             "discovered",
             "ingested",
+            "name",
             "scored",
             "triaged",
         ]
@@ -150,6 +151,36 @@ class TestResetSpec:
         assert "score_cost" not in spec.clear_fields
         assert "ingested_at" not in spec.clear_fields
         assert "relevance_stage" not in spec.clear_fields
+
+    def test_code_name_reset_selects_name_stage_non_duplicate(self, reset_mod):
+        """The name target re-triages the names arm's own skips, not duplicates.
+
+        Eligible rows are the names arm's skips (``relevance_stage='name'``)
+        whose skip reason is not a duplicate.  Duplicates stay: they are
+        content-identical to an admitted file, so re-judging them spends a
+        decision without changing the outcome.  The content stage is excluded
+        because its files are handled by the content target.
+        """
+        spec = reset_mod.CODE_RESET_SPECS["name"]
+        assert spec.label == "CodeFile"
+        # The names claim takes a discovered file with no name relevance.
+        assert spec.target_status == "discovered"
+        assert spec.source_statuses == ["skipped"]
+        # The scope must narrow the eligible statuses (AND), not widen them
+        # (OR): a source_filter would re-triage every skipped file whatever its
+        # stage.  The stage and the non-duplicate clause both ride extra_filter.
+        assert spec.source_filter is None
+        assert spec.extra_filter is not None
+        assert "n.relevance_stage = 'name'" in spec.extra_filter
+        assert "'duplicate'" in spec.extra_filter
+        assert "STARTS WITH" in spec.extra_filter
+        # A skipped file holds no chunks, so there is no cascade.
+        assert spec.post_cypher is None
+        # The relevance fields the names arm wrote go, so the file is claimable
+        # again, and the skip reason that recorded the skip goes with it.
+        assert "relevance_stage" in spec.clear_fields
+        assert "relevance_reconstruction_db" in spec.clear_fields
+        assert "skip_reason" in spec.clear_fields
 
 
 # ─── reset_to_status tests ──────────────────────────────────────────────
@@ -367,3 +398,27 @@ class TestResetToStatus:
         params = mock_gc.query.call_args[1]
         assert params["target_status"] == "ingested"
         assert params["source_statuses"] == ["ingested"]
+
+    def test_code_name_reset_renders_and_narrowed_scope(self, reset_mod):
+        """The name reset narrows the status match with an AND, so a skipped
+        content-stage or duplicate file is *not* admitted."""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 9}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.CODE_RESET_SPECS["name"]
+            count = reset_mod.reset_to_status(spec, "jt-60sa")
+
+        assert count == 9
+        query = mock_gc.query.call_args[0][0]
+        assert "n.status = $target_status" in query
+        assert "n.status IN $source_statuses AND n.relevance_stage = 'name'" in query
+        assert "NOT coalesce(n.skip_reason, '') STARTS WITH 'duplicate'" in query
+        # The OR-widening that would admit every skipped status is absent.
+        assert "n.status IN $source_statuses OR" not in query
+        assert "n.relevance_stage IS NULL" not in query
+        # No chunk cascade is rendered for a names-arm reset.
+        assert "CodeChunk" not in query
+        params = mock_gc.query.call_args[1]
+        assert params["target_status"] == "discovered"
+        assert params["source_statuses"] == ["skipped"]

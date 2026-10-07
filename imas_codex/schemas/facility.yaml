@@ -2989,7 +2989,7 @@ classes:
         range: datetime
       score_composite:
         description: >-
-          Jev content relevance (0.0-1.0): the largest of the four scope
+          Jev content relevance (0.0-1.0): the largest of the five scope
           probabilities from the file's relevance decision. Written by both
           decision arms and the one stored owner of a file's relevance.
         range: float
@@ -3064,9 +3064,9 @@ classes:
       score_reason:
         description: Brief LLM explanation for the assigned scores
       # Jev decision relevance (typed judgements, 0.0-1.0 each). A decisions
-      # model answers the six triage questions; these hold the four scope
+      # model answers the seven triage questions; these hold the five scope
       # probabilities plus the simulation probability and the chosen role.
-      # A file's relevance is the largest of the four scope probabilities.
+      # A file's relevance is the largest of the five scope probabilities.
       relevance_loads:
         description: Probability the file reads measured data from the facility's data systems
         range: float
@@ -3078,6 +3078,11 @@ classes:
         range: float
       relevance_imas:
         description: Probability the file maps facility data to or from IMAS
+        range: float
+      relevance_reconstruction_db:
+        description: >-
+          Probability the file reads or writes equilibrium or plasma-reconstruction
+          result database records
         range: float
       relevance_simulation:
         description: Probability the file is part of a simulation or physics solver
