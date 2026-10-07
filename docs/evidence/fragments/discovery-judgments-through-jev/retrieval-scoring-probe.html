@@ -20,10 +20,13 @@
   <ul id="retrieval-scoring-probe-pipeline">
     <li id="retrieval-scoring-probe-pipeline-vector">
       <strong>Vector index and k.</strong> Code: <code>code_chunk_embedding</code>
-      (COSINE, 256d) with an in-index <code>cc.facility_id = $facility</code> pre-filter
-      and an ANN cut of <code>max(k*2, 50)</code>. Docs: <code>wiki_chunk_embedding</code>,
-      same pre-filter, same cut. At the tool default <code>k=10</code> the cut is 50; at
-      the answered-questions depth <code>k=30</code> it is 60.
+      (COSINE, 256d) with an in-index <code>cc.facility_id = $facility</code> pre-filter.
+      The index is queried with <code>max(k*2, 50)</code> candidates but only the top
+      <code>k</code> are kept, so the vector cut that reaches the merger is exactly
+      <code>k</code>: 30 at the §9 label depth and 200 at the depth the census calls the
+      tool. Docs: <code>wiki_chunk_embedding</code>, same pre-filter, same
+      <code>k</code>-wide cut. This matters below: the cut width, not the scoring, decides
+      whether an answer is reachable at all.
     </li>
     <li id="retrieval-scoring-probe-pipeline-keyword">
       <strong>Keyword term (hybrid boost).</strong> A fulltext/BM25 query over
@@ -48,9 +51,9 @@
 
   <h3 id="retrieval-scoring-probe-table-heading">Per-answer table</h3>
   <table id="retrieval-scoring-probe-table">
-    <caption>Each answering chunk: raw cosine to its question, its rank in the facility's own vector order, the rank the tool gives it, the stage that buries it</caption>
+    <caption>Each answering chunk. Ranks are given at the depth the tool is called with in the census (k=200); the k=2000 deep-probe column is a separate, wider reading and is not the tool's rank at its called depth.</caption>
     <thead>
-      <tr><th>Q</th><th>Answering chunk</th><th>Raw cosine</th><th>Facility vector rank</th><th>Tool rank</th><th>Stage that buries it</th></tr>
+      <tr><th>Q</th><th>Answering chunk</th><th>Raw cosine</th><th>Facility vector rank</th><th>Tool rank (k=200)</th><th>Deep-probe rank (k=2000)</th><th>Stage that buries it</th></tr>
     </thead>
     <tbody>
       <tr id="retrieval-scoring-probe-row-q05">
@@ -58,22 +61,25 @@
         <td><code>eqgrd.f</code> (the flux-grid builder)</td>
         <td>0.438</td>
         <td>442 / 907</td>
+        <td>not in top 200</td>
         <td>447 / 907</td>
-        <td><strong>candidate generation</strong> — the cosine is low, so the chunk is outside even the widest vector cut; the tool preserves its (low) place rather than dropping it</td>
+        <td><strong>candidate generation</strong> — cosine 0.438 is far below the cut, so no scoring change reaches it</td>
       </tr>
       <tr id="retrieval-scoring-probe-row-q12">
         <td>Q12</td>
         <td><code>shtrd.f</code> chunk_1 (<code>#MAG</code> common block, <code>TCUR</code>)</td>
         <td>0.560</td>
         <td>49 / 907</td>
+        <td>not in top 200</td>
         <td>511 / 907</td>
-        <td><strong>sort</strong> — the answer is inside the vector cut (rank 49) but the unbounded BM25 term (scores 2–6 for other routines) pushes it past rank 500</td>
+        <td><strong>candidate generation at k=30, sort at k=200</strong> — at the §9 label depth the vector cut is only 30 wide, so the answer (facility rank 49) is not a candidate at all; at k=200 it is a candidate but the unbounded BM25 term buries it past rank 200</td>
       </tr>
       <tr id="retrieval-scoring-probe-row-q14">
         <td>Q14</td>
         <td><code>use_compiler-en.html</code> chunk_0</td>
         <td>0.713</td>
         <td>4 / 2000</td>
+        <td>181</td>
         <td>1734 / 2000</td>
         <td><strong>score saturation + sort</strong> — the 4th-highest-cosine chunk in the facility falls into a 268-chunk tie at exactly 1.0, ordered arbitrarily by set order</td>
       </tr>
@@ -82,18 +88,25 @@
         <td><code>use_login-en.html</code> chunk_0</td>
         <td>0.764</td>
         <td>2 / 2000</td>
+        <td>164</td>
         <td>1330 / 2000</td>
         <td><strong>score saturation + sort</strong> — the 2nd-highest-cosine chunk in the facility ties with 227 others at exactly 1.0, ordered arbitrarily by set order</td>
       </tr>
     </tbody>
+    <tfoot>
+      <tr id="retrieval-scoring-probe-table-note">
+        <td colspan="7">At k=200 the same answers rank Q14 181 and Q18 164 — the census depths. The
+        earlier 1734 / 1330 readings were taken at k=2000 and are shown only in the deep-probe column.</td>
+      </tr>
+    </tfoot>
   </table>
 
   <p id="retrieval-scoring-probe-tie-count">
     The docs tie mass is the completion of the merge formula, not a rounding artefact:
-    on Q14 <strong>268</strong> of the facility's chunks score exactly 1.0 (ranks 1732–1999)
-    and on Q18 <strong>227</strong> (ranks 1329–1555). Among them sit the facility's best
-    two to six wiki chunks, which the tool then orders by CPython set iteration — the
-    answer loses the tie by construction, not by rank.
+    on Q14 <strong>268</strong> of the facility's chunks score exactly 1.0 (deep-probe
+    ranks 1732–1999) and on Q18 <strong>227</strong> (ranks 1329–1555). Among them sit the
+    facility's best two to six wiki chunks, which the tool then orders by CPython set
+    iteration — the answer loses the tie by construction, not by rank.
   </p>
 
   <h3 id="retrieval-scoring-probe-change-heading">The change, and what it measures over the 18 §9 questions</h3>
@@ -111,14 +124,18 @@
     </li>
     <li id="retrieval-scoring-probe-change-rrf">
       <strong>reciprocal rank fusion</strong> — the vector list and the BM25 list are
-      fused by rank, <code>1/(60+r_vec) + 1/(60+r_bm25)</code>, which removes the raw
-      BM25 magnitude entirely.
+      fused by rank, <code>1/(60+r_vec) + 1/(60+r_bm25)</code>.
+    </li>
+    <li id="retrieval-scoring-probe-change-sat">
+      <strong>saturating keyword term</strong> — the linear BM25 term is replaced by a
+      bounded one, <code>0.7*vec + 0.1 + 0.3*BM25/(BM25+1)</code>, so the keyword
+      contribution is capped at 0.3 and cannot swamp the [0,1] vector score.
     </li>
     <li id="retrieval-scoring-probe-change-reserve">
       <strong>reserved vector slots</strong> — the current top 10 is kept exactly and
-      ranks 10–29 are filled with the facility's vector leaders not already shown. This
-      reorders nothing already displayed, so it cannot cost an existing hit; it
-      guarantees the vector-leading chunks appear within top 30.
+      the next slots (ranks 10–29, or 10–49 for the 50-slot variant) are filled with
+      the vector leaders not already shown. This reorders nothing displayed, so it
+      cannot cost an existing hit.
     </li>
   </ul>
   <p id="retrieval-scoring-probe-change-label">
@@ -127,49 +144,64 @@
     <code>answer_contains</code>), using the answering artifacts named in the
     retrieval-miss census for Q05/Q12/Q14/Q18; a top-10 slot neither labelled nor an
     answer artifact scores 0, so a reweighted variant's figure is a lower bound.
+    The nDCG@10 figures are at the §9 label depth (k=30). The Q12 column gives the rank
+    of <code>shtrd.f</code> chunk_1 at k=200, where it is a candidate; at k=30 it is not
+    one — the vector cut is 30 wide and its facility rank is 49.
   </p>
   <table id="retrieval-scoring-probe-ndcg">
-    <caption>nDCG@10 over the 18 §9 questions, current order vs the three changes</caption>
-    <thead><tr><th>Measure</th><th>Current</th><th>Bounded fusion</th><th>RRF</th><th>Reserved slots</th></tr></thead>
+    <caption>nDCG@10 over the 18 §9 questions (k=30) and the Q12 answer rank (k=200), per change</caption>
+    <thead><tr><th>Change</th><th>mean nDCG@10 (18)</th><th>Q16 control</th><th>Q12 shtrd.f rank (k=200)</th><th>Outcome</th></tr></thead>
     <tbody>
-      <tr id="retrieval-scoring-probe-ndcg-all"><td>mean nDCG@10, all 18</td><td>0.420</td><td>0.309</td><td>0.379</td><td><strong>0.420</strong></td></tr>
-      <tr id="retrieval-scoring-probe-ndcg-ans"><td>mean nDCG@10, answerable (17)</td><td>0.445</td><td>0.328</td><td>0.402</td><td><strong>0.445</strong></td></tr>
-      <tr id="retrieval-scoring-probe-ndcg-q14"><td>Q14</td><td>0.000</td><td>0.500</td><td>1.000</td><td>0.000 (answer at rank 14)</td></tr>
-      <tr id="retrieval-scoring-probe-ndcg-q18"><td>Q18</td><td>0.000</td><td>1.000</td><td>0.913</td><td>0.000 (answer at rank 10)</td></tr>
-      <tr id="retrieval-scoring-probe-ndcg-q16"><td>Q16 (preservation control)</td><td>0.968</td><td>0.000</td><td>0.412</td><td><strong>0.968</strong></td></tr>
+      <tr id="retrieval-scoring-probe-ndcg-current"><td>current order</td><td>0.420</td><td>0.968</td><td>not in top 200</td><td>baseline</td></tr>
+      <tr id="retrieval-scoring-probe-ndcg-bounded"><td>bounded fusion</td><td>0.309</td><td>0.000</td><td>84</td><td>fails the control</td></tr>
+      <tr id="retrieval-scoring-probe-ndcg-rrf"><td>RRF</td><td>0.379</td><td>0.412</td><td>140</td><td>fails the control</td></tr>
+      <tr id="retrieval-scoring-probe-ndcg-sat"><td>saturating keyword</td><td>0.349</td><td>0.000</td><td>not in top 200</td><td>fails the control</td></tr>
+      <tr id="retrieval-scoring-probe-ndcg-satreserve"><td>saturating + reserved slots (20)</td><td>0.349</td><td>0.000</td><td>not in top 200</td><td>fails the control</td></tr>
+      <tr id="retrieval-scoring-probe-ndcg-reserve20"><td>reserved slots (20)</td><td><strong>0.420</strong></td><td>0.968</td><td>not in top 200</td><td><strong>meets the control; lifts Q14/Q18 into top 30</strong></td></tr>
+      <tr id="retrieval-scoring-probe-ndcg-reserve50"><td>reserved slots (50)</td><td><strong>0.420</strong></td><td>0.968</td><td>59</td><td>meets the control; does not reach Q12</td></tr>
     </tbody>
   </table>
 
   <p id="retrieval-scoring-probe-verdict">
-    <strong>The reweighting changes lift the buried answers but fail the declared
-    preservation control; the reserved-slot change lifts the docs answers into top 30 and
-    meets it.</strong> Both bounded fusion and RRF move Q14 and Q18 to (or near) rank 0 —
-    and, for the same reason, evict the BM25-carried relevant candidates of Q16, Q06, Q09
-    and Q13. Q16's known relevant chunks leave the top 10 entirely under bounded fusion
-    (0.968 → 0.000) and only partly survive under RRF (→ 0.412), so the declared control —
-    that Q16 keeps its relevant candidates in the top 10 — is <em>not</em> met by either
-    reweighting. They also lower the mean, though 303 of the 540 top-10 slots the three
-    variants produce are unlabelled and scored 0, so those two figures are lower bounds.
+    <strong>Every reweighting fails the declared preservation control; only the reserved-slot
+    change meets it.</strong> Bounded fusion, RRF and the saturating keyword term all lift
+    Q14/Q18 by demoting the BM25-carried relevant candidates: Q16's known relevant chunks
+    leave the top 10 entirely under bounded fusion (0.968 → 0.000), under the saturating
+    term (→ 0.000) and, partly, under RRF (→ 0.412). The saturating term fails the control
+    alone and combined with reserved slots (0.000), because it changes the top 10 the
+    control inspects. Their mean figures are also below the current order (0.309 / 0.379 /
+    0.349 vs 0.420), though 610 top-10 slots across the reweighting variants are unlabelled
+    and scored 0, so those are lower bounds rather than a demonstrated loss.
   </p>
   <p id="retrieval-scoring-probe-verdict-reserve">
-    The reserved-slot change is the one that satisfies every stated requirement. It leaves
-    the top 10 of all 18 questions identical to the current order, so the mean nDCG@10 is
-    unchanged (0.420) and Q16 is preserved exactly (0.968) — and it lifts the answered docs
-    chunks into top 30 from where the tool buries them: <code>use_compiler-en.html:chunk_0
-    </code> to rank 14 (Q14, was 1734) and <code>use_login-en.html</code> chunks 4, 5 and 0
-    to ranks 10, 11 and 12 (Q18, was 1330). The tension it avoids is structural: any single
-    monotone reweighting that raises a zero-BM25, high-vector answer above a BM25 candidate
-    must demote the BM25-carried answers, so it cannot both lift Q14/Q18 to rank 0 and keep
-    Q16. Reserved slots add recall instead of reweighting, which is why they lift the
-    answers without moving a displayed result.
+    The reserved-slot change leaves the top 10 of all 18 questions identical to the current
+    order — so the mean nDCG@10 is unchanged (0.420) and Q16 is preserved exactly (0.968) —
+    and it lifts the answered docs chunks into top 30: <code>use_compiler-en.html:chunk_0
+    </code> to rank 14 (Q14) and <code>use_login-en.html</code> chunks 4, 5 and 0 to ranks
+    10, 11 and 12 (Q18). Q14's called-depth rank was 181 and Q18's 164, so both enter top 30
+    from below it. The tension it avoids is structural: a single monotone reweighting that
+    raises a zero-BM25, high-vector answer above a BM25 candidate must demote the
+    BM25-carried answers, so it cannot both lift Q14/Q18 to rank 0 and keep Q16. Reserved
+    slots add recall instead of reweighting.
   </p>
   <p id="retrieval-scoring-probe-verdict-remaining">
-    Two answers need a stage ahead of scoring. <strong>Q12</strong> (<code>shtrd.f</code>)
-    is inside the vector cut (rank 49) but outside the 20 reserved slots, so the slack must
-    come from a saturating BM25 term that bounds the tail without renormalising it away —
-    the change that carries the least risk to Q16. <strong>Q05</strong> (<code>eqgrd.f</code>)
-    cannot be reached by any scoring change: its cosine (0.438) is the 442nd of 907 code
-    chunks, outside every candidate cut, so it needs a lexical or encoder change at
-    candidate generation.
+    <strong>Q12</strong> (<code>shtrd.f</code>, facility vector rank 49) is reached by
+    neither the saturating term nor the 50-slot reservation: at k=200 the 50 reserved slots
+    place it at rank 59 (a top-30 window holds only 20 leaders after the top 10), and at
+    k=30 it is not a candidate at all (the vector cut is 30 wide). <strong>Q05</strong>
+    (<code>eqgrd.f</code>) cannot be reached by any scoring change — cosine 0.438 is the
+    442nd of 907 code chunks, outside every candidate cut. Both need a candidate-generation
+    change (a wider <code>k</code>, a lexical term, or a better encoder) that this node did
+    not measure.
+  </p>
+  <p id="retrieval-scoring-probe-recommendation">
+    <strong>Recommendation for the deploy node: the reserved-vector-slot change, reserving
+    at least 20 vector leaders at ranks 10–29, applied to the docs tool.</strong> It is the
+    only measured change that meets the preservation control: it costs the existing top 10
+    exactly nothing (mean nDCG@10 0.420 unchanged, Q16 0.968 unchanged across all 18
+    questions), and it moves the two answered docs chunks into top 30. No combination does
+    better — the saturating term, alone and with reserved slots, and the two reweightings
+    all score below the current order and all fail the control. Q12 and Q05 are out of reach
+    of any scoring change at these depths and are handed back as candidate-generation work.
   </p>
 </section>
