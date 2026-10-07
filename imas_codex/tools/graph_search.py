@@ -338,7 +338,9 @@ def _dd_version_clause(
     )
 
 
-def _rerank_dd_hits(query: str, hits: list[SearchHit]) -> list[SearchHit]:
+def _rerank_dd_hits(
+    query: str, hits: list[SearchHit]
+) -> tuple[list[SearchHit], str | None]:
     """Reorder DD-path hits through the shared search-time Jev rerank.
 
     The hits arrive in hybrid embedding order. Each becomes a candidate whose
@@ -348,6 +350,12 @@ def _rerank_dd_hits(query: str, hits: list[SearchHit]) -> list[SearchHit]:
     returns the embedding order unchanged, so the result is never worse than
     the order the search produced. Each hit rides its own candidate so the
     judged order maps back without a lookup.
+
+    Returns the hits in judged order and the note ``rerank_candidates``
+    returned. The note is ``None`` when every candidate was scored, otherwise
+    it names why some kept their embedding position — a missing decisions key
+    or an elapsed wall-time budget — so the caller can report a fallback it
+    cannot otherwise distinguish from a rerank that ran.
     """
     from imas_codex.llm.search_tools import rerank_candidates
 
@@ -361,8 +369,8 @@ def _rerank_dd_hits(query: str, hits: list[SearchHit]) -> list[SearchHit]:
         }
         for hit in hits
     ]
-    ordered, _note = rerank_candidates(query, candidates)
-    return [candidate["_hit"] for candidate in ordered]
+    ordered, note = rerank_candidates(query, candidates)
+    return [candidate["_hit"] for candidate in ordered], note
 
 
 class GraphSearchTool:
@@ -443,8 +451,9 @@ class GraphSearchTool:
             k=max_results,
         )
 
+        rerank_note: str | None = None
         if self._rerank and hits:
-            hits = _rerank_dd_hits(query, hits)
+            hits, rerank_note = _rerank_dd_hits(query, hits)
 
         mode = (
             SearchMode(search_mode)
@@ -458,14 +467,22 @@ class GraphSearchTool:
 
         physics_domains = sorted({h.physics_domain for h in hits if h.physics_domain})
 
+        summary: dict[str, Any] = {
+            "query": query,
+            "search_mode": str(mode),
+            "hits_returned": len(hits),
+            "ids_coverage": sorted({h.ids_name for h in hits if h.ids_name}),
+        }
+        # A rerank that fell back to embedding order (missing decisions key or
+        # an elapsed budget) leaves a note; surface it so the caller can tell
+        # a fallback from a completed rerank. The note is untouched by any
+        # change to the note's wording — it is a string ownership boundary.
+        if rerank_note:
+            summary["rerank_note"] = rerank_note
+
         return SearchPathsResult(
             hits=hits,
-            summary={
-                "query": query,
-                "search_mode": str(mode),
-                "hits_returned": len(hits),
-                "ids_coverage": sorted({h.ids_name for h in hits if h.ids_name}),
-            },
+            summary=summary,
             query=query,
             search_mode=mode,
             physics_domains=physics_domains,

@@ -125,19 +125,54 @@ def server_module():
     module._rerank_dd_paths = prior
 
 
-def test_full_server_reranks(server_module):
-    server_module.AgentsServer(read_only=False, dd_only=False)
-    assert server_module._rerank_dd_paths is True
+def _server_search_tool(server_module, **kwargs):
+    """Build the search tool the server's mode would construct."""
+    from imas_codex.tools import Tools
+
+    server_module.AgentsServer(**kwargs)
+    return Tools(
+        graph_client=MagicMock(),
+        rerank_dd_paths=server_module._rerank_dd_paths,
+    ).search_tool
 
 
-def test_read_only_server_never_reranks(server_module):
-    server_module.AgentsServer(read_only=True, dd_only=False)
-    assert server_module._rerank_dd_paths is False
+@pytest.mark.asyncio
+async def test_full_server_reranks(server_module):
+    tool = _server_search_tool(server_module, read_only=False, dd_only=False)
+    hits = [_hit("ids/a"), _hit("ids/b")]
+    with (
+        patch("imas_codex.graph.dd_search.hybrid_dd_search", return_value=list(hits)),
+        patch(
+            "imas_codex.llm.search_tools.rerank_candidates",
+            side_effect=lambda q, c, **kw: (list(reversed(c)), None),
+        ) as spy,
+    ):
+        await tool.search_dd_paths("query", max_results=2)
+    assert spy.call_count == 1
 
 
-def test_dd_only_server_never_reranks(server_module):
-    server_module.AgentsServer(read_only=True, dd_only=True)
-    assert server_module._rerank_dd_paths is False
+@pytest.mark.asyncio
+async def test_read_only_server_never_reranks(server_module):
+    tool = _server_search_tool(server_module, read_only=True, dd_only=False)
+    hits = [_hit("ids/a"), _hit("ids/b")]
+    with (
+        patch("imas_codex.graph.dd_search.hybrid_dd_search", return_value=list(hits)),
+        patch("imas_codex.llm.search_tools.rerank_candidates") as spy,
+    ):
+        await tool.search_dd_paths("query", max_results=2)
+    assert spy.call_count == 0
+
+
+@pytest.mark.asyncio
+async def test_dd_only_server_never_reranks(server_module):
+    tool = _server_search_tool(server_module, read_only=True, dd_only=True)
+    hits = [_hit("ids/a"), _hit("ids/b")]
+    with (
+        patch("imas_codex.graph.dd_search.hybrid_dd_search", return_value=list(hits)),
+        patch("imas_codex.llm.search_tools.rerank_candidates") as spy,
+    ):
+        await tool.search_dd_paths("query", max_results=2)
+    assert spy.call_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -153,10 +188,11 @@ def test_rerank_is_one_call_into_the_shared_owner():
         "imas_codex.llm.search_tools.rerank_candidates",
         side_effect=lambda q, c, **kw: (list(reversed(c)), None),
     ) as spy:
-        ordered = _rerank_dd_hits("query", hits)
+        ordered, note = _rerank_dd_hits("query", hits)
 
     assert spy.call_count == 1
     assert [h.path for h in ordered] == ["ids/c", "ids/b", "ids/a"]
+    assert note is None
 
 
 def test_candidate_carries_path_and_text_for_the_owner():
@@ -210,3 +246,61 @@ async def test_search_does_not_rerank_when_disabled():
 
     spy.assert_not_called()
     assert [h.path for h in result.hits] == ["ids/a", "ids/b"]
+
+
+# ---------------------------------------------------------------------------
+# The fallback note reaches the summary and the formatted report
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_completed_rerank_leaves_no_note():
+    from imas_codex.llm.search_formatters import format_search_dd_report
+    from imas_codex.tools.graph_search import GraphSearchTool
+
+    hits = [_hit("ids/a", "alpha"), _hit("ids/b", "beta")]
+    tool = GraphSearchTool(MagicMock(), rerank=True)
+    with (
+        patch("imas_codex.graph.dd_search.hybrid_dd_search", return_value=list(hits)),
+        patch(
+            "imas_codex.llm.search_tools.rerank_candidates",
+            side_effect=lambda q, c, **kw: (list(reversed(c)), None),
+        ),
+    ):
+        result = await tool.search_dd_paths("query", max_results=2)
+
+    assert "rerank_note" not in result.summary
+    assert "Rerank:" not in format_search_dd_report(result)
+
+
+@pytest.mark.asyncio
+async def test_skipped_rerank_leaves_the_note_in_summary_and_report(monkeypatch):
+    """With the decisions key absent, the fallback note is surfaced to the caller.
+
+    Every Jev caller skips cleanly when ``OPENROUTER_API_KEY_IMAS_CODEX`` is
+    not set: the judgement cannot run, so the embedding order is returned and
+    ``rerank_candidates`` reports the fallback in a note. Without this surface
+    the caller cannot tell that fallback from a rerank that ran and reordered
+    nothing. The note's wording is owned by the shared rerank owner; this node
+    owns only that it reaches the summary and the formatted report.
+    """
+    from imas_codex.llm.search_formatters import format_search_dd_report
+    from imas_codex.tools.graph_search import GraphSearchTool
+
+    monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", raising=False)
+
+    hits = [_hit("ids/a", "alpha"), _hit("ids/b", "beta")]
+    tool = GraphSearchTool(MagicMock(), rerank=True)
+    with patch("imas_codex.graph.dd_search.hybrid_dd_search", return_value=list(hits)):
+        result = await tool.search_dd_paths("query", max_results=2)
+
+    note = result.summary.get("rerank_note")
+    assert isinstance(note, str) and note, (
+        "a skipped rerank must leave a note describing the fallback"
+    )
+    # The order is unchanged where no judgement ran.
+    assert [h.path for h in result.hits] == ["ids/a", "ids/b"]
+
+    report = format_search_dd_report(result)
+    assert note in report
