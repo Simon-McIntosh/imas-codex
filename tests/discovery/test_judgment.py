@@ -3,6 +3,10 @@
 ``decide_batch`` is driven through the call layer it imports
 (``acall_decisions``), so no test here opens the live decisions endpoint.
 The autouse guard in ``tests/conftest.py`` fails any test that does.
+
+The decision core skips its calls when the decisions key is absent, so each
+test here sets its own key: the judgement it replaces would otherwise never be
+consulted and the assertion measures the skip rather than the ordering.
 """
 
 from __future__ import annotations
@@ -12,6 +16,12 @@ import asyncio
 import pytest
 
 from imas_codex.discovery.base import judgment
+
+
+@pytest.fixture(autouse=True)
+def _decisions_key(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+
 
 QUESTIONS = {
     "relevance_grade": {

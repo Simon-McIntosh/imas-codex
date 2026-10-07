@@ -1,0 +1,80 @@
+<!-- Each test that drives a Jev decisions caller now sets its own decisions
+     key, so the empty-key run (OPENROUTER_API_KEY_IMAS_CODEX='',
+     PYTHON_DOTENV_DISABLED=1, as in CI where no .env is reachable) reports the
+     same single failure as the key-present run instead of seventeen. The one
+     remaining failure is not key-dependent and is reported as a follow-on. -->
+<section id="decisions-key-test-isolation" data-reckon="evidence">
+  <h2 id="decisions-key-test-isolation-heading">Decisions-key test isolation</h2>
+  <p id="decisions-key-test-isolation-landing">
+    Seventeen tests in four files drove a Jev decisions caller while relying on
+    the ambient <code>OPENROUTER_API_KEY_IMAS_CODEX</code>. Since
+    <code>judgment.rerank_pool</code> and the candidate stage skip their calls
+    when the key is absent, each such test now installs its own dummy key with
+    <code>monkeypatch.setenv</code>, so the run no longer depends on the
+    environment. The empty-key run over the twelve listed files reports the
+    same single failure as the key-present run.
+  </p>
+  <table>
+    <thead>
+      <tr><th>File</th><th>Tests that failed with the key absent</th><th>Fixture added</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>tests/cli/test_discover_map.py</code></td>
+        <td>7: <code>test_candidate_worker_writes_one_route_per_source</code>,
+          <code>test_candidate_worker_scopes_retrieval_to_routed_ids</code>,
+          <code>test_candidate_worker_ids_filter_narrows_routed_ids</code>,
+          <code>test_candidate_worker_adds_cluster_siblings_and_books_the_second_call</code>,
+          <code>test_candidate_worker_releases_when_the_cluster_judgment_fails</code>,
+          <code>test_cost_limit_stops_the_loop</code>,
+          <code>test_source_limit_bounds_the_loop</code></td>
+        <td><code>_patch_worker</code> sets the key before it replaces the graph
+          with the test's own fakes.</td>
+      </tr>
+      <tr>
+        <td><code>tests/discovery/test_judgment.py</code></td>
+        <td>2: <code>test_rerank_pool_orders_by_descending_score</code>,
+          <code>test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails</code></td>
+        <td>Module-level autouse fixture setting the key.</td>
+      </tr>
+      <tr>
+        <td><code>tests/ids/test_escalated_target_choice.py</code></td>
+        <td>1: <code>TestNoCandidateLogged::test_candidate_worker_skips_and_logs_no_candidate</code></td>
+        <td>Class-level autouse fixture on <code>TestNoCandidateLogged</code>.</td>
+      </tr>
+      <tr>
+        <td><code>tests/llm/test_search_tools.py</code></td>
+        <td>7: <code>TestRerankCandidates</code> — <code>test_higher_score_ranks_first</code>,
+          <code>test_state_carries_the_locator_and_bounds_the_text</code>,
+          <code>test_a_failed_decision_keeps_the_embedding_order_and_notes_it</code>,
+          <code>test_a_candidate_unfinished_at_the_budget_keeps_its_position</code>;
+          <code>TestSearchToolsRerank</code> — <code>test_docs_report_follows_the_rerank_order</code>,
+          <code>test_docs_appends_a_note_when_the_rerank_fails</code>,
+          <code>test_code_report_follows_the_rerank_order</code></td>
+        <td>Autouse fixture on <code>TestRerankCandidates</code> and on
+          <code>TestSearchToolsRerank</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="decisions-key-test-isolation-repro">
+    Before the change the empty-key run over the twelve files reported
+    <strong>18 failed</strong> (17 key-dependent above plus the one follow-on);
+    after it, <strong>1 failed, 208 passed, 59 skipped</strong> against
+    <strong>1 failed, 253 passed, 14 skipped</strong> with the key present. The
+    two runs fail the same single id,
+    <code>tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index</code>
+    (<code>Exception: Index not found</code>), which fails with and without the
+    key. The empty-key run's extra skips are
+    <code>tests/discovery/test_signals_pipeline.py</code>'s 45 graph-reachability
+    probes, which need the Neo4j credential that <code>PYTHON_DOTENV_DISABLED=1</code>
+    also removes; a skip is not a failure and those tests do not drive a
+    decisions caller.
+  </p>
+  <p id="decisions-key-test-isolation-negative-control">
+    Negative control: removing the <code>tests/discovery/test_judgment.py</code>
+    fixture and re-running that file with the key absent fails
+    <code>test_rerank_pool_orders_by_descending_score</code> and
+    <code>test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails</code>
+    (<code>EXIT=1</code>), the two ids the head arm does not fail.
+  </p>
+</section>

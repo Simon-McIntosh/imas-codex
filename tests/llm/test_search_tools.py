@@ -2349,6 +2349,15 @@ def _fake_decisions(
 class TestRerankCandidates:
     """The rerank reorders by Score and never fails the search it serves."""
 
+    @pytest.fixture(autouse=True)
+    def _decisions_key(self, monkeypatch):
+        """Set a decisions key so the replaced judgement is actually consulted.
+
+        The rerank skips every call when the key is absent, which would make
+        these tests measure the skip rather than the ordering they replace.
+        """
+        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+
     def _candidates(self) -> list[dict[str, Any]]:
         return [
             {"id": "c0", "path": "alpha.py", "function_name": "alpha", "text": "A"},
@@ -2458,6 +2467,11 @@ class TestRerankCandidates:
 
 class TestSearchToolsRerank:
     """The search tools score a pool larger than k, then rerank it."""
+
+    @pytest.fixture(autouse=True)
+    def _decisions_key(self, monkeypatch):
+        """Set a decisions key so the search reaches the rerank it asserts on."""
+        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
 
     @pytest.fixture()
     def mock_gc(self):
