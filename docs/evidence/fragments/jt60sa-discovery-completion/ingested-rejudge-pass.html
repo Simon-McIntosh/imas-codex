@@ -28,9 +28,24 @@
       <tr><td>skipped</td><td>50</td><td>50</td></tr>
     </tbody></table>
   <p id="ingested-rejudge-pass-status-invariant">
-    Every ingested file is still <code>ingested</code> and no status moved between stages. For all 581
-    ingested content-stage files the per-file <code>HAS_CHUNK</code> count is unchanged (0 files changed),
-    the path set is identical, and no <code>CodeExample</code> or <code>CodeChunk</code> was added or removed.
+    Every ingested file is still <code>ingested</code> and no status moved between stages. Each file does
+    carry its text: a CodeFile reaches its chunks through its example
+    (<code>CodeFile &lt;-FROM_FILE- CodeExample -HAS_CHUNK-&gt; CodeChunk</code>), and over the 581 ingested
+    content-stage files the census reads <strong>3050</strong> chunks and <strong>581</strong> examples, with
+    <strong>0</strong> files holding no chunk — a positive control, since the file
+    <code>/analysis/src/edas2/v2.1.14/edas_share/edas_data/jt60u.py</code> reads the 15 chunks it is known to hold.
+    A census that matched a direct <code>CodeFile-[:HAS_CHUNK]-&gt;CodeChunk</code> edge instead read zero chunks
+    for every file; that broken traversal is the baseline arm of
+    <code>check_chunk_instrument.py</code> (exit 1, "the instrument sees no chunks"), while the example traversal
+    is its fixed arm (exit 0).
+  </p>
+  <p id="ingested-rejudge-pass-chunks-unchanged">
+    The pass leaves the example and chunk nodes untouched. A pass run between two corrected censuses changed the
+    per-file chunk count of <strong>0</strong> of the 581 files: <strong>3050</strong> chunks and
+    <strong>581</strong> examples before, <strong>3050</strong> and <strong>581</strong> after. No statement in the
+    pass writes a <code>CodeExample</code> or <code>CodeChunk</code>: the <code>ingested</code> reset spec carries
+    no <code>post_cypher</code> cascade (unlike the specs that move a file below <code>ingested</code>), and
+    <code>apply_ingested_rejudge</code> <code>SET</code>s only relevance fields on the matched <code>CodeFile</code>.
   </p>
   <h3 id="ingested-rejudge-pass-confidence">Ingested files with a facet confidence above zero</h3>
   <table id="ingested-rejudge-pass-confidence-above-zero">
