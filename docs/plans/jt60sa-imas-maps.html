@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -270,6 +270,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261007T061546254649-eddb-unit-normalisation" data-who="reckon-build" data-when="2026-10-07T09:46:03.844Z">
     <div class="r-comment-body"><p>a6102f2f1 defines m2, m3 and Pam3 as units without a symbol (the previous symbol 'm2' made a negative power format as 'm^2^-1', which re-parses to a different unit). a8998c5a4 regroups the census by pint unit. c38e99b97 adds the separator-bearing Celsius handling and leaves the ambiguous 'V.S' unresolved. Comparison of every DD unit string is by pint equivalence, not string equality.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261007T094737293400-review-of-eddb-unit-normalisation" data-who="reckon-build" data-when="2026-10-07T10:08:36.171Z">
+    <div class="r-comment-body"><p>reviewed the single commit 66cdc2c16 (parent a8998c5a4) gained since the prior review at a8998c5a4; stored a parsed record scoring all 6 dimensions (goal_fidelity 19, evidence 19, fit 19, reuse 18, scope_discipline 20, durability 18; total 113/120) at both scope paths, reviewed_base_sha a8998c5a4 and reviewed_head_sha 66cdc2c1.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261007T091146945195-review-of-local-llm-seats" data-who="reckon-build" data-when="2026-10-07T09:29:33.370Z">
     <div class="r-comment-body"><p>review-of-local-llm-seats: independent review of r-20261007T084110554429-local-llm-seats stored, SOUND at 102/120 (goal_fidelity 16, evidence 14, scope_discipline 19, durability 15, fit 19, reuse 19); the ids-mapping half of the seat move is real and gate-green, the cluster-labels half routes no call.</p></div>

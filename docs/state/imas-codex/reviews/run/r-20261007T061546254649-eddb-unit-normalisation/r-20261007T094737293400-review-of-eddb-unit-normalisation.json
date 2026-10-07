@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite gate logs: baseline gate_base.log revision 52f616dd (496 passed, EXIT=0) and after_suite gate_head_degc.log revision 66cdc2c1 (892 passed, EXIT=0). Zero failures on both, so added_failure_count=0 and added_failure_ids=[]. Reproduced independently: my reviewer base arm a8998c5a 891 passed EXIT=0, reviewer head arm 66cdc2c1 892 passed EXIT=0.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T061546254649-eddb-unit-normalisation/gate_head_degc.log",
+    "revision": "66cdc2c16cef10a1e49bc2aa4dfe8f20e543b226"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T061546254649-eddb-unit-normalisation/gate_base.log",
+    "revision": "52f616dd261ce21072921abca93d8f2291fe3c19"
+  },
+  "blockers": "none",
+  "completed_at": "2026-10-07T10:08:36.171Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-07T09:47:45Z",
+  "evidence_inputs": "reviewed range a8998c5a4..66cdc2c16 (one commit). Independent arms: base a8998c5a 891 passed/5 skipped EXIT=0; head 66cdc2c1 892 passed/5 skipped EXIT=0 (reviewer_base_arm.log, reviewer_head_arm.log). Own negative control: preprocessor registration and early fold removed -> 2 failed, 394 passed, EXIT=1 (reviewer_negative_control.log). Probe values at head: normalize('deg. C')='degC', normalize('deg.C')='degC', normalize('deg C')='C.deg', normalize('V.S')=None, normalize('deg')='deg', normalize('DegC')='\u00b0C', normalize('degC')='degC', units_are_equivalent('deg. C','degC')=True, ('deg. C','C.deg')=False, ('V.S','A')=True, 20 deg. C -> 293.15 K. At base, 20 deg. C -> K raised DimensionalityError 'Cannot convert from degree * coulomb to kelvin'. census.json: 6298 signals, 76 strings, 49 units, 3953 normalised, 13 strings / 2345 unresolved; degC group now 4 spellings / 301 signals, A group 425, V.S unresolved 1 signal.",
+  "findings": [
+    {
+      "file": "imas_codex/units/__init__.py",
+      "line": "75",
+      "severity": "follow-on",
+      "text": "follow-on: robustness - the fold pattern _SEPARATED_CELSIUS_RE = r'\\bdeg\\.\\s*C\\b' requires the period, so a space-only spelling 'deg C' is not folded and still resolves to 'C.deg' (degree times coulomb, a current-times-time dimensionality). Reproduced at head: normalize_unit_symbol('deg C') == 'C.deg' while normalize_unit_symbol('deg. C') == 'degC'. The catalogue corpus carries only the period-bearing 'deg. C', so this is latent rather than a live defect, and the source comment accurately states the period is required. Fix if wanted: make the corpus sweep cover 'deg C', or widen the pattern to r'\\bdeg\\.?\\s+C\\b' with a test.",
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "follow_ons": "none blocking. (1) The reviewed run's own manifest after_suite.revision reads c38e99b9772c8a8f1341c4622444e8b9425c4422 while the log it cites (gate_head_degc.log) was regenerated at the final head 66cdc2c16; the log itself is at 66cdc2c1 and is valid, only the manifest's revision label is stale - a provenance labelling slip, outside this review's commit scope. (2) The prior review's two findings are both closed by this commit: the fragment intro no longer claims a glued form is an @alias, and 'deg. C' no longer resolves to a coulomb-dimensioned unit.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "one commit against reviewed base a8998c5a4: 66cdc2c16 'fix(units): read the catalogue's degree-Celsius spelling as a temperature'. It adds a registry preprocessor and an early fold that rewrite the separator-bearing 'deg. C' onto the existing degC alias, adds 'V.S' to the ambiguous-string set so it stays unresolved, and updates the evidence fragment and tests. 3 files, +155/-28. c38e99b97 is an earlier attempt at the same change with the same parent; 66cdc2c1 supersedes it and differs only in the comment describing the regex, which c38e99b97 misdescribed as an 'optional period' and 66cdc2c1 corrects.",
+    "done_when": "met. The gate uv run --no-sync pytest tests/units tests/ids -p no:cacheprovider passes at head (892 passed, 5 skipped, EXIT=0, gate_head_degc.log) and at base (891 passed, 5 skipped, EXIT=0, gate_base.log); no added failures. normalize_unit_symbol('deg. C') == 'degC' and 20 deg. C -> 293.15 K; normalize_unit_symbol('V.S') is None."
+  },
+  "justifications": {
+    "durability": "18: the guard test_dd_unit_normalisation_is_not_regressed now asserts the moved set equals INTENTIONAL_CORRECTIONS exactly, so a future unintended unit change still fails. Deducted because the fold regex requires the period, leaving a latent space-only 'deg C' mis-resolution uncovered and untested (see findings).",
+    "durability_note": "",
+    "evidence": "19: I ran independent base (a8998c5a, 891 passed) and head (66cdc2c1, 892 passed) arms in scratch trees extracted with git archive, plus my own negative control that removes the preprocessor registration and the early fold and shows exactly test_separated_celsius_spelling_is_a_temperature and test_dd_unit_normalisation_is_not_regressed fail (2 failed, 394 passed, EXIT=1). The fragment's census numbers reconcile with census.json.",
+    "fit": "19: the fold uses the registry-preprocessor mechanism pint already offers, and the fragment and source comments explain why a name-level @alias cannot carry the spelling, consistent with the module's existing idiom.",
+    "goal_fidelity": "19: the commit resolves the exact defect the plan names - the catalogue's 'deg. C' free-text spelling resolved to a coulomb-dimensioned unit - by folding it onto the degC alias, and it refuses to guess the equally-cased 'V.S' rather than emit a current-dimensioned reading. Both were the prior review's open findings and both are closed here.",
+    "reuse": "18: one helper _fold_separated_celsius is used at two call sites (the preprocessor and the early fold before the canonical vocabulary), which the run's own manifest records as one function rather than two mechanisms. Deducted one because the canonical authority runs in its own registry, so the same fold is applied twice on the single path.",
+    "scope_discipline": "20: the commit touches only the units module, its evidence fragment and its tests; no unrelated files, no graph write."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nSCORE evidence: 19\nSCORE fit: 19\nSCORE reuse: 18\nSCORE scope_discipline: 20\nSCORE durability: 18\nTOTAL: 113\nJUSTIFICATION goal_fidelity: 19: the commit resolves the exact defect the plan names - the catalogue's 'deg. C' free-text spelling resolved to a coulomb-dimensioned unit - by folding it onto the degC alias, and it refuses to guess the equally-cased 'V.S' rather than emit a current-dimensioned reading. Both were the prior review's open findings and both are closed here.\nJUSTIFICATION evidence: 19: I ran independent base (a8998c5a, 891 passed) and head (66cdc2c1, 892 passed) arms in scratch trees extracted with git archive, plus my own negative control that removes the preprocessor registration and the early fold and shows exactly test_separated_celsius_spelling_is_a_temperature and test_dd_unit_normalisation_is_not_regressed fail (2 failed, 394 passed, EXIT=1). The fragment's census numbers reconcile with census.json.\nJUSTIFICATION fit: 19: the fold uses the registry-preprocessor mechanism pint already offers, and the fragment and source comments explain why a name-level @alias cannot carry the spelling, consistent with the module's existing idiom.\nJUSTIFICATION reuse: 18: one helper _fold_separated_celsius is used at two call sites (the preprocessor and the early fold before the canonical vocabulary), which the run's own manifest records as one function rather than two mechanisms. Deducted one because the canonical authority runs in its own registry, so the same fold is applied twice on the single path.\nJUSTIFICATION scope_discipline: 20: the commit touches only the units module, its evidence fragment and its tests; no unrelated files, no graph write.\nJUSTIFICATION durability: 18: the guard test_dd_unit_normalisation_is_not_regressed now asserts the moved set equals INTENTIONAL_CORRECTIONS exactly, so a future unintended unit change still fails. Deducted because the fold regex requires the period, leaving a latent space-only 'deg C' mis-resolution uncovered and untested (see findings).",
+  "review_run_id": "r-20261007T094737293400-review-of-eddb-unit-normalisation",
+  "review_scope": "incremental node: the single commit 66cdc2c1 gained since the prior review at a8998c5a4 (its parent), covering imas_codex/units/__init__.py, docs/evidence/fragments/jt60sa-imas-maps/eddb-unit-normalisation.html and tests/units/test_unit_alias_spellings.py. The alias-file and jt60sa_unit_strings.txt changes named in the dispatch were landed in the earlier, already-reviewed range and are unchanged by 66cdc2c1 (git diff a8998c5a..66cdc2c1 shows three files).",
+  "reviewed_base_sha": "a8998c5a4f11934826328d22ab07af7909c634b4",
+  "reviewed_head_sha": "66cdc2c16cef10a1e49bc2aa4dfe8f20e543b226",
+  "reviewed_run_id": "r-20261007T061546254649-eddb-unit-normalisation",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T10:00:00+00:00",
+  "total": 113
+}
