@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: the after arm is reports gate-default.log (rev b90e7fd275a6e1121b87023d86473d042d4ceda3, 1772 passed, 5 skipped, 4 deselected, EXIT=0) and the reviewed run names no baseline arm, so I ran one myself at the reviewed base_sha 52f616dd261ce21072921abca93d8f2291fe3c19 (reviewer_base_arm.log, 1768 passed, 5 skipped, 3 deselected, EXIT=0). Both arms completed to their summary line with 0 failures, so added_failure_count=0 and added_failure_ids=[]. I independently reproduced the after arm at the reviewed head 1b8457bbf16b057141a52193b629e5cab20d16d3 in a scratch tree (reviewer_after_arm.log, header names module.__file__ and cwd, 1772 passed, 5 skipped, 4 deselected, EXIT=0). The 3-vs-4 deselected difference is the new graph-marked test.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T064700072212-review-of-singleton-signal-sources/arms/after uv run --no-sync --directory /tmp/reckon-crew-scratch/r-20261007T064700072212-review-of-singleton-signal-sources/arms/after pytest tests/discovery tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T064700072212-review-of-singleton-signal-sources/reviewer_after_arm.log",
+    "revision": "1b8457bbf16b057141a52193b629e5cab20d16d3"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261007T064700072212-review-of-singleton-signal-sources/arms/base uv run --no-sync --directory /tmp/reckon-crew-scratch/r-20261007T064700072212-review-of-singleton-signal-sources/arms/base pytest tests/discovery tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T064700072212-review-of-singleton-signal-sources/reviewer_base_arm.log",
+    "revision": "52f616dd261ce21072921abca93d8f2291fe3c19"
+  },
+  "blockers": "none",
+  "completed_at": "2026-10-07T07:11:34.869Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-07T06:47:08Z",
+  "evidence_inputs": "The node adds a final pass to detect_signal_sources: grouped_ids is the union of the multi-group member ids, and every signal in the fetch result not in that set becomes a one-member group keyed by its accessor (falling back to its id when accessor is null). The pass routes every group through the function's own MERGE, so the min_instances threshold is unchanged: a two-member pattern forms no shared group and each of its signals gets its own source. The unused create_signal_source was deleted from imas_codex/discovery/base/grouping.py. Two commits: b90e7fd275a6e1121b87023d86473d042d4ceda3 (code + tests) and 1b8457bbf16b057141a52193b629e5cab20d16d3 (evidence fragment). Callers: the only consumer of the return value is parallel.py:5098 and the enrich-loop progress callback, both logging-only, so widening groups_detected to include singletons changes no control flow. claim_signals_for_enrichment excludes a signal only when it is MEMBER_OF a source whose representative_id differs, so a one-member source's signal (its own representative) is claimed, as the plan intends. The graph test builds facility pytest-singleton-<12hex>, two ungrouped signals (ALPHA_ONLY, BETA_ONLY) plus one three-member pattern (TRIP_00N:V), and asserts (3,5); a re-run returns (0,0); a second-run count query shows 3 sources and 5 edges; after propagate_source_enrichment the source reads enriched and claim_sources_for_candidates(facility) returns it; all fixture nodes are removed in a finally block. The plan's literal done-when grep `grep -rn create_signal_source imas_codex/ tests/` does NOT print nothing at the reviewed head: it matches 8 lines of the unrelated symbol detect_and_create_signal_sources in mdsplus/graph_ops.py and static/workers.py; the manifest honestly records the word-boundary form `grep -rnw`, which is empty.",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "1616",
+      "severity": "follow-on",
+      "text": "follow-on: evidence: the plan's node done-when states `grep -rn create_signal_source imas_codex/ tests/ prints nothing`, but at the reviewed head that command prints 8 lines \u2014 all from the distinct symbol detect_and_create_signal_sources (mdsplus/graph_ops.py:455, static/workers.py, tests/discovery/test_static_parallel.py). The manifest's evidence_inputs correctly substitutes `grep -rnw`, which is empty, and the plan text itself says detect_and_create_signal_sources serves MDSplus SignalNodes and is left alone, so the intent (the deleted creator has no references) holds. But the literal check as written is not met, and neither the manifest nor the fragment says why the substitution was needed. Fix: correct the plan's grep to a word-boundary form, or record in the fragment that create_signal_source survives only as a substring of the unrelated detect_and_create_signal_sources.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "821",
+      "severity": "follow-on",
+      "text": "follow-on: fit: the bulk channel-element skip in claim_signals_for_enrichment guards on `AND NOT EXISTS { (s)-[:MEMBER_OF]->(:SignalSource) }`. Before this change every ungrouped signal had no source, so a channel-like sub-threshold signal (accessor matching e.g. `.*[_:]\\d{2,3}\\)?$`) was bulk-marked skipped; after the change every such signal owns a one-member source, the guard is false, and the signal is claimed for individual LLM enrichment instead. This is the plan's stated intent (each one-member source's representative is enriched so the signal can reach the map), not a defect, but the interaction with the channel-element optimisation is unmentioned in the fragment and uncovered by the graph test (whose singletons are ALPHA_ONLY/BETA_ONLY, both non-numeric). Fix: state the interaction in the fragment and quantify the extra enrichments for JT-60SA, or add a channel-like singleton to the fixture.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "tests/discovery/test_singleton_sources.py",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "follow-on: durability: four mocked tests cover the singleton pass but none exercises the null-accessor branch \u2014 the line `key = r[\"accessor\"] if r[\"accessor\"] is not None else r[\"id\"]`. A signal with accessor null is skipped out of pattern_groups, is not in grouped_ids, and is therefore sourced alone keyed by its id; that path is unreachable in the suite. Add a case whose result carries accessor=None and assert group_key and group_id fall back to the signal id.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "tests/discovery/test_singleton_sources.py",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: durability: the mocked tests locate the shared versus singleton MERGE calls with `_merge_calls` + a member_count dict and with `call_args_list[1]` in test_signals_pipeline.py, so they pin call order and count rather than the pass's set of group keys. They would not catch a regression that emitted the right (groups, members) totals with the wrong keying. The live graph test does assert member_count 1,1,3 and the (0,0) second run, which is the stronger evidence.",
+      "verdict": "PLAUSIBLE"
+    }
+  ],
+  "follow_ons": "plan \u00a73 node done-when should state the grep with a word boundary (or explain the unrelated detect_and_create_signal_sources substring); the fragment should record the channel-element-skip interaction with one-member sources and its enrichment cost; add a null-accessor singleton case to tests/discovery/test_singleton_sources.py; the manifest carries no canonical baseline_suite/after_suite JSON, so the added-failure count is only recoverable by re-running the arms (done here).",
+  "item_aggregate": 4,
+  "item_verdicts": {
+    "diff": "two commits against reviewed base 52f616dd: b90e7fd275a6e1121b87023d86473d042d4ceda3 (parallel.py +39/-? adds the final pass and widens groups_detected; grouping.py -66 removes the unused create_signal_source; tests/discovery/test_signals_pipeline.py two assertions updated for the new counts; tests/discovery/test_singleton_sources.py new, 214 lines) and 1b8457bbf16b057141a52193b629e5cab20d16d3 (evidence fragment +35). Net: 5 files, +290/-83.",
+    "done_when": "the node done-when asks that detect_signal_sources give an ungrouped signal a one-member source with itself as representative, that a pattern with three members still forms a three-member source, re-running creates nothing twice, the enriched one-member source is claimable, a -m graph test proves the Cypher on a fixture of two ungrouped signals plus one three-member pattern (which I reproduced: 1 passed in the reviewed gate), and that grep prints nothing. All met except the literal grep, which matches detect_and_create_signal_sources; the plan-intended word-boundary grep is empty.",
+    "goal": "the node goal \u2014 give every signal grouping leaves ungrouped a one-member SignalSource inside detect_signal_sources \u2014 is delivered and tested: grouped_ids is the multi-group member set, every remaining fetched signal becomes its own group, the shared MERGE is reused so min_instances is unchanged, and the pass is idempotent because the fetch excludes signals already MEMBER_OF a source. No functional defect in the implemented pass was found.",
+    "manifest": "the manifest reads status complete and names both commits and all changed paths; it records the negative control, the live graph round trip and the (0,0) re-run. Its canonical baseline_suite/after_suite JSON fields are absent, so the added-failure count cannot be read from the manifest alone; the after-arm log it names (gate-default.log, EXIT=0) plus the reviewer base arm suffice. The manifest's evidence_inputs openly flags that it used grep -w where the plan wrote grep without it.",
+    "write_paths": "declared and granted paths are imas_codex/discovery/signals/parallel.py, imas_codex/discovery/base/grouping.py, tests/discovery/ and the evidence fragment/figures dir; the net diff touches exactly the two source files, two test files inside tests/discovery/, and the fragment; no graph write beyond the fixture, no discover run."
+  },
+  "justifications": {
+    "durability": "durability 17: the pass has four mocked tests plus a load-bearing live graph test that asserts (3,5), a (0,0) re-run, a second-run 3-source 5-edge census, enrichment propagation and candidate claiming; the negative control is fresh and load-bearing (disabling the pass fails 4 tests, none of which fail at the head arm). Gaps: no case exercises the null-accessor fallback branch or a channel-like singleton; the mocked tests lean on call order.",
+    "evidence": "evidence 17: I reproduced both arms independently in a scratch tree under TMPDIR \u2014 base 52f616dd 1768 passed EXIT=0, head 1b8457bbf 1772 passed EXIT=0, added failures 0 \u2014 and the reviewed run's own gate-default.log agrees. The live -m graph test is real Cypher on a uniquely named fixture removed in a finally block. Residual: the plan's literal grep check is not met (substituted with grep -w) and is not explained in the fragment or manifest; the manifest carries no canonical baseline_suite/after_suite JSON; the evidence fragment reports the measure but not the channel-element interaction.",
+    "fit": "fit 19: symbols and comments are mechanism-named (grouped_ids, groups, one-member source); no plan, sprint or ticket identifiers in code, filenames or the fragment; the new test module is named for the behaviour (singleton sources) not a plan; the fragment follows its sibling's section structure and the figure requirement is met by the absence of any figure the claim would need. Minor: test_detect_groups_below_threshold's comment still reads 'Only 2 signals in the group' while asserting three sources.",
+    "goal_fidelity": "goal_fidelity 19: the plan's mechanism is implemented verbatim \u2014 a final pass keyed by the signal (accessor, id fallback), the signal as sole member and representative, threshold unchanged (.a two-member pattern forms no shared group), before enrichment so the representative is claimed and propagated, and the dead create_signal_source deleted in the same commit. Delivery is confirmed live. The only shortfall is the plan's stated grep.",
+    "reuse": "reuse 19: the pass creates its groups with the function's own MERGE instead of the retired create_signal_source, and the singleton list is built by reusing the same (group_id, group_key, sigs) shape the shared groups use; deleting the dead creator removes a second, divergent source-creation path. Only minor: the Mock tests call the real pass but assert on call order.",
+    "scope_discipline": "scope_discipline 20: the net change sits entirely inside the granted write paths (parallel.py, grouping.py, tests/discovery/, and the granted evidence fragment); no out-of-scope file, no plan or index edit, no unrelated cleanup; the pre-existing Phase-n comments in parallel.py are untouched and outside the diff."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: goal_fidelity 19: the plan's mechanism is implemented verbatim \u2014 a final pass keyed by the signal (accessor, id fallback), the signal as sole member and representative, threshold unchanged (a two-member pattern forms no shared group), before enrichment so the representative is claimed and propagated, and the dead create_signal_source deleted in the same commit. Delivery is confirmed live. The only shortfall is the plan's stated grep.\nSCORE evidence: 17\nJUSTIFICATION evidence: evidence 17: I reproduced both arms independently in a scratch tree under TMPDIR \u2014 base 52f616dd 1768 passed EXIT=0, head 1b8457bbf 1772 passed EXIT=0, added failures 0 \u2014 and the reviewed run's own gate-default.log agrees. The live -m graph test is real Cypher on a uniquely named fixture removed in a finally block. Residual: the plan's literal grep check is not met (substituted with grep -w) and is not explained in the fragment or manifest; the manifest carries no canonical baseline_suite/after_suite JSON; the evidence fragment reports the measure but not the channel-element interaction.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: scope_discipline 20: the net change sits entirely inside the granted write paths (parallel.py, grouping.py, tests/discovery/, and the granted evidence fragment); no out-of-scope file, no plan or index edit, no unrelated cleanup; the pre-existing Phase-n comments in parallel.py are untouched and outside the diff.\nSCORE durability: 17\nJUSTIFICATION durability: durability 17: the pass has four mocked tests plus a load-bearing live graph test that asserts (3,5), a (0,0) re-run, a second-run 3-source 5-edge census, enrichment propagation and candidate claiming; the negative control is fresh and load-bearing (disabling the pass fails 4 tests, none of which fail at the head arm). Gaps: no case exercises the null-accessor fallback branch or a channel-like singleton; the mocked tests lean on call order.\nSCORE fit: 19\nJUSTIFICATION fit: fit 19: symbols and comments are mechanism-named (grouped_ids, groups, one-member source); no plan, sprint or ticket identifiers in code, filenames or the fragment; the new test module is named for the behaviour (singleton sources) not a plan; the fragment follows its sibling's section structure. Minor: test_detect_groups_below_threshold's comment still reads 'Only 2 signals in the group' while asserting three sources.\nSCORE reuse: 19\nJUSTIFICATION reuse: reuse 19: the pass creates its groups with the function's own MERGE instead of the retired create_signal_source, and the singleton list is built by reusing the same (group_id, group_key, sigs) shape the shared groups use; deleting the dead creator removes a second, typo-prone source-creation path.\n",
+  "review_run_id": "r-20261007T064700072212-review-of-singleton-signal-sources",
+  "review_scope": "full node: commits 52f616dd261ce21072921abca93d8f2291fe3c19..1b8457bbf16b057141a52193b629e5cab20d16d3 (b90e7fd, 1b8457bbf); files imas_codex/discovery/signals/parallel.py, imas_codex/discovery/base/grouping.py, tests/discovery/test_signals_pipeline.py, tests/discovery/test_singleton_sources.py, docs/evidence/fragments/jt60sa-imas-maps/singleton-signal-sources.html",
+  "reviewed_base_sha": "52f616dd261ce21072921abca93d8f2291fe3c19",
+  "reviewed_head_sha": "1b8457bbf16b057141a52193b629e5cab20d16d3",
+  "reviewed_run_id": "r-20261007T061522316683-singleton-signal-sources",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T07:05:00+00:00",
+  "total": 111
+}
