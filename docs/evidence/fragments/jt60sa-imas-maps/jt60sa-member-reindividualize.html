@@ -1,0 +1,55 @@
+<section id="jt60sa-member-reindividualize-record">
+  <h3>JT-60SA member names regenerated through the fixed individualization</h3>
+  <p id="jt60sa-member-reindividualize-landing">
+    <code>members_described</code> was reset to <code>false</code> on all 2,249
+    JT-60SA <code>SignalSource</code> nodes before one
+    <code>imas-codex discover signals jt-60sa --enrich-only --time 8</code> pass
+    from the main checkout. The pass re-ran
+    <code>individualize_source_descriptions</code>, where the fixed
+    <code>extract_member_identifier</code> drops the constant reference shot, and
+    regenerated 3,772 members across the 280 sources that carry more than one
+    member (singleton sources are excluded by the <code>size(members) &gt; 1</code>
+    gate). The pass exited 0 in 346.1&nbsp;s.
+  </p>
+  <table id="jt60sa-member-reindividualize-census">
+    <caption>JT-60SA <code>FacilitySignal</code> rows whose name or description
+    contains <code>101173</code> (6,298 signals total)</caption>
+    <thead><tr><th>state</th><th>name hits</th><th>description hits</th><th>any hit</th></tr></thead>
+    <tbody>
+      <tr><td>before reset</td><td>3,565</td><td>3,547</td><td>3,565</td></tr>
+      <tr><td>after pass</td><td>0</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <table id="jt60sa-member-reindividualize-names">
+    <caption>Five member signals captured before the reset and their regenerated
+    names after the pass</caption>
+    <thead><tr><th>accessor</th><th>name before</th><th>name after</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>eddbreadTime('E101173', 'CryoCP', 'm1TAF81', t1, t2)</code></td>
+        <td>Cold Box 01 Outlet Temperature Channel 101173/81</td>
+        <td>Cryo Cold Box 01 Outlet Temperature 81</td>
+      </tr>
+      <tr>
+        <td><code>eddbreadTime('E101173', 'CryoCP', 'm1TAF82', t1, t2)</code></td>
+        <td>Cold Box 01 Outlet Temperature Channel 101173/82</td>
+        <td>Cryo Cold Box 01 Outlet Temperature 82</td>
+      </tr>
+      <tr>
+        <td><code>eddbreadTime('E101173', 'CryoCP', 'm1TAF83', t1, t2)</code></td>
+        <td>Cold Box 01 Outlet Temperature Channel 101173/83</td>
+        <td>Cryo Cold Box 01 Outlet Temperature 83</td>
+      </tr>
+      <tr>
+        <td><code>eddbreadTime('E101173', 'CryoCP', 'm1TAF84', t1, t2)</code></td>
+        <td>Cold Box 01 Outlet Temperature Channel 101173/84</td>
+        <td>Cryo Cold Box 01 Outlet Temperature 84</td>
+      </tr>
+      <tr>
+        <td><code>eddbreadTime('E101173', 'CryoCP', 'm1TAF85', t1, t2)</code></td>
+        <td>Cold Box 01 Outlet Temperature Channel 101173/85</td>
+        <td>Cryo Cold Box 01 Outlet Temperature 85</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
