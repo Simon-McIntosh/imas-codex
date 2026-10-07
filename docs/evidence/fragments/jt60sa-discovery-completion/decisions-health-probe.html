@@ -12,7 +12,13 @@
     the decisions endpoint is never asked to judge anything and no decision is
     billed; a 200 is healthy, a refused connection or timeout is
     <code>endpoint refused</code>/<code>endpoint timeout</code>, and 401/403 is
-    <code>auth refused</code>. A second function,
+    <code>auth refused</code>. Because the probe reaches the OpenRouter
+    <em>origin's</em> key-info endpoint and not the <code>/api/alpha/decisions</code>
+    path itself, it covers reachability of the origin and validity of the
+    credential, not the presence of the alpha route: a removed decisions path on
+    a live origin would still read up. That is the cheap probe the constraint
+    allows — any request that exercised the alpha path itself would be a billed
+    decision. A second function,
     <code>llm_health_check_with_decisions(section, service)</code>, runs the
     existing <code>llm_health_check(section)</code> first and returns
     <code>score (...)</code> when that seat is down, otherwise probes the

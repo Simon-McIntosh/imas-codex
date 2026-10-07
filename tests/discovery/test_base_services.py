@@ -398,7 +398,12 @@ class TestLlmHealthCheckWithDecisions:
         healthy, detail = llm_health_check_with_decisions("discovery-score")
 
         assert healthy is True
-        assert detail  # names the route host
+        # The all-healthy path keeps the seat's detail (what the panel showed
+        # before the decisions probe existed), not the decisions route host.
+        assert detail == "titan"
+        # The decisions probe still ran and reached the route's key-info endpoint.
+        req = mock_urlopen.call_args[0][0]
+        assert req.full_url == "https://openrouter.ai/api/v1/key"
 
     @patch("imas_codex.discovery.base.services.llm_health_check")
     @patch("urllib.request.urlopen")

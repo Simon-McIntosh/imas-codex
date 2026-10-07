@@ -456,14 +456,14 @@ def llm_health_check_with_decisions(
         section: Chat model section to check (e.g. discovery-score).
         service: Service tag whose credential the decisions route needs.
     """
-    healthy, detail = llm_health_check(section)
+    healthy, seat_detail = llm_health_check(section)
     if not healthy:
-        return False, f"score ({detail})"
+        return False, f"score ({seat_detail})"
 
-    healthy, detail = decisions_health_check(service)
+    healthy, decisions_detail = decisions_health_check(service)
     if not healthy:
-        return False, f"decisions ({detail})"
-    return True, detail
+        return False, f"decisions ({decisions_detail})"
+    return True, seat_detail
 
 
 def llm_deep_health_check(section: str) -> tuple[bool, str, dict]:
