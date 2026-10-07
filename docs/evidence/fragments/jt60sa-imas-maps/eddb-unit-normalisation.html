@@ -1,8 +1,10 @@
 <!-- EDDB unit-spelling normalisation: the alias file repaired so a definition never
-     reuses a name pint already owns and no unit symbol contains a caret. The glued
-     spellings (m2, m3, Pam3) are defined as units without a symbol, so the formatter's
-     output always re-parses to the unit the source wrote. Read-only census over
-     JT-60SA FacilitySignal.unit (bounded by facility_id), grouped by pint unit, plus a
+     reuses a name pint already owns and no unit symbol contains a caret, plus a
+     registry preprocessor that folds the separator-bearing Celsius spelling onto the
+     alias name because the definition grammar cannot name it. The glued spellings
+     (m2, m3, Pam3) are defined as units without a symbol, so the formatter's output
+     always re-parses to the unit the source wrote. Read-only census over JT-60SA
+     FacilitySignal.unit (bounded by facility_id), grouped by pint unit, plus a
      fresh-process probe. No graph write. Scripts and raw output:
      ~/.config/reckon/crew/runs/r-20261007T061546254649-eddb-unit-normalisation/{census_units.py,census.json,guard_units.py,compare_units.py,units_base.tsv,units_head.tsv,units_diff.txt} -->
 <section id="eddb-unit-normalisation" data-reckon="evidence">
@@ -11,11 +13,18 @@
   <p id="eddb-unit-normalisation-intro">
     The EDDB catalogue writes units as human text: letter case varies
     (<code>KA</code>, <code>Mpa</code>, <code>DegC</code>), digit exponents are
-    glued to the symbol (<code>m2</code>, <code>m3</code>), and products are glued
-    (<code>Pam3</code>). The alias file parses these without claiming a name pint
-    already owns; a case variant and a glued form are both defined through
-    <code>@alias</code>, so <code>20 degC</code>, <code>20 DegC</code> and
-    <code>20 oC</code> each convert to 293.15 K.
+    glued to the symbol (<code>m2</code>, <code>m3</code>), products are glued
+    (<code>Pam3</code>), and one spelling carries a separator the definition
+    grammar cannot name (<code>deg. C</code>). The alias file parses these
+    without claiming a name pint already owns: a <em>case variant</em> is
+    defined through <code>@alias</code>, so <code>20 degC</code>,
+    <code>20 DegC</code> and <code>20 oC</code> each convert to 293.15 K. A
+    <em>separator-bearing</em> spelling cannot be an <code>@alias</code> at all —
+    pint names are single tokens — and pint would read the separator as a
+    multiplication, making <code>deg. C</code> a degree of angle times a coulomb,
+    a current-times-time dimensionality. A registry preprocessor folds that
+    spelling onto the same alias before parsing, so <code>20 deg. C</code> is
+    293.15 K as well.
   </p>
 
   <p id="eddb-unit-normalisation-roundtrip">
@@ -37,7 +46,7 @@
 
   <table id="eddb-unit-normalisation-census-table">
     <caption>6298 JT-60SA signals carry 76 distinct unit
-    strings, which denote 50 distinct pint units (3954
+    strings, which denote 49 distinct pint units (3953
     signals). Equivalent spellings are grouped under one unit.</caption>
     <thead>
       <tr><th>pint unit</th><th>spellings</th><th>signals</th></tr>
@@ -45,13 +54,13 @@
     <tbody>
       <tr id="eddb-unit-normalisation-unit-k"><td><code>K</code></td><td><code>K</code></td><td>500</td></tr>
       <tr id="eddb-unit-normalisation-unit-ust"><td><code>uST</code></td><td><code>uST</code>, <code>ppm</code></td><td>482</td></tr>
-      <tr id="eddb-unit-normalisation-unit-a"><td><code>A</code></td><td><code>A</code>, <code>V.S</code></td><td>426</td></tr>
+      <tr id="eddb-unit-normalisation-unit-a"><td><code>A</code></td><td><code>A</code></td><td>425</td></tr>
       <tr id="eddb-unit-normalisation-unit-v"><td><code>V</code></td><td><code>V</code></td><td>293</td></tr>
       <tr id="eddb-unit-normalisation-unit-m"><td><code>m</code></td><td><code>m</code></td><td>204</td></tr>
       <tr id="eddb-unit-normalisation-unit-mm"><td><code>mm</code></td><td><code>mm</code></td><td>187</td></tr>
       <tr id="eddb-unit-normalisation-unit-unit"><td><code>%</code></td><td><code>%</code></td><td>181</td></tr>
       <tr id="eddb-unit-normalisation-unit-ka"><td><code>kA</code></td><td><code>kA</code>, <code>KA</code></td><td>229</td></tr>
-      <tr id="eddb-unit-normalisation-unit-degc"><td><code>degC</code></td><td><code>degreeC</code>, <code>DegC</code>, <code>oC</code></td><td>257</td></tr>
+      <tr id="eddb-unit-normalisation-unit-degc"><td><code>degC</code></td><td><code>degreeC</code>, <code>DegC</code>, <code>oC</code>, <code>deg. C</code></td><td>301</td></tr>
       <tr id="eddb-unit-normalisation-unit-kv"><td><code>kV</code></td><td><code>kV</code>, <code>KV</code></td><td>199</td></tr>
       <tr id="eddb-unit-normalisation-unit-g-s-1"><td><code>g.s^-1</code></td><td><code>g/s</code></td><td>114</td></tr>
       <tr id="eddb-unit-normalisation-unit-wb"><td><code>Wb</code></td><td><code>Wb</code></td><td>92</td></tr>
@@ -61,7 +70,6 @@
       <tr id="eddb-unit-normalisation-unit-pa"><td><code>Pa</code></td><td><code>Pa</code></td><td>56</td></tr>
       <tr id="eddb-unit-normalisation-unit-mw"><td><code>MW</code></td><td><code>MW</code></td><td>50</td></tr>
       <tr id="eddb-unit-normalisation-unit-au"><td><code>au</code></td><td><code>au</code></td><td>49</td></tr>
-      <tr id="eddb-unit-normalisation-unit-c-deg"><td><code>C.deg</code></td><td><code>deg. C</code></td><td>44</td></tr>
       <tr id="eddb-unit-normalisation-unit-kpa"><td><code>kPa</code></td><td><code>kPa</code></td><td>39</td></tr>
       <tr id="eddb-unit-normalisation-unit-m3-pa-s-1"><td><code>m3.Pa.s^-1</code></td><td><code>Pa*m3/s</code>, <code>Pam3/s</code>, <code>Pam3/sec</code>, <code>W</code></td><td>59</td></tr>
       <tr id="eddb-unit-normalisation-unit-cps"><td><code>cps</code></td><td><code>cps</code>, <code>Hz</code></td><td>40</td></tr>
@@ -97,7 +105,7 @@
   </table>
 
   <table id="eddb-unit-normalisation-unresolved-table">
-    <caption>12 unit strings over 2344 signals stay
+    <caption>13 unit strings over 2345 signals stay
     unresolved, each with the reason it cannot be a unit.</caption>
     <thead>
       <tr><th>unit string</th><th>signals</th><th>reason</th></tr>
@@ -112,6 +120,7 @@
       <tr id="eddb-unit-normalisation-unresolved-n-s"><td><code>n/s</code></td><td>7</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
       <tr id="eddb-unit-normalisation-unresolved-m-2"><td><code>m-2</code></td><td>3</td><td>hyphenated exponent is not a valid pint unit name</td></tr>
       <tr id="eddb-unit-normalisation-unresolved-m-3"><td><code>m-3</code></td><td>3</td><td>hyphenated exponent is not a valid pint unit name</td></tr>
+      <tr id="eddb-unit-normalisation-unresolved-v-s"><td><code>V.S</code></td><td>1</td><td>pint reads the S as siemens, so the spelling is volt times siemens, an electric current; the signal it is attached to is a plasma-surface magnetic flux. The string carries both readings (volt times second would be a weber), so it is not resolved to either</td></tr>
       <tr id="eddb-unit-normalisation-unresolved-n-3month"><td><code>n/3month</code></td><td>1</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
       <tr id="eddb-unit-normalisation-unresolved-n-week"><td><code>n/week</code></td><td>1</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
       <tr id="eddb-unit-normalisation-unresolved-n-year"><td><code>n/year</code></td><td>1</td><td>'n' is a neutron count numerator the registry cannot name without colliding with the nano prefix</td></tr>
@@ -120,14 +129,16 @@
 
   <table id="eddb-unit-normalisation-regression-table">
     <caption>Base revision vs head, normalising every distinct DD unit string (487 strings): 163 resolved
-    at base and every one still resolves to an equivalent unit; 18 strings newly resolve; none changes unit</caption>
+    at base; 161 of them still resolve to an equivalent unit, and 2 are corrected where the base
+    reading contradicted the quantity the spelling is attached to; 18 strings newly resolve</caption>
     <thead>
       <tr><th>Outcome</th><th>Strings</th><th>Detail</th></tr>
     </thead>
     <tbody>
-      <tr id="eddb-unit-normalisation-reg-unchanged"><td>unchanged</td><td>163</td><td>every string resolved at base still resolves to an equivalent unit (compared with pint, not as strings)</td></tr>
+      <tr id="eddb-unit-normalisation-reg-unchanged"><td>unchanged</td><td>161</td><td>every string resolved at base still resolves to an equivalent unit (compared with pint, not as strings)</td></tr>
       <tr id="eddb-unit-normalisation-reg-newly-resolved"><td>newly resolved</td><td>18</td><td><code>KA</code>, <code>KV</code>, <code>KeV</code>, <code>Mpa</code>, <code>DEG</code>, <code>DegC</code>, <code>oC</code>, <code>m2</code>, <code>m3</code>, <code>Pam3</code>, <code>uST</code> and composites built from them</td></tr>
-      <tr id="eddb-unit-normalisation-reg-regressed"><td>changed unit</td><td>0</td><td>none</td></tr>
+      <tr id="eddb-unit-normalisation-reg-corrected"><td>corrected</td><td>2</td><td><code>deg. C</code> (<code>C.deg</code> &rarr; <code>degC</code>): the separator was read as a multiplication, making a temperature a degree-coulomb; <code>V.S</code> (<code>S.V</code> &rarr; unresolved): the S was read as siemens, making a magnetic flux an electric current</td></tr>
+      <tr id="eddb-unit-normalisation-reg-regressed"><td>unexplained movement</td><td>0</td><td>none; the two corrections are the only movements and are enumerated in the guard</td></tr>
     </tbody>
   </table>
 </section>

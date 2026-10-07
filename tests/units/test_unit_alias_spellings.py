@@ -6,14 +6,18 @@ exponents are glued to the symbol (``m2``, ``m3``) and products are glued
 (``Pam3``). Each added spelling either denotes the unit its author meant or is
 reported as unable to resolve — never left to a guess.
 
-Two facts are tested that a spell-to-symbol equality cannot see, because two
+Three facts are tested that a spell-to-symbol equality cannot see, because two
 equivalent spellings need not share a spelling, only a unit:
 
 * a case variant of an existing unit goes through ``@alias``, which keeps the
   original unit object, so the offset of ``degC`` survives and ``DegC``,
   ``oC`` and ``degC`` all mean the same temperature;
 * a glued form is a unit in its own right, defined without a symbol, so it
-  re-parses to exactly the unit its author wrote — the round-trip invariant.
+  re-parses to exactly the unit its author wrote — the round-trip invariant;
+* a spelling pint cannot reach through a name-level alias — a separator-bearing
+  degrees Celsius, ``deg. C`` — is folded by a registry preprocessor onto the
+  alias name, and resolves to the temperature rather than to the
+  current-times-time dimensionality pint reads from the bare separator.
 
 Equivalence is decided by pint (dimensionality equal, conversion factor
 exactly 1), the same reading ``analyze_units`` and ``build_dd._units_changed``
@@ -72,7 +76,31 @@ UNRESOLVED_SPELLINGS = [
     "ph/srsm2",
     "m-2",
     "m-3",
+    "V.S",
 ]
+
+# Spellings that pint reads, but as a unit the quantity they are attached to is
+# not — so they are deliberately left unresolved rather than guessed, and the
+# round-trip invariant does not apply to them.
+DELIBERATELY_UNRESOLVED = frozenset({"V.S"})
+
+# Spellings whose resolution at the base revision contradicted the quantity's
+# own dimensionality, corrected here on purpose. The regression guard counts
+# these as expected movement and nothing else; the list is asserted to be
+# exhaustive below, so it cannot quietly grow to hide a real regression.
+INTENTIONAL_CORRECTIONS = {
+    "deg. C": (
+        "pint split the separator as a multiplication (degree of angle times "
+        "the coulomb C, a current-times-time dimensionality); the spelling is "
+        "degrees Celsius"
+    ),
+    "V.S": (
+        "pint read the S as siemens, so the spelling was volt times siemens, "
+        "an electric current; the quantity it is attached to is a magnetic "
+        "flux. The string alone carries both readings, so it resolves to "
+        "nothing rather than to a current"
+    ),
+}
 
 
 def _parses(raw: str) -> bool:
@@ -102,8 +130,11 @@ def _base_snapshot() -> list[tuple[str, str]]:
 
 
 ROUND_TRIP_STRINGS = sorted(
-    set(_normalising_strings(JT60SA_FILE))
-    | {raw for raw, base in _base_snapshot() if base and _parses(raw)}
+    (
+        set(_normalising_strings(JT60SA_FILE))
+        | {raw for raw, base in _base_snapshot() if base and _parses(raw)}
+    )
+    - DELIBERATELY_UNRESOLVED
 )
 
 
@@ -143,6 +174,46 @@ def test_equivalent_spellings_denote_one_unit(first, second):
     assert units_are_equivalent(first, second)
     assert units_are_equivalent(
         normalize_unit_symbol(first), normalize_unit_symbol(second)
+    )
+
+
+def test_separated_celsius_spelling_is_a_temperature():
+    """The catalogue's ``deg. C`` is Celsius, never coulomb times degree.
+
+    The catalogue writes degrees Celsius with a separator. pint splits its
+    argument on whitespace, so the bare form becomes ``deg`` times ``C`` — a
+    degree of angle times a coulomb — which is a current-times-time
+    dimensionality and is not what the quantity it is attached to means.
+    Either the spelling resolves to Celsius, or it does not resolve at all.
+    """
+    normalised = normalize_unit_symbol("deg. C")
+    if normalised is not None:
+        assert unit_registry.Quantity(20, "deg. C").to("K").magnitude == (
+            pytest.approx(293.15)
+        )
+        assert units_are_equivalent(normalised, "degC")
+    assert not units_are_equivalent("deg. C", "C.deg"), (
+        "deg. C resolved to a coulomb-dimensioned unit"
+    )
+
+
+def test_volt_second_spelling_does_not_resolve_to_a_current():
+    """``V.S`` is left unresolved rather than read as volt times siemens.
+
+    The S is a case collision: pint reads it as siemens, which makes the
+    spelling an electric current, but the quantity the catalogue attaches it to
+    is a magnetic flux. The string carries both readings, so it must not be
+    settled by a guess — and must never come out current-dimensioned.
+    """
+    normalised = normalize_unit_symbol("V.S")
+    assert normalised is None, (
+        f"V.S resolved to {normalised!r}; pint reads the S as siemens, an "
+        "electric current, which is not the magnetic flux it is used for"
+    )
+    # What pint makes of the bare string is a current — the reading the
+    # normaliser must not pass through.
+    assert unit_registry.Quantity(1.0, "V.S").dimensionality == (
+        unit_registry.Quantity(1.0, "A").dimensionality
     )
 
 
@@ -212,8 +283,14 @@ def test_dd_unit_normalisation_is_not_regressed():
     to an equivalent unit. Comparison is pint's, not the string's: a spelling
     may change where the unit does not (that is a cosmetic change), but a
     string that resolved may not move to a different unit. Strings that were
-    unresolvable may gain a resolution — that is the point of the alias file."""
-    changed = []
+    unresolvable may gain a resolution — that is the point of the alias file.
+
+    Two spellings move on purpose, to a reading that no longer contradicts the
+    quantity each is attached to: they are listed in INTENTIONAL_CORRECTIONS.
+    The guard asserts that list is exactly the set that moved, so it still
+    catches any other movement and fails rather than passing silently when the
+    snapshot is missing a string it should cover."""
+    moved = []
     checked = 0
     for raw, base_canonical in _base_snapshot():
         if not base_canonical:
@@ -221,8 +298,9 @@ def test_dd_unit_normalisation_is_not_regressed():
         checked += 1
         head = normalize_unit_symbol(raw)
         if not units_are_equivalent(base_canonical, head):
-            changed.append((raw, base_canonical, head))
+            moved.append(raw)
     assert checked > 0, "base snapshot carried no resolved strings"
-    assert changed == [], (
-        f"{len(changed)} of {checked} resolved DD unit strings moved: {changed}"
+    assert set(moved) == set(INTENTIONAL_CORRECTIONS), (
+        f"resolved strings that moved: {sorted(moved)}; expected exactly "
+        f"{sorted(INTENTIONAL_CORRECTIONS)}"
     )
