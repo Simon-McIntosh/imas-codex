@@ -169,13 +169,13 @@ def rerank_candidates(
 ) -> tuple[list[dict[str, Any]], str | None]:
     """Reorder candidates by a Jev relevance Score; return ``(ordered, note)``.
 
-    ``candidates`` arrive in embedding order. Each is scored on the query and
-    its own path/title plus the first 1500 characters of its text, through
-    ``decide_batch`` on the discovery-relevance seat, so the rerank adds no
-    seat. Scored candidates are ranked by descending Score; a candidate whose
-    call failed or was still unscored when the wall-time budget elapsed keeps
-    its embedding position, and a wholly failed batch returns the embedding
-    order unchanged.
+    ``candidates`` arrive in embedding order. The ordering itself is
+    ``judgment.rerank_pool``; this caller owns only the judgement state (each
+    candidate's path/title plus the first 1500 characters of its text) and the
+    discovery-relevance seat, so the rerank adds no seat. Scored candidates are
+    ranked by descending Score; a candidate whose call failed or was still
+    unscored when the wall-time budget elapsed keeps its embedding position,
+    and a wholly failed batch returns the embedding order unchanged.
 
     ``note`` describes the fallback and is ``None`` when every candidate was
     scored. The ordering never raises: ranking is not a gate, so a failed or
@@ -190,14 +190,16 @@ def rerank_candidates(
 
         model = get_model("discovery-relevance")
 
-    from imas_codex.discovery.base.judgment import decide_batch
+    from imas_codex.discovery.base.judgment import rerank_pool
 
-    states = [_rerank_state(query, candidate) for candidate in candidates]
     try:
-        results, _cost = _run_batch(
-            decide_batch(
-                states,
-                _RERANK_QUESTION,
+        return _run_batch(
+            rerank_pool(
+                query,
+                candidates,
+                state_for=_rerank_state,
+                levels=_RERANK_QUESTION["relevance_grade"]["criteria"],
+                instructions=_RERANK_QUESTION["relevance_grade"]["instructions"],
                 model=model,
                 service=service,
                 concurrency=concurrency,
@@ -210,40 +212,6 @@ def rerank_candidates(
             list(candidates),
             f"rerank unavailable ({exc}); embedding order returned",
         )
-
-    scores: list[float | None] = []
-    for result in results:
-        if result is None:
-            scores.append(None)
-        else:
-            answers, _call_cost = result
-            grade = answers.get("relevance_grade") or {}
-            scores.append(grade.get("score"))
-
-    # Scored candidates fill the slots in embedding order by descending Score,
-    # and an unscored candidate keeps its own embedding position rather than
-    # being read as a zero.
-    scored_order = sorted(
-        (i for i, score in enumerate(scores) if score is not None),
-        key=lambda i: (-scores[i], i),
-    )
-    ordered: list[dict[str, Any]] = []
-    pointer = 0
-    for index, candidate in enumerate(candidates):
-        if scores[index] is None:
-            ordered.append(candidate)
-        else:
-            ordered.append(candidates[scored_order[pointer]])
-            pointer += 1
-
-    unscored = sum(1 for score in scores if score is None)
-    note = None
-    if unscored:
-        note = (
-            f"rerank incomplete: {unscored} of {len(candidates)} candidates "
-            f"kept their embedding position (unscored at the {budget_seconds}s budget)"
-        )
-    return ordered, note
 
 
 # ---------------------------------------------------------------------------

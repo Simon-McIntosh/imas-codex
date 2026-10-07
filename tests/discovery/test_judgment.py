@@ -154,3 +154,95 @@ async def test_no_budget_waits_for_a_slow_call(monkeypatch):
 
     assert all(result is not None for result in results)
     assert cost == pytest.approx(0.14)
+
+
+def _pool(n: int) -> list[dict]:
+    return [{"path": f"f{i}", "text": f"t{i}"} for i in range(n)]
+
+
+def _state_for(query: str, candidate: dict) -> dict:
+    return {
+        "query": query,
+        "candidate": {
+            "locator": {"path": candidate["path"]},
+            "text": candidate["text"],
+        },
+    }
+
+
+async def test_rerank_pool_orders_by_descending_score(monkeypatch):
+    async def fake(model, state, questions, *, service, **_kwargs):
+        score = {"f0": 3, "f1": 1, "f2": 5}[state["candidate"]["locator"]["path"]]
+        return _answers(score), 0.0
+
+    monkeypatch.setattr(judgment, "acall_decisions", fake)
+
+    ordered, note = await judgment.rerank_pool(
+        "q",
+        _pool(3),
+        state_for=_state_for,
+        levels=QUESTIONS["relevance_grade"]["criteria"],
+        instructions=QUESTIONS["relevance_grade"]["instructions"],
+        model=MODEL,
+        service=SERVICE,
+    )
+
+    assert [candidate["path"] for candidate in ordered] == ["f2", "f0", "f1"]
+    assert note is None
+
+
+async def test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails(
+    monkeypatch,
+):
+    async def fake(model, state, questions, *, service, **_kwargs):
+        raise RuntimeError("endpoint down")
+
+    monkeypatch.setattr(judgment, "acall_decisions", fake)
+
+    ordered, note = await judgment.rerank_pool(
+        "q",
+        _pool(3),
+        state_for=_state_for,
+        levels=QUESTIONS["relevance_grade"]["criteria"],
+        instructions=QUESTIONS["relevance_grade"]["instructions"],
+        model=MODEL,
+        service=SERVICE,
+        budget_seconds=5.0,
+    )
+
+    assert [candidate["path"] for candidate in ordered] == ["f0", "f1", "f2"]
+    assert note is not None and "kept their embedding position" in note
+
+
+async def test_rerank_pool_of_nothing_returns_nothing():
+    ordered, note = await judgment.rerank_pool(
+        "q",
+        [],
+        state_for=_state_for,
+        levels=QUESTIONS["relevance_grade"]["criteria"],
+        instructions=QUESTIONS["relevance_grade"]["instructions"],
+        model=MODEL,
+        service=SERVICE,
+    )
+
+    assert ordered == []
+    assert note is None
+
+
+def test_judgment_imports_nothing_from_the_llm_package():
+    """The discovery core must not depend on the search-side llm package."""
+    import ast
+    import pathlib
+
+    tree = ast.parse(pathlib.Path(judgment.__file__).read_text())
+    modules: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            modules.append(node.module or "")
+    assert not [
+        module
+        for module in modules
+        if module == "imas_codex.llm" or module.startswith("imas_codex.llm.")
+    ], modules
