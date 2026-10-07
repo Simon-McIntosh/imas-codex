@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -331,11 +331,23 @@
         section. The escalated choice call therefore returns only listed paths, or
         <code>none</code> with a disposition. It no longer returns a <code>TargetType</code>,
         and its response model in <code>imas_codex/ids/models.py</code> changes with the
-        prompts. Public definitions rise by one across §8: <code>read_candidates</code> and
-        <code>select_candidates</code> are added, <code>count_sources_by_mapping_status</code>
-        and the <code>workers.py</code> copy of <code>count_candidates_by_route</code> are
-        deleted, and the target-type rule is private. The one addition is
-        <code>section_of(path)</code> in <code>imas_codex/core/paths.py</code>, beside
+        prompts. <code>map-context-reads-candidates</code> kept public definitions level:
+        <code>read_candidates</code> and <code>select_candidates</code> were added, and
+        <code>count_sources_by_mapping_status</code> and the <code>workers.py</code> copy of
+        <code>count_candidates_by_route</code> were deleted. Counted from its merged head
+        (<code>61ff0131c</code>), the last two nodes raise the count by three, with seven added
+        and four removed. <code>map-run-chooses-candidates</code> replaces
+        <code>assign_targets</code>/<code>aassign_targets</code> with
+        <code>choose_targets</code>/<code>achoose_targets</code> and deletes
+        <code>generate_mapping</code>. It adds three definitions that have no predecessor:
+        <code>TargetChoice</code> and <code>TargetChoiceBatch</code>, the choice call's response
+        model, which carries a set of paths and a disposition that <code>TargetAssignment</code>
+        cannot; and <code>escalated_shortlist</code>, the one cut of a source's shortlist plus
+        its §11 siblings, shared by the prompt and the worker. It also adds
+        <code>claim_sources_for_escalated</code>, which replaces
+        <code>claim_sources_for_assignment</code>; that function has no caller left, and
+        <code>map-run-maps-each-home</code> deletes it. The target-type rule is private. The last
+        addition is <code>section_of(path)</code> in <code>imas_codex/core/paths.py</code>, beside
         <code>normalize_imas_path</code>. It merges three copies of one rule: the
         <code>parts[0] + '/' + parts[1]</code> derivation in <code>read_candidates</code>
         (<code>imas_codex/ids/graph_ops.py:608</code>), the re-derivation in
@@ -343,7 +355,11 @@
         <code>imas_codex/ids/assembler.py:187</code>. That prefix test also matches a sibling
         section whose name merely begins with the same text.</li>
       <li><strong>One owner for a path's section.</strong> <code>section_of(path)</code>
-        returns <code>&lt;ids&gt;/&lt;first segment&gt;</code>. §8's guard and target-type
+        returns <code>&lt;ids&gt;/&lt;first segment&gt;</code>. For a path with no second
+        segment, a bare IDS name, it returns the path unchanged, which is the IDS itself and
+        matches the fallback <code>validation.py:842</code> applies today. An empty path is refused
+        with <code>ValueError</code>, so the guard never compares against an undefined
+        section. §8's guard and target-type
         rule call it, <code>validation.py</code> calls it in place of its re-derivation, and
         <code>assembler.py</code> compares <code>section_of(m.target_id)</code> with the
         section in place of its prefix test. <code>read_candidates</code> computes the section
@@ -522,7 +538,8 @@
             tests/cli/test_discover_map.py tests/test_cli.py tests/core -p no:cacheprovider</code>
             passes, with tests showing:
             <ul>
-              <li><code>section_of</code> returns the IDS top-level ancestor, and
+              <li><code>section_of</code> returns the IDS top-level ancestor, returns a bare IDS
+                name unchanged, refuses an empty path, and
                 <code>assembler.py</code>'s section filter no longer matches a sibling section
                 that shares a name prefix;</li>
               <li>a selected source is mapped without an assign call;</li>
