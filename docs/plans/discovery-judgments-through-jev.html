@@ -22,7 +22,7 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;}">
 </head>
@@ -48,6 +48,13 @@
       <li><strong>Gate on Nouls.</strong> For an in-or-out decision, the maximum of the scope Nouls separated in-scope code at AUC 0.962. A five-level relevance Score reached 0.894, and the maximum of four facet Scores reached 0.913.</li>
       <li><strong>Use one Noul per label wherever several labels can hold.</strong> A Choice is single-answer. Measured by the mapping-candidate-selection plan: a JET plasma-current source received 1.0 on <code>magnetics</code> and 0 on <code>equilibrium</code> and <code>summary</code>, although it belongs in all three.</li>
       <li><strong>Use Choice for an exclusive classification, and Score for a graded facet that is stored and tracked.</strong> Facets are read only for items that pass the gate: outside it, MINPACK's least-squares routines scored 2.5 of 3 on signal processing.</li>
+      <li><strong>Store every distribution beside its value.</strong> The lead decided this on 2026-10-07. Every Jev judgment a pipeline persists keeps the model's own uncertainty, as typed fields that Cypher can query:
+        <ul>
+          <li>A Score field <code>X</code> is stored with <code>X_probs</code>, ordered by level index, and <code>X_confidence</code>.</li>
+          <li>A Choice is stored with <code>X_probs</code>, aligned to the schema enum's fixed order, and <code>X_confidence</code>.</li>
+          <li>A Noul's value is its probability.</li>
+        </ul>
+        Confidence near 0 marks a judgment whose mass is split between levels. Such a judgment is worth a second look, and the expected value alone hides it.</li>
     </ul>
     <p>Text generation stays with the language model: descriptions, keywords, signal names, cluster labels, and the DD, IDS and identifier enrichment text.</p>
 
