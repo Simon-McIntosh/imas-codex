@@ -4,14 +4,18 @@
 source only for a pattern with at least ``min_instances`` members. A signal in a
 smaller pattern has no source, and every mapping stage keys on a source, so such
 a signal can never be mapped. The final pass in ``detect_signal_sources`` gives
-each ungrouped signal a one-member source keyed by the signal itself.
+each ungrouped signal a one-member source keyed by the signal itself (its
+accessor, or its id when the accessor is null), with the signal as its
+representative.
 
-The mocked tests pin the pass's shape: which group ids, member lists and
-representatives it creates, and that the fetch excludes signals already in a
-source. One ``-m graph`` test drives the same pass against a live database on a
-uniquely named fixture facility, then enriches a one-member source and shows the
-candidate stage claims it; it removes every trace of the fixture in a ``finally``
-block.
+The mocked tests pin the set of sources the pass writes — (group_id, group_key,
+member_count) triples — rather than the order or count of statements. One
+``-m graph`` test drives the same pass against a live database on a uniquely
+named fixture facility: it checks the sources, the idempotent second run, that a
+one-member source enriched reads enriched and the candidate stage claims it, and
+that a channel-like accessor the enrichment claim bulk-skips when ungrouped is
+instead claimed once it carries a source. It removes every trace of the fixture
+in a ``finally`` block.
 """
 
 from __future__ import annotations
@@ -32,12 +36,17 @@ def _mock_gc(results):
     return gc
 
 
-def _merge_calls(gc):
-    return [c for c in gc.query.call_args_list if "MERGE (sg:SignalSource" in c.args[0]]
+def _written(gc):
+    """Map group_id to the kwargs of each SignalSource MERGE the pass issues."""
+    return {
+        c.kwargs["group_id"]: c.kwargs
+        for c in gc.query.call_args_list
+        if "MERGE (sg:SignalSource" in c.args[0]
+    }
 
 
-def _kwargs(call):
-    return call.kwargs
+def _triples(written):
+    return {(gid, kw["group_key"], kw["member_count"]) for gid, kw in written.items()}
 
 
 class TestOneMemberSources:
@@ -58,19 +67,19 @@ class TestOneMemberSources:
 
         assert (groups, members) == (2, 4)
 
-        merges = _merge_calls(gc)
-        by_count = {_kwargs(c)["member_count"]: _kwargs(c) for c in merges}
+        written = _written(gc)
+        assert _triples(written) == {
+            ("tcv:GAS_NNN:X", "GAS_NNN:X", 3),
+            ("tcv:LONE:Y", "LONE:Y", 1),
+        }
 
-        shared = by_count[3]
+        shared = written["tcv:GAS_NNN:X"]
         assert set(shared["member_ids"]) == {"tcv:a1", "tcv:a2", "tcv:a3"}
         assert shared["rep_id"] == "tcv:a1"  # first accessor alphabetically
-        assert shared["group_key"] == "GAS_NNN:X"
 
-        lone = by_count[1]
+        lone = written["tcv:LONE:Y"]
         assert lone["member_ids"] == ["tcv:lone"]
         assert lone["rep_id"] == "tcv:lone"
-        assert lone["group_key"] == "LONE:Y"
-        assert lone["group_id"] == "tcv:LONE:Y"
 
     def test_two_signal_pattern_forms_two_one_member_sources(self):
         """A sub-threshold pattern forms no shared group; each signal stands alone."""
@@ -86,8 +95,27 @@ class TestOneMemberSources:
             groups, members = detect_signal_sources("tcv", min_instances=3)
 
         assert (groups, members) == (2, 2)
-        group_ids = {_kwargs(c)["group_id"] for c in _merge_calls(gc)}
-        assert group_ids == {"tcv:PAIR_01:V", "tcv:PAIR_02:V"}
+        assert _triples(_written(gc)) == {
+            ("tcv:PAIR_01:V", "PAIR_01:V", 1),
+            ("tcv:PAIR_02:V", "PAIR_02:V", 1),
+        }
+
+    def test_null_accessor_falls_back_to_signal_id(self):
+        """A signal whose accessor is null is keyed by its id, not dropped."""
+        results = [{"id": "tcv:no_acc", "accessor": None}]
+        gc = _mock_gc(results)
+
+        with patch(
+            "imas_codex.discovery.signals.parallel.GraphClient", return_value=gc
+        ):
+            groups, members = detect_signal_sources("tcv", min_instances=3)
+
+        assert (groups, members) == (1, 1)
+        written = _written(gc)
+        assert _triples(written) == {("tcv:tcv:no_acc", "tcv:no_acc", 1)}
+        lone = written["tcv:tcv:no_acc"]
+        assert lone["member_ids"] == ["tcv:no_acc"]
+        assert lone["rep_id"] == "tcv:no_acc"
 
     def test_fetch_excludes_signals_already_in_a_source(self):
         """Re-running finds nothing: the fetch skips signals already MEMBER_OF."""
@@ -98,8 +126,10 @@ class TestOneMemberSources:
         ):
             assert detect_signal_sources("tcv", min_instances=3) == (0, 0)
 
-        fetch_statement = gc.query.call_args_list[0].args[0]
-        assert "NOT EXISTS { (s)-[:MEMBER_OF]->(:SignalSource) }" in fetch_statement
+        statements = [c.args[0] for c in gc.query.call_args_list]
+        assert any(
+            "NOT EXISTS { (s)-[:MEMBER_OF]->(:SignalSource) }" in s for s in statements
+        )
 
     def test_creates_nothing_when_no_signals(self):
         gc = _mock_gc([])
@@ -109,23 +139,34 @@ class TestOneMemberSources:
         ):
             assert detect_signal_sources("tcv", min_instances=3) == (0, 0)
 
-        assert _merge_calls(gc) == []
+        assert _written(gc) == {}
 
 
 @pytest.mark.graph
 def test_singleton_sources_round_trip():
-    """Live: two ungrouped signals and one three-member pattern become three
-    sources; a re-run adds nothing; enriching a one-member source makes it
-    claimable by the candidate stage."""
-    from imas_codex.discovery.signals.parallel import propagate_source_enrichment
+    """Live: two ungrouped signals, a channel-like ungrouped signal and a
+    three-member pattern become sources; a re-run adds nothing; enriching a
+    one-member source makes it claimable by the candidate stage, and the
+    channel-like signal is claimed.
+
+    The enrichment claim bulk-skips accessors matching the channel-element
+    pattern when they carry no source. That guard excludes signals already
+    MEMBER_OF a source, so a channel-like signal grouping would once have
+    skipped is now enriched individually."""
+    from imas_codex.discovery.signals.parallel import (
+        claim_signals_for_enrichment,
+        propagate_source_enrichment,
+    )
     from imas_codex.graph.client import GraphClient
     from imas_codex.ids.workers import claim_sources_for_candidates
 
     marker = uuid.uuid4().hex[:12]
     facility = f"pytest-singleton-{marker}"
+    channel_id = f"{facility}:CHANNEL_SENSE_01"
     signals = {
         f"{facility}:ALPHA_ONLY": "ALPHA_ONLY",
         f"{facility}:BETA_ONLY": "BETA_ONLY",
+        channel_id: "CHANNEL_SENSE_01",
         f"{facility}:TRIP_001:V": "TRIP_001:V",
         f"{facility}:TRIP_002:V": "TRIP_002:V",
         f"{facility}:TRIP_003:V": "TRIP_003:V",
@@ -148,7 +189,7 @@ def test_singleton_sources_round_trip():
                 )
 
             groups, members = detect_signal_sources(facility, min_instances=3)
-            assert (groups, members) == (3, 5)
+            assert (groups, members) == (4, 6)
 
             rows = gc.query(
                 """
@@ -159,8 +200,8 @@ def test_singleton_sources_round_trip():
                 """,
                 facility=facility,
             )
-            assert len(rows) == 3
-            assert sorted(r["member_count"] for r in rows) == [1, 1, 3]
+            assert len(rows) == 4
+            assert sorted(r["member_count"] for r in rows) == [1, 1, 1, 3]
             for row in rows:
                 assert row["rep"] in row["members"]
                 assert row["member_count"] == len(row["members"])
@@ -176,8 +217,13 @@ def test_singleton_sources_round_trip():
                 """,
                 facility=facility,
             )
-            assert counts[0]["sources"] == 3
-            assert counts[0]["edges"] == 5
+            assert counts[0]["sources"] == 4
+            assert counts[0]["edges"] == 6
+
+            # The channel-like accessor would be bulk-skipped while ungrouped;
+            # with a source it is claimed for individual enrichment.
+            claimed_signals = claim_signals_for_enrichment(facility)
+            assert channel_id in {row["id"] for row in claimed_signals}
 
             # Enrich one one-member source: the source reads enriched and the
             # candidate stage claims it.
@@ -191,6 +237,7 @@ def test_singleton_sources_round_trip():
                     "keywords": ["machine"],
                 },
             )
+            # Re-claim-set membership is what the candidate stage keys on.
             status = gc.query(
                 "MATCH (sg:SignalSource {id: $id}) RETURN sg.status AS status",
                 id=singleton["id"],

@@ -10,7 +10,9 @@
     now runs a final pass: each signal the threshold leaves ungrouped becomes a
     one-member source keyed by the signal itself, with the signal as its
     representative, created through the function's own <code>MERGE</code> so the
-    threshold is unchanged. The unused <code>create_signal_source</code> in
+    threshold is unchanged. The key is the accessor, which is unique per facility;
+    a signal whose accessor is null falls back to its id, so no signal is dropped.
+    The unused <code>create_signal_source</code> in
     <code>imas_codex/discovery/base/grouping.py</code>, which had no caller, is
     deleted; detection now owns source creation.
   </p>
@@ -18,18 +20,57 @@
   <h4 id="singleton-signal-sources-measure">Measure</h4>
   <p id="singleton-signal-sources-measure-detail">
     <code>uv run --no-sync pytest tests/discovery tests/ids -p no:cacheprovider</code>
-    exits 0 — 1772 passed, 5 skipped, 4 deselected. New unit tests assert a lone
-    signal forms a one-member source with itself as representative, and that a
-    sub-threshold pattern forms no shared group. The live <code>-m graph</code> test
-    builds a fixture facility of two ungrouped signals and one three-member pattern,
-    asserts two one-member sources and one three-member source after the first run
-    and no new source or edge after a second, then enriches a one-member source and
-    shows <code>claim_sources_for_candidates</code> claims it — 1 passed.
+    exits 0 — 1773 passed, 5 skipped, 4 deselected. The unit tests assert the
+    <em>set</em> of <code>(group_id, group_key, member_count)</code> the pass writes,
+    not call order: a lone signal forms a one-member source with itself as
+    representative, a sub-threshold pattern forms two one-member sources rather than
+    a shared group, and a null-accessor signal is keyed by its id rather than
+    dropped. The live <code>-m graph</code> test builds a fixture facility of three
+    ungrouped signals — one of them channel-like, its accessor ending
+    <code>_01</code> — and one three-member pattern, asserts three one-member
+    sources and one three-member source after the first run and no new source or
+    edge after a second, then enriches a one-member source and shows
+    <code>claim_sources_for_candidates</code> claims it — 1 passed.
   </p>
 
   <h4 id="singleton-signal-sources-negative-control">Negative control</h4>
   <p id="singleton-signal-sources-negative-control-detail">
-    With the final pass made to skip ungrouped signals, the one-member source tests
-    are the ones that fail: 4 failed, EXIT=1.
+    Made to skip ungrouped signals, the final pass fails exactly the one-member
+    source tests: 4 failed, EXIT=1. A second control drops the null-accessor
+    fallback (<code>key = r["accessor"]</code>): the null-accessor case fails alone,
+    1 failed, EXIT=1. Both mutations were reverted.
+  </p>
+
+  <h4 id="singleton-signal-sources-grep">The removal check and the grep the plan names</h4>
+  <p id="singleton-signal-sources-grep-detail">
+    The done-when's literal <code>grep -rn create_signal_source imas_codex/
+    tests/</code> does not print nothing: it also matches the unrelated
+    <code>detect_and_create_signal_sources</code> in the MDSplus discovery worker
+    (<code>imas_codex/discovery/mdsplus/graph_ops.py</code>), which the plan leaves
+    in place. The word-boundary form
+    <code>grep -rnw create_signal_source imas_codex/ tests/</code> prints nothing, so
+    the removed symbol is gone and the literal gate was over-broad. The plan's grep
+    is corrected to the word-boundary form.
+  </p>
+
+  <h4 id="singleton-signal-sources-enrichment">Interaction with the channel-element enrichment skip</h4>
+  <p id="singleton-signal-sources-enrichment-detail">
+    <code>claim_signals_for_enrichment</code> bulk-skips numbered channel signals,
+    marking them <code>skipped</code> with reason <code>channel_element</code>; that
+    guard excludes any signal already <code>MEMBER_OF</code> a source, because
+    grouping enriches the representative and propagates. A channel-like signal that
+    grouping left ungrouped was therefore bulk-skipped and never enriched; with a
+    one-member source it is claimed individually instead. The <code>-m graph</code>
+    fixture pins this: its channel-like signal
+    (<code>CHANNEL_SENSE_01</code>) is asserted to be claimed by
+    <code>claim_signals_for_enrichment</code> once it carries a source.
+  </p>
+  <p id="singleton-signal-sources-enrichment-jt60sa">
+    Quantified for JT-60SA with one bounded read-only count over the four guard
+    regexes: <strong>zero</strong> JT-60SA signals match the channel-element pattern
+    in any status — 0 of 5534 discovered, 0 of 763 checked, 0 of 1 enriched. So the
+    bulk-skip is a no-op at JT-60SA and this change alters no JT-60SA enrichment
+    behaviour. Of the 5534 discovered signals, 1969 were ungrouped and now each
+    receives a one-member source; none of those 1969 is channel-like.
   </p>
 </section>
