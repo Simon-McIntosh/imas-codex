@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -60,9 +60,12 @@
     </figure>
     <p>
       A stage registry in <code>imas_codex/cli/discover/sequence.py</code> lists the stages in
-      order. For each stage it records the command that runs it, what the stage needs, the stages
-      whose output it reads, and the predicate that says whether it has work. Each stage keeps exactly
-      one owner. The registry points at the existing click command and adds no second implementation.
+      order. Its domains are the existing <code>DISCOVERY_DOMAINS</code>
+      (<code>imas_codex/cli/discover/common.py:30</code>), which already gives the domain set one owner.
+      For each stage it records the command that runs it, what the stage needs, the stages whose
+      output it reads, and the existing pending-work predicate that says whether it has work. Each
+      stage keeps exactly one owner. The registry points at the existing click command and adds no
+      second implementation.
     </p>
     <table>
       <thead><tr><th>Stage</th><th>Runs</th><th>Needs</th><th>Reads output of</th></tr></thead>
@@ -79,14 +82,44 @@
       </tbody>
     </table>
     <p>
-      Access is probed through the owners that exist. SSH uses <code>check_ssh_connection</code>
-      (<code>imas_codex/remote/executor.py:97</code>) and the facility's declared environment uses
-      <code>probe_remote_environment</code> (<code>imas_codex/remote/tools.py:550</code>), the check
-      <code>ensure_remote_environment</code> already applies. Wiki and port-forwarded sites use
-      <code>verify_tunnel</code> and <code>is_tunnel_active</code> (<code>imas_codex/remote/tunnel.py</code>).
-      The graph uses the <code>GraphClient</code>'s own resolution. Each need is probed once at
-      start, and each SSH or tunnel need is probed again just before its stage runs, because a hop can
-      drop mid-sequence.
+      Access is probed through the owner every discover command already uses:
+      <code>ServiceMonitor</code> (<code>imas_codex/discovery/base/services.py:830</code>), built by
+      <code>create_service_monitor</code> (<code>:1117</code>) and reached through
+      <code>create_discovery_monitor</code> (<code>imas_codex/cli/discover/common.py:502</code>). Its
+      checks are <code>neo4j_health_check</code> (<code>:159</code>), <code>ssh_health_check</code>
+      (<code>:178</code>) and <code>wiki_auth_check</code> (<code>:200</code>). The sequence asks the
+      monitor for each stage's needs, so one owner holds facility access. A need no check covers, for
+      example the facility's declared remote environment, is added to the monitor as a check through
+      <code>probe_remote_environment</code> (<code>imas_codex/remote/tools.py:550</code>), never probed
+      beside it. Each need is checked once at start, and each SSH or tunnel need again just before its
+      stage runs, because a hop can drop mid-sequence.
+    </p>
+    <p>
+      Each stage's <em>nothing to do</em> comes from its existing predicate, and the registry names
+      them:
+    </p>
+    <ul>
+      <li><strong>paths:</strong> <code>has_pending_work</code>
+        (<code>imas_codex/discovery/paths/parallel.py:198</code>);</li>
+      <li><strong>code:</strong> <code>has_pending_scan_work</code>, <code>has_pending_triage_work</code>,
+        <code>has_pending_score_work</code>, <code>has_pending_enrich_work</code> and
+        <code>has_pending_code_work</code> (<code>imas_codex/discovery/code/graph_ops.py:579–717</code>);</li>
+      <li><strong>wiki:</strong> <code>has_pending_work</code>, <code>has_pending_scan_work</code> and
+        <code>has_pending_ingest_work</code> (<code>imas_codex/discovery/wiki/graph_ops.py:614–690</code>);</li>
+      <li><strong>signals:</strong> <code>has_pending_work</code>, <code>has_pending_enrich_work</code>
+        and <code>has_pending_check_work</code>
+        (<code>imas_codex/discovery/signals/parallel.py:549–587</code>);</li>
+      <li><strong>candidates:</strong> <code>has_pending_candidate_work</code>
+        (<code>imas_codex/ids/workers.py:404</code>);</li>
+      <li><strong>mapping:</strong> <code>has_pending_mapping_work</code> and
+        <code>has_pending_validation_work</code> (<code>imas_codex/ids/workers.py:386–395</code>).</li>
+    </ul>
+    <p>
+      Documents has its two checks only as private helpers, <code>_has_pending_image_documents</code>
+      and <code>_has_pending_image_scores</code> (<code>imas_codex/discovery/documents/pipeline.py:58,
+      74</code>). The node makes them one public <code>has_pending_work</code> in that module, which the
+      pipeline and the registry both call. That is one added public definition, which replaces two
+      private ones.
     </p>
     <p>
       Every stage ends in one of four outcomes, each with a reason: <em>ran</em> (counts done and
@@ -98,8 +131,10 @@
     </p>
     <p>
       <strong>Node</strong> <code>sequence-stage-registry</code>, role implement, 2 h. Write paths:
-      <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>
-      and <code>tests/cli/test_discover_sequence.py</code>. <strong>Done when</strong>
+      <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
+      <code>imas_codex/discovery/base/services.py</code>,
+      <code>imas_codex/discovery/documents/pipeline.py</code>, <code>tests/cli/test_discover_sequence.py</code>
+      and <code>tests/discovery/</code>. <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
       passes with tests showing:
     </p>
@@ -109,8 +144,9 @@
       <li>with SSH probed down, every SSH stage reads <em>skipped: unreachable</em> while the graph-only
         stages read runnable;</li>
       <li>a facility with no <code>wiki_sites</code> reads <em>skipped: not configured</em> for wiki;</li>
-      <li>no probe is written anew: each delegates to the named owner, and a test patches the owner and
-        sees the outcome follow it.</li>
+      <li>no probe is written anew: each need is a <code>ServiceMonitor</code> check, and a test
+        patches the check and sees the outcome follow it;</li>
+      <li>each stage's <em>nothing to do</em> follows its named pending-work predicate.</li>
     </ul>
 
     <h2 id="s3">§3 — The runner and its report</h2>
@@ -156,19 +192,26 @@
 <section data-reckon="section" data-id="s4" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       The last two stages run the mapping pipeline. <code>candidates</code> runs <code>discover
-      map</code>. <code>mapping</code> runs <code>imas map run</code> for each IDS that holds a selected
-      or escalated candidate edge for the facility, read through the candidate reader in
-      <code>imas_codex/ids/graph_ops.py</code>. With the per-IDS map claim from
-      <code>mapping-candidate-selection</code> §8, one invocation per IDS maps each source into every
-      home it has. The mapping stage runs only when the decision below allows it, because it spends on
+      map</code>. <code>mapping</code> runs <code>imas map run FACILITY</code> once, and its own target
+      enumeration, <code>discover_mappable_ids</code> (<code>imas_codex/ids/tools.py:376</code>,
+      called at <code>imas_codex/cli/map.py:211</code>), decides the IDSs. The sequence keeps no
+      second list. That enumeration picks IDSs by physics-domain overlap today, so it could miss an
+      IDS that holds a source's cross-IDS sibling home. This node extends it: an IDS holding a selected
+      or escalated candidate edge for the facility is a target even when the domain overlap misses
+      it. With the per-IDS map claim from <code>mapping-candidate-selection</code> §8, the one
+      invocation then maps each source into every home it has. The mapping stage runs only when the decision below allows it, because it spends on
       the reasoning seat.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-mapping-stages</code>, role implement, 0.75 h, after the
-      gate below. Write paths: <code>imas_codex/cli/discover/sequence.py</code> and
-      <code>tests/cli/test_discover_sequence.py</code>. <strong>Done when</strong> the same gate
-      passes with tests showing the mapping stage invokes <code>imas map run</code> once per IDS that
-      holds candidates, and skips with <em>nothing to do</em> when no source has a route.
+      gate below. Write paths: <code>imas_codex/cli/discover/sequence.py</code>,
+      <code>imas_codex/ids/tools.py</code>, <code>tests/cli/test_discover_sequence.py</code> and
+      <code>tests/ids/</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/ids tests/test_cli.py -p no:cacheprovider</code>
+      passes with tests showing the mapping stage invokes <code>imas map run FACILITY</code> exactly
+      once, <code>discover_mappable_ids</code> includes an IDS that holds a selected candidate edge but
+      no physics-domain overlap, and the stage skips with <em>nothing to do</em> when no source has a
+      route.
     </p>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
