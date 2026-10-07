@@ -22,9 +22,11 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
+<meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
+<meta name="plan-impl" content="0.13">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -180,12 +182,21 @@
 <li>For each query, the top 30 candidates from <code>_search_code</code> or <code>_search_docs</code> in <code>imas_codex/llm/search_tools.py</code>, hand-labelled relevant or not.</li>
 <li>Embedding-only order compared with the order after a Jev relevance Score per candidate, by nDCG@10 and mean reciprocal rank.</li>
 <li>Cost and latency per query recorded.</li>
-<li>Prototype scripts live under <code>/home/ITER/mcintos/.cache/imas-codex-jev/</code>, and the evidence goes in the plan's fragments.</li>
+<li>The prototype's scripts and raw data are in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/</code>, because a dispatch cannot write outside the repository. The evidence is in the plan's fragments.</li>
+</ul>
+<p><strong>Prototype result</strong> (landed 2026-10-07, <a href="search-rerank-prototype">evidence</a>):</p>
+<ul>
+<li>Mean nDCG@10 rises from 0.246 to 0.509 over 18 questions, and from 0.340 to 0.704 over the 13 whose top 30 holds a relevant candidate. The paired gain is +0.36 (95% CI 0.22–0.52). The rerank is better on 11 questions, worse on Q10 and equal on Q03.</li>
+<li>MRR rises from 0.384 to 0.544.</li>
+<li>A random order scores 0.207, so the embedding order carries only a little signal above chance within the top 30.</li>
+<li>The rerank costs $0.019 for 540 calls. Wall time is about 2 s per question for 30 candidates (median 2.04 s, max 2.58 s).</li>
+<li>Five questions retrieved no relevant candidate at all, which a rerank cannot repair. §10 classifies them.</li>
 </ul>
 <p><strong>Deploy</strong> (node <code>search-rerank</code>), only if the prototype shows a gain:</p>
 <ul>
 <li><code>_search_code</code> and <code>_search_docs</code> rerank their top candidates through <code>call_decisions</code>, on the existing <code>discovery-relevance</code> seat, so the rerank adds no seat, with the query and each candidate's text as state.</li>
 <li>Because ranking is not a gate, a failed or slow rerank returns the embedding order unchanged and says so in the result, rather than failing the search.</li>
+<li>The rerank runs its candidates concurrently under a wall-time budget, sized from the measured 2 s per question. A candidate still unscored when the budget runs out keeps its embedding position.</li>
 <li>The rerank waits for the code score-stage node to merge, because that node also writes <code>imas_codex/llm/search_tools.py</code>.</li>
 </ul>
 <p>Done when:</p>
@@ -193,6 +204,18 @@
 <li>The prototype's measured nDCG@10 and MRR, for both orders, are recorded.</li>
 <li>If the rerank wins, the deployed tools rerank with that measured gain reproduced on the same queries.</li>
 </ul>
+
+    <h2 id="s10">§10 — Why five search questions retrieved nothing relevant</h2>
+<section data-reckon="section" data-id="s10" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>In §9's prototype, five of eighteen JT-60SA questions (Q01, Q05, Q12, Q14 and Q18) had no relevant candidate in the top 30, which no rerank can repair. Q01 asks where the flux-loop positions are defined. Those defaults live in <code>mgset0.f</code>, which the content arm scored 0.39, below the 0.5 ingest gate, so it may never have been ingested. A miss can be a judgment consequence rather than a search fault, and the two need different repairs.</p>
+<p>Node <code>retrieval-miss-census</code>, evidence only: for each of the five questions, find the file or page that answers it, from the §9 answer sentence and the facility's own tree. Classify the miss as one of:</p>
+<ul>
+<li>never discovered;</li>
+<li>discovered but skipped by a judgment, with the stored relevance and stage;</li>
+<li>ingested but not chunked or not embedded;</li>
+<li>ingested and embedded but ranked below 30, with its rank from a deeper search.</li>
+</ul>
+<p>Done when every miss has one class with its graph evidence, and the fragment says which repair each class needs: a gate, a graded-facet admission rule, an embedding gap or a retrieval change. No code change and no graph write.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -228,6 +251,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261007T015817839561-review-of-search-rerank-prototype" data-who="reckon-build" data-when="2026-10-07T02:08:49.587Z">
     <div class="r-comment-body"><p>review of r-20261007T013029393604-search-rerank-prototype at head 92a1ceacc — 6 dimensions scored (goal_fidelity 19, evidence 17, scope_discipline 20, durability 17, fit 19, reuse 18; total 110); the Jev rerank lifts mean nDCG@10 0.246-&gt;0.508 over all 18 questions and 0.340-&gt;0.704 over the 13 answerable; two follow-on findings, none blocking</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-landing-search-rerank-prototype" data-who="reckon-build" data-when="2026-10-07T02:20:00Z">
+    <div class="r-comment-body"><p>Node search-rerank-prototype merged in c161f6fd7; the coordinator corrected the record's tie label (Q03, not Q15), the control naming and the data path in d1458b6aa. The first commit inverted the embedding baseline, and the worker corrected it on resume. Review 110/120. The rerank shows a gain, so the deploy node search-rerank is ready once the code score-stage node merges. impl 1/8.</p></div>
 </div>
 </section>
 </main>
