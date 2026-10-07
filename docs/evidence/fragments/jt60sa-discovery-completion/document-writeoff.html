@@ -1,0 +1,42 @@
+<section>
+  <h2 id="document-writeoff">The unreachable JT-60SA documents are written off as deferred</h2>
+  <p id="document-writeoff-result">
+    The JT-60SA document corpus in the graph is bounded by the retired
+    <code>nakasvr23</code> TWiki host: every document either points at the
+    <code>nakasvr23.iferc.org</code> web host, which is retired, or at
+    <code>ssh://jt-60sa/var/www/html/twiki/pub</code>, a tree that no longer
+    exists on the replacement server, plus two external vendor URLs swept up
+    with the corpus. All <strong>781</strong> documents at <code>scored</code>
+    or <code>discovered</code> in those families are marked
+    <code>deferred</code> through <code>mark_document_deferred</code> in
+    <code>imas_codex/discovery/wiki/graph_ops.py</code>, never by a hand-written
+    Cypher <code>SET</code>: <strong>779</strong> with the reason
+    <em>source host retired: pre-migration TWiki attachment, no reachable copy
+    (lead write-off 2026-10-07)</em> and <strong>2</strong> external vendor URLs
+    with the reason <em>external vendor URL, not JT-60SA documentation</em>.
+  </p>
+  <p id="document-writeoff-evidence">
+    Before, by source family and status: <code>nakasvr23_web</code> — 541
+    <code>scored</code>, 7 <code>discovered</code>, 10 <code>ingested</code>, 18
+    already <code>deferred</code>; <code>ssh_twiki_pub</code> — 131
+    <code>scored</code>, 100 <code>discovered</code>, 240 <code>ingested</code>;
+    <code>external_or_other</code> — 1 <code>scored</code>, 1
+    <code>discovered</code> (the vendor URLs
+    <code>https://www.intel.co.jp/.../oneapi-programming-guide-jp.pdf</code> and
+    <code>http://www.mathworks.com/moler/exm/chapters/pagerank.pdf</code>).
+    After: <strong>0</strong> JT-60SA documents remain at <code>scored</code> or
+    <code>discovered</code> in the two retired-source families; the
+    <strong>250</strong> <code>ingested</code> documents (10 web + 240 ssh); every
+    remaining write-off carries the reason, with <code>defer_reason</code>
+    counts over the facility summing to 779 for the retired-host reason and 2 for
+    the vendor reason.
+  </p>
+  <p id="document-writeoff-negative-controls">
+    Two controls verify the selection is bounded. A JT-60SA document already
+    <code>ingested</code> before the run
+    (<code>jt-60sa:Shift_20201015.png</code>) is still <code>ingested</code>
+    after. A <code>scored</code> document outside both retired-source families
+    (<code>tcv:TCV_007_5mm_mm.txt</code>) is unchanged, still
+    <code>scored</code> with a null <code>defer_reason</code>.
+  </p>
+</section>
