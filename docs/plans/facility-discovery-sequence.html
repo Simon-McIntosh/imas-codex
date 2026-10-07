@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="facility-discovery-sequence">
+  <meta name="plan-title" content="Facility Discovery Sequence">
+  <meta name="plan-summary" content="One command runs a facility's discovery stages in dependency order, probing each stage's access and skipping the unreachable with a recorded reason">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="5.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="discovery">
+  <title>Facility Discovery Sequence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why one command</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      Taking a facility from nothing to IMAS mappings takes seven commands today:
+      <code>discover paths</code>, <code>code</code>, <code>documents</code>, <code>wiki</code>,
+      <code>signals</code> and <code>map</code>, then <code>imas map run</code>. The operator has to
+      know their order: code and documents read the paths that <code>paths</code> scored, and signal
+      enrichment reads the wiki and code context those stages leave in the graph. The operator also
+      has to know which stages can reach the facility at all. For JT-60SA run from the ITER host, the
+      wiki and document sources sit behind tunnels through a laptop reverse tunnel. Every SSH stage
+      fails whenever that hop is down. The graph-only stages, signal enrichment, <code>discover
+      map</code> and <code>imas map run</code>, can always run.
+    </p>
+    <p>
+      One command, given a facility, runs every stage whose prerequisites hold, in dependency order.
+      It skips the stages it cannot run, and says why for each one. Re-running it continues where it
+      stopped, because every stage's claim loop is already idempotent.
+    </p>
+
+    <h2 id="s2">§2 — Stage registry and access probes</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <figure>
+      <img src="/imas-codex/figures/facility-discovery-sequence/stage-graph.svg"
+           alt="Discovery stages with what each needs; signal enrichment, discover map and imas map run need only the graph">
+      <figcaption>
+        The discovery stages and the access each needs. Solid arrows are data flow, and dashed arrows
+        are context that signal enrichment reads if an earlier stage left it. The three stages with
+        blue borders need only the graph and a model, so they run even when the facility itself cannot
+        be reached.
+      </figcaption>
+    </figure>
+    <p>
+      A stage registry in <code>imas_codex/cli/discover/sequence.py</code> lists the stages in
+      order. For each stage it records the command that runs it, what the stage needs, the stages
+      whose output it reads, and the predicate that says whether it has work. Each stage keeps exactly
+      one owner. The registry points at the existing click command and adds no second implementation.
+    </p>
+    <table>
+      <thead><tr><th>Stage</th><th>Runs</th><th>Needs</th><th>Reads output of</th></tr></thead>
+      <tbody>
+        <tr><td>paths</td><td><code>discover paths</code></td><td>SSH, discovery roots configured</td><td>—</td></tr>
+        <tr><td>code</td><td><code>discover code</code></td><td>SSH</td><td>paths</td></tr>
+        <tr><td>documents</td><td><code>discover documents</code></td><td>SSH</td><td>paths</td></tr>
+        <tr><td>wiki</td><td><code>discover wiki</code></td><td><code>wiki_sites</code> configured, each site reachable</td><td>—</td></tr>
+        <tr><td>signals scan</td><td><code>discover signals --scan-only</code></td><td>SSH, <code>data_systems</code> configured</td><td>—</td></tr>
+        <tr><td>signals enrich</td><td><code>discover signals --enrich-only</code></td><td>graph and LLM</td><td>signals scan; wiki and code as context</td></tr>
+        <tr><td>signals check</td><td><code>discover signals</code> check stage</td><td>SSH</td><td>signals enrich</td></tr>
+        <tr><td>candidates</td><td><code>discover map</code></td><td>graph and Jev</td><td>signals enrich</td></tr>
+        <tr><td>mapping</td><td><code>imas map run</code></td><td>graph and the reasoning seat</td><td>candidates</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Access is probed through the owners that exist. SSH uses <code>check_ssh_connection</code>
+      (<code>imas_codex/remote/executor.py:97</code>) and the facility's declared environment uses
+      <code>probe_remote_environment</code> (<code>imas_codex/remote/tools.py:550</code>), the check
+      <code>ensure_remote_environment</code> already applies. Wiki and port-forwarded sites use
+      <code>verify_tunnel</code> and <code>is_tunnel_active</code> (<code>imas_codex/remote/tunnel.py</code>).
+      The graph uses the <code>GraphClient</code>'s own resolution. Each need is probed once at
+      start, and each SSH or tunnel need is probed again just before its stage runs, because a hop can
+      drop mid-sequence.
+    </p>
+    <p>
+      Every stage ends in one of four outcomes, each with a reason: <em>ran</em> (counts done and
+      remaining), <em>skipped: not configured</em> (for example no <code>wiki_sites</code>),
+      <em>skipped: unreachable</em> (the probe's own result), and <em>skipped: nothing to do</em>
+      (its pending-work predicate is false). A stage whose input stage was skipped still runs if the
+      graph already holds that input from an earlier run. A first run of <code>code</code> needs
+      scored paths, and a later run can reuse them.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sequence-stage-registry</code>, role implement, 2 h. Write paths:
+      <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>
+      and <code>tests/cli/test_discover_sequence.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
+      passes with tests showing:
+    </p>
+    <ul>
+      <li>the registry orders the nine stages as the table does;</li>
+      <li><code>--dry-run</code> prints every stage with its outcome and reason and runs nothing;</li>
+      <li>with SSH probed down, every SSH stage reads <em>skipped: unreachable</em> while the graph-only
+        stages read runnable;</li>
+      <li>a facility with no <code>wiki_sites</code> reads <em>skipped: not configured</em> for wiki;</li>
+      <li>no probe is written anew: each delegates to the named owner, and a test patches the owner and
+        sees the outcome follow it.</li>
+    </ul>
+
+    <h2 id="s3">§3 — The runner and its report</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The runner invokes each runnable stage's existing click command with
+      <code>ctx.invoke</code>. Every discover domain builds its engine inside its own command
+      function and then calls <code>run_discovery</code>
+      (<code>imas_codex/cli/discover/common.py:212</code>), so invoking the command is the only path
+      that reuses each stage whole, without refactoring seven commands or starting subprocesses. The
+      runner passes the shared options through: <code>--time</code> per stage, and a total
+      <code>--cost-limit</code> shared across the paid stages in proportion to their pending work, with
+      each stage's own cap never exceeded.
+    </p>
+    <p>
+      A stage that raises is recorded as <em>failed</em> with its error. The runner then continues with
+      the stages that do not read its output, so one broken stage does not stop an independent one.
+      <code>--only</code> and <code>--skip</code> take stage names. The run ends with one table, one row
+      per stage, giving outcome, reason, counts done and remaining, cost and wall-clock time. The same
+      table goes to the CLI log at <code>~/.local/share/imas-codex/logs/</code>.
+    </p>
+    <p>
+      The command adds one CLI entry and retires none. The per-domain commands stay the way to run one
+      stage with its stage-specific options, for example <code>discover signals --category</code>.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h. Write paths:
+      <code>imas_codex/cli/discover/sequence.py</code> and
+      <code>tests/cli/test_discover_sequence.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
+      passes with tests showing:
+    </p>
+    <ul>
+      <li>stages run in registry order through <code>ctx.invoke</code> of their commands;</li>
+      <li>a failing stage is reported as failed, a stage that reads its output is skipped with that
+        reason, and an independent stage still runs;</li>
+      <li>the total cost cap is split across the paid stages and no stage exceeds its own cap;</li>
+      <li><code>--only</code> and <code>--skip</code> select stages by name;</li>
+      <li>the final table lists every stage with outcome, reason, counts, cost and time.</li>
+    </ul>
+
+    <h2 id="s4">§4 — The mapping stages join the sequence</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The last two stages run the mapping pipeline. <code>candidates</code> runs <code>discover
+      map</code>. <code>mapping</code> runs <code>imas map run</code> for each IDS that holds a selected
+      or escalated candidate edge for the facility, read through the candidate reader in
+      <code>imas_codex/ids/graph_ops.py</code>. With the per-IDS map claim from
+      <code>mapping-candidate-selection</code> §8, one invocation per IDS maps each source into every
+      home it has. The mapping stage runs only when the decision below allows it, because it spends on
+      the reasoning seat.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sequence-mapping-stages</code>, role implement, 0.75 h, after the
+      gate below. Write paths: <code>imas_codex/cli/discover/sequence.py</code> and
+      <code>tests/cli/test_discover_sequence.py</code>. <strong>Done when</strong> the same gate
+      passes with tests showing the mapping stage invokes <code>imas map run</code> once per IDS that
+      holds candidates, and skips with <em>nothing to do</em> when no source has a route.
+    </p>
+
+    <h2 id="s5">§5 — JT-60SA proof</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      From the ITER host, run <code>imas-codex discover run jt-60sa --dry-run</code>. Then run it for
+      real with <code>--only signals-enrich</code> under a small cap. The dry run must name every stage,
+      with wiki and documents skipped and their probe results as reasons. The real run must enrich
+      without touching the facility. The evidence fragment records both tables.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sequence-jt60sa-proof</code>, role test, 0.5 h. Write paths:
+      <code>docs/evidence/fragments/facility-discovery-sequence/sequence-jt60sa-proof.html</code>.
+      <strong>Done when</strong> the fragment holds both tables, and the real run's enriched-signal
+      count rose with zero SSH calls in its log.
+    </p>
+
+    <section data-reckon="gates" id="gates" class="r-gates">
+      <h2><span class="sec">§</span> Evidence gates</h2>
+      <div class="r-gate" data-id="g-fds-1" data-section="s4" data-gated-sections="s4"
+           data-status="open" data-verdict="">
+        <h4 class="r-gate-measure">imas map run claims each source per IDS of its selected candidate edges, so one invocation per IDS maps every home</h4>
+        <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
+      </div>
+    </section>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="command-name" data-choice="" data-by="" data-when=""
+           data-recommended="discover-run" data-recommended-by="reckon-build">
+        <p class="r-dec-q">What is the sequence command called?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="discover-run">imas-codex discover run FACILITY</button>
+          <button class="r-opt" data-value="discover-all">imas-codex discover all FACILITY</button>
+        </p>
+        <p class="r-dec-rat">The recommendation is <code>discover run</code>. It reads as an action
+          beside <code>discover status</code> and <code>discover clear</code>, and it does not promise
+          that every stage runs, which a skipped stage would contradict.</p>
+      </div>
+      <div class="r-dec" data-key="mapping-stage-default" data-choice="" data-by="" data-when=""
+           data-recommended="opt-in" data-recommended-by="reckon-build">
+        <p class="r-dec-q">Does the sequence run <code>imas map run</code> by default?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="opt-in">only with --through mapping</button>
+          <button class="r-opt" data-value="default">always, under the cost cap</button>
+        </p>
+        <p class="r-dec-rat">The recommendation is opt-in. The mapping stage spends on the reasoning
+          seat and writes bindings a person validates. Discovery up to candidates is cheap and safe to
+          repeat.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-fds-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-written-by="reckon-create" data-written-at="2026-10-07"
+               data-recommends-skill="/reckon-build facility-discovery-sequence §2">
+        <h4 class="r-fu-title">Build the stage registry and its probes</h4>
+        <div class="r-fu-body">The registry and its dry run come first; the runner and the mapping stages build on them.</div>
+        <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

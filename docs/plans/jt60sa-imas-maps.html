@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="jt60sa-imas-maps">
+  <meta name="plan-title" content="JT-60SA IMAS Maps">
+  <meta name="plan-summary" content="Take JT-60SA signals from discovered to validated IMAS mappings: enrich, make every signal mappable, normalise units, judge DD candidates with Jev, map">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="13.25">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="jt-60sa,signals,discovery">
+  <meta name="plan-section-depends-on" content="{&quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;, &quot;jt60sa-imas-maps#s3&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
+  <title>JT-60SA IMAS Maps | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Where JT-60SA stands</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      Measured from the graph on 2026-10-07. <code>jt60sa-discovery-completion</code> scanned 6,298
+      EDAS signals and enriched the five census categories (MAG, MDAC, PSRC, FAME, MMSYS). Nothing
+      downstream of that has run.
+    </p>
+    <table>
+      <thead><tr><th>Quantity</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td>FacilitySignals: discovered / checked / enriched</td><td>5,534 / 763 / 1</td></tr>
+        <tr><td>SignalSources: discovered / enriched</td><td>267 / 13</td></tr>
+        <tr><td>Signals in the 267 discovered sources</td><td>3,565</td></tr>
+        <tr><td>Discovered signals in no SignalSource</td><td>1,969</td></tr>
+        <tr><td>Sources with a candidate route; MAPS_TO_IMAS edges</td><td>0; 0</td></tr>
+        <tr><td>Distinct unit strings; signals whose unit normalises; signals whose unit does not</td><td>76; 3,106; 1,482</td></tr>
+        <tr><td>Signals linked to a Unit node</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The mapping pipeline reads enriched SignalSources only. Today it can reach 13 JT-60SA sources,
+      and it can never reach a signal that belongs to no source. The sections below close each gap in
+      the order the pipeline needs them, then run the candidate stage and the map.
+    </p>
+
+    <h2 id="s2">§2 — Enrich the JT-60SA signals</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Run <code>imas-codex discover signals jt-60sa --enrich-only</code> from the ITER host. Enrichment
+      claims only standalone signals and the representatives of SignalSources
+      (<code>build_enrich_claimable_predicate</code>,
+      <code>imas_codex/discovery/signals/parallel.py:317</code>). That is 267 representatives, whose
+      enrichment <code>propagate_source_enrichment</code> copies to the 3,565 members and to each
+      source, plus the 1,969 standalone signals: 2,236 claims. It reads only the graph and the LLM,
+      and needs no facility access. The census categories cost about USD 1 for 764 signals, so this run
+      is estimated at USD 3, under a USD 5 cap. <code>discovery-judgments-through-jev</code> later
+      moves signal-enrichment judgments to Jev and re-judges stored rows from the graph. This run does
+      not wait for it.
+    </p>
+    <p>
+      <strong>Node</strong> <code>jt60sa-signal-enrichment</code>, role implement, 1 h. Write path:
+      <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-signal-enrichment.html</code>.
+      <strong>Done when</strong> no standalone or representative JT-60SA signal remains discovered,
+      except failures the fragment lists with their error. All 280 SignalSources read enriched, and the
+      fragment records the spend against the cap. The run uses foreground passes of <code>--time 8</code>.
+    </p>
+
+    <h2 id="s3">§3 — Every signal reaches the map</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Every stage of the mapping pipeline keys on SignalSource: the candidate claim, the
+      <code>MAPPING_CANDIDATE</code> edges and the <code>MAPS_TO_IMAS</code> bindings. A signal that
+      grouping left alone has no source, so the 1,969 standalone JT-60SA signals can never be mapped. The
+      recommended repair, under the decision below, gives each standalone enriched signal a singleton
+      SignalSource. The signal is its only member and its representative. The source is made by the
+      existing owner of SignalSource creation, <code>create_signal_source</code>
+      (<code>imas_codex/discovery/base/grouping.py:26</code>), so the mapping pipeline keeps one unit
+      and needs no change. The repair is facility-independent, and JT-60SA is where it is measured.
+    </p>
+    <p>
+      <strong>Node</strong> <code>singleton-signal-sources</code>, role implement, 1.5 h. Write paths:
+      <code>imas_codex/discovery/base/grouping.py</code>,
+      <code>imas_codex/discovery/signals/parallel.py</code> and <code>tests/discovery/</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/discovery tests/ids -p no:cacheprovider</code>
+      passes with tests showing that an enriched standalone signal gains a singleton source carrying its
+      enrichment; that re-running creates none twice; and that <code>claim_sources_for_candidates</code>
+      claims the singleton. A live run then leaves no enriched JT-60SA signal outside a source.
+    </p>
+
+    <h2 id="s4">§4 — EDDB units reach Unit nodes</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The map stage writes unit conversions, and it reads each source's unit to do so. EDDB stores
+      units as free text. 1,482 JT-60SA signals carry a unit <code>normalize_unit_symbol</code>
+      (<code>imas_codex/units/__init__.py:96</code>) cannot parse, among them <code>uST</code> (480),
+      <code>n/day</code> (371), <code>MPaG</code> (187), <code>KA</code>, <code>DEG</code>,
+      <code>DegC</code>, <code>oC</code>, <code>KV</code> and the <code>Pa*m3/s</code> family. No
+      JT-60SA signal is linked to a Unit node. <code>jt60sa-discovery-completion</code> parked this as
+      followup <code>f-jdc-004</code> because it belongs to DD binding, and this plan adopts it.
+    </p>
+    <p>
+      Facility spellings join the pint definitions the normaliser already loads, in a facility-unit
+      alias file beside <code>data_dictionary_unit_aliases.txt</code>. That keeps one parser and one
+      definition mechanism. A spelling that names no physical unit is listed as unresolved with its
+      count, never guessed. <code>Unit</code> is one such spelling; gauge pressure (<code>MPaG</code>)
+      is another, because it is not an absolute pressure. EDAS signals are then linked to Unit nodes
+      the way the MDSplus path links its signals.
+    </p>
+    <p>
+      <strong>Node</strong> <code>eddb-unit-normalisation</code>, role implement, 2 h. Write paths:
+      <code>imas_codex/units/</code>, <code>imas_codex/discovery/signals/</code> and
+      <code>tests/units/</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/units tests/discovery -p no:cacheprovider</code> passes, and
+      a live census shows each of the 76 JT-60SA unit strings either normalised or listed as
+      unresolved with its count and reason. Every signal with a normalised unit has a
+      <code>HAS_UNIT</code> edge.
+    </p>
+
+    <h2 id="s5">§5 — Candidates for every JT-60SA source</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Run <code>imas-codex discover map jt-60sa</code> over every enriched source: the 280 grouped
+      sources, plus the singletons from §3. Each source gets the Jev IDS routing, the DD shortlist from
+      <code>hybrid_dd_search</code> reranked by Jev's <code>same_quantity</code> judgment, and the
+      cross-IDS cluster siblings from <code>mapping-candidate-selection</code> §11. The engine runs one
+      candidate worker, at an estimated three to four seconds a source. The run is idempotent, so the
+      node runs foreground passes of <code>--time 8</code> and is resumed until it finishes, under a USD
+      5 cap. It records the measured seconds per source, so the decision about adding workers rests on
+      a number.
+    </p>
+    <p>
+      <strong>Node</strong> <code>jt60sa-candidate-run</code>, role implement, 1.5 h of work over
+      resumes. Write path: <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-candidate-run.html</code>.
+      <strong>Done when</strong> no enriched JT-60SA source lacks a <code>candidate_route</code>,
+      except failures listed with their error. The fragment states the route counts, the spend against
+      the cap, the wall-clock time and the seconds per source.
+    </p>
+
+    <h2 id="s6">§6 — Every home, audited</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Draw 40 JT-60SA sources across the EDAS categories. Label each for every DD home it has, in any
+      IDS, without seeing its candidates. Unlike the <code>mapping-candidate-selection</code> §3 labels,
+      the IDS is not fixed first, so a second home such as the plasma current's measured constraint in
+      <code>equilibrium</code> is scored. Under the recommended defaults every source routes
+      <code>escalated</code>, so the measures read the stored candidate edges:
+    </p>
+    <ul>
+      <li>the share of labelled homes whose section is in the source's escalated list (its top five and
+        their cluster siblings), and the same share at node level;</li>
+      <li>how many sources have homes in two or more IDSs, and how many of those homes the list
+        carries;</li>
+      <li>section-level precision of a Jev-alone selection at the §3 thresholds, computed from the stored
+        probabilities;</li>
+      <li>the share of sources with no DD home that a floor of 0.1 would have caught.</li>
+    </ul>
+    <p>
+      <strong>Node</strong> <code>jt60sa-candidate-audit</code>, role implement, 2 h. Write path:
+      <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-candidate-audit.html</code>.
+      <strong>Done when</strong> the fragment states each measure above, and lists the 40 sources with
+      their labelled homes and their escalated lists.
+    </p>
+
+    <h2 id="s7">§7 — Map JT-60SA</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      Run <code>imas-codex imas map run jt-60sa</code> once for each IDS that holds a candidate, with
+      <code>--no-activate</code> and under a USD 10 cap on the reasoning seat. After
+      <code>mapping-candidate-selection</code> §8, the assign stage asks the reasoning model to pick
+      every listed home for each escalated source. The map stage then maps each source into every IDS
+      of its picks, checking each mapped field against the picked node's section. Validation runs per
+      IDS. Activation is a separate decision, made after the audit.
+    </p>
+    <p>
+      <strong>Node</strong> <code>jt60sa-map-run</code>, role implement, 2.5 h over resumes. Write
+      path: <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-map-run.html</code>.
+      <strong>Done when</strong> the fragment states, per IDS, the bindings written, the validation
+      outcome and the spend. 30 bindings drawn across IDSs are audited by hand for target, units and
+      sign convention, and the fragment reports their section-level precision with every disagreement
+      listed.
+    </p>
+
+    <h2 id="s8">§8 — Jev rerank in DD-path search</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The candidate stage already reranks DD paths with Jev for each source. The
+      <code>search_dd_paths</code> tool, which a person uses to check or correct a binding, does not.
+      <code>discovery-judgments-through-jev</code> §9 is building a search-time Jev rerank for code and
+      wiki search; its prototype raised nDCG@10 from 0.25 to 0.51. The DD-path tool reuses that rerank
+      owner and does not build a second one. Its own measure uses mapping questions: the plasma
+      current's homes, where flux-loop positions live, which IDS holds a coil current.
+    </p>
+    <p>
+      <strong>Node</strong> <code>dd-path-search-rerank</code>, role implement, 2.5 h, after the gate
+      below. Write paths: the DD search tool module and its tests, named at dispatch from the rerank
+      owner that section lands. <strong>Done when</strong> nDCG@10 on 15 hand-labelled mapping
+      questions is reported before and after the rerank, and the rerank is one call into the shared
+      owner.
+    </p>
+
+    <section data-reckon="gates" id="gates" class="r-gates">
+      <h2><span class="sec">§</span> Evidence gates</h2>
+      <div class="r-gate" data-id="g-jim-1" data-section="s7" data-gated-sections="s7"
+           data-status="open" data-verdict="">
+        <h4 class="r-gate-measure">imas map run chooses a set of homes for each escalated source and maps each source into every IDS of its selected candidate edges</h4>
+        <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
+      </div>
+      <div class="r-gate" data-id="g-jim-2" data-section="s8" data-gated-sections="s8"
+           data-status="open" data-verdict="">
+        <h4 class="r-gate-measure">a shared search-time Jev rerank owner exists for the code and wiki search tools</h4>
+        <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
+      </div>
+    </section>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="standalone-signals" data-choice="" data-by="" data-when=""
+           data-recommended="singleton-source" data-recommended-by="reckon-build">
+        <p class="r-dec-q">How does a signal in no SignalSource reach the mapping pipeline?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="singleton-source">a singleton SignalSource per standalone signal</button>
+          <button class="r-opt" data-value="claim-signals">the mapping stages also claim FacilitySignals</button>
+        </p>
+        <p class="r-dec-rat">The recommendation is a singleton source. Every mapping stage, edge and
+          claim keys on SignalSource. A singleton keeps one unit of mapping, while claiming signals
+          directly would need two units through every stage.</p>
+      </div>
+      <div class="r-dec" data-key="jt60sa-activation" data-choice="" data-by="" data-when=""
+           data-recommended="after-audit" data-recommended-by="reckon-build">
+        <p class="r-dec-q">When are JT-60SA mappings activated?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="after-audit">after the §7 audit, per IDS</button>
+          <button class="r-opt" data-value="on-validation">as soon as validation passes</button>
+        </p>
+        <p class="r-dec-rat">The recommendation is after the audit, per IDS. Validation checks that a
+          binding executes, not that it chose the right home.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-jim-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-written-by="reckon-create" data-written-at="2026-10-07"
+               data-recommends-skill="/reckon-build jt60sa-imas-maps §2">
+        <h4 class="r-fu-title">Enrich the JT-60SA signals</h4>
+        <div class="r-fu-body">Enrichment is graph-only and unblocks the candidate run. §3 and §4 can run beside it.</div>
+        <pre class="r-fu-prompt">/reckon-build jt60sa-imas-maps §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

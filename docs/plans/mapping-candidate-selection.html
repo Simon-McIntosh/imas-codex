@@ -21,9 +21,10 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="89">
 <meta name="plan-modified" content="2026-10-07">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;deferred&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
+<meta name="plan-blocks" content="jt60sa-imas-maps,facility-discovery-sequence">
 </head>
 <body>
   <main class="plan-doc">
@@ -569,7 +570,14 @@
     </ol>
 
     <h2 id="s9">§9 — First JET run, audited</h2>
-<section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links=""></section>
+    <p>
+      <strong>Moved to <code>jt60sa-imas-maps</code> §5 and §6 on 2026-10-07.</strong> The live run
+      targets JT-60SA, the facility being mapped, not JET. That plan also closes what the JT-60SA run
+      needs first: enrichment of its 5,534 discovered signals, sources for its 1,969 standalone
+      signals, and EDDB unit normalisation. This section is deferred, and the text below is kept as
+      the design that move started from.
+    </p>
     <p>
       The section is two nodes, run in order: the run, then the audit of what it wrote.
     </p>
@@ -820,6 +828,9 @@ fragment names only one negative control).</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-20261007T0231-s9-run-dispatch" data-who="reckon-build" data-when="2026-10-07T02:31:00Z">
     <div class="r-comment-body"><p>Dispatched <code>jet-candidate-run</code> (run <code>r-20261007T023034511813-jet-candidate-run</code>) with the unreviewed-plan waiver. No plan review can dispatch while a reckon-project run (<code>report-less-review-attempts-are-removed</code>) holds a claim on the whole plan-review reports directory. The node changes no product code: it runs the landed candidate stage (§7 and §11) over JET under a cumulative $10 cap and writes one evidence fragment. A plan review of §9's new text runs when the claim clears, before <code>jet-candidate-audit</code> is dispatched. It runs now, in parallel with §8's last node, because it needs nothing from §8 and takes an estimated two to three hours. The §8 node waits for a peer run's claim on <code>facility.yaml</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-20261007T0300-s9-moved" data-who="reckon-build" data-when="2026-10-07T03:00:00Z">
+    <div class="r-comment-body"><p>Deferred and moved to <code>jt60sa-imas-maps</code> §5 and §6, at the lead's direction that the work targets JT-60SA maps. <code>jet-candidate-run</code> (run <code>r-20261007T023034511813-jet-candidate-run</code>) was stopped two minutes after dispatch, having run only read-only counts: no pass ran, nothing was spent and no candidate edge was written. With §9 deferred, this plan closes when §8 lands.</p></div>
 </div>
 </section>
 </main>
