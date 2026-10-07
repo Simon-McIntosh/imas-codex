@@ -1,11 +1,15 @@
-"""Re-ingesting a code file writes one example, not a second one.
+"""The example write is idempotent on its id, and one file's write failure is one failure.
 
-The example id is derived from the file's content, so a re-ingest of unchanged
-content lands on the same id and must merge onto the example already there.  The
-``_FakeGraph`` below reproduces the contract the real graph enforces: creating a
-``CodeExample`` whose id already exists raises the uniqueness violation.  The
-pipeline never calls ``create_nodes`` for the example, so a regression to a plain
-create fails here with that violation rather than in production.
+``GraphClient.create_nodes`` already upserts — it issues
+``MERGE (n:{label} {id: item.id}) SET n += item`` — so a sequential re-ingest
+onto the same id never raised a uniqueness violation, and this test does not
+claim otherwise.  What it pins is that the pipeline's own example id is stable
+for unchanged content (so the re-ingest lands on the same node and refreshes its
+chunks), that changed content supersedes the file's previous example through the
+shared cascade, and that a failure writing one file does not abort the batch.
+
+The ``_FakeGraph`` below mirrors the real client's create contract: a create is a
+merge, not an insert, so it upserts an existing id rather than refusing it.
 """
 
 from __future__ import annotations
@@ -19,10 +23,6 @@ from imas_codex.ingestion.pipeline import ingest_files
 FACILITY = "jt-60sa"
 PATH = "/analysis/src/eqdb_io.py"
 CONTENT = "def read_eq(shot):\n    return shot\n"
-
-
-class _UniquenessViolation(RuntimeError):
-    """The error the graph raises when a created node's id already exists."""
 
 
 def _fake_fetch(_facility, paths):
@@ -47,7 +47,7 @@ def _fake_split(content, language, metadata, use_text_splitter=False):
 
 
 class _FakeGraph:
-    """A graph that enforces the CodeExample uniqueness constraint on create."""
+    """A graph mirroring GraphClient.create_nodes: a create upserts on the id."""
 
     def __init__(self):
         self.examples: dict[str, dict] = {}
@@ -65,12 +65,9 @@ class _FakeGraph:
 
     def create_nodes(self, label, items, create_relationships=True, **kwargs):
         if label == "CodeExample":
+            # MERGE semantics, as GraphClient issues them: an existing id is
+            # updated, never refused.
             for item in items:
-                if item["id"] in self.examples:
-                    raise _UniquenessViolation(
-                        "Node already exists with label CodeExample and id "
-                        f"'{item['id']}'"
-                    )
                 self.examples[item["id"]] = dict(item)
         elif label == "CodeChunk":
             self.chunk_writes.append([dict(c) for c in items])
@@ -113,21 +110,17 @@ def fake_graph(monkeypatch):
     return graph
 
 
-def test_reingest_merges_onto_the_existing_example(fake_graph):
-    """A second ingest of unchanged content must not raise a uniqueness error."""
+def test_reingest_leaves_one_example_and_refreshes_chunks(fake_graph):
+    """A second ingest of unchanged content reuses the example and rewrites its chunks."""
     first = asyncio.run(ingest_files(FACILITY, [PATH]))
     second = asyncio.run(ingest_files(FACILITY, [PATH]))
 
-    # A plain create would raise the uniqueness violation on the second
-    # ingest; this is the assertion the negative control fails.
-    assert "Node already exists" not in str(
-        second["outcomes"][PATH].get("reason", "")
-    ), second["outcomes"][PATH]
     assert first["outcomes"][PATH]["status"] == "ingested"
     assert second["outcomes"][PATH]["status"] == "ingested"
+    assert not second["failed"]
     # One example for the file, not two.
     assert len(fake_graph.examples) == 1
-    # The write is a merge, which is what makes the second ingest safe.
+    # The write goes through the merged example rather than creating a second.
     assert any("MERGE (e:CodeExample {id: item.id})" in q for q in fake_graph.queries)
     # The chunks are refreshed on the re-ingest.
     assert len(fake_graph.chunk_writes) == 2

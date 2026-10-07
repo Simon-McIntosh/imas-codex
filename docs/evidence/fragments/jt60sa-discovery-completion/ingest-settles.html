@@ -3,37 +3,44 @@
   <p id="ingest-settles-problem">
     The JT-60SA code pass left 31 admitted files unsettled. Twenty-nine ended at
     <code>failed</code> because three ingest batches (10/10/9 files) each aborted
-    on a CodeExample uniqueness violation
-    (&ldquo;Node already exists with label CodeExample&rdquo;) for
+    with the graph's duplicate-key refusal
+    (&ldquo;Node already exists with label CodeExample&rdquo;) on
     <code>jt-60sa:eqdb_io:e548f073</code>, <code>jt-60sa:mdbget:128ebdc3</code>
     and <code>jt-60sa:setvtcx:be55b2c6</code>; the batch handler then marked all
     ten claimed files failed, nine of them for another file's collision. Two
-    further files sat at <code>scored</code> having been enriched but never
-    claimed.
+    further files sat at <code>scored</code>, enriched and never claimed.
+  </p>
+  <p id="ingest-settles-cause">
+    <strong>What the collision actually was.</strong> The write that raised was
+    already a merge. <code>GraphClient.create_nodes</code> issues
+    <code>MERGE (n:{label} {id: item.id}) SET n += item</code>
+    (<code>imas_codex/graph/client.py</code>, unchanged across this range), so a
+    sequential re-ingest onto an existing id never raised and does not raise
+    now. The recorded duplicate-key refusal is the concurrent-MERGE failure — two
+    writers inserting the same id at once — which a <code>MERGE</code> does not
+    prevent. The explicit <code>MERGE</code> this node wrote in
+    <code>_write_file_example</code> is therefore functionally equivalent to the
+    <code>create_nodes</code> call it replaced for the single-writer path; it is
+    not the remedy, and this fragment does not claim idempotency was gained.
   </p>
   <p id="ingest-settles-change">
-    The CodeExample write in <code>imas_codex/ingestion/pipeline.py</code> is now
-    a merge on the example id (<code>MERGE (e:CodeExample {id: item.id})</code>),
-    not a plain create. The example id is content-derived —
-    <code>_generate_example_id</code> hashes facility, path and content — so a
-    re-ingest of unchanged content lands on the same id and merges, while
-    changed content yields a new id and the file's previous example and chunks
-    are removed by <code>_supersede_stale_example</code> through the shared
-    <code>_CODE_CHUNK_CASCADE</code> in
-    <code>imas_codex/discovery/base/reset.py</code>; no second traversal is
-    written. Each file's nodes are written in their own guarded step in
-    <code>_write_file_example</code>, and the batch records each file's own
-    outcome in <code>stats["outcomes"]</code>, so one file's write failure fails
-    only that file. The ingest batch in
+    <strong>What the change does deliver.</strong> Each file's nodes are written
+    in their own guarded step in <code>_write_file_example</code>, and the batch
+    records each file's own outcome in <code>stats["outcomes"]</code>, so one
+    file's write failure fails only that file instead of the ten claimed
+    together. The ingest batch in
     <code>imas_codex/discovery/code/workers.py</code> marks files from those
-    outcomes: <code>ingested</code> for files that wrote,
-    <code>skipped</code> (through the new <code>_mark_file_skipped</code>) for an
-    admitted file whose extraction yields no chunk, and <code>failed</code> only
-    for the file the write failed on. <code>_settle_unclaimable_files</code>
-    marks admitted content-stage files above the claim's line-count ceiling as
-    <code>skipped</code> with reason <code>exceeds max_line_count</code>, and
+    outcomes: <code>ingested</code> for a file that wrote, <code>skipped</code>
+    (through the new <code>_mark_file_skipped</code>) for an admitted file whose
+    extraction yields no chunk, and <code>failed</code> only for the file the
+    write failed on. <code>_settle_unclaimable_files</code> marks admitted
+    content-stage files above the claim's line-count ceiling as
+    <code>skipped</code> with reason <code>exceeds max_line_count</code>, under
+    the claim's own scope: the same relevance floor, the run's path prefixes and
+    the facility's exclusion prefixes.
     <code>CODE_RESET_SPECS["scored"]</code> now admits <code>failed</code> as a
-    source status and clears <code>error</code> and <code>skip_reason</code>.
+    source status and clears <code>error</code> and <code>skip_reason</code>, so
+    a failed file can be returned to <code>scored</code> and re-claimed.
   </p>
   <p id="ingest-settles-eslice-reason">
     <strong>Why the claim skips the two eslice files.</strong> Both are
@@ -43,36 +50,55 @@
     claim carries <code>coalesce(sf.line_count, 0) &lt;= $max_line_count</code>
     with <code>max_line_count=10000</code>, and the two rows carry
     <code>line_count=10467</code> (v2.1.15) and <code>line_count=10374</code>
-    (v2.1.14). They were therefore admitted by every earlier stage and reachable
-    by none, which is why they waited at <code>scored</code> for a claim that
-    never came. <code>_settle_unclaimable_files</code> applies the same ceiling
-    in the opposite direction (<code>&gt; $max_line_count</code>) and settles
-    them as <code>skipped</code>.
+    (v2.1.14). They were admitted by every earlier stage and reachable by none,
+    which is why they waited. <code>_settle_unclaimable_files</code> applies the
+    same ceiling in the opposite direction (<code>&gt; $max_line_count</code>)
+    and settles them as <code>skipped</code>.
   </p>
   <p id="ingest-settles-evidence">
     Gate
     <code>uv run --no-sync pytest -p no:cacheprovider tests/ingestion/test_code_ingest_idempotent.py tests/discovery/test_code_ingest_settles.py tests/discovery/test_code_relevance.py tests/discovery/test_code_pipeline.py tests/discovery/test_reset.py</code>
-    exits <strong>0</strong> (<strong>142 passed</strong>) on the fleet compute
+    exits <strong>0</strong> (<strong>143 passed</strong>) on the fleet compute
     node <code>98dci4-clu-2018</code> (run in place, no <code>srun</code>). The
-    new tests drive a fake graph that enforces the CodeExample uniqueness
-    constraint on create: a re-ingest of unchanged content merges onto one
-    example and refreshes its chunks; one failing file in a batch of three
-    leaves the other two <code>ingested</code> and records the third's own
-    reason; a chunk-less admitted file reaches <code>skipped</code> with reason
-    <code>no chunks extracted</code>; and the failed&rarr;scored reset clears
-    <code>error</code>. Every changed Cypher statement was planned against the
-    live graph with <code>EXPLAIN</code>: <strong>11 statements, 0 planning
-    failures</strong> (the seven statements of <code>_write_file_example</code>,
-    <code>_mark_file_skipped</code>, <code>_settle_unclaimable_files</code>, the
-    ingestion claim and the failed-file reset).
+    tests drive a fake graph that mirrors the real client's contract — a create
+    is a merge and upserts — and pin what the change actually delivers: a
+    re-ingest lands on one example and refreshes its chunks; changed content
+    supersedes the file's previous example through the shared
+    <code>_CODE_CHUNK_CASCADE</code>; one failing file in a batch of three leaves
+    the other two <code>ingested</code> and records the third's own reason; a
+    chunk-less admitted file reaches <code>skipped</code> with reason
+    <code>no chunks extracted</code>; the settle query carries the claim's
+    relevance floor and its scope and exclusion clauses; and the
+    failed&rarr;scored reset clears <code>error</code>. Every changed Cypher
+    statement was planned against the live graph with <code>EXPLAIN</code>:
+    <strong>12 statements, 0 planning failures</strong>.
+  </p>
+  <p id="ingest-settles-terminal-clause">
+    <strong>Terminal clause — not yet satisfied.</strong> The section asks that
+    Cypher afterwards show no JT-60SA CodeFile at <code>failed</code> for a
+    CodeExample collision and no content-stage file at <code>scored</code> with a
+    composite at or above 0.5 that is not claimable. This node holds a
+    read-only fence, so no discover run was performed and the code is landed and
+    gated but the live end state is unchanged. A bounded live read on
+    2026-10-07T11:53Z returned <strong>29</strong> such failed files (all 29
+    <code>failed</code> rows) and <strong>2</strong> unclaimable content-stage
+    files (the two eslice files). The clause becomes observable once the
+    coordinator runs the ingest pass: reset the 29 through the new
+    <code>CODE_RESET_SPECS["scored"]</code> target with
+    <code>--path-prefix</code> scoped to the JT-60SA code trees, then run the
+    code stage, which settles the two oversized files as
+    <code>skipped</code> and re-ingests the 29 with per-file isolation.
   </p>
   <p id="ingest-settles-negative-control">
-    Negative control: a scratch copy under <code>$TMPDIR</code> whose
-    <code>_write_file_example</code> writes the example through
-    <code>create_nodes("CodeExample", [example_props])</code> — the write the
-    pipeline used before — fails the re-ingest test with the uniqueness
-    violation as its first failure
-    (<code>AssertionError: {'reason': "Node already exists with label CodeExample and id 'jt-60sa:eqdb_io:b0a81d05'", 'status': 'failed'}</code>,
-    <code>1 failed</code>, exit 1), against the same test passing in this tree.
+    Negative controls, each reverting one answering change in a scratch tree
+    under <code>$TMPDIR</code> and confirming the check that names it fails:
+    reverting the per-file guarded write so a file's write failure propagates
+    fails <code>test_one_bad_file_does_not_fail_the_batch</code>
+    (<code>1 failed</code>, exit 1), against it passing here; dropping the
+    settle query's exclusion and scope clauses fails
+    <code>test_settle_unclaimable_files_matches_the_claim_set</code>
+    (<code>1 failed</code>, exit 1); and the corrected tests pass with the
+    pipeline's example write left as the <code>create_nodes</code> call it
+    replaced, since that call already merged.
   </p>
 </section>

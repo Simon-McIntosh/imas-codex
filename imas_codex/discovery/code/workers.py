@@ -757,22 +757,29 @@ def _settle_unclaimable_files(
 ) -> int:
     """Mark admitted files the ingestion claim can never reach as skipped.
 
-    A content-stage file above the claim's line-count ceiling is admitted by
-    every earlier stage but excluded by the claim's
-    ``coalesce(sf.line_count, 0) <= $max_line_count`` predicate, so it waits at
-    ``scored`` forever.  This gives it a terminal ``skipped`` state with the
-    reason, so no admitted file is left unsettled.
+    A file the claim would otherwise admit — content-stage, above the ingest
+    relevance floor, inside the run's path scope and outside the facility's
+    exclusion prefixes — is excluded by the claim's
+    ``coalesce(sf.line_count, 0) <= $max_line_count`` predicate when it is
+    oversized, so it waits at ``scored`` forever.  This gives exactly those rows
+    a terminal ``skipped`` state with the reason.
 
     Returns the number of files settled.
     """
+    from imas_codex.config.discovery_config import build_facility_exclusion_filter
     from imas_codex.discovery.code.scorer import (
         RELEVANCE_STAGE_CONTENT,
         relevance_predicate,
     )
     from imas_codex.graph import GraphClient
     from imas_codex.graph.query_builder import build_path_prefix_filter
+    from imas_codex.settings import (
+        get_code_facet_admission_threshold,
+        get_code_ingest_threshold,
+    )
 
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
+    excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     with GraphClient() as gc:
         result = gc.query(
             f"""
@@ -781,15 +788,17 @@ def _settle_unclaimable_files(
               AND {relevance_predicate("sf", RELEVANCE_STAGE_CONTENT, "$min_relevance", "$min_facet_relevance")}
               AND coalesce(sf.line_count, 0) > $max_line_count
               {prefix_clause}
+              {excluded_clause}
             SET sf.status = 'skipped',
                 sf.skip_reason = 'exceeds max_line_count'
             RETURN count(sf) AS settled
             """,
             facility=facility,
-            min_relevance=0.0,
-            min_facet_relevance=0.0,
+            min_relevance=get_code_ingest_threshold(),
+            min_facet_relevance=get_code_facet_admission_threshold(),
             max_line_count=max_line_count,
             **prefix_params,
+            **excluded_params,
         )
         return result[0]["settled"] if result else 0
 

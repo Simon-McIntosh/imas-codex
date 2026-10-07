@@ -191,6 +191,32 @@ def test_settle_unclaimable_files_names_the_line_ceiling(captured):
     assert count == 2
 
 
+def test_settle_unclaimable_files_matches_the_claim_set(captured, monkeypatch):
+    """It settles the rows the claim would otherwise admit, not a wider set."""
+    monkeypatch.setattr(
+        "imas_codex.config.discovery_config.build_facility_exclusion_filter",
+        lambda facility, alias: (
+            f"AND none(excluded IN $excluded_prefixes WHERE {alias}.path "
+            "STARTS WITH excluded)",
+            {"excluded_prefixes": ["/scratch"]},
+        ),
+    )
+    _settle_unclaimable_files(FACILITY, 10000, ["/analysis/src"])
+
+    (query,) = captured.queries
+    # The claim's own relevance floor, as parameters rather than hard-coded
+    # zeros, the run's path scope, and its exclusion prefixes, so the settled
+    # set is the set the claim would otherwise admit.
+    params = captured.params[0]
+    assert "min_relevance" in params
+    assert "min_facet_relevance" in params
+    assert params["prefixes"] == ["/analysis/src"]
+    assert params["excluded_prefixes"] == ["/scratch"]
+    assert "sf.path STARTS WITH prefix" in query
+    assert "sf.path STARTS WITH excluded" in query
+    assert "relevance_stage = 'content'" in query
+
+
 def test_claim_predicate_excludes_the_oversized_rows(captured):
     """The claim's own predicate is what leaves an oversized file unsettled."""
     from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
