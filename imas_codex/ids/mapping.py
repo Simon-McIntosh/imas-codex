@@ -30,9 +30,6 @@ from imas_codex.ids.graph_ops import (
     read_candidates,
     write_mapping_binding,
 )
-from imas_codex.ids.metadata import (
-    IDSMetadataResult,
-)
 from imas_codex.ids.models import (
     AssemblyBatch,
     AssemblyConfig,
@@ -324,6 +321,11 @@ def _validate_choice(
     if not choice.paths and choice.disposition is None:
         raise CandidateWriteError(
             f"choice for {choice.source_id} is empty with no disposition"
+        )
+    if choice.paths and choice.disposition is not None:
+        raise CandidateWriteError(
+            f"choice for {choice.source_id} names paths and a disposition; "
+            "the disposition belongs only to a choice with no path"
         )
     return choice
 
@@ -2103,16 +2105,3 @@ def run_error_derivation_only(
         )
 
     return error_bindings
-
-
-@dataclass
-class MappingResult:
-    """Result of the mapping pipeline."""
-
-    mapping_id: str
-    validated: ValidatedMappingResult
-    assembly: AssemblyBatch | None
-    cost: PipelineCost
-    persisted: bool = False
-    unassigned_groups: list[str] = field(default_factory=list)
-    metadata: IDSMetadataResult | None = None

@@ -129,6 +129,19 @@ class TestChoiceRefusal:
         with pytest.raises(CandidateWriteError):
             choose_targets("jet", {"id": "jet:coil:1"}, shortlist, cost=PipelineCost())
 
+    @patch("imas_codex.ids.mapping._call_llm")
+    def test_paths_with_a_disposition_are_refused(self, mock_call_llm):
+        from imas_codex.ids.models import MappingDisposition
+
+        shortlist = [_edge("magnetics/ip", 1)]
+        mock_call_llm.return_value = _batch(
+            "jet:coil:1",
+            ["magnetics/ip"],
+            disposition=MappingDisposition.NO_IMAS_EQUIVALENT,
+        )
+        with pytest.raises(CandidateWriteError):
+            choose_targets("jet", {"id": "jet:coil:1"}, shortlist, cost=PipelineCost())
+
 
 class TestSemanticBridgeNarrowed:
     @patch("imas_codex.ids.mapping.fetch_code_context", return_value=[])
@@ -228,12 +241,21 @@ class TestAssignWorkerSelects:
 
 
 class TestNoCandidateLogged:
-    def test_no_candidate_source_is_skipped_with_evidence(self, caplog):
+    def _state(self):
+        from imas_codex.ids.workers import CandidateDiscoveryState
+
+        state = CandidateDiscoveryState(facility="jet")
+        state.candidate_phase = MagicMock(done=True)
+        return state
+
+    def test_candidate_worker_skips_and_logs_no_candidate(self, caplog):
+        import asyncio
         import logging
 
-        from imas_codex.ids.candidates import PairJudgment, route
-        from imas_codex.settings import RouteThresholds
+        from imas_codex.ids.candidates import PairJudgment, Route
+        from imas_codex.ids.workers import candidate_worker
 
+        source = {"id": "jet:s1", "description": "coil current"}
         judgments = [
             PairJudgment(
                 path="magnetics/ip", p_same_quantity=0.41, model="m", judged_at="t"
@@ -242,20 +264,38 @@ class TestNoCandidateLogged:
                 path="magnetics/other", p_same_quantity=0.02, model="m", judged_at="t"
             ),
         ]
-        decision = route(judgments, RouteThresholds(0.9, 0.5, 5))
-        assert decision is not None
-        assert decision.decision == "no_candidate"
-        best = max(judgments, key=lambda j: j.p_same_quantity)
-        with caplog.at_level(logging.INFO):
-            logging.getLogger("imas_codex.ids.workers").info(
-                "No candidate for %s: best path %s (p_same_quantity=%.3f), skipping",
-                "jet:s1",
-                best.path,
-                best.p_same_quantity,
-            )
-        assert "jet:s1" in caplog.text
-        assert "magnetics/other" not in caplog.text
+        decision = Route(
+            decision="no_candidate", shortlist=tuple(judgments), selected=frozenset()
+        )
+        gc = MagicMock()
+        with (
+            patch(
+                "imas_codex.ids.workers.claim_sources_for_candidates",
+                side_effect=[[source], []],
+            ),
+            patch("imas_codex.ids.workers.GraphClient") as mock_gc_cls,
+            patch("imas_codex.ids.workers._facility_block", return_value={}),
+            patch("imas_codex.ids.workers.route_ids", return_value=["magnetics"]),
+            patch(
+                "imas_codex.ids.workers.retrieve_candidates",
+                return_value={"jet:s1": [MagicMock()]},
+            ),
+            patch("imas_codex.ids.workers.judge_candidates", return_value=judgments),
+            patch(
+                "imas_codex.ids.workers.expand_cluster_siblings",
+                return_value=([], []),
+            ),
+            patch("imas_codex.ids.workers.route", return_value=decision),
+            patch("imas_codex.ids.workers._candidate_records", return_value=[]),
+            patch("imas_codex.ids.workers.write_candidates", return_value=0),
+        ):
+            mock_gc_cls.return_value.__enter__.return_value = gc
+            with caplog.at_level(logging.INFO):
+                asyncio.run(candidate_worker(self._state()))
+
+        assert "No candidate for jet:s1: best path magnetics/ip" in caplog.text
         assert "0.410" in caplog.text
+        assert "magnetics/other" not in caplog.text
 
 
 class TestNoPathVerdictPersisted:

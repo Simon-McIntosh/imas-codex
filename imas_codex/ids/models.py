@@ -1,7 +1,7 @@
 """Response models for the IMAS signal mapping pipeline.
 
 Pydantic models used as structured output targets for each LLM step:
-  assign_targets      — TargetAssignmentBatch: assign signal sources to IDS target paths
+  choose_targets      — TargetChoiceBatch: choose the listed shortlist paths that hold an escalated source's values
   map_signals         — SignalMappingBatch: signal-level mappings with transforms
   discover_assembly   — AssemblyBatch: assembly patterns for struct-array population
   validate_mappings   — ValidatedMappingResult: programmatically validated mappings
