@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -299,6 +299,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s3-rerank-cost-returned" data-who="reckon-build" data-when="2026-10-07T11:45:00Z">
     <div class="r-comment-body"><p><code>rerank_pool</code> now returns <code>(ordered, note, cost)</code>, where cost is the real <code>decide_batch</code> sum and 0.0 on an empty pool or a wholly failed batch. This landed from the jt60sa-imas-maps session in merge 52c0e44fb (feature 2b1a10006). <code>rerank_candidates</code> unpacks the triple and logs the cost. The judge function this section builds on <code>decide_batch</code> returns its spend the same way, never as an imputed per-call constant. The same session measured the rerank on signal-enrichment context for 15 JT-60SA sources: precision at 3 rose from 0.067 in embedding order to 0.222 reranked, for USD 0.0215 over 900 judgements.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s3-judgment-mypy" data-who="reckon-build" data-when="2026-10-07T11:55:00Z">
+    <div class="r-comment-body"><p>The return annotation of <code>rerank_pool</code> now matches its triple (merge 55fda9a10). One mypy finding remains in <code>imas_codex/discovery/base/judgment.py</code>. The sort key <code>lambda index: (-scores[index], index)</code> applies unary minus to <code>float | None</code>. It is safe at runtime, because the generator drops the unscored entries first. The node that builds the judge function in this file narrows it to a local <code>float</code> list of scored entries and adds <code>mypy imas_codex/discovery/base/judgment.py</code> to its gate.</p></div>
 </div>
 </section>
 </main>
