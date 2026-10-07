@@ -432,8 +432,8 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
     "scored": ResetSpec(
         label="CodeFile",
         target_status="scored",
-        source_statuses=["ingested"],
-        clear_fields=["ingested_at"],
+        source_statuses=["ingested", "failed"],
+        clear_fields=["ingested_at", "error", "skip_reason"],
     ),
     "content": ResetSpec(
         label="CodeFile",
