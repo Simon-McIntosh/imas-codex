@@ -1,5 +1,5 @@
 <section>
-  <h2 id="relevance-trial">The deployed content-arm decisions separate in-scope code at AUC 0.955; the JT-60SA trial is blocked by the IFERC route being down</h2>
+  <h2 id="relevance-trial">The deployed content-arm decisions separate in-scope code at AUC 0.955; the seven-prefix JT-60SA trial ingested every required files, with a scope-breach anomaly to adjudicate</h2>
 
   <p id="relevance-trial-sample">
     The content arm of the deployed code triage was run against the 128-file
@@ -127,5 +127,108 @@
     <em>skipped</em>, <strong>0 ingested</strong> (query: same as above with
     <code>sf.path CONTAINS 'SAselene_v2.0_forPSRC/minpack'</code>). This is the
     pre-existing state, not a result of this node's run.
+  </p>
+
+  <h3 id="relevance-trial-ran">The seven-prefix trial ran when the IFERC route returned</h3>
+  <p id="relevance-trial-run">
+    With <code>jt-60sa</code> reachable again (route via the
+    <code>laptop</code> jump restored, <code>ssh -o BatchMode=yes jt-60sa
+    hostname</code> answering), the fence's discovery passes were run as
+    blocking foreground calls of <code>imas-codex discover code jt-60sa</code>
+    with the seven <code>--path-prefix</code> arguments exactly, each capped by
+    <code>--time 8</code>: pass 1 with <code>--reset-to discovered</code>, then
+    two more without it, stopping when a pass reported no pending work. Three
+    passes were needed; the third reported no work. All three ran inside one
+    SLURM allocation (the fleet node) — no login-node execution.
+  </p>
+  <table>
+    <thead><tr><th>pass</th><th>summary line</th><th>decisions spend</th></tr></thead>
+    <tbody>
+      <tr><td>1 (reset-to discovered)</td><td>0 scanned, 223 scored, 86 code ingested</td><td>$0.07</td></tr>
+      <tr><td>2</td><td>0 scanned, 0 scored, 10 code ingested</td><td>$0.00</td></tr>
+      <tr><td>3 (drained)</td><td>0 scanned, 0 scored, 0 code ingested</td><td>$0.00</td></tr>
+    </tbody>
+  </table>
+
+  <p id="relevance-trial-prefix-after">
+    <strong>Post-trial graph state</strong>, same query as above
+    (<code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE any(p IN $prefixes WHERE sf.path STARTS WITH p) RETURN sf.status,
+    coalesce(sf.relevance_stage,'&lt;none&gt;'), count(*)</code>), now carries a
+    populated <code>relevance_stage</code> on every touched row:
+  </p>
+  <table>
+    <thead><tr><th>prefix</th><th>total</th><th>by status &#183; stage</th></tr></thead>
+    <tbody>
+      <tr><td>/analysis/src/SAeqread</td><td>90</td><td>ingested&#183;content 27, scored&#183;content 39, skipped&#183;content 4, skipped&#183;name 20</td></tr>
+      <tr><td>/analysis/src/client_eqdbms.EQ32.Rev1</td><td>48</td><td>skipped&#183;name 48</td></tr>
+      <tr><td>/analysis/src/SAeqfame</td><td>7</td><td>ingested&#183;content 4, scored&#183;content 1, skipped&#183;name 2</td></tr>
+      <tr><td>/analysis/src/getseldata_v4.2</td><td>15</td><td>ingested&#183;content 11, scored&#183;content 3, skipped&#183;name 1</td></tr>
+      <tr><td>/analysis/src/SAselene_v2.0_forPSRC</td><td>206</td><td>ingested&#183;content 53, scored&#183;content 77, skipped&#183;name 76</td></tr>
+      <tr><td>/analysis/lib/eqdbms</td><td>5</td><td>ingested&#183;content 1, scored&#183;content 2, skipped&#183;name 2</td></tr>
+      <tr><td>/analysis/lib/JT60SAEQDB</td><td>0</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p id="relevance-trial-named-after">
+    <strong>Named files, post-trial</strong> (query:
+    <code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE sf.path ENDS WITH $name RETURN sf.status, relevance fields</code>).
+    All five receipt files were ingested through the content arm; the two
+    reported files carry their content relevance, and one of them falls below
+    the gate:
+  </p>
+  <ul>
+    <li><code>geteddb.c</code> — <strong>ingested</strong>, loads 0.94 (getseldata_v4.2)</li>
+    <li><code>outeddb.c</code> — <strong>ingested</strong>, loads 0.90 (getseldata_v4.2)</li>
+    <li><code>eddbaccess.h</code> — <strong>ingested</strong>, loads 0.80 (getseldata_v4.2)</li>
+    <li><code>fercor.f</code> — <strong>ingested</strong>, processes 0.82 (SAselene_v2.0_forPSRC)</li>
+    <li><code>eqjt60.f</code> — <strong>ingested</strong>, describes 0.86 (SAselene_v2.0_forPSRC)</li>
+    <li><code>inpgeo.c</code> — <strong>ingested</strong>, describes 0.60 (getseldata_v4.2, above the 0.5 gate)</li>
+    <li><code>mgset0.f</code> — <strong>scored, not ingested</strong>, describes 0.39 (SAselene_v2.0_forPSRC; below the 0.5 gate, so correctly left out)</li>
+  </ul>
+
+  <p id="relevance-trial-minpack-after">
+    <strong>Negative control, post-trial.</strong> The 8 files under
+    <code>/analysis/src/SAselene_v2.0_forPSRC/minpack</code> are all
+    <em>skipped</em>, <strong>0 ingested</strong> (query: same as above with
+    <code>sf.path CONTAINS 'SAselene_v2.0_forPSRC/minpack'</code>). The declared
+    negative control holds.
+  </p>
+
+  <p id="relevance-trial-spend">
+    <strong>Spend.</strong> Run passes: <strong>$0.07</strong>
+    (pass 1; passes 2 and 3 were $0.00). Labelled-sample scoring:
+    <strong>$0.01206</strong>. Total decisions spend for this node
+    <strong>$0.08206</strong>, read from the <code>Cost:</code> lines in
+    <code>code_jt-60sa.log</code> and <code>usage.cost</code> in
+    <code>score_sample_results.json</code>. No other model spend.
+  </p>
+
+  <p id="relevance-trial-scope">
+    <strong>Scope anomaly — reported, not resolved.</strong> The fence required
+    that no reset or run reach outside the seven prefixes. The graph shows it
+    did: <strong>2311</strong> jt-60sa <code>CodeFile</code> nodes carry a
+    <code>triaged_at</code> inside this run's window
+    (<code>[2026-10-06T23:58:52Z, 2026-10-07T00:12:04Z]</code>), and
+    <strong>1384</strong> of them are under <code>/analysis/src/edas2</code>,
+    stamped <code>[00:10:07Z, 00:12:04Z]</code> — inside pass 2 — although only
+    the <strong>371</strong> files under the seven prefixes are in scope. The
+    run log confirms it directly: a <code>code_worker started
+    facility=jt-60sa</code> at <code>02:10:01</code> local (00:10:01Z) is
+    followed by <code>triage decision failed for
+    /analysis/src/edas2/v2.1.15/.../mtoi.f</code> and dozens more edas2 paths.
+    No other <code>discover code</code> process existed at that time — the only
+    runs created in that window are this node's own passes — so the scoped
+    reset and triage stages did <em>not</em> honour <code>--path-prefix</code>.
+    Counts by query:
+    <code>MATCH (sf:CodeFile)-[:AT_FACILITY]-&gt;(f:Facility {id:'jt-60sa'})
+    WHERE sf.triaged_at &gt;= datetime('2026-10-06T23:57:28Z') RETURN count(sf),
+    min(sf.triaged_at), max(sf.triaged_at)</code> and the same with
+    <code>AND sf.path STARTS WITH '/analysis/src/edas2'</code>. This is a
+    tool-level defect, not an operator action — the command carried exactly the
+    seven prefixes. It is surfaced for the coordinator to adjudicate; the
+    seven-prefix measurements above are unaffected, but the run's side effects
+    exceeded its declared scope.
   </p>
 </section>
