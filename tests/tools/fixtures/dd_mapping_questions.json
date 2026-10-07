@@ -1,0 +1,130 @@
+{
+  "description": "Hand-labelled mapping questions. Each question pairs a facility-style natural-language query with the IMAS data-dictionary paths that answer it, graded on a 3-point scale: 3 = the path carries the quantity the query names, 2 = the same quantity in another IDS (a second home), 1 = a related quantity that a good mapping would surface but not return first. Paths were validated against the data dictionary before labelling. The k-threshold for the nDCG measurement is 10.",
+  "k": 10,
+  "questions": [
+    {
+      "id": "plasma_current",
+      "query": "plasma current",
+      "relevant": {
+        "equilibrium/time_slice/global_quantities/ip": 3,
+        "summary/global_quantities/ip": 2,
+        "equilibrium/time_slice/profiles_1d/j_phi": 1
+      }
+    },
+    {
+      "id": "plasma_volume",
+      "query": "total plasma volume",
+      "relevant": {
+        "equilibrium/time_slice/global_quantities/volume": 3,
+        "summary/global_quantities/volume": 2
+      }
+    },
+    {
+      "id": "stored_energy",
+      "query": "stored magnetic energy of the plasma",
+      "relevant": {
+        "equilibrium/time_slice/global_quantities/energy_mhd": 3,
+        "summary/global_quantities/energy_mhd": 2
+      }
+    },
+    {
+      "id": "electron_temperature",
+      "query": "electron temperature profile",
+      "relevant": {
+        "core_profiles/profiles_1d/electrons/temperature": 3,
+        "core_profiles/profiles_1d/electrons/temperature_fit/measured": 2
+      }
+    },
+    {
+      "id": "electron_density",
+      "query": "electron density profile",
+      "relevant": {
+        "core_profiles/profiles_1d/electrons/density": 3
+      }
+    },
+    {
+      "id": "ion_temperature",
+      "query": "ion temperature profile",
+      "relevant": {
+        "core_profiles/profiles_1d/ion/temperature": 3,
+        "core_profiles/profiles_1d/ion/density": 1
+      }
+    },
+    {
+      "id": "safety_factor",
+      "query": "safety factor q profile",
+      "relevant": {
+        "equilibrium/time_slice/profiles_1d/q": 3
+      }
+    },
+    {
+      "id": "poloidal_flux_profile",
+      "query": "poloidal magnetic flux profile",
+      "relevant": {
+        "equilibrium/time_slice/profiles_1d/psi": 3,
+        "equilibrium/time_slice/global_quantities/psi_magnetic_axis": 2,
+        "equilibrium/time_slice/profiles_1d/phi": 1
+      }
+    },
+    {
+      "id": "boundary_outline",
+      "query": "plasma boundary outline coordinates",
+      "relevant": {
+        "equilibrium/time_slice/boundary/outline/r": 3,
+        "equilibrium/time_slice/boundary/outline/z": 3
+      }
+    },
+    {
+      "id": "flux_loop_positions",
+      "query": "flux loop positions",
+      "relevant": {
+        "magnetics/flux_loop/position/r": 3,
+        "magnetics/flux_loop/position/z": 3,
+        "magnetics/flux_loop/flux": 1
+      }
+    },
+    {
+      "id": "flux_loop_voltage",
+      "query": "flux loop measured voltage",
+      "relevant": {
+        "magnetics/flux_loop/voltage": 3,
+        "magnetics/flux_loop/flux": 2
+      }
+    },
+    {
+      "id": "poloidal_field_probe",
+      "query": "poloidal magnetic field probe location",
+      "relevant": {
+        "magnetics/b_field_pol_probe/position/r": 3,
+        "magnetics/b_field_pol_probe/field": 2
+      }
+    },
+    {
+      "id": "coil_current",
+      "query": "poloidal field coil current",
+      "relevant": {
+        "pf_active/coil/current": 3,
+        "pf_passive/loop/current": 2,
+        "pf_active/coil/resistance": 1
+      }
+    },
+    {
+      "id": "toroidal_field_on_axis",
+      "query": "toroidal magnetic field on the magnetic axis",
+      "relevant": {
+        "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor": 3,
+        "summary/global_quantities/b0": 2,
+        "equilibrium/time_slice/profiles_2d/b_field_tor": 1
+      }
+    },
+    {
+      "id": "magnetic_axis_position",
+      "query": "position of the magnetic axis",
+      "relevant": {
+        "equilibrium/time_slice/global_quantities/magnetic_axis/r": 3,
+        "equilibrium/time_slice/global_quantities/psi_magnetic_axis": 1,
+        "summary/global_quantities/r0": 1
+      }
+    }
+  ]
+}

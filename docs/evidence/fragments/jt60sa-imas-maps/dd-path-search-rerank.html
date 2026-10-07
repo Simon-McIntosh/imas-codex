@@ -1,0 +1,123 @@
+<!-- DD-path search rerank: the construction-time switch, one call into the shared
+     search-time Jev rerank, and the nDCG@10 it moves on 15 hand-labelled mapping
+     questions. Measurement log:
+     ~/.cache/imas-codex-dd-path-rerank/measurement.log
+     Negative-control red log:
+     ~/.cache/imas-codex-dd-path-rerank/negative_control_red.log
+     Regression gate: ~/.cache/imas-codex-dd-path-rerank/regression_graph.log
+     Labels: tests/tools/fixtures/dd_mapping_questions.json -->
+<section id="dd-path-search-rerank" data-reckon="evidence">
+  <h2 id="dd-path-search-rerank-heading">DD-path search rerank — one call into the shared owner behind a mode switch</h2>
+
+  <p id="dd-path-search-rerank-wiring">
+    <code>search_dd_paths</code> now reorders its hybrid hits through
+    <code>rerank_candidates</code> in <code>imas_codex/llm/search_tools.py</code> — the
+    shared search-time owner the code and wiki search tools already use — rather than
+    carrying a second rerank of its own. The switch is a construction-time decision:
+    <code>GraphSearchTool(..., rerank=…)</code>, plumbed through
+    <code>Tools(..., rerank_dd_paths=…)</code>. The MCP server sets it on for a full or
+    facility server and leaves it off for a read-only or DD-only server, recording the
+    decision on the mode in <code>AgentsServer.__post_init__</code> and reading it when the
+    lazily-created <code>Tools</code> singleton is built. Each hit rides its own candidate
+    dict under <code>_hit</code>, with its path as the locator and its documentation and
+    description as the judged text, so the judged order maps back to the hits without a
+    path lookup (paths are not unique across IDSs). A failed or slow judgement returns the
+    embedding order unchanged, so the result is never worse than the search that produced
+    it.
+  </p>
+
+  <h3 id="dd-path-search-rerank-measure-heading">nDCG@10 on 15 hand-labelled mapping questions</h3>
+  <p id="dd-path-search-rerank-measure-prose">
+    <code>tests/tools/fixtures/dd_mapping_questions.json</code> holds 15 mapping questions —
+    each a facility-style natural-language query and the data-dictionary paths that answer
+    the query would answer it, graded 3 (the named quantity), 2 (the same quantity in a
+    second IDS) or 1 (a related quantity). The measurement scores the same retrieval twice
+    on the same labels, at <code>k=10</code>, against the live graph and a live Jev judge:
+    once in the tool's embedding order (<code>rerank=False</code>) and once after the rerank
+    (<code>rerank=True</code>).
+  </p>
+
+  <table id="dd-path-search-rerank-totals">
+    <caption>Graded nDCG@10, mean over the 15 questions. "Improved"/"degraded"/"unchanged" count questions whose nDCG@10 moved up, down or not at all.</caption>
+    <thead>
+      <tr><th>nDCG@10 before</th><th>nDCG@10 after</th><th>delta</th><th>improved</th><th>degraded</th><th>unchanged</th></tr>
+    </thead>
+    <tbody>
+      <tr id="dd-path-search-rerank-totals-row"><td>0.3324</td><td>0.2860</td><td>&minus;0.0465</td><td>3</td><td>6</td><td>6</td></tr>
+    </tbody>
+  </table>
+
+  <p id="dd-path-search-rerank-measure-read">
+    <strong>As wired, the rerank is net-negative on this label set</strong> (0.3324 &rarr;
+    0.2860). It helps three questions and hurts six. The gains are real:
+    <code>flux_loop_voltage</code> 0.5137 &rarr; 0.8936, <code>poloidal_field_probe</code>
+    0.2128 &rarr; 0.3374, <code>safety_factor</code> 0.4307 &rarr; 0.5000. The losses are
+    larger: <code>plasma_current</code> 0.7453 &rarr; 0.3726, <code>plasma_volume</code>
+    0.7872 &rarr; 0.4966, <code>electron_temperature</code> 0.4966 &rarr; 0.2624 and
+    <code>coil_current</code> 0.7453 &rarr; 0.4702. On the questions that matter most — a
+    query whose first embedding hit is already the labelled answer — the judge demotes the
+    answer for a path whose text reads as more topical. Six questions are unchanged: five of
+    them score 0.0 before and after because the labelled paths never appear in the top 10,
+    which is a retrieval reach question the rerank cannot address, and one
+    (<code>stored_energy</code>) is already in labelled order.
+  </p>
+
+  <table id="dd-path-search-rerank-rows">
+    <caption>Per-question graded nDCG@10. A 0.0000 before and after means no labelled path was retrieved in the top 10.</caption>
+    <thead>
+      <tr><th>Question</th><th>nDCG@10 before</th><th>nDCG@10 after</th></tr>
+    </thead>
+    <tbody>
+      <tr id="dd-path-search-rerank-row-plasma_current"><td>plasma current</td><td>0.7453</td><td>0.3726</td></tr>
+      <tr id="dd-path-search-rerank-row-plasma_volume"><td>total plasma volume</td><td>0.7872</td><td>0.4966</td></tr>
+      <tr id="dd-path-search-rerank-row-stored_energy"><td>stored magnetic energy</td><td>0.3936</td><td>0.3936</td></tr>
+      <tr id="dd-path-search-rerank-row-electron_temperature"><td>electron temperature profile</td><td>0.4966</td><td>0.2624</td></tr>
+      <tr id="dd-path-search-rerank-row-electron_density"><td>electron density profile</td><td>0.0000</td><td>0.0000</td></tr>
+      <tr id="dd-path-search-rerank-row-ion_temperature"><td>ion temperature profile</td><td>0.3549</td><td>0.2761</td></tr>
+      <tr id="dd-path-search-rerank-row-safety_factor"><td>safety factor q profile</td><td>0.4307</td><td>0.5000</td></tr>
+      <tr id="dd-path-search-rerank-row-poloidal_flux_profile"><td>poloidal magnetic flux profile</td><td>0.0000</td><td>0.0000</td></tr>
+      <tr id="dd-path-search-rerank-row-boundary_outline"><td>plasma boundary outline</td><td>0.0000</td><td>0.0000</td></tr>
+      <tr id="dd-path-search-rerank-row-flux_loop_positions"><td>flux loop positions</td><td>0.0000</td><td>0.0000</td></tr>
+      <tr id="dd-path-search-rerank-row-flux_loop_voltage"><td>flux loop measured voltage</td><td>0.5137</td><td>0.8936</td></tr>
+      <tr id="dd-path-search-rerank-row-poloidal_field_probe"><td>poloidal field probe location</td><td>0.2128</td><td>0.3374</td></tr>
+      <tr id="dd-path-search-rerank-row-coil_current"><td>poloidal field coil current</td><td>0.7453</td><td>0.4702</td></tr>
+      <tr id="dd-path-search-rerank-row-toroidal_field_on_axis"><td>toroidal field on the axis</td><td>0.0000</td><td>0.0000</td></tr>
+      <tr id="dd-path-search-rerank-row-magnetic_axis_position"><td>position of the magnetic axis</td><td>0.3067</td><td>0.2870</td></tr>
+    </tbody>
+  </table>
+
+  <p id="dd-path-search-rerank-caveat">
+    The measurement is a live judge on a sparse label set: the four <code>0.0000</code>
+    questions are retrieval misses, and the labelled set covers only the paths a mapping
+    question names, so a retrieved candidate no label covers counts as irrelevant. That
+    flatters neither order. The finding stands on the three questions where a labelled
+    answer was demoted: the judge reorders on documentation and description text, and where
+    the embedding order had already placed the answer first, that text is not enough to hold
+    it there.
+  </p>
+
+  <h3 id="dd-path-search-rerank-switch-heading">The switch honours the server mode</h3>
+  <p id="dd-path-search-rerank-switch-prose">
+    <code>AgentsServer.__post_init__</code> sets the module-level switch to
+    <code>not (read_only or dd_only)</code>, so a full server reranks and a read-only or
+    DD-only server — the public containers — never does, spending no judgement on an
+    external query. A directly-constructed <code>Tools</code> or
+    <code>GraphSearchTool</code> defaults the switch off, so a caller that wants the rerank
+    asks for it. The tests pin all four: full reranks, read-only never, DD-only never, and
+    the default is off.
+  </p>
+
+  <h3 id="dd-path-search-rerank-checks-heading">Checks</h3>
+  <p id="dd-path-search-rerank-checks-prose">
+    <code>tests/tools/test_dd_path_search_rerank.py</code> pins the construction-time switch,
+    that the rerank is exactly one call into <code>rerank_candidates</code>, that each
+    candidate carries its path and text, that the judged order is applied to the hits, and
+    that a disabled tool never calls the owner; it also verifies the nDCG@10 helper and the
+    fixture. It passes 14/14 alongside <code>tests/tools/test_tools.py</code> (11/11) and
+    <code>tests/tools/test_search_dd_paths_regression.py</code> under <code>-m graph</code>
+    (6/6). The negative control sets the switch on regardless of mode
+    (<code>_rerank_dd_paths = True</code>) and the read-only and DD-only tests then fail
+    because the switch is on for those modes — the red log is
+    <code>~/.cache/imas-codex-dd-path-rerank/negative_control_red.log</code>.
+  </p>
+</section>
