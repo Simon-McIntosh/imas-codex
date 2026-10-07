@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf">
-<meta name="plan-impl" content="0.22">
-<meta name="plan-version" content="15">
+<meta name="plan-impl" content="0.27">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-07">
 </head>
 <body>
@@ -195,7 +195,18 @@
 <li>The rerank costs $0.019 for 540 calls. Wall time is about 2 s per question for 30 candidates (median 2.04 s, max 2.58 s).</li>
 <li>Five questions retrieved no relevant candidate at all, which a rerank cannot repair. §10 classifies them.</li>
 </ul>
-<p><strong>Deploy</strong> (node <code>search-rerank</code>), only if the prototype shows a gain:</p>
+<p><strong>Docs score ties first</strong> (node <code>docs-score-ties</code>). §11 found that <code>_search_docs</code> scores saturate at exactly 1.0. For Q14, 268 chunks tie there and are ordered arbitrarily by set order, so the answers with the 2nd- and 4th-highest cosine in the facility land at ranks 164 and 181.</p>
+<ul>
+<li>The node measures, over the 18 §9 questions by nDCG@10 with Q16 as the control:
+<ul>
+<li>the current order;</li>
+<li>a secondary sort by raw cosine within tied scores;</li>
+<li>the score without its clamp;</li>
+<li>the reserved-vector-slot change §11 recommends (20 leaders at ranks 10–29).</li>
+</ul></li>
+<li>It deploys the variant that keeps Q16 and lifts the most answers into the top 30, in <code>imas_codex/llm/search_tools.py</code>, with a test that a tie at the clamp is broken by cosine or no longer occurs.</li>
+</ul>
+<p><strong>Deploy</strong> (node <code>search-rerank</code>), after <code>docs-score-ties</code>, since both write <code>search_tools.py</code>:</p>
 <ul>
 <li><code>_search_code</code> and <code>_search_docs</code> rerank their top candidates through <code>call_decisions</code>, on the existing <code>discovery-relevance</code> seat, so the rerank adds no seat, with the query and each candidate's text as state.</li>
 <li>Because ranking is not a gate, a failed or slow rerank returns the embedding order unchanged and says so in the result, rather than failing the search.</li>
@@ -215,18 +226,23 @@
   <p class="landed-summary">Landed: the five misses are classified. Q01 (<code>mgset0.f</code>, 0.39) is skipped by the 0.5 ingest gate. <code>eqgrd.f</code> (Q05) is also at scored 0.35 under today's gate, and keeps a chunk a reset left behind. Q05, Q12, Q14 and Q18 are embedded but ranked below 150, which §11 traces. Review 113/120. <a href="retrieval-miss-census">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-07</span>
     <h2 id="s11">§11 — Why embedded answers rank below 150 in code and docs search</h2>
-<section data-reckon="section" data-id="s11" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>§10 found that four of the five misses are answers already ingested and embedded that the search tools rank far down. In <code>_search_code</code>, <code>eqgrd.f</code> and <code>shtrd.f</code> are absent from the top 200 for questions they answer, and <code>eqequb.f</code> sits at 159. In <code>_search_docs</code>, the two answering nakasvr23 pages return at ranks 163 and 181 with a score of 1.0, which looks like a floor shared by many candidates. A rerank over the top 30 cannot reach any of them.</p>
-<p>Node <code>retrieval-scoring-probe</code>, evidence only: for the four questions, trace how <code>_search_code</code> and <code>_search_docs</code> build their candidate list and score in <code>imas_codex/llm/search_tools.py</code>:</p>
+<section data-reckon="section" data-id="s11" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed: <code>_search_docs</code> saturates at a 1.0 score, so the Q18 and Q14 answers, at the 2nd- and 4th-highest cosine in the facility, tie with 228 and 268 chunks and are ordered arbitrarily. Reserving 20 vector slots lifts both into the top 30 at no cost to any question's top 10, while reweighting and a saturating keyword term fail the Q16 control. Q12 and Q05 are never generated as candidates, which §12 takes. The fix for the score ties is <code>docs-score-ties</code> in §9. Reviews 90 and 91. <a href="retrieval-scoring-probe">full record</a></p>
+</section>
+
+    <h2 id="s12">§12 — Code search never generates two answers as candidates</h2>
+<section data-reckon="section" data-id="s12" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>§11 found two code answers that no scoring change can reach, because the tool never makes them candidates. <code>shtrd.f</code> (Q12) has cosine 0.560 and facility vector rank 49, outside a vector cut of 30. <code>eqgrd.f</code> (Q05) has cosine 0.438 and rank 442 of 907. Its single chunk is also left over from before a reset, and its file sits at scored 0.35 below the ingest gate.</p>
+<p>Node <code>code-candidate-probe</code>, evidence only. Measure, over the 12 code questions of §9 by nDCG@10 with Q16's code counterpart Q06 as the control:</p>
 <ul>
-<li>the vector index queried and its k;</li>
-<li>the facility pre-filter;</li>
-<li>any keyword or bonus terms;</li>
-<li>the final sort.</li>
+<li>a wider vector cut (50 and 100);</li>
+<li>a bounded lexical term over routine names and identifiers;</li>
+<li>embedding the stored file description beside the chunk text.</li>
 </ul>
-<p>Report each answering chunk's raw cosine similarity to its question beside the rank the tool gives it, and how many candidates share the docs score of 1.0.</p>
-<p>Done when the fragment names the stage that drops or buries each answer: candidate generation, a pre-filter, score saturation or the sort. It must also name the change that would lift each one into the top 30, with that change measured over the 18 §9 questions by nDCG@10 against the current order. No code change and no graph write.</p>
+<p>Report each variant's latency beside its gain. No code change and no graph write.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -277,6 +293,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261007T032751096451-review-of-retrieval-scoring-probe" data-who="reckon-build" data-when="2026-10-07T03:46:21.225Z">
     <div class="r-comment-body"><p>review of r-20261007T025440701113-retrieval-scoring-probe stored as a parsed six-dimension record (total 90/120) at the .at-49aed047d26e252ab48f382306080433e2dcc201.json path with a legacy copy beside it, naming base c53d0f98433251842fb04c78c1f725ca5dec264f and head 49aed047d26e252ab48f382306080433e2dcc201, with two follow-on findings</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-landing-retrieval-scoring-probe" data-who="reckon-build" data-when="2026-10-07T04:25:00Z">
+    <div class="r-comment-body"><p>Node retrieval-scoring-probe (49aed047d, af7321fe2) landed after one resume to measure Q12's keyword term and a 50-slot reservation, and to report ranks at the tool's own depth. Reviews 90 and 91. Two caveats are recorded in the evidence. Its current-order nDCG@10 of 0.420 is not comparable with §9's 0.246: it counts 17 answerable questions and scores 303 unlabelled top-10 slots as 0. Its reserved-slot ranks and Q12 column are 0-based positions, so each reads one lower than the tool's rank. The direct fix for the score saturation, a cosine tie-break, was not measured, so <code>docs-score-ties</code> measures it against the reserved slots. impl 3/11.</p></div>
 </div>
 </section>
 </main>
