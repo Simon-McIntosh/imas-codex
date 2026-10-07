@@ -4,18 +4,13 @@ Multi-step LLM pipeline that generates signal-level IMAS mappings
 from facility signal sources:
 
   gather_context:        Fetch signal sources + DD context (programmatic)
-  assign_targets:        LLM assigns sources to IDS target paths
+  choose_targets:        LLM chooses an escalated source's homes from its shortlist
   map_signals:           For each target, LLM generates signal mappings
   discover_assembly:     For each target, LLM discovers assembly patterns
   validate_mappings:     Programmatic validation (source/target existence, transforms, units)
   derive_error_mappings: Derive error field mappings via HAS_ERROR graph traversal (no LLM)
   populate_metadata:     Populate ids_properties and code metadata (programmatic + LLM)
   persist:               Write to graph
-
-Usage:
-    from imas_codex.ids.mapping import generate_mapping
-
-    result = generate_mapping("jet", "pf_active")
 """
 
 from __future__ import annotations
@@ -29,11 +24,14 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.ids.graph_ops import read_candidates, write_mapping_binding
+from imas_codex.ids.candidates import CLUSTER_ARM
+from imas_codex.ids.graph_ops import (
+    CandidateWriteError,
+    read_candidates,
+    write_mapping_binding,
+)
 from imas_codex.ids.metadata import (
     IDSMetadataResult,
-    persist_metadata,
-    populate_metadata,
 )
 from imas_codex.ids.models import (
     AssemblyBatch,
@@ -42,11 +40,12 @@ from imas_codex.ids.models import (
     EscalationFlag,
     SignalMappingBatch,
     TargetAssignmentBatch,
+    TargetChoice,
+    TargetChoiceBatch,
     TargetType,
     UnmappedSignal,
     ValidatedMappingResult,
     ValidatedSignalMapping,
-    persist_mapping_result,
 )
 from imas_codex.ids.tools import (
     _run_async,
@@ -248,6 +247,162 @@ def _format_source_detail(source: dict[str, Any]) -> str:
         targets = ", ".join(m["target_id"] for m in mapped)
         parts.append(f"**Existing Mappings**: {targets}")
     return "\n".join(parts)
+
+
+def escalated_shortlist(
+    edges: list[dict[str, Any]], shortlist_size: int
+) -> list[dict[str, Any]]:
+    """The candidate paths an escalated source is asked to choose among.
+
+    The top ``shortlist_size`` edges in Jev order (ascending ``rank``), plus
+    every cross-IDS sibling the cluster expansion added, carried regardless of
+    its rank so a home in another IDS is never hidden by the cap.
+    """
+    ordered = sorted(edges, key=lambda edge: edge.get("rank") or 0)
+    primary = [e for e in ordered if CLUSTER_ARM not in (e.get("arms") or [])]
+    siblings = [e for e in ordered if CLUSTER_ARM in (e.get("arms") or [])]
+    picked = primary[:shortlist_size]
+    seen = {e["path"] for e in picked}
+    picked.extend(e for e in siblings if e["path"] not in seen)
+    return picked
+
+
+def _format_shortlist(edges: list[dict[str, Any]]) -> str:
+    """Format an escalated source's shortlist for the choice prompt."""
+    lines: list[str] = []
+    for edge in edges:
+        arms = edge.get("arms") or []
+        tag = " [cross-IDS sibling]" if CLUSTER_ARM in arms else ""
+        prob = edge.get("p_same_quantity")
+        prob_txt = (
+            f", p_same_quantity={prob:.2f}" if isinstance(prob, (int, float)) else ""
+        )
+        line = (
+            f"- {edge['path']}{tag} "
+            f"(IDS={edge.get('ids') or '?'}, rank={edge.get('rank')}{prob_txt})"
+        )
+        doc = (edge.get("documentation") or "").strip()
+        if doc:
+            line += f": {doc}"
+        lines.append(line)
+    return "\n".join(lines) if lines else "(no candidates)"
+
+
+def _format_choice_context(
+    source: dict[str, Any], context: dict[str, Any] | None
+) -> str:
+    """Peer and kin context that grounds an escalated choice."""
+    parts: list[str] = []
+    domain = source.get("physics_domain")
+    if domain:
+        parts.append(f"- Physics domain: {domain}")
+    matrix = _format_semantic_match_matrix(
+        (context or {}).get("semantic_match_matrix", {}), source.get("id", "")
+    )
+    if matrix:
+        parts.append("Documentation and code that support this source:\n" + matrix)
+    return "\n".join(parts) if parts else "(none)"
+
+
+def _validate_choice(
+    choice: TargetChoice, shortlist: list[dict[str, Any]]
+) -> TargetChoice:
+    """Refuse a choice that names a path outside the source's shortlist.
+
+    The reasoning seat may only pick from the listed paths; a path it invents
+    is refused before anything is persisted, so the shortlist is the only
+    source of targets. An empty choice carries the disposition explaining why
+    none was picked.
+    """
+    allowed = {edge["path"] for edge in shortlist}
+    outside = [path for path in choice.paths if path not in allowed]
+    if outside:
+        raise CandidateWriteError(
+            f"choice for {choice.source_id} names path(s) outside its "
+            f"shortlist: {outside}"
+        )
+    if not choice.paths and choice.disposition is None:
+        raise CandidateWriteError(
+            f"choice for {choice.source_id} is empty with no disposition"
+        )
+    return choice
+
+
+def _render_choice_prompt(
+    facility: str,
+    source: dict[str, Any],
+    shortlist: list[dict[str, Any]],
+    context: dict[str, Any] | None,
+) -> str:
+    """Render the escalated choice prompt for one source and its shortlist."""
+    return _render_prompt(
+        "target_assignment",
+        facility=facility,
+        signal_source=_format_source_detail(source),
+        shortlist=_format_shortlist(shortlist),
+        context_notes=_format_choice_context(source, context),
+        cross_facility_mappings=_format_cross_facility_mappings(
+            (context or {}).get("cross_mappings", [])
+        ),
+    )
+
+
+def _choice_from_batch(
+    batch: TargetChoiceBatch, source_id: str, shortlist: list[dict[str, Any]]
+) -> TargetChoice:
+    """Pick one source's choice from the batch and validate it."""
+    for choice in batch.choices:
+        if choice.source_id == source_id:
+            return _validate_choice(choice, shortlist)
+    raise CandidateWriteError(f"choice batch carried no entry for {source_id}")
+
+
+def choose_targets(
+    facility: str,
+    source: dict[str, Any],
+    shortlist: list[dict[str, Any]],
+    *,
+    context: dict[str, Any] | None = None,
+    model: str | None = None,
+    cost: PipelineCost,
+) -> TargetChoice:
+    """Ask the reasoning seat which listed paths hold one escalated source.
+
+    The prompt carries only the source's shortlist; a returned path outside it
+    is refused with :class:`CandidateWriteError` before it can be persisted.
+    """
+    prompt = _render_choice_prompt(facility, source, shortlist, context)
+    messages = _build_messages("target_assignment_system", prompt)
+    batch = _call_llm(
+        messages,
+        TargetChoiceBatch,
+        model=model,
+        step_name="choose_targets",
+        cost=cost,
+    )
+    return _choice_from_batch(batch, source["id"], shortlist)
+
+
+async def achoose_targets(
+    facility: str,
+    source: dict[str, Any],
+    shortlist: list[dict[str, Any]],
+    *,
+    context: dict[str, Any] | None = None,
+    model: str | None = None,
+    cost: PipelineCost,
+) -> TargetChoice:
+    """Async version of :func:`choose_targets`."""
+    prompt = _render_choice_prompt(facility, source, shortlist, context)
+    messages = _build_messages("target_assignment_system", prompt)
+    batch = await _acall_llm(
+        messages,
+        TargetChoiceBatch,
+        model=model,
+        step_name="choose_targets",
+        cost=cost,
+    )
+    return _choice_from_batch(batch, source["id"], shortlist)
 
 
 def _format_fields(fields: list[dict[str, Any]]) -> str:
@@ -563,6 +718,21 @@ async def _acall_llm(
     return result
 
 
+def _escalated_source_ids(source_ids: list[str], gc: GraphClient) -> set[str]:
+    """The subset of ``source_ids`` whose candidate route is escalated."""
+    if not source_ids:
+        return set()
+    rows = gc.query(
+        """
+        MATCH (sg:SignalSource)
+        WHERE sg.id IN $source_ids AND sg.candidate_route = 'escalated'
+        RETURN sg.id AS id
+        """,
+        source_ids=list(source_ids),
+    )
+    return {row["id"] for row in rows}
+
+
 def gather_shared_context(
     facility: str,
     all_ids_names: list[str],
@@ -672,20 +842,34 @@ def gather_shared_context(
     except Exception:
         pass
 
-    # Per-source bridging queries, run ONCE with no IDS filter. DD candidate
-    # retrieval owns the IMAS side, so only the wiki and code bridges are kept.
-    _emit(f"wiki + code matches ({len(source_descs)} sources)")
+    # Per-source bridging queries, narrowed to the escalated sources. The
+    # bridge only grounds a source the reasoning seat must choose a home for;
+    # a source already selected by the candidate stage needs no re-embedding.
+    escalated_ids = _escalated_source_ids([sid for sid, _ in source_descs], gc)
+    escalated_descs = [
+        (sid, desc) for sid, desc in source_descs if sid in escalated_ids
+    ]
+    escalated_embeddings = (
+        [
+            embeddings[i]
+            for i, (sid, _) in enumerate(source_descs)
+            if sid in escalated_ids
+        ]
+        if embeddings is not None
+        else None
+    )
+    _emit(f"wiki + code matches ({len(escalated_descs)} escalated sources)")
     semantic_match_matrix: dict[str, list[dict[str, Any]]] = {}
-    if source_descs and embeddings is not None:
+    if escalated_descs and escalated_embeddings is not None:
         try:
             semantic_match_matrix = compute_semantic_matches(
-                source_descs,
+                escalated_descs,
                 gc=gc,
                 k_per_source=20,
                 include_wiki=True,
                 include_code=True,
                 on_progress=on_progress,
-                precomputed_embeddings=embeddings,
+                precomputed_embeddings=escalated_embeddings,
             )
         except Exception:
             logger.debug("Semantic match matrix failed", exc_info=True)
@@ -852,88 +1036,6 @@ def _fetch_ids_description(ids_name: str, gc: GraphClient) -> str:
     if rows and rows[0].get("desc"):
         return rows[0]["desc"]
     return ""
-
-
-def assign_targets(
-    facility: str,
-    ids_name: str,
-    context: dict[str, Any],
-    *,
-    gc: GraphClient | None = None,
-    model: str | None = None,
-    cost: PipelineCost,
-) -> TargetAssignmentBatch:
-    """Assign signal sources to IDS target paths."""
-    logger.info("Assigning signal sources to IDS target paths")
-
-    ids_description = ""
-    if gc is not None:
-        ids_description = _fetch_ids_description(ids_name, gc)
-
-    prompt = _render_prompt(
-        "target_assignment",
-        facility=facility,
-        ids_name=ids_name,
-        ids_description=ids_description,
-        signal_sources=_format_sources(context["groups"]),
-        imas_subtree=_format_subtree(context["subtree"]),
-        semantic_results=_format_subtree(context["semantic"]),
-        section_clusters=_format_section_clusters(context.get("section_clusters", [])),
-        cross_facility_mappings=_format_cross_facility_mappings(
-            context.get("cross_mappings", [])
-        ),
-    )
-
-    messages = _build_messages("target_assignment_system", prompt)
-
-    return _call_llm(
-        messages,
-        TargetAssignmentBatch,
-        model=model,
-        step_name="assign_targets",
-        cost=cost,
-    )
-
-
-async def aassign_targets(
-    facility: str,
-    ids_name: str,
-    context: dict[str, Any],
-    *,
-    gc: GraphClient | None = None,
-    model: str | None = None,
-    cost: PipelineCost,
-) -> TargetAssignmentBatch:
-    """Async version of assign_targets."""
-    logger.info("Assigning signal sources to IDS target paths (async)")
-
-    ids_description = ""
-    if gc is not None:
-        ids_description = _fetch_ids_description(ids_name, gc)
-
-    prompt = _render_prompt(
-        "target_assignment",
-        facility=facility,
-        ids_name=ids_name,
-        ids_description=ids_description,
-        signal_sources=_format_sources(context["groups"]),
-        imas_subtree=_format_subtree(context["subtree"]),
-        semantic_results=_format_subtree(context["semantic"]),
-        section_clusters=_format_section_clusters(context.get("section_clusters", [])),
-        cross_facility_mappings=_format_cross_facility_mappings(
-            context.get("cross_mappings", [])
-        ),
-    )
-
-    messages = _build_messages("target_assignment_system", prompt)
-
-    return await _acall_llm(
-        messages,
-        TargetAssignmentBatch,
-        model=model,
-        step_name="assign_targets",
-        cost=cost,
-    )
 
 
 def map_signals(
@@ -2014,206 +2116,3 @@ class MappingResult:
     persisted: bool = False
     unassigned_groups: list[str] = field(default_factory=list)
     metadata: IDSMetadataResult | None = None
-
-
-def generate_mapping(
-    facility: str,
-    ids_name: str,
-    *,
-    model: str | None = None,
-    reasoning_model: str | None = None,
-    dd_version: str | None = None,
-    persist: bool = True,
-    activate: bool = True,
-    gc: GraphClient | None = None,
-) -> MappingResult:
-    """Generate IMAS signal mapping via multi-step LLM pipeline.
-
-    Steps:
-        1. Gather signal sources + DD context (programmatic)
-        2. LLM assigns sources to IMAS sections
-        3. For each section, LLM generates signal mappings
-        4. Programmatic validation (source/target existence, transforms, units)
-        5. (Optional) Persist to graph
-
-    Args:
-        facility: Facility name (e.g., "jet").
-        ids_name: IDS name (e.g., "pf_active").
-        model: LLM model override for classification steps (default: language tier).
-        reasoning_model: LLM model override for signal mapping (default: reasoning tier).
-        dd_version: DD version override (default: from settings).
-        persist: Whether to persist results to graph.
-        activate: Whether to promote status to 'active' after persisting.
-        gc: GraphClient instance (created if None).
-
-    Returns:
-        MappingResult with validated mappings and cost breakdown.
-    """
-    if gc is None:
-        gc = GraphClient()
-
-    if dd_version is None:
-        # Try to find the latest DD version ≥ 4.x in the graph
-        try:
-            rows = gc.query(
-                """
-                MATCH (v:DDVersion)
-                WHERE v.major >= 4
-                RETURN v.id AS id
-                ORDER BY v.major DESC, v.minor DESC, v.patch DESC
-                LIMIT 1
-                """
-            )
-            if rows:
-                dd_version = rows[0]["id"]
-                logger.info("Auto-detected DD version from graph: %s", dd_version)
-        except Exception:
-            pass
-
-    if dd_version is None:
-        from imas_codex import dd_version as default_dd
-
-        dd_version = default_dd
-
-    # Extract major version number for DD filtering queries
-    dd_major: int | None = None
-    if dd_version:
-        try:
-            dd_major = int(str(dd_version).split(".")[0])
-        except (ValueError, IndexError):
-            pass
-
-    cost = PipelineCost()
-
-    # Step 0: Gather context
-    context = gather_context(facility, ids_name, gc=gc, dd_version=dd_major)
-
-    if not context["groups"]:
-        raise ValueError(
-            f"No signal sources found for {facility}/{ids_name}. "
-            "Run signal discovery first."
-        )
-
-    # Step 1: Assign targets
-    sections = assign_targets(
-        facility, ids_name, context, gc=gc, model=model, cost=cost
-    )
-
-    if not sections.assignments:
-        raise ValueError(
-            f"LLM could not assign any signal sources to IDS target paths "
-            f"for {facility}/{ids_name}."
-        )
-
-    # Step 2: Signal mappings (reasoning tier — highest accuracy needed)
-    mapping_model = reasoning_model or get_model("reasoning")
-    field_batches = map_signals(
-        facility,
-        ids_name,
-        sections,
-        context,
-        gc=gc,
-        model=mapping_model,
-        cost=cost,
-    )
-
-    # Step 3: Assembly discovery (LLM)
-    assembly = discover_assembly(
-        facility,
-        ids_name,
-        sections,
-        field_batches,
-        context,
-        gc=gc,
-        model=model,
-        cost=cost,
-    )
-
-    # Step 4: Programmatic validation (no LLM call)
-    validated = validate_mappings(
-        facility,
-        ids_name,
-        dd_version,
-        sections,
-        field_batches,
-        gc=gc,
-    )
-
-    # Step 5: Derive error field mappings (no LLM call)
-    error_bindings = derive_error_mappings(validated.bindings, gc=gc, facility=facility)
-    if error_bindings:
-        validated.bindings.extend(error_bindings)
-        logger.info(
-            "Derived %d error mappings for %s/%s",
-            len(error_bindings),
-            facility,
-            ids_name,
-        )
-
-    # Step 6: Populate IDS metadata (programmatic + LLM)
-    metadata_result: IDSMetadataResult | None = None
-    try:
-        # Convert validated bindings to signal summary dicts for the LLM
-        mapped_signals = [
-            {
-                "source_id": b.source_id,
-                "target_id": b.target_id,
-                "confidence": b.confidence,
-            }
-            for b in validated.bindings
-        ]
-        metadata_result = populate_metadata(
-            facility,
-            ids_name,
-            gc=gc,
-            dd_version=dd_version,
-            mapped_signals=mapped_signals,
-            model=model,
-        )
-        if metadata_result.cost_usd > 0:
-            cost.add("metadata", metadata_result.cost_usd, metadata_result.tokens)
-        logger.info(
-            "Populated metadata for %s/%s: %d deterministic, %d LLM fields",
-            facility,
-            ids_name,
-            len(metadata_result.deterministic_fields),
-            len(metadata_result.llm_fields),
-        )
-    except Exception:
-        logger.warning(
-            "Metadata population failed for %s/%s — continuing without metadata",
-            facility,
-            ids_name,
-            exc_info=True,
-        )
-
-    # Persist
-    mapping_id = f"{facility}:{ids_name}"
-    persisted = False
-    if persist:
-        status = "active" if activate else "generated"
-        mapping_id = persist_mapping_result(
-            validated, assembly=assembly, gc=gc, status=status
-        )
-        persisted = True
-        logger.info("Persisted mapping %s with status '%s'", mapping_id, status)
-        # Persist metadata if available
-        if metadata_result is not None:
-            persist_metadata(metadata_result, mapping_id, gc=gc)
-
-    logger.info(
-        "Pipeline complete: %d bindings, %d escalations, $%.4f total",
-        len(validated.bindings),
-        len(validated.escalations),
-        cost.total_usd,
-    )
-
-    return MappingResult(
-        mapping_id=mapping_id,
-        validated=validated,
-        assembly=assembly,
-        cost=cost,
-        persisted=persisted,
-        unassigned_groups=sections.unassigned_groups,
-        metadata=metadata_result,
-    )

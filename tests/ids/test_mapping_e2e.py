@@ -574,26 +574,6 @@ class TestPipelineOrchestrator:
         assert len(ctx["groups"]) == 2
         assert len(ctx["subtree"]) == 3
 
-    @patch("imas_codex.ids.mapping._call_llm")
-    def test_assign_targets(
-        self, mock_call_llm, sample_groups, sample_subtree, sample_section_assignment
-    ):
-        """Test section assignment."""
-        from imas_codex.ids.mapping import PipelineCost, assign_targets
-
-        mock_call_llm.return_value = sample_section_assignment
-        cost = PipelineCost()
-
-        context = {
-            "groups": sample_groups,
-            "subtree": sample_subtree,
-            "semantic": sample_subtree,
-        }
-
-        result = assign_targets("jet", "pf_active", context, cost=cost)
-        assert len(result.assignments) == 2
-        mock_call_llm.assert_called_once()
-
     @patch("imas_codex.ids.mapping.fetch_source_code_refs")
     @patch("imas_codex.ids.mapping._call_llm")
     @patch("imas_codex.ids.mapping.fetch_imas_fields")
@@ -667,134 +647,6 @@ class TestPipelineOrchestrator:
         assert len(result.bindings) == 2
         assert result.facility == "jet"
         assert result.dd_version == "4.1.1"
-
-    @patch("imas_codex.ids.mapping.validate_mappings")
-    @patch("imas_codex.ids.mapping.discover_assembly")
-    @patch("imas_codex.ids.mapping.map_signals")
-    @patch("imas_codex.ids.mapping.assign_targets")
-    @patch("imas_codex.ids.mapping.gather_context")
-    def test_generate_mapping_full_pipeline(
-        self,
-        mock_step0,
-        mock_step1,
-        mock_step2,
-        mock_step3,
-        mock_step4,
-        mock_gc,
-        sample_groups,
-        sample_subtree,
-        sample_section_assignment,
-        sample_field_batch,
-        sample_validated_result,
-    ):
-        """Test full pipeline end-to-end."""
-        from imas_codex.ids.mapping import generate_mapping
-
-        mock_step0.return_value = {
-            "groups": sample_groups,
-            "subtree": sample_subtree,
-            "semantic": sample_subtree,
-            "existing": {"mapping": None, "sections": [], "bindings": []},
-            "cocos_paths": [],
-        }
-        mock_step1.return_value = sample_section_assignment
-        mock_step2.return_value = [sample_field_batch]
-        mock_step3.return_value = None  # No assembly patterns discovered
-        mock_step4.return_value = sample_validated_result
-
-        result = generate_mapping(
-            "jet",
-            "pf_active",
-            dd_version="4.1.1",
-            persist=False,
-            gc=mock_gc,
-        )
-
-        assert result.mapping_id == "jet:pf_active"
-        assert len(result.validated.bindings) == 2
-        assert len(result.validated.escalations) == 1
-        assert result.persisted is False
-        assert result.unassigned_groups == []
-
-    @patch("imas_codex.ids.mapping.validate_mappings")
-    @patch("imas_codex.ids.mapping.discover_assembly")
-    @patch("imas_codex.ids.mapping.map_signals")
-    @patch("imas_codex.ids.mapping.assign_targets")
-    @patch("imas_codex.ids.mapping.gather_context")
-    def test_generate_mapping_surfaces_unassigned_groups(
-        self,
-        mock_step0,
-        mock_step1,
-        mock_step2,
-        mock_step3,
-        mock_step4,
-        mock_gc,
-        sample_groups,
-        sample_subtree,
-        sample_field_batch,
-        sample_validated_result,
-    ):
-        """Test that unassigned_groups from Step 1 are surfaced in MappingResult."""
-        from imas_codex.ids.mapping import generate_mapping
-
-        unassigned = TargetAssignmentBatch(
-            ids_name="pf_active",
-            assignments=[
-                TargetAssignment(
-                    source_id="jet:pf_coils:group1",
-                    imas_target_path="pf_active/coil",
-                    confidence=0.95,
-                    reasoning="PF coil geometry maps to pf_active/coil",
-                ),
-            ],
-            unassigned_groups=["jet:pf_coils:group3", "jet:pf_coils:group4"],
-        )
-
-        mock_step0.return_value = {
-            "groups": sample_groups,
-            "subtree": sample_subtree,
-            "semantic": sample_subtree,
-            "existing": {"mapping": None, "sections": [], "bindings": []},
-            "cocos_paths": [],
-        }
-        mock_step1.return_value = unassigned
-        mock_step2.return_value = [sample_field_batch]
-        mock_step3.return_value = None  # No assembly patterns discovered
-        mock_step4.return_value = sample_validated_result
-
-        result = generate_mapping(
-            "jet",
-            "pf_active",
-            dd_version="4.1.1",
-            persist=False,
-            gc=mock_gc,
-        )
-
-        assert result.unassigned_groups == [
-            "jet:pf_coils:group3",
-            "jet:pf_coils:group4",
-        ]
-
-    @patch("imas_codex.ids.mapping.gather_context")
-    def test_generate_mapping_no_groups_raises(self, mock_step0, mock_gc):
-        """Test that empty groups raises ValueError."""
-        from imas_codex.ids.mapping import generate_mapping
-
-        mock_step0.return_value = {
-            "groups": [],
-            "subtree": [],
-            "semantic": [],
-            "existing": {"mapping": None, "sections": [], "bindings": []},
-            "cocos_paths": [],
-        }
-
-        with pytest.raises(ValueError, match="No signal sources found"):
-            generate_mapping("jet", "pf_active", dd_version="4.1.1", gc=mock_gc)
-
-
-# ---------------------------------------------------------------------------
-# CLI tests
-# ---------------------------------------------------------------------------
 
 
 class TestMapCLI:
@@ -976,7 +828,7 @@ class TestPromptTemplates:
         path = PROMPTS_DIR / "mapping" / "target_assignment.md"
         assert path.exists()
         prompt = path.read_text().lower()
-        assert "signal sources" in prompt
+        assert "listed candidates" in prompt
 
     def test_signal_mapping_prompt_exists(self):
         from imas_codex.llm.prompt_loader import PROMPTS_DIR
@@ -1001,13 +853,13 @@ class TestPromptTemplates:
         rendered = _render_prompt(
             "target_assignment",
             facility="jet",
-            ids_name="pf_active",
-            signal_sources="- group1: PF coil 1",
-            imas_subtree="pf_active/coil (STRUCT_ARRAY)",
-            semantic_results="pf_active/coil — PF coil descriptions",
+            signal_source="**Source ID**: jet:pf_coils:group1",
+            shortlist="- pf_active/coil [cross-IDS sibling] (IDS=pf_active, rank=1)",
+            context_notes="- Physics domain: magnetic_field_systems",
+            cross_facility_mappings="",
         )
         assert "jet" in rendered
-        assert "pf_active" in rendered
+        assert "pf_active/coil" in rendered
         assert "group1" in rendered
 
     def test_signal_mapping_prompt_renders(self):
@@ -1161,30 +1013,6 @@ class TestGatherContextFields:
             assert "rep_cocos" in grp
             assert "physics_domain" in grp
             assert "sample_accessors" in grp
-
-
-class TestAssignSectionsValidOutput:
-    """Test that section assignment produces valid IDS paths."""
-
-    @patch("imas_codex.ids.mapping._call_llm")
-    def test_all_paths_start_with_ids_name(
-        self, mock_call_llm, sample_groups, sample_subtree, sample_section_assignment
-    ):
-        from imas_codex.ids.mapping import PipelineCost, assign_targets
-
-        mock_call_llm.return_value = sample_section_assignment
-        cost = PipelineCost()
-
-        context = {
-            "groups": sample_groups,
-            "subtree": sample_subtree,
-            "semantic": sample_subtree,
-        }
-
-        result = assign_targets("jet", "pf_active", context, cost=cost)
-        assert isinstance(result, TargetAssignmentBatch)
-        for a in result.assignments:
-            assert a.imas_target_path.startswith("pf_active/")
 
 
 class TestMapSignalsMultiTarget:

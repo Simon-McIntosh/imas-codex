@@ -102,6 +102,34 @@ class TargetAssignmentBatch(BaseModel):
     )
 
 
+class TargetChoice(BaseModel):
+    """The homes an escalated source chose from its listed candidates.
+
+    ``paths`` holds every listed shortlist path that should hold the source's
+    values, or an empty list when none does; ``disposition`` then carries why.
+    A path outside the source's listed shortlist is refused before it is
+    persisted, so the model can never introduce a target of its own.
+    """
+
+    source_id: str = Field(description="SignalSource node id")
+    paths: list[str] = Field(
+        default_factory=list,
+        description="Every listed candidate path that should hold the source's values",
+    )
+    disposition: MappingDisposition | None = Field(
+        default=None,
+        description="Why no listed path was chosen; set only when paths is empty",
+    )
+    confidence: float = Field(ge=0, le=1, description="Choice confidence 0-1")
+    reasoning: str = Field(description="Brief justification")
+
+
+class TargetChoiceBatch(BaseModel):
+    """One escalated choice call's result: a choice per listed source."""
+
+    choices: list[TargetChoice]
+
+
 # ---------------------------------------------------------------------------
 # Step 2: Signal-level mapping
 # ---------------------------------------------------------------------------

@@ -146,7 +146,7 @@ class TestSystemPromptSplit:
         sec = (PROMPTS_DIR / "mapping" / "target_assignment_system.md").read_text()
         assert "Task" in sec
         assert "Output Format" in sec
-        assert "UnassignedSource" in sec
+        assert "TargetChoiceBatch" in sec
 
         asm = (PROMPTS_DIR / "mapping" / "assembly_system.md").read_text()
         assert "Assembly Patterns" in asm
@@ -163,8 +163,8 @@ class TestSystemPromptSplit:
 
         sec = (PROMPTS_DIR / "mapping" / "target_assignment.md").read_text()
         assert "{{ facility }}" in sec
-        assert "{{ signal_sources }}" in sec
-        assert "{{ imas_subtree }}" in sec
+        assert "{{ signal_source }}" in sec
+        assert "{{ shortlist }}" in sec
 
         asm = (PROMPTS_DIR / "mapping" / "assembly.md").read_text()
         assert "{{ facility }}" in asm
@@ -222,7 +222,7 @@ class TestBuildMessages:
 
         messages = _build_messages("target_assignment_system", "user prompt")
         assert "IMAS mapping expert" in messages[0]["content"]
-        assert "TargetAssignmentBatch" in messages[0]["content"]
+        assert "TargetChoiceBatch" in messages[0]["content"]
 
     def test_assembly_system_prompt(self):
         from imas_codex.ids.mapping import _build_messages
@@ -246,15 +246,16 @@ class TestPromptRenderingWithContext:
         rendered = _render_prompt(
             "target_assignment",
             facility="jet",
-            ids_name="pf_active",
-            signal_sources="- jet:pf_coils:group1 (domain=magnetic_field_systems)",
-            imas_subtree="pf_active/coil (STRUCT_ARRAY) — PF coil descriptions",
-            semantic_results="pf_active/coil (0.95): PF coil details",
-            section_clusters="- **Magnetic Systems**: pf_active/coil",
+            signal_source=(
+                "**Source ID**: jet:pf_coils:group1\n"
+                "**Physics Domain**: magnetic_field_systems"
+            ),
+            shortlist="- pf_active/coil (IDS=pf_active, rank=1): PF coil details",
+            context_notes="- Physics domain: magnetic_field_systems",
             cross_facility_mappings="- **tcv**: pf_active/coil",
         )
         assert "jet" in rendered
-        assert "pf_active" in rendered
+        assert "pf_active/coil" in rendered
         assert "jet:pf_coils:group1" in rendered
         assert "tcv" in rendered
 
@@ -264,11 +265,9 @@ class TestPromptRenderingWithContext:
         rendered = _render_prompt(
             "target_assignment",
             facility="jet",
-            ids_name="pf_active",
-            signal_sources="- src1",
-            imas_subtree="tree",
-            semantic_results="results",
-            section_clusters="clusters",
+            signal_source="**Source ID**: src1",
+            shortlist="- a/b (IDS=a, rank=1)",
+            context_notes="(none)",
             cross_facility_mappings="",
         )
         assert "Cross-Facility" not in rendered
@@ -794,35 +793,40 @@ class TestCheckCoverageThreshold:
 # ---------------------------------------------------------------------------
 
 
-class TestAssignSectionsUsesSystemPrompt:
-    """Verify assign_targets sends system+user messages."""
+class TestChooseTargetsUsesSystemPrompt:
+    """Verify choose_targets sends system+user messages for one shortlist."""
 
     @patch("imas_codex.ids.mapping._call_llm")
-    def test_messages_have_system_role(
-        self, mock_call_llm, sample_groups, sample_subtree
-    ):
-        from imas_codex.ids.mapping import PipelineCost, assign_targets
+    def test_messages_have_system_role(self, mock_call_llm):
+        from imas_codex.ids.mapping import PipelineCost, choose_targets
+        from imas_codex.ids.models import TargetChoice, TargetChoiceBatch
 
-        mock_call_llm.return_value = TargetAssignmentBatch(
-            ids_name="pf_active",
-            assignments=[],
+        mock_call_llm.return_value = TargetChoiceBatch(
+            choices=[
+                TargetChoice(
+                    source_id="jet:pf_coils:group1",
+                    paths=["pf_active/coil"],
+                    confidence=0.9,
+                    reasoning="PF coil geometry",
+                )
+            ]
         )
         cost = PipelineCost()
-
-        context = {
-            "groups": sample_groups,
-            "subtree": sample_subtree,
-            "semantic": sample_subtree,
+        source = {
+            "id": "jet:pf_coils:group1",
+            "physics_domain": "magnetic_field_systems",
         }
+        shortlist = [
+            {"path": "pf_active/coil", "ids": "pf_active", "rank": 1, "arms": []}
+        ]
 
-        assign_targets("jet", "pf_active", context, cost=cost)
+        choice = choose_targets("jet", source, shortlist, cost=cost)
+        assert choice.paths == ["pf_active/coil"]
 
-        # Inspect the messages passed to _call_llm
-        call_args = mock_call_llm.call_args
-        messages = call_args[0][0]
+        messages = mock_call_llm.call_args[0][0]
         assert messages[0]["role"] == "system"
         assert messages[1]["role"] == "user"
-        assert "TargetAssignmentBatch" in messages[0]["content"]
+        assert "TargetChoiceBatch" in messages[0]["content"]
         assert "jet" in messages[1]["content"]
 
 
