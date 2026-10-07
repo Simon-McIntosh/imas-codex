@@ -2,6 +2,7 @@
 
 import importlib.resources
 import logging
+import re
 from functools import lru_cache
 from typing import Any
 
@@ -53,6 +54,57 @@ with importlib.resources.as_file(
     unit_registry.load_definitions(str(resource_path))
 
 
+# Degrees Celsius written with a separator ("deg. C", "deg.C"). pint splits the
+# argument on whitespace, so the separator-bearing form parses as ``deg`` times
+# ``C`` — a degree of angle times a coulomb, a current-times-time dimensionality
+# — where the catalogue means the offset unit degree_Celsius. The separator
+# cannot be spelled as a name-level ``@alias``: pint names are single tokens, so
+# the alias file cannot carry it. A registry preprocessor folds the separator
+# away before parsing, which lands the spelling on the ``degC`` alias the alias
+# file already defines, so it resolves to Celsius rather than attempting a
+# guess. The pattern targets the word "deg", a period and any following space,
+# then "C" in isolation; it leaves ``deg``, ``degC`` and ``deg.s^-1``
+# untouched, and is applied to any expression containing the separator.
+_SEPARATED_CELSIUS_RE = re.compile(r"\bdeg\.\s*C\b")
+
+
+def _fold_separated_celsius(text: str) -> str:
+    """Rewrite a separator-bearing degree-Celsius spelling to ``degC``."""
+    return _SEPARATED_CELSIUS_RE.sub("degC", text)
+
+
+unit_registry.preprocessors.append(_fold_separated_celsius)
+
+
+def units_are_equivalent(first: str | None, second: str | None) -> bool:
+    """Whether two unit spellings denote exactly the same unit.
+
+    The comparison is pint's, never string equality: both spellings must parse
+    through the shared ``unit_registry`` (so alias-file spellings resolve),
+    carry the same dimensionality, and describe a conversion factor of exactly
+    1. This is the same reading ``analyze_units`` and ``build_dd._units_changed``
+    make, so one helper keeps the tests and the census from each re-deriving it.
+    A spelling that does not parse is equivalent to nothing.
+
+    Args:
+        first: A unit spelling, typically ``normalize_unit_symbol`` output.
+        second: The spelling to compare it against.
+
+    Returns:
+        True when both parse and denote one unit, False otherwise.
+    """
+    if not first or not second:
+        return False
+    try:
+        quantity = unit_registry.Quantity(1.0, first)
+        other = unit_registry.Quantity(1.0, second)
+        if quantity.dimensionality != other.dimensionality:
+            return False
+        return quantity.to(second).magnitude == 1
+    except Exception:
+        return False
+
+
 # Dimensionless markers. The IMAS DD writes "-" for a dimensionless quantity
 # (imas-python returns it verbatim); "1" and "dimensionless" are equivalent
 # spellings. These are a REAL unit — the canonical dimensionless unit "1" — not
@@ -70,14 +122,21 @@ _DIMENSIONLESS_STRINGS = frozenset({"-", "1", "dimensionless"})
 # dimensionless unit 1.
 _COUNT_PSEUDO_UNITS = frozenset({"electrons", "atoms", "events.neutron^-1"})
 
-# Ambiguous DD unit spellings: the SAME string denotes different dimensionalities
+# Ambiguous unit spellings: the SAME string denotes different dimensionalities
 # depending on the quantity, so a context-free normaliser must NOT guess.
 # "Elementary Charge Unit" is written both on charge numbers (z_ion, z_min,
 # z_max, z_n — a charge, correctly 'e') and on ionisation potentials, which are
 # ENERGIES the DD carries as 'eV' elsewhere. Typing an energy as a charge is a
 # dimensionality error, so this resolves to None here; the quantity-aware DD
 # layer assigns it from the same quantity's unambiguous unit elsewhere.
-_AMBIGUOUS_UNIT_STRINGS = frozenset({"Elementary Charge Unit"})
+#
+# "V.S" carries the same defect through SI letter case: pint reads the "S" as
+# siemens, so "V.S" becomes volt times siemens, an electric current. The
+# catalogues write it for a magnetic flux, volt times second, which is a weber.
+# Only the surrounding quantity distinguishes the two readings and this helper
+# sees the string alone, so it resolves to None rather than asserting the
+# current-dimensioned reading. Folding "S" to "s" here would be a guess.
+_AMBIGUOUS_UNIT_STRINGS = frozenset({"Elementary Charge Unit", "V.S"})
 
 # Sentinel strings that are genuinely NOT a unit (no dimensionality to assign).
 _NON_UNIT_STRINGS = frozenset(
@@ -129,6 +188,14 @@ def normalize_unit_symbol(raw: str) -> str | None:
     if raw.startswith("units given") or raw.startswith("as_parent"):
         return None
 
+    # Fold a separator-bearing degree-Celsius spelling before the canonical
+    # vocabulary is consulted. That authority parses the separator as a
+    # multiplication — "deg" times the coulomb "C", a current-times-time
+    # dimensionality — and it runs in its own registry, so the preprocessor
+    # registered on ``unit_registry`` below does not reach it. Folding first
+    # lands the spelling on the same ``degC`` name here as it does below.
+    raw = _fold_separated_celsius(raw)
+
     # Canonicalise through the SAME authority the standard-name side uses, so a
     # unit has ONE spelling across the graph. Symbol order is meaningful — a
     # power density is conventionally 'W.m^-3', not 'm^-3.W' — and the pint
@@ -143,15 +210,17 @@ def normalize_unit_symbol(raw: str) -> str | None:
         logger.debug("imas_standard_names could not canonicalise unit '%s'", raw)
 
     # Fallback: pint, for units the canonical vocabulary does not cover. Keeps
-    # a DD-only unit resolvable rather than dropping it.
+    # a DD-only unit resolvable rather than dropping it. The formatter output
+    # is returned as-is: it re-parses to exactly the unit raw denotes, which is
+    # the only property downstream code needs (see ``units_are_equivalent``).
     try:
         parsed = unit_registry.parse_expression(raw)
         compact = f"{parsed.units:~U}"
-        compact = compact.replace("Ω", "ohm")
-        return compact
     except Exception:
         logger.debug("Could not normalize unit '%s'", raw)
         return None
+
+    return compact.replace("Ω", "ohm")
 
 
 def resolve_dd_unit(dd_path: str, raw: str | None) -> str | None:

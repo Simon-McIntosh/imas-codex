@@ -12,3 +12,27 @@ unit_error = [error]
 
 # Case-sensitive aliases for MDSplus unit strings
 @alias ohm = Ohm
+
+# Catalogue free-text unit spellings. The EDDB catalogue writes units as human
+# text: letter case varies (KA, KV, Mpa, KeV, DEG), and digit exponents and
+# products are glued to the symbol (m2, m3, Pam3). A case variant of an
+# existing unit goes through @alias, so the original unit and any temperature
+# offset survive; the glued forms are units in their own right. They carry no
+# symbol: a symbol containing "^" ("m^2") is read back as an exponent chain,
+# because pint's "^" is the right-associative "**", so a glued exponent under a
+# negative power would re-parse to a different unit. A bare "n" neutron
+# numerator cannot be added without shadowing the nano prefix, so the yield-rate
+# spellings (n/day, n/s, n/shot) stay unresolved.
+@alias degree = DEG
+@alias degC = DegC = oC
+KA = 1000 ampere = kA
+KV = 1000 volt = kV
+Mpa = 1e6 pascal = MPa
+KeV = 1000 electron_volt = keV
+m2 = 1 meter ** 2
+m3 = 1 meter ** 3
+Pam3 = 1 pascal * meter ** 3
+
+# Strain gauges publish microstrain. Strain is a dimensionless ratio, so the
+# micro prefix is the unit's entire scale: 1 uST = 1e-6.
+uST = 1e-6
