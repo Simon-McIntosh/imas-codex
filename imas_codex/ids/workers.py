@@ -369,16 +369,60 @@ def release_mapping_claims_batch(source_ids: list[str]) -> None:
     release_claims_batch("SignalSource", source_ids, **_MAPPING_CLAIM_FIELDS)
 
 
+def claim_sources_for_escalated(
+    facility: str,
+    ids_names: list[str] | None = None,
+    domains: list[str] | None = None,
+    batch_size: int = 20,
+) -> list[dict[str, Any]]:
+    """Claim escalated sources whose shortlist the reasoning seat must choose from.
+
+    A source is claimable while its ``candidate_route`` is ``escalated`` and it
+    carries at least one candidate the map run can target. ``ids_names``
+    restricts the claim to sources with a candidate in one of the run's target
+    IDSs. Choosing marks the picked edges ``selected`` and sets the route to
+    ``selected`` in one statement, so a chosen source drops out of this set and
+    is claimed next by the per-IDS map pass.
+    """
+    domain_filter, domain_params = _domain_filter(domains)
+    params: dict[str, Any] = dict(domain_params)
+    ids_clause = ""
+    if ids_names:
+        ids_clause = (
+            "AND EXISTS { (n)-[r:MAPPING_CANDIDATE]->(:IMASNode) "
+            "WHERE r.ids IN $ids_names } "
+        )
+        params["ids_names"] = list(ids_names)
+    return claim_batch(
+        "SignalSource",
+        facility=facility,
+        status_predicate=(
+            "n.candidate_route = 'escalated' "
+            "AND n.mapping_disposition IS NULL " + ids_clause + domain_filter
+        ),
+        status_params=params,
+        batch_size=batch_size,
+        return_fields=_ASSIGNMENT_FIELDS,
+        return_clause=_ASSIGNMENT_RETURN,
+        timeout_seconds=CLAIM_TIMEOUT_SECONDS,
+        **_MAPPING_CLAIM_FIELDS,
+    )
+
+
 def has_pending_assignment_work(
     facility: str,
     domains: list[str] | None = None,
 ) -> bool:
-    """Check if enriched sources without mapping_status exist."""
+    """Check if escalated sources with a candidate remain unselected."""
     domain_filter, domain_params = _domain_filter(domains)
     return has_pending(
         "SignalSource",
         facility=facility,
-        status_predicate=_ASSIGNMENT_STATUS + domain_filter,
+        status_predicate=(
+            "n.candidate_route = 'escalated' "
+            "AND n.mapping_disposition IS NULL "
+            "AND EXISTS { (n)-[:MAPPING_CANDIDATE]->(:IMASNode) } " + domain_filter
+        ),
         status_params=domain_params,
     )
 
@@ -439,7 +483,9 @@ def reset_mapping_state(
                 sg.mapping_claim_token = null,
                 sg.mapping_target_ids = null,
                 sg.mapping_target_path = null,
-                sg.mapping_target_type = null
+                sg.mapping_target_type = null,
+                sg.mapping_disposition = null,
+                sg.mapping_evidence = null
             RETURN count(sg) AS cleared
             """,
             **params,
@@ -531,110 +577,129 @@ async def assign_worker(
     on_progress: Callable | None = None,
     **_kwargs,
 ) -> None:
-    """Assign sources to IMAS target paths via LLM, per-IDS batch.
+    """Choose target paths for each escalated source from its own shortlist.
 
-    For each IDS target, filters sources to those matching the IDS's
-    physics domains, then calls aassign_targets.
+    Claim loop: claims escalated sources, reads each one's candidate shortlist
+    through :func:`read_candidates`, asks the reasoning seat which listed paths
+    hold its values, and marks the picked edges selected through
+    :func:`select_candidates`, which sets the source's route to ``selected``.
+    A source the candidate stage already selected carries its marked edges and
+    is not re-asked; a ``no_candidate`` source is skipped upstream. A source
+    whose choice names no listed path has its disposition and reasoning
+    recorded as its mapping evidence, so a later run does not claim and
+    re-ask it.
     """
     wlog = WorkerLogAdapter(logger, worker_name="assign_worker")
 
-    from imas_codex.ids.mapping import aassign_targets
+    from imas_codex.ids.graph_ops import read_candidates, select_candidates
+    from imas_codex.ids.mapping import achoose_targets, escalated_shortlist
 
-    for ids_name in state.target_ids_list:
-        if state.should_stop():
-            break
+    shortlist_size = get_mapping_route_thresholds().shortlist_size
 
-        context = state.contexts.get(ids_name)
-        if not context:
-            wlog.warning("No context for %s, skipping", ids_name)
-            continue
+    # Sources whose choice was refused or that picked no path are retried on a
+    # later run, not within this one: a stable `handled` set keeps the claim
+    # loop from re-reading a source that keeps returning the same answer.
+    handled: set[str] = set()
 
-        # Filter sources to IDS-relevant physics domains
-        ids_domains = set(context.get("target_domains", []))
-        all_groups = context.get("groups", [])
-        if ids_domains:
-            groups = [g for g in all_groups if g.get("physics_domain") in ids_domains]
-        else:
-            groups = all_groups
-
-        if not groups:
-            wlog.info("No domain-matched sources for %s, skipping", ids_name)
-            continue
-
-        # Build a scoped context with only domain-matched sources
-        scoped_context = {**context, "groups": groups}
-
-        if on_progress:
-            on_progress(
-                f"assigning {ids_name} ({len(groups)} sources)",
-                state.assign_stats,
-            )
-
-        wlog.info(
-            "Assigning %d/%d sources for %s (domains=%s)",
-            len(groups),
-            len(all_groups),
-            ids_name,
-            sorted(ids_domains),
+    while not state.should_stop():
+        sources = await asyncio.to_thread(
+            claim_sources_for_escalated,
+            state.facility,
+            state.target_ids_list,
+            batch_size=1,
         )
+        sources = [s for s in sources if s["id"] not in handled]
+        if not sources:
+            state.assign_phase.record_idle()
+            if state.assign_phase.done:
+                break
+            await asyncio.sleep(2.0)
+            continue
 
-        try:
-            sections = await aassign_targets(
-                state.facility,
-                ids_name,
-                scoped_context,
-                model=state.model,
-                cost=state.cost,
-            )
-            state.assignments[ids_name] = sections
-            assigned_count = len(sections.assignments)
-            state.sources_assigned += assigned_count
-            state.assign_stats.processed += assigned_count
+        state.assign_phase.record_activity(len(sources))
 
-            # Update graph: set mapping_status='assigned' on each source
-            for a in sections.assignments:
-                await asyncio.to_thread(
-                    set_mapping_status,
-                    a.source_id,
-                    "assigned",
-                    target_ids=ids_name,
-                    target_path=a.imas_target_path,
-                    target_type=a.target_type.value,
-                )
-
-            wlog.info(
-                "Assigned %d sources for %s, cost $%.4f",
-                assigned_count,
-                ids_name,
-                state.cost.total_usd,
+        with GraphClient() as gc:
+            candidate_edges = await asyncio.to_thread(
+                read_candidates, [s["id"] for s in sources], gc
             )
 
-            if on_progress:
-                stream_items = [
-                    {
-                        "source_id": a.source_id,
-                        "target_path": a.imas_target_path,
-                        "physics_domain": next(
-                            (
-                                g.get("physics_domain", "")
-                                for g in groups
-                                if g["id"] == a.source_id
-                            ),
-                            "",
-                        ),
-                    }
-                    for a in sections.assignments
-                ]
-                on_progress(
-                    f"{assigned_count} assigned for {ids_name}",
-                    state.assign_stats,
-                    stream_items,
+            for source in sources:
+                if state.should_stop():
+                    return
+                source_id = source["id"]
+                handled.add(source_id)
+
+                shortlist = escalated_shortlist(
+                    candidate_edges.get(source_id, []), shortlist_size
+                )
+                if not shortlist:
+                    wlog.warning(
+                        "Escalated %s has no candidate to choose from, releasing",
+                        source_id,
+                    )
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+
+                try:
+                    choice = await achoose_targets(
+                        state.facility,
+                        source,
+                        shortlist,
+                        model=state.model,
+                        cost=state.cost,
+                    )
+                except Exception as e:
+                    wlog.error("Choice failed for %s: %s", source_id, e)
+                    state.assign_stats.errors += 1
+                    await asyncio.to_thread(release_mapping_claim, source_id)
+                    continue
+
+                if not choice.paths:
+                    # Persist the verdict so the source is not claimed and
+                    # re-asked, and the reasoning seat not paid again, on a
+                    # later run. The disposition and its reasoning become the
+                    # source's mapping evidence; the candidate route is left
+                    # as the candidate stage wrote it.
+                    await asyncio.to_thread(
+                        set_mapping_status,
+                        source_id,
+                        choice.disposition.value,
+                        disposition=choice.disposition.value,
+                        evidence=choice.reasoning,
+                    )
+                    state.assign_stats.processed += 1
+                    wlog.info(
+                        "No listed path for %s: disposition=%s recorded",
+                        source_id,
+                        choice.disposition.value,
+                    )
+                    continue
+
+                marked = await asyncio.to_thread(
+                    select_candidates, source_id, choice.paths, gc
+                )
+                state.sources_assigned += 1
+                state.assign_stats.processed += 1
+
+                wlog.info(
+                    "Selected %d paths for %s, cost $%.4f",
+                    marked,
+                    source_id,
+                    state.cost.total_usd,
                 )
 
-        except Exception as e:
-            wlog.error("Assignment failed for %s: %s", ids_name, e)
-            state.assign_stats.errors += 1
-            raise
+                if on_progress:
+                    on_progress(
+                        f"{source_id} -> {marked} selected",
+                        state.assign_stats,
+                        [
+                            {
+                                "source_id": source_id,
+                                "target_path": ", ".join(choice.paths),
+                                "physics_domain": source.get("physics_domain", ""),
+                            }
+                        ],
+                    )
 
     state.assign_phase.mark_done()
 
@@ -1129,6 +1194,22 @@ async def candidate_worker(
                     )
                     await asyncio.to_thread(release_mapping_claim, source_id)
                     continue
+
+                # A source with no candidate is skipped; its best path and
+                # probability are logged as the evidence for the skip.
+                if decision.decision == "no_candidate":
+                    best = max(
+                        all_judgments,
+                        key=lambda j: j.p_same_quantity,
+                        default=None,
+                    )
+                    wlog.info(
+                        "No candidate for %s: best path %s "
+                        "(p_same_quantity=%s), skipping",
+                        source_id,
+                        best.path if best else None,
+                        f"{best.p_same_quantity:.3f}" if best else None,
+                    )
 
                 records = _candidate_records(
                     all_judgments, all_candidates, set(decision.selected)

@@ -1,0 +1,20 @@
+<section>
+  <h2 id="map-run-chooses-candidates">The assign stage chooses from the shortlist</h2>
+  <table id="map-run-chooses-candidates-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/ids tests/discovery tests/cli/test_discover_map.py tests/test_cli.py tests/llm/test_prompt_rendering.py -p no:cacheprovider</code></td><td>1805 passed, 1 warning, exit 0</td></tr>
+      <tr><td>escalated pick becomes selected edges and route selected</td><td><code>TestAssignWorkerSelects::test_escalated_pick_marks_selected</code></td></tr>
+      <tr><td>a pick of two paths in two IDSs marks both</td><td><code>TestAssignWorkerSelects::test_two_paths_in_two_idss_marked_both</code></td></tr>
+      <tr><td>escalated prompt lists only the shortlist and the cross-IDS siblings</td><td><code>TestShortlistPrompt</code>, <code>TestEscalatedShortlist</code></td></tr>
+      <tr><td>a path outside the listed shortlist is refused</td><td><code>TestChoiceRefusal::test_choice_refuses_path_outside_shortlist</code></td></tr>
+      <tr><td>a choice naming paths and a disposition is refused</td><td><code>TestChoiceRefusal::test_paths_with_a_disposition_are_refused</code></td></tr>
+      <tr><td>a no_candidate source is skipped with best path and probability logged</td><td><code>TestNoCandidateLogged::test_candidate_worker_skips_and_logs_no_candidate</code></td></tr>
+      <tr><td>the semantic bridge runs only for escalated sources</td><td><code>TestSemanticBridgeNarrowed::test_bridge_runs_only_for_escalated_sources</code></td></tr>
+      <tr><td>a 'none' choice persists its disposition and evidence and is not released</td><td><code>TestNoPathVerdictPersisted::test_none_choice_persists_disposition_and_evidence</code></td></tr>
+      <tr><td>a source carrying a disposition is not claimed again</td><td><code>TestDecidedSourceNotReclaimed::test_claim_predicate_excludes_decided_sources</code></td></tr>
+      <tr><td>the mapping reset clears disposition and evidence</td><td><code>TestResetClearsVerdict::test_reset_nulls_disposition_and_evidence</code></td></tr>
+      <tr><td>negative control — <code>_validate_choice</code> accepts a path outside the shortlist</td><td>1 failed, exit 1</td></tr>
+    </tbody>
+  </table>
+</section>
