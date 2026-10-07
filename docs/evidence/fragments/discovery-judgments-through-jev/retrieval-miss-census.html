@@ -37,7 +37,7 @@
         <td>Q05 — How is the poloidal flux grid built in SELENE?</td>
         <td><code>/analysis/src/SAselene_v2.0_forPSRC/eqgrd.f</code></td>
         <td>ingested-and-embedded-but-ranked-below-30</td>
-        <td>CodeFile <code>eqgrd.f</code> (<code>SUBROUTINE EQGRD</code>) builds the grid <code>RG</code>/<code>ZG</code>/<code>DR</code>/<code>DZ</code> from the mesh bounds and geometry; it has one embedded CodeChunk (<code>embedded_at</code> 2026-10-06T11:08:32Z) and does not appear in the top 200 for Q05. The Grad-Shafranov solver <code>eqequb.f</code> (which solves <code>L(PSI)=RCU</code>) is embedded (5 chunks) and appears at deep rank 159.</td>
+        <td>CodeFile <code>eqgrd.f</code> (<code>SUBROUTINE EQGRD</code>) builds the grid <code>RG</code>/<code>ZG</code>/<code>DR</code>/<code>DZ</code> from the mesh bounds and geometry; its CodeFile now reads status <code>scored</code> at composite 0.35, below the 0.5 ingest gate, so under today's gate it is also skipped by judgment, as Q01 is. It keeps one embedded CodeChunk (<code>embedded_at</code> 2026-10-06T11:08:32Z) from an ingest before a reset, which a code reset leaves behind. That chunk does not appear in the top 200 for Q05. The Grad-Shafranov solver <code>eqequb.f</code> (which solves <code>L(PSI)=RCU</code>) is embedded (5 chunks) and appears at deep rank 159.</td>
       </tr>
       <tr id="retrieval-miss-census-q12">
         <td>Q12 — Which routine reads the plasma current into the magnetics common block?</td>
