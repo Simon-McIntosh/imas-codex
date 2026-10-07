@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="discovery-judgments-through-jev">
   <meta name="plan-title" content="Discovery Judgments Through Jev">
   <meta name="plan-summary" content="Move every judgment the discovery LLM rubric makes onto Jev typed judgments, prototype-first, and re-judge stored rows from the graph">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="20.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,7 +22,7 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -214,6 +214,18 @@
     <h4 class="r-gate-measure">call_decisions validates score-type answers (score within the level range, probabilities over the offered levels summing to 1 within the rounding tolerance), which the path and signal judgments rely on for their facet Scores</h4>
     <p class="r-gate-required-evidence">jt60sa-discovery-completion#s25</p>
     </div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261007T013029393604-search-rerank-prototype" data-who="reckon-build" data-when="2026-10-07T01:57:31.083Z">
+    <div class="r-comment-body"><p>commit: 92a1ceacca31558a975e7a89b8ba4272e6f1d113
+previous_commit: 89d52c50da0f8e97c92b03a651b90078f8d77e09
+branch: detached worktree HEAD (not pushed; coordinator merges)
+summary: &gt;
+Evidence fragment plus one SVG figure for the JT-60SA search rerank
+prototype. The second commit corrects the embedding baseline, which the
+first commit had ordered by descending rank. No repository code changed, no
+graph write, no discover run.</p></div>
+</div>
 </section>
 </main>
 </body>
