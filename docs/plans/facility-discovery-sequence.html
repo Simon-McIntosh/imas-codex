@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -435,6 +435,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T055729378160-fold-paths-stage" data-who="reckon-build" data-when="2026-10-08T06:08:59Z">
     <div class="r-comment-body"><p>run_paths_stage with frozen PathsStageOptions routes the settled options and calibrated gate through the existing path engine; committed-head gate 12 passed, 1 warning in 11.72s, and the flush negative control failed as declared.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T060942087698-review-of-fold-paths-stage" data-who="reckon-build" data-when="2026-10-08T06:33:25.436Z">
+    <div class="r-comment-body"><p>review of run r-20261008T055729378160-fold-paths-stage stored parsed at total 110 (goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 19, reuse 19), reviewed_base_sha e4ff44bba7688c71535eeacdd8086c8dc6d5b51a, reviewed_head_sha 404da8bd59fa9fb7217764b2dd8823c626ee09bc, added_failure_count 0; four follow-on findings (missing fragment, out-of-scope callers of removed flags, scan-only still starts embed/dedup helpers, reviewed manifest omits its suite arms and never ran the regression surface).</p></div>
 </div>
 </section>
 </main>
