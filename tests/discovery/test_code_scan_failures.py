@@ -69,9 +69,8 @@ def run_scan(monkeypatch, output):
         patch("imas_codex.discovery.base.facility.get_facility", return_value={}),
         patch(
             "imas_codex.remote.executor.run_python_script",
-            side_effect=(
-                output if isinstance(output, Exception) else lambda **_kwargs: output
-            ),
+            side_effect=output if isinstance(output, Exception) else None,
+            return_value=output,
         ),
     ):
         asyncio.run(workers.scan_worker(state, batch_size=2))
