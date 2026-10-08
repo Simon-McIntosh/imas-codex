@@ -376,6 +376,7 @@ def has_pending_image_work(facility: str) -> bool:
 def claim_images_for_scoring(
     facility: str,
     limit: int = 10,
+    path_prefixes: tuple[str, ...] | None = None,
 ) -> list[dict[str, Any]]:
     """Claim ingested images for VLM scoring.
 
@@ -387,14 +388,23 @@ def claim_images_for_scoring(
     cutoff = f"PT{DEFAULT_CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
 
+    path_filter = (
+        """AND EXISTS {
+                MATCH (d:Document {facility_id: $facility})-[:HAS_IMAGE]->(img)
+                WHERE any(prefix IN $path_prefixes WHERE d.path STARTS WITH prefix)
+            }"""
+        if path_prefixes is not None
+        else ""
+    )
     with GraphClient() as gc:
         gc.query(
-            """
-            MATCH (img:Image {facility_id: $facility})
+            f"""
+            MATCH (img:Image {{facility_id: $facility}})
             WHERE img.status = 'ingested'
               AND img.description IS NULL
               AND (img.claimed_at IS NULL
                    OR img.claimed_at < datetime() - duration($cutoff))
+              {path_filter}
             WITH img
             ORDER BY rand()
             LIMIT $limit
@@ -404,6 +414,7 @@ def claim_images_for_scoring(
             cutoff=cutoff,
             limit=limit,
             token=claim_token,
+            path_prefixes=path_prefixes,
         )
 
         result = gc.query(

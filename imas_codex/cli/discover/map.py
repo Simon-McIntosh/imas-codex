@@ -18,11 +18,10 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from pathlib import Path
 
 import click
-from ruamel.yaml import YAML
-from ruamel.yaml.error import YAMLError
+
+from imas_codex.cli.discover.common import resolve_focus_items
 
 logger = logging.getLogger(__name__)
 
@@ -57,37 +56,6 @@ def clear_facility_candidates(facility: str) -> dict[str, int]:
         return clear_candidates(facility, gc)
 
 
-def _resolve_focus(tokens: tuple[str, ...]) -> list[str]:
-    """Expand source IDs and YAML manifests into one ordered ID list."""
-    resolved: list[str] = []
-    for token in tokens:
-        path = Path(token)
-        if path.is_file():
-            try:
-                content = YAML(typ="safe").load(path.read_text(encoding="utf-8"))
-            except (OSError, YAMLError) as exc:
-                raise click.UsageError(
-                    f"--focus {token}: cannot read manifest: {exc}"
-                ) from exc
-            values = content.get("sources") if isinstance(content, dict) else content
-            if (
-                not isinstance(values, list)
-                or not values
-                or any(
-                    not isinstance(value, str) or not value.strip() for value in values
-                )
-            ):
-                raise click.UsageError(
-                    f"--focus {token}: manifest must list SignalSource ids in 'sources'"
-                )
-            resolved.extend(values)
-        elif path.suffix.lower() in {".yaml", ".yml", ".json"}:
-            raise click.UsageError(f"--focus manifest not found: {token}")
-        else:
-            resolved.extend(token.split())
-    return list(dict.fromkeys(resolved))
-
-
 def _validate_focus(facility: str, ids: list[str]) -> None:
     """Refuse names that do not identify a source at this facility."""
     from imas_codex.graph import GraphClient
@@ -119,7 +87,7 @@ def run_candidates_stage(
     worker. ``--focus`` restricts claims to named SignalSource identities;
     ``--limit`` caps the sources judged this run.
     """
-    focus_ids = _resolve_focus(options.focus)
+    focus_ids = resolve_focus_items(options.focus)
     if focus_ids:
         _validate_focus(facility, focus_ids)
 
@@ -275,7 +243,7 @@ def run_candidates_stage(
 @click.option(
     "--focus",
     multiple=True,
-    help="Restrict claims to SignalSource ids or a YAML manifest listing sources.",
+    help="Restrict claims to SignalSource ids or a YAML manifest listing items.",
 )
 def map_candidates(
     facility: str,

@@ -16,9 +16,12 @@ import os
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import click
+from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
 
 if TYPE_CHECKING:
     from imas_codex.discovery.base.progress import BaseProgressDisplay
@@ -28,6 +31,40 @@ logger = logging.getLogger(__name__)
 
 # Valid discovery domains
 DISCOVERY_DOMAINS = ("paths", "wiki", "signals", "code", "documents", "map")
+
+
+def resolve_focus_items(tokens: tuple[str, ...]) -> list[str]:
+    """Expand named items and YAML manifests, preserving first-seen order."""
+    resolved: list[str] = []
+    for token in tokens:
+        path = Path(token)
+        if path.is_file():
+            try:
+                content = YAML(typ="safe").load(path.read_text(encoding="utf-8"))
+            except (OSError, YAMLError) as exc:
+                raise click.UsageError(
+                    f"--focus {token}: cannot read manifest: {exc}"
+                ) from exc
+            values = content.get("items") if isinstance(content, dict) else content
+            if (
+                not isinstance(values, list)
+                or not values
+                or any(
+                    not isinstance(value, str) or not value.strip() for value in values
+                )
+            ):
+                raise click.UsageError(
+                    f"--focus {token}: manifest must be a list of items "
+                    "or a mapping with an 'items' list"
+                )
+            resolved.extend(values)
+        elif path.suffix.lower() in {".yaml", ".yml", ".json"}:
+            raise click.UsageError(f"--focus manifest not found: {token}")
+        else:
+            resolved.extend(token.split())
+    if tokens and not resolved:
+        raise click.UsageError("--focus names no items")
+    return list(dict.fromkeys(resolved))
 
 
 # =============================================================================

@@ -38,13 +38,34 @@ class _Recorder:
 
 @pytest.fixture
 def documents_env(monkeypatch):
-    """Replace the scanner, the engine and facility config with recorders."""
+    """Replace graph, scanner, engine, and facility access with local doubles."""
     rec = _Recorder()
     monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
         "imas_codex.discovery.base.facility.get_facility",
         lambda name: {"id": name, "ssh_host": SSH_HOST},
     )
+
+    class Graph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+        def query(self, cypher, **params):
+            assert "UNWIND $prefixes AS prefix" in cypher
+            assert params["facility"] == FACILITY
+            paths = ("/archive/selected/a.png", "/archive/other/b.png")
+            return [
+                {
+                    "prefix": prefix,
+                    "matches": sum(path.startswith(prefix) for path in paths),
+                }
+                for prefix in params["prefixes"]
+            ]
+
+    monkeypatch.setattr("imas_codex.graph.GraphClient", Graph)
 
     def fake_scan(
         facility,
@@ -193,19 +214,24 @@ def test_limit_caps_items(documents_env) -> None:
     assert documents_env.scan_calls[0]["max_paths"] == 3
 
 
-def test_focus_is_refused_with_the_mechanism_message(documents_env) -> None:
+def test_focus_reaches_the_draining_stage_and_unknown_path_is_refused(
+    documents_env,
+) -> None:
     result = CliRunner().invoke(
-        discover, ["documents", FACILITY, "--focus", "equilibrium"]
+        discover, ["documents", FACILITY, "--flush", "--focus", "/archive/selected"]
     )
 
-    assert result.exit_code != 0
-    assert "--focus is not supported for documents yet" in result.output
-    assert "the documents claim query takes no item filter" in result.output
-    # The refusal states the mechanism, never a plan name or section number.
-    lowered = result.output.lower()
-    assert "facility-discovery-sequence" not in lowered
-    assert "§" not in result.output
-    assert " plan " not in lowered
+    assert result.exit_code == 0, result.output
+    assert documents_env.scan_calls == []
+    assert len(documents_env.pipeline_states) == 1
+    assert documents_env.pipeline_states[0].path_prefixes == ("/archive/selected",)
+
+    unknown = CliRunner().invoke(
+        discover, ["documents", FACILITY, "--flush", "--focus", "/missing"]
+    )
+    assert unknown.exit_code != 0
+    assert "/missing" in unknown.output
+    assert len(documents_env.pipeline_states) == 1
 
 
 def test_scan_only_and_flush_together_are_refused(documents_env) -> None:

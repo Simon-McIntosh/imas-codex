@@ -134,11 +134,15 @@ def test_focus_accepts_known_ids_and_refuses_unknown_ids(
     assert len(engine_calls) == 1
     assert engine_calls[0].focus_ids == ["source-a"]
 
-    with pytest.raises(click.UsageError, match="missing-source"):
+    with pytest.raises(click.UsageError, match="missing-source") as exc_info:
         run_candidates_stage(
             FACILITY, CandidatesStageOptions(focus=("source-a", "missing-source"))
         )
     assert len(engine_calls) == 1
+    message = str(exc_info.value).lower()
+    assert "plan" not in message
+    assert "section" not in message
+    assert "§" not in message
 
 
 def test_topic_is_carried_to_the_stage(stage_env, engine_calls, caplog):

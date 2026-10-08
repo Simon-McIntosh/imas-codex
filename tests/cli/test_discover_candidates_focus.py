@@ -88,7 +88,7 @@ def test_named_sources_are_the_only_claims(focus_env):
 
 def test_manifest_produces_the_same_claims(focus_env, tmp_path):
     manifest = tmp_path / "signals.yaml"
-    manifest.write_text("sources:\n  - source-a\n", encoding="utf-8")
+    manifest.write_text("items:\n  - source-a\n", encoding="utf-8")
 
     result = run_candidates_stage(
         FACILITY, CandidatesStageOptions(focus=(str(manifest),))
@@ -99,12 +99,16 @@ def test_manifest_produces_the_same_claims(focus_env, tmp_path):
 
 
 def test_unknown_source_is_refused_by_name(focus_env):
-    with pytest.raises(click.UsageError, match="missing-source"):
+    with pytest.raises(click.UsageError, match="missing-source") as exc_info:
         run_candidates_stage(
             FACILITY, CandidatesStageOptions(focus=("source-a", "missing-source"))
         )
 
     assert focus_env == []
+    message = str(exc_info.value).lower()
+    assert "plan" not in message
+    assert "section" not in message
+    assert "§" not in message
 
 
 def test_map_command_passes_focus_to_the_stage(monkeypatch):

@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 def _claim_image_documents(
     facility: str,
     limit: int = 10,
+    path_prefixes: tuple[str, ...] | None = None,
 ) -> list[dict[str, Any]]:
     """Claim Document nodes with document_type='image' for processing.
 
@@ -35,18 +36,25 @@ def _claim_image_documents(
     from imas_codex.graph import GraphClient
 
     claim_token = str(uuid.uuid4())
+    path_filter = (
+        "AND any(prefix IN $path_prefixes WHERE d.path STARTS WITH prefix)"
+        if path_prefixes is not None
+        else ""
+    )
     with GraphClient() as gc:
         gc.query(
-            """
-            MATCH (d:Document {facility_id: $facility, document_type: 'image'})
+            f"""
+            MATCH (d:Document {{facility_id: $facility, document_type: 'image'}})
             WHERE d.status = 'discovered'
               AND d.claimed_at IS NULL
+              {path_filter}
             WITH d ORDER BY rand() LIMIT $limit
             SET d.claimed_at = datetime(), d.claim_token = $token
             """,
             facility=facility,
             limit=limit,
             token=claim_token,
+            path_prefixes=path_prefixes,
         )
         result = gc.query(
             """
@@ -123,10 +131,13 @@ async def image_fetch_worker(
         if state.scan_only:
             break
 
+        claim_options = (
+            {"path_prefixes": state.path_prefixes}
+            if state.path_prefixes is not None
+            else {}
+        )
         docs = await asyncio.to_thread(
-            _claim_image_documents,
-            state.facility,
-            limit=batch_size,
+            _claim_image_documents, state.facility, limit=batch_size, **claim_options
         )
 
         if not docs:
@@ -326,8 +337,13 @@ async def image_score_worker(
             break
 
         try:
+            claim_options = (
+                {"path_prefixes": state.path_prefixes}
+                if state.path_prefixes is not None
+                else {}
+            )
             images = await asyncio.to_thread(
-                claim_images_for_scoring, state.facility, batch_size
+                claim_images_for_scoring, state.facility, batch_size, **claim_options
             )
         except Exception as e:
             logger.warning("image_score_worker: claim failed: %s", e)
