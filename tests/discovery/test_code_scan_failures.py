@@ -5,8 +5,6 @@ import json
 import subprocess
 from unittest.mock import patch
 
-import pytest
-
 from imas_codex.discovery.code import scanner, workers
 from imas_codex.discovery.code.state import FileDiscoveryState
 
@@ -69,7 +67,12 @@ def run_scan(monkeypatch, output):
     monkeypatch.setattr(scanner, "_get_pattern_categories", lambda _facility: {})
     with (
         patch("imas_codex.discovery.base.facility.get_facility", return_value={}),
-        patch("imas_codex.remote.executor.run_python_script", side_effect=output),
+        patch(
+            "imas_codex.remote.executor.run_python_script",
+            side_effect=(
+                output if isinstance(output, Exception) else lambda **_kwargs: output
+            ),
+        ),
     ):
         asyncio.run(workers.scan_worker(state, batch_size=2))
     return claims, state
