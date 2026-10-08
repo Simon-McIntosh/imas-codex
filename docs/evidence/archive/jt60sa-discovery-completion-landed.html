@@ -150,6 +150,11 @@
     <p><strong>Repairs</strong> (merge 91da83b7a):</p><ul><li><code>_validate_decisions_answers</code> tolerates 0.005 per offered criterion plus 1e-9 on a choice's probability sum. Jev rounds each probability to two decimals.</li><li><code>scan_worker</code>'s progress line renders an unscored path as <code>-</code>.</li><li><code>llm_health_check</code> probes a local-free seat's own <code>/models</code> endpoint, through the seat's route config.</li></ul><p>Gate: 2,471 passed. Negative control: restoring the fixed 0.01 tolerance turns the 0.99 acceptance test red. Review: 114.</p><p><strong>Trial</strong> (merge 7fd28b111):</p><ul><li>The deployed content-arm decisions separate the 128-file labelled set at AUC 0.955: precision 0.702 and recall 0.892 at 0.5, n = 126.</li><li>On the seven equilibrium prefixes:<ul><li><code>geteddb.c</code>, <code>outeddb.c</code>, <code>eddbaccess.h</code>, <code>fercor.f</code> and <code>eqjt60.f</code> were ingested.</li><li><code>inpgeo.c</code> was ingested at 0.60.</li><li><code>mgset0.f</code> was scored at 0.39, below the gate.</li><li>None of the 8 MINPACK files was ingested.</li></ul></li><li>Spend: about $0.08.</li></ul><p>The trial's reported scope anomaly is not a prefix defect. A concurrent edas2 run by the lead wrote to the same <code>code_jt-60sa.log</code>. The trial's reset logged 371 files, the seven-prefix total, while the lead's reset covered the 1,286 edas2 files.</p><p>Detail: <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/relevance-trial.html">trial fragment</a>.</p>
   </section>
 
+  <section id="s53">
+    <h2>§53 — vector-index test doubles aligned with GraphClient</h2>
+    <p>Run r-20261008T064247613775-vector-index-test-repair, commit <code>abb02d6a0</code>. <code>tests/graph/test_dd_aux_streaming.py</code> and <code>tests/graph/test_vector_quantization.py</code> used fakes that predate <code>GraphClient.ensure_vector_indexes</code>. With the fakes returning what the owner returns, 9 tests pass. Disabling the dimension-mismatch drop fails both <code>TestDimensionMismatchDetection</code> tests, so the production drop is what the tests guard.</p>
+  </section>
+
 </main>
 </body>
 </html>
