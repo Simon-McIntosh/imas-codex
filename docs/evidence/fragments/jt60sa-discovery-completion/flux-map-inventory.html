@@ -1,0 +1,84 @@
+<section id="flux-map-inventory">
+  <h2 id="flux-map-inventory-heading">Readable JT-60SA poloidal flux maps</h2>
+  <p id="flux-map-inventory-summary">On 2026-10-08, a read-only walk on
+    <code>intr26-2</code> covered 19 traversable immediate <code>/home</code>
+    directories and <code>/analysis_DB</code>, without following directory
+    symlinks. It validated <strong>499</strong> equilibrium-format grids.
+    <strong>425</strong> have JT-60SA evidence in their local database path,
+    header, machine path, SA simulation input, or shot-tagged reconstruction
+    path. The other <strong>74</strong> are readable software fixtures or
+    examples without JT-60SA provenance and are retained in the JSON with a
+    null <code>facility_basis</code>; they do not enter the counts below.
+    The walk encountered 455 permission-denied branches, so the census covers
+    files this account could read, not files behind those branches.</p>
+  <p id="flux-map-inventory-method">A binary grid passed matching Fortran
+    record markers, dimension, coordinate-order, finite-value and nonconstant-ψ
+    checks. A text G EQDSK passed its header dimensions, fixed profile offset,
+    full 2D ψ count, finite-value and nonconstant-ψ checks. Each count is a
+    readable file, including copies. “Time slices” counts distinct
+    (shot, time) pairs; the SA simulations include 206 maps with a time but no
+    shot number. Every file path, owner, shot, time, grid and validation range,
+    plus text-file headers, is in the
+    <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.json">full JSON inventory</a>.</p>
+  <table id="flux-map-inventory-code-table">
+    <thead><tr><th>Producer named by header or path</th><th>Files</th><th>Owners</th><th>Known shot range</th><th>Time slices</th><th>Grid sizes [R × Z]</th></tr></thead>
+    <tbody>
+      <tr><td>CHEASE</td><td>2</td><td>d240036, d260047</td><td>101025–101025</td><td>1</td><td>129×128 (2)</td></tr>
+      <tr><td>LIUQE/MEQ</td><td>2</td><td>d240036, d260047</td><td>101011–101011</td><td>1</td><td>60×129 (2)</td></tr>
+      <tr><td>SA</td><td>282</td><td>a144017, d200024, d200025, d240036, d260047</td><td>099991–101046; 206 without shot</td><td>96</td><td>129×129 (76), 257×257 (206)</td></tr>
+      <tr><td>SELENE</td><td>133</td><td>a048717, a114004, d200024, d200025, d230014, d240034, d240036</td><td>100999–101163</td><td>101</td><td>129×129 (133)</td></tr>
+      <tr><td>TOPICS</td><td>6</td><td>a048717</td><td>080296–080296</td><td>2</td><td>129×129 (6)</td></tr>
+    </tbody>
+  </table>
+  <table id="flux-map-inventory-owner-table">
+    <thead><tr><th>File owner</th><th>Files</th><th>Producer counts</th><th>Known shot range</th><th>Time slices</th><th>Grid sizes [R × Z]</th></tr></thead>
+    <tbody>
+      <tr><td>a048717</td><td>10</td><td>SELENE 4, TOPICS 6</td><td>080296–101153</td><td>6</td><td>129×129 (10)</td></tr>
+      <tr><td>a114004</td><td>5</td><td>SELENE 5</td><td>101163–101163</td><td>1</td><td>129×129 (5)</td></tr>
+      <tr><td>a144017</td><td>212</td><td>SA 212</td><td>099991–099995; 206 without shot</td><td>33</td><td>129×129 (6), 257×257 (206)</td></tr>
+      <tr><td>d200024</td><td>8</td><td>SA 4, SELENE 4</td><td>101008–101011</td><td>7</td><td>129×129 (8)</td></tr>
+      <tr><td>d200025</td><td>156</td><td>SA 58, SELENE 98</td><td>100999–101046</td><td>115</td><td>129×129 (156)</td></tr>
+      <tr><td>d230014</td><td>3</td><td>SELENE 3</td><td>101011–101044</td><td>3</td><td>129×129 (3)</td></tr>
+      <tr><td>d240034</td><td>2</td><td>SELENE 2</td><td>101011–101011</td><td>2</td><td>129×129 (2)</td></tr>
+      <tr><td>d240036</td><td>23</td><td>CHEASE 1, LIUQE/MEQ 1, SA 4, SELENE 17</td><td>101010–101046</td><td>9</td><td>60×129 (1), 129×128 (1), 129×129 (21)</td></tr>
+      <tr><td>d260047</td><td>6</td><td>CHEASE 1, LIUQE/MEQ 1, SA 4</td><td>101011–101046</td><td>3</td><td>60×129 (1), 129×128 (1), 129×129 (4)</td></tr>
+    </tbody>
+  </table>
+  <table id="flux-map-inventory-source-table">
+    <thead><tr><th>Readable source class</th><th>JT-60SA files</th><th>Formats</th><th>Grid sizes [R × Z]</th></tr></thead>
+    <tbody>
+      <tr><td>LOCALDB/EQDSK</td><td>197</td><td>eq11 6, g_eqdsk 58, selene_eq31 133</td><td>129×129 (197)</td></tr>
+      <tr><td>LOCALDB/2M</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><td>LOCALDB G EQDSK</td><td>4</td><td>g_eqdsk 4</td><td>129×129 (4)</td></tr>
+      <tr><td>EQDB_*</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><td>G EQDSK elsewhere</td><td>224</td><td>g_eqdsk 224</td><td>60×129 (2), 129×128 (2), 129×129 (14), 257×257 (206)</td></tr>
+    </tbody>
+  </table>
+  <p id="flux-map-inventory-directories">No readable
+    <code>LOCALDB/2M</code> or <code>EQDB_*</code> equilibrium file was found;
+    <code>/analysis_DB</code> exposed <code>EDASDB</code> and <code>MBDB</code>
+    at its top level and yielded no equilibrium grid. The completed file walk
+    establishes those file counts. A separate search for empty directories
+    reached its 300-second bound, so empty deeper <code>EQDB_*</code>
+    directories are not enumerated.</p>
+  <figure id="flux-map-inventory-figure">
+    <img src="/imas-codex/figures/jt60sa-flux-maps/selene-e101163-5s.svg"
+      alt="Contours of stored poloidal flux on the R and Z grid for SELENE shot E101163 at 5 seconds">
+    <figcaption>SELENE shot E101163 at 5.000 s from
+      <code>/home/a114004/LOCALDB/EQDSK/10/1011/101163/005000</code>:
+      129 × 129 ψ(R,Z), R 1.0–5.0 m, Z −3.5–3.5 m, stored ψ
+      −0.5500–1.3938. Contour labels are stored ψ values; the figure uses the
+      data-ink style and a magnitude colour scale.</figcaption>
+  </figure>
+  <p id="flux-map-inventory-check">The committed
+    <code>scripts/check_jt60sa_flux_maps.py</code> re-read inventoried EQ31,
+    EQ11 and G EQDSK examples and verified each grid. Its bounded-root guard
+    also refused <code>/home/../etc</code>. A generic D3D G EQDSK parsed but
+    had no JT-60SA basis, providing a visible exclusion control.</p>
+  <p id="flux-map-inventory-central">Central routes remain unavailable from
+    <code>intr26-2</code>: <code>dbsvr17p</code> did not resolve, and
+    <code>/JT60SA_EQ/EQDB</code>, <code>/JT60SA_EQ/EQDB_EFIT</code>,
+    <code>/analysis_DB/EQDB</code> and <code>/analysis_DB/EQDB_EFIT</code>
+    were absent. The local files prove readable maps, not restored central
+    EQDB access.</p>
+</section>
