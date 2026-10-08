@@ -50,8 +50,6 @@ _ADJUDICATION_REASONS = {
 # inventory, while repeated entries preserve the maximum occurrence count for a
 # path, label, and property. Line movement is harmless, repaired defects may
 # shrink that count, and any excess occurrence still fails the audit.
-# CodeChunk.related_ids in ingestion/graph.py is a runtime-property allowance:
-# live coverage is 4,826/271,460, while declared CodeExample.related_ids is 0/69,746.
 _ADJUDICATED_OCCURRENCES = """
 [defect]
 imas_codex/cli/discover/__init__.py|FacilityPath|scanned_at|352,353
@@ -94,7 +92,6 @@ imas_codex/standard_names/workers.py|StandardName|name|9572
 imas_codex/tools/graph_search.py|IMASNode|units|2182,2245
 imas_codex/tools/version_tool.py|IMASNodeChange|semantic_change_type|344,345
 [runtime]
-imas_codex/tools/graph_search.py|CodeChunk|related_ids|2559,2560
 imas_codex/discovery/base/grouping.py|SignalSource|claim_token|128,260
 imas_codex/discovery/base/grouping.py|SignalSource|claimed_at|128,210,260
 imas_codex/discovery/code/graph_ops.py|FacilityPath|files_claim_token|149
@@ -118,35 +115,6 @@ imas_codex/discovery/mdsplus/graph_ops.py|SignalSource|leaf_name|537,663,744
 imas_codex/discovery/mdsplus/graph_ops.py|SignalSource|node_type|539,665,746
 imas_codex/discovery/mdsplus/graph_ops.py|SignalSource|representative_path|540,666,740,747
 imas_codex/discovery/mdsplus/tdi_linkage.py|FacilitySignal|preferred_accessor|122,123
-imas_codex/discovery/paths/frontier.py|FacilityPath|claim_token|2940,3101
-imas_codex/discovery/paths/frontier.py|FacilityPath|score_reason|2715,3349
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_analysis_code|1468,1582,3122
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_composite|284,408,1466,1577,1579,1659,1660,3095,3114
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_convention|1477
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_data_access|1472,1586,3126
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_documentation|1475,1589,3129
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_experimental_data|1471,1585,3125
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_imas|1476,1590,3130
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_modeling_code|1467,1581,3121
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_modeling_data|1470,1584,3124
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_operations_code|1469,1583,3123
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_visualization|1474,1588,3128
-imas_codex/discovery/paths/frontier.py|FacilityPath|triage_workflow|1473,1587,3127
-imas_codex/discovery/paths/frontier.py|FacilityPath|triaged_at|1465
-imas_codex/discovery/paths/parallel.py|FacilityPath|claim_token|495,553,608,738,808
-imas_codex/discovery/paths/parallel.py|FacilityPath|score_reason|1049
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_analysis_code|825
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_composite|217,219,225,272,308,327,491,604,732,754,803,823
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_convention|834
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_data_access|829
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_documentation|832
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_experimental_data|828
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_imas|833
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_modeling_code|824
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_modeling_data|827
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_operations_code|826
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_visualization|831
-imas_codex/discovery/paths/parallel.py|FacilityPath|triage_workflow|830
 imas_codex/discovery/paths/parallel.py|FacilityUser|claim_token|406
 imas_codex/discovery/paths/parallel.py|FacilityUser|claimed_at|371,372,403,404,406,2633
 imas_codex/discovery/signals/parallel.py|SignalSource|claimed_at|1611
@@ -163,9 +131,7 @@ imas_codex/ids/metadata.py|IMASMapping|code_metadata|497
 imas_codex/ids/metadata.py|IMASMapping|ids_properties_metadata|496
 imas_codex/ids/metadata.py|IMASMapping|library_metadata|498
 imas_codex/ids/metadata.py|IMASMapping|metadata_populated|499
-imas_codex/ingestion/graph.py|CodeChunk|related_ids|85,86,96,97
 imas_codex/ingestion/pipeline.py|FacilityPath|last_ingested_at|447
-imas_codex/llm/server.py|FacilityPath|triage_composite|2265,2267,2287,2290
 imas_codex/mdsplus/batch_discovery.py|SignalEpoch|boundary_refined|791
 imas_codex/mdsplus/extraction.py|SignalNode|tags|127,944
 imas_codex/standard_names/edit.py|StandardName|edit_refine|667

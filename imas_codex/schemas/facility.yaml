@@ -893,6 +893,8 @@ classes:
       claimed_at:
         description: Timestamp when the branch-level exploration claim was acquired
         range: datetime
+      claim_token:
+        description: Token binding a path claim to the worker that releases it
       in_directory:
         description: Parent directory containing this path (null for root paths)
         range: FacilityPath
@@ -947,6 +949,14 @@ classes:
         required: true
         annotations:
           required_after: scored
+      score_reason:
+        description: Explanation of the path's scored value
+      triage_composite:
+        description: First-pass composite interest score before enrichment
+        range: float
+      triaged_at:
+        description: Timestamp when first-pass path judgments were stored
+        range: datetime
       score_percentile:
         description: Percentile rank within facility (0.0-1.0), updated periodically
         range: float

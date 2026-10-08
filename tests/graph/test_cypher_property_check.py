@@ -14,6 +14,7 @@ from imas_codex.graph.schema import GraphSchema
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 STANDARD_NAME_SCHEMA = REPO_ROOT / "imas_codex" / "schemas" / "standard_name.yaml"
+FACILITY_SCHEMA = REPO_ROOT / "imas_codex" / "schemas" / "facility.yaml"
 
 
 def _graph_schema_paths() -> tuple[Path, ...]:
@@ -105,6 +106,22 @@ def test_misspelled_property_literal_is_reported_from_linkml(
     assert label in requested_labels, (
         "the declared-property universe must be read from GraphSchema.get_all_slots"
     )
+
+
+def test_undeclared_facility_path_write_is_reported(tmp_path: Path) -> None:
+    fixture = tmp_path / "path_write.py"
+    fixture.write_text(
+        "QUERY = '''MATCH (p:FacilityPath {id: $id}) "
+        "SET p.undeclared_path_marker = true'''\n",
+        encoding="utf-8",
+    )
+
+    report = _audit(_checker_module(), fixture, schemas=(GraphSchema(FACILITY_SCHEMA),))
+
+    assert report.checked_properties >= 1
+    assert [(item.label, item.property_name) for item in report.violations] == [
+        ("FacilityPath", "undeclared_path_marker")
+    ]
 
 
 def test_repository_cypher_literals_have_declared_properties() -> None:
