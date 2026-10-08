@@ -457,6 +457,7 @@ def test_cli_parses_repeated_and_comma_separated_domains(
     ("target", "expected"),
     [
         ("signals", ["paths", "code", "wiki", "signals scan", "signals enrich"]),
+        ("signals scan", ["signals scan"]),
         ("code", ["paths", "code"]),
         (
             "mapping",
