@@ -1,0 +1,94 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/discovery/test_path_judgments.py::test_typed_path_judgment_stores_distributions_and_computes_gates"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own gate logs plus an independently constructed base/head arm of the tests/discovery suite. The reviewed manifest records neither baseline_suite nor after_suite, so no manifest-recorded arm exists. I extracted revision. Base 514d32ea843a8b06e2fc9d8eff5db96169969c5f ran `uv run --no-sync pytest -p no:cacheprovider -q tests/discovery` to 1428 passed, 3 deselected, EXIT=0 (indep-discovery-base.log). Head 4d6919fdf45727941f33b60febf80243caafbc34 ran the same command to 1434 passed, 1 failed, 3 deselected, EXIT=1 (indep-discovery-head.log). The single added id is tests/discovery/test_path_judgments.py::test_typed_path_judgment_stores_distributions_and_computes_gates: at base it asserts fields[\"scan_relevance\"] == 1.1/3 against the retired maximum-of-facets gate, and at head the category gate returns 1.0, so it fails. The reviewed run's own adjacent-test.log reproduces the same failure and its manifest declares the test file out of its write grant.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -q tests/discovery",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/discovery/test_path_judgments.py::test_typed_path_judgment_stores_distributions_and_computes_gates"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T111052980769-review-of-path-category-gate/indep-discovery-head.log",
+    "revision": "4d6919fdf45727941f33b60febf80243caafbc34"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -q tests/discovery",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T111052980769-review-of-path-category-gate/indep-discovery-base.log",
+    "revision": "514d32ea843a8b06e2fc9d8eff5db96169969c5f"
+  },
+  "completed_at": "2026-10-08T11:28:20.897Z",
+  "dispatched_at": "2026-10-08T11:11:01Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_path_judgments.py",
+      "line": "118",
+      "severity": "follow-on",
+      "text": "follow-on: this test still asserts the retired maximum-of-facets scan relevance (fields[\"scan_relevance\"] == 1.1/3) and fails at the reviewed head (1 failed, 6 passed, EXIT=1 in indep-judgments.log), an added failure against a green base arm. The file is outside the reviewed node's write grant, which the manifest declares, so the repair belongs to the coordinator, not to this run's fault."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103855443292-path-category-gate/exclusion-gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log header stamps REVISION=2e901e8d2e41bbfd6609e2671f034f7583c2d879 with 46 passed, but at that commit imas_codex/discovery/paths/parallel.py carries the duplicate `excluded_purposes=` keyword in has_pending_work and the terminal read, which the same-revision nearby-suite.log shows failing with TypeError: got multiple values for keyword argument 'excluded_purposes'. The successful exclusion run could only have been taken on a tree already carrying the fix committed later as 9907c67c8, so the header names a revision that would not produce its own result."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103855443292-path-category-gate/manifest.md",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: changed_paths lists imas_codex/discovery/paths/description.py, but git diff 514d32ea8..4d6919fdf does not touch that file; the optional-description follow-on lands in models.py and the cost assertion in tests/discovery/test_path_description.py. The declaration over-names one path it did not change."
+    },
+    {
+      "file": "imas_codex/discovery/paths/scorer.py",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "follow-on: path_scan_relevance and SCAN_FACETS are now reachable only from tests/discovery/test_path_judgments.py, the out-of-scope file that still fails; production no longer calls them after path_judgment_fields switched to path_category_gate. The retired facet helper is dead production code retained by a red test."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against 514d32ea8: 45b5ae087 renames the evidence file to labelled-path-categories.json and adds the stored category distribution per canonical path; 4115e23b5 adds path_category_gate, CODE_BEARING_PURPOSES/DATA_PURPOSES/SKIPPED_PURPOSES and the category-derived scan/expand/enrich fields plus the scored-container expansion test; d977830d6 adds refresh_stored_path_gates and rewrites the status/claim queries; 2e901e8d2 hardens the container test against facet gates; 9907c67c8 de-duplicates the excluded_purposes keyword; 4d6919fdf records the measures in the fragment.",
+    "done_when": "the three named witnesses are present: test_scored_container_claim_excludes_archive pins the category+child-listing claim query (scored in expand_statuses, archive in excluded_purposes, no facet composite) over the claimed container; test_category_gate_reproduces_source_label_auc reproduces 222 canonical, 134 positive, AUC 0.9244 through paths.scorer.path_category_gate, which the focused gate ran green at head (12 passed, EXIT=0); and live-expansion-modern-python.log records /home/a144017/ACCOME/JT60SA claimed with 20 children created, errors 0. The archive not being claimed is shown by live-archive-refusal.log (zero claims) and by the test's query-shape assertion, not by a behavioural unit test.",
+    "goal": "the section splits node 2 so that the scan, expand, route-as-data and skip decisions become code over the stored path_purpose distribution and the children-worth-listing answer, admitting already-scored paths to expansion; paths/scorer.py path_category_gate returns (scan, expand) and path_judgment_fields derives scan_relevance/should_expand/should_enrich from them, and paths/parallel.py EXPANSION_GATE plus claim_paths_for_expanding admit status in {triaged,scored,explored} while excluding archive/build_artifact/system/empty_directory and the data purposes carry scan_relevance 0.",
+    "manifest": "read; status complete with six commits ending 4d6919fdf; tests line names the focused and exclusion gates; negative_control_log points at negative-control.log with a matching note; baseline_suite and after_suite are both empty; changed_paths over-declares description.py; retry_failures lists the two duplicate-keyword failures (repaired) and the single surviving out-of-scope failure.",
+    "write_paths": "git diff --stat 514d32ea8..4d6919fdf touches the nine declared code/test/evidence paths and nothing else; the only declaration discrepancy is that description.py is listed but unchanged, and the plan-declared figure path docs/figures/discovery-judgments-through-jev/path-category-gate carries no figure."
+  },
+  "justifications": {
+    "durability": "the categorise-first gate is pinned by a parametrized test over analysis_code/container/archive/modeling_data that asserts scan/expand/enrich all follow the category rather than high facet scores, by the container-claim query test, by the stored-score refresh test asserting scan_indexes == CODE_BEARING_PURPOSES, and by the AUC test asserting the 0.9244 reproduction; I independently reproduced the declared negative control (the facet-composite gate makes test_scored_container_claim_excludes_archive fail, EXIT=1, indep-negative-control.log) with the unmutated head green. The shortfall is that the container/archive exclusion is pinned by query text and a FakeGraph that returns the row unconditionally, so no unit test exercises the archive path returning no claim.",
+    "evidence": "I re-ran the focused gate at 4d6919fdf (12 passed, EXIT=0, indep-focused-gate.log), the exclusion suite at head (46 passed, EXIT=0, indep-exclusions.log) and tests/discovery at both arms (base 1428 passed EXIT=0; head 1434 passed, 1 failed EXIT=1); the AUC test reproduced 0.9244 through the production path_category_gate; and I reproduced the negative control independently; base and head trees were extracted with git archive and run with the shared environment. The gaps are that the reviewed manifest stores no baseline_suite/after_suite, and exclusion-gate.log's header revision cannot produce its own passing result.",
+    "fit": "all six commits use conventional feat/fix/test/data/docs subjects with bodies stating the mechanism and the covered cases; the new symbols (path_category_gate, CODE_BEARING_PURPOSES, DATA_PURPOSES, SKIPPED_PURPOSES, EXPANSION_GATE, refresh_stored_path_gates) name what the code does, and no message, symbol, filename or comment carries a plan, section, ticket or version identifier.",
+    "goal_fidelity": "the node's category gate is implemented in production, admits scored containers while refusing archives, refreshes stored scan relevance without re-judging, and reproduces node 1's 0.9244 AUC through paths.scorer.path_category_gate; the folded follow-ons are taken (description typed str|None with the describe-failure cost assertion, and labelled-paths-v2.json renamed to labelled-path-categories.json). One done-when element \u2014 that a scored archive is not claimed \u2014 rests on a query-shape assertion plus the live log rather than a behavioural test.",
+    "reuse": "refresh_stored_path_gates recomputes scan relevance from path_purpose_probs read through the graph rather than re-querying a model, the expansion predicate is factored into one EXPANSION_GATE string shared by the status, pending-work and claim queries instead of being duplicated, and the questions and threshold come from build_path_judgment_questions and get_path_scan_threshold. The one lapse is that path_scan_relevance/SCAN_FACETS are left as dead production code that only the out-of-scope red test still imports.",
+    "scope_discipline": "git diff --stat 514d32ea8..4d6919fdf touches only the declared code, test and evidence paths, with no unrelated reformatting; the one out-of-scope test that fails (test_path_judgments.py) was correctly left untouched and declared as a follow-on rather than edited. The only scope observation is the manifest's over-declaration of description.py."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: node 2a's category gate is in production \u2014 paths/scorer.py path_category_gate derives scan/expand from the stored path_purpose distribution and children-worth-listing, paths/parallel.py EXPANSION_GATE admits scored containers and refuses archive/data/system/build_artifact/empty_directory.\nVERDICT done_when: AUC 0.9244 over 222 canonical/134 positive reproduces through path_category_gate (12 passed EXIT=0); the scored-container claim test pins the category query; live expansion claimed /home/a144017/ACCOME/JT60SA and created 20 children. Archive-not-claimed is shown by query-shape plus the live log.\nVERDICT write_paths: diff 514d32ea8..4d6919fdf touches exactly the nine declared code/test/evidence paths; manifest over-declares description.py.\nVERDICT manifest: status complete, commits 45b5ae087..4d6919fdf; baseline_suite and after_suite empty; negative control declared.\nVERDICT diff: categories bound to judgments; category gate added; status/claim queries rewritten; container test hardened; excluded_purposes de-duplicated; measures recorded.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the category gate, scored-container admission, stored-score refresh and folded follow-ons are all present and the AUC reproduces; archive-not-claimed rests on a query-shape test plus live log rather than behaviour.\nSCORE evidence: 17\nJUSTIFICATION evidence: independent head gate 12 passed, exclusions 46 passed, base 1428 passed, head 1 added failure, negative control reproduced; but the manifest records no baseline_suite/after_suite and exclusion-gate.log's header revision cannot produce its own result.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: diff touches only declared paths with no unrelated edits and the out-of-scope failing test was left alone and declared; the manifest over-declares description.py.\nSCORE durability: 16\nJUSTIFICATION durability: parametrized category test, claim-query test, refresh test and AUC test pin the mechanism and the negative control fires; the container/archive exclusion is not exercised behaviourally and one added failure is left red in the tree.\nSCORE fit: 19\nJUSTIFICATION fit: conventional subjects with mechanism bodies throughout; no plan, section or ticket identifiers in messages, symbols or comments.\nSCORE reuse: 17\nJUSTIFICATION reuse: one EXPANSION_GATE shared by all reads and refresh from stored distributions rather than re-judging; path_scan_relevance/SCAN_FACETS left as dead production code.\nFINDING test_path_judgments.py:118 follow-on: added failure retains the retired facet-gate assertion; file is out of grant and declared.\nFINDING exclusion-gate.log:1 follow-on: header revision 2e901e8d2 cannot produce the 46-passed result shown, since that commit carries the duplicate excluded_purposes keyword it reports as fixed.\nFINDING manifest.md:6 note: changed_paths lists description.py, which the diff does not touch.\nFINDING scorer.py:58 note: path_scan_relevance/SCAN_FACETS are dead production code retained only by the out-of-scope red test.",
+  "review_run_id": "r-20261008T111052980769-review-of-path-category-gate",
+  "reviewed_base_sha": "514d32ea843a8b06e2fc9d8eff5db96169969c5f",
+  "reviewed_head_sha": "4d6919fdf45727941f33b60febf80243caafbc34",
+  "reviewed_run_id": "r-20261008T103855443292-path-category-gate",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T11:27:00.000000+00:00",
+  "total": 106,
+  "verdict": "SOUND WITH FINDINGS"
+}

@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. after_suite is head-gate.log (revision 777739b74bb79512588e7c2731e1d073d7c95bd6, 89 passed, EXIT=0); the manifest and classification carry baseline_suite: null, so the base arm is the run's base-revision log gate.log (revision 407614bfe1ce4439b496fd798e0a1d07364173b7, 87 passed, EXIT=0). Both arms report zero failures, so zero failure ids are added regardless of the base arm's construction. Caveat recorded under findings: gate.log/gate-final.log stamp revision 407614bfe1ce4439b496fd798e0a1d07364173b7 yet collect tests/discovery/test_signals_scan_errors.py, a file the diff shows as new and absent at that revision, so they ran on a dirty tree; both are green, so the zero-added conclusion is unaffected.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/stage-errors-fail-the-stage uv run --no-sync pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/stage-errors-fail-the-stage/tests/cli/test_discover_sequence.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/stage-errors-fail-the-stage/tests/discovery/test_signals_scan_errors.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/stage-errors-fail-the-stage/tests/discovery/test_signals_pipeline.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105624167600-stage-errors-fail-the-stage/head-gate.log",
+    "revision": "777739b74bb79512588e7c2731e1d073d7c95bd6"
+  },
+  "backend": "local",
+  "base_log_revision": "407614bfe1ce4439b496fd798e0a1d07364173b7",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/discovery/test_signals_scan_errors.py tests/discovery/test_signals_pipeline.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105624167600-stage-errors-fail-the-stage/gate.log",
+    "revision": "407614bfe1ce4439b496fd798e0a1d07364173b7"
+  },
+  "completed_at": "2026-10-08T11:22:26.891Z",
+  "dispatched_at": "2026-10-08T11:06:39Z",
+  "evidence_inputs": {
+    "independent_head_gate": "89 passed, EXIT=0 at head (independent_head_gate.log)",
+    "independent_negative_control": "mutating the runner to ignore receipt errors makes test_receipt_errors_fail_stage_and_skip_consumers fail, EXIT=1 (independent_negative_control.log)",
+    "manifest_baseline_suite": "null",
+    "reviewed_base_sha": "407614bfe1ce4439b496fd798e0a1d07364173b7",
+    "reviewed_head_sha": "777739b74bb79512588e7c2731e1d073d7c95bd6"
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105624167600-stage-errors-fail-the-stage/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the plan's node write paths and the run's orientation_write_paths both name docs/evidence/fragments/facility-discovery-sequence/stage-errors-fail-the-stage.html, but no fragment was produced (the diff is 144 changed lines over source and tests, so the node is not 'small' by the prompt's own 50-line rule); the dispatch prompt waives evidence prose and a figure because the done-when names no artifact, so this is a plan-versus-prompt declaration mismatch rather than a worker omission, and the landing line is recorded in the manifest instead."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105624167600-stage-errors-fail-the-stage/gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run records no baseline_suite (manifest absent, classification.json null), and its two base-revision logs (gate.log 87 passed, gate-final.log 89 passed) both stamp revision 407614bf while collecting tests/discovery/test_signals_scan_errors.py, which the diff shows as a new file absent at that revision, and run without PYTHONPATH so they import the main checkout rather than the reviewed tree; no clean pre-change arm exists. Both arms are green, so added_failure_count is zero either way."
+    }
+  ],
+  "head_log_revision": "777739b74bb79512588e7c2731e1d073d7c95bd6",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit: 777739b adds scanner_errors to the signals engine state, records returned stats['error'] and caught non-infrastructure exceptions by scanner type (plus an unregistered-scanner KeyError), returns 'errors' in both run_parallel_data_discovery return sites, merges errors through _run_with_receipt, and makes run_sequence mark a stage FAILED with the errors as reason; the two test modules pin the behaviour.",
+    "done_when": "the gate uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/discovery/test_signals_scan_errors.py tests/discovery/test_signals_pipeline.py -p no:cacheprovider passes at head 777739b74bb79512588e7c2731e1d073d7c95bd6 with 89 passed, EXIT=0, reproduced independently (independent_head_gate.log). The three named witnesses are present: a scanner returning stats={'error': 'remote scan failed'} (edas) and a scanner raising ValueError('remote catalog failed') (ppf) both appear in the receipt errors (test_scanner_failures_reach_stage_receipt[True/False]), and a receipt with errors makes signals scan FAILED and candidates DEPENDENCY_FAILED with cost retained (test_receipt_errors_fail_stage_and_skip_consumers).",
+    "goal": "the node goal is to carry each signals scanner failure into the signals stage receipt under errors so the discover runner records the stage as failed; imas_codex/discovery/signals/parallel.py adds DataDiscoveryState.scanner_errors and returns 'errors': dict(state.scanner_errors) from run_parallel_data_discovery, and imas_codex/cli/discover/sequence.py reads receipt['errors'] to mark the stage FAILED; run_signals_stage surfaces the receipt unchanged, exercised by test_scanner_failures_reach_stage_receipt.",
+    "manifest": "read; status complete, commits [777739b], tests line names the head gate (89 passed), after_suite cites head-gate.log, baseline_suite is absent and classification.json records baseline_suite: null; changed_paths lists the four source/test files but not the plan-declared fragment.",
+    "write_paths": "the manifest declares imas_codex/cli/discover/sequence.py, imas_codex/discovery/signals/parallel.py, tests/cli/test_discover_sequence.py and tests/discovery/test_signals_scan_errors.py; git diff 407614bf..777739b touches exactly those four paths (142 insertions, 2 deletions), no out-of-scope edit. The plan and the run's orientation_write_paths additionally name imas_codex/cli/discover/signals. Note: signals.py was listed but needed no change because run_signals_stage already forwards its receipt."
+  },
+  "justifications": {
+    "durability": "the behaviour is pinned by test_scanner_failures_reach_stage_receipt parametrized over scan_only for both failure modes, test_stage_without_return_preserves_receipt_errors for the receipt-merge path, and test_receipt_errors_fail_stage_and_skip_consumers asserting FAILED, reason content, cost retention and dependent-skip; the mutation negative control shows those assertions fire when the guard is removed, and the same test passes at head.",
+    "evidence": "I re-ran the full gate at head 777739b74bb79512588e7c2731e1d073d7c95bd6 and got 89 passed, EXIT=0 (independent_head_gate.log), matching the run's head-gate.log, and I independently reproduced the negative control by mutating a scratch copy of sequence.py so the runner ignores receipt errors: test_receipt_errors_fail_stage_and_skip_consumers then fails 'ran' == 'failed', EXIT=1 (independent_negative_control.log), while it passes at the unmutated head. The shortfall is the base arm: the manifest and classification record baseline_suite null, and both base-revision logs were taken on a dirty tree (they collect a test file added only at head) without PYTHONPATH, so no clean pre-change full-suite arm exists; the zero-added-failure conclusion still holds because both arms are green.",
+    "fit": "one conventional fix(discover) commit whose body states the mechanism (record failures by source, treat nonempty receipt errors as a failed stage, retain cost); no plan, section, ticket or version identifiers appear in the subject, body, the added symbol scanner_errors, or the new test module name test_signals_scan_errors.py.",
+    "goal_fidelity": "the three done-when witnesses the plan names are all present and verified at head: a returned stats error and a raised non-infrastructure error both reach the receipt keyed by scanner, and a nonempty receipt makes the runner mark signals failed and skip candidates; the plan's 'generic receipt rule' is implemented in the runner, not special-cased to signals (parallel.py:2903/2986, sequence.py:728-739).",
+    "reuse": "the change extends the existing receipt mechanism and DataDiscoveryState rather than adding a parallel path: scanner_errors is a new field on the same state object that already accumulates scan stats, the errors mapping flows through the existing _run_with_receipt merge and the existing FAILED/dependency-skip branch, so the generic rule reuses the raise path's skipping and cost accounting.",
+    "reuse_note": "",
+    "scope_discipline": "git diff 407614bf..777739b lists only the four declared source/test paths with no unrelated reformatting; the only declaration shortfall is the plan-declared evidence fragment, which was not produced (the prompt waives evidence prose, so this is a plan-versus-prompt declaration mismatch rather than a worker omission)."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: scanner failures (returned in stats and raised non-infrastructure) reach the signals receipt under errors keyed by scanner; the runner marks the stage FAILED and skips dependents.\nVERDICT done_when: gate 89 passed, EXIT=0 at head 777739b74bb79512588e7c2731e1d073d7c95bd6, independently reproduced; returned-stats and raised-error witnesses plus the FAILED-and-skip witness all present.\nVERDICT write_paths: diff 407614bf..777739b touches exactly the four declared source/test paths; the plan-declared evidence fragment was not written.\nVERDICT manifest: status complete; after_suite cites head-gate.log; baseline_suite absent/null.\nVERDICT diff: 777739b adds scanner_errors to the signals state, returns errors from run_parallel_data_discovery, merges errors in _run_with_receipt, and marks the stage FAILED in run_sequence.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all three done-when witnesses present and verified at head; the receipt rule is implemented generically in the runner.\nSCORE evidence: 16\nJUSTIFICATION evidence: independent head gate and independent negative control both reproduced, but no clean base arm exists (baseline_suite null; base logs on a dirty tree).\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: only the four declared paths touched; the plan-declared fragment was left unwritten.\nSCORE durability: 18\nJUSTIFICATION durability: parametrized tests pin both failure modes and the FAILED/skip/cost behaviour, and the mutation negative control shows the assertions fire.\nSCORE fit: 19\nJUSTIFICATION fit: one conventional fix(discover) commit with a mechanism body; no plan, section or ticket identifiers in messages, symbols or test names.\nSCORE reuse: 18\nJUSTIFICATION reuse: extends the existing receipt mechanism, state object and FAILED/dependency-skip branch rather than adding a parallel path.\nFINDING manifest.md:1 follow-on: plan-declared evidence fragment docs/evidence/fragments/facility-discovery-sequence/stage-errors-fail-the-stage.html not produced; declaration mismatch, landing recorded in the manifest.\nFINDING gate.log:1 follow-on: no baseline_suite arm; base-revision logs run on a dirty tree without PYTHONPATH, so no clean pre-change measurement exists (both arms green, so zero added failures).",
+  "review_run_id": "r-20261008T110630362792-review-of-stage-errors-fail-the-stage",
+  "reviewed_base_sha": "407614bfe1ce4439b496fd798e0a1d07364173b7",
+  "reviewed_head_sha": "777739b74bb79512588e7c2731e1d073d7c95bd6",
+  "reviewed_run_id": "r-20261008T105624167600-stage-errors-fail-the-stage",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T11:21:16.699835+00:00",
+  "total": 107,
+  "verdict": "SOUND WITH FINDINGS"
+}

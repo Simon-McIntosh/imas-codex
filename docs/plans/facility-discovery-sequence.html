@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="95">
+<meta name="plan-version" content="96">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -417,6 +417,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261008T105624167600-stage-errors-fail-the-stage" data-who="reckon-build" data-when="2026-10-08T11:05:54Z">
     <div class="r-comment-body"><p>Scanner result errors and caught scanner exceptions now reach signals receipts by scanner; nonempty receipt errors fail the stage and block dependent stages; committed-head gate 89 passed, 0 failed, negative control 1 failed.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261008T110630362792-review-of-stage-errors-fail-the-stage" data-who="reckon-build" data-when="2026-10-08T11:22:26.891Z">
+    <div class="r-comment-body"><p>Reviewed r-20261008T105624167600-stage-errors-fail-the-stage: the gate passes 89 tests at head 777739b and the negative control fires; SOUND WITH FINDINGS, total 107/120, evidence 16 for a missing clean base arm and scope 17 for an unwritten plan-declared fragment.</p></div>
 </div>
 </section>
 </main>
