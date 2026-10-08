@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f">
 <meta name="plan-impl" content="0.583">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="45">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -340,6 +340,9 @@ them, so path discovery's behaviour does not change until the deploy node.</p></
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T044843390098-review-of-path-jev-deploy" data-who="reckon-build" data-when="2026-10-08T05:16:02.548Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T035418139036-path-jev-deploy stored as a parsed record over all six dimensions (goal_fidelity 18, evidence 17, scope_discipline 16, durability 18, fit 16, reuse 20; total 105) reading base 849a1a35 and head 07477c79b, with added_failure_count 0 and no added failure ids; one blocking finding (the scored pass nulls stored physics_domain/keywords/evidence on rescore) and two follow-ons (the declared evidence fragment and figure were not written; the rewrite leaves dead score/triage helpers).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-s5-lead" data-who="lead" data-when="2026-10-08T05:40:00Z">
+    <div class="r-comment-body"><p><strong>Lead, 2026-10-08: rescore the wiki pages with Jev, JT-60SA first.</strong> Dispatch on the codex lane. <code>imas_codex/schemas/facility.yaml</code> is a shared file, resolved by merge (lead direction recorded on jt60sa-discovery-completion §44). This node edits only the WikiPage, Document and Image classes, merges origin/main before its last commit, and the coordinator accepts the path at promotion. Its JT-60SA consumer is jt60sa-discovery-completion §52. The live JT-60SA wiki is the nakasvr26 Code wiki (238 pages ingested, all 5,812 chunks embedded). The Main web, which holds the SystemDailyReport pages, is unreachable while nakasvr23 refuses SSH, so the daily-report check reads one of the stored raw pages, or records that none can be read.</p></div>
 </div>
 </section>
 </main>
