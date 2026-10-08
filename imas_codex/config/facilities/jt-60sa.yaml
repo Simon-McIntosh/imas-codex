@@ -44,6 +44,15 @@ data_systems:
     databases: [EDDB, UDDB, PMDB, LCDB, MBDB, EQDB]
     api_path: /analysis/src/eddb
     lib_path: /analysis/lib/libeddb.so
+    uddb_api_path: /analysis/src/uddb
+    uddb_lib_path: /analysis/lib/libuddb.so
+    pmdb_api_path: /analysis/src/pmdb
+    pmdb_lib_path: /analysis/lib/libpmdb.so
+    lcdb_api_path: /analysis/src/lcdbWrapper
+    lcdb_root: /analysis_DB/EDASDB
+    mbdb_api_path: /analysis/src/mbdb
+    mbdb_lib_path: /analysis/lib/libmbdb.so
+    mbdb_root: /analysis_DB/MBDB
     header_path: /analysis/src/edas/include
     # Newest E-shot the catalogue listed on 2026-10-05; valid data starts at
     # E080000 and the scanner formats an integer as E%06d.

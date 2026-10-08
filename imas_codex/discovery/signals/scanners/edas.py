@@ -123,6 +123,22 @@ class EDASScanner:
                     "api_path": api_path,
                     "lib_path": lib_path,
                     "databases": config.get("databases", ["EDDB"]),
+                    **{
+                        key: config[key]
+                        for key in (
+                            "uddb_api_path",
+                            "uddb_lib_path",
+                            "pmdb_api_path",
+                            "pmdb_lib_path",
+                            "lcdb_api_path",
+                            "lcdb_root",
+                            "mbdb_api_path",
+                            "mbdb_lib_path",
+                            "mbdb_root",
+                            "eqdb_root",
+                        )
+                        if key in config
+                    },
                 },
                 ssh_host=ssh_host,
                 timeout=180,
@@ -193,6 +209,28 @@ class EDASScanner:
                         aliases=[raw["alias"]] if raw.get("alias") else None,
                         discovery_source="edas",
                         example_shot=ref_shot,
+                    )
+                )
+                continue
+
+            if raw.get("database") == "LCDB":
+                owner = raw["category"].split("/", 2)[1]
+                source_category = raw["file_category"]
+                shot = int(raw["shot"])
+                root = raw["root"]
+                signals.append(
+                    FacilitySignal(
+                        id=f"{facility}:general/lcdb_{owner}_{source_category}_{dname}".lower(),
+                        facility_id=facility,
+                        status=FacilitySignalStatus.discovered,
+                        physics_domain="general",
+                        name=f"LCDB/{owner}/{source_category}/{dname}",
+                        accessor=f"lcdb_value({shot}, {source_category!r}, [{dname!r}], root={root!r})",
+                        data_source_name="LCDB",
+                        data_source_path=f"{owner}/{source_category}/{dname}",
+                        description=f"LCDB {source_category} {dname} from {owner}",
+                        discovery_source="edas",
+                        example_shot=shot,
                     )
                 )
                 continue
@@ -328,6 +366,18 @@ class EDASScanner:
         for s in signals:
             source = s.data_source_path or s.name or ""
             parts = source.split("/")
+            if s.data_source_name == "LCDB" and len(parts) == 3:
+                batch.append(
+                    {
+                        "id": s.id,
+                        "database": "LCDB",
+                        "owner": parts[0],
+                        "category": parts[1],
+                        "data_name": parts[2],
+                        "shot": s.example_shot,
+                    }
+                )
+                continue
             if s.data_source_name == "UDDB" and len(parts) == 2:
                 batch.append({"id": s.id, "database": "UDDB", "pid": parts[1]})
                 continue
@@ -354,6 +404,8 @@ class EDASScanner:
                     "ref_shot": shot_str,
                     "api_path": api_path,
                     "lib_path": lib_path,
+                    "lcdb_api_path": config.get("lcdb_api_path"),
+                    "lcdb_root": config.get("lcdb_root"),
                 },
                 ssh_host=ssh_host,
                 timeout=180,

@@ -122,6 +122,28 @@ def main():
     results = []
     for sig in signals:
         try:
+            if sig.get("database") == "LCDB":
+                sys.path.insert(
+                    0, config.get("lcdb_api_path") or "/analysis/src/lcdbWrapper"
+                )
+                from lcdbWrapper import LcdbWrapper
+
+                root = config.get("lcdb_root") or "/analysis_DB/EDASDB"
+                ok, _values = LcdbWrapper().lcdb_value(
+                    int(sig["shot"]),
+                    sig["category"],
+                    [sig["data_name"]],
+                    root=f"{root}/{sig['owner']}",
+                )
+                results.append(
+                    {
+                        "id": sig["id"],
+                        "success": bool(ok),
+                        "dtype": "analysis" if ok else None,
+                        "error": None if ok else "LCDB value unavailable",
+                    }
+                )
+                continue
             if sig.get("database") == "UDDB":
                 sys.path.insert(0, config.get("uddb_api_path", "/analysis/src/uddb"))
                 from uddb_pwrapper import uddbWrapper

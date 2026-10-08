@@ -19,6 +19,7 @@ from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph.models import FacilitySignal, SignalDataClass
 from imas_codex.remote.scripts.enumerate_edas import (
     attempt_database,
+    enumerate_lcdb,
     enumerate_uddb,
     main as enumerate_main,
 )
@@ -60,6 +61,60 @@ CONFIG = {
 
 
 class TestConfiguredDatabases:
+    def test_lcdb_wrapper_catalogue_is_enumerated(self, monkeypatch):
+        class AnalysisCatalogue:
+            def lcdb_shot(self, **kwargs):
+                assert kwargs["root"] == "/analysis_DB/EDASDB/owner"
+                return True, [63632]
+
+            def lcdb_dname(self, shot, category, **kwargs):
+                assert (shot, category) == (63632, "ane.s001")
+                return True, ["DNAME", "NFIT"]
+
+        monkeypatch.setitem(
+            sys.modules,
+            "lcdbWrapper",
+            SimpleNamespace(LcdbWrapper=AnalysisCatalogue, lib=object()),
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas.os.scandir",
+            lambda path: [SimpleNamespace(path=f"{path}/owner", is_dir=lambda: True)],
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas._lcdb_categories",
+            lambda lib, root, shot: (["ane.s001"], 0),
+        )
+        rows, attempt = enumerate_lcdb({"lcdb_root": "/analysis_DB/EDASDB"})
+        assert attempt["return_code"] == 0
+        assert attempt["count"] == 2
+        assert {row["data_name"] for row in rows} == {"DNAME", "NFIT"}
+        assert all(row["shot"] == 63632 for row in rows)
+
+    async def test_lcdb_signal_keeps_owner_category_and_shot(self):
+        fixture = {
+            "signals": [
+                {
+                    "database": "LCDB",
+                    "category": "LCDB/owner/ane.s001",
+                    "file_category": "ane.s001",
+                    "data_name": "NFIT",
+                    "root": "/analysis_DB/EDASDB/owner",
+                    "shot": 63632,
+                }
+            ],
+            "categories": [],
+            "ncats": 0,
+        }
+        remote = AsyncMock(return_value=json.dumps(fixture))
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", CONFIG)
+        signal = result.signals[0]
+        assert signal.id == "jt-60sa:general/lcdb_owner_ane.s001_nfit"
+        assert signal.data_source_name == "LCDB"
+        assert signal.data_source_path == "owner/ane.s001/NFIT"
+        assert signal.example_shot == 63632
+        assert "lcdb_value(63632, 'ane.s001', ['NFIT']" in signal.accessor
+
     def test_eddb_only_failure_is_reported_as_error(self, monkeypatch, capsys):
         monkeypatch.setattr(
             "imas_codex.remote.scripts.enumerate_edas.enumerate_eddb",
@@ -86,10 +141,6 @@ class TestConfiguredDatabases:
                 assert kwargs["cat"] == ""
                 return False, {"irc": 301}
 
-        class AnalysisCatalogue:
-            def lcdb_shot(self, **kwargs):
-                return False, []
-
         class LargeAnalysisCatalogue:
             def __init__(self, path):
                 assert path.endswith("libmbdb.so")
@@ -102,15 +153,11 @@ class TestConfiguredDatabases:
             sys.modules, "pmdb_wrapper", SimpleNamespace(pmdbWrapper=PlantCatalogue)
         )
         monkeypatch.setitem(
-            sys.modules, "lcdbWrapper", SimpleNamespace(LcdbWrapper=AnalysisCatalogue)
-        )
-        monkeypatch.setitem(
             sys.modules,
             "mbdbWrapper",
             SimpleNamespace(mbdbWrapper=LargeAnalysisCatalogue),
         )
         assert attempt_database("PMDB", "E101173", {})["return_code"] == 301
-        assert attempt_database("LCDB", "E101173", {})["return_code"] == 1
         assert attempt_database("MBDB", "E101173", {})["return_code"] == 1012
         with patch(
             "imas_codex.remote.scripts.enumerate_edas.os.scandir",

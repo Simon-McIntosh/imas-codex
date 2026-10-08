@@ -93,6 +93,9 @@ def main():
         if database == "UDDB":
             rows, attempt = enumerate_uddb(config)
             signals.extend(rows)
+        elif database == "LCDB":
+            rows, attempt = enumerate_lcdb(config)
+            signals.extend(rows)
         else:
             attempt = attempt_database(database, ref_shot, config)
         attempts.append(attempt)
@@ -305,6 +308,99 @@ def enumerate_uddb(config):
     return rows, attempt
 
 
+def _lcdb_categories(lib, root, shot):
+    """Read the category names from the same library used by LcdbWrapper."""
+    import ctypes
+
+    croot = ctypes.c_char_p(root.encode("utf-8"))
+    cshot = ctypes.c_int(shot)
+    count = ctypes.c_int()
+    width = ctypes.c_int()
+    code = lib.lcdbCategoryCount(croot, cshot, ctypes.byref(count), ctypes.byref(width))
+    if code != 0:
+        return [], code
+    if count.value < 0 or count.value > 10000 or width.value < 0 or width.value > 1024:
+        return [], 1
+    names = ((ctypes.c_char * (width.value + 1)) * count.value)()
+    code = lib.lcdbCategoryList(
+        croot, cshot, ctypes.byref(count), ctypes.byref(width), ctypes.byref(names)
+    )
+    if code != 0:
+        return [], code
+    return [
+        ctypes.cast(item, ctypes.c_char_p).value.decode("utf-8") for item in names
+    ], 0
+
+
+def enumerate_lcdb(config):
+    """Enumerate every readable owner, shot, category and data name."""
+    api_path = config.get("lcdb_api_path", "/analysis/src/lcdbWrapper")
+    root_base = config.get("lcdb_root", "/analysis_DB/EDASDB")
+    call = f"lcdb_shot(root=owner); lcdbCategoryList(owner, shot); lcdb_dname(shot, category, root=owner) under {root_base}"
+    try:
+        sys.path.insert(0, api_path)
+        from lcdbWrapper import LcdbWrapper, lib
+
+        db = LcdbWrapper()
+        owners = sorted(entry.path for entry in os.scandir(root_base) if entry.is_dir())
+    except Exception as exc:
+        return [], {
+            "database": "LCDB",
+            "call": call,
+            "return_code": 1,
+            "error": str(exc)[:200],
+        }
+
+    found = {}
+    roots_with_shots = 0
+    shots_seen = 0
+    categories_seen = 0
+    failures = 0
+    for root in owners:
+        try:
+            ok, shots = db.lcdb_shot(root=root)
+            if not ok or not shots:
+                continue
+            roots_with_shots += 1
+            shots_seen += len(shots)
+            owner = os.path.basename(root)
+            for shot in sorted(shots):
+                categories, code = _lcdb_categories(lib, root, shot)
+                if code != 0:
+                    failures += 1
+                    continue
+                categories_seen += len(categories)
+                for category in categories:
+                    ok, names = db.lcdb_dname(shot, category, root=root)
+                    if not ok:
+                        failures += 1
+                        continue
+                    for name in names:
+                        key = (owner, category, name)
+                        found[key] = {
+                            "database": "LCDB",
+                            "category": f"LCDB/{owner}/{category}",
+                            "file_category": category,
+                            "data_name": name,
+                            "root": root,
+                            "shot": shot,
+                        }
+        except Exception:
+            failures += 1
+    rows = list(found.values())
+    return rows, {
+        "database": "LCDB",
+        "call": call,
+        "return_code": 0 if rows else 1,
+        "count": len(rows),
+        "roots_scanned": len(owners),
+        "roots_with_shots": roots_with_shots,
+        "shots": shots_seen,
+        "categories": categories_seen,
+        "failed_calls": failures,
+    }
+
+
 def attempt_database(database, ref_shot, config):
     """Record a bounded catalogue probe when no usable channel list is exposed."""
     call = "wrapper import"
@@ -317,22 +413,6 @@ def attempt_database(database, ref_shot, config):
             ok, response = db.plantdread(cat="", dname="", t1="", t2="")
             call = "plantdread(cat='', dname='', t1='', t2='')"
             code = (response or {}).get("irc", 0 if ok else 1)
-        elif database == "LCDB":
-            sys.path.insert(0, config.get("lcdb_api_path", "/analysis/src/lcdbWrapper"))
-            from lcdbWrapper import LcdbWrapper
-
-            root = config.get("lcdb_root", "/analysis_DB/EDASDB/public")
-            ok, shots = LcdbWrapper().lcdb_shot(root=root)
-            call = f"lcdb_shot(root='{root}')"
-            code = 0 if ok else 1
-            if ok:
-                return {
-                    "database": database,
-                    "call": call,
-                    "return_code": code,
-                    "count": len(shots),
-                    "reason": "shot list has no channel catalogue",
-                }
         elif database == "MBDB":
             sys.path.insert(0, config.get("mbdb_api_path", "/analysis/src/mbdb"))
             from mbdbWrapper import mbdbWrapper
