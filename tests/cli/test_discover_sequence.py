@@ -770,3 +770,88 @@ def test_failed_stage_receipt_reduces_independent_stage_budget(monkeypatch, heal
     )
     assert _outcome(outcomes, "paths").cost == 2.0
     assert ("wiki", 8.0) in received
+
+
+UNREACHABLE_SCAN = "Command 'enumerate_edas.py' returned non-zero exit status 255."
+
+
+def test_scan_that_loses_the_host_does_not_cancel_enrichment(monkeypatch, healthy):
+    calls = []
+
+    def resolve(stage):
+        def run(*args):
+            calls.append(stage.name)
+            if stage.name == "signals scan":
+                return {"errors": {"edas": UNREACHABLE_SCAN}, "cost": 0.0}
+            return {"cost": 0.0}
+
+        return run
+
+    monkeypatch.setattr(sequence, "_stage_function", resolve)
+    outcomes = sequence.run_sequence(
+        "jt-60sa",
+        config=_config(),
+        options=sequence.SequenceOptions(only=("signals",)),
+    )
+    assert _outcome(outcomes, "signals scan").outcome == sequence.HOST_LOST
+    assert _outcome(outcomes, "signals enrich").outcome == sequence.RAN
+    assert calls == ["signals scan", "signals enrich"]
+    report = sequence._report("jt-60sa", outcomes)
+    assert "signals scan stopped: host unreachable" in report
+
+
+def test_scan_raising_ssh_exit_255_is_host_lost(monkeypatch, healthy):
+    import subprocess
+
+    calls = []
+
+    def resolve(stage):
+        def run(*args):
+            calls.append(stage.name)
+            if stage.name == "signals scan":
+                raise subprocess.CalledProcessError(255, "enumerate_edas.py")
+            return {"cost": 0.0}
+
+        return run
+
+    monkeypatch.setattr(sequence, "_stage_function", resolve)
+    outcomes = sequence.run_sequence(
+        "jt-60sa",
+        config=_config(),
+        options=sequence.SequenceOptions(only=("signals",)),
+    )
+    assert _outcome(outcomes, "signals scan").outcome == sequence.HOST_LOST
+    assert "signals enrich" in calls
+
+
+def test_stage_waits_for_the_ssh_host_to_answer(monkeypatch, healthy):
+    answers = iter([False, False, True])
+    monkeypatch.setattr(
+        sequence, "ssh_health_check", lambda host: (next(answers), "banner timeout")
+    )
+    waits = []
+    monkeypatch.setattr(sequence, "_wait", waits.append)
+    calls = _recording_stages(monkeypatch)
+    outcomes = sequence.run_sequence(
+        "jt-60sa",
+        config=_config(),
+        options=sequence.SequenceOptions(only=("code",), time_limit=60),
+    )
+    assert _outcome(outcomes, "code").outcome == sequence.RAN
+    assert [name for name, _ in calls] == ["code"]
+    assert waits == [sequence.ACCESS_RETRY_SECONDS, sequence.ACCESS_RETRY_SECONDS]
+
+
+def test_dry_run_does_not_wait_for_an_unreachable_host(monkeypatch, healthy):
+    monkeypatch.setattr(
+        sequence, "ssh_health_check", lambda host: (False, "banner timeout")
+    )
+    waits = []
+    monkeypatch.setattr(sequence, "_wait", waits.append)
+    outcomes = sequence.run_sequence(
+        "jt-60sa",
+        config=_config(),
+        options=sequence.SequenceOptions(only=("code",), dry_run=True),
+    )
+    assert _outcome(outcomes, "code").outcome == sequence.UNREACHABLE
+    assert waits == []

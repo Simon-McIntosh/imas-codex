@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import logging
+import subprocess
 import time
 from dataclasses import dataclass, fields
 
@@ -28,7 +29,30 @@ NOTHING_TO_SEED = "skipped: nothing to seed"
 NOT_SELECTED = "skipped: not selected"
 NOT_REQUESTED = "skipped: not requested"
 LIMIT_REACHED = "skipped: limit reached"
+HOST_LOST = "stopped: host unreachable"
 DOMAINS = ("paths", "code", "documents", "wiki", "signals", "candidates", "mapping")
+
+# How long a stage waits at its start for an unreachable SSH host to answer,
+# and how often it asks. The facility route can drop for a minute or two, and
+# a run that skips a stage on the first refusal loses that stage for the night.
+ACCESS_WAIT_SECONDS = 600.0
+ACCESS_RETRY_SECONDS = 30.0
+
+
+def _host_unreachable(detail: object) -> bool:
+    """True when a stage stopped only because SSH could not reach the host.
+
+    ssh exits 255 when it cannot connect. That is an outage, not a fault in
+    the stage, so it must not cancel the stages that read this one: they work
+    from what is already in the graph.
+    """
+    if isinstance(detail, subprocess.CalledProcessError):
+        return detail.returncode == 255
+    return "returned non-zero exit status 255" in str(detail)
+
+
+def _wait(seconds: float) -> None:
+    time.sleep(seconds)
 
 
 @dataclass(frozen=True)
@@ -589,10 +613,19 @@ def _report(facility: str, outcomes: list[StageOutcome]) -> str:
         rows = [outcome for outcome in outcomes if outcome.domain == domain]
         failed = next((row for row in rows if row.outcome == FAILED), None)
         ran = [row for row in rows if row.outcome == RAN]
+        lost = [row for row in rows if row.outcome == HOST_LOST]
         runnable = next((row for row in rows if row.outcome == RUNNABLE), None)
-        selected = failed or (ran[-1] if ran else None) or runnable or rows[-1]
+        selected = (
+            failed
+            or (ran[-1] if ran else None)
+            or (lost[0] if lost else None)
+            or runnable
+            or rows[-1]
+        )
         outcome = selected.outcome
         reason = selected.reason
+        if lost and selected not in lost:
+            reason += "".join(f"; {row.stage} {HOST_LOST}" for row in lost)
         done = sum(row.done for row in rows if row.done is not None)
         done_text = str(done) if any(row.done is not None for row in rows) else "—"
         remaining = sum(row.remaining for row in rows if row.remaining is not None)
@@ -680,6 +713,44 @@ def _remaining_count(stage: Stage, facility: str, result: dict) -> int | None:
     return None
 
 
+def _ssh_unreachable(outcome: StageOutcome) -> bool:
+    return outcome.outcome == UNREACHABLE and outcome.reason.startswith("ssh:")
+
+
+def _evaluate_with_wait(
+    stage: Stage, facility: str, config: dict, wait: float
+) -> StageOutcome:
+    """Evaluate a stage, re-asking an unreachable SSH host for up to ``wait``."""
+    outcome = evaluate_stage(stage, facility, config)
+    if wait <= 0 or not _ssh_unreachable(outcome):
+        return outcome
+    deadline = time.monotonic() + wait
+    logging.getLogger(__name__).warning(
+        "%s: %s; retrying every %ds for up to %ds",
+        stage.name,
+        outcome.reason,
+        ACCESS_RETRY_SECONDS,
+        wait,
+    )
+    while _ssh_unreachable(outcome):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        _wait(min(ACCESS_RETRY_SECONDS, remaining))
+        outcome = evaluate_stage(stage, facility, config)
+    return outcome
+
+
+def _access_wait(options: SequenceOptions, started: float) -> float:
+    """Seconds a stage may wait for its host, bounded by the run's time left."""
+    if options.dry_run:
+        return 0.0
+    if options.time_limit is None:
+        return ACCESS_WAIT_SECONDS
+    remaining = options.time_limit * 60 - (time.monotonic() - started)
+    return max(0.0, min(ACCESS_WAIT_SECONDS, remaining))
+
+
 def run_sequence(
     facility: str,
     *,
@@ -753,7 +824,9 @@ def run_sequence(
                     f"{failed_input} failed",
                 )
             else:
-                outcome = evaluate_stage(stage, facility, config)
+                outcome = _evaluate_with_wait(
+                    stage, facility, config, _access_wait(options, started)
+                )
         if outcome.outcome != RUNNABLE or options.dry_run:
             if stale_context:
                 outcome.reason += f"; stale context: {', '.join(stale_context)}"
@@ -788,7 +861,14 @@ def run_sequence(
                 stage_options = _stage_options(stage, options, remaining_cost, minutes)
                 result = _run_with_receipt(function, facility, stage_options)
             errors = result.get("errors")
-            outcome.outcome = FAILED if errors else RAN
+            if (
+                isinstance(errors, dict)
+                and errors
+                and all(_host_unreachable(error) for error in errors.values())
+            ):
+                outcome.outcome = HOST_LOST
+            else:
+                outcome.outcome = FAILED if errors else RAN
             outcome.reason = (
                 "; ".join(f"{name}: {error}" for name, error in errors.items())
                 if isinstance(errors, dict) and errors
@@ -801,8 +881,8 @@ def run_sequence(
             outcome.cost = float(result.get("cost", 0.0))
             spent += outcome.cost
         except (Exception, SystemExit) as exc:
-            outcome.outcome = FAILED
             detail = exc.__cause__ or exc
+            outcome.outcome = HOST_LOST if _host_unreachable(detail) else FAILED
             outcome.reason = f"{type(detail).__name__}: {detail}"
             outcome.cost = sum(
                 float(receipt.get("cost", 0.0))
