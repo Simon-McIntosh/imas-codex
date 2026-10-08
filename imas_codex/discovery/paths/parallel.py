@@ -37,9 +37,11 @@ from imas_codex.discovery.base.supervision import (
     is_infrastructure_error,
 )
 from imas_codex.discovery.paths.scorer import (
+    CODE_BEARING_PURPOSES,
     DATA_PURPOSES,
     PATH_EXPAND_THRESHOLD,
     SKIPPED_PURPOSES,
+    build_path_judgment_questions,
 )
 from imas_codex.graph.models import PathStatus, TerminalReason
 from imas_codex.graph.query_builder import build_path_prefix_filter
@@ -69,6 +71,47 @@ def _expansion_gate_params() -> dict[str, Any]:
         "excluded_purposes": sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
         "expand_threshold": PATH_EXPAND_THRESHOLD,
     }
+
+
+@retry_on_deadlock()
+def refresh_stored_path_gates(facility: str, batch_size: int = 500) -> int:
+    """Recompute scan relevance from stored choices without rejudging paths."""
+    from imas_codex.graph import GraphClient
+
+    options = list(build_path_judgment_questions()["path_purpose"]["criteria"])
+    indexes = [
+        index
+        for index, purpose in enumerate(options)
+        if purpose in CODE_BEARING_PURPOSES
+    ]
+    updated = 0
+    with GraphClient() as gc:
+        while True:
+            rows = gc.query(
+                """
+                MATCH (p:FacilityPath {facility_id: $facility})
+                WHERE p.path_purpose_probs IS NOT NULL
+                  AND size(p.path_purpose_probs) = $option_count
+                WITH p, reduce(value = 0.0, index IN $scan_indexes |
+                    value + coalesce(p.path_purpose_probs[index], 0.0)) AS raw_score
+                WITH p, CASE WHEN p.path_purpose IN $excluded_purposes
+                    THEN 0.0 ELSE raw_score END AS score
+                WHERE p.scan_relevance IS NULL
+                   OR abs(p.scan_relevance - score) > 0.000001
+                WITH p, score ORDER BY rand() LIMIT $limit
+                SET p.scan_relevance = score
+                RETURN count(p) AS updated
+                """,
+                facility=facility,
+                option_count=len(options),
+                scan_indexes=indexes,
+                excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
+                limit=batch_size,
+            )
+            count = rows[0]["updated"] if rows else 0
+            updated += count
+            if count < batch_size:
+                return updated
 
 
 @dataclass
@@ -135,6 +178,7 @@ class DiscoveryState(DiscoveryStateBase):
         Both must not be awaiting expansion or enrichment.
         """
         from imas_codex.graph import GraphClient
+        from imas_codex.settings import get_path_scan_threshold
 
         with GraphClient() as gc:
             result = gc.query(
@@ -142,12 +186,16 @@ class DiscoveryState(DiscoveryStateBase):
                 MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
                 WHERE p.status IN [$triaged, $scored]
                   AND (NOT ({EXPANSION_GATE}))
-                  AND (p.should_enrich = false OR p.is_enriched = true)
+                  AND (p.path_purpose IN $excluded_purposes
+                       OR (p.should_enrich = false AND p.scan_relevance < $minimum)
+                       OR p.is_enriched = true)
                 RETURN count(p) AS terminal_count
                 """,
                 facility=self.facility,
                 triaged=PathStatus.triaged.value,
                 scored=PathStatus.scored.value,
+                minimum=get_path_scan_threshold(),
+                excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
                 **_expansion_gate_params(),
             )
             return result[0]["terminal_count"] if result else 0
@@ -233,6 +281,7 @@ def has_pending_work(facility: str) -> bool:
     pending to prevent premature termination while workers are mid-task.
     """
     from imas_codex.graph import GraphClient
+    from imas_codex.settings import get_path_scan_threshold
 
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     with GraphClient() as gc:
@@ -246,10 +295,13 @@ def has_pending_work(facility: str) -> bool:
                       THEN 'scanned' ELSE null END AS scn,
                  CASE WHEN {EXPANSION_GATE}
                       THEN 'expand' ELSE null END AS exp,
-                 CASE WHEN p.status = $triaged AND p.should_enrich = true
+                 CASE WHEN p.status = $triaged
+                      AND NOT (p.path_purpose IN $excluded_purposes)
+                      AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
                       AND (p.is_enriched IS NULL OR p.is_enriched = false)
                       THEN 'enrich' ELSE null END AS enr,
                  CASE WHEN p.is_enriched = true
+                      AND NOT (p.path_purpose IN $excluded_purposes)
                       AND p.scored_at IS NULL
                       THEN 'score' ELSE null END AS rsc
             WHERE (disc IS NOT NULL OR scn IS NOT NULL OR exp IS NOT NULL
@@ -266,6 +318,8 @@ def has_pending_work(facility: str) -> bool:
             discovered=PathStatus.discovered.value,
             scanned=PathStatus.scanned.value,
             triaged=PathStatus.triaged.value,
+            minimum=get_path_scan_threshold(),
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             **_expansion_gate_params(),
             **excluded_params,
         )
@@ -348,23 +402,28 @@ def _has_pending_triage_work(facility: str) -> bool:
         return bool(result and result[0]["has_work"])
 
 
-def _has_pending_enrich_work(facility: str) -> bool:
+def _has_pending_enrich_work(facility: str, threshold: float | None = None) -> bool:
     """Check if there are triaged paths awaiting enrichment."""
     from imas_codex.graph import GraphClient
+    from imas_codex.settings import get_path_scan_threshold
 
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
+    minimum = get_path_scan_threshold() if threshold is None else threshold
     with GraphClient() as gc:
         result = gc.query(
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
-              AND p.should_enrich = true
+              AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
+              AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
               {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
+            minimum=minimum,
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             **excluded_params,
         )
         return bool(result and result[0]["has_work"])
@@ -384,11 +443,13 @@ def _has_pending_score_work(facility: str) -> bool:
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.is_enriched = true
+              AND NOT (p.path_purpose IN $excluded_purposes)
               AND p.scored_at IS NULL
               {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             **excluded_params,
         )
         return bool(result and result[0]["has_work"])
@@ -767,12 +828,10 @@ def claim_paths_for_enriching(
     )
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
 
-    if auto_enrich_threshold is not None:
-        enrich_clause = (
-            "(p.should_enrich = true OR p.scan_relevance >= $auto_enrich_threshold)"
-        )
-    else:
-        enrich_clause = "p.should_enrich = true"
+    if auto_enrich_threshold is None:
+        from imas_codex.settings import get_path_scan_threshold
+
+        auto_enrich_threshold = get_path_scan_threshold()
 
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(_uuid.uuid4())
@@ -781,7 +840,8 @@ def claim_paths_for_enriching(
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
-              AND {enrich_clause}
+              AND (p.should_enrich = true OR p.scan_relevance >= $auto_enrich_threshold)
+              AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               AND (p.total_dirs IS NULL OR p.total_dirs <= 500)
@@ -795,6 +855,7 @@ def claim_paths_for_enriching(
             triaged=PathStatus.triaged.value,
             cutoff=cutoff,
             auto_enrich_threshold=auto_enrich_threshold,
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             token=claim_token,
             **scope_params,
             **excluded_params,
@@ -803,6 +864,7 @@ def claim_paths_for_enriching(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
+              AND NOT (p.path_purpose IN $excluded_purposes)
               {scope_clause}
               {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth, p.triage_composite AS triage_composite,
@@ -810,6 +872,7 @@ def claim_paths_for_enriching(
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             token=claim_token,
             **scope_params,
             **excluded_params,
@@ -857,6 +920,7 @@ def claim_paths_for_scoring(
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.is_enriched = true
               AND p.scan_relevance >= $min_score
+              AND NOT (p.path_purpose IN $excluded_purposes)
               AND p.scored_at IS NULL
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               {scope_clause}
@@ -868,6 +932,7 @@ def claim_paths_for_scoring(
             limit=limit,
             cutoff=cutoff,
             min_score=threshold,
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             token=claim_token,
             **scope_params,
             **excluded_params,
@@ -876,6 +941,7 @@ def claim_paths_for_scoring(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.is_enriched = true
+              AND NOT (p.path_purpose IN $excluded_purposes)
               {scope_clause}
               {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth,
@@ -913,6 +979,7 @@ def claim_paths_for_scoring(
             """,
             facility=facility,
             token=claim_token,
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             **scope_params,
             **excluded_params,
         )
@@ -2734,6 +2801,7 @@ async def run_parallel_discovery(
     # only one that should own claims for this facility, so force-clearing is
     # safe and prevents stale claims from a recently-crashed run blocking work.
     reset_orphaned_claims(facility, force=True)
+    refresh_stored_path_gates(facility)
 
     # Ensure we have paths to discover
     stats = get_discovery_stats(facility)
@@ -2779,7 +2847,10 @@ async def run_parallel_discovery(
         )
     )
     state.enrich_phase.set_has_work_fn(
-        lambda: _has_pending_enrich_work(facility) or not state.triage_phase.done
+        lambda: (
+            _has_pending_enrich_work(facility, resolved_enrich)
+            or not state.triage_phase.done
+        )
     )
     state.score_phase.set_has_work_fn(
         lambda: _has_pending_score_work(facility) or not state.enrich_phase.done

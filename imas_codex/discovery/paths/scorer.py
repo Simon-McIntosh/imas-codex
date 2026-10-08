@@ -106,10 +106,11 @@ def path_judgment_fields(
         ]
         fields[f"{stored}_confidence"] = float(answer["confidence"])
     distribution = dict(zip(options, fields["path_purpose_probs"], strict=True))
-    fields["scan_relevance"], _ = path_category_gate(
+    scan_relevance, _ = path_category_gate(
         distribution, fields["children_worth_listing"]
     )
     restricted = choice in DATA_PURPOSES | SKIPPED_PURPOSES
+    fields["scan_relevance"] = 0.0 if restricted else scan_relevance
     fields["should_expand"] = not restricted and (
         choice == "container"
         or fields["children_worth_listing"] >= PATH_EXPAND_THRESHOLD

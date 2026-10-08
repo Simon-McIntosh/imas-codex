@@ -266,7 +266,13 @@ def get_discovery_stats(facility: str) -> dict[str, Any]:
         Dict with counts: total, discovered, scanned, scored, skipped, excluded,
         max_depth, claimed (paths with active claims)
     """
+    from imas_codex.discovery.paths.scorer import (
+        DATA_PURPOSES,
+        PATH_EXPAND_THRESHOLD,
+        SKIPPED_PURPOSES,
+    )
     from imas_codex.graph import GraphClient
+    from imas_codex.settings import get_path_scan_threshold
 
     with GraphClient() as gc:
         result = gc.query(
@@ -280,15 +286,32 @@ def get_discovery_stats(facility: str) -> dict[str, Any]:
                 sum(CASE WHEN p.status = $skipped THEN 1 ELSE 0 END) AS skipped,
                 sum(CASE WHEN p.terminal_reason = $excluded_reason THEN 1 ELSE 0 END) AS excluded,
                 sum(CASE WHEN p.claimed_at IS NOT NULL THEN 1 ELSE 0 END) AS claimed,
-                sum(CASE WHEN p.status = $triaged AND p.should_expand = true AND p.expanded_at IS NULL THEN 1 ELSE 0 END) AS expansion_ready,
-                sum(CASE WHEN p.status = $triaged AND p.should_enrich = true AND (p.is_enriched IS NULL OR p.is_enriched = false) THEN 1 ELSE 0 END) AS enrichment_ready,
+                sum(CASE WHEN p.status IN $expand_statuses
+                    AND NOT (p.path_purpose IN $excluded_purposes)
+                    AND (p.path_purpose = 'container' OR p.children_worth_listing >= $expand_threshold)
+                    AND p.expanded_at IS NULL THEN 1 ELSE 0 END) AS expansion_ready,
+                sum(CASE WHEN p.status = $triaged
+                    AND NOT (p.path_purpose IN $excluded_purposes)
+                    AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
+                    AND (p.is_enriched IS NULL OR p.is_enriched = false)
+                    THEN 1 ELSE 0 END) AS enrichment_ready,
                 sum(CASE WHEN p.is_enriched = true THEN 1 ELSE 0 END) AS enriched,
                 sum(CASE WHEN p.status = $triaged THEN 1 ELSE 0 END) AS triaged,
                 sum(CASE WHEN p.status = $explored THEN 1 ELSE 0 END) AS explored,
-                sum(CASE WHEN p.is_enriched = true AND p.scored_at IS NULL THEN 1 ELSE 0 END) AS score_ready,
+                sum(CASE WHEN p.is_enriched = true
+                    AND NOT (p.path_purpose IN $excluded_purposes)
+                    AND p.scored_at IS NULL THEN 1 ELSE 0 END) AS score_ready,
                 max(coalesce(p.depth, 0)) AS max_depth
             """,
             facility=facility,
+            expand_statuses=[
+                PathStatus.triaged.value,
+                PathStatus.scored.value,
+                PathStatus.explored.value,
+            ],
+            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
+            expand_threshold=PATH_EXPAND_THRESHOLD,
+            minimum=get_path_scan_threshold(),
             discovered=PathStatus.discovered.value,
             scanned=PathStatus.scanned.value,
             triaged=PathStatus.triaged.value,

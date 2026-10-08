@@ -91,6 +91,32 @@ def test_scored_container_claim_excludes_archive(monkeypatch):
     assert "p.should_expand" not in claim
 
 
+def test_stored_judgments_refresh_scan_gate_without_rejudging(monkeypatch):
+    from imas_codex.discovery.paths import parallel
+
+    calls = []
+
+    class FakeGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def query(self, statement, **params):
+            calls.append((statement, params))
+            return [{"updated": 1 if len(calls) == 1 else 0}]
+
+    monkeypatch.setattr("imas_codex.graph.GraphClient", FakeGraph)
+    assert parallel.refresh_stored_path_gates("jt-60sa", batch_size=1) == 1
+    query, params = calls[0]
+    assert "p.path_purpose_probs[index]" in query
+    assert "SET p.scan_relevance = score" in query
+    assert "archive" in params["excluded_purposes"]
+    options = list(build_path_judgment_questions()["path_purpose"]["criteria"])
+    assert {options[index] for index in params["scan_indexes"]} == CODE_BEARING_PURPOSES
+
+
 def test_category_gate_reproduces_source_label_auc():
     path = (
         Path(__file__).resolve().parents[2]
