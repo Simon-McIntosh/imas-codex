@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
 <meta name="plan-impl" content="0.562">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -470,6 +470,9 @@ them, so path discovery's behaviour does not change until the deploy node.</p></
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261008-s5-landing" data-who="reckon-build" data-when="2026-10-08T07:12:00Z">
     <div class="r-comment-body"><p>The review raised three follow-ons. First, the with-and-without-matches comparison is unpaired: 60 of 80 rows differ although only 22 carry a match, so the reported 0.003 difference sits inside run-to-run variation, the same finding as §15. Second, the wiki runner's progress status still counts pages above the retired 0.5 (<code>wiki/parallel.py</code> around line 1028). Third, the document progress label still marks scores below 0.5 as skipped (<code>wiki/progress.py</code> line 741). The coordinator found a fourth at integration. <code>discover wiki</code> builds <code>WikiStageOptions.min_score</code> with a default of 0.5 and passes it to <code>run_parallel_wiki_discovery</code>, which overrides the new 0.16 <code>CONTENT_INGEST_THRESHOLD</code> default. Until the CLI default reads that constant, a wiki run without <code>--min-score 0.16</code> ingests at the retired threshold. The CLI belongs to the session that folded the discover stages, which was asked to change it.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T054628859296-wiki-jev-judgments" data-who="reckon-build" data-when="2026-10-08T06:52:13Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/discovery-judgments-through-jev/wiki-jev-judgments.html records the shared Jev gate, 80-page AUC 0.989333 with matches versus 0.929333 stored language-model score, 0.16 cutoff, USD 0.01543109 spend, and 603-pass merged gate.</p></div>
 </div>
 <div class="r-comment" data-section="s14" data-id="c-20261008-s14-describe-shape" data-who="reckon-build" data-when="2026-10-08T06:25:00Z">
     <div class="r-comment-body"><p><strong>The describe step blocks every JT-60SA path pass</strong> (measured 2026-10-08 08:03 to 08:06 in
