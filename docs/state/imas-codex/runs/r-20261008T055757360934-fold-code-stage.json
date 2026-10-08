@@ -1,0 +1,6006 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "e4ff44bba7688c71535eeacdd8086c8dc6d5b51a",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 8196736,
+      "cached_input_tokens_cumulative": 8196736,
+      "input_tokens": 8326686,
+      "input_tokens_cumulative": 8326686,
+      "output_tokens": 24507,
+      "output_tokens_cumulative": 24507,
+      "reasoning_output_tokens": 9464,
+      "reasoning_output_tokens_cumulative": 9464
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 255,
+    "files": 2,
+    "removed": 35
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "run_code_stage",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 373
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 77
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 77
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 77
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 76
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_focus_run_preflights_before_graph_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 80
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 1132,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_see_also_in_report",
+        "path": "tests/search/test_cluster_output.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 80
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 335,
+        "name": "test_cli_reaches_atomic_operator",
+        "path": "tests/standard_names/test_accepted_cohort_restage.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 80
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 583,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 948,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 79
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 713,
+        "name": "test_approval_creates_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 81
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_existing_rc_tag_does_not_block_approval",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 81
+    },
+    {
+      "existing_function": {
+        "line": 813,
+        "name": "test_undo_removes_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 81
+    },
+    {
+      "existing_function": {
+        "line": 855,
+        "name": "test_undo_restores_the_exact_rc_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 81
+    },
+    {
+      "existing_function": {
+        "line": 1018,
+        "name": "test_approval_locates_the_labelled_artifact_and_tags_the_version",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 81
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 78
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 132
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 132
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 132
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_focus_run_preflights_before_graph_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 1132,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_see_also_in_report",
+        "path": "tests/search/test_cluster_output.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 335,
+        "name": "test_cli_reaches_atomic_operator",
+        "path": "tests/standard_names/test_accepted_cohort_restage.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 583,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 948,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 136
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 713,
+        "name": "test_approval_creates_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_existing_rc_tag_does_not_block_approval",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 813,
+        "name": "test_undo_removes_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 855,
+        "name": "test_undo_restores_the_exact_rc_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 1018,
+        "name": "test_approval_locates_the_labelled_artifact_and_tags_the_version",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "window_line": 133
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "81517ae3b97c19010a379c8b5fefd59eb956f0e0"
+  ],
+  "completed_at": "2026-10-08T06:10:27Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T05:58:22Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "imas_codex/discovery/code/parallel.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/cli/test_discover_code_stage.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055757360934-fold-code-stage/gate-final.log"
+  },
+  "impl_move": {
+    "at_complete": 0.175,
+    "at_dispatch": 0.175,
+    "plan": "facility-discovery-sequence",
+    "reason": "section 3 closes with the runner and the retire node",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.2429956957103205,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T21:50:47Z, which is after this node's 3600s horizon ending 2026-10-08T06:58:00.955104+00:00",
+    "horizon_ends_at": "2026-10-08T06:58:00.955104+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T05:57:59Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T21:50:47Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 515819,
+    "state": "quiet",
+    "utilisation_pct": 33.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T05:57:59Z",
+    "read_at": "2026-10-08T05:58:00Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 33.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T06:10:27Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055757360934-fold-code-stage/manifest.md",
+  "member": "disposable-r-20261008T055757360934-fold-code-stage",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/cli/test_discover_code_stage.py::test_flush_runs_only_the_draining_workers"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/cli/test_discover_code_stage.py::test_flush_runs_only_the_draining_workers"
+    ],
+    "declaration": "make the stage function ignore --flush and run the seeding workers too; the --flush test must then fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055757360934-fold-code-stage/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055757360934-fold-code-stage/negative-control.log",
+    "test_paths": [
+      "tests/cli/test_discover_code_stage.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fold-code-stage",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1893,
+          "cached_input_tokens": 722970,
+          "input_tokens": 724865,
+          "output_tokens": 991,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 725856,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "tests/cli/test_discover_code_stage.py passes showing --scan-only runs only the seeding workers, --flush runs only the draining workers, --topic reaches the scorer the old free-text --focus reached, --limit caps items, and --focus ITEMS restricts the run through the existing path-prefix filter (code --path-prefix); the stage's path gate defaults to get_path_scan_threshold(), the Jev-calibrated gate, never get_discovery_threshold(); the click command is a thin wrapper that builds the options and calls the stage function; no plan name or section number appears in source; and the tests that drove the old command still pass",
+    "estimated_hours": null,
+    "goal": "Extract run_code_stage(facility, options) with a frozen options dataclass from the discover code click command in imas_codex/cli/discover/code.py using the settled discover option spellings, folding --path-prefix into --focus",
+    "id": "fold-code-stage",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T05:57:59Z",
+      "read_at": "2026-10-08T05:58:00Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 33.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055757360934-fold-code-stage/manifest.md",
+    "negative_control": "make the stage function ignore --flush and run the seeding workers too; the --flush test must then fail",
+    "plan": "facility-discovery-sequence",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/cli/discover/code.py",
+      "tests/cli/test_discover_code_stage.py",
+      "docs/evidence/fragments/facility-discovery-sequence/fold-code-stage.html",
+      "docs/figures/facility-discovery-sequence/fold-code-stage"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.242808154013642,
+      "derived": 0.16185066892609132,
+      "drain_hours": 168.0,
+      "effective_limit": 0.16185066892609132,
+      "elapsed_fraction": 0.1471369717509921,
+      "elapsed_hours": 24.719011254166674,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T05:58:07+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.6699999999999999,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.33,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.254826,
+      "decided_by": "window",
+      "margin": 0.38892400000000005,
+      "name": "fold-code-stage",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.33
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.440515,
+        "observed_at": "2026-10-08T05:58:07+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.33,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "fold-code-stage",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T05:58:07.440515+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "The lead asked to use the codex lane to raise throughput while the local lane is congested; codex weekly window 32% used, resets 2026-10-14.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.593,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "facility-discovery-sequence",
+  "plan_impl_at_dispatch": 0.175,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "81517ae3b97c19010a379c8b5fefd59eb956f0e0",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e4ff44bba7688c71535eeacdd8086c8dc6d5b51a",
+    "reviewed_head_sha": "81517ae3b97c19010a379c8b5fefd59eb956f0e0",
+    "scores": {
+      "durability": 19,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 111
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T055757360934-fold-code-stage",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "mapping-20261006",
+  "session_harness": "codex",
+  "session_id": "01a11a17-839a-7640-a7ee-89f190c13d78",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 7,
+  "throughput": {
+    "cumulative_cached_input_tokens": 8196736,
+    "cumulative_input_tokens": 16523422,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 33971
+  },
+  "time_budget": "60m",
+  "tool_steps": 87.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 725,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T06:10:29Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T05:58:28Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T055757360934-fold-code-stage",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 246,
+    "worker_pid": 1949190
+  },
+  "worker_seconds": 725,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
