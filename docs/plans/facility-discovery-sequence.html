@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="88">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -526,6 +526,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T093047410719-retire-domain-subcommands" data-who="reckon-build" data-when="2026-10-08T09:55:50Z">
     <div class="r-comment-body"><p>Retired six domain commands and moved owned callers to discover FACILITY --only DOMAIN; final gate 543 passed, owned grep 0 matches, help shows wiki min-score default 0.16, and documents retains default 0.5.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T100011929810-review-of-retire-domain-subcommands" data-who="reckon-build" data-when="2026-10-08T10:18:25.017Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261008T093047410719-retire-domain-subcommands stored parsed at total 112/120 (SOUND WITH FINDINGS): six retired domain wrappers and registrations deleted, code callers and source hints moved to `discover FACILITY --only DOMAIN`, ten test files migrated and the gate green at head 29711e0388534dd19ad0668553e6cdd955e1fddb against base d3bbc51a106e46bac02d5a0d26a6b99b6d83b019; added_failure_count 0, added_failure_ids []; four follow-on findings (wiki.py changelog docstring and a retired --score-only runtime hint, the missing node fragment, and the manifest leaving baseline_suite empty).</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261008T064515993215-review-of-focus-candidates" data-who="reckon-build" data-when="2026-10-08T07:03:54.008Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T061140828099-focus-candidates stored as a parsed record scoring goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 18, reuse 18 (total 108), verdict SOUND WITH FINDINGS, reviewed_base_sha ad49d924d10ce972975339230f51bd72ccd93e62 and reviewed_head_sha 7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e, with added_failure_count 0 derived from clean arms at both revisions; four follow-on findings, no blocker.</p></div>
