@@ -51,13 +51,19 @@ def _generate_ref_id(facility: str, ref_type: str, raw_string: str) -> str:
 def link_chunks_to_edas_signals(
     graph_client: GraphClient | None = None,
     example_ids: list[str] | None = None,
+    *,
+    facility_id: str,
 ) -> dict[str, int]:
-    """Backfill stored JT-60SA code reads and resolve literal signal keys.
+    """Backfill stored code reads and resolve literal EDAS signal keys.
 
     Reads only stored CodeChunk text. It never contacts a facility or reruns
     discovery, so ingestion and backfill share the same extraction path.
     """
+    from imas_codex.discovery.base.facility import get_facility
     from imas_codex.ingestion.extractors.edas import extract_edas_references
+
+    if "edas" not in (get_facility(facility_id).get("data_systems") or {}):
+        raise ValueError(f"EDAS is not configured for {facility_id}")
 
     selection = (
         "AND c.code_example_id IN $example_ids" if example_ids is not None else ""
@@ -67,7 +73,7 @@ def link_chunks_to_edas_signals(
             "MATCH (c:CodeChunk {facility_id: $facility}) "
             f"WHERE c.text IS NOT NULL {selection} "
             "RETURN c.id AS id, c.text AS text",
-            facility="jt-60sa",
+            facility=facility_id,
             example_ids=example_ids,
         )
         rows = []
@@ -76,7 +82,9 @@ def link_chunks_to_edas_signals(
                 rows.append(
                     {
                         "chunk_id": chunk["id"],
-                        "id": _generate_ref_id("jt-60sa", ref.ref_type, ref.raw_string),
+                        "id": _generate_ref_id(
+                            facility_id, ref.ref_type, ref.raw_string
+                        ),
                         "raw_string": ref.raw_string,
                         "ref_type": ref.ref_type,
                         "category": ref.category,
@@ -115,7 +123,7 @@ def link_chunks_to_edas_signals(
                 RETURN count(s) AS resolved
                 """,
                 rows=rows[offset : offset + 200],
-                facility="jt-60sa",
+                facility=facility_id,
             )
             resolved += result[0]["resolved"] if result else 0
         return {

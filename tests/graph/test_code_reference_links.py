@@ -86,7 +86,9 @@ def test_real_code_reference_links_and_missing_count_guard():
                 id=chunk_id,
             )[0]["roots"] == [ids_id]
 
-            counts = link_chunks_to_edas_signals(graph, [example])
+            counts = link_chunks_to_edas_signals(
+                graph, [example], facility_id="jt-60sa"
+            )
             assert counts == {"chunks": 2, "references": 2, "resolved": 1}
             assert graph.query(
                 "MATCH (c:CodeChunk {id: $id})-[:CONTAINS_REF]->"
