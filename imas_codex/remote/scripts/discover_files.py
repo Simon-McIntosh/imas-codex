@@ -54,6 +54,7 @@ Output (JSON on stdout):
 
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -198,24 +199,44 @@ def _count_lines(path):
     return 0
 
 
-def _rg_count(pattern, path):
-    # type: (str, str) -> int
+def _batch_pattern_counts(files, pattern_categories):
+    # type: (List[str], Dict[str, str]) -> Dict[str, Dict[str, int]]
+    if not files or not pattern_categories:
+        return {}
+    compiled = {
+        name: re.compile(pattern) for name, pattern in pattern_categories.items()
+    }
+    combined = "|".join(
+        "(?:" + pattern + ")" for pattern in pattern_categories.values()
+    )
     try:
         result = subprocess.run(
-            ["rg", "-c", "--no-filename", pattern, path],
+            ["rg", "--json", "--no-messages", "-e", combined, "--"] + files,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
-            timeout=10,
+            timeout=30,
         )
-        if result.returncode == 0 and result.stdout.strip():
-            return int(result.stdout.strip())
-    except (subprocess.TimeoutExpired, ValueError):
-        pass
-    return 0
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    if result.returncode not in (0, 1):
+        return {}
+    matches = {}
+    for record in result.stdout.splitlines():
+        event = json.loads(record)
+        if event.get("type") != "match":
+            continue
+        data = event["data"]
+        path = data["path"].get("text", "")
+        line = data["lines"].get("text", "")
+        counts = matches.setdefault(path, {})
+        for name, regex in compiled.items():
+            if regex.search(line):
+                counts[name] = counts.get(name, 0) + 1
+    return matches
 
 
-def _enrich_file(path, pattern_categories, has_rg):
+def _enrich_file(path, pattern_categories, has_rg, matches=None):
     # type: (str, Dict[str, str], bool) -> Dict[str, Any]
     info = {
         "path": sanitize_str(path),
@@ -224,13 +245,8 @@ def _enrich_file(path, pattern_categories, has_rg):
         "line_count": _count_lines(path),
     }
     if has_rg and pattern_categories:
-        total = 0
-        for category, pattern in pattern_categories.items():
-            count = _rg_count(pattern, path)
-            if count > 0:
-                info["patterns"][category] = count
-                total += count
-        info["total_matches"] = total
+        info["patterns"] = matches or {}
+        info["total_matches"] = sum(info["patterns"].values())
     return info
 
 
@@ -264,8 +280,11 @@ def discover_path(
 
     # Enrich each file with pattern matching
     enriched_files = []
+    match_counts = _batch_pattern_counts(files, pattern_categories) if has_rg else {}
     for f in files:
-        enriched_files.append(_enrich_file(f, pattern_categories, has_rg))
+        enriched_files.append(
+            _enrich_file(f, pattern_categories, has_rg, match_counts.get(f))
+        )
 
     return {
         "path": sanitize_str(path),

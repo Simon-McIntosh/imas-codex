@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 
 import pytest
 
@@ -11,6 +12,9 @@ from imas_codex.discovery.code.scanner import _get_pattern_categories
 from imas_codex.discovery.code.scorer import build_triage_state
 from imas_codex.discovery.paths.enrichment import _build_enrich_patterns
 from imas_codex.discovery.paths.scorer import build_path_judgment_state
+from imas_codex.remote.scripts.discover_files import _batch_pattern_counts
+from imas_codex.remote.scripts.enrich_directories import count_category_matches
+from imas_codex.remote.scripts.enrich_files import batch_pattern_counts
 
 
 @pytest.mark.parametrize("facility", sorted(list_facilities()))
@@ -73,3 +77,24 @@ def test_facility_access_patterns_reach_path_and_code_states(facility: str) -> N
         or []
     }
     assert not (other_facility_keys - expected.keys()) & patterns.keys()
+
+
+def test_remote_matchers_count_access_calls_in_one_scan(tmp_path) -> None:
+    if not shutil.which("rg"):
+        pytest.skip("Remote matchers require rg")
+    source = tmp_path / "reader.py"
+    source.write_text("getseldata()\neddbreadTime()\ngetseldata()\n")
+    unrelated = tmp_path / "unrelated.py"
+    unrelated.write_text("print('nothing matched')\n")
+    categories = {
+        "facility_tool:getseldata": re.escape("getseldata"),
+        "facility_import:eddbreadTime": re.escape("eddbreadTime"),
+    }
+    expected = {
+        "facility_tool:getseldata": 2,
+        "facility_import:eddbreadTime": 1,
+    }
+    files = [str(source), str(unrelated)]
+    assert count_category_matches(str(tmp_path), categories) == expected
+    assert _batch_pattern_counts(files, categories) == {str(source): expected}
+    assert batch_pattern_counts(files, categories) == {str(source): expected}
