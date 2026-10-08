@@ -1,0 +1,121 @@
+{
+  "schema": "facility-conventions-proposal/1",
+  "facility": "jt-60sa",
+  "measured_utc": "2026-10-08",
+  "reference": {
+    "cocos_definition": "https://www.epfl.ch/research/domains/swiss-plasma-center/wp-content/uploads/2018/10/Sauter_COCOS_Tokamak_Coordinate_Conventions.pdf",
+    "machine_direction": "https://www.jt60sa.org/wp/wp-content/uploads/2021/02/JT-60SA_Res_Plan-5.pdf"
+  },
+  "machine_orientation": {
+    "r_positive": {"value": "outward", "confidence": "high", "evidence": "Cylindrical R in the COCOS definition, Table I"},
+    "z_positive": {"value": "upward", "confidence": "high", "evidence": "Cylindrical Z in the COCOS definition, Table I"},
+    "phi_positive_from_above": {"value": "counterclockwise", "confidence": "medium", "evidence": "/analysis/src/edas2/v2.2.1/edas_share/external_func_api/edas_cdcalc_api.py:156 defines PHI from the horizontal X axis, anti-clockwise; this is an EDAS beam geometry coordinate, not a demonstrated universal source convention"},
+    "standard_ip_from_above": {"value": "clockwise", "confidence": "high", "evidence": "JT-60SA Research Plan, Appendix G, Basic magnetic configuration"},
+    "standard_bt_from_above": {"value": "clockwise", "confidence": "high", "evidence": "JT-60SA Research Plan, Appendix G, Basic magnetic configuration"},
+    "ip_bt_sign_in_counterclockwise_phi": {"value": -1, "confidence": "high", "evidence": "Clockwise standard operation relative to the explicitly counterclockwise reference frame"}
+  },
+  "sources": {
+    "eddb_signals": {
+      "cocos": null,
+      "confidence": "medium",
+      "signs": {
+        "ip": "positive raw PSRC/Ip, calIp and comIp represent the standard clockwise discharge in the observed shot; same-shot, same-time positive SELENE TTCU confirms the raw and equilibrium current signs agree; preserve the stored sign before a coordinate conversion",
+        "bt": "getseldata derives BTV=R*Bt from EDDB PID 1625 O293 by multiplying the stored value by 2.25*2.96/25.7; the raw PID polarity was not read",
+        "flux_loops": "PSRC/magFluxLp1 and magFluxLp7 have opposite signed Wb values; each channel's positive surface normal and winding polarity are unverified",
+        "pickup_coils": "positive EDDB PSRC/magPbTC1 is +0.108064 T at E101163, 5.0 s; raw coil polarity against its geometric normal is unverified"
+      },
+      "sensor_geometry": "27 loop R,Z points and 17 probe R,Z,angle points in getseldata geo.in; angle is in degrees and increases counterclockwise from +R in the R-Z plane; no loop winding or normal appears in the file",
+      "flux_normalization": "raw PSRC/magFluxLp1 is labelled Wb; geteddb.c:598 divides its 27-channel array by 2pi, while outeddb.c:91-92 passes the same array through and labels it Wb/2pi; the active DBSEL conversion must be checked before mapping",
+      "evidence": [
+        "EDDB eddbreadTime E101163 5.0-5.01 s: PSRC/Ip +994088.375 A, calIp +986436.375 A, comIp +1000000 A; all irc=0, 41 points",
+        "At E101163 5.100 s EDDB PSRC/Ip is +993885.9375 A (irc=0) and FLEDD EQDB ID 1 SELENE TTCU is +0.992992906 MA (eqdata_get and eqdbl_get iret=0); magnitudes differ by 0.09%",
+        "EDDB eddbreadTime E101163 5.0-5.01 s: PSRC/magFluxLp1 -0.624938 Wb, magFluxLp7 +1.085777 Wb, magPbTC1 +0.108064 T; all irc=0, 41 points",
+        "/analysis/src/getseldata_v4.2/eddbaccess.h:49-54; geteddb.c:253-358,598,645-651; outeddb.c:91-92,170-176,254-288",
+        "docs/evidence/receipts/jt60sa-selene-sensor-order.json"
+      ]
+    },
+    "selene_eq31": {
+      "cocos": 2,
+      "confidence": "medium",
+      "signs": "native SELENE ψ is in Wb/rad, rises from magnetic axis to edge for positive clockwise Ip and Bt, and q is positive; mgfild computes internal BR=(1/R)dψ/dZ and BZ=-(1/R)dψ/dR, then negates both into the measured-field projections",
+      "example": "FLEDD EQDB ID 1 E101163 at 4.700 s: BTV +6.66 T m, TTCU +0.994504 MA, SAXIS -0.445550 Wb/rad, SIV edge 0, QQV axis +1.00667; each item getter iret=0",
+      "evidence": [
+        "/analysis/src/SAselene_v2.0_forPSRC/mgfild.f:4-7,17-41; efitout.f:19-30,262-269; eqdbput.f:219-231",
+        "/analysis/src/safledd/eqitem_get.f:188-208 defines BTV, TTCU, SAXIS, SIV and QQV",
+        "COCOS paper Table I and equations 12-13: clockwise phi, increasing Wb/rad ψ and positive q match index 2",
+        "docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html"
+      ]
+    },
+    "fame_fledd": {
+      "cocos": null,
+      "candidate_cocos": 2,
+      "confidence": "low",
+      "signs": "legacy-shot FAME sample stores positive BTV and TTCU, increasing Wb/rad-like SIV and positive QQV; no FAME-specific BR/BZ equation or explicit COCOS label was established, and this sample does not establish a JT-60SA E-shot polarity",
+      "example": "FLEDD FAME ID 0 shot 45218 at 3.200 s: BTV +5.207183 T m, TTCU +0.436174 MA, SAXIS -0.303198, SIV edge 0, QQV axis +0.999963; each item getter iret=0",
+      "evidence": [
+        "/analysis/src/safledd/eqdata_get.f uses the FLEDD EQDB common layout; eqitem_get.f:188-208 names the queried fields",
+        "docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html"
+      ]
+    },
+    "eqdb_fledd": {
+      "cocos": null,
+      "observed_selene_record_cocos": 2,
+      "confidence": "medium",
+      "signs": "EQDB ID 1 SELENE examples carry positive BTV, TTCU and q with ψ increasing to zero at the edge; FLEDD does not return a COCOS tag, so other EQDB writers remain undetermined",
+      "evidence": [
+        "FLEDD EQDB ID 1 E101163 at 4.700 s: BTV +6.66, TTCU +0.994504, SIV -0.445550 to 0, QQV +1.00667 to +20.01361; eqdata_get and five item getters iret=0",
+        "/analysis/src/SAselene_v2.0_forPSRC/eqdbput.f:23-29,219-231; /analysis/src/SAeqfame/eqdbget.f:227-254"
+      ]
+    },
+    "localdb_g_eqdsk_sa": {
+      "cocos": 2,
+      "confidence": "high",
+      "signs": "clockwise-positive Ip and Bt; ψ in Wb/rad increases axis to edge; positive q",
+      "example": "E101011 6.8 s: current +491265 A, Bcentr +2.030714 T, ψedge-ψaxis +0.415981 Wb/rad, qaxis +1.000869",
+      "evidence": [
+        "jt-60sa.yaml equilibrium example path ends COCOS02 and is hash-pinned",
+        "/analysis/src/SAselene_v2.0_forPSRC/efitout.f:19-30,252-269 and 355-367 writes these fields",
+        "docs/evidence/fragments/jt60sa-discovery-completion/file-equilibria-access.html"
+      ]
+    },
+    "localdb_g_eqdsk_liuqe_meq": {
+      "cocos": 7,
+      "confidence": "high",
+      "signs": "file-native current and Bcentr are positive, ψ decreases from axis to edge, and q is positive; because COCOS 7 defines counterclockwise phi, the positive file signs cannot also describe the standard clockwise machine direction without an explicit transformation",
+      "example": "E101011 6.8 s: current +492111 A, Bcentr +2.030715 T, ψedge-ψaxis -3.003336, qaxis +1.256678",
+      "evidence": [
+        "jt-60sa.yaml equilibrium example path ends COCOS07 and is hash-pinned",
+        "G-EQDSK header names LIUQE-JT-60SA(C) (MEQ); COCOS paper Table I defines index 7"
+      ]
+    },
+    "localdb_g_eqdsk_chease": {
+      "cocos": 17,
+      "confidence": "high",
+      "signs": "file-native current and Bcentr are positive, ψ decreases from axis to edge, and q is positive; this computational output's positive toroidal signs do not establish physical clockwise polarity",
+      "example": "E101025 5.9 s: current +975208 A, Bcentr +1.6921 T, ψedge-ψaxis -3.070393, qaxis +1.0012",
+      "evidence": [
+        "G-EQDSK header explicitly says FROM CHEASE BUT COCOS=17 ,SI UNITS; path and digest pinned in jt-60sa.yaml",
+        "COCOS paper Table I: index 17 has counterclockwise phi, decreasing full ψ, positive q for positive native Ip and Bt"
+      ]
+    },
+    "dbsel": {
+      "cocos": 2,
+      "confidence": "medium",
+      "signs": "DBSEL passes EDDB measurements to SELENE and selects the -2 local EQ31 writer; its output inherits SELENE's convention, while raw EDDB sensor polarity remains separate",
+      "evidence": [
+        "/analysis/bin/dbsel invokes /analysis/bin/getseldata and /analysis/exec/SAselene.ex 0 1 -2 mgt",
+        "/analysis/src/SAselene_v2.0_forPSRC/eqdbput.f:23-29 selects local -2 output",
+        "docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html"
+      ]
+    }
+  },
+  "undetermined": [
+    "Whether every FAME record uses COCOS 2; its sample's signs and psi scaling do not prove phi or the poloidal field equation",
+    "Whether every EQDB ID and writer read through FLEDD uses SELENE's COCOS 2; FLEDD exposes no COCOS tag",
+    "EDDB toroidal field PID 1625 O293 polarity relative to clockwise physical Bt",
+    "Raw EDDB flux-loop winding and positive surface normal for each of 27 channels",
+    "Raw EDDB pickup-coil wiring polarity relative to each of 17 geo.in angles; normal-probe angles and channels are not provided by the getseldata namelist",
+    "Which getseldata flux-loop division by 2pi is active in the DBSEL route, because geteddb.c and outeddb.c differ",
+    "Why the positive Ip and Bcentr in COCOS 7 and 17 files do not follow the standard clockwise physical signs in their counterclockwise phi coordinates"
+  ]
+}
