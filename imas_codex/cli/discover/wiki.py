@@ -56,6 +56,7 @@ class WikiStageOptions:
     store_images: bool = False
     min_score: float = 0.5
     reset_to: str | None = None
+    verbose: bool = False
 
 
 def run_wiki_stage(facility: str, options: WikiStageOptions) -> dict:
@@ -73,7 +74,7 @@ def run_wiki_stage(facility: str, options: WikiStageOptions) -> dict:
     and ingests the nodes the seeding half created.
     """
 
-    if options.options.topic:
+    if options.focus:
         raise click.UsageError(_FOCUS_REFUSAL)
 
     from imas_codex.cli.discover.common import make_log_print, setup_logging
