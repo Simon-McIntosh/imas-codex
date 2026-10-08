@@ -195,6 +195,20 @@ class TestCLISubcommands:
         assert result.exit_code == 0
         assert "--only" in result.output
 
+    @pytest.mark.parametrize(
+        ("domain", "selected"),
+        [("paths", "paths"), ("wiki", "wiki"), ("map", "candidates")],
+    )
+    def test_retired_discover_domain_is_refused_with_bare_command(
+        self, runner, domain, selected
+    ):
+        from imas_codex.cli import main
+
+        result = runner.invoke(main, ["discover", domain, "jt-60sa"])
+        assert result.exit_code != 0
+        assert f"imas-codex discover jt-60sa --only {selected}" in result.output
+        assert "Got unexpected extra argument" not in result.output
+
     def test_imas_dd_build_help(self, runner):
         """imas dd build subcommand exists."""
         from imas_codex.cli import main
