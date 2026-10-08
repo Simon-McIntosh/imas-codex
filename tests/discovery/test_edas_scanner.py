@@ -14,10 +14,12 @@ import sys
 from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
+from imas_codex.discovery.signals.parallel import DataDiscoveryState, seed_worker
+from imas_codex.discovery.signals.scanners.base import ScanResult
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
-from imas_codex.graph.models import FacilitySignal, SignalDataClass
+from imas_codex.graph.models import DataAccess, FacilitySignal, SignalDataClass
 from imas_codex.remote.scripts.check_edas import main as check_main
 from imas_codex.remote.scripts.enumerate_edas import (
     attempt_database,
@@ -61,6 +63,72 @@ CONFIG = {
     "api_path": "/opt/edas/api",
     "lib_path": "/opt/edas/libeddb.so",
 }
+
+
+async def test_scanner_access_methods_share_the_existing_persistence_writer():
+    """All access nodes must exist before signal ingestion creates their edges."""
+    methods = [
+        DataAccess(
+            id=f"jt-60sa:edas:access_{name}",
+            facility_id="jt-60sa",
+            method_type="edas",
+            library="test",
+            access_type="local",
+            data_source=name,
+            connection_template="",
+            data_template="",
+        )
+        for name in ("eddb", "eqdb", "g_eqdsk")
+    ]
+    signal = FacilitySignal(
+        id="jt-60sa:equilibrium/test_psi",
+        facility_id="jt-60sa",
+        name="psi",
+        accessor="psi",
+        data_access=methods[-1].id,
+    )
+
+    class Scanner:
+        scanner_type = "edas"
+
+        async def scan(self, **_kwargs):
+            return ScanResult(
+                signals=[signal],
+                data_access=methods[0],
+                data_accesses=[methods[1], methods[2], methods[0]],
+            )
+
+    state = DataDiscoveryState(
+        facility="jt-60sa",
+        ssh_host="nakasvr26",
+        scanner_types=["edas"],
+        facility_config={"data_systems": {"edas": CONFIG}},
+        initial_version_counts={"total": 0},
+        initial_signal_counts={"total": 0},
+        cost_limit=10.0,
+    )
+    events = []
+    graph = MagicMock()
+    graph.__enter__.return_value = graph
+    graph.__exit__.return_value = None
+    graph.query.side_effect = lambda query, **kw: (
+        events.append(kw["id"]) if "MERGE (da:DataAccess" in query else []
+    )
+
+    with (
+        patch(
+            "imas_codex.discovery.signals.scanners.base.get_scanner",
+            return_value=Scanner(),
+        ),
+        patch("imas_codex.discovery.signals.parallel.GraphClient", return_value=graph),
+        patch(
+            "imas_codex.discovery.signals.parallel.ingest_discovered_signals",
+            side_effect=lambda rows: events.append("ingest") or len(rows),
+        ),
+    ):
+        await seed_worker(state)
+
+    assert events == [method.id for method in methods] + ["ingest"]
 
 
 class TestConfiguredDatabases:
