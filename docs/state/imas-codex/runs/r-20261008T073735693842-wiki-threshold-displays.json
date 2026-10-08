@@ -1,0 +1,1323 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "f186f51aef37b9eb1dea9fbe4f228919020bdced",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 5518208,
+      "cached_input_tokens_cumulative": 5518208,
+      "input_tokens": 5625773,
+      "input_tokens_cumulative": 5625773,
+      "output_tokens": 21521,
+      "output_tokens_cumulative": 21521,
+      "reasoning_output_tokens": 7339,
+      "reasoning_output_tokens_cumulative": 7339
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 41,
+    "files": 3,
+    "removed": 7
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 418,
+        "name": "test_composite_is_the_largest_of_five_nouls",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 980,
+        "name": "get_wiki_discovery_stats",
+        "path": "imas_codex/discovery/wiki/parallel.py"
+      },
+      "window_line": 1004
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "fa5123a2e47bc26b482c2102d07fe01710e18ec5"
+  ],
+  "completed_at": "2026-10-08T07:50:59Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T07:38:00Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/wiki/test_wiki_threshold_displays.py tests/wiki/test_progress_display.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073735693842-wiki-threshold-displays/gate-committed.log"
+  },
+  "impl_move": {
+    "at_complete": 0.647,
+    "at_dispatch": 0.588,
+    "plan": "discovery-judgments-through-jev",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.8660488626790226,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T09:02:27Z, which is after this node's 2700s horizon ending 2026-10-08T08:22:39.667962+00:00",
+    "horizon_ends_at": "2026-10-08T08:22:39.667962+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-08T07:37:38Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T09:02:27Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 509840,
+    "state": "quiet",
+    "utilisation_pct": 45.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T07:37:38Z",
+    "read_at": "2026-10-08T07:37:39Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 45.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T07:50:59Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073735693842-wiki-threshold-displays/manifest.md",
+  "member": "disposable-r-20261008T073735693842-wiki-threshold-displays",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/wiki/test_wiki_threshold_displays.py::test_pending_ingest_uses_content_cutoff"
+    ],
+    "baseline_failure_ids": [
+      "tests/wiki/test_wiki_threshold_displays.py::test_document_label_uses_content_cutoff",
+      "tests/wiki/test_wiki_threshold_displays.py::test_pending_ingest_uses_content_cutoff"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/wiki/test_wiki_threshold_displays.py::test_pending_ingest_uses_content_cutoff"
+    ],
+    "declaration": "restore the literal 0.5 in the runner's pending-ingest count; the new test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073735693842-wiki-threshold-displays/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073735693842-wiki-threshold-displays/negative-control.log",
+    "test_paths": [
+      "tests/wiki/test_wiki_threshold_displays.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "wiki-threshold-displays",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2065,
+          "cached_input_tokens": 459470,
+          "input_tokens": 461537,
+          "output_tokens": 821,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 462358,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "the runner's pending-ingest count and the document skipped label both read CONTENT_INGEST_THRESHOLD, and a test fails when either compares against a literal threshold",
+    "estimated_hours": null,
+    "goal": "point the wiki progress displays at CONTENT_INGEST_THRESHOLD",
+    "id": "wiki-threshold-displays",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T07:37:38Z",
+      "read_at": "2026-10-08T07:37:39Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 45.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073735693842-wiki-threshold-displays/manifest.md",
+    "negative_control": "restore the literal 0.5 in the runner's pending-ingest count; the new test must fail",
+    "plan": "discovery-judgments-through-jev",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§18",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/wiki/parallel.py",
+      "imas_codex/discovery/wiki/progress.py",
+      "tests/wiki/test_wiki_threshold_displays.py",
+      "docs/evidence/fragments/discovery-judgments-through-jev/wiki-threshold-displays.html",
+      "docs/figures/discovery-judgments-through-jev/wiki-threshold-displays"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.865847871828597,
+      "derived": 0.17272375301769174,
+      "drain_hours": 168.0,
+      "effective_limit": 0.17272375301769174,
+      "elapsed_fraction": 0.15702159365244703,
+      "elapsed_hours": 26.379627733611102,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T07:37:45+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.55,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.45,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.4252500000000001,
+      "decided_by": "window",
+      "margin": 0.21849999999999997,
+      "name": "wiki-threshold-displays",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.45
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.659841,
+        "observed_at": "2026-10-08T07:37:45+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.45,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "wiki-threshold-displays",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T07:37:45.659841+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.11,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "discovery-judgments-through-jev",
+  "plan_impl_at_dispatch": 0.588,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "fa5123a2e47bc26b482c2102d07fe01710e18ec5",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f186f51aef37b9eb1dea9fbe4f228919020bdced",
+    "reviewed_head_sha": "fa5123a2e47bc26b482c2102d07fe01710e18ec5",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 118
+  },
+  "review_tier": "light",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T073735693842-wiki-threshold-displays",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§18",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a11a72-c3f2-7fe3-82d7-5b9ae349520c",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 5518208,
+    "cumulative_input_tokens": 11143981,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 28860
+  },
+  "time_budget": "45m",
+  "tool_steps": 110.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: The repaired describe_paths owner is not used by the triage worker. The resumed bounded control on main reproduced PathDescriptionBatch results Field required and scored 0; so the necessary source repair exceeds this node's fragment-only write grant.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 2222,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T07:10:35Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T07:00:46Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T054432526078-jt60sa-jev-rescan",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 626,
+          "worker_pid": 2728645
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "The repaired describe_paths owner is not used by the triage worker. The resumed bounded control on main reproduced PathDescriptionBatch results Field required and scored 0; so the necessary source repair exceeds this node's fragment-only write grant.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T07:10:35Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1634,
+        "log_fresh": false,
+        "manifest_commits": [
+          "1dbe6daed12767e1b7a30a91079dc29afc79cad4",
+          "258a9bdbad90ba48764cabefb079ed17466713e9"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "11b7096c496daecd9a25af9084ade3659254416e33872ff049f6a1189f255311",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T054432526078-jt60sa-jev-rescan/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T054432526078-jt60sa-jev-rescan/manifest.md; resolve the blocker before resuming the run",
+        "node": "jt60sa-jev-rescan",
+        "phase": "blocked",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T054432526078-jt60sa-jev-rescan",
+        "session": "jt60sa-20261005",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261008T054432526078-jt60sa-jev-rescan",
+          "session_id": "01a11a0b-2ea6-7d30-8bc2-825796d31041",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 1690,
+        "terminal_at": "2026-10-08T07:09:32Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/jt60sa-jev-rescan"
+      }
+    ]
+  },
+  "wall_seconds": 779,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T07:51:05Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T07:38:07Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T073735693842-wiki-threshold-displays",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 286,
+    "worker_pid": 3032935
+  },
+  "worker_seconds": 779,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
