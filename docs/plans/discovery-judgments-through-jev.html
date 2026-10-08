@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
-<meta name="plan-impl" content="0.625">
-<meta name="plan-version" content="62">
+<meta name="plan-impl" content="0.588">
+<meta name="plan-version" content="63">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -252,6 +252,17 @@ documents, and its inbound link count. Measure AUC with and without that context
 repeat-call evidence, and the scan-or-expand AUC under both labellings. Node 2's fragment gives the paired AUC with and
 without graph context, and a test parametrised over every facility config asserts each judge's state carries its
 neighbourhood fields.</p>
+
+    <h2 id="s18">§18 — Retire the 0.5 wiki threshold from the runner status and the document label</h2>
+<section data-reckon="section" data-id="s18" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> §5 moved wiki and document ingest to a Jev gate at <code>CONTENT_INGEST_THRESHOLD</code> = 0.16.
+Its review found two displays still keyed to the retired 0.5 language-model threshold. The wiki runner's progress
+status in <code>imas_codex/discovery/wiki/parallel.py</code>, around line 1028, counts pending ingest as
+<code>wp.status = $scored AND wp.score_composite >= 0.5</code>, which under-reports the pages the ingest claim takes.
+The document progress display in <code>imas_codex/discovery/wiki/progress.py</code>, line 741, labels a document
+skipped below 0.5. The CLI defaults are a separate node owned by the session that folded the discover stages.</p>
+<p><strong>Done when</strong> both read <code>CONTENT_INGEST_THRESHOLD</code>, and a test fails if either compares
+against a literal threshold.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
