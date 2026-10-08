@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
 <meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -493,6 +493,9 @@ after §15 releases <code>paths/scorer.py</code>. It moves <code>scorer.py</code
 </div>
 <div class="r-comment" data-section="s14" data-id="c-run-r-20261008T061834979151-path-description-shape" data-who="reckon-build" data-when="2026-10-08T06:29:01Z">
     <div class="r-comment-body"><p>The parallel path describe step uses one reusable owner with an explicit results-shaped prompt and accepts path-keyed answers; focused gate 10 passed and the live discovery-score call returned 3/3 root descriptions.</p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-run-r-20261008T063346870340-review-of-path-description-shape" data-who="reckon-build" data-when="2026-10-08T06:55:56.048Z">
+    <div class="r-comment-body"><p>Review of r-20261008T061834979151-path-description-shape stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T061834979151-path-description-shape.json: the describe-step owner is real and the prompt shape guard fires, with three follow-ons (scorer.py duplicate deferred to the scorer node, the declared evidence fragment absent, and the reviewed manifest&#x27;s null baseline/after suites).</p></div>
 </div>
 <div class="r-comment" data-section="s17" data-id="c-20261008-s17-categorise" data-who="lead" data-when="2026-10-08T06:55:00Z">
     <div class="r-comment-body"><p><strong>Lead, 2026-10-08: categorise before the content is known; score once it is.</strong> At the path stage the

@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: base arm base-prompt.log (base revision 91dae5cfe90ba96e0a18b618f154beca399c95c7) carries failure_ids [\"tests/discovery/test_path_description.py::test_parallel_description_prompt_names_batch_shape\"], after arm head-committed.log (head revision 406f445097a81274cfe646a8e5dedc08d4eed232) carries none; added_failure_ids = after minus base = [] and added_failure_count = 0. Independent arms at the same revisions agree: base 91dae5cfe (tests/discovery/test_path_judgments.py, 7 passed, EXIT=0) and head tests/discovery/test_path_description.py plus tests/discovery/test_path_judgments.py, 10 passed, EXIT=0, 0 failed each.",
+  "backend": "local",
+  "base_log_revision": "91dae5cfe90ba96e0a18b618f154beca399c95c7",
+  "completed_at": "2026-10-08T06:55:56.048Z",
+  "dispatched_at": "2026-10-08T06:34:16Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/paths/scorer.py",
+      "line": "384",
+      "severity": "follow-on",
+      "text": "follow-on: the describe-then-judge step still has two owners after this node. DirectoryTriager.async_triage_batch (scorer.py:384) builds its own shape-less system prompt and requests response_model=PathDescriptionBatch, so the path-keyed answer the discovery-score seat emits would still break it; the plan comment assigns moving scorer.py onto describe_paths to the node that runs after \u00a715 releases the file, and the existing test tests/discovery/test_path_judgments.py:224 pins the current PathDescriptionBatch contract, so this is recorded rather than repaired."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/path-description-shape.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's orientation_write_paths declares the fragment path-description-shape.html and a figures directory under docs/figures/discovery-judgments-through-jev/, and neither is present at the reviewed head (the fragments directory holds eight other files and no path-description-shape). \u00a714's done-when does not require a fragment, so this is an unused declared path rather than a missing deliverable, but a later reader of the plan finds no per-node evidence artifact for this change."
+    },
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "2415",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest declares baseline_suite and after_suite as null, so the node's own record does not carry a base/after arm from which added failures can be read; its base-prompt.log is a single discriminating test run at the base revision (EXIT=1) rather than a baseline suite, and no arm runs the sibling regression surface at the base revision. This review supplies the arms at both reviewed revisions (base 7 passed / head 10 passed, module resolving from each scratch tree) and derives 0 added failures."
+    }
+  ],
+  "head_log_revision": "406f445097a81274cfe646a8e5dedc08d4eed232",
+  "item_verdicts": {
+    "call_sites": "describe_paths has exactly one production caller, _async_score_with_llm at parallel.py:2415, and PathDescriptionResponse is referenced only inside description.py; the sibling describe call in imas_codex/discovery/paths/scorer.py:384 (DirectoryTriager.async_triage_batch) still builds its own prompt and calls PathDescriptionBatch directly, which the plan comment assigns to the follow-on node that runs after \u00a715 releases scorer.py.",
+    "diff": "read against base 91dae5cfe: parallel.py loses its inline acall_llm_structured describe block and the local set() guard and now calls describe_paths, and description.py is added as a new module holding the prompt, the path-keyed-answer validator and the input-path guard; the removed function-local 'import json' is unused in the remaining _async_score_with_llm body (verified: no json. reference in lines 2395-2457).",
+    "done_when": "the plan comment names four checks: the new module, the results-shaped prompt, the replayed path-keyed answer test, and a bounded live discovery-score call over stored JT-60SA roots with no facility hop; the new test file proves the first three (test_parallel_description_prompt_names_batch_shape asserts the prompt names the results shape, test_path_keyed_answer_replays_as_one_description_per_path replays the recorded path-keyed answer through _parse_structured_content, test_description_refuses_missing_or_repeated_paths pins the count/set guard), and live-description.log shows valid_batch=3 over stored_root_rows=3 with no facility hop; I reproduced the focused gate independently (head arm 10 passed EXIT=0) and the prompt check's negative control (mutated prompt 1 failed EXIT=1).",
+    "goal": "the plan's Node 1 is to give the describe step one owner now, in a new module imas_codex/discovery/paths/description.py, whose prompt states the exact output object {\"results\": [{\"path\", \"description\"}]} with one entry per input path, and have parallel.py call it: description.py:36 defines describe_paths, description.py:13 subclasses PathDescriptionBatch as PathDescriptionResponse, its system prompt (description.py:52-58) states 'Return only a JSON object shaped {\"results\": [{\"path\": \"input path\", \"description\": \"factual sentence\"}]}, with one entry per input path', and parallel.py:2415 calls describe_paths with model, focus and reasoning_effort; the duplicated inline prompt and its duplicate set-comparison guard are removed from _async_score_with_llm.",
+    "manifest": "read; status complete, commits [406f44509], changed_paths the three source files, negative_control_log the declared old-prompt mutation failing test_parallel_description_prompt_names_batch_shape; it declares baseline_suite and after_suite as null and its own arms are base-prompt.log (base revision, the new discriminating test red at EXIT=1) and head-committed.log (head, 10 passed EXIT=0), so added_failure_count is not derivable from the manifest's declared suite fields alone.",
+    "write_paths": "the reviewed manifest declares imas_codex/discovery/paths/description.py, imas_codex/discovery/paths/parallel.py, tests/discovery/test_path_description.py plus a fragment and a figures dir; git diff --stat 91dae5cfe..406f44509 touches exactly the first three (169 insertions, 21 deletions), nothing else."
+  },
+  "justifications": {
+    "durability": "the prompt guard fires: replacing the new system prompt with the old shape-less text in a scratch copy of 406f44509 fails test_parallel_description_prompt_names_batch_shape with 'assert '\"'\"'results'\"'\"' in prompt' at EXIT=1, while the unmutated head passes it (my own arm); the input-path guard is independently pinned by test_description_refuses_missing_or_repeated_paths, which raises ValueError('Path descriptions do not match the input paths') on two routes naming the same path, and the reviewed run's declared negative control records the same red prompt test at EXIT=1.",
+    "evidence": "the reviewed head gate is real and I reproduced it independently in a scratch extraction of 406f44509 (tests/discovery/test_path_description.py and tests/discovery/test_path_judgments.py, 10 passed EXIT=0, module under test resolving from the scratch tree), and the positive control is clean (describe_paths import resolves and the module is the scratch copy). The shortfall is on the record: the manifest declares baseline_suite and after_suite as null, so a reader cannot derive added failures from the declared fields, and its base-prompt.log is a single-test base arm (the new discriminating test red at EXIT=1) rather than a baseline suite; this review supplies the missing arms at the reviewed revisions (base 7 passed / head 10 passed, 0 added failures).",
+    "fit": "the added surface is named by what it does with no plan, section or stage identifier anywhere in description.py or the test: describe_paths, PathDescriptionResponse and the module docstring 'Describe facility paths before their separate relevance judgment' describe the mechanism; the module follows the sibling paths/ modules' idiom (module-level async helper plus a service-tagged acall_llm_structured call) and the added test file is named for the behaviour it proves.",
+    "goal_fidelity": "every element Node 1 names is present and named by mechanism: description.py:36 is the single describe_paths owner, description.py:52-58 states the exact {\"results\": [{\"path\", \"description\"}]} object and asks for one entry per input path, parallel.py:2415 calls it, and describe_paths replaces the removed inline prompt plus its duplicate set-comparison guard (the file now guards with an explicit count-and-set check at description.py:73-75). The shortfall is that the \u00a714 done-when's 'one owner that both callers use' is not fully reached by this node: scorer.py:384 still carries a second describe prompt and the plan comment explicitly defers that move to the node that runs after \u00a715, so this is an expected partial and not a deviation.",
+    "reuse": "the change reuses PathDescriptionBatch, acall_llm_structured, get_model and get_reasoning_effort unchanged and forks no engine: PathDescriptionResponse subclasses PathDescriptionBatch and adds only a before-validator, and describe_paths returns the existing model type so parallel.py's downstream rows construction is untouched; the one reservation is that a second response model now sits beside PathDescriptionBatch until the deferred scorer.py move lands, and the fixture in tests/discovery/test_path_judgments.py:224 still asserts response_model is PathDescriptionBatch against scorer.py's own copy, which is the follow-on node's surface.",
+    "scope_discipline": "git diff --stat 91dae5cfe90ba96e0a18b618f154beca399c95c7..406f445097a81274cfe646a8e5dedc08d4eed232 touches only imas_codex/discovery/paths/description.py, imas_codex/discovery/paths/parallel.py and tests/discovery/test_path_description.py, all inside the declared write paths, with no dependency change, no edit to scorer.py (correctly deferred) and no unrelated file; the declared fragment docs/evidence/fragments/discovery-judgments-through-jev/path-description-shape.html and the declared figures directory were not produced, which is an evidence-artifact shortfall rather than scope creep (\u00a714's done-when does not require a fragment)."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: description.py:36 describe_paths is the single owner; its prompt (description.py:52-58) states the exact {\"results\": [{\"path\", \"description\"}]} shape with one entry per input path; parallel.py:2415 calls it.\nVERDICT done_when: the new test file proves the prompt shape, the replayed path-keyed answer and the input-path guard; the bounded live call returned valid_batch=3/3 with no facility hop; head gate 10 passed EXIT=0.\nVERDICT write_paths: git diff 91dae5cfe..406f44509 touches description.py, parallel.py and test_path_description.py only.\nVERDICT manifest: complete; baseline_suite/after_suite null; base-prompt.log is a single-test base arm, head-committed.log is 10 passed EXIT=0.\nVERDICT diff: parallel.py drops the inline describe block and its duplicate set() guard and delegates to the new module; the removed import json is unused in the remaining body.\nVERDICT call_sites: one production caller (parallel.py:2415); scorer.py:384 still duplicates the describe step, deferred to the follow-on node.\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 19\nSCORE durability: 19\nSCORE fit: 19\nSCORE reuse: 18\nFINDING scorer.py:384 still owns a second describe prompt (deferred follow-on node)\nFINDING declared fragment path-description-shape.html and its figure are absent at head (unused declared path)\nFINDING manifest declares no baseline_suite/after_suite; review supplies both arms, 0 added failures\n",
+  "review_run_id": "r-20261008T063346870340-review-of-path-description-shape",
+  "reviewed_base_sha": "91dae5cfe90ba96e0a18b618f154beca399c95c7",
+  "reviewed_head_sha": "406f445097a81274cfe646a8e5dedc08d4eed232",
+  "reviewed_run_id": "r-20261008T061834979151-path-description-shape",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:51:11.613071+00:00",
+  "total": 109,
+  "verdict": "SOUND WITH FINDINGS"
+}
