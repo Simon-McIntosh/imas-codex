@@ -1,0 +1,164 @@
+<section id="diagnostic-convention-audit">
+<h2 id="diagnostic-convention-audit-heading">JT-60SA diagnostic conventions against SELENE COCOS 2</h2>
+<p id="diagnostic-convention-audit-summary">The <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/jt60sa-diagnostic-conventions.json">per-channel JSON</a> contains 132 channels and the measured E101163 (4.8, 5.0, 5.1 s) and E101011 (6.8 s) values. Flux-loop and pickup identities, DD geometry and COCOS 17 target rules are sourced from the read-only imas-alambic-jt60sa v0.2.0-rc3 bundle. Rogowski, diamagnetic, toroidal-field and profile observations remain this audit’s own measurements. Every rule disagreement is preserved for adjudication.</p>
+<p id="diagnostic-convention-audit-authority">Authority: imas-alambic-jt60sa v0.2.0-rc3, <code>machine_map.json</code> SHA-256 <code>6a0e4b10b1bf01805e588f22a778efbf7f8319ec9c240eb4a4b395ed8a65efec</code>, <code>maps/magnetics.json</code> SHA-256 <code>99bdc9688e482e501d408d66e30c18b92e015d9c5816422342e1452cbe2181de</code>; target DD 4.1.1 / COCOS 17. OP1 and OP2 <code>magnetics.nc</code> were read through <code>imas.DBEntry</code> at DD 4.1.1. The <a href="/imas-ambix/evidence/fragments/jt60sa-machine-map/jtmm-loop-reference-rca.html">loop-reference study</a> is the source of the vacuum-shot polarity and reference-loop findings. Its 45 rules comprise 27 raw MDAC loops, 17 raw MDAC pickups and one PSRC Ip; its 57 blocked entries include the processed aliases and the 13 raw channels beyond the DD indices.</p>
+<p id="diagnostic-convention-audit-receipts">Own EDDB/SELENE receipts are magnetic-comparison-data.log (225 data rows, EXIT=0), second-shot-comparison.log (80 rows, EXIT=0), other-channels.log (72 rows, EXIT=0) and mdac-magnetics.log (114 rows, EXIT=0) in the run directory. EDDB IRC=0 for shown readings. E101163 5.5 s was excluded because EQTIM=0 and the grid repeated 5.1 s despite a zero load return; E101163 4.7 s returned IRC=1051.</p>
+<h3 id="diagnostic-convention-audit-flux">Flux loops</h3>
+<p id="diagnostic-convention-audit-flux-method">Both OP1 and OP2 descriptions hold 53 flux-loop entries: positioned type-1 FL1–FL27, followed by 26 positionless type-6 FL&lt;L&gt;-FL7 entries with <code>indices_differential=[7,L]</code>. FL7 is the only absolute raw loop. For every L≠7, compare raw Wb/(2π) directly with SELENE COCOS 2 <code>ψL−ψ7</code> at the two positioned loops; no per-slice median offset is fitted. The earlier offset subtraction approximately cancelled <code>ψ7</code> for the 26 differential loops (for example the E101011 offset −0.439353 versus <code>−ψ7=−0.440648</code> Wb/rad), explaining their apparent fit and why applying that offset to absolute loop 7 made it look like an outlier. The two loop-7 outlier flags are removed; its direct absolute residual is retained in JSON (MDAC +0.092732 Wb/rad at E101163 5.1 s and −0.012701 at E101011 6.8 s).</p>
+<p id="diagnostic-convention-audit-flux-result">Without an offset, the 26 differential loops per source have median absolute residuals 0.006609, 0.002325, 0.007229 and 0.003699 Wb/rad for PSRC at E101163 4.8/5.0/5.1 s and E101011 6.8 s; MDAC has 0.004921 and 0.003872 Wb/rad at E101163 5.1 s and E101011 6.8 s. Our snapshot inference is raw/(2π)→positive COCOS 2 <code>ψL−ψ7</code>. The scalar conversion is <code>ψ17=+2πψ2</code>, so this yields raw→COCOS 17 factor +1. The imas-alambic map assigns channel_factor −1 to all 27 raw MDAC loops, from a different vacuum-shot comparison (loop 7 absolute median slope −0.992; E100642 differential loops slope −0.913 to −1.017). All 27 raw-loop comparisons and 27 processed-alias comparisons therefore read DISAGREE. These two sign verdicts are reported side by side and remain unresolved. Loop 7’s own snapshot sign is tentative because its absolute level differs at E101163.</p>
+<p id="diagnostic-convention-audit-flux-coverage">Raw MDAC loops 28–34 have no DD flux_loop index: getseldata reads PID 1626 S007 channels 1–27 only. Their seven blocked reasons also report no unique processed PSRC partner. Processed PSRC loops 28–34 have no direct bundle rule or blocked entry; the raw index limit and identity result apply to their proposed counterpart. This is an absent DD channel identity, not a missing position on an existing sensor.</p>
+<table id="diagnostic-convention-audit-flux-table"><thead><tr><th>Channel</th><th>DD entry / role</th><th>E101163 raw Wb / SELENE ψ comparison Wb/rad</th><th>E101011 6.8 s raw / ψ comparison</th><th>Own COCOS 2 → 17 factor</th><th>Ambix COCOS 17 factor / validation</th><th>Comparison</th></tr></thead><tbody>
+<tr><td>PSRC/magFluxLp1</td><td>28; differential FL1−FL7</td><td>-0.62494 / -0.09886</td><td>-0.28042 / -0.04069</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp2</td><td>29; differential FL2−FL7</td><td>-0.16564 / -0.02814</td><td>-0.10118 / -0.01413</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp3</td><td>30; differential FL3−FL7</td><td>+0.08020 / +0.00751</td><td>+0.01158 / +0.00055</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp4</td><td>31; differential FL4−FL7</td><td>+0.15657 / +0.01727</td><td>-0.01493 / -0.00786</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp5</td><td>32; differential FL5−FL7</td><td>+0.13625 / +0.01338</td><td>-0.04973 / -0.01688</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp6</td><td>33; differential FL6−FL7</td><td>+0.03993 / +0.00179</td><td>-0.05427 / -0.01549</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp7</td><td>7; absolute reference</td><td>+1.08578 / +0.06927</td><td>+2.69151 / +0.44065</td><td>tentative + → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp8</td><td>34; differential FL8−FL7</td><td>+0.03933 / +0.00425</td><td>+0.08485 / +0.01227</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp9</td><td>35; differential FL9−FL7</td><td>+0.12611 / +0.01794</td><td>+0.13562 / +0.02129</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp10</td><td>36; differential FL10−FL7</td><td>+0.11936 / +0.01815</td><td>+0.02608 / +0.00432</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp11</td><td>37; differential FL11−FL7</td><td>+0.07352 / +0.01114</td><td>-0.10745 / -0.01782</td><td>+ → +</td><td>− (source-only); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp12</td><td>38; differential FL12−FL7</td><td>-0.05530 / -0.01149</td><td>-0.49791 / -0.08621</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp13</td><td>39; differential FL13−FL7</td><td>+0.15747 / +0.02347</td><td>-0.33832 / -0.05984</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp14</td><td>40; differential FL14−FL7</td><td>+0.54495 / +0.08691</td><td>+0.02725 / +0.00050</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp15</td><td>41; differential FL15−FL7</td><td>-0.72227 / -0.11247</td><td>-0.23111 / -0.03164</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp16</td><td>42; differential FL16−FL7</td><td>-0.29725 / -0.04553</td><td>-0.16073 / -0.02155</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp17</td><td>43; differential FL17−FL7</td><td>+0.76188 / +0.11878</td><td>+0.09129 / +0.01156</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp18</td><td>44; differential FL18−FL7</td><td>+1.26920 / +0.19735</td><td>+0.30781 / +0.04112</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp19</td><td>45; differential FL19−FL7</td><td>+1.43390 / +0.22315</td><td>+0.46668 / +0.06374</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp20</td><td>46; differential FL20−FL7</td><td>+1.46070 / +0.22892</td><td>+0.79277 / +0.11435</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp21</td><td>47; differential FL21−FL7</td><td>+1.30047 / +0.20810</td><td>+1.09704 / +0.17225</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp22</td><td>48; differential FL22−FL7</td><td>+1.09708 / +0.17678</td><td>+0.97511 / +0.15922</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp23</td><td>49; differential FL23−FL7</td><td>+1.66529 / +0.25800</td><td>+0.84454 / +0.13797</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp24</td><td>50; differential FL24−FL7</td><td>+2.28529 / +0.35839</td><td>+1.31358 / +0.21068</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp25</td><td>51; differential FL25−FL7</td><td>+2.54318 / +0.40112</td><td>+1.58888 / +0.25368</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp26</td><td>52; differential FL26−FL7</td><td>+2.60861 / +0.41335</td><td>+1.73459 / +0.27617</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp27</td><td>53; differential FL27−FL7</td><td>+1.47316 / +0.23554</td><td>+0.84375 / +0.13275</td><td>+ → +</td><td>− (corpus-validated); processed alias to raw</td><td>DISAGREE</td></tr>
+<tr><td>PSRC/magFluxLp28</td><td>—; no DD index</td><td>—</td><td>+0.07744 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magFluxLp29</td><td>—; no DD index</td><td>—</td><td>+0.09063 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magFluxLp30</td><td>—; no DD index</td><td>—</td><td>+0.04877 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magFluxLp31</td><td>—; no DD index</td><td>—</td><td>+0.01867 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magFluxLp32</td><td>—; no DD index</td><td>—</td><td>-0.00457 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magFluxLp33</td><td>—; no DD index</td><td>—</td><td>-0.02784 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magFluxLp34</td><td>—; no DD index</td><td>—</td><td>+0.03226 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magFlxLp1</td><td>28; differential FL1−FL7</td><td>-0.63365 / -0.09755</td><td>-0.29838 / -0.04069</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp2</td><td>29; differential FL2−FL7</td><td>-0.17938 / -0.03293</td><td>-0.11771 / -0.01413</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp3</td><td>30; differential FL3−FL7</td><td>+0.06997 / -0.00620</td><td>-0.00113 / +0.00055</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp4</td><td>31; differential FL4−FL7</td><td>+0.14543 / +0.00196</td><td>-0.02658 / -0.00786</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp5</td><td>32; differential FL5−FL7</td><td>+0.11716 / +0.00241</td><td>-0.06766 / -0.01688</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp6</td><td>33; differential FL6−FL7</td><td>+0.02333 / -0.00155</td><td>-0.06905 / -0.01549</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp7</td><td>7; absolute reference</td><td>+1.15767 / +0.09152</td><td>+2.68887 / +0.44065</td><td>tentative + → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp8</td><td>34; differential FL8−FL7</td><td>+0.02915 / +0.00479</td><td>+0.07215 / +0.01227</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp9</td><td>35; differential FL9−FL7</td><td>+0.11434 / +0.01619</td><td>+0.11991 / +0.02129</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp10</td><td>36; differential FL10−FL7</td><td>+0.10811 / +0.01263</td><td>+0.01302 / +0.00432</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp11</td><td>37; differential FL11−FL7</td><td>+0.05794 / +0.00240</td><td>-0.12171 / -0.01782</td><td>+ → +</td><td>− (source-only); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp12</td><td>38; differential FL12−FL7</td><td>-0.09360 / -0.02859</td><td>-0.52564 / -0.08621</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp13</td><td>39; differential FL13−FL7</td><td>+0.12007 / +0.00779</td><td>-0.36709 / -0.05984</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp14</td><td>40; differential FL14−FL7</td><td>+0.51117 / +0.07426</td><td>-0.00102 / +0.00050</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp15</td><td>41; differential FL15−FL7</td><td>-0.72755 / -0.10988</td><td>-0.25423 / -0.03164</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp16</td><td>42; differential FL16−FL7</td><td>-0.30682 / -0.04676</td><td>-0.18372 / -0.02155</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp17</td><td>43; differential FL17−FL7</td><td>+0.74134 / +0.10761</td><td>+0.06563 / +0.01156</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp18</td><td>44; differential FL18−FL7</td><td>+1.24504 / +0.18314</td><td>+0.27911 / +0.04112</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp19</td><td>45; differential FL19−FL7</td><td>+1.41010 / +0.20885</td><td>+0.43601 / +0.06374</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp20</td><td>46; differential FL20−FL7</td><td>+1.44276 / +0.21813</td><td>+0.75940 / +0.11435</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp21</td><td>47; differential FL21−FL7</td><td>+1.29077 / +0.20606</td><td>+1.05863 / +0.17225</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp22</td><td>48; differential FL22−FL7</td><td>+1.08483 / +0.17722</td><td>+0.93403 / +0.15922</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp23</td><td>49; differential FL23−FL7</td><td>+1.61511 / +0.25484</td><td>+0.80409 / +0.13797</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp24</td><td>50; differential FL24−FL7</td><td>+2.23938 / +0.35598</td><td>+1.28131 / +0.21068</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp25</td><td>51; differential FL25−FL7</td><td>+2.50461 / +0.39902</td><td>+1.56132 / +0.25368</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp26</td><td>52; differential FL26−FL7</td><td>+2.57757 / +0.41106</td><td>+1.71025 / +0.27617</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp27</td><td>53; differential FL27−FL7</td><td>+1.44281 / +0.22792</td><td>+0.81724 / +0.13275</td><td>+ → +</td><td>− (corpus-validated); direct</td><td>DISAGREE</td></tr>
+<tr><td>MDAC/magFlxLp28</td><td>—; no DD index</td><td>-0.52914 / —</td><td>-0.63779 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magFlxLp29</td><td>—; no DD index</td><td>-0.51970 / —</td><td>-0.65471 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magFlxLp30</td><td>—; no DD index</td><td>-0.54154 / —</td><td>-0.64122 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magFlxLp31</td><td>—; no DD index</td><td>-0.55500 / —</td><td>-0.65443 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magFlxLp32</td><td>—; no DD index</td><td>-0.52494 / —</td><td>-0.64274 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magFlxLp33</td><td>—; no DD index</td><td>-0.52977 / —</td><td>-0.63700 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magFlxLp34</td><td>—; no DD index</td><td>-0.50938 / —</td><td>-0.62307 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-pickup">Tangential pickup coils</h3>
+<p id="diagnostic-convention-audit-pickup-method">The DD description has 17 positioned probes, and the bundle maps exactly raw MDAC probes 1–17. The earlier SELENE calculation used the normal <code>N=(−sin ω,cos ω)</code> and found raw ≈ <code>−B·N</code>. The DD <code>poloidal_angle=(90°−ω) mod 360°</code> directs the sensing axis <code>(sin ω,−cos ω)=−N</code>; therefore the same measurements are positive along the DD axis. Physical projected B has COCOS 2→17 factor +1 and no 2π factor. All 17 MDAC rules assign channel_factor +1 (16 corpus-validated, probe 17 source-only), agreeing with our directed-axis verdict; the 17 PSRC processed aliases have the same linked comparison and their own blocked entries. The PSRC median absolute residuals against that directed axis are 0.0132, 0.0041, 0.0133 and 0.0051 T at the named slices; MDAC gives 0.0119 and 0.0059 T.</p>
+<p id="diagnostic-convention-audit-pickup-coverage">Raw MDAC probes 18–23 are blocked because getseldata reads PID 1626 S006 channels 1–17 only, leaving no DD b_field_pol_probe index. The bundle’s blocked reasons also identify PSRC probe 18 as a non-identity near-duplicate of raw MDAC 18 (slope −4.197, r −0.977) and PSRC 19–23 as lacking unique raw partners. Those processed channels have no direct rule or blocked entry. This is an index and identity limit, not missing positions.</p>
+<table id="diagnostic-convention-audit-pickup-table"><thead><tr><th>Channel</th><th>DD entry</th><th>E101163 raw / SELENE directed-axis T</th><th>E101011 6.8 s raw / prediction T</th><th>Own COCOS 2 → 17 sign</th><th>Ambix COCOS 17 factor / validation</th><th>Comparison</th></tr></thead><tbody>
+<tr><td>PSRC/magPbTC1</td><td>1</td><td>+0.10806 / +0.09682</td><td>+0.07744 / +0.06525</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC2</td><td>2</td><td>+0.13286 / +0.12535</td><td>+0.09063 / +0.08664</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC3</td><td>3</td><td>+0.11874 / +0.11717</td><td>+0.04877 / +0.04964</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC4</td><td>4</td><td>+0.08687 / +0.09017</td><td>+0.01867 / +0.02278</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC5</td><td>5</td><td>-0.05172 / -0.04394</td><td>-0.00457 / +0.00083</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC6</td><td>6</td><td>-0.06775 / -0.06359</td><td>-0.02784 / -0.02281</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC7</td><td>7</td><td>+0.06581 / +0.07184</td><td>+0.03226 / +0.03780</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC8</td><td>8</td><td>+0.16386 / +0.17287</td><td>+0.05490 / +0.06708</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC9</td><td>9</td><td>+0.19359 / +0.19791</td><td>+0.08311 / +0.09209</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC10</td><td>10</td><td>+0.09381 / +0.09504</td><td>+0.05735 / +0.05416</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC11</td><td>11</td><td>-0.04255 / -0.04231</td><td>-0.04588 / -0.04823</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC12</td><td>12</td><td>-0.06755 / -0.06762</td><td>-0.08054 / -0.08293</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC13</td><td>13</td><td>+0.01813 / +0.01949</td><td>+0.01016 / +0.00922</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC14</td><td>14</td><td>+0.13872 / +0.13841</td><td>+0.10041 / +0.09950</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC15</td><td>15</td><td>+0.09315 / +0.08917</td><td>+0.04336 / +0.03923</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC16</td><td>16</td><td>+0.07689 / +0.07005</td><td>+0.03793 / +0.03033</td><td>+ → +</td><td>+ (corpus-validated); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC17</td><td>17</td><td>+0.08679 / +0.07710</td><td>+0.05408 / +0.04289</td><td>+ → +</td><td>+ (source-only); processed alias to raw</td><td>agree</td></tr>
+<tr><td>PSRC/magPbTC18</td><td>—</td><td>—</td><td>-0.00383 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magPbTC19</td><td>—</td><td>—</td><td>-0.00328 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magPbTC20</td><td>—</td><td>—</td><td>-0.00434 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magPbTC21</td><td>—</td><td>—</td><td>-0.00215 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magPbTC22</td><td>—</td><td>—</td><td>-0.00241 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>PSRC/magPbTC23</td><td>—</td><td>—</td><td>-0.00031 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magPbTC1</td><td>1</td><td>+0.10777 / +0.08070</td><td>+0.07645 / +0.06525</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC2</td><td>2</td><td>+0.13348 / +0.11768</td><td>+0.08949 / +0.08664</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC3</td><td>3</td><td>+0.11767 / +0.11755</td><td>+0.04823 / +0.04964</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC4</td><td>4</td><td>+0.08625 / +0.09980</td><td>+0.01821 / +0.02278</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC5</td><td>5</td><td>-0.05227 / -0.02717</td><td>-0.00605 / +0.00083</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC6</td><td>6</td><td>-0.06783 / -0.04631</td><td>-0.02901 / -0.02281</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC7</td><td>7</td><td>+0.06433 / +0.09025</td><td>+0.03148 / +0.03780</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC8</td><td>8</td><td>+0.16413 / +0.18822</td><td>+0.05435 / +0.06708</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC9</td><td>9</td><td>+0.19660 / +0.19265</td><td>+0.08541 / +0.09209</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC10</td><td>10</td><td>+0.09505 / +0.08780</td><td>+0.05812 / +0.05416</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC11</td><td>11</td><td>-0.04322 / -0.04857</td><td>-0.04695 / -0.04823</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC12</td><td>12</td><td>-0.06922 / -0.07386</td><td>-0.08076 / -0.08293</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC13</td><td>13</td><td>+0.01827 / +0.01840</td><td>+0.01000 / +0.00922</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC14</td><td>14</td><td>+0.13956 / +0.13693</td><td>+0.10168 / +0.09950</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC15</td><td>15</td><td>+0.09095 / +0.08324</td><td>+0.04316 / +0.03923</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC16</td><td>16</td><td>+0.07597 / +0.05904</td><td>+0.03849 / +0.03033</td><td>+ → +</td><td>+ (corpus-validated); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC17</td><td>17</td><td>+0.08624 / +0.06213</td><td>+0.05322 / +0.04289</td><td>+ → +</td><td>+ (source-only); direct</td><td>agree</td></tr>
+<tr><td>MDAC/magPbTC18</td><td>—</td><td>-0.01522 / —</td><td>-0.03415 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magPbTC19</td><td>—</td><td>+0.00378 / —</td><td>+0.00964 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magPbTC20</td><td>—</td><td>-0.01118 / —</td><td>+0.00673 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magPbTC21</td><td>—</td><td>+0.03577 / —</td><td>+0.01461 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magPbTC22</td><td>—</td><td>-0.00989 / —</td><td>-0.03651 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+<tr><td>MDAC/magPbTC23</td><td>—</td><td>-0.00673 / —</td><td>+0.00339 / —</td><td>—</td><td>No rule; no DD index</td><td>not comparable</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-rogowski">Ip Rogowski coils</h3>
+<p id="diagnostic-convention-audit-rogowski-method">SELENE current is +0.992993 MA at E101163 5.1 s and the SA COCOS 2 G-EQDSK current is +0.491265 MA at E101011 6.8 s. A sign is assigned only when both raw currents exceed 10% of the reconstruction magnitude. RCP1 is positive for clockwise Ip. RCIP2 and outer-VV coils 1, 2 and 4 are negative for the same reference direction; they are explicit family polarity disagreements. RCIP3–4, outer-VV coil 3 and inner-VV coils 1–4 carry little current in both shots and cannot establish a winding sign. Current has no 2π flux factor.</p>
+<table id="diagnostic-convention-audit-rogowski-table"><thead><tr><th>Channel</th><th>E101163 measured / SELENE A</th><th>E101011 measured / SELENE A</th><th>Sign for clockwise Ip</th><th>Confidence</th><th>Flag</th></tr></thead><tbody>
+<tr><td>MDAC/curRCP1</td><td>994058.7 / 992992.9</td><td>490347.4 / 491265.1</td><td>+</td><td>medium</td><td>—</td></tr>
+<tr><td>MDAC/curRCIP2</td><td>-984622.1 / 992992.9</td><td>-499738.4 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curRCIP3</td><td>0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curRCIP4</td><td>-0.0 / 992992.9</td><td>-0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curAVVRC1</td><td>-890075.4 / 992992.9</td><td>-482269.4 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curAVVRC2</td><td>-1026462.4 / 992992.9</td><td>-555838.9 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curAVVRC3</td><td>9933.6 / 992992.9</td><td>12029.1 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curAVVRC4</td><td>-1027008.7 / 992992.9</td><td>-560811.1 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curIVVRC1</td><td>-0.0 / 992992.9</td><td>-0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curIVVRC2</td><td>-0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curIVVRC3</td><td>0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curIVVRC4</td><td>0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-diamagnetic">Diamagnetic loop</h3>
+<p id="diagnostic-convention-audit-diamagnetic-method">The three MDAC loop voltages and corrected PSRC flux are readable at both shots, but no diamagnetic sensor geometry or SELENE prediction at that loop was established. Voltage cannot be divided by 2π and compared directly with poloidal ψ. The sign, positive normal and flux normalization of each channel remain unknown.</p>
+<table id="diagnostic-convention-audit-diamagnetic-table"><thead><tr><th>Channel</th><th>E101163 value</th><th>E101011 value</th><th>Unit</th><th>Inferred sign</th></tr></thead><tbody>
+<tr><td>MDAC/volDmagL1</td><td>-0.02323</td><td>-0.00406</td><td>V</td><td>unknown</td></tr>
+<tr><td>MDAC/volDmagL2</td><td>-1.54305</td><td>-2.31027</td><td>V</td><td>unknown</td></tr>
+<tr><td>MDAC/volDmagL3</td><td>-0.30530</td><td>-0.44563</td><td>V</td><td>unknown</td></tr>
+<tr><td>PSRC/corDmagL1</td><td>-0.02322</td><td>-0.00406</td><td>Wb</td><td>unknown</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-toroidal">Toroidal-field measurement</h3>
+<p id="diagnostic-convention-audit-toroidal-method">The EDDB PID 1625 O293 maps to PSC/oTFCur. The active outeddb.c source multiplies this current by +2.25×2.96/25.7 to obtain SELENE BTV. At E101011, +23.195272 kA gives +6.010914961 T·m, matching the SA COCOS 2 G-EQDSK +6.010914972 T·m to 0.000000011 T·m. MDAC/oTFCur also reads positive and differs from PSC by less than 0.08%. Both measured currents thus have positive sign for clockwise Bt; no 2π conversion applies. E101163 FLEDD BTV is +6.66 T·m while the scaled current is about +6.011 T·m, so amplitude agreement is specific to the E101011 example.</p>
+<table id="diagnostic-convention-audit-toroidal-table"><thead><tr><th>Channel</th><th>E101163 [kA]</th><th>E101011 [kA]</th><th>Sign for clockwise Bt</th><th>Confidence</th></tr></thead><tbody>
+<tr><td>PSC/oTFCur</td><td>23.18429</td><td>23.19527</td><td>+</td><td>medium</td></tr>
+<tr><td>MDAC/oTFCur</td><td>23.19710</td><td>23.17879</td><td>+</td><td>low</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-profiles">Profile coordinates</h3>
+<p id="diagnostic-convention-audit-profiles-method">The active EDAS coordinate selector maps FIT_RHOTYPE 0 to equal ψ, 1 to volume-average ρ, 2 to toroidal-flux-average ρ, 3 to poloidal-flux-average ρ and 9 to poloidal flux with SOL. This is a per-record selector, so a profile family cannot inherit one fixed coordinate. A live LCDB/a042181/ate.s001 record for shot E101173 reports FIT_RHOTYPE=1 and positive XEXPDATA 0.563–0.827, but its equilibrium shot is 75000. Its TOPICS_RHOTYPE=6 is absent from that selector map. Neither selector was compared numerically with a SELENE reference at the same shot, so coordinate sign and the TOPICS axis remain unverified.</p>
+<p id="diagnostic-convention-audit-limit">The 27 raw flux-loop signs disagree with the imas-alambic COCOS 17 rules and are left unresolved, with processed alias comparisons labelled separately. The 7 extra raw loop and 6 extra raw pickup indices are blocked by getseldata/DD coverage; their processed counterparts lack served rules or unique identities. Diamagnetic geometry and prediction remain unavailable, and the sampled profile uses a different equilibrium shot. These limitations are recorded per channel in JSON.</p>
+</section>
