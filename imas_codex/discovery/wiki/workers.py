@@ -208,10 +208,20 @@ async def score_worker(
         # Step 1: Fetch content for all pages in parallel.
         # For ssh:// URLs (twiki_raw), use batch SSH to read all files in
         # a single SSH call (~3s total) instead of N individual calls (N×3s).
-        ssh_pages = [p for p in pages if p.get("url", "").startswith("ssh://")]
-        non_ssh_pages = [p for p in pages if not p.get("url", "").startswith("ssh://")]
+        stored_pages = [
+            {**page, "fetch_error": None}
+            for page in pages
+            if page.get("status") != WikiPageStatus.scanned.value
+            and page.get("preview_text")
+        ]
+        stored_ids = {page["id"] for page in stored_pages}
+        pages_to_fetch = [page for page in pages if page["id"] not in stored_ids]
+        ssh_pages = [p for p in pages_to_fetch if p.get("url", "").startswith("ssh://")]
+        non_ssh_pages = [
+            p for p in pages_to_fetch if not p.get("url", "").startswith("ssh://")
+        ]
 
-        fetched_pages: list[dict] = []
+        fetched_pages: list[dict] = stored_pages[:]
 
         if ssh_pages:
             from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
@@ -973,13 +983,15 @@ async def docs_score_worker(
             document_type = document.get("document_type", "unknown")
 
             try:
-                preview_text = await _extract_document_preview(
-                    url=url,
-                    document_type=document_type,
-                    facility=state.facility,
-                    max_chars=1500,
-                    session=auth_session,
-                )
+                preview_text = document.get("preview_text")
+                if not preview_text:
+                    preview_text = await _extract_document_preview(
+                        url=url,
+                        document_type=document_type,
+                        facility=state.facility,
+                        max_chars=1500,
+                        session=auth_session,
+                    )
                 documents_with_text.append(
                     {
                         "id": document_id,

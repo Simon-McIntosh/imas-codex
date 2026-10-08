@@ -488,7 +488,7 @@ def has_pending_document_work(facility: str, *, base_url: str | None = None) -> 
             f"""
             MATCH (wa:Document {{facility_id: $facility}})
             WHERE ((wa.status = $discovered)
-               OR (wa.status = $scored AND wa.score_composite >= 0.5
+               OR (wa.status = $scored AND wa.ingest_relevance >= 0.5
                    AND wa.document_type IN $ingestable))
               AND (wa.claimed_at IS NULL
                    OR wa.claimed_at < datetime() - duration($cutoff))
@@ -514,11 +514,18 @@ def has_pending_document_score_work(
     OR by the document's own URL (for bulk-discovered unlinked documents).
     """
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
+    from imas_codex.settings import get_model
+
     url_filter = _document_url_filter(base_url)
     with GraphClient() as gc:
         params: dict = {
             "facility": facility,
             "discovered": DocumentStatus.discovered.value,
+            "stale_statuses": [
+                DocumentStatus.scored.value,
+                DocumentStatus.ingested.value,
+            ],
+            "judgment_model": get_model("discovery-relevance"),
             "types": list(SCORABLE_DOCUMENT_TYPES),
             "cutoff": cutoff,
         }
@@ -526,7 +533,10 @@ def has_pending_document_score_work(
         result = gc.query(
             f"""
             MATCH (wa:Document {{facility_id: $facility}})
-            WHERE wa.status = $discovered
+            WHERE (wa.status = $discovered OR
+                   (wa.status IN $stale_statuses
+                    AND coalesce(wa.judgment_model, '') <> $judgment_model
+                    AND wa.preview_text IS NOT NULL))
               AND wa.document_type IN $types
               AND (wa.claimed_at IS NULL
                    OR wa.claimed_at < datetime() - duration($cutoff))
@@ -566,7 +576,7 @@ def has_pending_document_ingest_work(
             f"""
             MATCH (wa:Document {{facility_id: $facility}})
             WHERE (
-                (wa.status = $scored AND wa.score_composite >= 0.5
+                (wa.status = $scored AND wa.ingest_relevance >= 0.5
                  AND wa.document_type IN $types)
                 OR (wa.status = $discovered AND wa.score_exempt = true)
               )
@@ -643,7 +653,7 @@ def has_pending_work(facility: str, *, base_url: str | None = None) -> bool:
             f"""
             MATCH (wp:WikiPage {{facility_id: $facility}})
             WHERE (wp.status = $scanned
-                   OR (wp.status = $scored AND wp.score_composite >= 0.5))
+                   OR (wp.status = $scored AND wp.ingest_relevance >= 0.5))
               AND (wp.claimed_at IS NULL
                    OR wp.claimed_at < datetime() - duration($cutoff))
               {url_filter}
@@ -664,11 +674,19 @@ def has_pending_scan_work(facility: str, *, base_url: str | None = None) -> bool
     URL prefix.
     """
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
+    from imas_codex.settings import get_model
+
     url_filter = "AND wp.url STARTS WITH $base_url" if base_url else ""
     with GraphClient() as gc:
         params: dict = {
             "facility": facility,
             "scanned": WikiPageStatus.scanned.value,
+            "stale_statuses": [
+                WikiPageStatus.scored.value,
+                WikiPageStatus.skipped.value,
+                WikiPageStatus.ingested.value,
+            ],
+            "judgment_model": get_model("discovery-relevance"),
             "cutoff": cutoff,
         }
         if base_url:
@@ -676,7 +694,10 @@ def has_pending_scan_work(facility: str, *, base_url: str | None = None) -> bool
         result = gc.query(
             f"""
             MATCH (wp:WikiPage {{facility_id: $facility}})
-            WHERE wp.status = $scanned
+            WHERE (wp.status = $scanned OR
+                   (wp.status IN $stale_statuses
+                    AND coalesce(wp.judgment_model, '') <> $judgment_model
+                    AND wp.preview_text IS NOT NULL))
               AND (wp.claimed_at IS NULL
                    OR wp.claimed_at < datetime() - duration($cutoff))
               {url_filter}
@@ -710,7 +731,7 @@ def has_pending_ingest_work(facility: str, *, base_url: str | None = None) -> bo
             f"""
             MATCH (wp:WikiPage {{facility_id: $facility}})
             WHERE wp.status = $scored
-              AND (wp.score_composite >= 0.5 OR wp.should_ingest = true)
+              AND wp.ingest_relevance >= 0.5
               AND (wp.claimed_at IS NULL
                    OR wp.claimed_at < datetime() - duration($cutoff))
               {url_filter}
@@ -813,77 +834,36 @@ def reset_transient_pages(
 # =============================================================================
 
 
-@retry_on_deadlock()
 def claim_pages_for_scoring(
     facility: str, limit: int = 50, *, base_url: str | None = None
 ) -> list[dict[str, Any]]:
-    """Claim scanned pages for content-aware scoring.
+    """Claim new or stale wiki judgments, preferring never-judged pages."""
+    from imas_codex.discovery.base.claims import claim_batch
+    from imas_codex.settings import get_model
 
-    Workflow: scanned + unclaimed → set claimed_at
-    Score worker fetches content and scores in single pass.
-    After scoring: update status to 'scored' and set score field.
-
-    Uses claim token pattern to handle race conditions between workers:
-    1. Generate unique claim token
-    2. Atomically SET token on unclaimed pages
-    3. Read back only pages with OUR token (pages we actually won)
-
-    When ``base_url`` is provided, only claims pages whose URL starts
-    with the given prefix (site-scoped in multi-site mode).
-    """
-    import uuid
-
-    cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"  # ISO 8601 duration
-    claim_token = str(uuid.uuid4())
-    url_filter = "AND wp.url STARTS WITH $base_url" if base_url else ""
-
-    with GraphClient() as gc:
-        params: dict = {
-            "facility": facility,
-            "scanned": WikiPageStatus.scanned.value,
-            "cutoff": cutoff,
-            "limit": limit,
-            "token": claim_token,
-        }
-        if base_url:
-            params["base_url"] = base_url
-        # Step 1: Attempt to claim pages with our unique token
-        # Using random() in ORDER BY reduces collision probability further
-        gc.query(
-            f"""
-            MATCH (wp:WikiPage {{facility_id: $facility}})
-            WHERE wp.status = $scanned
-              AND (wp.claimed_at IS NULL
-                   OR wp.claimed_at < datetime() - duration($cutoff))
-              {url_filter}
-            WITH wp
-            ORDER BY rand()
-            LIMIT $limit
-            SET wp.claimed_at = datetime(), wp.claim_token = $token
-            """,
-            **params,
-        )
-
-        # Step 2: Read back only pages WE successfully claimed
-        # If another worker raced us, they have a different token
-        result = gc.query(
-            """
-            MATCH (wp:WikiPage {facility_id: $facility, claim_token: $token})
-            RETURN wp.id AS id, wp.title AS title, wp.url AS url,
-                   wp.content_language AS content_language
-            """,
-            facility=facility,
-            token=claim_token,
-        )
-        claimed = list(result)
-
-        logger.debug(
-            "claim_pages_for_scoring: requested %d, won %d (token=%s)",
-            limit,
-            len(claimed),
-            claim_token[:8],
-        )
-        return claimed
+    params: dict[str, Any] = {
+        "scanned": WikiPageStatus.scanned.value,
+        "stale_statuses": [
+            WikiPageStatus.scored.value,
+            WikiPageStatus.skipped.value,
+            WikiPageStatus.ingested.value,
+        ],
+        "judgment_model": get_model("discovery-relevance"),
+    }
+    predicate = "(n.status = $scanned OR (n.status IN $stale_statuses AND coalesce(n.judgment_model, '') <> $judgment_model AND n.preview_text IS NOT NULL))"
+    if base_url:
+        predicate += " AND n.url STARTS WITH $base_url"
+        params["base_url"] = base_url
+    return claim_batch(
+        "WikiPage",
+        facility=facility,
+        status_predicate=predicate,
+        status_params=params,
+        batch_size=limit,
+        graph_client=GraphClient,
+        order_key="CASE WHEN n.status = $scanned THEN 0 ELSE 1 END",
+        return_fields="n.id AS id, n.title AS title, n.url AS url, n.content_language AS content_language, n.status AS status, n.preview_text AS preview_text",
+    )
 
 
 @retry_on_deadlock()
@@ -928,7 +908,7 @@ def claim_pages_for_ingesting(
             f"""
             MATCH (wp:WikiPage {{facility_id: $facility}})
             WHERE wp.status = $scored
-              AND (wp.score_composite >= $min_score OR wp.should_ingest = true)
+              AND wp.ingest_relevance >= $min_score
               AND (wp.claimed_at IS NULL
                    OR wp.claimed_at < datetime() - duration($cutoff))
               {url_filter}
@@ -1006,11 +986,15 @@ def mark_pages_scored(
 
         item = {
             "id": page_id,
-            "score_composite": r.get("score_composite", 0.0),
+            "score_composite": r.get("ingest_relevance", 0.0),
+            "ingest_relevance": r.get("ingest_relevance", 0.0),
+            "judgment_model": r.get("judgment_model"),
+            "purpose_probs": r.get("purpose_probs"),
+            "purpose_confidence": r.get("purpose_confidence"),
             "purpose": r.get("purpose", r.get("page_purpose", "other")),
             "description": r.get("description") or None,
-            "reasoning": r.get("reasoning", ""),
-            "keywords": r.get("keywords", []),
+            "reasoning": r.get("reasoning"),
+            "keywords": r.get("keywords"),
             "physics_domain": r.get("physics_domain"),
             "preview_text": r.get("preview_text", ""),
             "score_data_documentation": r.get("score_data_documentation", 0.0),
@@ -1024,8 +1008,18 @@ def mark_pages_scored(
             "is_physics": r.get("is_physics", False),
             "score_cost": r.get("score_cost", 0.0),
         }
+        for facet in (
+            "score_data_documentation",
+            "score_physics_content",
+            "score_code_documentation",
+            "score_data_access",
+            "score_calibration",
+            "score_imas_relevance",
+        ):
+            item[f"{facet}_probs"] = r.get(f"{facet}_probs")
+            item[f"{facet}_confidence"] = r.get(f"{facet}_confidence")
 
-        if item["score_composite"] >= skip_threshold or item.get("should_ingest"):
+        if r.get("ingest_relevance", 0.0) >= skip_threshold:
             scored_batch.append(item)
         else:
             skipped_batch.append(item)
@@ -1038,13 +1032,13 @@ def mark_pages_scored(
         _SET_SCORING_FIELDS = """
                 UNWIND $batch AS item
                 MATCH (wp:WikiPage {id: item.id})
-                SET wp.status = $status,
+                SET wp.status = CASE WHEN wp.status = $ingested THEN wp.status ELSE $status END,
                     wp.score_composite = item.score_composite,
                     wp.purpose = item.purpose,
                     wp.description = item.description,
-                    wp.reasoning = item.reasoning,
-                    wp.keywords = item.keywords,
-                    wp.physics_domain = item.physics_domain,
+                    wp.reasoning = coalesce(item.reasoning, wp.reasoning),
+                    wp.keywords = coalesce(item.keywords, wp.keywords),
+                    wp.physics_domain = coalesce(item.physics_domain, wp.physics_domain),
                     wp.preview_text = item.preview_text,
                     wp.score_data_documentation = item.score_data_documentation,
                     wp.score_physics_content = item.score_physics_content,
@@ -1056,6 +1050,22 @@ def mark_pages_scored(
                     wp.skip_reason = item.skip_reason,
                     wp.is_physics_content = item.is_physics,
                     wp.score_cost = item.score_cost,
+                    wp.ingest_relevance = item.ingest_relevance,
+                    wp.judgment_model = item.judgment_model,
+                    wp.purpose_probs = item.purpose_probs,
+                    wp.purpose_confidence = item.purpose_confidence,
+                    wp.score_data_documentation_probs = item.score_data_documentation_probs,
+                    wp.score_data_documentation_confidence = item.score_data_documentation_confidence,
+                    wp.score_physics_content_probs = item.score_physics_content_probs,
+                    wp.score_physics_content_confidence = item.score_physics_content_confidence,
+                    wp.score_code_documentation_probs = item.score_code_documentation_probs,
+                    wp.score_code_documentation_confidence = item.score_code_documentation_confidence,
+                    wp.score_data_access_probs = item.score_data_access_probs,
+                    wp.score_data_access_confidence = item.score_data_access_confidence,
+                    wp.score_calibration_probs = item.score_calibration_probs,
+                    wp.score_calibration_confidence = item.score_calibration_confidence,
+                    wp.score_imas_relevance_probs = item.score_imas_relevance_probs,
+                    wp.score_imas_relevance_confidence = item.score_imas_relevance_confidence,
                     wp.scored_at = datetime(),
                     wp.preview_fetched_at = datetime(),
                     wp.claimed_at = null
@@ -1066,6 +1076,7 @@ def mark_pages_scored(
                 _SET_SCORING_FIELDS,
                 batch=scored_batch,
                 status=WikiPageStatus.scored.value,
+                ingested=WikiPageStatus.ingested.value,
             )
 
         if skipped_batch:
@@ -1073,6 +1084,7 @@ def mark_pages_scored(
                 _SET_SCORING_FIELDS,
                 batch=skipped_batch,
                 status=WikiPageStatus.skipped.value,
+                ingested=WikiPageStatus.ingested.value,
             )
             logger.info(
                 "mark_pages_scored: %d pages skipped (score < %.1f)",
@@ -1632,79 +1644,37 @@ def defer_failed_documents(facility: str) -> int:
 # =============================================================================
 
 
-@retry_on_deadlock()
 def claim_documents_for_scoring(
     facility: str,
     limit: int = 20,
     *,
     base_url: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Claim discovered documents for scoring.
+    """Claim new or stale document judgments through the shared claim loop."""
+    from imas_codex.discovery.base.claims import claim_batch
+    from imas_codex.settings import get_model
 
-    Claims documents with status='discovered' and any scorable document_type.
-    Image documents are NOT scored here — they bypass LLM scoring and go
-    directly to ingestion via claim_documents_for_ingesting.
-
-    Workflow: discovered + scorable_type + unclaimed → set claimed_at
-    Score worker extracts text preview and scores with LLM.
-    After scoring: update status to 'scored' and set score/description/physics_domain.
-
-    Uses claim token pattern to handle race conditions between workers.
-    When ``base_url`` is provided, matches documents by linked page URL
-    OR by the document's own URL (for bulk-discovered unlinked documents).
-    """
-    import uuid
-
-    cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
-    claim_token = str(uuid.uuid4())
-    url_filter = _document_url_filter(base_url)
-
-    with GraphClient() as gc:
-        params: dict = {
-            "facility": facility,
-            "discovered": DocumentStatus.discovered.value,
-            "types": list(SCORABLE_DOCUMENT_TYPES),
-            "cutoff": cutoff,
-            "limit": limit,
-            "token": claim_token,
-        }
+    params: dict[str, Any] = {
+        "discovered": DocumentStatus.discovered.value,
+        "stale_statuses": [DocumentStatus.scored.value, DocumentStatus.ingested.value],
+        "judgment_model": get_model("discovery-relevance"),
+        "types": list(SCORABLE_DOCUMENT_TYPES),
+    }
+    predicate = "n.document_type IN $types AND (n.status = $discovered OR (n.status IN $stale_statuses AND coalesce(n.judgment_model, '') <> $judgment_model AND n.preview_text IS NOT NULL))"
+    if base_url:
+        url_filter = _document_url_filter(base_url).replace("wa.", "n.")
+        predicate += " " + url_filter
         params.update(_base_url_params(base_url))
-        # Step 1: Attempt to claim documents with our unique token
-        gc.query(
-            f"""
-            MATCH (wa:Document {{facility_id: $facility}})
-            WHERE wa.status = $discovered
-              AND wa.document_type IN $types
-              AND (wa.claimed_at IS NULL
-                   OR wa.claimed_at < datetime() - duration($cutoff))
-              {url_filter}
-            WITH wa
-            ORDER BY rand()
-            LIMIT $limit
-            SET wa.claimed_at = datetime(), wa.claim_token = $token
-            """,
-            **params,
-        )
-
-        # Step 2: Read back only documents WE successfully claimed
-        result = gc.query(
-            """
-            MATCH (wa:Document {facility_id: $facility, claim_token: $token})
-            RETURN wa.id AS id, wa.url AS url, wa.filename AS filename,
-                   wa.document_type AS document_type, wa.size_bytes AS size_bytes
-            """,
-            facility=facility,
-            token=claim_token,
-        )
-        claimed = list(result)
-
-        logger.debug(
-            "claim_documents_for_scoring: requested %d, won %d (token=%s)",
-            limit,
-            len(claimed),
-            claim_token[:8],
-        )
-        return claimed
+    return claim_batch(
+        "Document",
+        facility=facility,
+        status_predicate=predicate,
+        status_params=params,
+        batch_size=limit,
+        graph_client=GraphClient,
+        order_key="CASE WHEN n.status = $discovered THEN 0 ELSE 1 END",
+        return_fields="n.id AS id, n.url AS url, n.filename AS filename, n.document_type AS document_type, n.size_bytes AS size_bytes, n.status AS status, n.preview_text AS preview_text",
+    )
 
 
 @retry_on_deadlock()
@@ -1756,7 +1726,7 @@ def claim_documents_for_ingesting(
             f"""
             MATCH (wa:Document {{facility_id: $facility}})
             WHERE (
-                (wa.status = $scored AND wa.score_composite >= $min_score
+                (wa.status = $scored AND wa.ingest_relevance >= $min_score
                  AND wa.document_type IN $types)
                 OR (wa.status = $discovered AND wa.score_exempt = true)
               )
@@ -1816,11 +1786,15 @@ def mark_documents_scored(
         batch_data.append(
             {
                 "id": document_id,
-                "score_composite": r.get("score_composite", 0.0),
+                "score_composite": r.get("ingest_relevance", 0.0),
+                "ingest_relevance": r.get("ingest_relevance", 0.0),
+                "judgment_model": r.get("judgment_model"),
+                "purpose_probs": r.get("purpose_probs"),
+                "purpose_confidence": r.get("purpose_confidence"),
                 "document_purpose": r.get("document_purpose", "other"),
                 "description": r.get("description") or None,
-                "reasoning": r.get("reasoning", ""),
-                "keywords": r.get("keywords", []),
+                "reasoning": r.get("reasoning"),
+                "keywords": r.get("keywords"),
                 "physics_domain": r.get("physics_domain"),
                 "preview_text": r.get("preview_text", "")[:500],
                 "score_data_documentation": r.get("score_data_documentation", 0.0),
@@ -1834,6 +1808,16 @@ def mark_documents_scored(
                 "score_cost": r.get("score_cost", 0.0),
             }
         )
+        for facet in (
+            "score_data_documentation",
+            "score_physics_content",
+            "score_code_documentation",
+            "score_data_access",
+            "score_calibration",
+            "score_imas_relevance",
+        ):
+            batch_data[-1][f"{facet}_probs"] = r.get(f"{facet}_probs")
+            batch_data[-1][f"{facet}_confidence"] = r.get(f"{facet}_confidence")
 
     if not batch_data:
         return 0
@@ -1843,13 +1827,13 @@ def mark_documents_scored(
             """
             UNWIND $batch AS item
             MATCH (wa:Document {id: item.id})
-            SET wa.status = $status,
+            SET wa.status = CASE WHEN wa.status = $ingested THEN wa.status ELSE $status END,
                 wa.score_composite = item.score_composite,
                 wa.document_purpose = item.document_purpose,
                 wa.description = item.description,
-                wa.reasoning = item.reasoning,
-                wa.keywords = item.keywords,
-                wa.physics_domain = item.physics_domain,
+                wa.reasoning = coalesce(item.reasoning, wa.reasoning),
+                wa.keywords = coalesce(item.keywords, wa.keywords),
+                wa.physics_domain = coalesce(item.physics_domain, wa.physics_domain),
                 wa.preview_text = item.preview_text,
                 wa.score_data_documentation = item.score_data_documentation,
                 wa.score_physics_content = item.score_physics_content,
@@ -1860,11 +1844,28 @@ def mark_documents_scored(
                 wa.should_ingest = item.should_ingest,
                 wa.skip_reason = item.skip_reason,
                 wa.score_cost = item.score_cost,
+                wa.ingest_relevance = item.ingest_relevance,
+                wa.judgment_model = item.judgment_model,
+                wa.purpose_probs = item.purpose_probs,
+                wa.purpose_confidence = item.purpose_confidence,
+                wa.score_data_documentation_probs = item.score_data_documentation_probs,
+                wa.score_data_documentation_confidence = item.score_data_documentation_confidence,
+                wa.score_physics_content_probs = item.score_physics_content_probs,
+                wa.score_physics_content_confidence = item.score_physics_content_confidence,
+                wa.score_code_documentation_probs = item.score_code_documentation_probs,
+                wa.score_code_documentation_confidence = item.score_code_documentation_confidence,
+                wa.score_data_access_probs = item.score_data_access_probs,
+                wa.score_data_access_confidence = item.score_data_access_confidence,
+                wa.score_calibration_probs = item.score_calibration_probs,
+                wa.score_calibration_confidence = item.score_calibration_confidence,
+                wa.score_imas_relevance_probs = item.score_imas_relevance_probs,
+                wa.score_imas_relevance_confidence = item.score_imas_relevance_confidence,
                 wa.scored_at = datetime(),
                 wa.claimed_at = null
             """,
             batch=batch_data,
             status=DocumentStatus.scored.value,
+            ingested=DocumentStatus.ingested.value,
         )
 
     return len(batch_data)
@@ -2022,7 +2023,42 @@ def mark_images_scored(
         mark_images_scored as _mark,
     )
 
-    return _mark(facility, results, store_images=store_images)
+    count = _mark(facility, results, store_images=store_images)
+    judgment_fields = (
+        "judgment_model",
+        "ingest_relevance",
+        "purpose_probs",
+        "purpose_confidence",
+        "score_data_documentation_probs",
+        "score_data_documentation_confidence",
+        "score_physics_content_probs",
+        "score_physics_content_confidence",
+        "score_code_documentation_probs",
+        "score_code_documentation_confidence",
+        "score_data_access_probs",
+        "score_data_access_confidence",
+        "score_calibration_probs",
+        "score_calibration_confidence",
+        "score_imas_relevance_probs",
+        "score_imas_relevance_confidence",
+    )
+    rows = [
+        {
+            "id": result["id"],
+            "fields": {key: result.get(key) for key in judgment_fields},
+        }
+        for result in results
+    ]
+    with GraphClient() as gc:
+        gc.query(
+            """
+            UNWIND $rows AS row
+            MATCH (img:Image {id: row.id})
+            SET img += row.fields
+            """,
+            rows=rows,
+        )
+    return count
 
 
 def _release_claimed_images(image_ids: list[str]) -> None:

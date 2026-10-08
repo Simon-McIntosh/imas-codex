@@ -27,6 +27,161 @@ from imas_codex.graph import GraphClient
 
 logger = logging.getLogger(__name__)
 
+
+def build_content_judgment_state(
+    item: dict[str, Any],
+    kind: str,
+    facility: str,
+    facility_config: dict[str, Any],
+) -> dict[str, Any]:
+    """Present fetched content and its facility-specific matches to Jev."""
+    from imas_codex.discovery.code.scorer import facility_relevance_block
+    from imas_codex.discovery.wiki.entity_extraction import (
+        extract_facility_tool_mentions,
+    )
+
+    patterns = facility_config.get("data_access_patterns") or {}
+    if kind == "image":
+        content = "\n".join(
+            str(item.get(key) or "")
+            for key in (
+                "description",
+                "ocr_text",
+                "mermaid_diagram",
+                "surrounding_text",
+            )
+        )
+    else:
+        content = str(item.get("preview_text") or item.get("summary") or "")
+    content = content[:3000]
+    matches = extract_facility_tool_mentions(
+        content,
+        patterns.get("key_tools"),
+        patterns.get("code_import_patterns"),
+    )
+    return {
+        "facility": facility_relevance_block(facility, facility_config),
+        "resource": {
+            "kind": kind,
+            "title": item.get("title")
+            or item.get("filename")
+            or item.get("page_title")
+            or "",
+            "text": content,
+            "data_access_tool_matches": matches,
+        },
+    }
+
+
+_CONTENT_FACETS = (
+    "score_data_documentation",
+    "score_physics_content",
+    "score_code_documentation",
+    "score_data_access",
+    "score_calibration",
+    "score_imas_relevance",
+)
+
+
+def build_content_judgment_questions() -> dict[str, Any]:
+    """Ask for one admission Noul, an exclusive purpose, and stored facets."""
+    from imas_codex.graph.schema import get_schema
+
+    schema = get_schema()
+    purpose_options = {
+        item["value"]: item["description"]
+        for item in schema.get_enum_with_descriptions("ContentPurpose") or []
+    }
+    questions: dict[str, Any] = {
+        "ingest_relevance": {
+            "type": "noul",
+            "instructions": "Would ingesting this resource help map facility measurements, code, machine systems or IMAS data? Judge its own text and any matched facility access tools, not the mere existence of tools in the facility reference block.",
+            "criteria": {
+                "true": "The resource contains useful facility-specific technical information.",
+                "false": "The resource is administrative, empty, or lacks useful technical content.",
+            },
+        },
+        "purpose": {
+            "type": "choice",
+            "instructions": "Which single category best describes this resource?",
+            "criteria": purpose_options,
+        },
+    }
+    slots = schema.get_all_slots("WikiPage")
+    for name in _CONTENT_FACETS:
+        questions[name] = {
+            "type": "score",
+            "instructions": f"How much does the resource's own content support {slots[name]['description']}?",
+            "criteria": [
+                "No evidence of this content.",
+                "A passing mention or index entry.",
+                "A useful explanation or reference.",
+                "Primary, detailed source for this content.",
+            ],
+        }
+    return questions
+
+
+def content_judgment_fields(answers: dict[str, Any], model: str) -> dict[str, Any]:
+    """Validate and flatten Jev answers, keeping each distribution."""
+    questions = build_content_judgment_questions()
+    missing = set(questions) - set(answers)
+    if missing:
+        raise ValueError(f"Content judgment missing answers: {sorted(missing)}")
+    purpose = answers["purpose"]
+    options = list(questions["purpose"]["criteria"])
+    choice = purpose["choice"]
+    if choice not in options:
+        raise ValueError(f"Unknown content purpose: {choice}")
+    fields: dict[str, Any] = {
+        "ingest_relevance": float(answers["ingest_relevance"]["noul"]),
+        "purpose": choice,
+        "purpose_probs": [float(purpose["probabilities"].get(x, 0)) for x in options],
+        "purpose_confidence": float(purpose["confidence"]),
+        "judgment_model": model,
+    }
+    for name in _CONTENT_FACETS:
+        answer = answers[name]
+        levels = len(questions[name]["criteria"])
+        fields[name] = float(answer["score"]) / (levels - 1)
+        fields[f"{name}_probs"] = [
+            float(answer["probabilities"].get(str(i), 0)) for i in range(levels)
+        ]
+        fields[f"{name}_confidence"] = float(answer["confidence"])
+    return fields
+
+
+async def judge_content_items(
+    items: list[dict[str, Any]],
+    kind: str,
+    facility: str,
+    facility_config: dict[str, Any],
+) -> tuple[list[dict[str, Any]], float]:
+    """Judge fetched resources through the shared decision loop."""
+    from imas_codex.discovery.base.judgment import judge_rows
+    from imas_codex.settings import get_model
+
+    model = get_model("discovery-relevance")
+
+    def apply(answered, _cost):
+        return [
+            {**row, **content_judgment_fields(answers, model), "score_cost": paid}
+            for row, answers, paid in answered
+        ]
+
+    judged, cost, failed = await judge_rows(
+        items,
+        lambda row: build_content_judgment_state(row, kind, facility, facility_config),
+        build_content_judgment_questions,
+        apply,
+        model=model,
+        service="facility-discovery",
+    )
+    if failed:
+        raise ValueError(f"Jev left {len(failed)} {kind} resources unanswered")
+    return judged or [], cost
+
+
 # ---------------------------------------------------------------------------
 # Dynamic calibration (same architecture as code/scorer.py)
 # ---------------------------------------------------------------------------
@@ -411,6 +566,60 @@ def _extract_text_from_bytes(content_bytes: bytes, document_type: str) -> str:
     return ""
 
 
+async def _describe_and_judge_content(
+    items: list[dict[str, Any]],
+    model: str,
+    kind: str,
+    facility: str | None,
+    data_access_patterns: dict[str, Any] | None,
+    reasoning_effort: str | None,
+) -> tuple[list[dict[str, Any]], float]:
+    """Generate descriptions, then ask Jev to judge the same fetched text."""
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.wiki.models import DocumentScoreBatch, WikiScoreBatch
+
+    response_model = WikiScoreBatch if kind == "page" else DocumentScoreBatch
+    facility_config = get_facility(facility) if facility else {}
+    if data_access_patterns:
+        facility_config = {
+            **facility_config,
+            "data_access_patterns": data_access_patterns,
+        }
+    context = "\n\n".join(
+        f"ID: {item['id']}\nTitle: {item.get('title') or item.get('filename') or ''}"
+        f"\nText: {(item.get('preview_text') or '')[:1500]}"
+        for item in items
+    )
+    batch, description_cost, _ = await acall_llm_structured(
+        model=model,
+        messages=[
+            {
+                "role": "system",
+                "content": "Describe each resource in one or two factual sentences. Return only its ID and description.",
+            },
+            {"role": "user", "content": context},
+        ],
+        response_model=response_model,
+        service="facility-discovery",
+        reasoning_effort=reasoning_effort,
+    )
+    descriptions = {result.id: result.description for result in batch.results}
+    if any(item["id"] not in descriptions for item in items):
+        raise ValueError("Description batch omitted a resource")
+    described = [{**item, "description": descriptions[item["id"]]} for item in items]
+    judged, judgment_cost = await judge_content_items(
+        described, kind, facility or "", facility_config
+    )
+    for item in judged:
+        item["score_composite"] = item["ingest_relevance"]
+        item["should_ingest"] = item["ingest_relevance"] >= 0.5
+        item["score_cost"] += description_cost / len(items)
+        if kind == "document":
+            item["document_purpose"] = item["purpose"]
+    return judged, description_cost + judgment_cost
+
+
 async def _score_documents_batch(
     documents: list[dict[str, Any]],
     model: str,
@@ -419,145 +628,10 @@ async def _score_documents_batch(
     facility: str | None = None,
     reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
-    """Score a batch of documents using LLM with structured output.
-
-    Uses acall_llm_structured with DocumentScoreBatch Pydantic model for
-    structured output. Content-based scoring with per-dimension scores.
-
-    Args:
-        documents: List of document dicts with id, filename, preview_text, etc.
-        model: Model identifier from get_model()
-        focus: Optional focus area for scoring
-        data_access_patterns: Optional facility-specific data access patterns
-            from facility config. When provided, injected into the prompt
-            template so the LLM can boost documents matching facility tools/APIs.
-
-    Returns:
-        (results, cost) tuple where cost is actual LLM cost from OpenRouter.
-    """
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.discovery.wiki.models import (
-        DocumentScoreBatch,
-        grounded_document_score,
+    """Describe document previews and apply Jev judgments."""
+    return await _describe_and_judge_content(
+        documents, model, "document", facility, data_access_patterns, reasoning_effort
     )
-    from imas_codex.llm.prompt_loader import render_prompt
-
-    # Build system prompt using document-scorer template
-    context: dict[str, Any] = {}
-    if focus:
-        context["focus"] = focus
-    if data_access_patterns:
-        context["data_access_patterns"] = data_access_patterns
-
-    # Inject calibration examples from scored Document nodes
-    dimension_calibration = sample_wiki_document_calibration(
-        facility=facility, per_level=2
-    )
-    has_calibration = any(
-        any(examples for examples in levels.values())
-        for levels in dimension_calibration.values()
-    )
-    if has_calibration:
-        context["dimension_calibration"] = dimension_calibration
-
-    system_prompt = render_prompt("wiki/document-scorer", context)
-
-    # Build user prompt with document content
-    lines = [
-        f"Score these {len(documents)} wiki documents based on their content.",
-        "(Use the preview text to assess value for the IMAS knowledge graph.)\n",
-    ]
-
-    for i, a in enumerate(documents, 1):
-        lines.append(f"\n## Document {i}")
-        lines.append(f"ID: {a['id']}")
-        lines.append(f"Filename: {a.get('filename', 'Unknown')}")
-        lines.append(f"Type: {a.get('document_type', 'unknown')}")
-
-        if a.get("size_bytes"):
-            size_mb = a["size_bytes"] / (1024 * 1024)
-            lines.append(f"Size: {size_mb:.1f} MB")
-
-        preview = a.get("preview_text", "")
-        if preview:
-            lines.append(f"Content Preview:\n{preview[:800]}")
-        else:
-            lines.append("Content Preview: (not available - score from filename/type)")
-
-        if a.get("url"):
-            lines.append(f"URL: {a['url']}")
-
-    lines.append(
-        "\n\nReturn results for each document in order. "
-        "The response format is enforced by the schema."
-    )
-
-    user_prompt = "\n".join(lines)
-
-    messages: list[dict[str, Any]] = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-    ]
-
-    batch, total_cost, _ = await acall_llm_structured(
-        model=model,
-        messages=messages,
-        response_model=DocumentScoreBatch,
-        max_tokens=16000,
-        temperature=0.3,
-        timeout=120,
-        max_retries=5,
-        retry_base_delay=4.0,
-        service="facility-discovery",
-        reasoning_effort=reasoning_effort,
-    )
-
-    llm_results = batch.results
-
-    # Convert to result dicts
-    cost_per_document = total_cost / len(documents) if documents else 0.0
-    results = []
-
-    for r in llm_results[: len(documents)]:
-        scores = {
-            "score_data_documentation": r.score_data_documentation,
-            "score_physics_content": r.score_physics_content,
-            "score_code_documentation": r.score_code_documentation,
-            "score_data_access": r.score_data_access,
-            "score_calibration": r.score_calibration,
-            "score_imas_relevance": r.score_imas_relevance,
-        }
-
-        combined_score = grounded_document_score(scores, r.document_purpose)
-
-        # Find the matching document for filename
-        matching = next((a for a in documents if a["id"] == r.id), {})
-
-        results.append(
-            {
-                "id": r.id,
-                "score_composite": combined_score,
-                "document_purpose": r.document_purpose.value,
-                "description": r.description,
-                "reasoning": r.reasoning,
-                "keywords": r.keywords[:5],
-                "physics_domain": r.physics_domain.value if r.physics_domain else None,
-                "should_ingest": r.should_ingest,
-                "skip_reason": r.skip_reason or None,
-                "score_data_documentation": r.score_data_documentation,
-                "score_physics_content": r.score_physics_content,
-                "score_code_documentation": r.score_code_documentation,
-                "score_data_access": r.score_data_access,
-                "score_calibration": r.score_calibration,
-                "score_imas_relevance": r.score_imas_relevance,
-                "score_cost": cost_per_document,
-                # Pass through filename for display
-                "filename": matching.get("filename", ""),
-                "document_type": matching.get("document_type", ""),
-            }
-        )
-
-    return results, total_cost
 
 
 # =============================================================================
@@ -571,20 +645,89 @@ async def _score_images_batch(
     facility_id: str | None = None,
     reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
-    """Score a batch of images using VLM with structured output.
+    """Caption images with vision, then judge their text through Jev."""
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.wiki.entity_extraction import FacilityEntityExtractor
+    from imas_codex.discovery.wiki.models import ImageCaptionBatch
 
-    Delegates to the shared implementation in discovery.base.image.
-    """
-    from imas_codex.discovery.base.image import score_images_batch
-
-    return await score_images_batch(
-        images,
-        model,
-        focus,
-        data_access_patterns,
-        facility_id=facility_id,
+    user_content: list[dict[str, Any]] = [
+        {
+            "type": "text",
+            "text": "For each image return only its ID, factual caption, OCR text, and Mermaid diagram text if it is a schematic.",
+        }
+    ]
+    for image in images:
+        user_content.append(
+            {
+                "type": "text",
+                "text": f"ID: {image['id']}\nPage: {image.get('page_title') or ''}\nContext: {(image.get('surrounding_text') or '')[:500]}",
+            }
+        )
+        user_content.append(
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/{image.get('image_format', 'webp')};base64,{image['image_data']}"
+                },
+            }
+        )
+    batch, vision_cost, _ = await acall_llm_structured(
+        model=model,
+        messages=[{"role": "user", "content": user_content}],
+        response_model=ImageCaptionBatch,
+        service="facility-discovery",
         reasoning_effort=reasoning_effort,
     )
+    captions = {result.id: result for result in batch.results}
+    if any(image["id"] not in captions for image in images):
+        raise ValueError("Vision batch omitted an image")
+    facility_config = get_facility(facility_id) if facility_id else {}
+    if data_access_patterns:
+        facility_config = {
+            **facility_config,
+            "data_access_patterns": data_access_patterns,
+        }
+    extractor = FacilityEntityExtractor(facility_id) if facility_id else None
+    captioned = []
+    for image in images:
+        result = captions[image["id"]]
+        item = {
+            **image,
+            "description": result.description,
+            "ocr_text": result.ocr_text,
+            "mermaid_diagram": result.mermaid_diagram,
+        }
+        if extractor:
+            entities = extractor.extract(result.ocr_text)
+            item.update(
+                ocr_mdsplus_paths=entities.mdsplus_paths,
+                ocr_imas_paths=entities.imas_paths,
+                ocr_ppf_paths=entities.ppf_paths,
+                ocr_tool_mentions=entities.tool_mentions,
+            )
+        else:
+            item.update(
+                ocr_mdsplus_paths=[],
+                ocr_imas_paths=[],
+                ocr_ppf_paths=[],
+                ocr_tool_mentions=[],
+            )
+        captioned.append(item)
+    judged, judgment_cost = await judge_content_items(
+        captioned, "image", facility_id or "", facility_config
+    )
+    for item in judged:
+        item.update(
+            score_composite=item["ingest_relevance"],
+            should_ingest=item["ingest_relevance"] >= 0.5,
+            reasoning="",
+            keywords=[],
+            physics_domain=None,
+            skip_reason=None,
+        )
+        item["score_cost"] += vision_cost / len(images)
+    return judged, vision_cost + judgment_cost
 
 
 async def _fetch_html(
@@ -822,150 +965,10 @@ async def _score_pages_batch(
     facility: str | None = None,
     reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
-    """Score a batch of pages using LLM with structured output.
-
-    Uses litellm.acompletion with WikiScoreBatch Pydantic model for
-    structured output. Content-based scoring with per-dimension scores.
-
-    The retry loop includes response parsing because JSON/validation
-    errors from truncated responses are retryable — a fresh LLM call
-    often returns valid output. Cost is accumulated across all attempts
-    since API calls are billed regardless of parsing success.
-
-    Args:
-        pages: List of page dicts with id, title, summary, preview_text, etc.
-        model: Model identifier from get_model()
-        focus: Optional focus area for scoring
-        data_access_patterns: Optional facility-specific data access patterns
-            from facility config. When provided, injected into the prompt
-            template so the LLM can boost pages matching facility tools/APIs.
-
-    Returns:
-        (results, cost) tuple where cost is actual LLM cost from OpenRouter.
-    """
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.discovery.wiki.models import (
-        WikiScoreBatch,
-        grounded_wiki_score,
+    """Describe page previews and apply Jev judgments."""
+    return await _describe_and_judge_content(
+        pages, model, "page", facility, data_access_patterns, reasoning_effort
     )
-    from imas_codex.llm.prompt_loader import render_prompt
-
-    # Build system prompt using dynamic template with schema injection
-    context: dict[str, Any] = {}
-    if focus:
-        context["focus"] = focus
-    if data_access_patterns:
-        context["data_access_patterns"] = data_access_patterns
-
-    # Inject calibration examples from scored WikiPage nodes
-    dimension_calibration = sample_wiki_page_calibration(facility=facility, per_level=2)
-    has_calibration = any(
-        any(examples for examples in levels.values())
-        for levels in dimension_calibration.values()
-    )
-    if has_calibration:
-        context["dimension_calibration"] = dimension_calibration
-
-    system_prompt = render_prompt("wiki/scorer", context)
-
-    # Build user prompt with page content (not graph metrics)
-    lines = [
-        f"Score these {len(pages)} wiki pages based on their content.",
-        "(Use the preview text to infer value - graph metrics like in_degree are NOT indicators.)\n",
-    ]
-
-    for i, p in enumerate(pages, 1):
-        lines.append(f"\n## Page {i}")
-        lines.append(f"ID: {p['id']}")
-        lines.append(f"Title: {p.get('title', 'Unknown')}")
-
-        # Use preview_text for content-based scoring (preferred over summary)
-        preview = p.get("preview_text") or p.get("summary") or ""
-        if preview:
-            lines.append(f"Preview: {preview[:800]}")
-
-        # Include URL for context (Confluence vs MediaWiki structure hints)
-        url = p.get("url")
-        if url:
-            lines.append(f"URL: {url}")
-
-        # Include language hint for non-English content
-        content_language = p.get("content_language")
-        if content_language and content_language != "en":
-            lines.append(
-                f"Note: Content may be in {content_language}. "
-                "Score based on technical content regardless of language."
-            )
-
-    lines.append(
-        "\n\nReturn results for each page in order. "
-        "The response format is enforced by the schema."
-    )
-
-    user_prompt = "\n".join(lines)
-
-    # Shared retry+parse loop handles both API errors and JSON/validation
-    # errors from truncated responses. Cost accumulated across retries.
-    # Model-aware token limits + timeout applied automatically.
-    batch, total_cost, _tokens = await acall_llm_structured(
-        model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        response_model=WikiScoreBatch,
-        temperature=0.3,
-        service="facility-discovery",
-        reasoning_effort=reasoning_effort,
-    )
-
-    llm_results = batch.results
-
-    # Convert to result dicts, computing combined scores
-    cost_per_page = total_cost / len(pages) if pages else 0.0
-    results = []
-
-    for r in llm_results[: len(pages)]:
-        # Build per-dimension scores dict
-        scores = {
-            "score_data_documentation": r.score_data_documentation,
-            "score_physics_content": r.score_physics_content,
-            "score_code_documentation": r.score_code_documentation,
-            "score_data_access": r.score_data_access,
-            "score_calibration": r.score_calibration,
-            "score_imas_relevance": r.score_imas_relevance,
-        }
-
-        # Compute combined score using grounded function
-        combined_score = grounded_wiki_score(scores, r.page_purpose)
-
-        results.append(
-            {
-                "id": r.id,
-                "score_composite": combined_score,
-                "purpose": r.page_purpose.value,
-                "description": r.description,
-                "reasoning": r.reasoning,
-                "keywords": r.keywords[:5],
-                "physics_domain": r.physics_domain.value if r.physics_domain else None,
-                "should_ingest": r.should_ingest,
-                "skip_reason": r.skip_reason or None,
-                # Per-dimension scores
-                "score_data_documentation": r.score_data_documentation,
-                "score_physics_content": r.score_physics_content,
-                "score_code_documentation": r.score_code_documentation,
-                "score_data_access": r.score_data_access,
-                "score_calibration": r.score_calibration,
-                "score_imas_relevance": r.score_imas_relevance,
-                # Legacy fields for compatibility
-                "page_type": r.page_purpose.value,
-                "is_physics": r.physics_domain is not None
-                and r.physics_domain.value != "general",
-                "score_cost": cost_per_page,
-            }
-        )
-
-    return results, total_cost
 
 
 def _score_pages_heuristic(
