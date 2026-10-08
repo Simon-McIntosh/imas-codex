@@ -1,0 +1,67 @@
+{
+  "absent": {},
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T07:15:06.056Z",
+  "dispatched_at": "2026-10-08T07:05:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html",
+      "line": "35",
+      "severity": "follow-on",
+      "text": "follow-on: the probe scripts named in the fragment's command lines (list_probe.py at :35, data_probe.py at :58 and dbsel_plain.py at :88) were written under /tmp and never committed, so the investigation cannot be re-run from the committed artifact; the raw receipts survive only in the run directory, which a retention sweep reclaims. Committing the three small probe scripts beside the fragment would make the evidence regenerable."
+    },
+    {
+      "file": "manifest.md",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "follow-on: retry_failures lists three ids (dbsel-strace-preflight, dbsel-selene-eof, dbsel-output-symlink) but failure_attribution fixes a cause for only two; dbsel-selene-eof carries none. That eof was the first scratch run's expected missing-EQSLE.DATA iteration (dbsel-plain.log STDERR 'end-of-file during read, unit 7 ... EQSLE.DATA'), not a scaffolding fault, so recording it as an unattributed retry id makes the stop-rule count ambiguous for a reader."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html",
+      "line": "35",
+      "severity": "follow-on",
+      "text": "follow-on: the remote probes implement the facility hop inline (ssh -T -F ~/.ssh/config jt-60sa ... python3 - < probe.py) instead of the repository's canonical remote-execution owner imas_codex/remote/executor.py:1071 run_python_script with a script under imas_codex/remote/scripts/; jt-60sa is a configured facility (imas_codex/config/facilities/jt-60sa.yaml, ssh_host: jt-60sa), so the hop is a capability the repository already owns."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the landed change is a documentation fragment; no runtime code can reach it, so there are no production call sites.",
+    "diff": "read 773020273..24346b9bd, one commit and one file: the fragment records the FLEDD list and data receipts and the DBSEL isolation, with no code change.",
+    "done_when": "For this node's share: the fragment gives the meaning of each nonzero code (operational, :24-31), one 2D map read through the socket route with shot/time/grid (:65-73, four such maps), and DBSEL's inputs, outputs and a side-effect-free invocation (:75-108); the source-verified code decode is the one clause blocked by owner-only eqdbms/S and C.",
+    "goal": "\u00a749 is an investigation-only node; the landed fragment reports the FLEDD time-list behaviour across 42 calls, four complete 2D psi grids for FAME ID 0 and EQDB ID 1, and DBSEL's scratch-local reconstruction, with operational meanings for both nonzero codes and the source decode escalated as a facility follow-on.",
+    "manifest": "read; status complete after a coordinator repair from blocked (status-repair.json), commits [24346b9], baseline_suite and after_suite absent because this is an investigation with no suite arms, negative_control_log empty.",
+    "write_paths": "read the manifest's declared paths; git show --stat 24346b9 lists exactly the one declared path, the evidence fragment."
+  },
+  "justifications": {
+    "durability": "The artefact is committed at 24346b9 in a clean worktree, so the finding survives the run directory. Docked because the probe scripts named in the fragment's own command lines (list_probe.py at :35, data_probe.py at :58, dbsel_plain.py at :88) were staged under /tmp and never committed, so the investigation cannot be re-run from the record and the raw receipts survive only in the run directory, which crew gc reclaims.",
+    "evidence": "I reconciled the fragment's numbers against the run's own logs and they match: fledd-lists.log carries all 42 eqlist_get_rev_ records (IRET/NLIST/TIMES) whose values reproduce fledd-equilibrium-read.html:41-50 exactly, and fledd-data.log carries the four psi SHA-256 digests and MIN/MAX ranges matching :65-73. The worker supplies positive controls (nonempty time lists; FINITE=True and nonconstant grids) so the zero counts are not read from empty output, and it preserves the nonfatal ERROR(EQEXTRA) RETURN CODE = 991 and states that the DBSEL wrapper exit alone is insufficient, citing SELENE's own registration success and iret=0.",
+    "fit": "The fragment follows the docs/evidence/fragments convention and names only mechanisms; commit 24346b9's subject docs(equilibrium): record socket reads and DBSEL isolation is conventional and carries a body, and no plan, sprint, ticket or gate identifier appears in the fragment text; the fragment uses no plan-label vocabulary.",
+    "goal_fidelity": "\u00a749's goal is investigation-only: record the FLEDD socket and DBSEL equilibrium routes and the meaning of the nonzero return codes. The fragment docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html:11-31 gives operational meanings for 6415 (no time list on IDs 1-4 for that shot) and 6151 (IDs 5-8 empty in every shot), :33-73 records four full 129x129 psi grids for FAME and EQDB, and :75-108 records DBSEL's inputs, outputs and scratch-local invocation. Docked because deliverable (a) asks the codes be decoded from the eqdbms source, which this account cannot read: source-codes.log shows ls on eqdbms/S exits 2 with Permission denied, so the source-level names are correctly left as a facility follow-on rather than asserted.",
+    "reuse": "No production code was added, so the landed change forks no repository capability. Docked because the remote probes ran inline (fledd-equilibrium-read.html:35,58,88 show ssh -T -F ~/.ssh/config jt-60sa ... python3 - < probe.py) rather than through the repository's own remote-execution owner, imas_codex/remote/executor.py:1071 run_python_script, which I confirmed exists; the facility hop is thereby implemented outside the owner the repo names as canonical.",
+    "scope_discipline": "git show --stat 24346b9bd8c2dc9d274b5e0cb63f713cfe46ed14 changes exactly one path, docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html (109 insertions), which is the single changed_path the manifest declares; the worktree is otherwise clean and no config, plan or shared index is touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a749 is an investigation-only node; the fragment docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html reports the FLEDD time-list behaviour across 42 calls, four complete 129x129 psi grids for FAME 0 and EQDB 1, and DBSEL's scratch-local reconstruction, with operational meanings for both nonzero codes.\nVERDICT done_when: the fragment gives operational meanings for 6415 (no time list on IDs 1-4 for that shot) and 6151 (IDs 5-8 empty in every shot) at :24-31, four 2D maps with shot/time/grid at :65-73, and DBSEL's inputs, outputs and side-effect-free invocation at :75-108; the source-level decode named by deliverable (a) is the one clause not met, blocked by owner-only eqdbms/S and C.\nVERDICT write_paths: git show --stat 24346b9 lists exactly one path, docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html (109 insertions), the manifest's declared changed_path.\nVERDICT manifest: read; status complete after a coordinator repair from blocked, commits [24346b9], baseline_suite and after_suite absent (investigation, no suite arms), retry_failures [dbsel-strace-preflight, dbsel-selene-eof, dbsel-output-symlink].\nVERDICT diff: read 773020273..24346b9bd, one commit one file; the fragment records the FLEDD list and data receipts and the DBSEL isolation, with no code change.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: fledd-equilibrium-read.html:11-31 gives operational meanings for both nonzero codes and :33-108 records four full 129x129 grids and DBSEL's isolation; docked because the source decode of 6415/6151 is unmet (source-codes.log shows ls on eqdbms/S exits 2 with Permission denied).\nSCORE evidence: 19\nJUSTIFICATION evidence: fledd-lists.log's 42 eqlist_get_rev_ records reproduce fledd-equilibrium-read.html:41-50, and fledd-data.log's four psi SHA-256 digests match :65-73; the run supplies positive controls (nonempty lists, FINITE=True nonconstant grids).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 24346b9 changes exactly one path, docs/evidence/fledd-equilibrium-read.html, inside the manifest's declared changed_path, in an otherwise clean worktree.\nSCORE durability: 18\nJUSTIFICATION durability: the artefact is committed at 24346b9 in a clean worktree; docked because the probe scripts named at :35,58,88 were staged under /tmp and never committed, so the receipts are not regenerable from the record alone.\nSCORE fit: 20\nJUSTIFICATION fit: the fragment follows the docs/evidence/fragments convention and the commit subject docs(equilibrium): record socket reads and DBSEL isolation is conventional with a body; no plan, sprint or ticket identifier appears in the fragment, its path or the commit.\nSCORE reuse: 16\nJUSTIFICATION reuse: no production code was added, but the probes ran inline (:35,58,88 use ssh jt-60sa ... python3 -) rather than through the repository owner imas_codex/remote/executor.py:1071 run_python_script, which I confirmed exists.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html:35 follow-on: probe scripts list_probe.py, data_probe.py and dbsel_plain.py were staged under /tmp and not committed, so the investigation is not re-runnable from the artifact.\nFINDING manifest.md:13 follow-on: retry_failures lists dbsel-selene-eof with no failure_attribution entry; it was the first run's expected missing-EQSLE.DATA iteration, not a scaffolding fault, so the unattributed id makes the stop-rule count ambiguous.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html:35 follow-on: the remote probes implement the facility hop inline rather than through imas_codex/remote/executor.py:1071 run_python_script, a capability the repository already owns for the configured jt-60sa facility.\n",
+  "review_run_id": "r-20261008T070458009952-review-of-fledd-equilibrium-read",
+  "reviewed_base_sha": "773020273474b2b227243d06494bbfa5a3ecfb57",
+  "reviewed_head_sha": "24346b9bd8c2dc9d274b5e0cb63f713cfe46ed14",
+  "reviewed_run_id": "r-20261008T051402168467-fledd-equilibrium-read",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 16,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:20:00+00:00",
+  "total": 109
+}
