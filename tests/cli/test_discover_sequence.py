@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 from unittest.mock import MagicMock
 
+import click
 import pytest
 from click.testing import CliRunner
 
@@ -400,6 +401,57 @@ def test_conflicting_options_are_refused(arguments):
     assert result.exit_code == 2
 
 
+@pytest.mark.parametrize("selection", [[], ["--only", "paths", "--only", "candidates"]])
+def test_bare_focus_requires_one_domain_before_stages(monkeypatch, selection):
+    from imas_codex.cli.discover import discover
+
+    stage_function = MagicMock()
+    monkeypatch.setattr(sequence, "_stage_function", stage_function)
+    result = CliRunner().invoke(discover, ["jt-60sa", *selection, "--focus", "X"])
+    assert result.exit_code == 2, result.output
+    assert "--focus requires exactly one --only domain" in result.output
+    stage_function.assert_not_called()
+
+
+def test_bare_candidate_focus_reaches_stage(monkeypatch, healthy, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import discover, map as discover_map
+
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
+    )
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+    )
+    candidate_stage = MagicMock(return_value={"sources_judged": 1, "remaining": 0})
+    monkeypatch.setattr(discover_map, "run_candidates_stage", candidate_stage)
+
+    result = CliRunner().invoke(
+        discover, ["jt-60sa", "--only", "candidates", "--focus", "X"]
+    )
+    assert result.exit_code == 0, result.output
+    candidate_stage.assert_called_once()
+    assert candidate_stage.call_args.args[1].focus == ("X",)
+
+
+@pytest.mark.parametrize(
+    ("arguments", "message"),
+    [
+        (["--cost-limit", "-1"], "cost and time limits must be non-negative"),
+        (["--time", "-1"], "cost and time limits must be non-negative"),
+        (["--limit", "-1"], "--limit must be non-negative"),
+    ],
+)
+def test_negative_limits_are_refused_before_stages(monkeypatch, arguments, message):
+    stage_function = MagicMock()
+    monkeypatch.setattr(sequence, "_stage_function", stage_function)
+    result = CliRunner().invoke(sequence.run, ["jt-60sa", *arguments])
+    assert result.exit_code == 2, result.output
+    assert message in result.output
+    stage_function.assert_not_called()
+
+
 def test_final_table_lists_every_domain(monkeypatch, healthy, capsys):
     _recording_stages(monkeypatch)
     sequence.run_sequence("jt-60sa", config=_config())
@@ -444,8 +496,8 @@ def test_mapping_focus_and_limit_restrict_ids_targets(monkeypatch, tmp_path):
     from imas_codex.graph import client
     from imas_codex.ids import tools
 
-    manifest = tmp_path / "ids.txt"
-    manifest.write_text("equilibrium\npf_active\n")
+    manifest = tmp_path / "ids.yaml"
+    manifest.write_text("items:\n  - equilibrium\n  - pf_active\n")
     callback = MagicMock()
     monkeypatch.setattr(map_run, "callback", callback)
     monkeypatch.setattr(client, "GraphClient", MagicMock())
@@ -469,6 +521,32 @@ def test_mapping_focus_and_limit_restrict_ids_targets(monkeypatch, tmp_path):
     assert callback.call_args.kwargs["domains"] == ()
     assert callback.call_args.kwargs["ids_names"] == ("equilibrium",)
     assert result["remaining"] == 1
+
+
+def test_mapping_focus_and_ids_without_overlap_are_refused(monkeypatch):
+    from imas_codex.cli.map import map_run
+
+    callback = MagicMock()
+    monkeypatch.setattr(map_run, "callback", callback)
+    with pytest.raises(click.UsageError, match="select no common IDS"):
+        sequence.run_mapping_stage(
+            "jt-60sa",
+            sequence.SequenceOptions(focus=("equilibrium",), ids=("pf_active",)),
+            3.5,
+            7,
+        )
+    callback.assert_not_called()
+
+
+def test_missing_remaining_key_uses_pending_predicate(monkeypatch):
+    from imas_codex.ids import workers
+
+    stage = _stage("mapping")
+    monkeypatch.setattr(workers, "has_pending_mapping_work", lambda facility: False)
+    monkeypatch.setattr(workers, "has_pending_validation_work", lambda facility: False)
+    assert sequence._remaining_count(stage, "jt-60sa", {"bindings": 1}) == 0
+    monkeypatch.setattr(workers, "has_pending_mapping_work", lambda facility: True)
+    assert sequence._remaining_count(stage, "jt-60sa", {"bindings": 1}) is None
 
 
 def test_signals_halves_resolve_to_the_signals_stage_function():
