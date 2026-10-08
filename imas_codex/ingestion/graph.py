@@ -87,13 +87,30 @@ def link_chunks_to_ids_roots(
     graph_client: GraphClient | None = None,
     example_ids: list[str] | None = None,
 ) -> int:
-    """Link bare IDS names to IDS roots and refuse a silent zero result."""
+    """Link bare IDS names to IDS roots and refuse missing named links."""
     with _get_client(graph_client) as client:
         mentions, linked = _link_chunk_references(
             client, "related_ids", "IDS", "REFERENCES_IDS", example_ids
         )
-        if mentions and not linked:
-            raise ValueError(f"No IDS roots linked for {mentions} named references")
+        if mentions:
+            selection = (
+                "WHERE c.code_example_id IN $example_ids"
+                if example_ids is not None
+                else ""
+            )
+            params = {"example_ids": example_ids} if example_ids is not None else {}
+            missing_rows = client.query(
+                f"MATCH (c:CodeChunk) {selection} "
+                "UNWIND c.related_ids AS name "
+                "OPTIONAL MATCH (c)-[:REFERENCES_IDS]->(root:IDS {id: name}) "
+                "WITH root WHERE root IS NULL RETURN count(*) AS missing",
+                **params,
+            )
+            missing = missing_rows[0]["missing"] if missing_rows else mentions - linked
+            if missing:
+                raise ValueError(
+                    f"No IDS roots linked for {missing} of {mentions} named references"
+                )
         logger.info("Resolved %d IDS root references", linked)
         return linked
 

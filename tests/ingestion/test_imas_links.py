@@ -96,6 +96,12 @@ def test_named_ids_without_a_root_raises():
         link_chunks_to_ids_roots(graph, ["example"])
 
 
+def test_one_valid_ids_name_does_not_hide_a_missing_name():
+    graph = _ReferenceGraph(names=("equilibrium", "missing"))
+    with pytest.raises(ValueError, match="1 of 2 named references"):
+        link_chunks_to_ids_roots(graph, ["example"])
+
+
 def test_ingestion_keeps_both_reference_kinds(monkeypatch):
     from types import SimpleNamespace
 
