@@ -80,9 +80,13 @@
     opened EDDB and returned IRC=0 and 41 samples per channel for E101163,
     5.000–5.010 s: <code>PSRC/Ip</code> +994088.375 A,
     <code>calIp</code> +986436.375 A and <code>comIp</code> +1000000 A
-    at the first sample. Positive stored Ip is thus observed for a
-    standard-direction shot; preserve it as clockwise-positive in the raw
-    source. The same call returned <code>magFluxLp1</code> −0.624938 Wb,
+    at the first sample. At the same shot and 5.100 s, raw
+    <code>PSRC/Ip</code> is +993885.9375 A (IRC=0), while FLEDD's
+    SELENE <code>TTCU</code> is +0.992992906 MA (load and getter IRET=0),
+    agreeing in sign and within 0.09% in magnitude. Positive stored Ip
+    therefore tracks SELENE's clockwise-positive COCOS 2 current in this
+    observed discharge; preserve its sign before coordinate conversion.
+    The same call returned <code>magFluxLp1</code> −0.624938 Wb,
     <code>magFluxLp7</code> +1.085777 Wb and <code>magPbTC1</code>
     +0.108064 T. Opposite loop signs make a common normal an unsafe
     inference. <code>getseldata_v4.2/eddbaccess.h:49–54</code> names the

@@ -19,7 +19,7 @@
       "cocos": null,
       "confidence": "medium",
       "signs": {
-        "ip": "positive raw PSRC/Ip, calIp and comIp represent the standard clockwise discharge in the observed shot; preserve their stored sign before a coordinate conversion",
+        "ip": "positive raw PSRC/Ip, calIp and comIp represent the standard clockwise discharge in the observed shot; same-shot, same-time positive SELENE TTCU confirms the raw and equilibrium current signs agree; preserve the stored sign before a coordinate conversion",
         "bt": "getseldata derives BTV=R*Bt from EDDB PID 1625 O293 by multiplying the stored value by 2.25*2.96/25.7; the raw PID polarity was not read",
         "flux_loops": "PSRC/magFluxLp1 and magFluxLp7 have opposite signed Wb values; each channel's positive surface normal and winding polarity are unverified",
         "pickup_coils": "positive EDDB PSRC/magPbTC1 is +0.108064 T at E101163, 5.0 s; raw coil polarity against its geometric normal is unverified"
@@ -28,6 +28,7 @@
       "flux_normalization": "raw PSRC/magFluxLp1 is labelled Wb; geteddb.c:598 divides its 27-channel array by 2pi, while outeddb.c:91-92 passes the same array through and labels it Wb/2pi; the active DBSEL conversion must be checked before mapping",
       "evidence": [
         "EDDB eddbreadTime E101163 5.0-5.01 s: PSRC/Ip +994088.375 A, calIp +986436.375 A, comIp +1000000 A; all irc=0, 41 points",
+        "At E101163 5.100 s EDDB PSRC/Ip is +993885.9375 A (irc=0) and FLEDD EQDB ID 1 SELENE TTCU is +0.992992906 MA (eqdata_get and eqdbl_get iret=0); magnitudes differ by 0.09%",
         "EDDB eddbreadTime E101163 5.0-5.01 s: PSRC/magFluxLp1 -0.624938 Wb, magFluxLp7 +1.085777 Wb, magPbTC1 +0.108064 T; all irc=0, 41 points",
         "/analysis/src/getseldata_v4.2/eddbaccess.h:49-54; geteddb.c:253-358,598,645-651; outeddb.c:91-92,170-176,254-288",
         "docs/evidence/receipts/jt60sa-selene-sensor-order.json"
