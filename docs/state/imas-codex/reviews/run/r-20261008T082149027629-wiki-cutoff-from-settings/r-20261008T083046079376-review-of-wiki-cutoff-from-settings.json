@@ -1,0 +1,71 @@
+{
+  "absent": {},
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_sites": [
+    "imas_codex/discovery/wiki/parallel.py:1031",
+    "imas_codex/discovery/wiki/parallel.py:1106",
+    "imas_codex/discovery/wiki/pipeline.py:73",
+    "imas_codex/discovery/wiki/progress.py:743",
+    "imas_codex/discovery/wiki/workers.py:425",
+    "imas_codex/discovery/wiki/scoring.py:616",
+    "imas_codex/discovery/base/image.py:746",
+    "imas_codex/cli/discover/wiki.py:58",
+    "imas_codex/cli/discover/wiki.py:1261"
+  ],
+  "completed_at": "2026-10-08T08:40:49.226Z",
+  "dispatched_at": "2026-10-08T08:31:03Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/wiki/graph_ops.py",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: the fresh-interpreter test asserts only that an environment override reaches CONTENT_INGEST_THRESHOLD, so any env-honouring read (for example float(os.getenv('IMAS_CODEX_WIKI_INGEST_THRESHOLD', 0.16))) would also pass it \u2014 the test does not by itself pin the shared getter get_wiki_ingest_threshold, nor exercise the [discovery].wiki-ingest-threshold config-file priority below it. The literal mutation control is equivalent to the base arm (both restore 0.16), so it proves re-literalisation is caught but adds no independent evidence about the getter path."
+    },
+    {
+      "file": "tests/wiki/test_wiki_ingest_cutoff_source.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest leaves baseline_suite empty while after_suite is populated, so the base-arm measurement (baseline-cutoff.log, 1 failed, EXIT=1 at dd2fe44a) is present on disk and cited in test_logs but absent from the structured field the record shape expects. Filling baseline_suite would let a coordinator reconcile added_failure_count from the manifest alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "CONTENT_INGEST_THRESHOLD consumers: parallel.py:31,471,1031,1106; pipeline.py:37,73,151,1572,2633; progress.py:50,743; workers.py:26,425; scoring.py:579,616; discovery/base/image.py:660,746. get_wiki_ingest_threshold consumers: cli/discover/wiki.py:22,58,1261.",
+    "diff": "read 1c1dd03e in full: graph_ops.py +2/-1 (settings import plus CONTENT_INGEST_THRESHOLD = get_wiki_ingest_threshold()) and a new 24-line tests/wiki/test_wiki_ingest_cutoff_source.py running one fresh-interpreter subprocess assertion.",
+    "done_when": "the constant reads the shared getter and the setting is the single source: a fresh-interpreter test shows IMAS_CODEX_WIKI_INGEST_THRESHOLD=0.37 reaches the constant (head-absolute-cutoff.log 4 passed EXIT=0), the base arm fails the same assertion reading 0.16 (baseline-cutoff.log EXIT=1), and restoring the literal fails it again (negative-control-cutoff.log EXIT=1).",
+    "goal": "\u00a719 node 2 delivered: CONTENT_INGEST_THRESHOLD = get_wiki_ingest_threshold() at graph_ops.py:30, the getter resolved from settings.py:1070, and no residual 0.16 literal in the wiki/discovery/cli-discover consumers.",
+    "manifest": "read; commits names 1c1dd03e, reviewed head 1c1dd03e matches the worktree HEAD, after_suite records head-absolute-cutoff.log 4 passed EXIT=0; baseline_suite is empty, so the base measurement is read from baseline-cutoff.log (cited in test_logs) rather than the structured field; negative_control_log reproduces 1 failed EXIT=1. The heads and logs reconcile with what I opened.",
+    "write_paths": "git diff --name-only dd2fe44a..1c1dd03e lists exactly imas_codex/discovery/wiki/graph_ops.py and tests/wiki/test_wiki_ingest_cutoff_source.py, matching the manifest changed_paths."
+  },
+  "justifications": {
+    "added_failure_count": "derived from the reviewed run's own arms: baseline-cutoff.log (base dd2fe44a) has 1 failure and head-absolute-cutoff.log (head 1c1dd03e) has 0, so the change adds no failure onto the baseline arm.",
+    "durability": "the guard is shown to fire rather than merely green: the base arm fails the new test against the literal source, and restoring the literal 0.16 in graph_ops.py makes test_wiki_ingest_cutoff_uses_environment_in_fresh_interpreter fail (negative-control-cutoff.log EXIT=1). The test runs in a fresh interpreter via subprocess, so it exercises real import-time resolution rather than a monkeypatched module, and it inherits PYTHONPATH to pin the worktree source. Deduction: the test asserts only that the environment override reaches the constant, which an ad-hoc `float(os.getenv(...))` would also satisfy, so it does not by itself distinguish the shared getter from a local reimplementation, and the [discovery].wiki-ingest-threshold config-file path is unexercised.",
+    "evidence": "the reviewed run carries a reproducing baseline (baseline-cutoff.log: 1 failed, 1 warning, EXIT=1, header REVISION=dd2fe44a) whose single failure is the new subprocess test reading '0.16' where '0.37' is expected, a head arm (head-absolute-cutoff.log: 4 passed, EXIT=0, revision=1c1dd03e) and a literal mutation control (negative-control-cutoff.log: 1 failed, EXIT=1, header REVISION=1c1dd03e+literal-mutation). I opened all three logs and independently re-ran the scoped three-file gate at head in the reviewed worktree (review-head-rerun.log: 4 passed, EXIT=0), so the head arm reproduces. Deduction: the reviewed manifest records after_suite but leaves baseline_suite empty, so the baseline measurement is recoverable only from test_logs/the log file rather than the structured field, and the mutation control is byte-equivalent to the base arm (it restores the same literal 0.16), so it demonstrates re-literalisation is caught but not that the constant is the getter rather than any env-honouring read.",
+    "fit": "the commit subject 'fix(wiki): read ingest cutoff from settings' is conventional with a body stating what changed and why; the test name and file name describe the mechanism under test; the constant keeps its existing name. No plan, sprint, ticket or phase identifier appears in the diff, message, or code, and the commit carries no attribution trailer.",
+    "goal_fidelity": "\u00a719 node 2 asks that imas_codex/discovery/wiki/graph_ops.py set CONTENT_INGEST_THRESHOLD = get_wiki_ingest_threshold() from imas_codex.settings, so the setting is the one source of the number, once the setting has merged. Head 1c1dd03e changes the assignment at graph_ops.py:30 from the literal 0.16 to get_wiki_ingest_threshold() and imports it at graph_ops.py:21; the getter resolves at settings.py:1070 (env IMAS_CODEX_WIKI_INGEST_THRESHOLD \u2192 [discovery].wiki-ingest-threshold \u2192 0.16). The getter already existed at base dd2fe44a, so the 'after the setting merges' precondition is met. A scan of the wiki, discovery/base and cli/discover trees finds no residual 0.16 literal, so the constant is the sole spelling of the number.",
+    "reuse": "the change routes the constant through the existing single-source get_wiki_ingest_threshold already used by imas_codex/cli/discover/wiki.py:22,58,1261, rather than adding a second threshold or a local default; CONTENT_INGEST_THRESHOLD remains the one symbol all twenty in-tree consumers import (parallel.py, pipeline.py, progress.py, workers.py, scoring.py, discovery/base/image.py).",
+    "scope_discipline": "git diff --name-only dd2fe44a..1c1dd03e lists exactly imas_codex/discovery/wiki/graph_ops.py and tests/wiki/test_wiki_ingest_cutoff_source.py \u2014 the two paths the manifest declares. git show --stat is +3/-1 in graph_ops.py (import plus one-line assignment) and a new 24-line test. The tracked worktree is clean at the commit. No CLI, settings, or pipeline file was touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a719 node 2 delivered \u2014 imas_codex/discovery/wiki/graph_ops.py:30 sets CONTENT_INGEST_THRESHOLD = get_wiki_ingest_threshold() (settings.py:1070), the setting is the single source of the number, and no residual 0.16 literal remains among the wiki/discovery consumers.\nVERDICT done_when: the constant reads the shared getter and is shown to be configurable \u2014 head arm passes (4 passed, EXIT=0), base arm fails the env-override assertion (1 failed, EXIT=1), and restoring the literal fails it again (1 failed, EXIT=1).\nVERDICT write_paths: exactly imas_codex/discovery/wiki/graph_ops.py and tests/wiki/test_wiki_ingest_cutoff_source.py across dd2fe44a..1c1dd03e.\nVERDICT scope clean, tracked worktree clean at head.\nVERDICT manifest: commit 1c1dd03e, after_suite head-absolute-cutoff.log 4 passed EXIT=0, negative_control_log reproduces; baseline_suite field is empty (baseline log present in test_logs).\nVERDICT diff: graph_ops.py +2/-1, new 24-line subprocess test; independently re-ran at head (4 passed, EXIT=0).\nCALL_SITES: parallel.py:1031,1106; pipeline.py:73; progress.py:743; workers.py:425; scoring.py:616; discovery/base/image.py:746; cli/discover/wiki.py:58,1261\nSCORE goal_fidelity: 20\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 19\nSCORE fit: 20\nSCORE reuse: 20\nFINDING imas_codex/discovery/wiki/graph_ops.py:30 follow-on: the test pins the env override but would also pass for an ad-hoc env read, so it does not distinguish the shared getter.\nFINDING tests/wiki/test_wiki_ingest_cutoff_source.py:1 follow-on: manifest baseline_suite left empty though the base-arm log exists and is cited in test_logs.\n",
+  "review_run_id": "r-20261008T083046079376-review-of-wiki-cutoff-from-settings",
+  "reviewed_base_sha": "dd2fe44ad9ef19971a6d68ac412c3c4e7ea374ad",
+  "reviewed_head_sha": "1c1dd03e1158f700cd00508e18b2b243f5718b7f",
+  "reviewed_run_id": "r-20261008T082149027629-wiki-cutoff-from-settings",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T08:45:00+00:00",
+  "total": 118
+}
