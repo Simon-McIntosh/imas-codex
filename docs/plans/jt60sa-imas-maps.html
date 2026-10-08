@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -164,6 +164,31 @@
       of its picks, checking each mapped field against the picked node's section. Validation runs per
       IDS. Activation is a separate decision, made after the audit.
     </p>
+    <p>
+      <strong>Equilibrium 2D flux maps.</strong> The lead set the anchoring rule on 2026-10-08, recorded
+      in <code>jt60sa-discovery-completion</code> §40 (merged as <code>2e4ba3904</code>). Map the
+      format, read through the facility's client, and treat files as evidence. Access to the central
+      EQDB on dbsvr17p is on hold, so 2D flux maps are readable only from users' local databases.
+      Three rules follow.
+    </p>
+    <ul>
+      <li><strong>Meaning is the record format, not a file.</strong> An EQDB record's
+        <code>#GEO</code> grid arrays and <code>#EQU</code> psi map to
+        <code>equilibrium.time_slice[:].profiles_2d[0].grid.dim1</code>, <code>grid.dim2</code> and
+        <code>psi</code>. A G-EQDSK's <code>r</code>, <code>z</code> and <code>psirz</code> map to the
+        same paths, under the file's own COCOS, which is COCOS 7 for the LIUQE/MEQ exemplar. The field
+        definitions come from the ingested code: the <code>.bf</code> includes and
+        <code>eqdbput.f</code>.</li>
+      <li><strong>Access is the facility's client.</strong> <code>jt60sa-discovery-completion</code>
+        §46 creates two DataAccess methods: an EQDB-record read through the client's local mode
+        (<code>localio.f</code>), and a G-EQDSK file read. Their templates are parameterised by mode,
+        root, shot and time, so restoring dbsvr17p changes the mode and root, never the maps. §46
+        also adds a FacilitySignal for each format field, keyed by code (SELENE, LIUQE).</li>
+      <li><strong>Files are dated, hashed exemplars.</strong> §45 inventories every readable
+        equilibrium file, recording owner, code, shot, time, grid and sha256. The records validate a
+        map and never anchor one. Maps are per code, because several users may hold different
+        reconstructions of the same shot and time.</li>
+    </ul>
     <p>
       <strong>Node</strong> <code>jt60sa-map-run</code>, role implement, 2.5 h over resumes. Write
       path: <code>docs/evidence/fragments/jt60sa-imas-maps/jt60sa-map-run.html</code>.
