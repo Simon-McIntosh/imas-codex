@@ -1,10 +1,16 @@
-"""Signals discovery command: facility-agnostic signal scanning and enrichment.
+"""Signals discovery stage: facility-agnostic signal scanning and enrichment.
 
 Dispatches to registered scanner plugins based on facility config data_systems.
 Scanner plugins handle facility-specific enumeration (TDI, PPF, EDAS, MDSplus,
 IMAS, device XML), while shared infrastructure handles LLM enrichment and
 validation. Wiki content is used as enrichment context rather than a
 user-selectable scanner.
+
+The discovery logic lives in :func:`run_signals_stage`, which takes a facility
+and a frozen :class:`SignalsStageOptions`. The click command is a thin wrapper
+that builds the options and calls the stage function. ``--scan-only`` selects
+the seeding half (enumerate work, judge nothing); ``--flush`` selects the
+draining half (enrich and check the nodes the seeding half created).
 """
 
 from __future__ import annotations
@@ -12,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from dataclasses import dataclass
 
 import click
 
@@ -19,126 +26,50 @@ from imas_codex.cli.discover.common import reset_to_option
 
 logger = logging.getLogger(__name__)
 
+# Message for the --focus refusal. The signals claim query takes no item
+# filter — it cannot select by accessor or SignalSource id — so naming items
+# cannot be honoured.
+_FOCUS_REFUSAL = (
+    "--focus is not supported for signals yet: the signals claim query takes "
+    "no item filter."
+)
 
-@click.command()
-@click.argument("facility")
-@click.option(
-    "--cost-limit",
-    "-c",
-    type=float,
-    default=5.0,
-    help="Maximum LLM spend in USD",
-)
-@click.option(
-    "--signal-limit",
-    "-n",
-    type=int,
-    default=None,
-    help="Maximum signals to process",
-)
-@click.option(
-    "--scanners",
-    "-s",
-    type=str,
-    default=None,
-    help="Comma-separated scanner types to run (e.g., 'tdi,mdsplus'). "
-    "Default: auto-detect from facility config data_systems.",
-)
-@click.option(
-    "--focus",
-    "-f",
-    help="Focus on specific signal patterns (e.g., 'equilibrium')",
-)
-@click.option(
-    "--category",
-    "categories",
-    type=str,
-    default=None,
-    help="Comma-separated signal categories to enrich and check, matched on "
-    "the leading path segment of the signal's source path (e.g. 'MAG,PSRC').",
-)
-@click.option(
-    "--scan-only",
-    is_flag=True,
-    help="Only scan for signals, skip enrichment",
-)
-@click.option(
-    "--enrich-only",
-    is_flag=True,
-    help="Only enrich already-discovered signals, skip scan",
-)
-@click.option(
-    "--enrich-workers",
-    type=int,
-    default=2,
-    help="Number of parallel enrichment workers",
-)
-@click.option(
-    "--check-workers",
-    type=int,
-    default=4,
-    help="Number of parallel check workers",
-)
-@click.option(
-    "--time",
-    "time_limit",
-    type=int,
-    default=None,
-    help="Maximum runtime in minutes (e.g., 5). Discovery halts when time expires.",
-)
-@click.option(
-    "--reference-shot",
-    type=int,
-    default=None,
-    help="Override reference shot/pulse for validation",
-)
-@click.option(
-    "--rescan",
-    is_flag=True,
-    default=False,
-    help="Re-discover signals from data sources. Signals already enriched or "
-    "checked are not re-scanned — only 'discovered' signals are re-scanned.",
-)
-@reset_to_option("signals")
-@click.option(
-    "--reenrich",
-    is_flag=True,
-    default=False,
-    hidden=True,
-    help="Deprecated: use --reset-to discovered instead.",
-)
-def signals(
-    facility: str,
-    cost_limit: float,
-    signal_limit: int | None,
-    scanners: str | None,
-    focus: str | None,
-    categories: str | None,
-    scan_only: bool,
-    enrich_only: bool,
-    enrich_workers: int,
-    check_workers: int,
-    time_limit: int | None,
-    reference_shot: int | None,
-    rescan: bool,
-    reenrich: bool,
-    reset_to: str | None = None,
-) -> None:
-    """Discover signals from facility data sources.
 
-    Scans configured data sources to discover facility signals, then enriches
-    them with descriptions, physics domains, and IMAS mappings. Scanners are
-    auto-detected from facility config data_systems section.
+@dataclass(frozen=True)
+class SignalsStageOptions:
+    """Settled options for the signals discovery stage.
 
-    \b
-    Examples:
-      imas-codex discover signals tcv
-      imas-codex discover signals tcv --scan-only
-      imas-codex discover signals jet -s ppf -c 2.0
-      imas-codex discover signals jt-60sa -s edas --scan-only
-      imas-codex discover signals tcv -s tdi,mdsplus -f equilibrium
-      imas-codex discover signals tcv --reset-to discovered -s tdi
+    Field names follow the settled discover option surface: ``scan_only`` and
+    ``flush`` select the seeding and draining halves, ``topic`` is the
+    free-text steer the enricher reads, ``focus`` names items and is refused
+    because the claim query takes no item filter, and ``limit`` caps items.
     """
+
+    scan_only: bool = False
+    flush: bool = False
+    topic: str | None = None
+    focus: tuple[str, ...] = ()
+    limit: int | None = None
+    cost_limit: float = 5.0
+    time_limit: int | None = None
+    rescan: bool = False
+    scanners: str | None = None
+    categories: str | None = None
+    reference_shot: int | None = None
+    enrich_workers: int = 2
+    check_workers: int = 4
+    reset_to: str | None = None
+
+
+def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
+    """Run the signals discovery stage for a facility.
+
+    Builds the engine config and calls ``run_discovery``; returns the run's
+    result dict (counts, cost, elapsed seconds).
+    """
+    if options.focus:
+        raise click.UsageError(_FOCUS_REFUSAL)
+
     # Auto-detect rich output
     from imas_codex.cli.discover.common import (
         DiscoveryConfig,
@@ -172,8 +103,8 @@ def signals(
     ensure_remote_environment(config)
 
     # Resolve scanner types
-    if scanners:
-        scanner_types = [s.strip() for s in scanners.split(",")]
+    if options.scanners:
+        scanner_types = [s.strip() for s in options.scanners.split(",")]
         # Validate requested scanner types exist
         available = list_scanners()
         invalid = [s for s in scanner_types if s not in available]
@@ -195,6 +126,7 @@ def signals(
         raise SystemExit(1)
 
     # Resolve reference shot from config if not specified
+    reference_shot = options.reference_shot
     data_systems = config.get("data_systems", {})
     if reference_shot is None:
         for source_config in data_systems.values():
@@ -206,30 +138,23 @@ def signals(
                     reference_shot = int(ref)
                     break
 
-    # Handle --reenrich (deprecated alias for --reset-to discovered)
-    if reenrich and not reset_to:
-        reset_to = "discovered"
-        log_print(
-            "[yellow]--reenrich is deprecated, use --reset-to discovered[/yellow]"
-        )
-
     # Handle --reset-to: reset signals back to the target state
-    if reset_to:
+    if options.reset_to:
         from imas_codex.discovery.base.reset import SIGNAL_RESET_SPECS, reset_to_status
 
-        spec = SIGNAL_RESET_SPECS[reset_to]
+        spec = SIGNAL_RESET_SPECS[options.reset_to]
         extra_filter = ""
         extra_params: dict = {}
-        if scanners:
+        if options.scanners:
             extra_filter = "AND n.discovery_source IN $sources"
             extra_params["sources"] = scanner_types
 
         reset_count = reset_to_status(
             spec, facility, extra_filter=extra_filter, extra_params=extra_params
         )
-        scope = f" (scanner: {scanners})" if scanners else ""
+        scope = f" (scanner: {options.scanners})" if options.scanners else ""
         log_print(
-            f"[yellow]Reset {reset_count} signals to '{reset_to}'{scope}[/yellow]"
+            f"[yellow]Reset {reset_count} signals to '{options.reset_to}'{scope}[/yellow]"
         )
 
     log_print(f"\n[bold]Signal Discovery: {facility}[/bold]")
@@ -237,23 +162,27 @@ def signals(
     log_print(f"  SSH host: {ssh_host}")
     if reference_shot:
         log_print(f"  Reference shot: {reference_shot}")
-    log_print(f"  Cost limit: ${cost_limit:.2f}")
-    if signal_limit:
-        log_print(f"  Signal limit: {signal_limit}")
-    if time_limit is not None:
-        log_print(f"  Time limit: {time_limit} min")
-    if focus:
-        log_print(f"  Focus: {focus}")
+    log_print(f"  Cost limit: ${options.cost_limit:.2f}")
+    if options.limit:
+        log_print(f"  Signal limit: {options.limit}")
+    if options.time_limit is not None:
+        log_print(f"  Time limit: {options.time_limit} min")
+    if options.topic:
+        log_print(f"  Topic: {options.topic}")
     category_list = (
-        [c.strip() for c in categories.split(",") if c.strip()] if categories else None
+        [c.strip() for c in options.categories.split(",") if c.strip()]
+        if options.categories
+        else None
     )
     if category_list:
         log_print(f"  Categories: {', '.join(category_list)}")
-    if rescan:
+    if options.rescan:
         log_print("  Mode: rescan")
-    if reset_to:
-        log_print(f"  Mode: reset-to {reset_to}")
-    log_print(f"  Workers: {enrich_workers} enrich, {check_workers} check")
+    if options.reset_to:
+        log_print(f"  Mode: reset-to {options.reset_to}")
+    log_print(
+        f"  Workers: {options.enrich_workers} enrich, {options.check_workers} check"
+    )
     log_print("")
 
     try:
@@ -261,8 +190,8 @@ def signals(
 
         # Compute deadline from time limit
         deadline: float | None = None
-        if time_limit is not None:
-            deadline = time.time() + (time_limit * 60)
+        if options.time_limit is not None:
+            deadline = time.time() + (options.time_limit * 60)
 
         sig_logger = logging.getLogger("imas_codex.discovery.signals")
 
@@ -273,12 +202,12 @@ def signals(
 
             display = DataProgressDisplay(
                 facility=facility,
-                cost_limit=cost_limit,
-                signal_limit=signal_limit,
-                focus=focus or "",
+                cost_limit=options.cost_limit,
+                signal_limit=options.limit,
+                focus=options.topic or "",
                 console=console,
-                discover_only=scan_only,
-                enrich_only=enrich_only,
+                discover_only=options.scan_only,
+                enrich_only=options.flush,
             )
 
         # Custom async graph refresh for signals (uses update_from_graph with kwargs)
@@ -314,8 +243,8 @@ def signals(
             model_section="discovery-describe",
             display=display,
             check_graph=True,
-            check_embed=not scan_only,
-            check_model=not scan_only,
+            check_embed=not options.scan_only,
+            check_model=not options.scan_only,
             check_ssh=True,
             check_auth=False,
             graph_refresh_interval=2.0,
@@ -376,15 +305,15 @@ def signals(
                 ssh_host=ssh_host,
                 scanner_types=scanner_types,
                 reference_shot=reference_shot,
-                cost_limit=cost_limit,
-                signal_limit=signal_limit,
-                focus=focus,
+                cost_limit=options.cost_limit,
+                signal_limit=options.limit,
+                focus=options.topic,
                 categories=category_list,
-                discover_only=scan_only,
-                enrich_only=enrich_only,
+                discover_only=options.scan_only,
+                enrich_only=options.flush,
                 deadline=deadline,
-                num_enrich_workers=enrich_workers,
-                num_check_workers=check_workers,
+                num_enrich_workers=options.enrich_workers,
+                num_check_workers=options.check_workers,
                 on_discover_progress=on_scan,
                 on_extract_progress=on_extract,
                 on_promote_progress=on_promote,
@@ -446,3 +375,154 @@ def signals(
         raise SystemExit(1) from e
 
     log_print("\n[green]Signal discovery complete.[/green]")
+    return result
+
+
+@click.command()
+@click.argument("facility")
+@click.option(
+    "--cost-limit",
+    "-c",
+    type=float,
+    default=5.0,
+    help="Maximum LLM spend in USD",
+)
+@click.option(
+    "--limit",
+    type=int,
+    default=None,
+    help="Maximum signals to process",
+)
+@click.option(
+    "--scanners",
+    "-s",
+    type=str,
+    default=None,
+    help="Comma-separated scanner types to run (e.g., 'tdi,mdsplus'). "
+    "Default: auto-detect from facility config data_systems.",
+)
+@click.option(
+    "--topic",
+    type=str,
+    default=None,
+    help="Free-text steer for the enrichment stage (e.g., 'equilibrium').",
+)
+@click.option(
+    "--focus",
+    "focus_items",
+    multiple=True,
+    default=(),
+    help="Restrict to named items or a manifest file. Not supported for "
+    "signals yet, so it is refused: the claim query takes no item filter.",
+)
+@click.option(
+    "--category",
+    "categories",
+    type=str,
+    default=None,
+    help="Comma-separated signal categories to enrich and check, matched on "
+    "the leading path segment of the signal's source path (e.g. 'MAG,PSRC').",
+)
+@click.option(
+    "--scan-only",
+    is_flag=True,
+    help="Only scan for signals, skip enrichment",
+)
+@click.option(
+    "--flush",
+    is_flag=True,
+    help="Only run the draining half: enrich and check already-discovered "
+    "signals, skip scanning",
+)
+@click.option(
+    "--enrich-only",
+    is_flag=True,
+    help="Deprecated: use --flush.",
+)
+@click.option(
+    "--enrich-workers",
+    type=int,
+    default=2,
+    help="Number of parallel enrichment workers",
+)
+@click.option(
+    "--check-workers",
+    type=int,
+    default=4,
+    help="Number of parallel check workers",
+)
+@click.option(
+    "--time",
+    "-t",
+    "time_limit",
+    type=int,
+    default=None,
+    help="Maximum runtime in minutes (e.g., 5). Discovery halts when time expires.",
+)
+@click.option(
+    "--reference-shot",
+    type=int,
+    default=None,
+    help="Override reference shot/pulse for validation",
+)
+@click.option(
+    "--rescan",
+    is_flag=True,
+    default=False,
+    help="Re-discover signals from data sources. Signals already enriched or "
+    "checked are not re-scanned — only 'discovered' signals are re-scanned.",
+)
+@reset_to_option("signals")
+def signals(
+    facility: str,
+    cost_limit: float,
+    limit: int | None,
+    scanners: str | None,
+    topic: str | None,
+    focus_items: tuple[str, ...],
+    categories: str | None,
+    scan_only: bool,
+    flush: bool,
+    enrich_only: bool,
+    enrich_workers: int,
+    check_workers: int,
+    time_limit: int | None,
+    reference_shot: int | None,
+    rescan: bool,
+    reset_to: str | None = None,
+) -> None:
+    """Discover signals from facility data sources.
+
+    Scans configured data sources to discover facility signals, then enriches
+    them with descriptions, physics domains, and IMAS mappings. Scanners are
+    auto-detected from facility config data_systems section.
+
+    \b
+    Examples:
+      imas-codex discover signals tcv
+      imas-codex discover signals tcv --scan-only
+      imas-codex discover signals tcv --flush
+      imas-codex discover signals jet -s ppf -c 2.0
+      imas-codex discover signals jt-60sa -s edas --scan-only
+      imas-codex discover signals tcv -s tdi,mdsplus --topic equilibrium
+      imas-codex discover signals tcv --reset-to discovered -s tdi
+    """
+    run_signals_stage(
+        facility,
+        SignalsStageOptions(
+            scan_only=scan_only,
+            flush=flush or enrich_only,
+            topic=topic,
+            focus=tuple(focus_items),
+            limit=limit,
+            cost_limit=cost_limit,
+            time_limit=time_limit,
+            rescan=rescan,
+            scanners=scanners,
+            categories=categories,
+            reference_shot=reference_shot,
+            enrich_workers=enrich_workers,
+            check_workers=check_workers,
+            reset_to=reset_to,
+        ),
+    )

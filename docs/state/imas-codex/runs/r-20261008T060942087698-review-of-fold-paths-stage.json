@@ -1,0 +1,655 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "0103460e33b3dbff69aadcf655e5d42f0893f870",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4763279,
+      "input_tokens_cumulative": 4763279,
+      "output_tokens": 41757,
+      "output_tokens_cumulative": 41757,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-08T06:33:25.436Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T06:09:59Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "docs/evidence/fragments/facility-discovery-sequence/fold-paths-stage.html",
+    "imas_codex/llm/prompts/discovery/roots.md:232",
+    "imas_codex/discovery/README.md:310",
+    "imas_codex/cli/compute.py:605",
+    "imas_codex/discovery/base/progress.py:1005",
+    "imas_codex/discovery/paths/parallel.py:2878"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.175,
+    "plan": "facility-discovery-sequence",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T07:09:43.331407+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T06:09:43Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 26,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": 1,
+    "mean_context": 138182,
+    "observed_at": "2026-10-08T06:09:17Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 26,
+      "aggregate_tokens_per_second": 306.366,
+      "detail": "",
+      "mean_tokens_per_second": 28.902,
+      "observed_at": "2026-10-08T06:09:17Z",
+      "runs": 10.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T06:33:25.436Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T060942087698-review-of-fold-paths-stage/manifest.md",
+  "member": "disposable-r-20261008T060942087698-review-of-fold-paths-stage",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run writes only the review record outside the repository",
+  "node": "review-of-fold-paths-stage",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1569,
+          "cached_input_tokens": 737085,
+          "input_tokens": 738656,
+          "output_tokens": 673,
+          "reasoning_output_tokens": 55,
+          "total_tokens": 739329,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "the review for r-20261008T055729378160-fold-paths-stage stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs, including tests/discovery/test_paths_pipeline.py in both arms; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261008T055729378160-fold-paths-stage",
+    "id": "review-of-fold-paths-stage",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T06:09:43Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 26,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": 1,
+      "mean_context": 138182,
+      "observed_at": "2026-10-08T06:09:17Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 26,
+        "aggregate_tokens_per_second": 306.366,
+        "detail": "",
+        "mean_tokens_per_second": 28.902,
+        "observed_at": "2026-10-08T06:09:17Z",
+        "runs": 10.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T060942087698-review-of-fold-paths-stage/manifest.md",
+    "negative_control": "",
+    "plan": "facility-discovery-sequence",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T055729378160-fold-paths-stage.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T055729378160-fold-paths-stage.at-404da8bd59fa9fb7217764b2dd8823c626ee09bc.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3993319.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "review-of-fold-paths-stage",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T06:09:49.798806+00:00",
+    "score": 0.625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Reviews stay on the local lane.",
+    "confidence": 0.92,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 1411498.789983,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude-haiku",
+        "budget_age_s": 1411498.789983,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude-opus",
+        "budget_age_s": 1411498.789983,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 10.780983,
+        "budget_reason": null,
+        "burn_multiple": 2.3596114315243564,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.961688229363427,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.16316245753703706,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 35.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex-astra",
+        "budget_age_s": 10.780983,
+        "budget_reason": null,
+        "burn_multiple": 2.3596114315243564,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.961688229363427,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.16316245753703706,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 35.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex-luna",
+        "budget_age_s": 10.780983,
+        "budget_reason": null,
+        "burn_multiple": 2.3596114315243564,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.961688229363427,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.16316245753703706,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 35.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 445.774,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2703.226,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 60.1,
+          "peak_utilisation_p90_pct": 76.4,
+          "peak_utilisation_runs": 390,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 29,
+          "passed": 291,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 2
+      }
+    ],
+    "probabilities": {
+      "hold": 0.04,
+      "local:deepseek-v4.1-flash": 0.96
+    },
+    "rendered_token_estimate": 568,
+    "usage": {
+      "cost": 8.127e-05,
+      "input_tokens": 1935,
+      "output_tokens": 49
+    }
+  },
+  "plan": "facility-discovery-sequence",
+  "plan_impl_at_dispatch": 0.175,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "0103460e33b3dbff69aadcf655e5d42f0893f870",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": true,
+    "process_stopped_pid": 2095160,
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261008T060942087698-review-of-fold-paths-stage",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261008T060942087698-review-of-fold-paths-stage"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/review-of-fold-paths-stage",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261008T060942087698-review-of-fold-paths-stage",
+    "reviewed_base_sha": "e4ff44bba7688c71535eeacdd8086c8dc6d5b51a",
+    "reviewed_head_sha": "404da8bd59fa9fb7217764b2dd8823c626ee09bc",
+    "scores": {
+      "durability": 19,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "none",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T060942087698-review-of-fold-paths-stage",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "mapping-20261006",
+  "session_harness": "claude",
+  "session_id": "8baa9042-bead-4da5-915b-b84581526dff",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 4763279,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1401.419,
+    "generated_tokens": 41757,
+    "generation_seconds": 1128.982,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 67.6,
+    "machine_seconds": 272.437,
+    "peak_input_tokens": 155602,
+    "tokens_per_second": 36.99,
+    "wall_tokens_per_second": 29.8
+  },
+  "time_budget": "60m",
+  "tool_steps": 52.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1406,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T06:33:39Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-08T06:10:07Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T060942087698-review-of-fold-paths-stage",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9552,
+    "worker_pid": 2096065
+  },
+  "worker_seconds": 1377,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

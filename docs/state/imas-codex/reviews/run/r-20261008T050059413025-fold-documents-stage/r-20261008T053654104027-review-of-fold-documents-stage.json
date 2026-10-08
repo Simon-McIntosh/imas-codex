@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:525",
+    "imas_codex/cli/discover/documents.py:344"
+  ],
+  "completed_at": "2026-10-08T05:56:04.167Z",
+  "dispatched_at": "2026-10-08T05:37:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/fold-documents-stage.html",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the gate ran at 425dd5620 with 56 passed, but the new test module exists only at head so 56 can only be the head figure, and gate.log's own header records rev 1824768c3; the same base-sha citation appears on the manifest's artifacts line 15."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T050059413025-fold-documents-stage/manifest.md",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest names the two suite arms only through test_logs and omits the baseline_suite and after_suite fields its dispatch template required, so the added-failure derivation reads unmeasured from the manifest and the arm pair (old-command.log at 425dd5620 as base, gate.log at 1824768c3 as after) had to be reconstructed from the log names."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against 425dd5620; the two commits extract run_documents_stage and the frozen DocumentsOptions, add the --flush half-selection and the --focus refusal, and reduce the click command to a thin wrapper.",
+    "done_when": "the done-when names tests/cli/test_discover_documents_stage.py showing that --scan-only and --flush select the halves, --topic reaches the scorer, --limit caps items and --focus is refused with a mechanism message; the new file shows all five (test_flush_runs_only_the_draining_half_via_the_command, test_topic_reaches_the_scorer, test_limit_caps_items, test_focus_is_refused_with_the_mechanism_message, test_scan_only_and_flush_together_are_refused) and gate.log records 56 passed EXIT=0.",
+    "goal": "the node goal is to extract run_documents_stage(facility, options) with a frozen options dataclass from the discover documents click command using the settled option spellings; imas_codex/cli/discover/documents.py:17 defines the frozen DocumentsOptions, documents.py:41 exposes run_documents_stage, and documents.py:308-366 leaves documents a thin wrapper that builds the options and calls it.",
+    "manifest": "read; it records the gate at 56 passed EXIT=0 and a negative control at 2 failed EXIT=1, but it names its two suite arms only through test_logs and omits the baseline_suite and after_suite fields, and its artifacts line 15 cites the gate \"at 425dd5620\" while gate.log's own header reads rev 1824768c3.",
+    "write_paths": "the reviewed manifest declares imas_codex/cli/discover/documents.py, tests/cli/test_discover_documents_stage.py and the evidence fragment; git diff --stat 425dd5620..1824768c3 touches exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "negative-control.log mutates the stage to ignore --flush and both test_flush_runs_only_the_draining_half_via_the_command and test_stage_flush_skips_the_seeding_half fail at tests/cli/test_discover_documents_stage.py:161 and :168 where the green gate passes them, so the drain-half guard is shown to fire.",
+    "evidence": "gate.log records 56 passed EXIT=0 at rev 1824768c3 asserting every done-when item, but the fragment at line 15 and the manifest artifacts line 15 cite the gate figure at the base 425dd5620, and the manifest omits its baseline_suite/after_suite fields, so the record's revision citation is muddled.",
+    "fit": "the added symbols DocumentsOptions and run_documents_stage are named by what they do with no plan label, and documents.py follows the sibling discover folds' stage-plus-thin-wrapper idiom.",
+    "goal_fidelity": "documents.py:17 freezes DocumentsOptions on the settled spellings and documents.py:41 exposes run_documents_stage, so the extraction the goal states is present with the command left a thin wrapper.",
+    "reuse": "the change reuses DiscoveryConfig, run_discovery, DocumentDiscoveryState and run_document_discovery unchanged and forks no capability; a search over imas_codex/cli/discover found no other owner of a documents stage.",
+    "scope_discipline": "git diff --stat 425dd5620..1824768c3 touches only imas_codex/cli/discover/documents.py, tests/cli/test_discover_documents_stage.py and the fragment, all inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to extract run_documents_stage(facility, options) with a frozen options dataclass from the discover documents click command using the settled option spellings; imas_codex/cli/discover/documents.py:17 defines the frozen DocumentsOptions, documents.py:41 exposes run_documents_stage, and documents.py:308-366 leaves documents a thin wrapper that builds the options and calls it.\nVERDICT done_when: the done-when names tests/cli/test_discover_documents_stage.py showing that --scan-only and --flush select the halves, --topic reaches the scorer, --limit caps items and --focus is refused with a mechanism message; the new file shows all five (test_flush_runs_only_the_draining_half_via_the_command, test_topic_reaches_the_scorer, test_limit_caps_items, test_focus_is_refused_with_the_mechanism_message, test_scan_only_and_flush_together_are_refused) and gate.log records 56 passed EXIT=0.\nVERDICT write_paths: the reviewed manifest declares imas_codex/cli/discover/documents.py, tests/cli/test_discover_documents_stage.py and the evidence fragment; git diff --stat 425dd5620..1824768c3 touches exactly those three files and nothing else.\nVERDICT manifest: read; it records the gate at 56 passed EXIT=0 and a negative control at 2 failed EXIT=1, but it names its two suite arms only through test_logs and omits the baseline_suite and after_suite fields, and its artifacts line 15 cites the gate \"at 425dd5620\" while gate.log's own header reads rev 1824768c3.\nVERDICT diff: read commit by commit against 425dd5620; the two commits extract run_documents_stage and the frozen DocumentsOptions, add the --flush half-selection and the --focus refusal, and reduce the click command to a thin wrapper.\nCALL_SITES: imas_codex/cli/discover/__init__.py:525, imas_codex/cli/discover/documents.py:344\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: documents.py:17 freezes DocumentsOptions on the settled spellings and documents.py:41 exposes run_documents_stage, so the extraction the goal states is present with the command left a thin wrapper.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate.log records 56 passed EXIT=0 at rev 1824768c3 asserting every done-when item, but the fragment at line 15 and the manifest artifacts line 15 cite the gate figure at the base 425dd5620, and the manifest omits its baseline_suite/after_suite fields, so the record's revision citation is muddled.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 425dd5620..1824768c3 touches only imas_codex/cli/discover/documents.py, tests/cli/test_discover_documents_stage.py and the fragment, all inside the declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control.log mutates the stage to ignore --flush and both test_flush_runs_only_the_draining_half_via_the_command and test_stage_flush_skips_the_seeding_half fail at tests/cli/test_discover_documents_stage.py:161 and :168 where the green gate passes them, so the drain-half guard is shown to fire.\nSCORE fit: 19\nJUSTIFICATION fit: the added symbols DocumentsOptions and run_documents_stage are named by what they do with no plan label, and documents.py follows the sibling discover folds' stage-plus-thin-wrapper idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change reuses DiscoveryConfig, run_discovery, DocumentDiscoveryState and run_document_discovery unchanged and forks no capability; a search over imas_codex/cli/discover found no other owner of a documents stage.\nFINDING docs/evidence/fragments/facility-discovery-sequence/fold-documents-stage.html:15 follow-on: the fragment states the gate ran at 425dd5620 with 56 passed, but the new test module exists only at head so 56 can only be the head figure, and gate.log's own header records rev 1824768c3; the same base-sha citation appears on the manifest's artifacts line 15.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T050059413025-fold-documents-stage/manifest.md:12 follow-on: the manifest names the two suite arms only through test_logs and omits the baseline_suite and after_suite fields its dispatch template required, so the added-failure derivation reads unmeasured from the manifest and the arm pair (old-command.log at 425dd5620 as base, gate.log at 1824768c3 as after) had to be reconstructed from the log names.\nreviewed_base_sha: 425dd562082047198131194bd59bd7ad24aaa28a\nreviewed_head_sha: 1824768c392af5f645a0cdae8ed477d67918e2cc\n",
+  "review_run_id": "r-20261008T053654104027-review-of-fold-documents-stage",
+  "reviewed_base_sha": "425dd562082047198131194bd59bd7ad24aaa28a",
+  "reviewed_head_sha": "1824768c392af5f645a0cdae8ed477d67918e2cc",
+  "reviewed_run_id": "r-20261008T050059413025-fold-documents-stage",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:57:11.514938+00:00",
+  "total": 114
+}

@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite (fde2c0555) completed with failure_count 0 and after_suite (b2cb7c1e5) completed with failure_count 0, so after minus base is 0 added failures.",
+  "backend": "local",
+  "base_log_revision": "fde2c0555d642914d022b63f0cbcb66a034eabd6",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T06:16:40.861Z",
+  "dispatched_at": "2026-10-08T05:56:39Z",
+  "findings": [
+    {
+      "file": "imas_codex/config/facilities/jt-60sa.yaml",
+      "line": "321",
+      "severity": "follow-on",
+      "text": "follow-on: the new comment asserts a direct-VPN browser route (https://nakasvr26.iferc.org/wiki/WebHome.html) on nakasvr26, but the sibling fragment docs/evidence/fragments/jt60sa-discovery-completion/twiki-attachment-probe.html, landed the same morning, concludes \"nakasvr26 hosts no web server and no wiki\" (no httpd/nginx binary, no /var/www). A worker cannot reach nakasvr26 to test liveness (services are workstation-only) and the plan's node 1 directs this URL, so the node implemented the directive correctly; the two must be reconciled by the coordinator or lead before the URL is treated as live."
+    },
+    {
+      "file": "imas_codex/config/facilities/jt-60sa.yaml",
+      "line": "326",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's orientation_write_paths declares docs/evidence/fragments/jt60sa-discovery-completion/wiki-browser-config.html and docs/figures/jt60sa-discovery-completion/wiki-browser-config, neither of which exists in the diff; the node's evidence is carried only in the manifest, so a fragment is absent for a later reader of the plan."
+    }
+  ],
+  "head_log_revision": "b2cb7c1e51d3a8673fbe7e24d103ba5fa2859104",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "browser.services has no production code consumer; the only readers are the new test and the BrowserConfig model at imas_codex/config/models.py:344, so the corrected URLs reach agents and documentation rather than a call site.",
+    "diff": "read commit by commit against fde2c0555; 5aa37bab0 adds test_browser_services_match_port_forwards and b2cb7c1e5 rewrites the browser block and its comment, all inside the declared scope.",
+    "done_when": "the plan's node-1 done-when is that the browser services name live URLs; the services now equal the port_forwards set by name and port and match the wiki_sites paths, and the reviewed manifest records tests/config at 59 passed EXIT=0.",
+    "goal": "the node-1 goal is to correct browser.services to the live nakasvr26 URLs and record both viewing routes; jt-60sa.yaml:327 lists twiki_code and server_docs only, the comment at jt-60sa.yaml:321-323 carries the direct-VPN URL and the ssh tunnel command, and the retired twiki_main entry and twiki_html/8802 path are removed.",
+    "manifest": "read; it states 59 passed EXIT=0, names baseline_suite and after_suite (both completed, failure_count 0) and a negative_control_log at EXIT=1, so added_failure_count and added_failure_ids are derivable and zero; its orientation_write_paths overstate by naming a fragment and figures dir that were not produced.",
+    "write_paths": "the reviewed manifest declares imas_codex/config/facilities/jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py, a wiki-browser-config evidence fragment and a figures dir; git diff --stat fde2c0555..b2cb7c1e5 touches exactly the first two and nothing else."
+  },
+  "justifications": {
+    "durability": "the new guard fires: running its body against a base-shaped config (twiki_main restored) raises AssertionError at tests/config/test_jt60sa_exclusions.py:102, and the reviewed negative-browser.log records the same failure at EXIT=1, so the guard is shown to refuse rather than merely pass.",
+    "evidence": "the manifest names its arms by baseline_suite (fde2c0555, exit 0, completed true, failure_count 0) and after_suite (b2cb7c1e5, exit 0, completed true, failure_count 0); I re-ran the exact gate at head myself (59 passed, EXIT=0, clean tree) and re-derived the guard's refusal independently; the shortfall is that the declared fragment and figures write paths were never produced, so the node's evidence lives only in the manifest.",
+    "fit": "test_browser_services_match_port_forwards is named by the mechanism it checks and extends tests/config/test_jt60sa_exclusions.py, the module that already owns the jt-60sa facility-config assertions; the config comment states the route rather than a plan label.",
+    "goal_fidelity": "jt-60sa.yaml:327 browser.services now names only twiki_code (https://localhost:8800/wiki/WebHome.html) and server_docs (https://localhost:8801/), matching the two port_forwards by name and the wiki_sites paths, and jt-60sa.yaml:321-323 records both viewing routes (the direct IFERC VPN URL and the ssh -N -L 8800:nakasvr26.iferc.org:443 jt-60sa tunnel); the retired twiki_main entry and the stale jt-60sa-twiki-forward.service reference are gone, which is exactly the node-1 deliverable.",
+    "reuse": "the change reuses get_facility and the existing jt-60sa test module and forks no new accessor; a search over imas_codex for a browser.services reader found only the BrowserConfig model at imas_codex/config/models.py:344, so no second owner was created.",
+    "scope_discipline": "git diff --stat fde2c0555..b2cb7c1e5 touches only imas_codex/config/facilities/jt-60sa.yaml and tests/config/test_jt60sa_exclusions.py, both inside the declared write paths, with no dependency, schema or unrelated config change."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node-1 goal is to correct browser.services to the live nakasvr26 URLs and record both viewing routes; jt-60sa.yaml:327 lists twiki_code and server_docs only and jt-60sa.yaml:321-323 records the direct-VPN URL and the ssh tunnel.\nVERDICT done_when: the services equal the port_forwards set by name and port and match wiki_sites; reviewed manifest gate 59 passed EXIT=0.\nVERDICT write_paths: git diff --stat fde2c0555..b2cb7c1e5 touches imas_codex/config/facilities/jt-60sa.yaml and tests/config/test_jt60sa_exclusions.py, both declared, nothing else.\nVERDICT manifest: read; baseline_suite and after_suite both completed with failure_count 0; negative_control_log EXIT=1; orientation_write_paths name a fragment and figures dir never produced.\nVERDICT diff: read 5aa37bab0 and b2cb7c1e5 against fde2c0555; a test and a browser-block rewrite, all in scope.\nCALL_SITES: none (config data; only reader is the new test and imas_codex/config/models.py:344)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: jt-60sa.yaml:327 browser.services now names only twiki_code (https://localhost:8800/wiki/WebHome.html) and server_docs (https://localhost:8801/), matching the two port_forwards by name and the wiki_sites paths, and jt-60sa.yaml:321-323 records both viewing routes (the direct IFERC VPN URL and the ssh -N -L 8800:nakasvr26.iferc.org:443 jt-60sa tunnel); the retired twiki_main entry and the stale jt-60sa-twiki-forward.service reference are gone, which is exactly the node-1 deliverable.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest names its arms by baseline_suite (fde2c0555, exit 0, completed true, failure_count 0) and after_suite (b2cb7c1e5, exit 0, completed true, failure_count 0); I re-ran the exact gate at head myself (59 passed, EXIT=0, clean tree) and re-derived the guard's refusal independently; the shortfall is that the declared fragment and figures write paths were never produced, so the node's evidence lives only in the manifest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat fde2c0555..b2cb7c1e5 touches only imas_codex/config/facilities/jt-60sa.yaml and tests/config/test_jt60sa_exclusions.py, both inside the declared write paths, with no dependency, schema or unrelated config change.\nSCORE durability: 18\nJUSTIFICATION durability: the new guard fires: running its body against a base-shaped config (twiki_main restored) raises AssertionError at tests/config/test_jt60sa_exclusions.py:102, and the reviewed negative-browser.log records the same failure at EXIT=1, so the guard is shown to refuse rather than merely pass.\nSCORE fit: 19\nJUSTIFICATION fit: test_browser_services_match_port_forwards is named by the mechanism it checks and extends tests/config/test_jt60sa_exclusions.py, the module that already owns the jt-60sa facility-config assertions; the config comment states the route rather than a plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change reuses get_facility and the existing jt-60sa test module and forks no new accessor; a search over imas_codex for a browser.services reader found only the BrowserConfig model at imas_codex/config/models.py:344, so no second owner was created.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:321 follow-on: the new comment asserts a direct-VPN browser route (https://nakasvr26.iferc.org/wiki/WebHome.html) on nakasvr26, but the sibling fragment docs/evidence/fragments/jt60sa-discovery-completion/twiki-attachment-probe.html, landed the same morning, concludes \"nakasvr26 hosts no web server and no wiki\" (no httpd/nginx binary, no /var/www). A worker cannot reach nakasvr26 to test liveness (services are workstation-only) and the plan's node 1 directs this URL, so the node implemented the directive correctly; the two must be reconciled by the coordinator or lead before the URL is treated as live.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:326 follow-on: the manifest's orientation_write_paths declares docs/evidence/fragments/jt60sa-discovery-completion/wiki-browser-config.html and docs/figures/jt60sa-discovery-completion/wiki-browser-config, neither of which exists in the diff; the node's evidence is carried only in the manifest, so a fragment is absent for a later reader of the plan.\n",
+  "review_run_id": "r-20261008T055625300769-review-of-wiki-browser-config",
+  "reviewed_base_sha": "fde2c0555d642914d022b63f0cbcb66a034eabd6",
+  "reviewed_head_sha": "b2cb7c1e51d3a8673fbe7e24d103ba5fa2859104",
+  "reviewed_run_id": "r-20261008T054539255592-wiki-browser-config",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:09:58.360839+00:00",
+  "total": 114,
+  "verdict": "SOUND WITH FINDINGS"
+}

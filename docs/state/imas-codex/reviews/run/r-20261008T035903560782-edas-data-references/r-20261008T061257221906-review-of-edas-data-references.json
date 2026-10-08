@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ingestion/pipeline.py:95",
+    "imas_codex/ingestion/pipeline.py:301",
+    "imas_codex/ingestion/pipeline.py:705"
+  ],
+  "completed_at": "2026-10-08T06:31:47.396Z",
+  "dispatched_at": "2026-10-08T06:13:22Z",
+  "findings": [
+    {
+      "file": "imas_codex/ingestion/pipeline.py",
+      "line": "95",
+      "severity": "follow-on",
+      "text": "follow-on: reference extraction is now gated on the facility's declared data_systems, so a facility declaring neither mdsplus nor tdi stops extracting MDSplus paths and TDI calls that the previous code extracted unconditionally. ITER declares only imas, so its MDSplus/TDI code references are no longer extracted; a metadata dict with no facility_id leaves handlers empty and extracts no references at all. Confirm the coverage change is intended or declare the missing systems for the affected facilities."
+    },
+    {
+      "file": "imas_codex/ingestion/extractors/__init__.py",
+      "line": "39",
+      "severity": "follow-on",
+      "text": "follow-on: _split_and_extract and _write_file_example dispatch on handler.linker identity (is link_chunks_to_data_nodes / is link_chunks_to_edas_signals) rather than an explicit kind carried by ReferenceHandler, so a future handler that shares a linker would be silently mis-routed; naming the kind on the NamedTuple would make the contract explicit."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit 9575c60b5..1c2862d93: 9575c60b5 adds REFERENCE_HANDLERS/reference_handlers_for_systems and routes pipeline and graph writes through them; 1dfbe3cee, 2a835906d and 1c2862d93 refresh the evidence fragment, the counts and the snapshot timestamp.",
+    "done_when": "the fragment now gives the per-type chunk count and resolution share (EDDB 13/15/0, UDDB 5/5/5, total 16 chunks / 20 mentions / 5 resolved = 25%) plus a config-routing table, a resolved-UDDB control, and a search_code check; the new tests pin each call form with two negative controls I reproduced.",
+    "goal": "\u00a744 asks for an EDAS extractor beside ingestion/extractors/mdsplus.py and an ingest path that reuses it. The gained commits make the ingest path select its reference handlers from each facility's declared data_systems (imas_codex/ingestion/extractors/__init__.py:27-50, imas_codex/ingestion/pipeline.py:95) and thread facilities' facility_id through EDAS linking (imas_codex/ingestion/graph.py:51-70), which satisfies the 'runs in the ingest path' clause, but selecting handlers by config also changes extraction for facilities beyond JT-60SA, which \u00a744's text does not ask for.",
+    "manifest": "read; it records a 41-passed focused gate (1dfbe3cee, focused-config-gate.log), a 123-passed ingestion gate, a negative control removing eddbreadTime (4 failed, EXIT=1), and the backfill/search-check logs. The delivered after_suite (502a9622d, head-gate-current.log, 39 passed, EXIT=0) is the pre-gain baseline.",
+    "write_paths": "git diff --name-only 502a9622d..1c2862d93 lists exactly the six paths the reviewed manifest and this node's goal declare: the evidence fragment, extractors/__init__.py, ingestion/graph.py, ingestion/pipeline.py, tests/graph/test_code_reference_links.py and tests/ingestion/test_edas_extractor.py."
+  },
+  "justifications": {
+    "durability": "two new guards fire under mutation: removing the EDAS-config refusal in graph.py makes test_edas_backfill_requires_declared_data_system fail (EXIT=1), and making reference_handlers_for_systems ignore config fails all four routing cases; both mutations were restored with a clean diff.",
+    "evidence": "the fragment now reports the per-type counts (EDDB 13 chunks/15 mentions/0 resolved, UDDB 5/5/5, total 16 chunks/20 mentions/5 resolved = 25%), a per-facility routing table matching the four configs, a resolved-UDDB control and a config-routing gate line; the counts reconcile with the run manifest's artifacts. I reproduced the 41-passed focused gate and 214 ingestion/discovery tests on the reviewed tree.",
+    "fit": "ReferenceHandler is a NamedTuple in the extractors package beside the extractor functions, reference_handlers_for_systems is a module-level pure selector, and no symbol, filename, comment or commit subject carries a plan label.",
+    "goal_fidelity": "imas_codex/ingestion/extractors/__init__.py:27-50 adds REFERENCE_HANDLERS and reference_handlers_for_systems and imas_codex/ingestion/pipeline.py:95,301,705 select handlers from get_facility(facility).get('data_systems'), so the extractor runs in the ingest path as \u00a744 requires; imas_codex/ingestion/graph.py:51-70 makes link_chunks_to_edas_signals take a keyword-only facility_id and refuse a facility without EDAS. The deliverable is met, but the config gating also changes extraction for facilities beyond JT-60SA.",
+    "reuse": "the change reuses the existing extractor functions and _generate_ref_id and GraphClient idioms, deduplicates the shared MDSplus/TDI handler through dict.fromkeys, and adds no parallel capability.",
+    "scope_discipline": "git diff --name-only 502a9622d..1c2862d93 lists exactly the six declared paths; no out-of-scope file is touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the gained commits select reference handlers from each facility's declared data_systems and thread facility_id through EDAS linking, satisfying \u00a744's ingest-path clause, but the config gating also changes extraction for facilities beyond JT-60SA.\nVERDICT done_when: the fragment carries the per-type counts and 25% resolution share and a routing table; the new tests pin each call form with two negative controls reproduced here.\nVERDICT write_paths: the diff touches exactly the six declared paths.\nVERDICT manifest: the run's after_suite (1dfbe3cee, 41 passed) and its delivered after_suite (502a9622d, 39 passed) give the baseline and after arms.\nVERDICT diff: read 9575c60b5..1c2862d93; the routing change is the substance and the rest is evidence refresh.\nCALL_SITES: imas_codex/ingestion/pipeline.py:95, imas_codex/ingestion/pipeline.py:301, imas_codex/ingestion/pipeline.py:705\nSCORE goal_fidelity: 18\nSCORE evidence: 19\nSCORE scope_discipline: 19\nSCORE durability: 19\nSCORE fit: 20\nSCORE reuse: 20\nFINDING imas_codex/ingestion/pipeline.py:95 follow-on: config gating drops MDSplus/TDI extraction for facilities that do not declare mdsplus/tdi (ITER), a coverage change beyond \u00a744's text.\nFINDING imas_codex/ingestion/extractors/__init__.py:39 follow-on: dispatch on linker identity is brittle; an explicit kind on ReferenceHandler would make the routing contract explicit.\n",
+  "review_run_id": "r-20261008T061257221906-review-of-edas-data-references",
+  "reviewed_base_sha": "502a9622d8395d846b70f75b7919ba49115c29be",
+  "reviewed_head_sha": "1c2862d93161bead3f6ca53f196779006964ae12",
+  "reviewed_run_id": "r-20261008T035903560782-edas-data-references",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:26:00+00:00",
+  "total": 115
+}

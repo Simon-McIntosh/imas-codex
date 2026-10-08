@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T02:54:02.258Z",
+  "dispatched_at": "2026-10-08T02:38:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html",
+      "line": "243",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment records the psi(R,Z) reads as text only and writes no figure although docs/figures/jt60sa-discovery-completion/flux-map-route was in the declared write paths and a 2D flux map is the lead's key requirement, so the result is less legible than a plot of the SELENE grid would be."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate that validated the fragment's anchors, six-code coverage and eight route statuses is an ad-hoc stdin script named only in fragment-gate.log, not committed, so a later edit that silently drops a route or misstates a READ_EXIT fails nothing."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 223593c25f6494a51ab4573e1414a4724bd96314; the single commit ee04a0e2943a8f4031dc81d385fb7846c2d4aece adds one file, docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html, 248 lines (15012 bytes), entirely inside the declared write path.",
+    "done_when": "the done_when requires all four questions answered with evidence and the working route named; the fragment records a command and output per question and the manifest records the fragment gate EXIT=0 PASS ids=21 codes=6 route_probes=8 maps=2 bytes=15012, a structural gate that confirms the answers are present and their recorded route statuses match the probe logs rather than re-deriving the physics.",
+    "goal": "the node's goal is \u00a740's investigation-only fragment naming the working equilibrium route from nakasvr26; docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html answers Q1 client defaults at :14-26 (dbsvr17p:/JT60SA_EQ/EQDB, ctypes get_defaults=300), Q2 reachability at :43-50, the Q3 six-code census at :89-135, the Q4 reads plus the lead's fifth 2D psi(R,Z) map at :160-225, and names SELENE's directly readable local file the working route at :243-247.",
+    "manifest": "read; it records the commit ee04a0e, changed_paths, the gate command (python3 -, fragment anchor, six-code coverage, eight route-status and two map-log assertions) and its result EXIT=0 PASS ids=21 codes=6 route_probes=8 maps=2 bytes=15012 with the map-read logs, but names no baseline_suite/after_suite pair so no pytest added-failure count could be taken.",
+    "write_paths": "the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html and docs/figures/jt60sa-discovery-completion/flux-map-route; the single landed commit touches only the fragment, and the granted figures directory was left unused."
+  },
+  "justifications": {
+    "durability": "the fragment's probes at :171-196 and :207-224 carry falsifiable asserts (matching record trailers, monotonic R and Z, finite and nonconstant psi), but neither they nor the structural gate are committed as a test, so an edit that misstates a route status reddens nothing.",
+    "evidence": "the gate logged at fragment-gate.log:1 records revision=ee04a0e with EXIT=0 ids=21 codes=6 route_probes=8 maps=2, matching the fragment's 21 unique ids and 15012 bytes, so its measured result is recorded rather than claimed.",
+    "fit": "the fragment follows the id-anchored section and pre idiom of sibling docs/evidence/fragments/jt60sa-discovery-completion/*.html and its ids (flux-map-route-*) carry no plan label or version.",
+    "goal_fidelity": "docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html:160-201 reads the SELENE 129x129 psi(R,Z) grid for shot E101163 at 129x129 and :89-135 answers the four \u00a740 questions and the lead's fifth, naming the SELENE file the working route at :243-247.",
+    "reuse": "the diff adds no code definition, so the only capability it could fork is evidence recording; it extends the existing docs/evidence/fragments/jt60sa-discovery-completion idiom rather than a new store, and a search of that directory and imas_codex/config found no machine-readable owner of the SELENE route.",
+    "scope_discipline": "commit ee04a0e's only path docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html is inside the declared write paths, but the granted figures directory was left unused though a 2D flux map was read."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is \u00a740's investigation-only fragment naming the working equilibrium route from nakasvr26; docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html answers Q1 client defaults at :14-26 (dbsvr17p:/JT60SA_EQ/EQDB, ctypes get_defaults=300), Q2 reachability at :43-50, the Q3 six-code census at :89-135, the Q4 reads plus the lead's fifth 2D psi(R,Z) map at :160-225, and names SELENE's directly readable local file the working route at :243-247.\nVERDICT done_when: the done_when requires all four questions answered with evidence and the working route named; the fragment records a command and output per question and the manifest records the fragment gate EXIT=0 PASS ids=21 codes=6 route_probes=8 maps=2 bytes=15012, a structural gate that confirms the answers are present and their recorded route statuses match the probe logs rather than re-deriving the physics.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html and docs/figures/jt60sa-discovery-completion/flux-map-route; the single landed commit touches only the fragment, and the granted figures directory was left unused.\nVERDICT manifest: read; it records the commit ee04a0e, changed_paths, the gate command (python3 -, fragment anchor, six-code coverage, eight route-status and two map-log assertions) and its result EXIT=0 PASS ids=21 codes=6 route_probes=8 maps=2 bytes=15012 with the map-read logs, but names no baseline_suite/after_suite pair so no pytest added-failure count could be taken.\nVERDICT diff: read commit by commit against base 223593c25f6494a51ab4573e1414a4724bd96314; the single commit ee04a0e2943a8f4031dc81d385fb7846c2d4aece adds one file, docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html, 248 lines (15012 bytes), entirely inside the declared write path.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html:160-201 reads the SELENE 129x129 psi(R,Z) grid for shot E101163 at 129x129 and :89-135 answers the four \u00a740 questions and the lead's fifth, naming the SELENE file the working route at :243-247.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate logged at fragment-gate.log:1 records revision=ee04a0e with EXIT=0 ids=21 codes=6 route_probes=8 maps=2, matching the fragment's 21 unique ids and 15012 bytes, so its measured result is recorded rather than claimed.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: commit ee04a0e's only path docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html is inside the declared write paths, but the granted figures directory was left unused though a 2D flux map was read.\nSCORE durability: 12\nJUSTIFICATION durability: the fragment's probes at :171-196 and :207-224 carry falsifiable asserts (matching record trailers, monotonic R and Z, finite and nonconstant psi), but neither they nor the structural gate are committed as a test, so an edit that misstates a route status reddens nothing.\nSCORE fit: 19\nJUSTIFICATION fit: the fragment follows the id-anchored section and pre idiom of sibling docs/evidence/fragments/jt60sa-discovery-completion/*.html and its ids (flux-map-route-*) carry no plan label or version.\nSCORE reuse: 18\nJUSTIFICATION reuse: the diff adds no code definition, so the only capability it could fork is evidence recording; it extends the existing docs/evidence/fragments/jt60sa-discovery-completion idiom rather than a new store, and a search of that directory and imas_codex/config found no machine-readable owner of the SELENE route.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html:243 follow-on: the fragment records the psi(R,Z) reads as text only and writes no figure although docs/figures/jt60sa-discovery-completion/flux-map-route was in the declared write paths and a 2D flux map is the lead's key requirement, so the result is less legible than a plot of the SELENE grid would be.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/flux-map-route.html:1 follow-on: the gate that validated the fragment's anchors, six-code coverage and eight route statuses is an ad-hoc stdin script named only in fragment-gate.log, not committed, so a later edit that silently drops a route or misstates a READ_EXIT fails nothing.\n",
+  "review_run_id": "r-20261008T023751615147-review-of-flux-map-route",
+  "reviewed_base_sha": "223593c25f6494a51ab4573e1414a4724bd96314",
+  "reviewed_head_sha": "ee04a0e2943a8f4031dc81d385fb7846c2d4aece",
+  "reviewed_run_id": "r-20261008T015601347473-flux-map-route",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T02:50:43.656124+00:00",
+  "total": 104
+}

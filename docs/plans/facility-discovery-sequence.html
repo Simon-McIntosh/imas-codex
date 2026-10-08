@@ -20,9 +20,9 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="43">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -68,8 +68,8 @@
       stale.
       For each stage it records the command that runs it, what the stage needs, the stages whose
       output it reads, and the existing pending-work predicate that says whether it has work. Each
-      stage keeps exactly one owner. The registry points at the existing click command and adds no
-      second implementation.
+      stage keeps exactly one owner. The registry points at the domain's stage function, which §3
+      folds out of the domain's former click command, and adds no second implementation.
     </p>
     <table>
       <thead><tr><th>Stage</th><th>Runs</th><th>Needs</th><th>Reads output of</th></tr></thead>
@@ -165,94 +165,195 @@
         to do</em>.</li>
     </ul>
 
-    <h2 id="s3">§3 — The runner and its report</h2>
+    <h2 id="s3">§3 — One discover command: the settled surface, the folded domains and the runner</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      The runner invokes each runnable stage's existing click command with
-      <code>ctx.invoke</code>. Every discover domain builds its engine inside its own command
-      function and then calls <code>run_discovery</code>
-      (<code>imas_codex/cli/discover/common.py:212</code>), so invoking the command is the only path
-      that reuses each stage whole, without refactoring seven commands or starting subprocesses.
-      <code>--cost-limit</code> and <code>--time</code> mean what they mean on every per-domain
-      command: a cap on this invocation's spend and wall-clock time. The sequence's invocation is
-      longer, so before each stage it passes the remainder, the cap minus what the earlier stages
-      spent or took, as that stage's own <code>--cost-limit</code> and <code>--time</code>. No stage can
-      exceed what is left, and no option is overloaded.
+      The lead settled the surface on 2026-10-08 from the §6 census
+      (<code>docs/research/discover-cli-surface.html</code>). It follows <code>sn run</code>. One command
+      runs the work, and it selects stages by name. A few subcommands remain to inspect and reset
+      state. The per-domain subcommands <code>discover paths</code>, <code>code</code>,
+      <code>documents</code>, <code>wiki</code>, <code>signals</code> and <code>map</code> are retired.
+      <code>imas-codex discover FACILITY</code> runs every stage in order, mapping included.
+      <code>status</code>, <code>clear</code>, <code>seed</code> and <code>inspect</code> stay as
+      subcommands. The group routes a first argument that names no subcommand to a hidden
+      <code>run</code>, as <code>_HostGroup</code> in <code>imas_codex/cli/host.py</code> does. So
+      <code>imas-codex discover jt-60sa</code> runs the sequence, and
+      <code>imas-codex discover status jt-60sa</code> is unchanged.
+    </p>
+    <table>
+      <thead><tr><th>option</th><th>meaning</th><th>replaces</th></tr></thead>
+      <tbody>
+        <tr><td><code>--only DOMAIN</code></td><td>Run only these domains, repeatable or comma-separated: <code>paths</code>, <code>code</code>, <code>documents</code>, <code>wiki</code>, <code>signals</code>, <code>candidates</code> and <code>mapping</code>. Same grammar as <code>sn run --only</code>.</td><td>running one per-domain subcommand</td></tr>
+        <tr><td><code>--skip DOMAIN</code></td><td>Run every domain except these.</td><td>new</td></tr>
+        <tr><td><code>--scan-only</code></td><td>Run each selected domain's seeding half only: enumerate new work, judge nothing.</td><td><code>--scan-only</code> on paths, code, documents, wiki and signals</td></tr>
+        <tr><td><code>--flush</code></td><td>Run each selected domain's draining half only, without seeding: the same concept as <code>sn run --flush</code>. A drain half is a status-plus-claim query over nodes the seed half created (census §4).</td><td><code>--triage-only</code>, <code>--score-only</code> and <code>--enrich-only</code></td></tr>
+        <tr><td><code>--focus ITEMS</code></td><td>Restrict to named items, or to a manifest file, as on <code>sn run</code>. A path item covers everything under it. The item kind is the domain's own: facility paths, code files, wiki pages, signal accessors or source ids.</td><td><code>paths --root</code>, <code>code --path-prefix</code></td></tr>
+        <tr><td><code>--topic TEXT</code></td><td>A free-text steer for stages that score or enrich.</td><td>the free-text <code>--focus</code> on every discover domain</td></tr>
+        <tr><td><code>-c</code>, <code>--cost-limit USD</code></td><td>The invocation's spend cap. Each domain receives what remains.</td><td>same meaning, kept</td></tr>
+        <tr><td><code>-t</code>, <code>--time MINUTES</code></td><td>The invocation's wall-clock cap. Each domain receives what remains. The short form now matches <code>sn run -t</code>.</td><td><code>--time</code>, kept</td></tr>
+        <tr><td><code>--limit N</code></td><td>Item cap for each selected domain, as on <code>sn run --limit</code>.</td><td><code>--path-limit</code>, <code>--max-paths</code>, <code>--signal-limit</code>, <code>wiki --max-pages</code> and <code>-n</code></td></tr>
+        <tr><td><code>--dry-run</code></td><td>Print every stage with its outcome and reason, and invoke nothing.</td><td>new; no discover domain had one</td></tr>
+        <tr><td><code>--reset-to TARGET</code></td><td>The per-domain reset target. It needs exactly one <code>--only</code> domain, because targets differ per domain.</td><td>per-domain <code>--reset-to</code></td></tr>
+        <tr><td><code>--rescan</code></td><td>Re-discover items already scanned, in the domains that scan.</td><td>per-domain <code>--rescan</code></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Domain tunables move onto the one command unchanged, among them worker counts, thresholds,
+      <code>--category</code>, <code>--scanners</code>, <code>--reference-shot</code>,
+      <code>--physics-domain</code>, <code>--ids</code>, <code>--rejudge-ingested</code> and
+      <code>--rescan-documents</code>, <code>--add-roots</code>, <code>--store-bytes</code>, <code>--max-depth</code> and <code>--store-images</code>. <code>code --min-score</code> gives way to the Jev-calibrated gates described below. A tunable whose name another domain or <code>sn run</code>
+      already uses with a different meaning takes the domain as a prefix. <code>wiki --source</code>
+      becomes <code>--wiki-site</code>, because <code>sn run --source</code> is an extraction source.
+      Two deprecated aliases are deleted: <code>paths --reset-scored</code> and
+      <code>signals --reenrich</code>.
     </p>
     <p>
-      A stage that raises is recorded as <em>failed</em> with its error. The runner then continues with
-      the stages that do not read its output, so one broken stage does not stop an independent one.
-      <code>--only</code> and <code>--skip</code> take stage names. The run ends with one table, one row
-      per stage, giving outcome, reason, counts done and remaining, cost and wall-clock time. The same
-      table goes to the CLI log at <code>~/.local/share/imas-codex/logs/</code>.
-    </p>
-    <p>
-      The command adds one CLI entry, <code>discover run FACILITY</code>, and five options:
-      <code>--dry-run</code>, <code>--only</code> and <code>--skip</code> (stage names),
-      <code>--cost-limit</code> and <code>--time</code>. The last two are the per-domain options with
-      the same meaning over a longer invocation, so the sequence adds no new concept for them. The
-      mapping stage is opted into by naming it, under the decision below, and needs no option of its
-      own. Nothing is retired. The per-domain commands stay the way to run one stage with its
-      stage-specific options, for example <code>discover signals --category</code>, which the sequence
-      does not re-declare.
-    </p>
-    <p>
-      <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h. Write paths:
-      <code>imas_codex/cli/discover/sequence.py</code> and
-      <code>tests/cli/test_discover_sequence.py</code>. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
-      passes with tests showing:
+      Each domain module turns its click command into one stage function,
+      <code>run_&lt;domain&gt;_stage(facility, options)</code>, with a frozen dataclass of the settled
+      options. The body that builds the engine and calls <code>run_discovery</code>
+      (<code>imas_codex/cli/discover/common.py:212</code>) is kept whole, so no engine changes. The click
+      subcommand is deleted with its registration. These six folds touch disjoint files, so they run in
+      parallel, with one exception. <code>discovery-judgments-through-jev</code> §4's node
+      <code>path-jev-deploy</code> is editing <code>paths.py</code> and <code>code.py</code>. It retires
+      the 0.9 composite threshold as the path gate in favour of Jev-calibrated scan, expand and enrich
+      gates, and code-scan path selection stops reading the old threshold. So
+      <code>fold-paths-stage</code> and <code>fold-code-stage</code> dispatch only after that node
+      merges, and they carry its gate options rather than the 0.9 default. Wiki keeps its own
+      <code>--min-score</code>. The other four folds run now:
     </p>
     <ul>
-      <li>stages run in registry order through <code>ctx.invoke</code> of their commands;</li>
-      <li>a failing stage is reported as failed, a stage that reads its output is skipped with that
-        reason, and an independent stage still runs;</li>
-      <li>each stage receives the remaining cost and time as its own <code>--cost-limit</code> and
-        <code>--time</code>, and the sequence stops invoking paid stages when nothing remains;</li>
-      <li><code>--only</code> and <code>--skip</code> select stages by name;</li>
-      <li>the final table lists every stage with outcome, reason, counts, cost and time.</li>
+      <li><code>fold-paths-stage</code>: <code>imas_codex/cli/discover/paths.py</code> and <code>tests/cli/test_discover_paths_stage.py</code></li>
+      <li><code>fold-code-stage</code>: <code>imas_codex/cli/discover/code.py</code> and <code>tests/cli/test_discover_code_stage.py</code></li>
+      <li><code>fold-documents-stage</code>: <code>imas_codex/cli/discover/documents.py</code> and <code>tests/cli/test_discover_documents_stage.py</code></li>
+      <li><code>fold-wiki-stage</code>: <code>imas_codex/cli/discover/wiki.py</code> and <code>tests/cli/test_discover_wiki_stage.py</code></li>
+      <li><code>fold-signals-stage</code>: <code>imas_codex/cli/discover/signals.py</code> and <code>tests/cli/test_discover_signals_stage.py</code></li>
+      <li><code>fold-candidates-stage</code>: <code>imas_codex/cli/discover/map.py</code> and <code>tests/cli/test_discover_candidates_stage.py</code></li>
+    </ul>
+    <p>
+      Each fold is role implement, 1.5 h, with its fragment under
+      <code>docs/evidence/fragments/facility-discovery-sequence/</code>. A fold leaves its click command
+      in place as a thin wrapper that builds the options and calls the stage function. That way no two
+      folds write <code>imas_codex/cli/discover/__init__.py</code>, and nothing breaks before the runner
+      lands. <code>--focus ITEMS</code> is wired where the domain's engine already filters by item:
+      <code>paths</code> through its root filter and <code>code</code> through its path prefix. A domain
+      without one refuses <code>--focus</code>, and never ignores it silently. The message states the
+      mechanism: this domain's claim query takes no item filter yet. It names no plan or section,
+      because plan references do not belong in source.
+      <strong>Done when</strong> the module exposes the stage function, and its new test file shows
+      four things. <code>--scan-only</code> and <code>--flush</code> run the seeding and draining
+      workers respectively. <code>--topic</code> reaches the scorer or enricher that the old free-text
+      <code>--focus</code> reached. <code>--limit</code> caps items. <code>--focus</code> is honoured or
+      refused as above, with no plan name or section number in the message or comments. The tests that
+      drove the old command still pass.
+    </p>
+    <p>
+      <strong>Node</strong> <code>retire-domain-subcommands</code>, role implement, 1.5 h, after
+      <code>sequence-runner</code>. It deletes the six thin wrappers and their registrations. It greps for
+      every caller of <code>discover paths</code>, <code>code</code>, <code>documents</code>,
+      <code>wiki</code>, <code>signals</code> and <code>map</code> in <code>imas_codex/</code>,
+      <code>tests/</code>, <code>scripts/</code>, <code>docs/</code> and the <code>AGENTS.md</code>
+      files, and moves each one to the bare-command spelling. The census found code callers in
+      <code>imas_codex/cli/map.py</code>, <code>compute.py</code> and <code>wiki.py</code>, and prose
+      in the facility YAML comments, the READMEs and <code>schemas/common.yaml</code>. A file another
+      session holds at dispatch is named in the fragment and left for that session, never edited
+      under it. It also rewrites the fold reviews' leftovers. It removes the stage-option docstrings phrased as changelog ("the old <code>--source</code>" in <code>wiki.py</code>) and the <code>--score-only</code> and <code>--enrich-only</code> aliases on the wrappers it deletes. It updates the prose that still names <code>--root</code>, <code>--score-only</code> or <code>--path-limit</code>: <code>imas_codex/llm/prompts/discovery/roots.md</code>, the discovery README, the worker-count hints in <code>compute.py</code>, and the progress comments. <strong>Done when</strong> no caller of a retired subcommand remains outside the files
+      the fragment lists, and the tests that drove the six commands pass through the bare command.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h, after the six folds, built on
+      the unmerged registry commit <code>21c0e6d34</code>. Write paths:
+      <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
+      <code>tests/cli/test_discover_sequence.py</code> and its fragment. The registry's stages become
+      the seven domains. Each has a seed half and a drain half, except <code>candidates</code> and
+      <code>mapping</code>, which only drain what earlier domains seeded. Under <code>--scan-only</code> they
+      read <em>skipped: nothing to seed</em>, rather than reporting a run that did nothing. The runner calls each runnable
+      domain's stage function in order, passing the remaining cost and time. A stage that raises is
+      recorded as failed, and a domain that reads its output is skipped with that reason, while an
+      independent domain still runs. The run ends with one table, one row per domain, giving outcome,
+      reason, counts done and remaining, cost and wall-clock time; the same table goes to the CLI log.
+      It also fixes the registry review's three findings. Each signals half resolves to the signals
+      stage function with its half selected, not to the bare command. The mapping stage's seat is
+      <code>ids-mapping</code>, a key of <code>MODEL_SECTIONS</code>. The wiki probe tests every
+      configured site, and the stage reads unreachable if any site is down. <code>discover status</code> marks high-value paths at the Jev scan gate,
+      <code>get_path_scan_threshold()</code>, rather than the old 0.90. Only the call site in
+      <code>imas_codex/cli/discover/__init__.py</code> changes; <code>discovery-judgments-through-jev</code>
+      fixes the default inside <code>get_high_value_paths</code>.
+      <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
+      passes with tests showing the following:
+    </p>
+    <ul>
+      <li><code>imas-codex discover jt-60sa --dry-run</code> routes to the sequence, and
+        <code>imas-codex discover status jt-60sa</code> still reaches status;</li>
+      <li>domains run in order through their stage functions;</li>
+      <li>failure isolation works as described above;</li>
+      <li>each domain receives the remaining cost and time;</li>
+      <li><code>--only</code>, <code>--skip</code>, <code>--scan-only</code> and <code>--flush</code>
+        select domains and halves;</li>
+      <li><code>--reset-to</code> without exactly one <code>--only</code> domain is refused, and so are <code>--scan-only</code> and <code>--flush</code> together, which would ask for seeding only and draining only at once (the signals fold showed nothing else catches it);</li>
+      <li>the final table lists every domain;</li>
+      <li>the three review findings are pinned.</li>
     </ul>
 
     <h2 id="s4">§4 — The mapping stages join the sequence</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
-      The last two stages run the mapping pipeline. <code>candidates</code> runs <code>discover
-      map</code>. <code>mapping</code> runs <code>imas map run FACILITY</code> once, and its own target
-      enumeration, <code>discover_mappable_ids</code> (<code>imas_codex/ids/tools.py:376</code>,
-      called at <code>imas_codex/cli/map.py:211</code>), decides the IDSs. The sequence keeps no
-      second list. That enumeration picks IDSs by physics-domain overlap today, so it could miss an
-      IDS that holds a source's cross-IDS sibling home. This node extends it: an IDS holding a selected
-      or escalated candidate edge for the facility is a target even when the domain overlap misses
-      it. With the per-IDS map claim from <code>mapping-candidate-selection</code> §8, the one
-      invocation then maps each source into every home it has. The mapping stage runs only when the decision below allows it, because it spends on
-      the reasoning seat.
+      The last two domains run the mapping pipeline. <code>candidates</code> runs the candidate stage
+      that <code>discover map</code> ran, now <code>run_candidates_stage</code>. <code>mapping</code>
+      calls the function behind <code>imas map run FACILITY</code> once. It runs by default under the
+      lead's decision, because its reasoning seat, <code>ids-mapping</code>, is local. Its own target
+      enumeration, <code>discover_mappable_ids</code> (<code>imas_codex/ids/tools.py:376</code>), decides
+      the IDSs, and the sequence keeps no second list. That enumeration picks IDSs by physics-domain
+      overlap today, so it could miss an IDS that holds a source's cross-IDS sibling home. This node
+      extends it: an IDS holding a selected or escalated candidate edge for the facility is a target
+      even when the domain overlap misses it. With the per-IDS map claim from
+      <code>mapping-candidate-selection</code> §8, the one invocation then maps each source into every
+      home it has. <code>imas map run</code> stays as the <code>imas</code> group's own command, because
+      that group is not a discover domain.
     </p>
     <p>
-      <strong>Node</strong> <code>sequence-mapping-stages</code>, role implement, 0.75 h, after the
-      gate below. Write paths: <code>imas_codex/cli/discover/sequence.py</code>,
-      <code>imas_codex/ids/tools.py</code>, <code>tests/cli/test_discover_sequence.py</code> and
-      <code>tests/ids/</code>. <strong>Done when</strong>
+      <strong>Node</strong> <code>sequence-mapping-stages</code>, role implement, 0.75 h, after
+      <code>sequence-runner</code>. Write paths: <code>imas_codex/cli/discover/sequence.py</code>,
+      <code>imas_codex/ids/tools.py</code>, <code>tests/cli/test_discover_sequence.py</code>,
+      <code>tests/ids/test_mappable_ids_from_candidates.py</code> and its fragment. <strong>Done
+      when</strong>
       <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/ids tests/test_cli.py -p no:cacheprovider</code>
-      passes with tests showing the mapping stage invokes <code>imas map run FACILITY</code> exactly
-      once, <code>discover_mappable_ids</code> includes an IDS that holds a selected candidate edge but
-      no physics-domain overlap, and the stage skips with <em>nothing to do</em> when no source has a
-      route.
+      passes with tests showing three things. The mapping domain runs by default and calls the map
+      pipeline once. <code>discover_mappable_ids</code> includes an IDS that holds a selected candidate
+      edge but has no physics-domain overlap. The domain skips with <em>nothing to do</em> when no
+      source has a route.
     </p>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
-      From the ITER host, run <code>imas-codex discover run jt-60sa --dry-run</code>. Then run it for
-      real with <code>--only signals-enrich</code> under a small cap. The dry run must name every stage,
-      with wiki and documents skipped and their probe results as reasons. The real run must enrich
-      without touching the facility. The evidence fragment records both tables.
+      From the ITER host, run <code>imas-codex discover jt-60sa --dry-run</code>. Then run it for real
+      with <code>--only signals --flush</code> under a small cap. The dry run must name every domain,
+      with wiki and documents skipped and their probe results as reasons. The real run must drain
+      signal enrichment without touching the facility. The check half needs SSH, so it reads
+      unreachable or runs, by its probe. The evidence fragment records both tables. When
+      <code>jt60sa-imas-maps</code> §5 is released, its enrichment, candidate and mapping pass runs
+      through this command.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-jt60sa-proof</code>, role test, 0.5 h. Write paths:
       <code>docs/evidence/fragments/facility-discovery-sequence/sequence-jt60sa-proof.html</code>.
       <strong>Done when</strong> the fragment holds both tables, and the real run's enriched-signal
-      count rose with zero SSH calls in its log.
+      count rose with zero SSH calls in its log. It waits for the census fragment of
+      <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code>, so that the proof and that
+      rescan never scan the same JT-60SA paths at once.
     </p>
+
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
+    <h2 id="s6">§6 — One option surface across discover and sn run</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The census of every discover, map and sn run option is merged; the lead settled one surface from it, recorded in §3. <a href="/imas-codex/evidence/archive/facility-discovery-sequence-landed.html#s6">full record</a></p>
+</section>
+
+    <h2 id="s7">§7 — --focus names items in every domain</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><code>--focus ITEMS</code> restricts a run to named items, or to a manifest file, as on <code>sn run</code>. Paths and code honour it from §3 through filters their engines already have. Signals, wiki, documents and candidates refuse it until their claim queries take an item filter. Signals filters by accessor or SignalSource id, in <code>imas_codex/discovery/signals/parallel.py</code>. Wiki filters by page, in the wiki claim module. Documents filters by document path. Candidates filters by SignalSource id, in <code>claim_sources_for_candidates</code> in <code>imas_codex/ids/workers.py</code>. Each is one node, writing its engine's claim module and a named test file. Each dispatches once its domain's fold is on main. Signals also waits until <code>jt60sa-discovery-completion</code>'s widening releases the signals engine. Documents waits for <code>sequence-runner</code>, because the held registry commit also changes <code>imas_codex/discovery/documents/pipeline.py</code>. Candidates goes first, as node <code>focus-candidates</code>, writing <code>imas_codex/ids/workers.py</code>, <code>imas_codex/cli/discover/map.py</code> and <code>tests/cli/test_discover_candidates_focus.py</code>. <strong>Done when</strong> each domain's test shows a focused run claiming only the named items, a manifest naming the same items producing the same run, and an unknown item refused with its name.</p>
 
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
@@ -261,25 +362,30 @@
     <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
     <a class="r-gate-evidence" href="mapping-candidate-selection section 8 landed (merge 3c1c0ce8f on main): the assign stage picks every listed home for an escalated source and the map stage maps each source into every IDS of its picks, claiming per IDS.">Evidence</a>
 </div>
+<div class="r-gate" data-id="g-fds-2" data-section="s3" data-gated-sections="s3,s4" data-status="closed" data-verdict="passed">
+    <h4 class="r-gate-measure">the option surface for imas-codex discover FACILITY is settled from the §6 census and recorded in this plan</h4>
+    <p class="r-gate-required-evidence">facility-discovery-sequence#s6</p>
+    <a class="r-gate-evidence" href="The census merged as bdb42163a (docs/research/discover-cli-surface.html, review 111/120), and the lead settled the surface on 2026-10-08: the per-domain subcommands fold into imas-codex discover FACILITY with --only/--skip, --scan-only, --flush, --focus items and --topic text. Section 3 records the settled option table, plan version 20.">Evidence</a>
+</div>
 </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="command-name" data-choice="discover-run" data-by="lead" data-when="2026-10-08T02:18:50+00:00" data-recommended="discover-run" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="command-name" data-choice="discover" data-by="lead" data-when="2026-10-08T02:31:22+00:00" data-recommended="discover-run" data-recommended-by="reckon-build">
     <p class="r-dec-q">What is the sequence command called?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="discover-run">imas-codex discover run FACILITY</button>
+      <button class="r-opt" data-value="discover-run">imas-codex discover run FACILITY</button>
       <button class="r-opt" data-value="discover-all">imas-codex discover all FACILITY</button>
       </p>
-    <p class="r-dec-rat">The lead named the command imas-codex discover run; it reads as an action beside discover status and discover clear and does not promise that every stage runs.</p>
+    <p class="r-dec-rat">The lead chose the bare group, imas-codex discover FACILITY, without a run subcommand, as other groups do: host.py&#x27;s _HostGroup routes an unknown first argument to a hidden subcommand, so imas-codex discover jt-60sa runs the sequence while imas-codex discover signals jt-60sa still reaches its subcommand.</p>
     </div>
-<div class="r-dec" data-key="mapping-stage-default" data-choice="opt-in" data-by="lead" data-when="2026-10-08T02:18:50+00:00" data-recommended="opt-in" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="mapping-stage-default" data-choice="default" data-by="lead" data-when="2026-10-08T02:31:22+00:00" data-recommended="opt-in" data-recommended-by="reckon-build">
     <p class="r-dec-q">Does the sequence run imas map run by default?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="opt-in">only when named in --only</button>
-      <button class="r-opt" data-value="default">always, under the cost cap</button>
+      <button class="r-opt" data-value="opt-in">only when named in --only</button>
+      <button class="r-opt chosen" data-value="default">always, under the cost cap</button>
       </p>
-    <p class="r-dec-rat">Accepted with the plan&#x27;s recommendation when the lead asked for the command to be built: the mapping stage writes bindings a person validates, so it runs only when named in --only, while discovery up to candidates is safe to repeat.</p>
+    <p class="r-dec-rat">The lead chose to run the mapping stage by default; its reasoning seat is now local (ids-mapping), so it spends nothing on OpenRouter, and --skip excludes it when wanted.</p>
     </div>
 </section>
 
@@ -290,7 +396,59 @@
     <div class="r-fu-body">The registry and its dry run come first; the runner and the mapping stages build on them.</div>
     <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §2</pre>
     </article>
+<article class="r-fu" data-id="f-fds-002" data-status="open" data-written-by="reckon-build" data-written-at="2026-10-08T06:12:44Z" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stop helper workers on a seed-only run</h4>
+    <div class="r-fu-body"><p>The paths and code folds select the seeding workers correctly under <code>--scan-only</code>. But the engines in <code>imas_codex/discovery/paths/parallel.py</code> and <code>imas_codex/discovery/code/parallel.py</code> still append their embed, dedup and user helper pools unconditionally. So a seed-only run still starts work that belongs to the draining half. The fix gates those pools on the selected half, and the stage tests then assert that the pools are absent. It waits until <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code> stops running through those engines.</p></div>
+    <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §3</pre>
+    </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T021952758562-sequence-stage-registry" data-who="reckon-build" data-when="2026-10-08T03:09:57.030Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/facility-discovery-sequence/sequence-stage-registry.html</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T034022169014-review-of-sequence-stage-registry" data-who="reckon-build" data-when="2026-10-08T03:57:09.705Z">
+    <div class="r-comment-body"><p>review of run r-20261008T021952758562-sequence-stage-registry stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T021952758562-sequence-stage-registry.json: parsed record scoring all six dimensions 0..20 (goal_fidelity 18, evidence 17, scope_discipline 20, durability 15, fit 16, reuse 20; total 106), reviewed_base_sha 202972657fdd2028c3c138b04aedd400420acaf4 and reviewed_head_sha 21c0e6d34f2c1b3c5b86e6d5be61f62a25955e00, added_failure_count null with added_failure_ids [] because the reviewed run's manifest declares no baseline_suite log; the §2 done-when met; 3 follow-on findings (signals-mode collapse in stage_command, invalid mapping model seat, single-site wiki probe).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261008T040251800434-review-of-discover-cli-surface-census" data-who="reckon-build" data-when="2026-10-08T04:22:48.332Z">
+    <div class="r-comment-body"><p>review of run r-20261008T023259015541-discover-cli-surface-census stored as docs/state/imas-codex review r-20261008T040251800434 at head 1efcfaa10: scores goal_fidelity 16, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 20, total 111; 4 findings (wiki --max-pages dropped from the item-cap concept and the verdicts; section 5 verdicts not exhaustive; sn run census a stated subset; section 4 bare file prefixes); added_failure_count unmeasured (docs-only reviewed run names no suite gate)</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261008T023259015541-discover-cli-surface-census" data-who="reckon-build" data-when="2026-10-08T04:29:36.880Z">
+    <div class="r-comment-body"><p>docs/research/discover-cli-surface.html proposes one option surface for imas-codex discover FACILITY — census of discover domains, imas map run and sn run; --focus (topic vs path) and --reset-to (domain vs name) each marked one-spelling-two-meanings; --only/--skip/--flush proposed; 9 stage-selection flags and 2 deprecated aliases marked retire; measure: reckon audit-doc returns OK, 0 errors</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T045854169300-review-of-fold-signals-stage" data-who="reckon-build" data-when="2026-10-08T05:13:29.481Z">
+    <div class="r-comment-body"><p>review of r-20261008T043352243384-fold-signals-stage stored with status parsed, six scores goal_fidelity 18, evidence 18, scope_discipline 19, durability 19, fit 17, reuse 19 (total 110), reviewed_base_sha df596be2, reviewed_head_sha 0093af4b7, added_failure_count 0, added_failure_ids []; one follow-on recorded (source hardcodes the plan doc name in the --focus refusal message).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T043352243384-fold-signals-stage" data-who="reckon-build" data-when="2026-10-08T05:17:23.833Z">
+    <div class="r-comment-body"><p>signals.py exposes run_signals_stage(facility, options) with a frozen SignalsStageOptions and the click command is a thin wrapper that builds the options and calls it; the --focus refusal states the mechanism (the claim query takes no item filter) with no plan reference; gate 21 passed (11 new) at 32913438b; negative control makes the stage ignore --flush and the two --flush tests then fail.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T050059274277-review-of-fold-candidates-stage" data-who="reckon-build" data-when="2026-10-08T05:23:40.176Z">
+    <div class="r-comment-body"><p>review of run r-20261008T043424229971-fold-candidates-stage stored to reviews/imas-codex/r-20261008T043424229971-fold-candidates-stage.json (+ .at-ed4fdf1d3 copy): status parsed, six dimensions scored goal_fidelity 18 / evidence 18 / scope_discipline 19 / durability 18 / fit 19 / reuse 19, total 111; reviewed_base_sha df596be2, reviewed_head_sha ed4fdf1d3; added_failure_count 1, added_failure_ids [tests/cli/test_discover_candidates_stage.py::test_flush_runs_the_draining_worker] -- that id is the run's own declared negative control, not a regression; two follow-on findings (map.py:92 drain-only no-op for --scan-only/--topic; the run manifest suite mislabeling).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T043424229971-fold-candidates-stage" data-who="reckon-build" data-when="2026-10-08T05:31:33.458Z">
+    <div class="r-comment-body"><p>fold-candidates-stage - run_candidates_stage(facility, options) with a frozen CandidatesStageOptions dataclass extracted from the discover map click command, now a thin wrapper. tests/cli/test_discover_candidates_stage.py plus the old tests/cli/test_discover_map.py pass 18 of 18 (gate EXIT=0), and the negative control fails 1 (test_flush_runs_the_draining_worker) when the stage is mutated to treat --flush as the seeding half (EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T050059413025-fold-documents-stage" data-who="reckon-build" data-when="2026-10-08T05:30:12.775Z">
+    <div class="r-comment-body"><p>Extracted run_documents_stage(facility, options) and frozen DocumentsOptions from the documents click command, leaving a thin wrapper; --scan-only runs the seeding half, --flush the draining half, --limit caps items, --topic reaches the VLM scorer, --focus ITEMS is refused with a mechanism message (the claim query takes no item filter, no plan reference); gate 56 passed, declared mutation red on 2 flush tests.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T053654104027-review-of-fold-documents-stage" data-who="reckon-build" data-when="2026-10-08T05:56:04.167Z">
+    <div class="r-comment-body"><p>review of run r-20261008T050059413025-fold-documents-stage stored to reviews/imas-codex/r-20261008T050059413025-fold-documents-stage.json (+ .at-1824768c3 copy, byte-identical): status parsed, six dimensions scored goal_fidelity 19 / evidence 17 / scope_discipline 20 / durability 19 / fit 19 / reuse 20, total 114; reviewed_base_sha 425dd5620, reviewed_head_sha 1824768c3; added_failure_count 0, added_failure_ids []; two follow-on findings (the fragment/manifest cite the 56-passed gate figure at the base 425dd5620 while gate.log's header reads rev 1824768c3; the reviewed manifest names its two suite arms only via test_logs and omits baseline_suite/after_suite, so the harness reads the added-failure count unmeasured from the manifest).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T055729378160-fold-paths-stage" data-who="reckon-build" data-when="2026-10-08T06:08:59Z">
+    <div class="r-comment-body"><p>run_paths_stage with frozen PathsStageOptions routes the settled options and calibrated gate through the existing path engine; committed-head gate 12 passed, 1 warning in 11.72s, and the flush negative control failed as declared.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T060942087698-review-of-fold-paths-stage" data-who="reckon-build" data-when="2026-10-08T06:33:25.436Z">
+    <div class="r-comment-body"><p>review of run r-20261008T055729378160-fold-paths-stage stored parsed at total 110 (goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 19, reuse 19), reviewed_base_sha e4ff44bba7688c71535eeacdd8086c8dc6d5b51a, reviewed_head_sha 404da8bd59fa9fb7217764b2dd8823c626ee09bc, added_failure_count 0; four follow-on findings (missing fragment, out-of-scope callers of removed flags, scan-only still starts embed/dedup helpers, reviewed manifest omits its suite arms and never ran the regression surface).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T053800843965-fold-wiki-stage" data-who="reckon-build" data-when="2026-10-08T06:27:11.760Z">
+    <div class="r-comment-body"><p>code only — no figure and no evidence prose, because the node's done-when names no artifact; the tests are the measure</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T063256981731-review-of-fold-wiki-stage" data-who="reckon-build" data-when="2026-10-08T06:54:58.192Z">
+    <div class="r-comment-body"><p>review of run r-20261008T053800843965-fold-wiki-stage stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T053800843965-fold-wiki-stage.json: parsed record scoring all six dimensions 0..20 (goal_fidelity 18, evidence 16, scope_discipline 20, durability 19, fit 19, reuse 20; total 112), reviewed_base_sha 0031d00ac742afe5c1775136cbe19b0e9ee74061 and reviewed_head_sha 60fc95f6478d198456029d65d49b9bcb78d67b47, added_failure_count 0 with added_failure_ids [] derived from the reviewed run's own complete after arm (gate.log 58 passed EXIT=0, zero failures); the fold's four done-when bullets are each measured; 4 follow-on findings (--score-only kept as an alias, a stale --score-only user hint, changelog phrasing in the options docstring, gate-log header not self-binding).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T055757360934-fold-code-stage" data-who="reckon-build" data-when="2026-10-08T06:10:27Z">
+    <div class="r-comment-body"><p>Extracted run_code_stage with frozen CodeStageOptions and settled code options; the focused gate passed 14 tests and the declared flush mutation failed its test with EXIT=1.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

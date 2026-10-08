@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
-<meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53">
-<meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="38">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
+<meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="54">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -76,55 +76,19 @@
     </table>
     <p>Out of scope here: the code pipeline, owned by §25 of JT-60SA Discovery Completion, and IMAS mapping, owned by the mapping-candidate-selection plan. That plan rewrites <code>imas_codex/ids/mapping.py</code> and <code>imas_codex/ids/workers.py</code>, and no node of this plan writes those files.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s3">§3 — One judge function, and stale judgments as claimable work</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>Most stored rows carry the text Jev needs, so re-judging them needs no facility traffic. Counted on 2026-10-07:</p>
-    <table>
-      <thead><tr><th>Node</th><th>Rows</th><th>Judged by the language model</th><th>Text stored for re-judging</th></tr></thead>
-      <tbody>
-        <tr><td>FacilityPath</td><td>275,351</td><td>46,307</td><td>115,139 descriptions</td></tr>
-        <tr><td>WikiPage</td><td>28,239</td><td>23,054</td><td>23,054 previews</td></tr>
-        <tr><td>Document</td><td>41,175</td><td>6,112</td><td>20,961 previews</td></tr>
-        <tr><td>CodeFile</td><td>264,618</td><td>163,193</td><td>98,379 previews</td></tr>
-        <tr><td>FacilitySignal</td><td>53,170</td><td>49,760</td><td>49,760 descriptions</td></tr>
-      </tbody>
-    </table>
-    <p>At the measured $0.0001 and 0.4 s per call, re-judging every row with stored text costs about $55–60 and about 8 hours at a concurrency of 8.</p>
-    <p>Re-judging extends the owners that already exist and adds no driver for any pipeline.</p>
-    <ul>
-      <li><strong>One judge function.</strong> It goes in <code>imas_codex/discovery/base/judgment.py</code>, which §9's <code>search-rerank</code> node creates with <code>decide_batch</code>, the batch decision core. The judge function is built on <code>decide_batch</code> and adds the claim and the applier. It takes a batch of rows, a state builder, a question builder and an applier. It runs <code>acall_decisions</code> under a concurrency bound, books the cost, applies the answers, and leaves a row unjudged when its decision fails. The code pipeline's two arms are extracted into it from <code>code/workers.py</code> and <code>code/scorer.py</code> (<code>build_triage_questions</code>, <code>build_triage_state</code> and their content-arm counterparts) and become its first two callers. Each later pipeline supplies only its own three functions (§4–§6).</li>
-      <li><strong>A stale judgment is claimable work.</strong> Each pipeline's own judgment claim also admits a row that is past judgment when its stored judgment model differs from the seat's model and its judgment text is stored. Rows that have never been judged are claimed first. Scoping comes from the run's facility and <code>--path-prefix</code>, as for any claim, and spend is bounded by the run's existing cost limit. A future model change therefore re-judges through an ordinary run.</li>
-      <li><strong>One owner for the claim.</strong> The stale-judgment predicate and the never-judged-first order are written once, in <code>claim_batch</code> (<code>imas_codex/discovery/base/claims.py</code>), which gains an ordering hook beside its <code>status_predicate</code>. The code pipeline's two judgment claims (<code>claim_files_for_triage</code> and <code>claim_files_for_scoring</code> in <code>code/graph_ops.py</code>) move onto it here, and each later pipeline's judgment claims move onto it in its own section. The pending counters that count the same state (<code>has_pending_triage_work</code> and <code>has_pending_score_work</code> in <code>code/graph_ops.py</code>, and the counts in <code>code/parallel.py</code>) read the same predicate, so counts and claims agree. The reset field registries (<code>_CODE_RELEVANCE_FIELDS</code> in <code>discovery/base/reset.py</code> and <code>_RELEVANCE_FIELDS</code> in <code>code/scorer.py</code>) carry every judgment field, the stored distributions included.</li>
-      <li><strong>The applier never moves a row backwards.</strong> An ingested row keeps its status, chunks and embeddings, and only its judgment fields change. A skipped row that is now admitted moves to its pipeline's admitted status and enters the normal fetch. An admitted row not yet ingested that is now skipped moves to skipped.</li>
-      <li><strong>Why not <code>--reset-to</code>.</strong> The reset owner in <code>imas_codex/discovery/base/reset.py</code> keeps its meaning, which is full reprocessing from a stage. Its targets clear ingest fields, for example <code>ingested_at</code> and <code>chunk_count</code> on wiki pages, so re-judging through them would re-fetch and re-embed rows that are already ingested.</li>
-    </ul>
-    <p>Interface account: one public function, the judge function, added to the module §9 creates, and the code pipeline's inline decision loops retired onto <code>decide_batch</code>. No CLI option, no seat and no driver.</p>
-    <p>Done when:</p>
-    <ul>
-      <li>A scoped code run re-judges rows whose stored judgment model differs from the seat's with no SSH call, and a test asserts that the remote executor is never invoked. Never-judged rows are claimed before stale ones.</li>
-      <li>An ingested row keeps its status and chunks through a re-judge.</li>
-      <li>No inline decision loop remains in <code>code/workers.py</code>: both arms run through the judge function.</li>
-      <li>It writes the same fields the pipeline's own judgment writes.</li>
-      <li>Its spend is recorded.</li>
-    </ul>
+<section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The shared judge function landed in imas_codex/discovery/base/judgment.py, built on decide_batch. Both code-triage arms run through it. Judgment claims also admit rows whose stored judgment model differs from the seat's, never-judged rows first. A scoped re-judge reads stored text and makes no facility call. tests/discovery and tests/ids went from 1,849 to 1,856 passed with no added failures. Review 20/20/20/19/20/20. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/judge-function.html">full record</a></p>
+</section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s4">§4 — Paths through Jev</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>Path judgments gate everything downstream: code discovery scans only paths above the discovery threshold of 0.9. On 2026-10-06 that admitted 94 of the 692 JT-60SA paths outside <code>/home</code>, and excluded the getseldata, SAeqfame, eqdbms and client_eqdbms equilibrium trees.</p>
-    <p>Prototype first, as for code:</p>
-    <ul>
-      <li>a labelled sample of at least 120 paths across JT-60SA, TCV and JET;</li>
-      <li>the questions from §2, with the facility's <code>data_access_patterns</code> injected;</li>
-      <li>AUC and operating points measured against the current composite.</li>
-    </ul>
-    <p>Then deploy:</p>
-    <ul>
-      <li>Path triage and scoring write Jev judgments.</li>
-      <li>The scan, expand and enrich gates read Nouls.</li>
-      <li>The 0.9 threshold retires from path gating.</li>
-      <li>The language model keeps only the description.</li>
-    </ul>
-    <p>Done when the deployed path judgments reproduce the prototype's AUC within 0.02 on its labelled set.</p>
+<section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Path triage and scoring run through Jev: a PathPurpose Choice, eleven facet Scores with distributions and confidence, and a children-worth-listing Noul. Gates are computed in code; the code-scan gate is 0.30, calibrated on 118 positive and 40 negative JT-60SA paths (TP 80, FP 4, FN 38, TN 36, AUC 0.886; the prototype's 0.807 is reproduced). Re-scoring keeps stored enrichment fields. The merged head passes 1,500 tests; spend was USD 0.0034. Re-review 18/18/18/17/18/15. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html">full record</a></p>
+</section>
 
     <h2 id="s5">§5 — Wiki pages and documents through Jev</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -203,6 +167,134 @@
     <h2 id="s13">§13 — Label what the rerank lifts, and place the four deep misses</h2>
 <section data-reckon="section" data-id="s13" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
 <p>The search-rerank sweep left two readings unsettled. First, a deeper pool lifts candidates from embedding ranks 31–150 into the top ten, and those candidates carry no hand label. The whole-set nDCG@10 therefore counts every lifted candidate as irrelevant and penalises depth by construction, while the labelled-only nDCG@10 ignores them. The two readings disagree on whether 60 or 150 ranks better: labelled-only gives 0.482 at 60 and 0.653 at 150. Second, the four census answers (<code>eqgrd.f</code>, <code>shtrd.f</code>, <code>use_compiler-en</code>, <code>use_login-en</code>) sit at embedding ranks 159 to 181 for their questions, beyond any pool the 5 s budget can score.</p><p>This section is evidence only. Label every candidate that the reranked order at pools 60 and 150 places in the top ten and that has no label yet, under the prototype's rule, its labels file and its 18 questions, all in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/</code>. Then recompute whole-set nDCG@10 at both pools from the sweep's saved scores in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank/sweep.json</code>, with no new Jev calls. For each of the four census answers, record its embedding cosine to the query, whether the full-text index matches it, and the rank it takes under the query reworded in the vocabulary of its own path and title. That says whether the miss is the embedding, the query wording or the absence of a text match.</p><p>Done when the evidence fragment carries the relabelled whole-set table at pools 60 and 150 beside the labelled-only figures, and the four-answer table with cosine, text match and reworded rank. The scripts go in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/rerank-depth-labels/</code>. Live graph reads only: no graph write, no code change.</p>
+
+    <h2 id="s14">§14 — Retire the old path threshold from every path gate</h2>
+<section data-reckon="section" data-id="s14" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> Follow-ons from the §4 deploy review: three places still read the retired 0.90 path threshold,
+and one piece of wiring is duplicated. (1) <code>run_parallel_file_discovery</code> defaults <code>min_score</code> to
+<code>get_discovery_threshold()</code> (0.90) when a caller passes none, while the CLI passes the 0.30 Jev gate.
+(2) <code>get_high_value_paths</code> in <code>imas_codex/discovery/paths/frontier.py</code> defaults to the same setting.
+<code>imas_codex/discovery/paths/progress.py</code> (around line 1385) passes its own copy of it, so the status and progress
+surfaces disagree with the gate on which paths are high value. The map session is changing the <code>discover status</code>
+call site in its runner node. (3) The describe-then-judge step is wired twice: in <code>_async_score_with_llm</code> in
+<code>paths/parallel.py</code> and in <code>paths/scorer.py</code>.</p>
+<p><strong>Done when</strong> every path-gating default reads <code>get_path_scan_threshold()</code>, and a test fails if any
+path gate reads <code>get_discovery_threshold()</code>. The describe-then-judge step has one owner that both callers use. The
+focused path tests pass with baseline and after logs.</p>
+
+    <h2 id="s15">§15 — Give every judge its facility&#x27;s own access-pattern matches</h2>
+<section data-reckon="section" data-id="s15" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> The lead asked on 2026-10-08 that every Jev judge, the wiki judge included, receive all of its
+relevant context, and that the judges match known data-access patterns and data loaders in the items they judge. The
+deployed path judge scores AUC 0.886 on the widened JT-60SA labelled set, with 38 false negatives against 80 true
+positives at the scan gate. The lead also directed that this is a durable multi-machine tool: each facility's patterns
+must be wired when discovery runs on that facility, with JT-60SA the current focus.</p>
+<p><strong>What each judge receives today</strong> (read from the code on 2026-10-08):</p>
+<table>
+<thead><tr><th>Judge</th><th>Facility patterns as reference text</th><th>Matches of those patterns in the judged item</th></tr></thead>
+<tbody>
+<tr><td>Path (<code>build_path_judgment_state</code>, <code>paths/scorer.py</code>)</td><td>yes, through
+<code>facility_relevance_block</code></td><td>no: <code>pattern_categories</code> come from one global registry
+(MDSplus, PPF, UFILE, HDF5, NetCDF, EQDSK, IMAS, conventions), built by <code>_build_enrich_patterns</code> in
+<code>paths/enrichment.py</code></td></tr>
+<tr><td>Code triage (<code>build_triage_state</code>, <code>code/scorer.py</code>)</td><td>yes</td><td>no: the code
+scanner's <code>_get_pattern_categories</code> in <code>code/scanner.py</code> reads only
+<code>PATTERN_REGISTRY</code>, a second registry that differs from the path one; the path-only arm carries no pattern
+evidence at all</td></tr>
+<tr><td>Wiki pages and documents (§5)</td><td>yes, in the prompt</td><td>no: <code>extract_facility_tool_mentions</code>
+runs at ingest, after scoring; §5's node now puts its matches in the wiki state</td></tr>
+</tbody></table>
+<p>So no facility's own loaders are ever counted. Every facility config that declares <code>data_access_patterns</code>
+(TCV, JET, ITER, JT-60SA) lists <code>key_tools</code> and <code>code_import_patterns</code>, and none of them reaches
+pattern matching. For JT-60SA, <code>eddbreadTime</code>, <code>getseldata</code> and the EDAS API imports are invisible
+to the judge except where they happen to fall in the first 1,500 characters of a file.</p>
+<p><strong>Deliverable.</strong> One builder owns the pattern categories that path enrichment and the code scanner send to
+the remote matcher. It takes the facility id, and it adds that facility's <code>key_tools</code> and
+<code>code_import_patterns</code> from its config, escaped as literals, to the shared registry. Matching stays one pass per
+directory or file batch rather than one per pattern, and it records which of the facility's patterns matched, with counts.
+The path state and both code-triage arms carry those matches, labelled as the facility's own data-access calls, beside
+the generic categories. No facility id appears as a literal in code.</p>
+<p><strong>Done when</strong> a test parametrised over every facility config under
+<code>imas_codex/config/facilities</code> (excluding <code>*_private.yaml</code>) asserts four things:</p>
+<ul>
+<li>The builder's categories for that facility include its own patterns.</li>
+<li>The path state and the content-arm triage state built from a row matching one of them carry the match.</li>
+<li>A row matching none carries no match, as the negative control.</li>
+<li>Another facility's patterns are absent.</li>
+</ul>
+<p>The labelled JT-60SA path set is committed beside the fragment: the prototype's <code>labelled-paths.json</code> and
+the deploy's widened labels, both now held only in run directories. The fragment reports path-judge AUC and the
+scan-gate confusion counts on that set, with and without the match evidence. The with-evidence arm re-enriches the
+labelled paths through the facility, with Jev spend inside the JT-60SA authorization.</p>
+
+    <h2 id="s16">§16 — Declare what the path code writes, and retire reads of retired properties</h2>
+<section data-reckon="section" data-id="s16" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> The lead asked on 2026-10-08 for the failures in the coordinator's merged-head gate to be
+fixed. Two of them are fallout from the §4 deploy, and both fail with <code>.env</code> linked (measured 2026-10-08 on
+<code>cb3b7e526</code>).</p>
+<ul>
+<li><code>tests/graph/test_cypher_property_check.py</code> fails on two undeclared writes:
+<code>FacilityPath.claim_token</code> in the judgment claim queries of <code>paths/scorer.py</code>, and
+<code>FacilityPath.score_reason</code> at <code>paths/parallel.py</code> around line 1090. It also fails on 27
+runtime adjudications for <code>triage_*</code> and <code>triage_composite</code> reads in <code>paths/frontier.py</code>
+that no longer match a source line. The adjudications in <code>imas_codex/graph/cypher_property_check.py</code> are keyed
+by line, so moved code orphans them.</li>
+<li><code>tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts</code> still expects
+<code>paths/scorer</code> and <code>paths/triage</code>, the prompts the deploy retired.</li>
+</ul>
+<p><strong>Deliverable.</strong> Declare in the schema every property the path code genuinely writes, and stop writing
+any that nothing reads. For each <code>triage_*</code> read in <code>frontier.py</code>, decide whether it still reads a
+value anything writes. A read of a retired property returns nothing, silently, so it is retired or moved to the
+judgment fields rather than re-adjudicated. Bring the prompt-coverage expectation in line with the prompts that still
+exist.</p>
+<p><strong>Done when</strong> both tests pass at the head. Re-adding an undeclared FacilityPath property write fails the
+property check. The fragment lists each <code>triage_*</code> read with its disposition.</p>
+
+    <h2 id="s17">§17 — Correct the goldens, find the variation, and give every judge its graph neighbourhood</h2>
+<section data-reckon="section" data-id="s17" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> The lead asked on 2026-10-08 what limits the judges and whether the goldens are wrong. The
+lead also asked whether the knowledge graph is exploited: a resource's links to and from other resources, and the types
+of the resources it links to. §15's paired run gave AUC 0.850 without facility matches and 0.851 with them, at the
+0.30 scan gate on the 158 labelled JT-60SA paths. Reading its 32 misses and 6 false alarms (coordinator, 2026-10-08)
+gives four findings.</p>
+<ul>
+<li><strong>The measure scores a decision the pipeline does not make.</strong> 16 of the 32 misses are containers the
+judge already marks worth expanding, with children-worth-listing at 0.5 or more (<code>edas2/v2.1.14</code> 0.87,
+<code>esurf_plugins</code> 0.88, <code>topics/common</code> 0.83). Scored on the decision the pipeline makes, scan or
+expand, the same judgments give AUC 0.890. Scan at 0.30 or expand at 0.6 reaches 101 of 118 positives with 6 of 40
+false alarms. The children-worth-listing values come from the deploy run, not the fresh one.</li>
+<li><strong>The goldens are skewed and inconsistent.</strong> 50 of 158 labels are working copies of TOPICS under
+<code>/home/a048717/src/pjtopics_*</code>, 36 of them positive. <code>atdisp</code> is negative in three copies while
+sibling TOPICS directories are positive, and <code>client_eqdbms…/eqtrace</code>, equilibrium tracing in the EQDB
+client, is negative. The labels were made from paths and stored descriptions, which is the same text the judge reads,
+not from the source.</li>
+<li><strong>Variation exceeds the effects being measured.</strong> Repeat calls changed the score on 117 of 137 paths
+whose state did not change. The fresh describe step writes a new description on every pass, and the description is in
+the state, so the input may not be stable.</li>
+<li><strong>The graph context is unused.</strong> The path state carries the directory alone. The schema holds its parent
+and children (<code>IN_DIRECTORY</code>), aliases (<code>ALIAS_OF</code>) and repository copies (<code>INSTANCE_OF</code>),
+the CodeFiles under it with their chunks' <code>DataReference</code> and IDS links, and the Documents under it. 20 of
+the 32 misses have no children or files in the graph, because they were never scanned. The containers do have judged
+children the state does not show: <code>edas2/v2.1.14</code> has a child scoring 0.50 for analysis code, and the FLEDD
+<code>eqdbms</code> has a child scoring 0.67 for data access. None of the 32 carries <code>INSTANCE_OF</code> or
+<code>ALIAS_OF</code>, so the working copies look independent. Wiki pages naming a tool or path (eSurf, eqdbms,
+getseldata) are not linked to the FacilityPath. Code files carry no include or import links.</li>
+</ul>
+<p><strong>Node 1: goldens and noise.</strong> Relabel the set from source inspection on the facility, with two labels
+per path: worth scanning for code, and worth expanding. Mark each working copy with the canonical path it copies; a
+copy is judged once, by its canonical path. Add enough non-TOPICS paths that no single tree supplies more than a
+quarter of the set. Find the variation source by judging each path three times with a frozen state and three times with
+a fresh description. Report AUC on the scan-or-expand decision, with confidence intervals, under the old and new labels.
+Committed beside the fragment: <code>labelled-paths-v2.json</code>, which does not replace the earlier files.</p>
+<p><strong>Node 2: graph context, after node 1 and §15 land.</strong> Add the graph neighbourhood to each judge's state,
+read through the graph client. For a path: its parent's and children's judgments, its canonical copy and that copy's
+judgment, and the CodeFiles and Documents under it with their facets and data references. For a code file: its
+directory's judgment and the DataReferences and IDS its chunks link. For a wiki page: the types of its link targets and
+documents, and its inbound link count. Measure AUC with and without that context on node 1's labels.</p>
+<p><strong>Done when</strong> node 1's fragment gives the relabelled set's composition, the variation source with
+repeat-call evidence, and the scan-or-expand AUC under both labellings. Node 2's fragment gives the paired AUC with and
+without graph context, and a test parametrised over every facility config asserts each judge's state carries its
+neighbourhood fields.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -306,9 +398,17 @@ graph write, no discover run.</p></div>
 <div class="r-comment" data-section="s3" data-id="c-20261008-s3-critical" data-who="lead" data-when="2026-10-08T02:25:00Z">
     <div class="r-comment-body"><p>Lead, 2026-10-08: critical path. §4's path judgments run through this judge function, and JT-60SA code discovery waits on both. Dispatch on the codex lane.</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T020846501902-judge-function" data-who="reckon-build" data-when="2026-10-08T02:45:15Z">
+    <div class="r-comment-body"><p>Shared judge, model-aware stale claims, and scoped remote-free rejudgment committed in c47801540 and 437119048; base 1849 passed, final head 1856 passed, zero added failures; model-blind mutation failed the stale-claim test.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T024710258732-review-of-judge-function" data-who="reckon-build" data-when="2026-10-08T03:00:25.585Z">
+    <div class="r-comment-body"><p>independent review of run r-20261008T020846501902-judge-function (judge-function) scored 6/6 dimensions, total 119/120; no blocking finding, one follow-on on the RERANK_POOL guard.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261008-s3-landing" data-who="reckon-build" data-when="2026-10-08T03:12:00Z">
+    <div class="r-comment-body"><p>Gate passed; merged as <code>875958064</code>. The coordinator's clean-archive gate of the merged head gave 1,855 passed and one 30-second <code>pytest-timeout</code> in <code>tests/ids/test_metadata.py</code> under load; all 46 tests in that file pass on the merged head when run alone. The review's follow-on: the <code>RERANK_POOL</code> guard asserts a fixed 30 rather than the stated invariant, that the pool exceeds the k the search tools return.</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-s4-design" data-who="lead" data-when="2026-10-08T02:25:00Z">
-    <div class="r-comment-body">
-<p><strong>Lead, 2026-10-08: this is critical-path work.</strong> JT-60SA code discovery now waits on it.
+    <div class="r-comment-body"><p><strong>Lead, 2026-10-08: this is critical-path work.</strong> JT-60SA code discovery now waits on it.
 The lead lifted the <code>/home</code> exclusion and asked for every scan to be rescored with Jev, because core
 applications may live in home directories that the language-model path scores never admitted. Of
 7,667 JT-60SA <code>/home</code> path rows, 3,391 are scored and 1,660 triaged, all by the language model. On
@@ -344,8 +444,84 @@ at least 120 JT-60SA paths spanning <code>/analysis</code>, <code>/home</code> a
 include the known misses <code>getseldata_v4.2</code>, <code>SAeqfame</code>, <code>eqdbms</code> and
 <code>client_eqdbms</code>, and the home trees the language model scored high but no scan ever listed. The
 prototype measures AUC and operating points against the current composite. It adds the builders without wiring
-them, so path discovery's behaviour does not change until the deploy node.</p>
+them, so path discovery's behaviour does not change until the deploy node.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T020930881891-path-jev-prototype" data-who="reckon-build" data-when="2026-10-08T02:33:56Z">
+    <div class="r-comment-body"><p>Path judgment builders and schema coverage committed; 142 JT-60SA paths judged, paired AUC Jev 0.807 versus composite 0.677, total Jev spend USD 0.01765415.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261008-s4-prototype" data-who="reckon-build" data-when="2026-10-08T03:12:00Z">
+    <div class="r-comment-body"><p>Prototype node landed; merged as <code>ac2e9a179</code>. <code>imas_codex/discovery/paths/scorer.py</code> carries the question and state builders of the lead's design, not yet wired into path discovery. 142 JT-60SA paths were labelled (70 <code>/analysis</code>, 66 <code>/home</code>, 6 <code>/work</code>). On the 136 paths both judgments cover, the Jev scan gate (maximum of nine facet Scores) scores AUC 0.807, against 0.677 for the language-model composite. That set has only 18 negatives, so the deploy should widen it before fixing operating points. The four known misses score 0.35–0.53 on the Jev gate, so the deployed threshold must sit well below the retired 0.9. Spend USD 0.018. Review 20/20/20/18/19/20. The deploy node needs <code>imas_codex/schemas/facility.yaml</code> for the stored probabilities and confidences, and follows the JT-60SA §43 node that holds it.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T024111667517-review-of-path-jev-prototype" data-who="reckon-build" data-when="2026-10-08T03:10:44.580Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261008T020930881891-path-jev-prototype stored as a parsed record at reviewed base 9542178aab31dd9113a4f051b780c01b6b3fa5ab and head 68818f8ad7ef80771cab85b9237cef0ed30b22f5, scoring goal_fidelity 20, evidence 20, scope_discipline 20, durability 18, fit 19, reuse 20 (total 117), with one follow-on finding on the fragment's home-control composite range.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T044843390098-review-of-path-jev-deploy" data-who="reckon-build" data-when="2026-10-08T05:16:02.548Z">
+    <div class="r-comment-body"><p>Independent review of r-20261008T035418139036-path-jev-deploy stored as a parsed record over all six dimensions (goal_fidelity 18, evidence 17, scope_discipline 16, durability 18, fit 16, reuse 20; total 105) reading base 849a1a35 and head 07477c79b, with added_failure_count 0 and no added failure ids; one blocking finding (the scored pass nulls stored physics_domain/keywords/evidence on rescore) and two follow-ons (the declared evidence fragment and figure were not written; the rewrite leaves dead score/triage helpers).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T035418139036-path-jev-deploy" data-who="reckon-build" data-when="2026-10-08T05:23:30Z">
+    <div class="r-comment-body"><p>Jev path judgments and the 0.30 scan gate are deployed; the 158-path paired set (118 positive, 40 negative) gives TP 80/FP 4/FN 38/TN 36 and widened AUC 0.886, with original AUC 0.807 reproduced. A scoped five-path re-judge made zero facility calls; Jev spend was USD 0.003404436 of USD 3. Review repair now preserves stored physics domain, keywords and evidence on Jev-only rescoring, proved by a passing test and failing unconditional-write mutation; focused gate 94 baseline to 95 after.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T052402868449-review-of-path-jev-deploy" data-who="reckon-build" data-when="2026-10-08T05:39:39.664Z">
+    <div class="r-comment-body"><p>Independent review of r-20261008T035418139036-path-jev-deploy stored a parsed record scoring all six dimensions (goal_fidelity 18, evidence 18, scope_discipline 18, durability 17, fit 18, reuse 15; total 104) over revision pair base=849a1a35fadb419a3d4cfe1b07795fbd233fdca0 head=a1a8a63babcfe740204853bc859910e94d532f75, with added_failure_count 0 and no added ids derived from the reviewed run's baseline and after gate logs, and three follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261008-s4-landing" data-who="reckon-build" data-when="2026-10-08T05:50:00Z">
+    <div class="r-comment-body"><p>Gate passed; merged as <code>5ca9c2929</code>. The first review blocked the merge because re-scoring nulled stored <code>physics_domain</code>, <code>keywords</code> and evidence. The repair writes only judgment fields and adds a preservation test with a negative control. The remaining review follow-ons are §14. The map session's paths and code folds carry the 0.30 gate through <code>get_path_scan_threshold()</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-s5-lead" data-who="lead" data-when="2026-10-08T05:40:00Z">
+    <div class="r-comment-body"><p><strong>Lead, 2026-10-08: rescore the wiki pages with Jev, JT-60SA first.</strong> Dispatch on the codex lane. <code>imas_codex/schemas/facility.yaml</code> is a shared file, resolved by merge (lead direction recorded on jt60sa-discovery-completion §44). This node edits only the WikiPage, Document and Image classes, merges origin/main before its last commit, and the coordinator accepts the path at promotion. Its JT-60SA consumer is jt60sa-discovery-completion §52. The live JT-60SA wiki is the nakasvr26 Code wiki (238 pages ingested, all 5,812 chunks embedded). The Main web, which holds the SystemDailyReport pages, is unreachable while nakasvr23 refuses SSH, so the daily-report check reads one of the stored raw pages, or records that none can be read.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-s5-matches" data-who="lead" data-when="2026-10-08T06:00:00Z">
+    <div class="r-comment-body"><p>Lead, 2026-10-08: every wiki, document and image Jev state carries the facility's access-pattern matches on the item's own text, found by <code>extract_facility_tool_mentions</code> with the facility's <code>key_tools</code> and <code>code_import_patterns</code>, config-driven for every facility. A test parametrised over every facility config asserts the match, with text that matches none as the negative control. The fragment reports labelled-set AUC with and without the matches.</p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-20261008-s14-describe-shape" data-who="reckon-build" data-when="2026-10-08T06:25:00Z">
+    <div class="r-comment-body"><p><strong>The describe step blocks every JT-60SA path pass</strong> (measured 2026-10-08 08:03 to 08:06 in
+<code>paths_jt-60sa.log</code>). The JT-60SA rescan's root pass over the 24 roots scored none of them. Its single-path
+retry also failed: <code>LLM failed after 5 attempts: 1 validation error for PathDescriptionBatch; results Field
+required</code>. The <code>discovery-score</code> seat, <code>local/deepseek-v4.1-flash</code>, answered with an object
+keyed by path, <code>{'jt-60sa:/analysis/src/…': '…'}</code>. It ignores the non-strict <code>json_schema</code>
+response format, and neither describe prompt states the output shape. Both copies, in
+<code>_async_score_with_llm</code> (<code>paths/parallel.py</code>) and in <code>paths/scorer.py</code>, send
+<code>{"focus", "directories": [...]}</code> and ask only for "path and description".</p>
+<p><strong>Two nodes.</strong> Node 1 gives the describe step its one owner now, as a function in a new module
+<code>imas_codex/discovery/paths/description.py</code>, which avoids an import cycle between <code>parallel.py</code> and
+<code>scorer.py</code>. Its prompt states the exact output object, <code>{"results": [{"path", "description"}]}</code>,
+with one entry per input path. <code>parallel.py</code> calls it. The test replays the recorded path-keyed answer and
+asserts that the prompt the owner sends names the <code>results</code> shape. A bounded live call on the
+<code>discovery-score</code> seat over stored JT-60SA root rows returns a valid batch, with no facility hop. Node 2 runs
+after §15 releases <code>paths/scorer.py</code>. It moves <code>scorer.py</code> onto the same owner and retires the
+0.90 defaults named above.</p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-run-r-20261008T061834979151-path-description-shape" data-who="reckon-build" data-when="2026-10-08T06:29:01Z">
+    <div class="r-comment-body"><p>The parallel path describe step uses one reusable owner with an explicit results-shaped prompt and accepts path-keyed answers; focused gate 10 passed and the live discovery-score call returned 3/3 root descriptions.</p></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-20261008-s17-categorise" data-who="lead" data-when="2026-10-08T06:55:00Z">
+    <div class="r-comment-body"><p><strong>Lead, 2026-10-08: categorise before the content is known; score once it is.</strong> At the path stage the
+judge sees names, counts, child names, file types and a description generated from that same metadata. 20 of the 32
+misses had nothing beneath them in the graph. Scoring eleven facets on that evidence is guessing a degree without the
+thing it measures. The design changes as follows, and this supersedes the two binary labels in node 1 above.</p>
+<ul>
+<li><strong>Path stage: a category, and an action derived from it in code.</strong> The judge answers the
+<code>path_purpose</code> Choice it already asks, over the <code>PathPurpose</code> values, plus the children-worth-listing
+Noul. The scan, expand and skip decisions are code over the category distribution:
+<ul>
+<li>scan when the probability of the code-bearing categories clears a calibrated threshold (modeling, analysis and
+operations code, data access, workflow, visualization, software project, test suite);</li>
+<li>expand for containers, or when children-worth-listing clears its threshold;</li>
+<li>route experimental and modeling data to data-store handling;</li>
+<li>skip archives, build artifacts, system directories and empty directories.</li>
+</ul>
+No facet Score is asked at the path stage.</li>
+<li><strong>Content stage: scores.</strong> The eleven facet Scores are judged where content is read, by the code
+judge's content arm on each file. A path's facet values become a roll-up of its judged files, stored with the count of
+files they rest on, so a path score always names the evidence behind it.</li>
+<li><strong>Goldens are categories.</strong> Node 1 labels each path with its <code>PathPurpose</code> category from
+source inspection on the facility, marks each working copy with the canonical path it copies, and caps any one tree at
+a quarter of the set. It reports category accuracy and macro-F1 for the Choice, and scan-or-expand AUC with
+confidence intervals, for two gates: the current maximum-of-facets gate and the category-derived gate. It also locates
+the variation with three frozen-state and three fresh-description judgments per path.</li>
+<li><strong>Node 2</strong> implements the category gate and the file roll-up, and adds the graph neighbourhood to
+each judge's state, measured against node 1's labels.</li>
+</ul></div>
 </div>
 </section>
 </main>

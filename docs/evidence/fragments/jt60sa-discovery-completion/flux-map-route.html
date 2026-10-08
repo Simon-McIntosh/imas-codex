@@ -1,0 +1,248 @@
+<section id="flux-map-route">
+  <h2 id="flux-map-route-heading">Equilibrium files reachable from the JT-60SA analysis server</h2>
+  <p id="flux-map-route-summary">Read-only investigation on 2026-10-08. The
+    <code>jt-60sa</code> SSH hop returned <code>intr26-2</code> (exit 0). A
+    current SELENE result is directly readable from another user's
+    <code>LOCALDB/EQDSK</code>: shot E101163 at 5.000 s contains a finite,
+    nonconstant 129 × 129 ψ(R,Z) grid. An older LIUQE/MEQ G EQDSK is also
+    readable (E101011, 6.800 s, 60 × 129). The installed network EQDB client
+    returned code 300; its configured server does not resolve from
+    <code>intr26-2</code>. These are direct file reads, not proof that the
+    network client or its central database works.</p>
+
+  <h3 id="flux-map-route-defaults">1. Client defaults</h3>
+  <p id="flux-map-route-defaults-source">The current library's readable
+    <code>/analysis/lib/JT60SAEQDB/eqdbms/defaults.eqdbms</code> names
+    <code>dbsvr17p:/JT60SA_EQ/EQDB</code>; its
+    <code>efitrv.eqdbms</code> names
+    <code>dbsvr17p:/JT60SA_EQ/EQDB_EFIT</code>. The older
+    <code>/analysis/lib/eqdbms</code> defaults name
+    <code>nakasvr17:/analysis_DB/EQDB</code> and its
+    <code>EQDB_EFIT</code> sibling. In the readable client source,
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqdb_get_rev.f</code>
+    lines 87, 112 and 115 call <code>get_defaults</code>,
+    <code>get_server_name</code> and <code>get_eqdb_path</code> before composing
+    the shot directory. The current library's compiled-in values agree with
+    the current defaults file, but its initializer did not succeed.</p>
+  <pre id="flux-map-route-defaults-command"><code>ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa \
+  'awk '\''tolower($0) !~ /pass|secret|token|key|credential/ {print NR ":" $0}'\'' \
+  /analysis/lib/JT60SAEQDB/eqdbms/defaults.eqdbms'
+# exit 0:
+1:SERVER_NAME:dbsvr17p
+2:EQDB_PATH:/JT60SA_EQ/EQDB
+3:LOCK_DIR:/JT60SA_EQ/LOCK
+4:LOG_DIR:/JT60SA_EQ/LOG
+6:HOST_OWNER:h060028
+
+# ctypes call of get_defaults_, get_server_name_, get_eqdb_path_
+# from /analysis/lib/JT60SAEQDB/libEQDBMSPIC.so on intr26-2:
+get_defaults=300 server=dbsvr17p path=/JT60SA_EQ/EQDB
+# Python/SSH process exit 0; the library return code is 300.</code></pre>
+
+  <h3 id="flux-map-route-central">2. Central route and Web API</h3>
+  <p id="flux-map-route-central-result">Neither current nor legacy central
+    EQDB directory is mounted on <code>intr26-2</code>. The configured
+    <code>dbsvr17p</code> hostname does not resolve there, and the old
+    <code>jt-60sa-23</code> SSH hop refused forwarding (exit 255). The Data
+    Handbook's Web API manuals exist as two graph <code>Document</code> rows,
+    both <code>deferred</code>; their old TWiki attachment paths are unreadable
+    on this host, and local HTTP port 80 refuses connections. No central or Web
+    API equilibrium read was demonstrated.</p>
+  <pre id="flux-map-route-central-command"><code>ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa 'getent hosts dbsvr17p; echo DNS_RC=$?;
+  timeout 8 ssh -o BatchMode=yes -o ConnectTimeout=5 dbsvr17p hostname;
+  echo DBSSH_RC=$?'
+DNS_RC=2
+ssh: Could not resolve hostname dbsvr17p: Name or service not known
+DBSSH_RC=255
+
+ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa 'ls -ld /JT60SA_EQ/EQDB /analysis_DB/EQDB'
+ls: cannot access '/JT60SA_EQ/EQDB': No such file or directory
+ls: cannot access '/analysis_DB/EQDB': No such file or directory
+# ls exit 2
+
+GraphClient.query("MATCH (d:Document {facility_id:'jt-60sa'}) RETURN count(d) AS n")
+[{"n": 1049}]                 # positive control, process exit 0
+GraphClient.query("MATCH (d:Document {facility_id:'jt-60sa'})
+  WHERE d.filename IN ['実験DBWebAPI説明書_EN.pdf','WEB_API_MAN_EN.pdf']
+  RETURN d.filename AS filename,d.path AS path,d.url AS url,d.status AS status LIMIT 10")
+WEB_API_MAN_EN.pdf: ssh://jt-60sa/var/www/html/twiki/pub/Main/DataAnalysis/WEB_API_MAN_EN.pdf; deferred
+実験DBWebAPI説明書_EN.pdf: ssh://jt-60sa/var/www/html/twiki/pub/Main/DataAnalysis/実験DBWebAPI説明書_EN.pdf; deferred
+# process exit 0
+
+ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa 'test -r /var/www/html/twiki/pub/Main/DataAnalysis/WEB_API_MAN_EN.pdf;
+  echo MANUAL_READ_RC=$?; curl -sS -I --max-time 5 http://localhost/twiki/pub/Main/DataAnalysis/WEB_API_MAN_EN.pdf;
+  echo CURL_RC=$?'
+MANUAL_READ_RC=1
+curl: (7) Failed to connect to localhost port 80
+CURL_RC=7</code></pre>
+
+  <h3 id="flux-map-route-codes">3. Reconstruction codes and output locations</h3>
+  <p id="flux-map-route-code-method">The exact common read probe was run on
+    <code>intr26-2</code> for every path below. Each <code>READ_EXIT</code> is
+    the remote Python command's status, not the enclosing SSH loop's status:
+    <code>python3 -c 'import sys; f=open(sys.argv[1],"rb"); b=f.read(32);
+    f.close(); print("read_bytes",len(b),"prefix_hex",b[:16].hex())' PATH</code>.
+    All were invoked through
+    <code>ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes
+    -o ControlMaster=no -o ControlPath=none jt-60sa 'bash -s'</code>.
+    Full output is in the run's <code>route-reads.log</code>.</p>
+  <table id="flux-map-route-code-table">
+    <thead><tr><th>Code</th><th>Output location and source basis</th><th>Read result</th></tr></thead>
+    <tbody>
+      <tr><td>SELENE</td><td><code>/home/a114004/LOCALDB/EQDSK/10/1011/101163/005000</code>;
+        <code>SAselene_v2.0_forPSRC/eqdbput.f</code> writes <code>#GEO</code> and
+        <code>#EQU</code> arrays; <code>main.f:53</code> identifies <code>EQSLG</code>
+        as SASELENE. <code>/analysis/bin/saequ_slice</code> invokes SELENE;
+        FBEQU/SAEQU are part of this family.</td><td><code>read_bytes 32</code>,
+        <code>READ_EXIT=0</code>; complete map read below.</td></tr>
+      <tr><td>EFIT</td><td>Current configured
+        <code>dbsvr17p:/JT60SA_EQ/EQDB_EFIT</code>; legacy
+        <code>nakasvr17:/analysis_DB/EQDB_EFIT</code>. The local
+        <code>/home/d240044/work/efit_jt60sa</code> files are EDDB input
+        signals and geometry, not an EFIT result.</td><td>Both local path
+        attempts raised <code>FileNotFoundError [Errno 2]</code>, each
+        <code>READ_EXIT=1</code>. No central read.</td></tr>
+      <tr><td>N.I.C.E.</td><td>No output location established on this
+        server. A depth-six name search of <code>/home</code>,
+        <code>/analysis/src</code> and <code>/analysis/bin</code> found LIUQE
+        files as a positive control but no N.I.C.E. reconstruction output;
+        a graph search of 8,466 JT-60SA wiki chunks also found none. The
+        one <code>run_nice10_notbackground</code> script is a scheduler
+        priority wrapper, not the reconstruction code.</td><td>Candidate
+        <code>/analysis/bin/NICE</code>: <code>FileNotFoundError [Errno 2]</code>,
+        <code>READ_EXIT=1</code>; actual route remains unknown.</td></tr>
+      <tr><td>LIUQE/MEQ</td><td><code>/home/d260047/olivier/equil_runs/EQDSK_E101011t6.8_COCOS07</code>;
+        <code>/home/d260047/shared/liuqe_public/README.md</code> names
+        <code>liu</code>, <code>liut</code> and <code>meq2eqdsk</code> as its
+        reconstruction/export path.</td><td><code>read_bytes 32</code>,
+        <code>READ_EXIT=0</code>; archived 2025 shot parsed below. No newer
+        LIUQE EQDSK was found in the searched home trees.</td></tr>
+      <tr><td>offline TCCS</td><td><code>/analysis/bin/tccs</code> invokes
+        <code>/analysis/exec/TCCS_SA.ex</code>. The source's grid dump to
+        invocation-directory <code>fort.26</code> is commented out in
+        <code>offlineTCCS/TCCS/src/CCS/tccs_main.c:1091-1108</code>.
+        <code>/home/a144017/OFFTCCS_FP/E100601_lcfs_plot.dat</code> is a
+        readable boundary/plot product, not a ψ(R,Z) map.</td><td>
+        <code>fort.26</code>: <code>FileNotFoundError [Errno 2]</code>,
+        <code>READ_EXIT=1</code>; LCFS plot <code>READ_EXIT=0</code>.</td></tr>
+      <tr><td>MECS</td><td><code>/analysis/bin/MECS_bin</code> points to
+        <code>/home/ap/IA/MECS_share/bin</code>. Candidate simulation output
+        <code>/home/d200025/MECS/ETM_MECSVV_Inoue/flux_map.txt</code> exists;
+        the MBDB wrapper's read-open attempts for shot 101163 and category
+        <code>MBEQ</code> returned 1043/1012, not a successful read.</td><td>
+        <code>PermissionError [Errno 13]</code>, <code>READ_EXIT=1</code>.
+        This output cannot be validated as a shot equilibrium by this account.</td></tr>
+    </tbody>
+  </table>
+  <pre id="flux-map-route-read-output"><code>ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa 'bash -s' &lt;&lt;'REMOTE'
+for spec in 'SELENE:/home/a114004/LOCALDB/EQDSK/10/1011/101163/005000' \
+ 'EFIT:/JT60SA_EQ/EQDB_EFIT' 'EFIT_legacy:/analysis_DB/EQDB_EFIT' \
+ 'NICE_candidate:/analysis/bin/NICE' \
+ 'LIUQE:/home/d260047/olivier/equil_runs/EQDSK_E101011t6.8_COCOS07' \
+ 'TCCS_grid:/home/a144017/OFFTCCS_FP/fort.26' \
+ 'TCCS_boundary:/home/a144017/OFFTCCS_FP/E100601_lcfs_plot.dat' \
+ 'MECS:/home/d200025/MECS/ETM_MECSVV_Inoue/flux_map.txt'; do
+ label=${spec%%:*}; path=${spec#*:}; printf 'CODE=%s PATH=%s\n' "$label" "$path"
+ python3 -c 'import sys; f=open(sys.argv[1],"rb"); b=f.read(32); f.close(); print("read_bytes",len(b),"prefix_hex",b[:16].hex())' "$path"
+ printf 'READ_EXIT=%s\n' "$?"
+done
+REMOTE
+# SSH exit 0; per-path output:
+SELENE read_bytes 32 READ_EXIT=0
+EFIT FileNotFoundError [Errno 2] READ_EXIT=1
+EFIT_legacy FileNotFoundError [Errno 2] READ_EXIT=1
+NICE_candidate FileNotFoundError [Errno 2] READ_EXIT=1
+LIUQE read_bytes 32 READ_EXIT=0
+TCCS_grid FileNotFoundError [Errno 2] READ_EXIT=1
+TCCS_boundary read_bytes 32 READ_EXIT=0
+MECS PermissionError [Errno 13] READ_EXIT=1</code></pre>
+
+  <h3 id="flux-map-route-reads">4–5. Equilibrium and 2D map reads</h3>
+  <p id="flux-map-route-selene-proof">The current SELENE file is a big-endian
+    Fortran sequential file: three record markers close at lengths 252,
+    452904 and 3248 bytes. The first record gives shot, time, <code>EQ31</code>
+    and an <code>EQSLG</code> title. The next record begins with six integers,
+    ending 129 and 129, followed by 129 R coordinates, 129 Z coordinates and
+    129 × 129 ψ doubles. This order is consistent with
+    <code>inc/#AAA</code> (IRDM=129, IZDM2=129), <code>inc/#GEO</code>,
+    <code>inc/#EQU</code> and <code>eqdbput.f:203-219</code>. The read asserted
+    matching record trailers, increasing R and Z, finite ψ and a nonzero ψ
+    range, so the result is more than a readable header.</p>
+  <pre id="flux-map-route-selene-command"><code>ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa 'python3 -' &lt;&lt;'PY'
+import hashlib, math, struct
+from pathlib import Path
+p=Path('/home/a114004/LOCALDB/EQDSK/10/1011/101163/005000')
+b=p.read_bytes(); pos=0; records=[]
+while pos&lt;len(b):
+    n=struct.unpack_from('&gt;I',b,pos)[0]
+    assert struct.unpack_from('&gt;I',b,pos+4+n)[0]==n
+    records.append(b[pos+4:pos+4+n]); pos+=n+8
+assert [len(x) for x in records]==[252,452904,3248]
+h,body,_=records
+shot=struct.unpack_from('&gt;i',h)[0]; t=struct.unpack_from('&gt;d',h,4)[0]
+nr,nz=struct.unpack_from('&gt;6i',body)[-2:]
+assert (nr,nz)==(129,129)
+r=struct.unpack_from('&gt;{}d'.format(nr),body,24)
+z=struct.unpack_from('&gt;{}d'.format(nz),body,24+nr*8)
+psi=struct.unpack_from('&gt;{}d'.format(nr*nz),body,24+(nr+nz)*8)
+assert all(math.isfinite(x) for x in psi)
+assert all(a&lt;b for a,b in zip(r,r[1:])) and all(a&lt;b for a,b in zip(z,z[1:]))
+assert max(psi)-min(psi)&gt;0.1
+print('file',p)
+print('sha256',hashlib.sha256(b).hexdigest())
+print('shot',shot,'time_s',t,'grid',nr,nz)
+print('R_m',r[0],r[-1],'Z_m',z[0],z[-1])
+print('psi_min_max',min(psi),max(psi))
+PY
+# exit 0; selected output:
+shot 101163 time_s 5.0 grid 129 129
+R_m 1.0 5.0 Z_m -3.5 3.5
+psi_min_max -0.55003229622874 1.393803723115182
+sha256 c1b975f893e91c49283115655edf7254dbfcadab8e8347b1cdc144edb4f32089</code></pre>
+  <p id="flux-map-route-liuqe-proof">The archived LIUQE G EQDSK header
+    explicitly names <code>LIUQE-JT-60SA(C) (MEQ)</code>, shot E101011,
+    6.800 s and grid 60 × 129. A fixed G EQDSK profile offset yielded 7,740
+    finite ψ values with a nonzero range; the local file is readable but is
+    not evidence of a current LIUQE publication service.</p>
+  <pre id="flux-map-route-liuqe-command"><code>ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa 'python3 -' &lt;&lt;'PY'
+import hashlib, math, re
+from pathlib import Path
+p=Path('/home/d260047/olivier/equil_runs/EQDSK_E101011t6.8_COCOS07')
+b=p.read_bytes(); lines=b.decode('ascii').splitlines()
+nr,nz=map(int,lines[0].split()[-2:])
+pat=r'[-+]?\d*\.\d+(?:[EeDd][-+]?\d+)?|[-+]?\d+[EeDd][-+]?\d+'
+v=[float(x.replace('D','E').replace('d','e')) for x in re.findall(pat,'\n'.join(lines[1:]))]
+psi=v[20+4*nr:20+4*nr+nr*nz]
+assert len(psi)==nr*nz and all(math.isfinite(x) for x in psi) and max(psi)&gt;min(psi)
+print('file',p)
+print('sha256',hashlib.sha256(b).hexdigest())
+print('header',lines[0])
+print('grid',nr,nz,'psi_min_max',min(psi),max(psi))
+PY
+# exit 0; selected output:
+LIUQE-JT-60SA(C) (MEQ) #0 t=6.8000 13-Nov-2025     3  60 129
+grid 60 129; psi_min_max -3.827948374 3.0022418
+sha256 f385641ad9740ed00698cbc03c8329a99577b36c948227bb6543e5888c86cd10</code></pre>
+  <p id="flux-map-route-host25">The lead's <code>naka25</code> name was
+    checked separately: <code>getent hosts nakasvr25.iferc.org</code> on
+    <code>intr26-2</code> exited 2, and SSH to that name exited 255 with
+    “Could not resolve hostname.” The configured <code>jt-60sa</code> host is
+    <code>nakasvr26.iferc.org</code>, resolving there and returning
+    <code>intr26-2</code>. No separate nakasvr25 route was established.</p>
+  <pre id="flux-map-route-host25-command"><code>ssh -F /home/ITER/mcintos/.ssh/config -o BatchMode=yes -o ControlMaster=no -o ControlPath=none jt-60sa \
+  'getent hosts nakasvr25.iferc.org; echo DNS25=$?;
+  getent hosts nakasvr26.iferc.org; echo DNS26=$?;
+  timeout 10 ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=7 nakasvr25.iferc.org hostname;
+  echo SSH25=$?'
+DNS25=2
+157.111.6.49    nakasvr26.iferc.org
+DNS26=0
+ssh: Could not resolve hostname nakasvr25.iferc.org: Name or service not known
+SSH25=255
+# enclosing SSH exit 0</code></pre>
+  <p id="flux-map-route-limits">The working read route for a recent 2D map
+    is the SELENE user's directly readable local EQDB file. Central EQDB,
+    EFIT, N.I.C.E., TCCS grid and MECS map access remain unresolved by the
+    recorded probes; no credential was read, copied or included here.
+    The LIUQE example is an older local export.</p>
+</section>

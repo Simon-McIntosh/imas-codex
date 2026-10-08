@@ -363,6 +363,8 @@ enums:
         description: Empty directory with no files or subdirectories
       empty:
         description: Empty directory (alias for empty_directory)
+      other:
+        description: A purpose not covered by the listed directory categories
 
   DiscoveryStatus:
     description: >-
@@ -387,6 +389,16 @@ enums:
         description: TDI function call (e.g., tcv_eq("PSI", "LIUQE"))
       imas_path:
         description: IMAS data dictionary path (future)
+      edas_eddb:
+        description: EDAS experiment database signal read
+      edas_uddb:
+        description: EDAS unprocessed database signal read
+      edas_pmdb:
+        description: EDAS plant database signal read
+      edas_lcdb:
+        description: EDAS local database signal read
+      edas_mbdb:
+        description: EDAS machine database signal read
 
   SignalNodeSource:
     description: How a SignalNode was discovered and ingested
@@ -1003,6 +1015,208 @@ classes:
       path_purpose:
         description: Classified purpose of the directory
         range: PathPurpose
+      scan_relevance:
+        description: Strongest discovery-relevant facet for code and data scanning
+        range: float
+      children_worth_listing:
+        description: Probability that listing child directories reveals useful facility content
+        range: float
+      judgment_model:
+        description: Decisions model that produced the stored path judgments
+      path_purpose_probs:
+        description: Purpose probabilities in PathPurpose enum order, with other last
+        multivalued: true
+        range: float
+      path_purpose_confidence:
+        description: Confidence of the exclusive purpose judgment
+        range: float
+      score_modeling_code_probs:
+        description: Probabilities for ordered score_modeling_code levels
+        multivalued: true
+        range: float
+      score_modeling_code_confidence:
+        description: Confidence of the score_modeling_code judgment
+        range: float
+      score_analysis_code_probs:
+        description: Probabilities for ordered score_analysis_code levels
+        multivalued: true
+        range: float
+      score_analysis_code_confidence:
+        description: Confidence of the score_analysis_code judgment
+        range: float
+      score_operations_code_probs:
+        description: Probabilities for ordered score_operations_code levels
+        multivalued: true
+        range: float
+      score_operations_code_confidence:
+        description: Confidence of the score_operations_code judgment
+        range: float
+      score_modeling_data_probs:
+        description: Probabilities for ordered score_modeling_data levels
+        multivalued: true
+        range: float
+      score_modeling_data_confidence:
+        description: Confidence of the score_modeling_data judgment
+        range: float
+      score_experimental_data_probs:
+        description: Probabilities for ordered score_experimental_data levels
+        multivalued: true
+        range: float
+      score_experimental_data_confidence:
+        description: Confidence of the score_experimental_data judgment
+        range: float
+      score_data_access_probs:
+        description: Probabilities for ordered score_data_access levels
+        multivalued: true
+        range: float
+      score_data_access_confidence:
+        description: Confidence of the score_data_access judgment
+        range: float
+      score_workflow_probs:
+        description: Probabilities for ordered score_workflow levels
+        multivalued: true
+        range: float
+      score_workflow_confidence:
+        description: Confidence of the score_workflow judgment
+        range: float
+      score_visualization_probs:
+        description: Probabilities for ordered score_visualization levels
+        multivalued: true
+        range: float
+      score_visualization_confidence:
+        description: Confidence of the score_visualization judgment
+        range: float
+      score_documentation_probs:
+        description: Probabilities for ordered score_documentation levels
+        multivalued: true
+        range: float
+      score_documentation_confidence:
+        description: Confidence of the score_documentation judgment
+        range: float
+      score_imas_probs:
+        description: Probabilities for ordered score_imas levels
+        multivalued: true
+        range: float
+      score_imas_confidence:
+        description: Confidence of the score_imas judgment
+        range: float
+      score_convention_probs:
+        description: Probabilities for ordered score_convention levels
+        multivalued: true
+        range: float
+      score_convention_confidence:
+        description: Confidence of the score_convention judgment
+        range: float
+      triage_modeling_code_probs:
+        description: Probabilities for ordered triage_modeling_code levels
+        multivalued: true
+        range: float
+      triage_modeling_code_confidence:
+        description: Confidence of the triage_modeling_code judgment
+        range: float
+      triage_analysis_code_probs:
+        description: Probabilities for ordered triage_analysis_code levels
+        multivalued: true
+        range: float
+      triage_analysis_code_confidence:
+        description: Confidence of the triage_analysis_code judgment
+        range: float
+      triage_operations_code_probs:
+        description: Probabilities for ordered triage_operations_code levels
+        multivalued: true
+        range: float
+      triage_operations_code_confidence:
+        description: Confidence of the triage_operations_code judgment
+        range: float
+      triage_modeling_data_probs:
+        description: Probabilities for ordered triage_modeling_data levels
+        multivalued: true
+        range: float
+      triage_modeling_data_confidence:
+        description: Confidence of the triage_modeling_data judgment
+        range: float
+      triage_experimental_data_probs:
+        description: Probabilities for ordered triage_experimental_data levels
+        multivalued: true
+        range: float
+      triage_experimental_data_confidence:
+        description: Confidence of the triage_experimental_data judgment
+        range: float
+      triage_data_access_probs:
+        description: Probabilities for ordered triage_data_access levels
+        multivalued: true
+        range: float
+      triage_data_access_confidence:
+        description: Confidence of the triage_data_access judgment
+        range: float
+      triage_workflow_probs:
+        description: Probabilities for ordered triage_workflow levels
+        multivalued: true
+        range: float
+      triage_workflow_confidence:
+        description: Confidence of the triage_workflow judgment
+        range: float
+      triage_visualization_probs:
+        description: Probabilities for ordered triage_visualization levels
+        multivalued: true
+        range: float
+      triage_visualization_confidence:
+        description: Confidence of the triage_visualization judgment
+        range: float
+      triage_documentation_probs:
+        description: Probabilities for ordered triage_documentation levels
+        multivalued: true
+        range: float
+      triage_documentation_confidence:
+        description: Confidence of the triage_documentation judgment
+        range: float
+      triage_imas_probs:
+        description: Probabilities for ordered triage_imas levels
+        multivalued: true
+        range: float
+      triage_imas_confidence:
+        description: Confidence of the triage_imas judgment
+        range: float
+      triage_convention_probs:
+        description: Probabilities for ordered triage_convention levels
+        multivalued: true
+        range: float
+      triage_convention_confidence:
+        description: Confidence of the triage_convention judgment
+        range: float
+      triage_modeling_code:
+        description: First-pass value of modeling code
+        range: float
+      triage_analysis_code:
+        description: First-pass value of analysis code
+        range: float
+      triage_operations_code:
+        description: First-pass value of operations code
+        range: float
+      triage_modeling_data:
+        description: First-pass value of modeling data
+        range: float
+      triage_experimental_data:
+        description: First-pass value of experimental data
+        range: float
+      triage_data_access:
+        description: First-pass value of data access
+        range: float
+      triage_workflow:
+        description: First-pass value of workflow
+        range: float
+      triage_visualization:
+        description: First-pass value of visualization
+        range: float
+      triage_documentation:
+        description: First-pass value of documentation
+        range: float
+      triage_imas:
+        description: First-pass value of imas
+        range: float
+      triage_convention:
+        description: First-pass value of convention
+        range: float
       # Enrichment tracking (for high-value paths with du/tokei data)
       is_enriched:
         description: Whether this path has been enriched with deep scan data
@@ -3410,6 +3624,12 @@ classes:
       mdsplus_ref_count:
         description: Count of MDSplus path references in this chunk
         range: integer
+      related_ids:
+        description: IDS names found in this code chunk
+        multivalued: true
+      imas_paths:
+        description: Normalized IMAS data dictionary paths found in this code chunk
+        multivalued: true
       ref_doc_id:
         description: Reference to parent document ID for provenance
       data_references:
@@ -3426,6 +3646,13 @@ classes:
         range: IMASNode
         annotations:
           relationship_type: REFERENCES_IMAS
+      references_ids:
+        description: IDS roots named in this code chunk
+        multivalued: true
+        inlined: false
+        range: IDS
+        annotations:
+          relationship_type: REFERENCES_IDS
 
   DataReference:
     description: >-
@@ -3450,6 +3677,10 @@ classes:
         description: Type of data reference
         required: true
         range: DataReferenceType
+      edas_category:
+        description: Literal EDAS category argument, when supplied by the call
+      edas_data_name:
+        description: Literal EDAS data name or PID supplied by the call
       facility_id:
         description: Parent facility ID
         required: true
@@ -3468,6 +3699,12 @@ classes:
         description: IMAS path this reference resolves to (future)
         range: IMASNode
         multivalued: true
+      resolves_to_facility_signal:
+        description: FacilitySignal identified by the literal EDAS category and data name
+        range: FacilitySignal
+        multivalued: true
+        annotations:
+          relationship_type: RESOLVES_TO_FACILITY_SIGNAL
 
   AgentRun:
     description: >-

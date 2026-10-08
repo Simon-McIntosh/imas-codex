@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "849a1a35fadb419a3d4cfe1b07795fbd233fdca0",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/paths/parallel.py:score_worker",
+    "imas_codex/discovery/paths/parallel.py:triage_worker",
+    "imas_codex/cli/discover/paths.py:paths",
+    "imas_codex/discovery/code/graph_ops.py:claim_paths_for_file_scan",
+    "imas_codex/cli/discover/code.py:code"
+  ],
+  "completed_at": "2026-10-08T05:16:02.548Z",
+  "dispatched_at": "2026-10-08T04:49:12Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "2538",
+      "severity": "blocking",
+      "text": "blocking: the scored pass builds results without physics_domain, keywords, primary_evidence, evidence_summary or adjustment_reason, and score_worker at parallel.py:2247 assigns them with no fallback while mark_score_complete at parallel.py:1092 assigns them non-coalesced, so rescoring any enriched path now nulls stored physics_domain (consumed at imas_codex/discovery/paths/progress.py:600), keywords and evidence that the base _build_score_results preserved through its p.get fallbacks."
+    },
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the node declared this evidence fragment and docs/figures/discovery-judgments-through-jev/path-jev-deploy as write paths, but neither exists at head and no docs path appears in the diff, so the \u00a74 evidence is absent from the plan's evidence store while the prototype node did land its fragment."
+    },
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "2401",
+      "severity": "follow-on",
+      "text": "follow-on: _build_score_results is dead after _build_score_results' caller was replaced by judge_rows, and scorer.py:456 _build_system_prompt and scorer.py:501 _build_user_prompt have no production caller, so roughly three hundred lines plus the ScoreBatch import remain that the goal no longer implies."
+    }
+  ],
+  "head_log_revision": "07477c79b4448925ac7db0b8b005e15148a19130",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "three commits 08babc692, 6e28c83c0 and 07477c79b against base 849a1a35 add typed path judgments to scorer.py, repoint the scan/enrich/score gates at scan_relevance, add the schema fields and the --rejudge-stale path, all inside the declared write paths.",
+    "done_when": "the \u00a74 done-when asks the deployed judgments to reproduce the prototype AUC within 0.02, recorded in auc-reproduction.log (deployed_parser_original_auc 0.8067325800376648 equal to the published prototype 0.8067325800376648, delta 0.000000000, EXIT=0), and the manifest carries the 94-passed gate.",
+    "goal": "the goal is to deploy the \u00a74 Jev path judgments, and imas_codex/discovery/paths/parallel.py:2511 routes both the synchronous scorer.DirectoryTriager.async_triage_batch and the asynchronous parallel._async_score_with_llm passes through imas_codex/discovery/base/judgment.py:136 judge_rows, with the language model reduced to imas_codex/discovery/paths/models.py:277 PathDescription (path and description only).",
+    "manifest": "read; it declares status complete, records baseline 90 passed and head 94 passed at 07477c79b, names scan-gate-negative-control-final.log and schema-dimension-negative-control-final.log (both EXIT=1), and lists three commits, all of which I confirmed reachable.",
+    "write_paths": "the manifest's declared paths cover the thirteen source and test files the diff touches and also name docs/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html and docs/figures/discovery-judgments-through-jev/path-jev-deploy, neither of which exists at head."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_path_judgments.py:16 derives its expected question set from schema.get_all_slots(\"FacilityPath\"), independent of the code under test, and the two recorded mutations redden it at EXIT=1, though tests/discovery/test_scorer.py:131 still exercises the now non-production _map_triaged_directories.",
+    "evidence": "auc-reproduction.log records the deployed parser reproducing the published AUC (delta 0.000000000, EXIT=0) and the manifest's 94-passed log is on disk, but the comparison reuses the same inputs and formula as the prototype so it does not independently exercise the deployed code, and no evidence fragment was written.",
+    "fit": "scorer.py:50 and scorer.py:95 follow the module's build_* builder idiom and reuse judge_rows, but the rewrite leaves _build_score_results (imas_codex/discovery/paths/parallel.py:2401) with no caller anywhere.",
+    "goal_fidelity": "imas_codex/discovery/paths/scorer.py:50 path_judgment_fields persists the purpose Choice, eleven facet Scores with distributions and confidence, the children Noul and the model, while the language model keeps only the description.",
+    "reuse": "the added judges extend the shared owner imas_codex/discovery/base/judgment.py:136 judge_rows and the existing path scorers rather than forking a capability.",
+    "scope_discipline": "every path in the diff is declared, but the declared evidence fragment and figure were not produced."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to deploy the \u00a74 Jev path judgments, and imas_codex/discovery/paths/parallel.py:2511 routes both the synchronous scorer.DirectoryTriager.async_triage_batch and the asynchronous parallel._async_score_with_llm passes through imas_codex/discovery/base/judgment.py:136 judge_rows, with the language model reduced to imas_codex/discovery/paths/models.py:277 PathDescription (path and description only).\nVERDICT done_when: the \u00a74 done-when asks the deployed judgments to reproduce the prototype AUC within 0.02, recorded in auc-reproduction.log (deployed_parser_original_auc 0.8067325800376648 equal to the published prototype 0.8067325800376648, delta 0.000000000, EXIT=0), and the manifest carries the 94-passed gate.\nVERDICT write_paths: the manifest's declared paths cover the thirteen source and test files the diff touches and also name docs/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html and docs/figures/discovery-judgments-through-jev/path-jev-deploy, neither of which exists at head.\nVERDICT manifest: read; it declares status complete, records baseline 90 passed and head 94 passed at 07477c79b, names scan-gate-negative-control-final.log and schema-dimension-negative-control-final.log (both EXIT=1), and lists three commits, all of which I confirmed reachable.\nVERDICT diff: three commits 08babc692, 6e28c83c0 and 07477c79b against base 849a1a35 add typed path judgments to scorer.py, repoint the scan/enrich/score gates at scan_relevance, add the schema fields and the --rejudge-stale path, all inside the declared write paths.\nCALL_SITES: imas_codex/discovery/paths/parallel.py:score_worker, imas_codex/discovery/paths/parallel.py:triage_worker, imas_codex/cli/discover/paths.py:paths, imas_codex/discovery/code/graph_ops.py:claim_paths_for_file_scan, imas_codex/cli/discover/code.py:code\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/paths/scorer.py:50 path_judgment_fields persists the purpose Choice, eleven facet Scores with distributions and confidence, the children Noul and the model, while the language model keeps only the description.\nSCORE evidence: 17\nJUSTIFICATION evidence: auc-reproduction.log records the deployed parser reproducing the published AUC (delta 0.000000000, EXIT=0) and the manifest's 94-passed log is on disk, but the comparison reuses the same inputs and formula as the prototype so it does not independently exercise the deployed code, and no evidence fragment was written.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every path in the diff is declared, but the declared evidence fragment and figure were not produced.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_path_judgments.py:16 derives its expected question set from schema.get_all_slots(\"FacilityPath\"), independent of the code under test, and the two recorded mutations redden it at EXIT=1, though tests/discovery/test_scorer.py:131 still exercises the now non-production _map_triaged_directories.\nSCORE fit: 16\nJUSTIFICATION fit: scorer.py:50 and scorer.py:95 follow the module's build_* builder idiom and reuse judge_rows, but the rewrite leaves _build_score_results (imas_codex/discovery/paths/parallel.py:2401) with no caller anywhere.\nSCORE reuse: 20\nJUSTIFICATION reuse: the added judges extend the shared owner imas_codex/discovery/base/judgment.py:136 judge_rows and the existing path scorers rather than forking a capability.\nFINDING imas_codex/discovery/paths/parallel.py:2538 blocking: the scored pass builds results without physics_domain, keywords, primary_evidence, evidence_summary or adjustment_reason, and score_worker at parallel.py:2247 assigns them with no fallback while mark_score_complete at parallel.py:1092 assigns them non-coalesced, so rescoring any enriched path now nulls stored physics_domain (consumed at imas_codex/discovery/paths/progress.py:600), keywords and evidence that the base _build_score_results preserved through its p.get fallbacks.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html:1 follow-on: the node declared this evidence fragment and docs/figures/discovery-judgments-through-jev/path-jev-deploy as write paths, but neither exists at head and no docs path appears in the diff, so the \u00a74 evidence is absent from the plan's evidence store while the prototype node did land its fragment.\nFINDING imas_codex/discovery/paths/parallel.py:2401 follow-on: _build_score_results is dead after _build_score_results' caller was replaced by judge_rows, and scorer.py:456 _build_system_prompt and scorer.py:501 _build_user_prompt have no production caller, so roughly three hundred lines plus the ScoreBatch import remain that the goal no longer implies.",
+  "review_run_id": "r-20261008T044843390098-review-of-path-jev-deploy",
+  "reviewed_base_sha": "849a1a35fadb419a3d4cfe1b07795fbd233fdca0",
+  "reviewed_head_sha": "07477c79b4448925ac7db0b8b005e15148a19130",
+  "reviewed_run_id": "r-20261008T035418139036-path-jev-deploy",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:15:10.047115+00:00",
+  "total": 105
+}

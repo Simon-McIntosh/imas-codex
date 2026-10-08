@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 import re
+from dataclasses import dataclass
+from pathlib import Path
 
 import click
 from rich.markup import escape
@@ -15,14 +17,105 @@ from imas_codex.cli.discover.common import reset_to_option
 logger = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
+class PathsStageOptions:
+    """Options shared by the paths command and the discovery sequence."""
+
+    focus: tuple[str, ...] = ()
+    topic: str | None = None
+    cost_limit: float = 10.0
+    limit: int | None = None
+    threshold: float | None = None
+    scan_workers: int = 1
+    triage_workers: int = 2
+    scan_only: bool = False
+    flush: bool = False
+    rejudge_stale: bool = False
+    add_roots: bool = False
+    enrich_threshold: float | None = None
+    reset_to: str | None = None
+    time_limit: int | None = None
+    triage_batch_size: int | None = None
+
+
+def _focus_roots(items: tuple[str, ...]) -> list[str] | None:
+    """Expand path items and newline-separated manifest files into roots."""
+    roots: list[str] = []
+    for item in items:
+        path = Path(item)
+        if path.is_file():
+            roots.extend(
+                line.strip()
+                for line in path.read_text().splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            )
+        else:
+            roots.append(item)
+    return roots or None
+
+
+def run_paths_stage(facility: str, options: PathsStageOptions) -> None:
+    """Run path discovery with the requested seed and drain halves."""
+    from imas_codex.settings import get_path_scan_threshold
+
+    if options.scan_only and options.flush:
+        raise click.UsageError("--scan-only and --flush are mutually exclusive")
+    if options.flush and options.add_roots:
+        raise click.UsageError("--flush and --add-roots are mutually exclusive")
+
+    root_filter = _focus_roots(options.focus)
+    if options.rejudge_stale:
+        import asyncio
+
+        from imas_codex.discovery.paths.scorer import rejudge_stale_paths
+
+        if (
+            not root_filter
+            or len(root_filter) != 1
+            or options.reset_to
+            or options.add_roots
+            or options.scan_only
+            or options.flush
+        ):
+            raise click.UsageError(
+                "--rejudge-stale requires exactly one --focus path and no reset, add-roots or scan-only"
+            )
+        count, spent = asyncio.run(
+            rejudge_stale_paths(facility, root_filter[0], limit=options.limit or 25)
+        )
+        click.echo(f"Re-judged {count} paths from stored evidence (${spent:.6f})")
+        return
+
+    _run_iterative_discovery(
+        facility=facility,
+        budget=options.cost_limit,
+        path_limit=options.limit,
+        focus=options.topic,
+        threshold=(
+            options.threshold
+            if options.threshold is not None
+            else get_path_scan_threshold()
+        ),
+        num_scan_workers=options.scan_workers,
+        num_triage_workers=options.triage_workers,
+        scan_only=options.scan_only,
+        triage_only=options.flush,
+        root_filter=root_filter,
+        add_roots=options.add_roots,
+        enrich_threshold=options.enrich_threshold,
+        reset_to=options.reset_to,
+        timeout_minutes=options.time_limit,
+        triage_batch_size=options.triage_batch_size,
+    )
+
+
 @click.command()
 @click.argument("facility")
 @click.option(
-    "--root",
-    "-r",
+    "--focus",
     multiple=True,
     type=str,
-    help="Restrict discovery to these root paths (can specify multiple)",
+    help="Restrict discovery to path items or a newline-separated manifest",
 )
 @click.option(
     "--cost-limit",
@@ -32,21 +125,18 @@ logger = logging.getLogger(__name__)
     help="Maximum LLM spend in USD (default: $10)",
 )
 @click.option(
-    "--path-limit",
-    "-l",
+    "--limit",
     type=int,
     default=None,
     help="Stop after this many paths reach terminal state (triaged/scored)",
 )
 @click.option(
-    "--focus",
-    "-f",
+    "--topic",
     type=str,
     help="Natural language focus (e.g., 'equilibrium codes')",
 )
 @click.option(
     "--threshold",
-    "-t",
     default=None,
     type=float,
     help="Minimum score for high-value processing (default: from settings)",
@@ -70,10 +160,16 @@ logger = logging.getLogger(__name__)
     help="SSH scan only, no LLM scoring (fast, requires SSH access)",
 )
 @click.option(
-    "--triage-only",
+    "--flush",
     is_flag=True,
     default=False,
-    help="LLM triage/scoring only, no SSH scanning (offline, graph-only)",
+    help="Drain existing paths without scanning or expanding new roots",
+)
+@click.option(
+    "--rejudge-stale",
+    is_flag=True,
+    default=False,
+    help="Refresh stale path judgments under exactly one --focus path from stored evidence",
 )
 @click.option(
     "--add-roots",
@@ -89,14 +185,8 @@ logger = logging.getLogger(__name__)
 )
 @reset_to_option("paths")
 @click.option(
-    "--reset-scored",
-    is_flag=True,
-    default=False,
-    hidden=True,
-    help="Deprecated: use --reset-to triaged instead.",
-)
-@click.option(
     "--time",
+    "-t",
     "time_limit",
     type=int,
     default=None,
@@ -110,18 +200,18 @@ logger = logging.getLogger(__name__)
 )
 def paths(
     facility: str,
-    root: tuple[str, ...],
+    focus: tuple[str, ...],
     cost_limit: float,
-    path_limit: int | None,
-    focus: str | None,
-    threshold: float,
+    limit: int | None,
+    topic: str | None,
+    threshold: float | None,
     scan_workers: int,
     triage_workers: int,
     scan_only: bool,
-    triage_only: bool,
+    flush: bool,
+    rejudge_stale: bool,
     add_roots: bool,
     enrich_threshold: float | None,
-    reset_scored: bool,
     time_limit: int | None,
     triage_batch_size: int | None,
     reset_to: str | None = None,
@@ -136,40 +226,30 @@ def paths(
     Examples:
       imas-codex discover paths <facility>                 # Default $10 limit
       imas-codex discover paths <facility> -c 20.0         # $20 limit
-      imas-codex discover paths iter --focus "equilibrium"  # Focus scoring
+      imas-codex discover paths iter --topic "equilibrium"  # Steer scoring
       imas-codex discover paths iter --scan-only            # SSH only, no LLM
-      imas-codex discover paths iter --score-only           # LLM only, no SSH
-      imas-codex discover paths tcv -r /home/codes/astra    # Deep dive
+      imas-codex discover paths iter --flush                # Drain existing work
+      imas-codex discover paths tcv --focus /home/codes/astra
     """
-    # Validate mutually exclusive flags
-    if scan_only and triage_only:
-        click.echo("Error: --scan-only and --triage-only are mutually exclusive")
-        raise SystemExit(1)
-
-    # Handle deprecated --reset-scored (alias for --reset-to triaged)
-    if reset_scored and not reset_to:
-        reset_to = "triaged"
-        click.echo("Warning: --reset-scored is deprecated, use --reset-to triaged")
-
-    # Convert root tuple to list or None
-    root_filter = list(root) if root else None
-
-    _run_iterative_discovery(
-        facility=facility,
-        budget=cost_limit,
-        path_limit=path_limit,
-        focus=focus,
-        threshold=threshold,
-        num_scan_workers=scan_workers,
-        num_triage_workers=triage_workers,
-        scan_only=scan_only,
-        triage_only=triage_only,
-        root_filter=root_filter,
-        add_roots=add_roots,
-        enrich_threshold=enrich_threshold,
-        reset_to=reset_to,
-        timeout_minutes=time_limit,
-        triage_batch_size=triage_batch_size,
+    run_paths_stage(
+        facility,
+        PathsStageOptions(
+            focus=focus,
+            topic=topic,
+            cost_limit=cost_limit,
+            limit=limit,
+            threshold=threshold,
+            scan_workers=scan_workers,
+            triage_workers=triage_workers,
+            scan_only=scan_only,
+            flush=flush,
+            rejudge_stale=rejudge_stale,
+            add_roots=add_roots,
+            enrich_threshold=enrich_threshold,
+            reset_to=reset_to,
+            time_limit=time_limit,
+            triage_batch_size=triage_batch_size,
+        ),
     )
 
 
@@ -226,7 +306,7 @@ def _run_iterative_discovery(
     if not use_rich:
         disc_logger.setLevel(logging.INFO)
 
-    # Get initial stats to determine next steps
+    # Read graph counts to decide whether seeding is needed.
     stats = get_discovery_stats(facility)
 
     # Handle --add-roots flag
@@ -254,20 +334,19 @@ def _run_iterative_discovery(
             log_print(f"[dim]No paths to reset to '{reset_to}'{scope}[/dim]")
         stats = get_discovery_stats(facility)
 
-    # Handle targeted deep dive with --root
+    # Handle targeted discovery under named paths.
     if root_filter:
         log_print(f"[cyan]Targeted discovery: {len(root_filter)} root(s)[/cyan]")
         for r in root_filter:
             log_print(f"  • {r}")
-        seeded = seed_facility_roots(facility, root_paths=root_filter)
-        if seeded > 0:
-            log_print(f"[green]Added {seeded} new root path(s)[/green]")
-        stats = get_discovery_stats(facility)
+        if not triage_only:
+            seeded = seed_facility_roots(facility, root_paths=root_filter)
+            if seeded > 0:
+                log_print(f"[green]Added {seeded} new root path(s)[/green]")
+            stats = get_discovery_stats(facility)
     elif stats["total"] == 0:
         if triage_only:
-            log_print(
-                "[red]Error: --triage-only requires existing paths in the graph.[/red]"
-            )
+            log_print("[red]Error: --flush requires existing paths in the graph.[/red]")
             log_print(
                 f"[yellow]Run 'imas-codex discover paths {facility}' or "
                 "'--scan-only' first to populate the graph.[/yellow]"
@@ -297,7 +376,7 @@ def _run_iterative_discovery(
     if scan_only:
         mode_str = " [bold cyan](SCAN ONLY)[/bold cyan]"
     elif triage_only:
-        mode_str = " [bold green](TRIAGE ONLY)[/bold green]"
+        mode_str = " [bold green](DRAIN ONLY)[/bold green]"
 
     log_print(
         f"[bold]Starting parallel discovery for {facility.upper()}[/bold]{mode_str}"
@@ -313,9 +392,9 @@ def _run_iterative_discovery(
 
     # Build worker count display showing actual worker types.
     # Defaults from run_parallel_discovery for workers not exposed via CLI:
-    num_expand = 1
-    num_enrich = 2
-    num_score = 1
+    num_expand = 0 if triage_only else 1
+    num_enrich = 0 if scan_only else 2
+    num_score = 0 if scan_only else 1
 
     worker_parts = []
     if not triage_only and effective_scan_workers > 0:
@@ -366,7 +445,7 @@ def _run_iterative_discovery(
             check_graph=True,
             check_embed=not scan_only,
             check_model=not scan_only,
-            check_ssh=not triage_only,
+            check_ssh=bool(effective_scan_workers or num_expand or num_enrich),
             check_auth=False,
         )
 
@@ -431,7 +510,10 @@ def _run_iterative_discovery(
                 root_filter=root_filter,
                 auto_enrich_threshold=enrich_threshold,
                 num_scan_workers=effective_scan_workers,
+                num_expand_workers=num_expand,
                 num_triage_workers=effective_triage_workers,
+                num_enrich_workers=num_enrich,
+                num_score_workers=num_score,
                 **(
                     {
                         "triage_batch_size": triage_batch_size,
@@ -647,15 +729,15 @@ def _print_discovery_summary(
     if scan_only:
         console.print()
         console.print(
-            f"[dim]Next step: Run 'imas-codex discover paths {facility} --score-only' "
+            f"[dim]Next step: Run 'imas-codex discover paths {facility} --flush' "
             "to score listed paths.[/dim]"
         )
         return
 
-    from imas_codex.settings import get_discovery_threshold
+    from imas_codex.settings import get_path_scan_threshold
 
     all_high_value = get_high_value_paths(
-        facility, min_score=get_discovery_threshold(), limit=200
+        facility, min_score=get_path_scan_threshold(), limit=200
     )
 
     if scored_this_run:

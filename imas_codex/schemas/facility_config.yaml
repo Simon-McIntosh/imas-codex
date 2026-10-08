@@ -801,6 +801,21 @@ classes:
         multivalued: true
         range: DDADescriptionConfig
 
+  EDASEquilibriumExample:
+    description: An equilibrium file used to identify discoverable fields and validate access
+    attributes:
+      code: {description: Equilibrium producer code, range: string}
+      inventory_code: {description: Code used by the equilibrium inventory, range: string}
+      format: {description: Equilibrium file format, range: string}
+      root: {description: Directory containing equilibrium files, range: string}
+      filename_template: {description: Template for files at other shots and times, range: string}
+      path: {description: Path to the observed equilibrium file, range: string}
+      shot: {description: Shot recorded in the example file, range: integer}
+      time: {description: Time in seconds recorded in the example file, range: float}
+      grid: {description: Radial and vertical grid dimensions, range: integer, multivalued: true}
+      cocos: {description: COCOS convention of the example equilibrium, range: integer}
+      sha256: {description: SHA-256 digest of the example file, range: string}
+
   EDASConfig:
     description: >-
       JT-60SA EDAS (Experiment Data Access System) configuration.
@@ -810,8 +825,25 @@ classes:
     mixins:
       - DataSystemBase
     attributes:
+      databases:
+        description: EDAS databases to enumerate during signal discovery
+        range: string
+        multivalued: true
       api_path:
         description: Path to EDAS API source files
+      uddb_api_path: {description: Path to the UDDB Python API source, range: string}
+      uddb_lib_path: {description: Path to the UDDB shared library, range: string}
+      pmdb_api_path: {description: Path to the PMDB Python API source, range: string}
+      pmdb_lib_path: {description: Path to the PMDB shared library, range: string}
+      lcdb_api_path: {description: Path to the LCDB wrapper API source, range: string}
+      lcdb_root: {description: Root directory of LCDB analysis data, range: string}
+      mbdb_api_path: {description: Path to the MBDB Python API source, range: string}
+      mbdb_lib_path: {description: Path to the MBDB shared library, range: string}
+      mbdb_root: {description: Root directory of MBDB data, range: string}
+      equilibrium_examples:
+        description: Observed equilibrium files used to discover and validate fields
+        range: EDASEquilibriumExample
+        multivalued: true
       header_path:
         description: Path to EDAS C header files with signal definitions
       reference_shot:

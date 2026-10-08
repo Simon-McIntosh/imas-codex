@@ -41,7 +41,8 @@ class ScanResult:
 
     Attributes:
         signals: Discovered FacilitySignal nodes (status=discovered).
-        data_access: DataAccess node created/found for this data source.
+        data_access: Existing single DataAccess node for this data source.
+        data_accesses: Additional DataAccess nodes returned by a scanner.
         metadata: Scanner-specific metadata (e.g., TDI function list, PPF DDA catalog).
             Stored for use by enrichment and check phases.
         stats: Summary statistics for logging/progress.
@@ -55,6 +56,7 @@ class ScanResult:
     metadata: dict[str, Any] = field(default_factory=dict)
     stats: dict[str, Any] = field(default_factory=dict)
     wiki_context: dict[str, dict[str, str]] = field(default_factory=dict)
+    data_accesses: list[DataAccess] = field(default_factory=list)
 
 
 @runtime_checkable

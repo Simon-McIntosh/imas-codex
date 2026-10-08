@@ -1,0 +1,18 @@
+<section id="fold-candidates-stage">
+  <h2 id="fold-candidates-stage-heading">fold-candidates-stage</h2>
+  <p id="fold-candidates-stage-anchor">
+    Extracted <code>run_candidates_stage(facility, options)</code> and the frozen
+    <code>CandidatesStageOptions</code> dataclass from the <code>discover map</code>
+    click command in <code>imas_codex/cli/discover/map.py</code>, which is now a thin
+    wrapper that builds the options and delegates. The stage drains the sources the
+    signals stage seeded, so it has no seeding half: <code>--scan-only</code> runs no
+    worker, <code>--flush</code> and the default run the draining worker,
+    <code>--limit</code> caps the sources judged, <code>--focus</code> is refused
+    with a message stating the mechanism (the claim query takes no item filter),
+    and <code>--topic</code> is carried
+    onto the stage. Measure: <code>pytest tests/cli/test_discover_candidates_stage.py
+    tests/cli/test_discover_map.py</code> passes 18, with the negative control
+    failing 1 (the <code>--flush</code> test) when the stage is mutated to treat
+    <code>--flush</code> as the seeding half.
+  </p>
+</section>

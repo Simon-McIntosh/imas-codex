@@ -8,6 +8,8 @@ matched nothing), so the absolute entries belong in ``path_prefixes``.
 
 from __future__ import annotations
 
+from urllib.parse import urlsplit
+
 import pytest
 
 from imas_codex.config.discovery_config import get_exclusion_config_for_facility
@@ -63,12 +65,11 @@ def test_data_access_root_is_seeded_and_unexcluded(root: str) -> None:
     assert should_exclude is False, f"{root}/child excluded by {reason}"
 
 
-def test_home_subtree_excluded() -> None:
-    """A path under /home is excluded as a path prefix."""
+def test_home_subtree_not_excluded() -> None:
+    """A path under /home remains available for targeted discovery."""
     config = get_exclusion_config_for_facility("jt-60sa")
-    should_exclude, reason = config.should_exclude("/home/u/x")
-    assert should_exclude is True
-    assert reason == "path_prefix:/home"
+    should_exclude, _ = config.should_exclude("/home/u/x")
+    assert should_exclude is False
 
 
 def test_work_edas_subtree_excluded() -> None:
@@ -90,3 +91,23 @@ def test_home_is_not_a_discovery_root() -> None:
     """User home directories are no longer a discovery root."""
     roots = get_facility("jt-60sa").get("discovery_roots") or []
     assert "/home" not in roots
+
+
+def test_browser_services_match_port_forwards() -> None:
+    """Each browser URL uses the TLS port assigned to its named service."""
+    facility = get_facility("jt-60sa")
+    forwards = {item["name"]: item for item in facility["port_forwards"]["forwards"]}
+    services = facility["browser"]["services"]
+
+    assert {item["name"] for item in services} == set(forwards)
+    for service in services:
+        forward = forwards[service["name"]]
+        url = urlsplit(service["url"])
+        assert url.hostname == "localhost"
+        assert url.port == forward["local_port"]
+        assert url.scheme == forward["protocol"]
+
+    assert {item["name"]: item["url"] for item in services} == {
+        "twiki_code": "https://localhost:8800/wiki/WebHome.html",
+        "server_docs": "https://localhost:8801/",
+    }

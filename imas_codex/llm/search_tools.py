@@ -1659,6 +1659,7 @@ def _search_code(
 
         # Step 1b: Text search for keyword matches (hybrid boost)
         text_chunks = _text_search_code_chunks(gc, query, facility, pool)
+        text_chunks.extend(_reference_search_code_chunks(gc, query, facility, pool))
         for r in text_chunks:
             cid = r["id"]
             text_score = round(r["score"], 3)
@@ -1846,6 +1847,7 @@ def _enrich_code_chunks(
         OPTIONAL MATCH (cc)-[:CONTAINS_REF]->(dr:DataReference)
         OPTIONAL MATCH (dr)-[:RESOLVES_TO_NODE]->(tn)
         OPTIONAL MATCH (dr)-[:RESOLVES_TO_IMAS_PATH]->(ip:IMASNode)
+        OPTIONAL MATCH (dr)-[:RESOLVES_TO_FACILITY_SIGNAL]->(fs:FacilitySignal)
         OPTIONAL MATCH (cf)-[:IN_DIRECTORY]->(fp:FacilityPath)
         RETURN cc.id AS id, cc.text AS text,
                cc.function_name AS function_name,
@@ -1853,11 +1855,35 @@ def _enrich_code_chunks(
                source_file,
                cf.id AS source_file_id,
                coalesce(ce.facility_id, cc.facility_id) AS facility_id,
-               collect(DISTINCT {{type: dr.ref_type, raw: dr.raw_string,
+               collect(DISTINCT {{type: dr.ref_type,
+                       raw: CASE WHEN fs IS NULL THEN dr.raw_string
+                            ELSE dr.raw_string + ' → signal: ' + fs.id END,
                        tree: tn.path, imas_path: ip.id}}) AS data_refs,
                fp.path AS directory, fp.description AS dir_description
     """
     return gc.query(cypher, chunk_ids=chunk_ids)
+
+
+def _reference_search_code_chunks(
+    gc: GraphClient, query: str, facility: str | None, k: int
+) -> list[dict[str, Any]]:
+    """Find code by literal EDAS category and signal name on linked references."""
+    if not query.strip():
+        return []
+    return gc.query(
+        """
+        MATCH (cc:CodeChunk)-[:CONTAINS_REF]->(dr:DataReference)
+        WHERE dr.ref_type STARTS WITH 'edas_'
+          AND ($facility IS NULL OR cc.facility_id = $facility)
+          AND all(part IN split(toLower(dr.raw_string), '/')
+                  WHERE $query_lower CONTAINS part)
+        RETURN DISTINCT cc.id AS id, 0.9 AS score
+        LIMIT $limit
+        """,
+        facility=facility,
+        query_lower=query.lower(),
+        limit=k * 2,
+    )
 
 
 def _text_search_code_chunks(

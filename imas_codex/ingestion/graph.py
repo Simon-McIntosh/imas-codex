@@ -48,6 +48,91 @@ def _generate_ref_id(facility: str, ref_type: str, raw_string: str) -> str:
     return f"{facility}:{ref_type}:{hash_suffix}"
 
 
+def link_chunks_to_edas_signals(
+    graph_client: GraphClient | None = None,
+    example_ids: list[str] | None = None,
+    *,
+    facility_id: str,
+) -> dict[str, int]:
+    """Backfill stored code reads and resolve literal EDAS signal keys.
+
+    Reads only stored CodeChunk text. It never contacts a facility or reruns
+    discovery, so ingestion and backfill share the same extraction path.
+    """
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.ingestion.extractors.edas import extract_edas_references
+
+    if "edas" not in (get_facility(facility_id).get("data_systems") or {}):
+        raise ValueError(f"EDAS is not configured for {facility_id}")
+
+    selection = (
+        "AND c.code_example_id IN $example_ids" if example_ids is not None else ""
+    )
+    with _get_client(graph_client) as client:
+        chunks = client.query(
+            "MATCH (c:CodeChunk {facility_id: $facility}) "
+            f"WHERE c.text IS NOT NULL {selection} "
+            "RETURN c.id AS id, c.text AS text",
+            facility=facility_id,
+            example_ids=example_ids,
+        )
+        rows = []
+        for chunk in chunks:
+            for ref in extract_edas_references(chunk["text"]):
+                rows.append(
+                    {
+                        "chunk_id": chunk["id"],
+                        "id": _generate_ref_id(
+                            facility_id, ref.ref_type, ref.raw_string
+                        ),
+                        "raw_string": ref.raw_string,
+                        "ref_type": ref.ref_type,
+                        "category": ref.category,
+                        "data_name": ref.data_name,
+                        "signal_path": (
+                            ref.raw_string
+                            if ref.category
+                            else f"{ref.ref_type.removeprefix('edas_').upper()}/{ref.data_name}"
+                        ),
+                    }
+                )
+        if not rows:
+            return {"chunks": len(chunks), "references": 0, "resolved": 0}
+        resolved = 0
+        for offset in range(0, len(rows), 200):
+            result = client.query(
+                """
+                UNWIND $rows AS item
+                MATCH (c:CodeChunk {id: item.chunk_id})
+                MERGE (d:DataReference {id: item.id})
+                SET d.facility_id = $facility,
+                    d.ref_type = item.ref_type,
+                    d.raw_string = item.raw_string,
+                    d.edas_category = item.category,
+                    d.edas_data_name = item.data_name
+                MERGE (c)-[:CONTAINS_REF]->(d)
+                WITH d, item
+                MATCH (f:Facility {id: $facility})
+                MERGE (d)-[:AT_FACILITY]->(f)
+                WITH d, item
+                OPTIONAL MATCH (s:FacilitySignal {
+                    facility_id: $facility, data_source_path: item.signal_path
+                })
+                FOREACH (_ IN CASE WHEN s IS NULL THEN [] ELSE [1] END |
+                    MERGE (d)-[:RESOLVES_TO_FACILITY_SIGNAL]->(s))
+                RETURN count(s) AS resolved
+                """,
+                rows=rows[offset : offset + 200],
+                facility=facility_id,
+            )
+            resolved += result[0]["resolved"] if result else 0
+        return {
+            "chunks": len(chunks),
+            "references": len(rows),
+            "resolved": resolved,
+        }
+
+
 @contextlib.contextmanager
 def _get_client(graph_client: GraphClient | None = None) -> Iterator[GraphClient]:
     """Context manager that uses provided client or creates a new one."""
@@ -65,10 +150,7 @@ def link_chunks_to_imas_paths(
     graph_client: GraphClient | None = None,
     example_ids: list[str] | None = None,
 ) -> int:
-    """Create REFERENCES_IMAS relationships for chunks with IDS references.
-
-    Matches CodeChunk nodes that have related_ids metadata to
-    existing IMASNode IDS root nodes (where ids field matches the IDS name).
+    """Link extracted DD paths to existing IMASNode paths only.
 
     Args:
         graph_client: Optional GraphClient instance. If None, creates one.
@@ -76,37 +158,77 @@ def link_chunks_to_imas_paths(
             CodeExample IDs. Otherwise processes all chunks (legacy mode).
 
     Returns:
-        Number of relationships created
+        Number of path references resolved
     """
-    if example_ids is not None:
-        cypher = """
-            MATCH (c:CodeChunk)
-            WHERE c.code_example_id IN $example_ids
-              AND c.related_ids IS NOT NULL
-            UNWIND c.related_ids AS ids_name
-            MATCH (p:IMASNode)
-            WHERE p.ids = ids_name AND p.id = ids_name
-            MERGE (c)-[:REFERENCES_IMAS]->(p)
-            RETURN count(*) AS created
-        """
-        params = {"example_ids": example_ids}
-    else:
-        cypher = """
-            MATCH (c:CodeChunk)
-            WHERE c.related_ids IS NOT NULL
-            UNWIND c.related_ids AS ids_name
-            MATCH (p:IMASNode)
-            WHERE p.ids = ids_name AND p.id = ids_name
-            MERGE (c)-[:REFERENCES_IMAS]->(p)
-            RETURN count(*) AS created
-        """
-        params = {}
-
     with _get_client(graph_client) as client:
-        result = client.query(cypher, **params)
-        count = result[0]["created"] if result else 0
-        logger.info("Created %d REFERENCES_IMAS relationships", count)
+        count = _link_chunk_references(
+            client, "imas_paths", "IMASNode", "REFERENCES_IMAS", example_ids
+        )[1]
+        logger.info("Resolved %d IMAS DD path references", count)
         return count
+
+
+def link_chunks_to_ids_roots(
+    graph_client: GraphClient | None = None,
+    example_ids: list[str] | None = None,
+) -> int:
+    """Link bare IDS names to IDS roots and refuse missing named links."""
+    with _get_client(graph_client) as client:
+        mentions, linked = _link_chunk_references(
+            client, "related_ids", "IDS", "REFERENCES_IDS", example_ids
+        )
+        if mentions:
+            selection = (
+                "WHERE c.code_example_id IN $example_ids"
+                if example_ids is not None
+                else ""
+            )
+            params = {"example_ids": example_ids} if example_ids is not None else {}
+            missing_rows = client.query(
+                f"MATCH (c:CodeChunk) {selection} "
+                "UNWIND c.related_ids AS name "
+                "OPTIONAL MATCH (c)-[:REFERENCES_IDS]->(root:IDS {id: name}) "
+                "WITH root WHERE root IS NULL RETURN count(*) AS missing",
+                **params,
+            )
+            missing = missing_rows[0]["missing"] if missing_rows else mentions - linked
+            if missing:
+                raise ValueError(
+                    f"No IDS roots linked for {missing} of {mentions} named references"
+                )
+        logger.info("Resolved %d IDS root references", linked)
+        return linked
+
+
+def _link_chunk_references(
+    client: GraphClient,
+    property_name: str,
+    target_label: str,
+    relationship: str,
+    example_ids: list[str] | None,
+) -> tuple[int, int]:
+    """Count references, then merge links only to existing target nodes."""
+    selection = (
+        "WHERE c.code_example_id IN $example_ids" if example_ids is not None else ""
+    )
+    params = {"example_ids": example_ids} if example_ids is not None else {}
+    counts = client.query(
+        f"MATCH (c:CodeChunk) {selection} "
+        f"RETURN sum(size(coalesce(c.{property_name}, []))) AS mentions",
+        **params,
+    )
+    mentions = (counts[0]["mentions"] or 0) if counts else 0
+    if not mentions:
+        return 0, 0
+    links = client.query(
+        f"MATCH (c:CodeChunk) {selection} "
+        f"UNWIND c.{property_name} AS reference "
+        f"MATCH (target:{target_label} {{id: reference}}) "
+        f"MERGE (c)-[:{relationship}]->(target) "
+        "RETURN count(*) AS linked",
+        **params,
+    )
+    return mentions, links[0]["linked"] if links else 0
 
 
 def link_examples_to_facility(
@@ -175,7 +297,7 @@ def link_chunks_to_data_nodes(
 
         link_times: dict[str, float] = {}
 
-        # Step 1: Create DataReference nodes from mdsplus_paths
+        # Materialize DataReference nodes from chunk path strings.
         t_s = _time.monotonic()
         if scoped:
             create_refs_simple = """
@@ -219,7 +341,7 @@ def link_chunks_to_data_nodes(
         link_times["create_refs"] = _time.monotonic() - t_s
         logger.info("Created/matched %d DataReference nodes", refs_created)
 
-        # Step 2: Create CONTAINS_REF relationships
+        # Connect each chunk to its extracted path references.
         t_s = _time.monotonic()
         if scoped:
             contains_ref = """
@@ -251,7 +373,7 @@ def link_chunks_to_data_nodes(
         link_times["contains_ref"] = _time.monotonic() - t_s
         logger.info("Created %d CONTAINS_REF relationships", contains_count)
 
-        # Step 2.5: Compute normalized_path for new refs only
+        # Normalize only references in this batch.
         t_s = _time.monotonic()
         if scoped:
             # Only normalize refs we just created/matched
@@ -291,13 +413,13 @@ def link_chunks_to_data_nodes(
             logger.info("Computed normalized_path for %d refs", len(updates))
         link_times["normalize"] = _time.monotonic() - t_s
 
-        # Step 3: Create RESOLVES_TO_NODE relationships
+        # Resolve references to facility signal nodes.
         # Two-phase: exact match first (uses path+facility_id index),
         # then fuzzy match for remaining (facility-scoped to avoid
         # catastrophic O(all_refs × all_signals) cross-product).
         t_s = _time.monotonic()
         if scoped:
-            # Phase 1: Exact path match (index-friendly)
+            # Exact path matching uses the facility and path index.
             resolve_exact = """
                 MATCH (c:CodeChunk)
                 WHERE c.code_example_id IN $example_ids
@@ -309,7 +431,7 @@ def link_chunks_to_data_nodes(
                 MERGE (d)-[:RESOLVES_TO_NODE]->(t)
                 RETURN count(*) AS resolved
             """
-            # Phase 2: Fuzzy match for remaining (facility-scoped).
+            # Fuzzy matching stays within unresolved facility references.
             # Uses CALL {} subquery with LIMIT 1 per DataReference to avoid
             # O(refs × signals) cross-product that caused 14-26s stalls.
             resolve_fuzzy = """
@@ -331,7 +453,7 @@ def link_chunks_to_data_nodes(
                 RETURN count(*) AS resolved
             """
         else:
-            # Phase 1: Exact path match (index-friendly)
+            # Exact path matching uses the facility and path index.
             resolve_exact = """
                 MATCH (d:DataReference {ref_type: 'mdsplus_path'})
                 WHERE NOT (d)-[:RESOLVES_TO_NODE]->()
@@ -340,7 +462,7 @@ def link_chunks_to_data_nodes(
                 MERGE (d)-[:RESOLVES_TO_NODE]->(t)
                 RETURN count(*) AS resolved
             """
-            # Phase 2: Fuzzy match for remaining (facility-scoped).
+            # Fuzzy matching stays within unresolved facility references.
             # Uses CALL {} subquery with LIMIT 1 per DataReference.
             resolve_fuzzy = """
                 MATCH (d:DataReference {ref_type: 'mdsplus_path'})
@@ -372,7 +494,7 @@ def link_chunks_to_data_nodes(
             fuzzy_count,
         )
 
-        # Step 4: Create RESOLVES_TO_IMAS_PATH via SignalNode → IMASMapping → IMASNode
+        # Carry resolved signal mappings through to IMAS paths.
         t_s = _time.monotonic()
         if scoped:
             imas_q = """
@@ -398,7 +520,7 @@ def link_chunks_to_data_nodes(
         if imas_linked:
             logger.info("Created %d RESOLVES_TO_IMAS_PATH relationships", imas_linked)
 
-        # Step 5: Create CALLS_TDI_FUNCTION for TDI call references
+        # Connect TDI call references to function nodes.
         t_s = _time.monotonic()
         if scoped:
             tdi_q = """
@@ -494,7 +616,7 @@ def link_example_mdsplus_paths(
     refs_created = result[0]["refs_created"] if result else 0
 
     # Resolve to DataNodes (facility-scoped, two-phase)
-    # Phase 1: Exact match (uses path+facility_id index)
+    # Exact matching uses the facility and path index.
     graph_client.query(
         """
         MATCH (e:CodeExample {id: $example_id})-[:HAS_CHUNK]->(c:CodeChunk)
@@ -506,7 +628,7 @@ def link_example_mdsplus_paths(
         """,
         example_id=example_id,
     )
-    # Phase 2: Fuzzy match for remaining (facility-scoped)
+    # Fuzzy matching stays within unresolved facility references.
     graph_client.query(
         """
         MATCH (e:CodeExample {id: $example_id})-[:HAS_CHUNK]->(c:CodeChunk)
@@ -537,6 +659,7 @@ def link_example_mdsplus_paths(
 
 __all__ = [
     "link_chunks_to_imas_paths",
+    "link_chunks_to_ids_roots",
     "link_chunks_to_data_nodes",
     "link_example_mdsplus_paths",
     "link_examples_to_facility",

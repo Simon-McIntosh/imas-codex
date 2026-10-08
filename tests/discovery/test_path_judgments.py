@@ -1,0 +1,261 @@
+"""The path decision questions track the FacilityPath schema."""
+
+from __future__ import annotations
+
+import pytest
+
+from imas_codex.discovery.paths.scorer import (
+    build_path_judgment_questions,
+    build_path_judgment_state,
+    path_judgment_fields,
+    path_scan_relevance,
+)
+from imas_codex.graph.schema import get_schema
+
+
+def test_path_questions_cover_schema_purposes_and_scores():
+    schema = get_schema()
+    questions = build_path_judgment_questions()
+    purposes = schema.get_enum_with_descriptions("PathPurpose") or []
+    expected_purposes = {item["value"] for item in purposes} - {"empty"}
+    expected_purposes.add("other")
+    assert set(questions["path_purpose"]["criteria"]) == expected_purposes
+    assert questions["path_purpose"]["criteria"]["empty_directory"]
+    for item in purposes:
+        if item["value"] != "empty":
+            assert (
+                questions["path_purpose"]["criteria"][item["value"]]
+                == item["description"]
+            )
+
+    score_fields = {
+        name
+        for name, slot in schema.get_all_slots("FacilityPath").items()
+        if name.startswith("score_")
+        and name
+        not in {"score_composite", "score_percentile", "score_reason", "score_cost"}
+        and not name.endswith(("_probs", "_confidence"))
+        and slot["type"] == "float"
+    }
+    assert set(questions) == score_fields | {
+        "path_purpose",
+        "children_worth_listing",
+    }
+    for field in score_fields:
+        assert questions[field]["type"] == "score"
+        slots = schema.get_all_slots("FacilityPath")
+        assert slots[f"{field}_probs"]["multivalued"] is True
+        assert slots[f"{field}_confidence"]["type"] == "float"
+        assert (
+            schema.get_all_slots("FacilityPath")[field]["description"].lower()
+            in questions[field]["instructions"]
+        )
+        assert len(questions[field]["criteria"]) >= 3
+    assert questions["children_worth_listing"]["type"] == "noul"
+
+
+def test_path_state_carries_scanner_evidence_and_facility_patterns():
+    row = {
+        "path": "/analysis/src/getseldata_v4.2",
+        "depth": 2,
+        "total_files": 12,
+        "total_dirs": 3,
+        "child_names": '["src/", "README"]',
+        "file_type_counts": '{".f": 8, ".h": 4}',
+        "tree_context": "src/\nREADME",
+        "has_readme": True,
+        "has_makefile": True,
+        "vcs_type": "git",
+        "patterns_detected": ["eddbreadTime"],
+        "description": "Reads EDDB channels into SELENE arrays",
+    }
+    config = {
+        "data_access_patterns": {
+            "primary_method": "edas",
+            "key_tools": ["getseldata"],
+            "code_import_patterns": ["eddbreadTime"],
+        }
+    }
+    state = build_path_judgment_state(row, "jt-60sa", config)
+    directory = state["directory"]
+    assert directory["path"] == row["path"]
+    assert directory["file_type_counts"] == {".f": 8, ".h": 4}
+    assert directory["child_names"] == ["src/", "README"]
+    assert directory["tree_context"] == row["tree_context"]
+    assert directory["patterns_detected"] == ["eddbreadTime"]
+    assert directory["has_readme"] and directory["has_makefile"]
+    assert state["facility"]["data_access_tools"] == ["getseldata"]
+    assert state["facility"]["data_access_code_patterns"] == ["eddbreadTime"]
+
+
+def test_typed_path_judgment_stores_distributions_and_computes_gates():
+    questions = build_path_judgment_questions()
+    options = list(questions["path_purpose"]["criteria"])
+    answers = {
+        "path_purpose": {
+            "choice": "analysis_code",
+            "probabilities": {name: float(name == "analysis_code") for name in options},
+            "confidence": 0.91,
+        },
+        "children_worth_listing": {"noul": 0.81},
+    }
+    for name in questions:
+        if name.startswith("score_"):
+            probabilities = {"0": 0.4, "1": 0.2, "2": 0.3, "3": 0.1}
+            answers[name] = {
+                "score": 1.1 if name == "score_data_access" else 0,
+                "probabilities": probabilities,
+                "confidence": 0.6,
+            }
+    fields = path_judgment_fields(answers, "test-judge", prefix="triage")
+    assert fields["path_purpose_probs"] == [
+        float(x == "analysis_code") for x in options
+    ]
+    assert fields["path_purpose_confidence"] == 0.91
+    assert fields["triage_data_access"] == 1.1 / 3
+    assert fields["triage_data_access_probs"] == [0.4, 0.2, 0.3, 0.1]
+    assert fields["triage_data_access_confidence"] == 0.6
+    assert fields["scan_relevance"] == 1.1 / 3
+    assert fields["should_enrich"] is True
+    assert (
+        path_judgment_fields(answers, "test-judge", scan_threshold=0.4)["should_enrich"]
+        is False
+    )
+    assert fields["should_expand"] is True
+    assert fields["judgment_model"] == "test-judge"
+    assert (
+        path_scan_relevance({"score_documentation": 1, "score_data_access": 0.1}) == 0.1
+    )
+
+
+def test_code_scan_claim_uses_judged_facets(monkeypatch):
+    from imas_codex.discovery.code import graph_ops
+
+    queries = []
+
+    class FakeGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def query(self, statement, **_params):
+            queries.append(statement)
+            return []
+
+    monkeypatch.setattr(graph_ops, "GraphClient", FakeGraph)
+    graph_ops.claim_paths_for_file_scan("jt-60sa", limit=1)
+    claim = next(query for query in queries if "SET p.files_claimed_at" in query)
+    assert "p.scan_relevance >= $min_score" in claim
+    assert "p.score_composite >= $min_score" not in claim
+
+
+def test_rescoring_preserves_enriched_metadata(monkeypatch):
+    from imas_codex.discovery.paths.parallel import mark_score_complete
+
+    stored = {
+        "physics_domain": "equilibrium",
+        "keywords": '["plasma", "reconstruction"]',
+        "primary_evidence": '["mdsplus"]',
+        "evidence_summary": "Reader patterns were found",
+        "score_reason": "Enrichment identified a data reader",
+        "description": "Prior description",
+    }
+
+    class FakeGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def query(self, statement, **params):
+            item = params["items"][0]
+            for field, answer in {
+                "physics_domain": "physics_domain",
+                "keywords": "keywords",
+                "primary_evidence": "primary_evidence",
+                "evidence_summary": "evidence_summary",
+                "score_reason": "adjustment_reason",
+                "description": "description",
+            }.items():
+                value = item[answer]
+                if f"p.{field} = coalesce(item.{answer}, p.{field})" in statement:
+                    if value is not None:
+                        stored[field] = value
+                else:
+                    stored[field] = value
+            return []
+
+    monkeypatch.setattr("imas_codex.graph.GraphClient", FakeGraph)
+    mark_score_complete(
+        "jt-60sa",
+        [
+            {
+                "path": "/analysis/example",
+                "score": 0.43,
+                "path_purpose": "analysis_code",
+                "description": "New factual description",
+                "should_expand": True,
+                "judgments": {"scan_relevance": 0.43, "score_data_access": 0.43},
+            }
+        ],
+    )
+    assert stored == {
+        "physics_domain": "equilibrium",
+        "keywords": '["plasma", "reconstruction"]',
+        "primary_evidence": '["mdsplus"]',
+        "evidence_summary": "Reader patterns were found",
+        "score_reason": "Enrichment identified a data reader",
+        "description": "New factual description",
+    }
+
+
+@pytest.mark.parametrize("purpose", ["empty_directory", "other"])
+def test_triage_keeps_judged_purpose_and_uses_text_only_model(monkeypatch, purpose):
+    from imas_codex.discovery.base import facility, judgment, llm
+    from imas_codex.discovery.paths.models import PathDescription, PathDescriptionBatch
+    from imas_codex.discovery.paths.scorer import DirectoryTriager
+
+    path = "/analysis/example"
+
+    async def describe(*, response_model, **_kwargs):
+        assert response_model is PathDescriptionBatch
+        assert set(PathDescription.model_fields) == {"path", "description"}
+        return (
+            PathDescriptionBatch(
+                results=[PathDescription(path=path, description="Stored text")]
+            ),
+            0.01,
+            12,
+        )
+
+    async def judge(rows, state_for, questions_for, apply, **_kwargs):
+        assert state_for(rows[0])["directory"]["description"] == "Stored text"
+        questions = questions_for()
+        options = list(questions["path_purpose"]["criteria"])
+        answers = {
+            "path_purpose": {
+                "choice": purpose,
+                "probabilities": {name: float(name == purpose) for name in options},
+                "confidence": 1,
+            },
+            "children_worth_listing": {"noul": 0},
+        }
+        for name in questions:
+            if name.startswith("score_"):
+                answers[name] = {
+                    "score": 0,
+                    "probabilities": {"0": 1, "1": 0, "2": 0, "3": 0},
+                    "confidence": 1,
+                }
+        return apply([(rows[0], answers, 0.001)], 0.001), 0.001, []
+
+    monkeypatch.setattr(llm, "acall_llm_structured", describe)
+    monkeypatch.setattr(judgment, "judge_rows", judge)
+    monkeypatch.setattr(facility, "get_facility", lambda _facility: {})
+    result = DirectoryTriager(facility="jt-60sa").triage_batch(
+        [{"path": path, "total_files": 0, "total_dirs": 0}]
+    )
+    assert result.triaged_dirs[0].to_graph_dict()["path_purpose"] == purpose

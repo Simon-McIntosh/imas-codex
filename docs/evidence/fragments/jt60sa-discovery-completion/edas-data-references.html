@@ -1,0 +1,40 @@
+<section id="edas-data-references">
+  <h2 id="edas-data-references-title">EDAS references in stored JT-60SA code</h2>
+  <table id="edas-data-references-counts">
+    <caption>Backfill snapshot at 2026-10-08 06:07 UTC: 3,832 stored CodeChunk texts; distinct chunks by type, de-duplicated in total</caption>
+    <thead>
+      <tr><th>Reference type</th><th>Chunks</th><th>Mentions</th><th>Resolved mentions</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>EDDB</td><td>13</td><td>15</td><td>0</td></tr>
+      <tr><td>UDDB</td><td>5</td><td>5</td><td>5</td></tr>
+      <tr><td>PMDB</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>LCDB</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>MBDB</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th>Total</th><th>16 (0.42% of chunks)</th><th>20</th><th>5 (25%)</th></tr>
+    </tbody>
+  </table>
+  <table id="edas-data-references-routing">
+    <caption>Code reference handlers selected by public facility data systems</caption>
+    <thead>
+      <tr><th>Facility</th><th>Declared reference systems</th><th>Handlers run once</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>JT-60SA</td><td>edas, imas</td><td>EDAS</td></tr>
+      <tr><td>TCV</td><td>tdi, mdsplus</td><td>Shared MDSplus/TDI handler once</td></tr>
+      <tr><td>JET</td><td>mdsplus among other data systems</td><td>MDSplus</td></tr>
+      <tr><td>ITER</td><td>imas</td><td>None</td></tr>
+    </tbody>
+  </table>
+  <table id="edas-data-references-checks">
+    <caption>Stored-graph controls after backfill</caption>
+    <tbody>
+      <tr><th>Catalog lookup positive control</th><td>CAM/DivIRmP15R0: 1 FacilitySignal</td></tr>
+      <tr><th>Extracted TMS/neyag exact lookup</th><td>0 FacilitySignal</td></tr>
+      <tr><th>Resolved UDDB control</th><td>5 chunks reading 2842UA001 link to UDDB/2842UA001</td></tr>
+      <tr><th>Code search for TMS neyag</th><td>Matched EDAS reading chunks and rendered <code>edas_eddb: TMS/neyag</code></td></tr>
+      <tr><th>Graph verification</th><td>Live rollback transaction: 1 passed; missing IDS root refused</td></tr>
+      <tr><th>Config routing gate</th><td>All 4 public facility configs selected their declared reference handlers</td></tr>
+    </tbody>
+  </table>
+</section>

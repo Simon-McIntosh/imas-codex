@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "clive",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T06:19:19.627Z",
+  "dispatched_at": "2026-10-08T06:06:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html",
+      "line": "118",
+      "severity": "follow-on",
+      "text": "follow-on: the working route that does not go through dbsvr17p is asserted from a failed getent lookup plus static disassembly; the fragment reverse lookup of 192.168.29.13 also exits 2, so a reader cannot distinguish a bypass of dbsvr17p from that host under another address, and the done-when item is met only as named."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html",
+      "line": "142",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt log path is inside the run envelope and not committed, so a report-envelope GC leaves the cited path unopenable; the fragment states the receipt is embedded above as the durable copy."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html",
+      "line": "150",
+      "severity": "follow-on",
+      "text": "follow-on: DBSEL is identified from source inspection only, and /analysis/bin/dbsel is not reconciled with the /analysis/bin/il SHOT TIME spelling pending in the plan section comment that mentions DBSEL, so a reader cannot tell whether they are one tool or two."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read c1308340..c00f9f05 commit by commit; one commit, one file, +154 lines, no source or test file changed.",
+    "done_when": "the fragment lists all eleven eSurf DB ids with FLEDD route and one per-id Eqlist_Get_Rev return code (esurf-dbsel-trace-calls-table), locates DBSEL at /analysis/bin/dbsel, names the FAME socket route and records no credential.",
+    "goal": "the node goal is to trace eSurf's equilibrium database access and DBSEL on nakasvr26; docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html:1-154 delivers it.",
+    "manifest": "read; status complete, records commit c00f9f05, the eleven-call receipt command and its landing line.",
+    "write_paths": "the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html and docs/figures/jt60sa-discovery-completion/esurf-dbsel-trace; the diff touches only the first."
+  },
+  "justifications": {
+    "durability": "the fragment is committed at c00f9f05, but the receipt it names (fledd-calls-valid.log) lives only in the run envelope; the embedded call code and IRET table keep the record reproducible.",
+    "evidence": "docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html carries a positive control (FAME id 0 IRET=0 NLIST=5) and negative controls (invalid FAME_HOST/FAME_DIR unchanged), but the socket hop rests on objdump because the runtime strace was refused (fame-route.log), so it is inferred, not traced.",
+    "fit": "every element id in docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html begins with the node id, the landing is a manifest line rather than a plan edit, and no plan or sprint identifier appears in the file.",
+    "goal_fidelity": "docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html:1-154 lists all eleven DB ids, routes and per-id IRET, and locates DBSEL, but the done-when route \"that does not go through dbsvr17p\" is named yet its identity is left unresolved, so the deliverable is met as named rather than proven.",
+    "reuse": "no production code is added so no capability is forked; the id/name enum re-read from edas_enum.py duplicates mapping knowledge the plan says is already ingested (database_api/edas_fledd_api.py eqdb_enumtype) without reconciling the two.",
+    "scope_discipline": "git diff c1308340..c00f9f05 touches only docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html (+154) and nothing else."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "\nVERDICT goal: the node goal is to trace eSurf's equilibrium database access and DBSEL on nakasvr26; docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html:1-154 delivers it.\nVERDICT done_when: the fragment lists all eleven eSurf DB ids with FLEDD route and one per-id Eqlist_Get_Rev return code (esurf-dbsel-trace-calls-table), locates DBSEL at /analysis/bin/dbsel, names the FAME socket route and records no credential.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html and docs/figures/jt60sa-discovery-completion/esurf-dbsel-trace; the diff touches only the first.\nVERDICT manifest: read; status complete, records commit c00f9f05, the eleven-call receipt command and its landing line.\nVERDICT diff: read c1308340..c00f9f05 commit by commit; one commit, one file, +154 lines, no source or test file changed.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html:1-154 lists all eleven DB ids, routes and per-id IRET, and locates DBSEL, but the done-when route \"that does not go through dbsvr17p\" is named yet its identity is left unresolved, so the deliverable is met as named rather than proven.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html carries a positive control (FAME id 0 IRET=0 NLIST=5) and negative controls (invalid FAME_HOST/FAME_DIR unchanged), but the socket hop rests on objdump because the runtime strace was refused (fame-route.log), so it is inferred, not traced.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff c1308340..c00f9f05 touches only docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html (+154) and nothing else.\nSCORE durability: 15\nJUSTIFICATION durability: the fragment is committed at c00f9f05, but the receipt it names (fledd-calls-valid.log) lives only in the run envelope; the embedded call code and IRET table keep the record reproducible.\nSCORE fit: 19\nJUSTIFICATION fit: every element id in docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html begins with the node id, the landing is a manifest line rather than a plan edit, and no plan or sprint identifier appears in the file.\nSCORE reuse: 16\nJUSTIFICATION reuse: no production code is added so no capability is forked; the id/name enum re-read from edas_enum.py duplicates mapping knowledge the plan says is already ingested (database_api/edas_fledd_api.py eqdb_enumtype) without reconciling the two.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html:118 follow-on: the working route that does not go through dbsvr17p is asserted from a failed getent lookup plus static disassembly; the fragment reverse lookup of 192.168.29.13 also exits 2, so a reader cannot distinguish a bypass of dbsvr17p from that host under another address, and the done-when item is met only as named.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html:142 follow-on: the receipt log path is inside the run envelope and not committed, so a report-envelope GC leaves the cited path unopenable; the fragment states the receipt is embedded above as the durable copy.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/esurf-dbsel-trace.html:150 follow-on: DBSEL is identified from source inspection only, and /analysis/bin/dbsel is not reconciled with the /analysis/bin/il SHOT TIME spelling pending in the plan section comment that mentions DBSEL, so a reader cannot tell whether they are one tool or two.\n",
+  "review_run_id": "r-20261008T060619533427-review-of-esurf-dbsel-trace",
+  "reviewed_base_sha": "c130834015ce00af646328a982ee1245201399e7",
+  "reviewed_head_sha": "c00f9f05e27db1c402cd8d46637d7a3c879423ca",
+  "reviewed_run_id": "r-20261008T044924743905-esurf-dbsel-trace",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:16:25Z",
+  "total": 103
+}

@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/cli/test_discover_candidates_stage.py::test_flush_runs_the_draining_worker"
+  ],
+  "backend": "local",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:526"
+  ],
+  "completed_at": "2026-10-08T05:23:40.176Z",
+  "dispatched_at": "2026-10-08T05:01:28Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/map.py",
+      "line": "92",
+      "severity": "follow-on",
+      "text": "follow-on: the stage returns a no-op {\"sources_judged\": 0} for --scan-only and carries --topic (map.py:111) without reaching any worker, because candidates drains the sources the signals stage seeded and has no seeding half, so the \u00a73 fold done-when items naming a seeding worker and a --topic scorer/enricher do not apply and the sequence runner must model candidates as drain-only."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043424229971-fold-candidates-stage/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest sets after_suite to the negative-control log and both suites claim base revision df596be2 while the logs' own headers read rev=ed4fdf1d3, so the derived added failure test_flush_runs_the_draining_worker is the run's declared negative control rather than a regression the change introduced."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read ed4fdf1d3 against df596be2; the change extracts run_candidates_stage and the frozen CandidatesStageOptions, adds a --scan-only no-worker early return for the drain-only domain, keeps the run_discovery body whole and turns the click command into a thin wrapper.",
+    "done_when": "the done-when names a new test file showing --scan-only/--flush select the halves, --topic reaches its target, --limit caps items and --focus is honoured or refused, with the old command's tests still passing; tests/cli/test_discover_candidates_stage.py shows all four (with --scan-only a no-op and --focus a UsageError naming section 7), tests/cli/test_discover_map.py is unchanged, and the gate records 18 passed EXIT=0.",
+    "goal": "\u00a73 fold-candidates-stage asks for run_candidates_stage(facility, options) with a frozen dataclass of settled options, extracted from the discover map click command with the engine body kept whole and the command left as a thin wrapper; imas_codex/cli/discover/map.py:57 exposes the stage function, map.py:27 the frozen CandidatesStageOptions, map.py:121-181 keeps the DiscoveryConfig/run_discovery body whole and map.py:221-250 leaves map_candidates a thin wrapper, so the extraction is present, though the plan's generic --scan-only-seeds and --topic-reaches-a-scorer items are vacuous for this drain-only domain.",
+    "manifest": "read; it records the head gate at 18 passed EXIT=0 and a negative control at 1 failed EXIT=1, but its baseline_suite and after_suite both name revision df596be2 while their logs' headers read rev=ed4fdf1d3, and its after_suite points at the negative-control log rather than a post-change suite.",
+    "write_paths": "the reviewed manifest declares imas_codex/cli/discover/map.py, tests/cli/test_discover_candidates_stage.py and the evidence fragment; git diff --stat df596be2..ed4fdf1d3 touches exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "negative-control.log mutates the stage so --flush takes the no-worker path and test_flush_runs_the_draining_worker fails at tests/cli/test_discover_candidates_stage.py:76 (assert len(engine_calls)==1 reads 0==1, EXIT=1) where the green gate passes it, so the drain-half guard is shown to fire.",
+    "evidence": "gate.log records the done-when gate at 18 passed EXIT=0 at rev ed4fdf1d3 with the four named behaviours, but the manifest's baseline_suite and after_suite both name revision df596be2 while the log headers read rev=ed4fdf1d3 and after_suite names the negative-control log, so the suite revision record is muddled.",
+    "fit": "the added symbols run_candidates_stage and CandidatesStageOptions are named by what they do with no plan label, and map.py follows the sibling discover domains' stage-plus-thin-wrapper idiom.",
+    "goal_fidelity": "map.py:57 exposes the stage function and map.py:121-181 keeps the engine body whole, but the plan's generic --scan-only-runs-the-seeding-worker and --topic-reaches-the-scorer items do not apply to the drain-only candidates domain (map.py:92 returns a no-op, map.py:111 only logs the topic), so the landed change realises \u00a73 as far as the domain allows.",
+    "reuse": "the change reuses DiscoveryConfig, run_discovery, CandidateDiscoveryState and run_candidate_engine unchanged (map.py:75-181) and forks no capability; a search over imas_codex/cli/discover and imas_codex/ids found no other owner of a candidates stage.",
+    "scope_discipline": "git diff --stat df596be2..ed4fdf1d3 touches only imas_codex/cli/discover/map.py, tests/cli/test_discover_candidates_stage.py and the evidence fragment, all inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a73 fold-candidates-stage asks for run_candidates_stage(facility, options) with a frozen dataclass of settled options, extracted from the discover map click command with the engine body kept whole and the command left as a thin wrapper; imas_codex/cli/discover/map.py:57 exposes the stage function, map.py:27 the frozen CandidatesStageOptions, map.py:121-181 keeps the DiscoveryConfig/run_discovery body whole and map.py:221-250 leaves map_candidates a thin wrapper, so the extraction is present, though the plan's generic --scan-only-seeds and --topic-reaches-a-scorer items are vacuous for this drain-only domain.\nVERDICT done_when: the done-when names a new test file showing --scan-only/--flush select the halves, --topic reaches its target, --limit caps items and --focus is honoured or refused, with the old command's tests still passing; tests/cli/test_discover_candidates_stage.py shows all four (with --scan-only a no-op and --focus a UsageError naming section 7), tests/cli/test_discover_map.py is unchanged, and the gate records 18 passed EXIT=0.\nVERDICT write_paths: the reviewed manifest declares imas_codex/cli/discover/map.py, tests/cli/test_discover_candidates_stage.py and the evidence fragment; git diff --stat df596be2..ed4fdf1d3 touches exactly those three files and nothing else.\nVERDICT manifest: read; it records the head gate at 18 passed EXIT=0 and a negative control at 1 failed EXIT=1, but its baseline_suite and after_suite both name revision df596be2 while their logs' headers read rev=ed4fdf1d3, and its after_suite points at the negative-control log rather than a post-change suite.\nVERDICT diff: read ed4fdf1d3 against df596be2; the change extracts run_candidates_stage and the frozen CandidatesStageOptions, adds a --scan-only no-worker early return for the drain-only domain, keeps the run_discovery body whole and turns the click command into a thin wrapper.\nCALL_SITES: imas_codex/cli/discover/__init__.py:526\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: map.py:57 exposes the stage function and map.py:121-181 keeps the engine body whole, but the plan's generic --scan-only-runs-the-seeding-worker and --topic-reaches-the-scorer items do not apply to the drain-only candidates domain (map.py:92 returns a no-op, map.py:111 only logs the topic), so the landed change realises \u00a73 as far as the domain allows.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate.log records the done-when gate at 18 passed EXIT=0 at rev ed4fdf1d3 with the four named behaviours, but the manifest's baseline_suite and after_suite both name revision df596be2 while the log headers read rev=ed4fdf1d3 and after_suite names the negative-control log, so the suite revision record is muddled.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat df596be2..ed4fdf1d3 touches only imas_codex/cli/discover/map.py, tests/cli/test_discover_candidates_stage.py and the evidence fragment, all inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control.log mutates the stage so --flush takes the no-worker path and test_flush_runs_the_draining_worker fails at tests/cli/test_discover_candidates_stage.py:76 (assert len(engine_calls)==1 reads 0==1, EXIT=1) where the green gate passes it, so the drain-half guard is shown to fire.\nSCORE fit: 19\nJUSTIFICATION fit: the added symbols run_candidates_stage and CandidatesStageOptions are named by what they do with no plan label, and map.py follows the sibling discover domains' stage-plus-thin-wrapper idiom.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change reuses DiscoveryConfig, run_discovery, CandidateDiscoveryState and run_candidate_engine unchanged (map.py:75-181) and forks no capability; a search over imas_codex/cli/discover and imas_codex/ids found no other owner of a candidates stage.\nreviewed_base_sha: df596be24ebd7883e00ed499a926ddf459d9e615\nreviewed_head_sha: ed4fdf1d3a8b13b6eb231e811446ecdb2c3dd5b7\nFINDING imas_codex/cli/discover/map.py:92 follow-on: the stage returns a no-op {\"sources_judged\": 0} for --scan-only and carries --topic (map.py:111) without reaching any worker, because candidates drains the sources the signals stage seeded and has no seeding half, so the \u00a73 fold done-when items naming a seeding worker and a --topic scorer/enricher do not apply and the sequence runner must model candidates as drain-only.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043424229971-fold-candidates-stage/manifest.md:16 follow-on: the manifest sets after_suite to the negative-control log and both suites claim base revision df596be2 while the logs' own headers read rev=ed4fdf1d3, so the derived added failure test_flush_runs_the_draining_worker is the run's declared negative control rather than a regression the change introduced.\n",
+  "review_run_id": "r-20261008T050059274277-review-of-fold-candidates-stage",
+  "reviewed_base_sha": "df596be24ebd7883e00ed499a926ddf459d9e615",
+  "reviewed_head_sha": "ed4fdf1d3a8b13b6eb231e811446ecdb2c3dd5b7",
+  "reviewed_run_id": "r-20261008T043424229971-fold-candidates-stage",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:19:03.877601+00:00",
+  "total": 111
+}

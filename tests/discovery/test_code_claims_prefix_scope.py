@@ -56,7 +56,10 @@ class StubGraphClient:
             for row in self._match(cypher, kwargs):
                 row["claim_token"] = kwargs["token"]
             return []
-        if "{claim_token: $token}" in cypher:
+        if (
+            "{claim_token: $token}" in cypher
+            or "WHERE sf.claim_token = $token" in cypher
+        ):
             token = kwargs["token"]
             return [r for r in self.code_files if r.get("claim_token") == token]
         if "count(sf) > 0 AS has_work" in cypher:
@@ -103,6 +106,138 @@ class StubGraphClient:
                 r for r in rows if any(str(r["path"]).startswith(p) for p in prefixes)
             ]
         return rows
+
+
+class StaleJudgmentGraph(StubGraphClient):
+    """Evaluate model freshness and claim priority as the query states them."""
+
+    def query(self, cypher, **kwargs):
+        if "SET sf.claimed_at" in cypher:
+            rows = self._match(cypher, kwargs)
+            if "CASE WHEN" in cypher:
+                first_status = (
+                    "triaged"
+                    if "sf.relevance_stage = 'content'" in cypher
+                    else "discovered"
+                )
+                rows.sort(key=lambda row: row["status"] != first_status)
+            for row in rows[: kwargs.get("batch_size", kwargs.get("limit"))]:
+                row["claim_token"] = kwargs["token"]
+            return []
+        return super().query(cypher, **kwargs)
+
+    def _match(self, cypher, kwargs):
+        rows = [
+            row for row in self.code_files if row["facility_id"] == kwargs["facility"]
+        ]
+        if "sf.relevance_stage = 'content'" in cypher:
+            fresh = [
+                row
+                for row in rows
+                if row["status"] == "triaged" and row.get("is_enriched")
+            ]
+            stale = [
+                row
+                for row in rows
+                if row.get("relevance_stage") == "content"
+                and row["status"] in {"scored", "skipped", "ingested"}
+                and row.get("preview_text")
+            ]
+        else:
+            fresh = [
+                row
+                for row in rows
+                if row["status"] == "discovered" and row.get("relevance_stage") is None
+            ]
+            stale = (
+                [
+                    row
+                    for row in rows
+                    if row.get("relevance_stage") == "name"
+                    and row["status"] in {"triaged", "skipped"}
+                ]
+                if "sf.relevance_stage = 'name'" in cypher
+                else []
+            )
+        if "coalesce(sf.relevance_model, '') <> $judgment_model" in cypher:
+            stale = [
+                row
+                for row in stale
+                if row.get("relevance_model", "") != kwargs["judgment_model"]
+            ]
+        if "STARTS WITH prefix" in cypher:
+            prefixes = kwargs["prefixes"]
+            fresh = [
+                row for row in fresh if any(row["path"].startswith(p) for p in prefixes)
+            ]
+            stale = [
+                row for row in stale if any(row["path"].startswith(p) for p in prefixes)
+            ]
+        return fresh + stale
+
+
+def test_stale_name_claim_checks_model_and_claims_unjudged_first(monkeypatch):
+    """A current judgment cannot consume a slot ahead of an old one."""
+    from imas_codex.discovery.code.graph_ops import claim_files_for_triage
+
+    current = _code_file(
+        INSIDE + "/current.f", "skipped", relevance_stage="name", relevance_model="seat"
+    )
+    stale = _code_file(
+        INSIDE + "/stale.f", "skipped", relevance_stage="name", relevance_model="older"
+    )
+    fresh = _code_file(INSIDE + "/fresh.f", "discovered")
+    outside = _code_file(OUTSIDE + "/outside.f", "discovered")
+    graph = StaleJudgmentGraph([current, stale, fresh, outside])
+    monkeypatch.setattr(
+        "imas_codex.discovery.code.graph_ops.GraphClient", lambda: graph
+    )
+    monkeypatch.setattr("imas_codex.settings.get_model", lambda _: "seat")
+
+    claimed = claim_files_for_triage(FACILITY, limit=2, path_prefixes=[INSIDE])
+
+    assert {row["path"] for row in claimed} == {fresh["path"], stale["path"]}
+    assert current.get("claim_token") is None
+    assert outside.get("claim_token") is None
+
+
+def test_stale_content_claim_and_pending_check_share_model_selection(monkeypatch):
+    from imas_codex.discovery.code.graph_ops import (
+        claim_files_for_scoring,
+        has_pending_score_work,
+    )
+
+    current = _code_file(
+        INSIDE + "/current.f",
+        "scored",
+        relevance_stage="content",
+        relevance_model="seat",
+        preview_text="stored",
+    )
+    stale = _code_file(
+        INSIDE + "/stale.f",
+        "ingested",
+        relevance_stage="content",
+        relevance_model="older",
+        preview_text="stored",
+    )
+    fresh = _code_file(INSIDE + "/fresh.f", "triaged", is_enriched=True)
+    graph = StaleJudgmentGraph([current, stale, fresh])
+    monkeypatch.setattr(
+        "imas_codex.discovery.code.graph_ops.GraphClient", lambda: graph
+    )
+    monkeypatch.setattr("imas_codex.settings.get_model", lambda _: "seat")
+
+    assert has_pending_score_work(FACILITY, path_prefixes=[INSIDE]) is True
+    claimed = claim_files_for_scoring(FACILITY, limit=2, path_prefixes=[INSIDE])
+    assert {row["path"] for row in claimed} == {fresh["path"], stale["path"]}
+    assert current.get("claim_token") is None
+    fresh["status"] = "scored"
+    fresh["relevance_stage"] = "content"
+    fresh["relevance_model"] = "seat"
+    fresh["preview_text"] = "stored"
+    stale["relevance_model"] = "seat"
+    assert has_pending_score_work(FACILITY, path_prefixes=[INSIDE]) is False
 
 
 def _call(fn, target, rows, **kwargs):

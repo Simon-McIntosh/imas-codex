@@ -1,0 +1,717 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "0cde30ea3afa79c763efc8cd647860b33c01cde8",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 3885184,
+      "cached_input_tokens_cumulative": 3885184,
+      "input_tokens": 3973215,
+      "input_tokens_cumulative": 3973215,
+      "output_tokens": 14008,
+      "output_tokens_cumulative": 14008,
+      "reasoning_output_tokens": 5324,
+      "reasoning_output_tokens_cumulative": 5324
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 4,
+    "files": 2,
+    "removed": 6
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "718a29c86a16ccbea81d3d768cb6f896e6c13835"
+  ],
+  "completed_at": "2026-10-08T02:30:19Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T02:17:17Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "/home"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/config/test_jt60sa_exclusions.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T021647073809-home-exclusion-lift/coordinator-archive-gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.878,
+    "at_dispatch": 0.878,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "first of two §41 nodes; impl moves when the /home scan closes the section",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.278123390260332,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-12T21:16:06Z, which is after this node's 1800s horizon ending 2026-10-08T02:46:50.318496+00:00",
+    "horizon_ends_at": "2026-10-08T02:46:50.318496+00:00",
+    "horizon_seconds": 1800,
+    "metered": true,
+    "observed_at": "2026-10-08T02:16:49Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-12T21:16:06Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 529089,
+    "state": "quiet",
+    "utilisation_pct": 16.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T02:16:49Z",
+    "read_at": "2026-10-08T02:16:50Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 16.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T02:30:19Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T021647073809-home-exclusion-lift/manifest.md",
+  "member": "disposable-r-20261008T021647073809-home-exclusion-lift",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/config/test_jt60sa_exclusions.py::test_home_subtree_not_excluded"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/config/test_jt60sa_exclusions.py::test_home_subtree_not_excluded"
+    ],
+    "declaration": "restore /home to excludes.path_prefixes; the new not-excluded test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T021647073809-home-exclusion-lift/negative-control-home-exclusion.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T021647073809-home-exclusion-lift/negative-control-home-exclusion.log",
+    "test_paths": [
+      "tests/config/test_jt60sa_exclusions.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "home-exclusion-lift",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 398,
+          "cached_input_tokens": 375323,
+          "input_tokens": 375723,
+          "output_tokens": 1120,
+          "reasoning_output_tokens": 380,
+          "total_tokens": 376843,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "/home is absent from excludes.path_prefixes in imas_codex/config/facilities/jt-60sa.yaml and stays absent from discovery_roots; test_home_subtree_excluded in tests/config/test_jt60sa_exclusions.py is replaced by a test asserting a path under /home is not excluded; test_home_is_not_a_discovery_root still passes; the whole test file passes; no discovery run is made",
+    "estimated_hours": null,
+    "goal": "lift the JT-60SA /home exclusion in the facility config",
+    "id": "home-exclusion-lift",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T02:16:49Z",
+      "read_at": "2026-10-08T02:16:50Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 16.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T021647073809-home-exclusion-lift/manifest.md",
+    "negative_control": "restore /home to excludes.path_prefixes; the new not-excluded test must fail",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§41",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/config/facilities/jt-60sa.yaml",
+      "tests/config/test_jt60sa_exclusions.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/home-exclusion-lift.html",
+      "docs/figures/jt60sa-discovery-completion/home-exclusion-lift"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.2779859528479032,
+      "derived": 0.13771669368336656,
+      "drain_hours": 168.0,
+      "effective_limit": 0.13771669368336656,
+      "elapsed_fraction": 0.12519699425760594,
+      "elapsed_hours": 21.033095035277796,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T02:16:58+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.84,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.16,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.068608,
+      "decided_by": "window",
+      "margin": 0.500142,
+      "name": "home-exclusion-lift",
+      "score": 0.56875,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.16
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.142127,
+        "observed_at": "2026-10-08T02:16:58+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.16,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "home-exclusion-lift",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T02:16:58.142127+00:00",
+    "score": 0.56875,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "lead named the codex lane on 2026-10-08",
+    "confidence": 0.94,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 370.872,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2465.416,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1397538.20477,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 54938,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1397538.20477,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 54938,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1397538.20477,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 54938,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 6,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 54938,
+          "headroom_pct": 76.1,
+          "peak_utilisation_p50_pct": 59.8,
+          "peak_utilisation_p90_pct": 76.4,
+          "peak_utilisation_runs": 374,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 97,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 3
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 63.59677,
+        "budget_reason": null,
+        "burn_multiple": 1.277478259740242,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 54938,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.123269076736111,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13777142480357138,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 16.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 63.59677,
+        "budget_reason": null,
+        "burn_multiple": 1.277478259740242,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 54938,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.123269076736111,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13777142480357138,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 16.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 63.59677,
+        "budget_reason": null,
+        "burn_multiple": 1.277478259740242,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 54938,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.123269076736111,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13777142480357138,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 16.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0,
+      "claude:claude-sonnet-5-5": 0,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.02,
+      "hold": 0.02,
+      "local:deepseek-v4.1-flash": 0.96
+    },
+    "rendered_token_estimate": 1803,
+    "usage": {
+      "cost": 0.00022008,
+      "input_tokens": 5240,
+      "output_tokens": 150
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.878,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "718a29c86a16ccbea81d3d768cb6f896e6c13835",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261008T021647073809-home-exclusion-lift",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261008T021647073809-home-exclusion-lift"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/home-exclusion-lift",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T021647073809-home-exclusion-lift",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§41",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a1194d-301e-7ed0-9bf6-92fd345fee84",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 3885184,
+    "cumulative_input_tokens": 7858399,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 19332
+  },
+  "time_budget": "30m",
+  "tool_steps": 65.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 782,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T02:30:25Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T02:17:26Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T021647073809-home-exclusion-lift",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 184,
+    "worker_pid": 3945566
+  },
+  "worker_seconds": 782,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

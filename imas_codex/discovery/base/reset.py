@@ -234,6 +234,14 @@ _PATH_SCORE_FIELDS = [
     "score_imas",
     "score_convention",
 ]
+_PATH_SCORE_FIELDS += [
+    f"{name}_{suffix}"
+    for name in _PATH_SCORE_FIELDS
+    if name.startswith("score_")
+    and name
+    not in {"score_composite", "score_percentile", "score_reason", "score_cost"}
+    for suffix in ("probs", "confidence")
+]
 
 _PATH_TRIAGE_FIELDS = [
     "triaged_at",
@@ -259,6 +267,17 @@ _PATH_TRIAGE_FIELDS = [
     "expansion_reason",
     "skip_reason",
     "enrich_skip_reason",
+    "path_purpose_probs",
+    "path_purpose_confidence",
+    "children_worth_listing",
+    "judgment_model",
+    "scan_relevance",
+]
+_PATH_TRIAGE_FIELDS += [
+    f"{name}_{suffix}"
+    for name in _PATH_TRIAGE_FIELDS
+    if name.startswith("triage_") and name != "triage_composite"
+    for suffix in ("probs", "confidence")
 ]
 
 _PATH_ENRICH_FIELDS = [

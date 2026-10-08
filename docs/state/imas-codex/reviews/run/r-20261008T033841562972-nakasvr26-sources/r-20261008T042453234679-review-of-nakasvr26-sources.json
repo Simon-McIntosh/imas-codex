@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest declares no baseline_suite and no after_suite arm (both keys empty), so there is no paired gate-log difference to draw added failures from; its gates (wiki-gate.log, final-wiki-gate.log, head-gate.log, final-gate.log) are single-arm fragment/config/graph assertions, all EXIT=0, and the node's change is a facility YAML plus an evidence fragment with no test suite, so added_failure_count is 0 and the id set is empty.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/wiki/scraper.py:get_wiki_config",
+    "imas_codex/discovery/wiki/parallel.py:_resolve_excludes",
+    "imas_codex/discovery/signals/parallel.py:wiki_sites gate"
+  ],
+  "completed_at": "2026-10-08T04:35:47.050Z",
+  "dispatched_at": "2026-10-08T04:25:12Z",
+  "findings": [
+    {
+      "file": "imas_codex/config/facilities/jt-60sa.yaml",
+      "line": "277",
+      "severity": "follow-on",
+      "text": "follow-on: the node remapped port_forwards (twiki_code on 8800, server_docs on 8801, both to nakasvr26.iferc.org:443) but the browser.services block below at imas_codex/config/facilities/jt-60sa.yaml:277 was outside its directed scope and still names the retired twiki_main at http://localhost:8800/twiki and twiki_code at https://localhost:8801/twiki_html plus server_docs at https://localhost:8802/; after the remap those browser URLs tunnel to the wrong service (8801 now reaches server_docs) or to no forward at all (8802), and the site name twiki_main no longer exists, so an operator following this section reaches the retired host's paths or a dead port; the node was scoped to wiki_sites and port_forwards and told not to declare the file, so it is recorded as a follow-on rather than a scoring fault."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base 796f88e36; 69b2a22fb and eeee14f73 repoint the facility YAML, 56e30cbaa/f77dcf575/1d0b62b7e/4597a66f6 build the fragment, and 9047529d3/9b1fdf442 are shared-mainline merges; subjects are conventional with mechanism bodies, and none carries a plan identifier or AI attribution.",
+    "done_when": "section 47's done-when requires wiki_sites on live hosts only, the nakasvr26 wiki pages ingested with a count in the fragment, each of the 15 manuals parsed with chunks or recorded as not found with the URLs tried, and the fragment stating what sarp26/rdg is with the requests that show it; the fragment supplies the 237/38/238 counts, the 41-row no-live-copy record for 14 manuals plus 1 ingested with 11 chunks, and the rdg client call list with 403 receipts.",
+    "goal": "the node's goal is section 47's outcome, moving JT-60SA documentation sources to nakasvr26 and identifying its data portal; the head repoints wiki_sites and port_forwards to live nakasvr26 hosts, ingests the Code wiki, records the 15 manuals, and identifies sarp26/rdg as a Guacamole gateway.",
+    "manifest": "read at head 9b1fdf442; it reports status complete, the eight commits, both changed paths, EXIT=0 gates, and retry_failures for two fence-scaffolding faults (fetch over the user SSH config, and a read-only shared notes ref); its terminal worker message is a NEEDS-HELP asking the coordinator to honour the pre-authorized YAML path at promotion.",
+    "write_paths": "the reviewed manifest declares docs/evidence/fragments/jt60sa-discovery-completion/nakasvr26-sources.html and imas_codex/config/facilities/jt-60sa.yaml; every path this node authored is inside them, and the YAML edit stays within the wiki_sites and port_forwards sections specified by the resumed lead direction."
+  },
+  "justifications": {
+    "durability": "the evidence fragment is committed at the reviewed head and is the durable receipt, and the YAML re-validated against its schema in wiki-gate.log (EXIT=0); there is no test surface for a facility YAML change (negative_control none) and no guard detects the browser.services/port_forwards divergence the change introduced, so the config can drift again silently.",
+    "evidence": "the run stores real receipts rather than assertions: manual-http-status.log holds 41 HEAD/GET rows with statuses and the one 200 whose bytes (1,574,228) were fetched and parsed to 4,635 characters, the four gate logs each carry a revision header plus EXIT=0 (fragment-gate 56e30cbaa, head-gate f77dcf575, wiki-gate 69b2a22fb, final-wiki-gate 4597a66f6, final-gate 1d0b62b7e), and the fragment states the ingested/skipped counts; the reviewed manifest declares no baseline_suite or after_suite arm, and its terminal message is a NEEDS-HELP over check-manifest refusing the lead-authorized YAML path, so this review derived zero added failures from the absent arms.",
+    "fit": "the fragment is capability-named (nakasvr26-sources) and states the retired-host and portal mechanisms in prose, the YAML edits carry mechanism comments rather than changelog, and no landed name, filename, comment or commit subject carries a plan, sprint or ticket identifier or an author attribution.",
+    "goal_fidelity": "the reviewed head meets section 47's done-when: imas_codex/config/facilities/jt-60sa.yaml names only live hosts (twiki_code at https://nakasvr26.iferc.org/wiki and server_docs at https://nakasvr26.iferc.org, with port_forwards remapped to nakasvr26.iferc.org:443 on 8800/8801 and no nakasvr23 or 157.111.10.188 reference left); the fragment documents 237 ingested plus 38 skipped Code topics, a separately ingested WebHome (238 live /wiki/ WikiPage URLs), 1 of 15 deferred manuals recovered and ingested with 11 chunks and 14 recorded as not found with the URLs tried (41 request rows), sarp26/rdg identified as an Apache Guacamole gateway from its client API calls and 403 receipts, and USD 0.00 spent of the USD 5 cap; the one gap is that the node's authorized port_forwards remap left the adjacent browser.services block misdirecting, recorded as a follow-on.",
+    "reuse": "the change edits the existing facility config in place (2 live wiki_sites and 2 matching TLS forwards) rather than adding a parallel source or a second config owner, and it reuses the existing document ingest pipeline for the recovered manual rather than a bespoke parser.",
+    "scope_discipline": "the node authored only its two declared paths (the evidence fragment and imas_codex/config/facilities/jt-60sa.yaml), and within the shared YAML it changed only the wiki_sites and port_forwards sections it was directed to edit, obeying the lead direction to not declare the file and to resolve it by merge; the remaining commits between base 796f88e36 and head 9b1fdf442 are peer releases and shared-mainline merges, not this node's authorship."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is section 47's outcome, moving JT-60SA documentation sources to nakasvr26 and identifying its data portal; the head repoints wiki_sites and port_forwards to live nakasvr26 hosts, ingests the Code wiki, records the 15 manuals, and identifies sarp26/rdg as a Guacamole gateway.\nVERDICT done_when: section 47's done-when requires wiki_sites on live hosts only, the nakasvr26 wiki pages ingested with a count in the fragment, each of the 15 manuals parsed with chunks or recorded as not found with the URLs tried, and the fragment stating what sarp26/rdg is with the requests that show it; the fragment supplies the 237/38/238 counts, the 41-row no-live-copy record for 14 manuals plus 1 ingested with 11 chunks, and the rdg client call list with 403 receipts.\nVERDICT write_paths: the reviewed manifest declares docs/evidence/fragments/jt60sa-discovery-completion/nakasvr26-sources.html and imas_codex/config/facilities/jt-60sa.yaml; every path this node authored is inside them, and the YAML edit stays within the wiki_sites and port_forwards sections specified by the resumed lead direction.\nVERDICT manifest: read at head 9b1fdf442; it reports status complete, the eight commits, both changed paths, EXIT=0 gates, and retry_failures for two fence-scaffolding faults; its terminal worker message is a NEEDS-HELP asking the coordinator to honour the pre-authorized YAML path at promotion.\nVERDICT diff: read commit by commit against base 796f88e36; 69b2a22fb and eeee14f73 repoint the facility YAML, 56e30cbaa/f77dcf575/1d0b62b7e/4597a66f6 build the fragment, and 9047529d3/9b1fdf442 are shared-mainline merges; subjects conventional with mechanism bodies, no plan identifier and no AI attribution.\nCALL_SITES: imas_codex/discovery/wiki/scraper.py:get_wiki_config, imas_codex/discovery/wiki/parallel.py:_resolve_excludes, imas_codex/discovery/signals/parallel.py:wiki_sites gate\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the reviewed head names only live hosts in imas_codex/config/facilities/jt-60sa.yaml, remaps the TLS forwards and ingests the Code wiki, satisfying section 47's done-when; the residual browser.services misdirection is outside the directed scope and recorded as a follow-on.\nSCORE evidence: 17\nJUSTIFICATION evidence: 41 request rows with statuses, four EXIT=0 gate logs carrying revision headers, and the fragment's ingested/skipped counts are real receipts, but the reviewed manifest declares no baseline_suite or after_suite arm and ended on a check-manifest NEEDS-HELP.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: only the two declared paths were authored, the YAML edit touched only the directed wiki_sites and port_forwards sections, and the lead's do-not-declare direction was honoured.\nSCORE durability: 16\nJUSTIFICATION durability: the fragment is committed and the YAML re-validated, but a facility-YAML change has no test surface and no guard detects the browser.services/port_forwards divergence.\nSCORE fit: 19\nJUSTIFICATION fit: capability-named fragment, mechanism comments, and the YAML re-validated and no plan, sprint or ticket label or author attribution in any landed name or comment.\nSCORE reuse: 19\nJUSTIFICATION reuse: the existing facility config is edited in place and the existing document ingest pipeline is reused instead of a bespoke parser.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:277 follow-on: the port_forwards remap left the adjacent browser.services block pointing at the retired twiki_main and twiki_html paths on ports 8801/8802 that now reach the wrong service or no forward; the node was scoped to wiki_sites and port_forwards, so it is recorded as a follow-on.",
+  "review_run_id": "r-20261008T042453234679-review-of-nakasvr26-sources",
+  "reviewed_base": "796f88e36feb5144a453c05a013bfd259e02d7c4",
+  "reviewed_base_sha": "796f88e36feb5144a453c05a013bfd259e02d7c4",
+  "reviewed_commit": "9b1fdf442dd75afc7dd532e7fb68202b4d841067",
+  "reviewed_head_sha": "9b1fdf442dd75afc7dd532e7fb68202b4d841067",
+  "reviewed_run_id": "r-20261008T033841562972-nakasvr26-sources",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T04:32:20Z",
+  "total": 108
+}

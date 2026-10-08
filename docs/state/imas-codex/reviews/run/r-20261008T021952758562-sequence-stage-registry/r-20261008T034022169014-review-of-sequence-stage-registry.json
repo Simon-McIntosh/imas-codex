@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:528 discover.add_command(sequence_run)",
+    "imas_codex/cli/discover/sequence.py:422 run_sequence via the run command",
+    "imas_codex/cli/discover/sequence.py:398 ctx.invoke of the stage command"
+  ],
+  "completed_at": "2026-10-08T03:57:09.705Z",
+  "dispatched_at": "2026-10-08T03:40:48Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/sequence.py",
+      "line": "365",
+      "severity": "follow-on",
+      "text": "follow-on: stage_command returns commands[stage.domain], so all three signals stages (domain \"signals\") resolve to the bare signals command and the recorded stage.command flags are ignored \u2014 a non-dry run would invoke \"discover signals\" three times without --scan-only/--enrich-only (imas_codex/cli/discover/signals.py:61) and never run the scan/enrich/check split the registry documents."
+    },
+    {
+      "file": "imas_codex/cli/discover/sequence.py",
+      "line": "202",
+      "severity": "follow-on",
+      "text": "follow-on: the mapping stage records model_section=\"mapping\", which is not a key of settings.MODEL_SECTIONS (imas_codex/settings.py:141 lists \"ids-mapping\"); a consumer calling settings.get_model(stage.model_section) raises ValueError, so the recorded seat is unusable and inconsistent with the candidates stage's valid \"mapping-candidates\"."
+    },
+    {
+      "file": "imas_codex/cli/discover/sequence.py",
+      "line": "226",
+      "severity": "follow-on",
+      "text": "follow-on: _wiki_target returns the first configured wiki_site only, so the wiki stage's access probe tests one site's reachability while \u00a72 requires \"each site reachable\"; with a second site down the stage still reads runnable."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base 202972657fdd2028c3c138b04aedd400420acaf4 to head 21c0e6d34f2c1b3c5b86e6d5be61f62a25955e00; the single commit adds six files (sequence.py 432, __init__.py 2, documents/pipeline.py 10, two test files, one evidence fragment) totalling 761 insertions, all inside the declared scope.",
+    "done_when": "the done-when names tests/cli/test_discover_sequence.py and tests/test_cli.py; all seven bullets have a test \u2014 table order (test_registry_lists_nine_stages_in_table_order), dry run prints every stage and invocations are zero (test_dry_run_prints_every_stage_and_runs_nothing), SSH down reads unreachable while graph-only reads runnable (test_ssh_down_reads_ssh_stages_unreachable_and_graph_stages_runnable), no wiki_sites reads not configured (test_wiki_without_sites_reads_not_configured), each need patched and outcome follows (test_probe_access_calls_the_canonical_checks, test_graph_check_governs_the_graph_only_stages), each stage follows its named predicate (test_each_stage_follows_its_named_pending_predicate), documents has_pending_work true when either private check is and a raising query reads unreachable (test_raising_pending_query_reads_unreachable, tests/discovery/test_documents_pending_work.py::test_a_failed_query_reaches_the_caller) \u2014 and the manifest records the gate at 69 passed, exit 0.",
+    "goal": "the node's goal is \u00a72 of facility-discovery-sequence \u2014 one ordered stage registry in imas_codex/cli/discover/sequence.py with each stage's access need, config keys, input stages and pending-work predicate, plus access probes reusing the canonical checks and a dry run; the landed STAGES tuple holds the nine stages in exactly the plan's table order (paths, code, documents, wiki, signals scan, signals enrich, signals check, candidates, mapping), each domain from DISCOVERY_DOMAINS is owned by a stage and mapping records domain None, so the goal is met.",
+    "manifest": "read; it records commit 21c0e6d34, six changed paths, the gate command with 69 passed exit 0, the negative-control result (2 failed, exit 1) and its log path, and names no baseline_suite so no base arm exists.",
+    "write_paths": "the manifest declares imas_codex/cli/discover/sequence.py, imas_codex/cli/discover/__init__.py, imas_codex/discovery/documents/pipeline.py, tests/cli/test_discover_sequence.py and tests/discovery/; the diff adds six files all inside them, and nothing outside was touched."
+  },
+  "justifications": {
+    "durability": "tests/cli/test_discover_sequence.py:137 patches the pending predicates True then False and asserts the outcome follows, and the raising-query tests genuinely redden under the recorded negative control, but no test covers the non-dry run_sequence invocation loop (sequence.py:398), so the signals-mode mis-dispatch and the invalid mapping seat pass the whole suite.",
+    "evidence": "the gate command in imas_codex/cli/discover/sequence.py's own test file measures the done-when and its result is recorded (69 passed, exit 0) in the manifest and in pytest-gate.log, and the negative control is recorded red with two failing ids, but the gate log carries no revision/tree/command header so it is not self-binding to 21c0e6d34 and is tied only through the manifest's word.",
+    "fit": "the module follows the repo idiom (frozen dataclass, click command, module docstring) and its names carry no plan label, but the mapping stage's model_section \"mapping\" (sequence.py:202) is not a key of MODEL_SECTIONS (imas_codex/settings.py:141), which the repo's own seat owner rejects.",
+    "goal_fidelity": "imas_codex/cli/discover/sequence.py:112 builds STAGES in the plan's nine-stage table order with domain None for mapping, but the extra model_section field carries an invalid seat (see findings) and the non-dry invocation path mis-dispatches the signals stages.",
+    "reuse": "sequence.py:33 imports neo4j_health_check, ssh_health_check and wiki_auth_check unchanged and imas_codex/discovery/documents/pipeline.py:91 has_pending_work extends the pipeline that owns those private checks; a search of imas_codex found no existing stage-sequence owner, so no capability was forked.",
+    "scope_discipline": "all six files the commit adds lie inside the manifest's declared write paths and no path outside them changed."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is \u00a72 of facility-discovery-sequence \u2014 one ordered stage registry in imas_codex/cli/discover/sequence.py with each stage's access need, config keys, input stages and pending-work predicate, plus access probes reusing the canonical checks and a dry run; the landed STAGES tuple holds the nine stages in exactly the plan's table order (paths, code, documents, wiki, signals scan, signals enrich, signals check, candidates, mapping), each domain from DISCOVERY_DOMAINS is owned by a stage and mapping records domain None, so the goal is met.\nVERDICT done_when: the done-when names tests/cli/test_discover_sequence.py and tests/test_cli.py; all seven bullets have a test \u2014 table order (test_registry_lists_nine_stages_in_table_order), dry run prints every stage and invocations are zero (test_dry_run_prints_every_stage_and_runs_nothing), SSH down reads unreachable while graph-only reads runnable (test_ssh_down_reads_ssh_stages_unreachable_and_graph_stages_runnable), no wiki_sites reads not configured (test_wiki_without_sites_reads_not_configured), each need patched and outcome follows (test_probe_access_calls_the_canonical_checks, test_graph_check_governs_the_graph_only_stages), each stage follows its named predicate (test_each_stage_follows_its_named_pending_predicate), documents has_pending_work true when either private check is and a raising query reads unreachable (test_raising_pending_query_reads_unreachable, tests/discovery/test_documents_pending_work.py::test_a_failed_query_reaches_the_caller) \u2014 and the manifest records the gate at 69 passed, exit 0.\nVERDICT write_paths: the manifest declares imas_codex/cli/discover/sequence.py, imas_codex/cli/discover/__init__.py, imas_codex/discovery/documents/pipeline.py, tests/cli/test_discover_sequence.py and tests/discovery/; the diff adds six files all inside them, and nothing outside was touched.\nVERDICT manifest: read; it records commit 21c0e6d34, six changed paths, the gate command with 69 passed exit 0, the negative-control result (2 failed, exit 1) and its log path, and names no baseline_suite so no base arm exists.\nVERDICT diff: read commit by commit against base 202972657fdd2028c3c138b04aedd400420acaf4 to head 21c0e6d34f2c1b3c5b86e6d5be61f62a25955e00; the single commit adds six files (sequence.py 432, __init__.py 2, documents/pipeline.py 10, two test files, one evidence fragment) totalling 761 insertions, all inside the declared scope.\nCALL_SITES: imas_codex/cli/discover/__init__.py:528 discover.add_command(sequence_run), imas_codex/cli/discover/sequence.py:422 run_sequence via the run command, imas_codex/cli/discover/sequence.py:398 ctx.invoke of the stage command\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/cli/discover/sequence.py:112 builds STAGES in the plan's nine-stage table order with domain None for mapping, but the extra model_section field carries an invalid seat (see findings) and the non-dry invocation path mis-dispatches the signals stages.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate command in imas_codex/cli/discover/sequence.py's own test file measures the done-when and its result is recorded (69 passed, exit 0) in the manifest and in pytest-gate.log, and the negative control is recorded red with two failing ids, but the gate log carries no revision/tree/command header so it is not self-binding to 21c0e6d34 and is tied only through the manifest's word.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all six files the commit adds lie inside the manifest's declared write paths and no path outside them changed.\nSCORE durability: 15\nJUSTIFICATION durability: tests/cli/test_discover_sequence.py:137 patches the pending predicates True then False and asserts the outcome follows, and the raising-query tests genuinely redden under the recorded negative control, but no test covers the non-dry run_sequence invocation loop (sequence.py:398), so the signals-mode mis-dispatch and the invalid mapping seat pass the whole suite.\nSCORE fit: 16\nJUSTIFICATION fit: the module follows the repo idiom (frozen dataclass, click command, module docstring) and its names carry no plan label, but the mapping stage's model_section \"mapping\" (sequence.py:202) is not a key of MODEL_SECTIONS (imas_codex/settings.py:141), which the repo's own seat owner rejects.\nSCORE reuse: 20\nJUSTIFICATION reuse: sequence.py:33 imports neo4j_health_check, ssh_health_check and wiki_auth_check unchanged and imas_codex/discovery/documents/pipeline.py:91 has_pending_work extends the pipeline that owns those private checks; a search of imas_codex found no existing stage-sequence owner, so no capability was forked.\nFINDING imas_codex/cli/discover/sequence.py:365 follow-on: stage_command returns commands[stage.domain], so all three signals stages (domain \"signals\") resolve to the bare signals command and the recorded stage.command flags are ignored \u2014 a non-dry run would invoke \"discover signals\" three times without --scan-only/--enrich-only (imas_codex/cli/discover/signals.py:61) and never run the scan/enrich/check split the registry documents.\nFINDING imas_codex/cli/discover/sequence.py:202 follow-on: the mapping stage records model_section=\"mapping\", which is not a key of settings.MODEL_SECTIONS (imas_codex/settings.py:141 lists \"ids-mapping\"); a consumer calling settings.get_model(stage.model_section) raises ValueError, so the recorded seat is unusable and inconsistent with the candidates stage's valid \"mapping-candidates\".\nFINDING imas_codex/cli/discover/sequence.py:226 follow-on: _wiki_target returns the first configured wiki_site only, so the wiki stage's access probe tests one site's reachability while \u00a72 requires \"each site reachable\"; with a second site down the stage still reads runnable.\n",
+  "review_run_id": "r-20261008T034022169014-review-of-sequence-stage-registry",
+  "reviewed_base_sha": "202972657fdd2028c3c138b04aedd400420acaf4",
+  "reviewed_head_sha": "21c0e6d34f2c1b3c5b86e6d5be61f62a25955e00",
+  "reviewed_run_id": "r-20261008T021952758562-sequence-stage-registry",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T03:54:50.817072+00:00",
+  "total": 106
+}

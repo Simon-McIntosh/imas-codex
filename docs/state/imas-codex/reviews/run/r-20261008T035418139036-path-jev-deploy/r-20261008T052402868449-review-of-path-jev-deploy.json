@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "deepseek",
+  "base_log_revision": "07477c79b4448925ac7db0b8b005e15148a19130",
+  "call_site_count": 9,
+  "call_sites": [
+    "imas_codex/discovery/paths/parallel.py:1752 (DirectoryTriager triage worker)",
+    "imas_codex/discovery/code/graph_ops.py:claim_paths_for_file_scan",
+    "imas_codex/discovery/code/graph_ops.py:has_pending_scan_work",
+    "imas_codex/discovery/paths/parallel.py:claim_paths_for_enriching",
+    "imas_codex/discovery/paths/parallel.py:claim_paths_for_scoring",
+    "imas_codex/discovery/paths/parallel.py:mark_score_complete",
+    "imas_codex/discovery/paths/enrichment.py:get_paths_pending_enrichment",
+    "imas_codex/cli/discover/paths.py",
+    "imas_codex/cli/discover/code.py"
+  ],
+  "completed_at": "2026-10-08T05:39:39.664Z",
+  "dispatched_at": "2026-10-08T05:24:14Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/parallel.py",
+      "line": "140",
+      "severity": "follow-on",
+      "text": "follow-on: run_parallel_file_discovery resolves its default min_score through get_discovery_threshold() (0.90) and passes it to claim_paths_for_file_scan, which now gates on p.scan_relevance, so a library caller that names no min_score still gates the code-scan path selection at 0.90 while the CLI path passes 0.30; the done_when states the 0.9 threshold no longer gates code-scan path selection. This file is outside the node's write scope, so it is recorded rather than repaired."
+    },
+    {
+      "file": "imas_codex/cli/discover/__init__.py",
+      "line": "140",
+      "severity": "follow-on",
+      "text": "follow-on: discover status --json reports high-value paths through get_high_value_paths(facility, min_score=get_discovery_threshold(), limit=20), and get_high_value_paths now filters p.scan_relevance, so this status surface still gates at 0.90 while the discover paths summary uses 0.30; the two surfaces disagree on which paths are high value. Outside the node's write scope."
+    },
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "2395",
+      "severity": "follow-on",
+      "text": "follow-on: _async_score_with_llm re-implements the describe-then-judge pipeline (same description system prompt, same description/paths match assertion, same judge_rows call and path_judgment_fields) already written at scorer.py:354; the duplicated wiring should be extracted so the description-and-judge step has one owner."
+    }
+  ],
+  "head_log_revision": "a1a8a63babcfe740204853bc859910e94d532f75",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 9 production call site(s)",
+    "diff": "read commit by commit against 849a1a35fadb419a3d4cfe1b07795fbd233fdca0 into a1a8a63babcfe740204853bc859910e94d532f75; the six commits rewrite scorer.py and parallel.py to route decisions through judge_rows and rename the path gate to get_path_scan_threshold.",
+    "done_when": "the done_when names tests/discovery/test_path_judgments.py, test_scorer.py and test_paths_progress.py with baseline and after logs, and the manifest records those runs; the recorded gate (94 passed baseline at 07477c79b, 95 passed after at a1a8a63ba, EXIT=0 both) asserts the measure.",
+    "goal": "the node goal is to deploy Jev path judgments into path discovery and its gates; the diff replaces the LLM triage/score prompts with a description model plus the shared judge_rows in imas_codex/discovery/base/judgment.py, storing path_purpose Choice, eleven facet Scores with probs and confidence, children_worth_listing and judgment_model.",
+    "manifest": "read; it states the focused gate result, the widened 158-path AUC 0.886 against the original 0.807, spend USD 0.003404436 of USD 3, and names its gate, mutation and rollback logs.",
+    "write_paths": "read the manifest's declared write paths; all 13 changed source and test files plus the one evidence fragment lie inside them, and the changed_paths list names two test files (test_scorer.py, test_paths_progress.py) that the diff does not touch."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_path_judgments.py:1918 test_code_scan_claim_uses_judged_facets reddens on reinstating p.score_composite in the claim (scan-gate-negative-control-final.log EXIT=1), and test_rescoring_preserves_enriched_metadata reddens when the unconditional-write is restored (score-preservation-negative-control-final.log EXIT=1).",
+    "evidence": "the after gate at imas_codex/discovery/paths/scorer.py has its result recorded in path-review-after-committed.log (95 passed EXIT=0) and the calibration figure in docs/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html is backed by metrics-widened.json.",
+    "fit": "the module keeps the surrounding style of imas_codex/discovery/paths/models.py, the new get_path_scan_threshold follows settings.py:1012 and no name the repository's naming rules forbid is introduced.",
+    "goal_fidelity": "imas_codex/discovery/paths/scorer.py:88 path_judgment_fields computes the scan, expand and enrich gates in code from the judged facets and parallel.py:2462 scores through the shared judge_rows, delivering the \u00a74 design.",
+    "reuse": "the judging loop extends the owner judge_rows in imas_codex/discovery/base/judgment.py:136, but the describe-then-judge wiring is duplicated between scorer.py:354 and parallel.py:2395 without a shared owner.",
+    "scope_discipline": "every path in the diff (imas_codex/discovery/paths/*, imas_codex/discovery/base/reset.py, imas_codex/schemas/facility.yaml, imas_codex/settings.py, tests/discovery/test_path_judgments.py) is inside the manifest's declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to deploy Jev path judgments into path discovery and its gates; the diff replaces the LLM triage/score prompts with a description model plus the shared judge_rows in imas_codex/discovery/base/judgment.py, storing path_purpose Choice, eleven facet Scores with probs and confidence, children_worth_listing and judgment_model.\nVERDICT done_when: the done_when names tests/discovery/test_path_judgments.py, test_scorer.py and test_paths_progress.py with baseline and after logs, and the manifest records those runs; the recorded gate (94 passed baseline at 07477c79b, 95 passed after at a1a8a63ba, EXIT=0 both) asserts the measure.\nVERDICT write_paths: read the manifest's declared write paths; all 13 changed source and test files plus the one evidence fragment lie inside them, and the changed_paths list names two test files (test_scorer.py, test_paths_progress.py) that the diff does not touch.\nVERDICT manifest: read; it states the focused gate result, the widened 158-path AUC 0.886 against the original 0.807, spend USD 0.003404436 of USD 3, and names its gate, mutation and rollback logs.\nVERDICT diff: read commit by commit against 849a1a35fadb419a3d4cfe1b07795fbd233fdca0 into a1a8a63babcfe740204853bc859910e94d532f75; the six commits rewrite scorer.py and parallel.py to route decisions through judge_rows and rename the path gate to get_path_scan_threshold.\nCALL_SITES: imas_codex/discovery/paths/parallel.py:1752 (DirectoryTriager triage worker), imas_codex/discovery/code/graph_ops.py:claim_paths_for_file_scan, imas_codex/discovery/code/graph_ops.py:has_pending_scan_work, imas_codex/discovery/paths/parallel.py:claim_paths_for_enriching, imas_codex/discovery/paths/parallel.py:claim_paths_for_scoring, imas_codex/discovery/paths/parallel.py:mark_score_complete, imas_codex/discovery/paths/enrichment.py:get_paths_pending_enrichment, imas_codex/cli/discover/paths.py, imas_codex/cli/discover/code.py\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/paths/scorer.py:88 path_judgment_fields computes the scan, expand and enrich gates in code from the judged facets and parallel.py:2462 scores through the shared judge_rows, delivering the \u00a74 design.\nSCORE evidence: 18\nJUSTIFICATION evidence: the after gate at imas_codex/discovery/paths/scorer.py has its result recorded in path-review-after-committed.log (95 passed EXIT=0) and the calibration figure in docs/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html is backed by metrics-widened.json.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the diff (imas_codex/discovery/paths/*, imas_codex/discovery/base/reset.py, imas_codex/schemas/facility.yaml, imas_codex/settings.py, tests/discovery/test_path_judgments.py) is inside the manifest's declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_path_judgments.py:1918 test_code_scan_claim_uses_judged_facets reddens on reinstating p.score_composite in the claim (scan-gate-negative-control-final.log EXIT=1), and test_rescoring_preserves_enriched_metadata reddens when the unconditional-write is restored (score-preservation-negative-control-final.log EXIT=1).\nSCORE fit: 18\nJUSTIFICATION fit: the module keeps the surrounding style of imas_codex/discovery/paths/models.py, the new get_path_scan_threshold follows settings.py:1012 and no name the repository's naming rules forbid is introduced.\nSCORE reuse: 15\nJUSTIFICATION reuse: the judging loop extends the owner judge_rows in imas_codex/discovery/base/judgment.py:136, but the describe-then-judge wiring is duplicated between scorer.py:354 and parallel.py:2395 without a shared owner.\nFINDING imas_codex/discovery/code/parallel.py:140 follow-on: run_parallel_file_discovery resolves its default min_score through get_discovery_threshold() (0.90) and passes it to claim_paths_for_file_scan, which now gates on p.scan_relevance, so a library caller that names no min_score still gates the code-scan path selection at 0.90 while the CLI path passes 0.30; the done_when states the 0.9 threshold no longer gates code-scan path selection. This file is outside the node's write scope, so it is recorded rather than repaired.\nFINDING imas_codex/cli/discover/__init__.py:140 follow-on: discover status --json reports high-value paths through get_high_value_paths(facility, min_score=get_discovery_threshold(), limit=20), and get_high_value_paths now filters p.scan_relevance, so this status surface still gates at 0.90 while the discover paths summary uses 0.30; the two surfaces disagree on which paths are high value. Outside the node's write scope.\nFINDING imas_codex/discovery/paths/parallel.py:2395 follow-on: _async_score_with_llm re-implements the describe-then-judge pipeline (same description system prompt, same description/paths match assertion, same judge_rows call and path_judgment_fields) already written at scorer.py:354; the duplicated wiring should be extracted so the description-and-judge step has one owner.",
+  "review_run_id": "r-20261008T052402868449-review-of-path-jev-deploy",
+  "reviewed_base_sha": "849a1a35fadb419a3d4cfe1b07795fbd233fdca0",
+  "reviewed_head_sha": "a1a8a63babcfe740204853bc859910e94d532f75",
+  "reviewed_run_id": "r-20261008T035418139036-path-jev-deploy",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:36:27.962354+00:00",
+  "total": 104
+}

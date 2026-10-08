@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from clean arms at the reviewed base and head revisions, each including tests/discovery/test_paths_pipeline.py: baseline_suite (e4ff44bba7688c71535eeacdd8086c8dc6d5b51a) completed with failure_count 0 and after_suite (404da8bd59fa9fb7217764b2dd8823c626ee09bc) completed with failure_count 0, so after minus base is 0 added failures.",
+  "backend": "local",
+  "base_log_revision": "e4ff44bba7688c71535eeacdd8086c8dc6d5b51a",
+  "completed_at": "2026-10-08T06:33:25.436Z",
+  "dispatched_at": "2026-10-08T06:09:59Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/fold-paths-stage.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the plan says each fold carries a fragment under docs/evidence/fragments/facility-discovery-sequence/, and the reviewed manifest's orientation_write_paths declares fold-paths-stage.html, but no such file exists in the tree or the diff (the directory holds only discover-cli-surface-census.html, fold-candidates-stage.html, fold-documents-stage.html and fold-signals-stage.html). The node's evidence lives only in its manifest, so a later reader of the plan has no fragment for this fold."
+    },
+    {
+      "file": "imas_codex/llm/prompts/discovery/roots.md",
+      "line": "232",
+      "severity": "follow-on",
+      "text": "follow-on: this change removes the -r/--root spelling (now --focus) and the --score-only/--triage-only spellings (now --flush), but out-of-scope callers still use them and now fail: roots.md:232,235,238 instruct 'imas-codex discover paths {facility} -r <path>', imas_codex/discovery/README.md:310 shows 'discover paths iter --score-only', imas_codex/cli/compute.py:605 names --scan-workers/--score-workers, and imas_codex/discovery/base/progress.py:1005 still comments '--path-limit flag'. The plan assigns caller migration to the retire-domain-subcommands node and these files are outside this node's write scope, so they are recorded rather than repaired."
+    },
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "2878",
+      "severity": "follow-on",
+      "text": "follow-on: the embedded and dedup workers are appended to the engine unconditionally (embed and score_phase lifecycle at parallel.py:2878-2892, dedup at parallel.py:2894-2903), so a --scan-only run still starts the embed and dedup (graph-only) helpers even though run_paths_stage passes num_enrich_workers=0 and num_score_workers=0; the plan's --scan-only means 'enumerate new work, judge nothing'. The reviewed manifest already records this as its follow_on and it is confirmed here; suppressing the helpers needs an engine change outside the node's write scope."
+    },
+    {
+      "file": "imas_codex/cli/discover/paths.py",
+      "line": "41",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest records its arms only through test_logs and gate2/gate3/gate-head, and declares no baseline_suite/after_suite; its gate2.log and gate3.log carry a revision header of e4ff44bb while the tree was already modified (they collect 12 items and pass 10-12), so the base arm ran with the change in flight. No arm includes tests/discovery/test_paths_pipeline.py, the regression surface for this file, so the node's own logs do not show added_failure_count. This review supplies the missing arms at the reviewed revisions (0 added failures)."
+    }
+  ],
+  "head_log_revision": "404da8bd59fa9fb7217764b2dd8823c626ee09bc",
+  "item_verdicts": {
+    "call_sites": "run_paths_stage has one production caller, the paths click command (paths.py:206); _focus_roots and PathsStageOptions are used only there and in the new test; the settled option spellings reach imas_codex/cli/discover/__init__.py, which still registers the paths subcommand unchanged.",
+    "diff": "read against e4ff44bb: paths.py gains PathsStageOptions, _focus_roots and run_paths_stage and loses the deprecated --reset-scored alias; the body of _run_iterative_discovery was also changed (worker counts now derive from --scan-only/--flush, seeding is gated on not flush, check_ssh re-derived, and num_expand_workers/num_enrich_workers/num_score_workers are now passed to run_parallel_discovery).",
+    "done_when": "the node's done-when is four behaviours in the new test file plus the old tests passing; tests/cli/test_discover_paths_stage.py proves each: --scan-only/--flush halves (test_scan_only_runs_only_seeding_workers, test_flush_runs_only_draining_workers), --topic reaching the scorer (test_topic_reaches_scorer_and_limit_caps_items), --limit capping items (same test), --focus honoured through the root filter (test_focus_restricts_root_filter, test_focus_manifest_restricts_root_filter) with no plan name in any message, and the default gate is get_path_scan_threshold() (test_default_threshold_is_the_calibrated_scan_gate); the old tests that drove the command still pass, which I verified by running tests/discovery/test_paths_pipeline.py at both reviewed revisions.",
+    "goal": "the plan's fold-paths-stage node is to turn imas_codex/cli/discover/paths.py into run_paths_stage(facility, options) with a frozen dataclass of the settled options, leaving the click command as a thin wrapper: paths.py:20 defines frozen PathsStageOptions, paths.py:41 exposes run_paths_stage, and paths.py:206 leaves the click command a thin wrapper that builds the options and calls the stage; the settled renames (--root to --focus items, --path-limit to --limit, the free-text --focus to --topic, --triage-only to --flush, -t moved to --time) and the deleted --reset-scored alias are all present.",
+    "manifest": "read; it states 12 passed EXIT=0 at 404da8bd, names changed_paths (two files) and a negative_control_log at EXIT=1 naming test_flush_runs_only_draining_workers; it omits baseline_suite and after_suite entirely, and its gate2.log/gate3.log carry a revision header of e4ff44bb while the tree was already modified (they collect 12 items and pass 10-12), so the node's own arms do not yield a clean added-failure count.",
+    "write_paths": "the reviewed manifest declares imas_codex/cli/discover/paths.py, tests/cli/test_discover_paths_stage.py, a fragment under docs/evidence/fragments/facility-discovery-sequence/ and a figures dir; git diff --stat e4ff44bb..404da8bd touches exactly the first two, nothing else."
+  },
+  "justifications": {
+    "durability": "the drain-half guard fires: mutating run_paths_stage to ignore --flush (triage_only=options.flush -> triage_only=False) fails test_flush_runs_only_draining_workers at tests/cli/test_discover_paths_stage.py:82 with 'assert 1 == 0', where the unmutated head gate passes it (my own negative-control.log, EXIT=1); the reviewed run's declared negative control records the same test red at EXIT=1, and the mutual-exclusion and manifest-scope guards are additionally pinned by test_flush_refuses_add_roots and test_scan_only_and_flush_are_mutually_exclusive.",
+    "evidence": "the reviewed head gate (12 passed, EXIT=0 at 404da8bd) I reproduced independently in a scratch checkout of 404da8bd (12 passed, EXIT=0), and I ran the regression surface the node's own arms omitted, tests/discovery/test_paths_pipeline.py, at both reviewed revisions (3 passed EXIT=0 each, module resolved from each scratch tree). The shortfall is on the record, not the code: the reviewed manifest declares no baseline_suite/after_suite, its gate2.log/gate3.log name revision e4ff44bb while the tree was modified (10/12 and 12/12 under a base revision header), and none of the node's arms include test_paths_pipeline.py, so a reader cannot derive added failures from the node's own logs.",
+    "fit": "the added symbols PathsStageOptions, run_paths_stage and _focus_roots are named by what they do with no plan label or section number, and paths.py follows the sibling discover folds' stage-plus-thin-wrapper idiom; the only stale spelling in source is the pre-existing usage examples in the docstring and the 'discover paths' message strings, which the later retire-domain-subcommands node owns.",
+    "goal_fidelity": "all four done-when behaviours and the settled option spellings are present and named by mechanism: run_paths_stage routes --scan-only to the seeding half, --flush to the draining half (paths.py:95 triage_only=options.flush), --topic to the engine focus, --limit to path_limit, and --focus items or a manifest file through _focus_roots; the default gate is get_path_scan_threshold() rather than the 0.9 default, which the plan required for this fold. The shortfall is that the plan says the engine-building body is 'kept whole, so no engine changes', and this fold did change _run_iterative_discovery (worker counts, seeding gate, check_ssh, and three new worker-count kwargs to run_parallel_discovery); those edits are what make the halves real, so they are justified, but they are a deviation from the stated extraction shape, and the plan's per-fold evidence fragment was not produced.",
+    "reuse": "the change reuses _run_iterative_discovery, run_parallel_discovery, seed_facility_roots and get_path_scan_threshold unchanged and forks no engine; the three new worker-count kwargs it passes (num_expand_workers/num_enrich_workers/num_score_workers) already exist on run_parallel_discovery (imas_codex/discovery/paths/parallel.py:2634-2637), so no engine parameter was invented; a search of imas_codex/cli found no earlier owner of a paths stage and no shared items-or-manifest reader that _focus_roots duplicates.",
+    "scope_discipline": "git diff --stat e4ff44bba7688c71535eeacdd8086c8dc6d5b51a..404da8bd59fa9fb7217764b2dd8823c626ee09bc touches only imas_codex/cli/discover/paths.py and tests/cli/test_discover_paths_stage.py, both inside the declared write paths, with no edit to imas_codex/cli/discover/__init__.py, no dependency change and no unrelated file; the declared fragment and figures dir were not produced, which is an evidence shortfall rather than scope creep."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: paths.py:20 freezes PathsStageOptions and paths.py:41 exposes run_paths_stage... (see item_verdicts).\nVERDICT done_when: the new test file shows --scan-only/--flush halves, --topic to the scorer, --limit, and --focus honoured through the root filter with no plan name; the old tests still pass.\nVERDICT write_paths: git diff e4ff44bb..404da8bd touches imas_codex/cli/discover/paths.py and tests/cli/test_discover_paths_stage.py only.\nVERDICT manifest: 12 passed EXIT=0 at 404da8bd; no baseline_suite/after_suite; gate2/gate3 mislabel revision e4ff44bb on a modified tree.\nVERDICT diff: read against e4ff44bb; extraction plus option renames, and in-body edits to _run_iterative_discovery.\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 19\nSCORE durability: 19\nSCORE fit: 19\nSCORE reuse: 19\nFINDING no fragment at docs/evidence/fragments/facility-discovery-sequence/fold-paths-stage.html\nFINDING out-of-scope callers of removed flags remain (roots.md -r, README --score-only, compute.py, progress.py)\nFINDING --scan-only still starts embed and dedup workers (parallel.py:2878, :2894)\nFINDING the reviewed manifest omits baseline_suite/after_suite and never runs test_paths_pipeline.py; arms at the reviewed revisions show 0 added failures\n",
+  "review_run_id": "r-20261008T060942087698-review-of-fold-paths-stage",
+  "reviewed_base_sha": "e4ff44bba7688c71535eeacdd8086c8dc6d5b51a",
+  "reviewed_head_sha": "404da8bd59fa9fb7217764b2dd8823c626ee09bc",
+  "reviewed_run_id": "r-20261008T055729378160-fold-paths-stage",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:30:10.261237+00:00",
+  "total": 110,
+  "verdict": "SOUND WITH FINDINGS"
+}
