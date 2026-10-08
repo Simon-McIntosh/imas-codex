@@ -609,6 +609,8 @@ def _run_with_receipt(function, *args):
         for name, value in receipt.items():
             if isinstance(value, int | float) and not isinstance(value, bool):
                 combined[name] = combined.get(name, 0) + value
+            elif name == "errors" and isinstance(value, dict):
+                combined.setdefault("errors", {}).update(value)
     return combined
 
 
@@ -724,8 +726,15 @@ def run_sequence(
             else:
                 stage_options = _stage_options(stage, options, remaining_cost, minutes)
                 result = _run_with_receipt(function, facility, stage_options)
-            outcome.outcome = RAN
-            outcome.reason = "completed"
+            errors = result.get("errors")
+            outcome.outcome = FAILED if errors else RAN
+            outcome.reason = (
+                "; ".join(f"{name}: {error}" for name, error in errors.items())
+                if isinstance(errors, dict) and errors
+                else f"errors: {errors}"
+                if errors
+                else "completed"
+            )
             outcome.done = _done_count(result)
             outcome.remaining = _remaining_count(stage, facility, result)
             outcome.cost = float(result.get("cost", 0.0))
