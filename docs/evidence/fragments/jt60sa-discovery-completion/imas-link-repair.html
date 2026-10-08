@@ -5,8 +5,9 @@
     and bare IDS names in <code>related_ids</code>. A DD path receives
     <code>REFERENCES_IMAS</code> only when an <code>IMASNode</code> with that
     exact path ID exists. A bare name receives <code>REFERENCES_IDS</code>
-    to its <code>IDS</code> root. An IDS-name set that yields no root link
-    raises. Python attribute chains, Fortran derived-type chains and slash
+    to its <code>IDS</code> root. Each missing named root link raises, even
+    when another name in the same batch links. Python attribute chains,
+    Fortran derived-type chains and slash
     strings feed the same DD path extractor.
   </p>
   <table id="imas-link-repair-counts">
@@ -33,11 +34,12 @@
     The old query reproduced a zero result on a chunk naming
     <code>equilibrium</code> while its IDS root existed. The focused gate
     passed eight direct tests; the focused ingestion and schema gate passed
-    57 tests. Restoring the old <code>IMASNode</code>
+    58 tests. Restoring the old <code>IMASNode</code>
     <code>id = ids</code> match made the DD-path and IDS-root link tests fail
-    (two failures, exit 1); four edited Cypher statements passed live
+    (two failures, exit 1); five edited Cypher statements passed live
     <code>EXPLAIN</code>. The backfill receipt and mutation log are stored in
     the run directory under <code>jt60sa-backfill.log</code> and
-    <code>negative-control.log</code>.
+    <code>negative-control.log</code>. A live rerun of the per-name guard
+    found zero missing links among the 65 JT-60SA IDS mentions.
   </p>
 </section>
