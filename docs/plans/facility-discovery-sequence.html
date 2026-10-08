@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -395,6 +395,11 @@
     <h4 class="r-fu-title">Build the stage registry and its probes</h4>
     <div class="r-fu-body">The registry and its dry run come first; the runner and the mapping stages build on them.</div>
     <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §2</pre>
+    </article>
+<article class="r-fu" data-id="f-fds-002" data-status="open" data-written-by="reckon-build" data-written-at="2026-10-08T06:12:44Z" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stop helper workers on a seed-only run</h4>
+    <div class="r-fu-body"><p>The paths and code folds select the seeding workers correctly under <code>--scan-only</code>. But the engines in <code>imas_codex/discovery/paths/parallel.py</code> and <code>imas_codex/discovery/code/parallel.py</code> still append their embed, dedup and user helper pools unconditionally. So a seed-only run still starts work that belongs to the draining half. The fix gates those pools on the selected half, and the stage tests then assert that the pools are absent. It waits until <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code> stops running through those engines.</p></div>
+    <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §3</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
