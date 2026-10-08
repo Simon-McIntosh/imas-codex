@@ -1,0 +1,103 @@
+<section id="diagnostic-convention-audit">
+<h2 id="diagnostic-convention-audit-heading">JT-60SA diagnostic conventions against SELENE COCOS 2</h2>
+<p id="diagnostic-convention-audit-summary">Paired EDDB measurements with SELENE reconstructions at E101163 (4.8, 5.0 and 5.1 s) and E101011 (6.8 s). The <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/jt60sa-diagnostic-conventions.json">per-channel JSON</a> holds 75 entries and the exact values, positions, inferred signs, confidence and flags. The audit is incomplete where geometry or a reference prediction is unavailable; those entries retain unknown signs.</p>
+<p id="diagnostic-convention-audit-receipts">The data receipts are magnetic-comparison-data.log (225 data rows, EXIT=0), second-shot-comparison.log (80 rows, EXIT=0), and other-channels.log (72 rows, EXIT=0) in the run directory. EDDB IRC=0 for each value shown. The E101163 5.5 s FLEDD read was excluded: although its load returned zero, EQTIM returned zero and its grid repeated the 5.1 s grid. E101163 at 4.7 s had EDDB IRC=1051 for all mapped channels and was also excluded. Thus an empty or stale read does not become a sign observation.</p>
+<h3 id="diagnostic-convention-audit-flux">Flux loops</h3>
+<p id="diagnostic-convention-audit-flux-method">The PSRC catalogue has 34 flux-loop channels. The getseldata geometry input maps the first 27 to R,Z. At each mapped sensor the SELENE ψ grid was bilinearly interpolated, with a common shot-specific flux gauge offset removed. Raw Wb divided by 2π gives median absolute residuals of 0.0047, 0.0025 and 0.0053 Wb/rad at E101163 4.8, 5.0 and 5.1 s; E101011 gives 0.0042 Wb/rad. The unscaled and negative-factor fits have much larger spread. Twenty-six mapped channels have maximum absolute residual below 0.02 Wb/rad over those four comparisons, so their positive winding and Wb→Wb/rad factor are high confidence. Loop 7 misses by 0.139–0.427 Wb/rad and has no accepted sign. Channels 28–34 have no SELENE sensor position in this geometry input.</p>
+<table id="diagnostic-convention-audit-flux-table"><thead><tr><th>Channel</th><th>E101163 measured Wb / SELENE ψ Wb/rad</th><th>E101011 measured Wb / SELENE ψ Wb/rad</th><th>Sign</th><th>Raw-to-ψ factor</th><th>Confidence</th><th>Flag</th></tr></thead><tbody>
+<tr><td>PSRC/magFluxLp1</td><td>-0.62494 / -0.02960</td><td>-0.28042 / 0.39996</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp2</td><td>-0.16564 / 0.04112</td><td>-0.10118 / 0.42652</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp3</td><td>0.08020 / 0.07678</td><td>0.01158 / 0.44120</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp4</td><td>0.15657 / 0.08654</td><td>-0.01493 / 0.43278</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp5</td><td>0.13625 / 0.08265</td><td>-0.04973 / 0.42377</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp6</td><td>0.03993 / 0.07106</td><td>-0.05427 / 0.42516</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp7</td><td>1.08578 / 0.06927</td><td>2.69151 / 0.44065</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>persistent_reconstruction_disagreement</td></tr>
+<tr><td>PSRC/magFluxLp8</td><td>0.03933 / 0.07352</td><td>0.08485 / 0.45292</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp9</td><td>0.12611 / 0.08721</td><td>0.13562 / 0.46194</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp10</td><td>0.11936 / 0.08741</td><td>0.02608 / 0.44496</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp11</td><td>0.07352 / 0.08041</td><td>-0.10745 / 0.42283</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp12</td><td>-0.05530 / 0.05777</td><td>-0.49791 / 0.35443</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp13</td><td>0.15747 / 0.09274</td><td>-0.33832 / 0.38080</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp14</td><td>0.54495 / 0.15617</td><td>0.02725 / 0.44115</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp15</td><td>-0.72227 / -0.04321</td><td>-0.23111 / 0.40901</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp16</td><td>-0.29725 / 0.02374</td><td>-0.16073 / 0.41910</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp17</td><td>0.76188 / 0.18805</td><td>0.09129 / 0.45221</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp18</td><td>1.26920 / 0.26662</td><td>0.30781 / 0.48177</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp19</td><td>1.43390 / 0.29241</td><td>0.46668 / 0.50439</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp20</td><td>1.46070 / 0.29818</td><td>0.79277 / 0.55499</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp21</td><td>1.30047 / 0.27736</td><td>1.09704 / 0.61290</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp22</td><td>1.09708 / 0.24605</td><td>0.97511 / 0.59987</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp23</td><td>1.66529 / 0.32727</td><td>0.84454 / 0.57862</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp24</td><td>2.28529 / 0.42766</td><td>1.31358 / 0.65133</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp25</td><td>2.54318 / 0.47039</td><td>1.58888 / 0.69433</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp26</td><td>2.60861 / 0.48262</td><td>1.73459 / 0.71682</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp27</td><td>1.47316 / 0.30480</td><td>0.84375 / 0.57340</td><td>+</td><td>1/(2*pi)</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magFluxLp28</td><td>0.10816 / —</td><td>0.07744 / —</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magFluxLp29</td><td>0.13325 / —</td><td>0.09063 / —</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magFluxLp30</td><td>0.11812 / —</td><td>0.04877 / —</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magFluxLp31</td><td>0.08584 / —</td><td>0.01867 / —</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magFluxLp32</td><td>-0.05080 / —</td><td>-0.00457 / —</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magFluxLp33</td><td>-0.06754 / —</td><td>-0.02784 / —</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magFluxLp34</td><td>0.06492 / —</td><td>0.03226 / —</td><td>unknown</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-pickup">Tangential pickup coils</h3>
+<p id="diagnostic-convention-audit-pickup-method">The PSRC catalogue has 23 pickup channels; the SELENE input maps 17 to R,Z,angle rows. From the COCOS 2 ψ grid, Br=(∂ψ/∂Z)/R and Bz=−(∂ψ/∂R)/R. The listed angle defines N=(−sin θ, cos θ) in the R–Z plane. All 17 mapped measured channels follow −B·N, with median absolute residuals 0.0132, 0.0041, 0.0133 and 0.0051 T at E101163 4.8, 5.0, 5.1 s and E101011 6.8 s. The along-angle projection gives 0.0477 T at E101163 5.0 s, and +B·N is worse still. Thus the observed winding is negative relative to that geometric normal. The measurements are in tesla, with no 2π factor. Six further channels lack sensor positions, so their orientation is unknown.</p>
+<table id="diagnostic-convention-audit-pickup-table"><thead><tr><th>Channel</th><th>E101163 measured / SELENE expected T</th><th>E101011 measured / SELENE expected T</th><th>Angle [deg]</th><th>Orientation</th><th>Confidence</th><th>Flag</th></tr></thead><tbody>
+<tr><td>PSRC/magPbTC1</td><td>0.10806 / 0.09682</td><td>0.07744 / 0.06525</td><td>0.28000</td><td>− normal</td><td>medium</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC2</td><td>0.13286 / 0.12535</td><td>0.09063 / 0.08664</td><td>21.20000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC3</td><td>0.11874 / 0.11717</td><td>0.04877 / 0.04964</td><td>34.89000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC4</td><td>0.08687 / 0.09017</td><td>0.01867 / 0.02278</td><td>50.39000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC5</td><td>-0.05172 / -0.04394</td><td>-0.00457 / 0.00083</td><td>85.14000</td><td>− normal</td><td>medium</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC6</td><td>-0.06775 / -0.06359</td><td>-0.02784 / -0.02281</td><td>124.41000</td><td>− normal</td><td>medium</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC7</td><td>0.06581 / 0.07184</td><td>0.03226 / 0.03780</td><td>179.06000</td><td>− normal</td><td>medium</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC8</td><td>0.16386 / 0.17287</td><td>0.05490 / 0.06708</td><td>180.01000</td><td>− normal</td><td>medium</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC9</td><td>0.19359 / 0.19791</td><td>0.08311 / 0.09209</td><td>180.21000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC10</td><td>0.09381 / 0.09504</td><td>0.05735 / 0.05416</td><td>180.17000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC11</td><td>-0.04255 / -0.04231</td><td>-0.04588 / -0.04823</td><td>180.27000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC12</td><td>-0.06755 / -0.06762</td><td>-0.08054 / -0.08293</td><td>234.21000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC13</td><td>0.01813 / 0.01949</td><td>0.01016 / 0.00922</td><td>274.28000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC14</td><td>0.13872 / 0.13841</td><td>0.10041 / 0.09950</td><td>311.04000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC15</td><td>0.09315 / 0.08917</td><td>0.04336 / 0.03923</td><td>324.55000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC16</td><td>0.07689 / 0.07005</td><td>0.03793 / 0.03033</td><td>338.37000</td><td>− normal</td><td>high</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC17</td><td>0.08679 / 0.07710</td><td>0.05408 / 0.04289</td><td>350.24000</td><td>− normal</td><td>medium</td><td>—</td></tr>
+<tr><td>PSRC/magPbTC18</td><td>-0.00218 / —</td><td>-0.00383 / —</td><td>—</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magPbTC19</td><td>-0.00328 / —</td><td>-0.00328 / —</td><td>—</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magPbTC20</td><td>-0.00284 / —</td><td>-0.00434 / —</td><td>—</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magPbTC21</td><td>-0.00076 / —</td><td>-0.00215 / —</td><td>—</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magPbTC22</td><td>-0.00227 / —</td><td>-0.00241 / —</td><td>—</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+<tr><td>PSRC/magPbTC23</td><td>-0.00227 / —</td><td>-0.00031 / —</td><td>—</td><td>unknown</td><td>undetermined</td><td>sensor_position_missing</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-rogowski">Ip Rogowski coils</h3>
+<p id="diagnostic-convention-audit-rogowski-method">SELENE current is +0.992993 MA at E101163 5.1 s and the SA COCOS 2 G-EQDSK current is +0.491265 MA at E101011 6.8 s. A sign is assigned only when both raw currents exceed 10% of the reconstruction magnitude. RCP1 is positive for clockwise Ip. RCIP2 and outer-VV coils 1, 2 and 4 are negative for the same reference direction; they are explicit family polarity disagreements. RCIP3–4, outer-VV coil 3 and inner-VV coils 1–4 carry little current in both shots and cannot establish a winding sign. Current has no 2π flux factor.</p>
+<table id="diagnostic-convention-audit-rogowski-table"><thead><tr><th>Channel</th><th>E101163 measured / SELENE A</th><th>E101011 measured / SELENE A</th><th>Sign for clockwise Ip</th><th>Confidence</th><th>Flag</th></tr></thead><tbody>
+<tr><td>MDAC/curRCP1</td><td>994058.7 / 992992.9</td><td>490347.4 / 491265.1</td><td>+</td><td>medium</td><td>—</td></tr>
+<tr><td>MDAC/curRCIP2</td><td>-984622.1 / 992992.9</td><td>-499738.4 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curRCIP3</td><td>0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curRCIP4</td><td>-0.0 / 992992.9</td><td>-0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curAVVRC1</td><td>-890075.4 / 992992.9</td><td>-482269.4 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curAVVRC2</td><td>-1026462.4 / 992992.9</td><td>-555838.9 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curAVVRC3</td><td>9933.6 / 992992.9</td><td>12029.1 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curAVVRC4</td><td>-1027008.7 / 992992.9</td><td>-560811.1 / 491265.1</td><td>−</td><td>medium</td><td>opposite_to_clockwise_positive_ip</td></tr>
+<tr><td>MDAC/curIVVRC1</td><td>-0.0 / 992992.9</td><td>-0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curIVVRC2</td><td>-0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curIVVRC3</td><td>0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+<tr><td>MDAC/curIVVRC4</td><td>0.0 / 992992.9</td><td>0.0 / 491265.1</td><td>unknown</td><td>undetermined</td><td>—</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-diamagnetic">Diamagnetic loop</h3>
+<p id="diagnostic-convention-audit-diamagnetic-method">The three MDAC loop voltages and corrected PSRC flux are readable at both shots, but no diamagnetic sensor geometry or SELENE prediction at that loop was established. Voltage cannot be divided by 2π and compared directly with poloidal ψ. The sign, positive normal and flux normalization of each channel remain unknown.</p>
+<table id="diagnostic-convention-audit-diamagnetic-table"><thead><tr><th>Channel</th><th>E101163 value</th><th>E101011 value</th><th>Unit</th><th>Inferred sign</th></tr></thead><tbody>
+<tr><td>MDAC/volDmagL1</td><td>-0.02323</td><td>-0.00406</td><td>V</td><td>unknown</td></tr>
+<tr><td>MDAC/volDmagL2</td><td>-1.54305</td><td>-2.31027</td><td>V</td><td>unknown</td></tr>
+<tr><td>MDAC/volDmagL3</td><td>-0.30530</td><td>-0.44563</td><td>V</td><td>unknown</td></tr>
+<tr><td>PSRC/corDmagL1</td><td>-0.02322</td><td>-0.00406</td><td>Wb</td><td>unknown</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-toroidal">Toroidal-field measurement</h3>
+<p id="diagnostic-convention-audit-toroidal-method">The EDDB PID 1625 O293 maps to PSC/oTFCur. The active outeddb.c source multiplies this current by +2.25×2.96/25.7 to obtain SELENE BTV. At E101011, +23.195272 kA gives +6.010914961 T·m, matching the SA COCOS 2 G-EQDSK +6.010914972 T·m to 0.000000011 T·m. MDAC/oTFCur also reads positive and differs from PSC by less than 0.08%. Both measured currents thus have positive sign for clockwise Bt; no 2π conversion applies. E101163 FLEDD BTV is +6.66 T·m while the scaled current is about +6.011 T·m, so amplitude agreement is specific to the E101011 example.</p>
+<table id="diagnostic-convention-audit-toroidal-table"><thead><tr><th>Channel</th><th>E101163 [kA]</th><th>E101011 [kA]</th><th>Sign for clockwise Bt</th><th>Confidence</th></tr></thead><tbody>
+<tr><td>PSC/oTFCur</td><td>23.18429</td><td>23.19527</td><td>+</td><td>medium</td></tr>
+<tr><td>MDAC/oTFCur</td><td>23.19710</td><td>23.17879</td><td>+</td><td>low</td></tr>
+</tbody></table>
+<h3 id="diagnostic-convention-audit-profiles">Profile coordinates</h3>
+<p id="diagnostic-convention-audit-profiles-method">The active EDAS coordinate selector maps FIT_RHOTYPE 0 to equal ψ, 1 to volume-average ρ, 2 to toroidal-flux-average ρ, 3 to poloidal-flux-average ρ and 9 to poloidal flux with SOL. This is a per-record selector, so a profile family cannot inherit one fixed coordinate. A live LCDB/a042181/ate.s001 record for shot E101173 reports FIT_RHOTYPE=1 and positive XEXPDATA 0.563–0.827, but its equilibrium shot is 75000. Its TOPICS_RHOTYPE=6 is absent from that selector map. Neither selector was compared numerically with a SELENE reference at the same shot, so coordinate sign and the TOPICS axis remain unverified.</p>
+<p id="diagnostic-convention-audit-limit">Completion gap: 7 flux-loop and 6 pickup positions are missing from the reconstruction input; diamagnetic geometry/prediction is unresolved; the sampled profile uses a different equilibrium shot. The JSON leaves these convention values null and lists the measurements needed to settle them.</p>
+</section>
