@@ -115,7 +115,7 @@ def _link_chunk_references(
         f"RETURN sum(size(coalesce(c.{property_name}, []))) AS mentions",
         **params,
     )
-    mentions = counts[0]["mentions"] or 0
+    mentions = (counts[0]["mentions"] or 0) if counts else 0
     if not mentions:
         return 0, 0
     links = client.query(
