@@ -33,6 +33,10 @@ class _FakeEncoder:
 class _FakeClient:
     def __init__(self):
         self.writes = []
+        self.index_ensures = 0
+
+    def ensure_vector_indexes(self):
+        self.index_ensures += 1
 
     def query(self, cypher: str, **params):
         self.writes.append((cypher, params))
@@ -183,6 +187,7 @@ def test_embed_identifier_schemas_emits_items(monkeypatch):
     )
 
     assert stats["updated"] == 1
+    assert client.index_ensures == 1
     assert emitted[0]["primary_text"] == "coordinate_identifier"
 
 
@@ -204,4 +209,5 @@ def test_embed_ids_nodes_emits_items(monkeypatch):
     )
 
     assert stats["updated"] == 1
+    assert client.index_ensures == 1
     assert emitted[0]["primary_text"] == "core_profiles"
