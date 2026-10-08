@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="61">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -366,6 +366,19 @@
       patches it explicitly. Write paths: <code>tests/ids/test_metadata.py</code> and its fragment. <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/ids/test_metadata.py -p no:cacheprovider</code> passes with the guard fixture in
       place, so no test in the file reaches an endpoint.
+    </p>
+    <p>
+      <code>sequence-mapping-stages</code> landed the candidate-home union only for the unfiltered call (2,958 selected or
+      escalated edges across 59 IDSs give JT-60SA 76 targets, 2.7 s live). Its review found two gaps. A <code>--physics-domain</code>
+      run still picks targets by domain overlap alone, so a source in that domain whose home lies in another domain's IDS is
+      never mapped. And the early return when no enriched source carries a <code>physics_domain</code> skips the union
+      entirely. An explicit <code>--ids</code> list stays as given.
+      <strong>Node</strong> <code>candidate-homes-under-domain-filter</code>, role implement, 0.5 h. Under a domain filter
+      the union adds the candidate homes of sources in those domains, and the union runs before the early return. Write paths:
+      <code>imas_codex/ids/tools.py</code>, <code>tests/ids/test_mappable_ids_from_candidates.py</code> and its fragment.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider</code>
+      passes with tests showing a domain-filtered call includes a cross-domain home of a source in that domain, excludes the
+      home of a source outside it, and an explicit <code>--ids</code> list is returned unchanged.
     </p>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
