@@ -539,6 +539,7 @@ class DataDiscoveryState(DiscoveryStateBase):
     # Data source configuration
     reference_shot: int | None = None
     scanner_types: list[str] = field(default_factory=list)
+    scanner_errors: dict[str, str] = field(default_factory=dict)
 
     # Legacy — kept for backwards compat with progress display
     tdi_path: str | None = None
@@ -2899,6 +2900,7 @@ async def seed_worker(
             scanner = get_scanner(scanner_type)
         except KeyError:
             logger.warning("Scanner '%s' not registered, skipping", scanner_type)
+            state.scanner_errors[scanner_type] = "scanner not registered"
             continue
 
         scanner_config = _facility_scanner_config(facility_config, scanner_type)
@@ -2913,6 +2915,8 @@ async def seed_worker(
                 config=scanner_config,
                 reference_shot=state.reference_shot,
             )
+            if result.stats.get("error"):
+                state.scanner_errors[scanner_type] = str(result.stats["error"])
 
             if result.wiki_context:
                 state.wiki_context.update(result.wiki_context)
@@ -2979,6 +2983,7 @@ async def seed_worker(
             logger.error("%s scan failed for %s: %s", scanner_type, state.facility, e)
             if is_infrastructure_error(e):
                 raise
+            state.scanner_errors[scanner_type] = str(e)
 
     state.seed_phase.mark_done()
     if on_progress:
@@ -5476,6 +5481,7 @@ async def run_parallel_data_discovery(
 
         return {
             "scanned": state.discover_stats.processed,
+            "errors": dict(state.scanner_errors),
             "discovered": state.discover_stats.processed
             + state.promote_stats.processed,
             "enriched": 0,
@@ -5554,6 +5560,7 @@ async def run_parallel_data_discovery(
     elapsed = time.time() - start_time
     return {
         "scanned": state.discover_stats.processed,
+        "errors": dict(state.scanner_errors),
         "discovered": state.discover_stats.processed + state.promote_stats.processed,
         "enriched": state.enrich_stats.processed,
         "checked": state.check_stats.processed,

@@ -329,6 +329,34 @@ def test_failure_skips_consumers_and_independent_domains_continue(monkeypatch, h
     assert _outcome(outcomes, "mapping").outcome == sequence.NOT_REQUESTED
 
 
+def test_receipt_errors_fail_stage_and_skip_consumers(monkeypatch, healthy):
+    calls = []
+
+    def resolve(stage):
+        def run(*args):
+            calls.append(stage.name)
+            if stage.name == "signals scan":
+                return {"errors": {"edas": "remote scan failed"}, "cost": 1.0}
+            return {"cost": 0.0}
+
+        return run
+
+    monkeypatch.setattr(sequence, "_stage_function", resolve)
+    outcomes = sequence.run_sequence(
+        "jt-60sa",
+        config=_config(),
+        options=sequence.SequenceOptions(only=("signals", "candidates")),
+    )
+    assert _outcome(outcomes, "signals scan").outcome == sequence.FAILED
+    assert "edas" in _outcome(outcomes, "signals scan").reason
+    assert "remote scan failed" in _outcome(outcomes, "signals scan").reason
+    assert _outcome(outcomes, "signals scan").cost == 1.0
+    assert _outcome(outcomes, "signals enrich").outcome == sequence.DEPENDENCY_FAILED
+    assert _outcome(outcomes, "candidates").outcome == sequence.DEPENDENCY_FAILED
+    assert "signals enrich" not in calls
+    assert "candidates" not in calls
+
+
 def test_selection_and_halves(monkeypatch, healthy):
     calls = _recording_stages(monkeypatch)
     selected = sequence.run_sequence(
@@ -615,6 +643,22 @@ def test_stage_without_return_still_supplies_its_cost_receipt(monkeypatch):
 
     result = sequence._run_with_receipt(stage, "jt-60sa", object())
     assert result == {"cost": 2.25, "scanned": 4}
+
+
+def test_stage_without_return_preserves_receipt_errors(monkeypatch):
+    from imas_codex.cli.discover import common
+
+    monkeypatch.setattr(
+        common,
+        "run_discovery",
+        lambda *args, **kwargs: {"errors": {"edas": "remote scan failed"}},
+    )
+
+    def stage(facility, options):
+        common.run_discovery(None, None)
+
+    result = sequence._run_with_receipt(stage, "jt-60sa", object())
+    assert result["errors"] == {"edas": "remote scan failed"}
 
 
 def test_failed_stage_receipt_reduces_independent_stage_budget(monkeypatch, healthy):
