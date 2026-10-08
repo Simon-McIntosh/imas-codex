@@ -416,6 +416,26 @@ def release_mapping_claims_batch(source_ids: list[str]) -> None:
     release_claims_batch("SignalSource", source_ids, **_MAPPING_CLAIM_FIELDS)
 
 
+def _escalated_source_predicate(
+    ids_names: list[str] | None,
+    domains: list[str] | None = None,
+) -> tuple[str, dict[str, Any]]:
+    """Select unresolved escalated sources with a candidate in a target IDS."""
+    domain_filter, params = _domain_filter(domains)
+    ids_clause = ""
+    if ids_names:
+        ids_clause = (
+            "AND EXISTS { (n)-[r:MAPPING_CANDIDATE]->(:IMASNode) "
+            "WHERE r.ids IN $ids_names } "
+        )
+        params["ids_names"] = list(ids_names)
+    return (
+        "n.candidate_route = 'escalated' "
+        "AND n.mapping_disposition IS NULL " + ids_clause + domain_filter,
+        params,
+    )
+
+
 def claim_sources_for_escalated(
     facility: str,
     ids_names: list[str] | None = None,
@@ -431,22 +451,11 @@ def claim_sources_for_escalated(
     ``selected`` in one statement, so a chosen source drops out of this set and
     is claimed next by the per-IDS map pass.
     """
-    domain_filter, domain_params = _domain_filter(domains)
-    params: dict[str, Any] = dict(domain_params)
-    ids_clause = ""
-    if ids_names:
-        ids_clause = (
-            "AND EXISTS { (n)-[r:MAPPING_CANDIDATE]->(:IMASNode) "
-            "WHERE r.ids IN $ids_names } "
-        )
-        params["ids_names"] = list(ids_names)
+    predicate, params = _escalated_source_predicate(ids_names, domains)
     return claim_batch(
         "SignalSource",
         facility=facility,
-        status_predicate=(
-            "n.candidate_route = 'escalated' "
-            "AND n.mapping_disposition IS NULL " + ids_clause + domain_filter
-        ),
+        status_predicate=predicate,
         status_params=params,
         batch_size=batch_size,
         return_fields=_ASSIGNMENT_FIELDS,
@@ -461,21 +470,11 @@ def has_pending_assignment_work(
     ids_names: list[str] | None = None,
 ) -> bool:
     """Check if escalated sources with a target IDS candidate remain unselected."""
-    ids_clause = ""
-    params: dict[str, Any] = {}
-    if ids_names:
-        ids_clause = (
-            "AND EXISTS { (n)-[r:MAPPING_CANDIDATE]->(:IMASNode) "
-            "WHERE r.ids IN $ids_names } "
-        )
-        params["ids_names"] = list(ids_names)
+    predicate, params = _escalated_source_predicate(ids_names)
     return has_pending(
         "SignalSource",
         facility=facility,
-        status_predicate=(
-            "n.candidate_route = 'escalated' "
-            "AND n.mapping_disposition IS NULL " + ids_clause
-        ),
+        status_predicate=predicate,
         status_params=params,
     )
 
