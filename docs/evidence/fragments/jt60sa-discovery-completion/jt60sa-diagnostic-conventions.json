@@ -1,0 +1,3266 @@
+{
+  "schema": "jt60sa-diagnostic-conventions/1",
+  "reference": {
+    "code": "SELENE",
+    "cocos": 2,
+    "shots": [
+      {
+        "shot": "E101163",
+        "times_s": [
+          4.8,
+          5.0,
+          5.1
+        ],
+        "equilibrium": "EQDB ID 1 and local EQ31",
+        "current_reference_a": 992992.9060900304
+      },
+      {
+        "shot": "E101011",
+        "times_s": [
+          6.8
+        ],
+        "equilibrium": "SA G-EQDSK COCOS02",
+        "current_reference_a": 491265.075
+      }
+    ],
+    "excluded_probe": {
+      "shot": "E101163",
+      "time_s": 5.5,
+      "reason": "FLEDD returned IRET=0 but EQTIM=0 and repeated the 5.1 s grid; excluded from inference"
+    },
+    "sources": [
+      "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-cocos-study.html",
+      "docs/evidence/receipts/jt60sa-selene-sensor-order.json",
+      "magnetic-comparison-data.log",
+      "second-shot-comparison.log",
+      "other-channels.log"
+    ]
+  },
+  "method": {
+    "flux": "Bilinear SELENE psi(R,Z) at each geo.in loop position. Compare raw EDDB Wb divided by 2pi after removing the median offset across the 27 mapped loops per shot/time. Residuals test individual channels.",
+    "pickup": "Bilinear derivatives of SELENE psi at each geo.in probe position, Br=(dpsi/dZ)/R and Bz=-(dpsi/dR)/R; project on listed R-Z angle. The available model does not isolate vacuum and coil contributions.",
+    "rogowski": "Compare each raw current with SELENE TTCU or SA G-EQDSK current at the named shot. Sign inference requires at least 10% of reference current in both shots.",
+    "toroidal": "PSC/oTFCur is PID 1625 O293; outeddb.c uses positive factor 2.25*2.96/25.7 to produce BTV in T m.",
+    "profile": "Read per-record coordinate selector rather than assign one coordinate system to all profiles."
+  },
+  "families": {
+    "flux_loops": {
+      "catalogued_channels": 34,
+      "mapped_sensor_positions": 27,
+      "factor_test": {
+        "raw_divided_by_2pi_median_absolute_deviation_wb_per_rad": {
+          "E101163@4.8": 0.0047,
+          "E101163@5.0": 0.0025,
+          "E101163@5.1": 0.0053,
+          "E101011@6.8": 0.0042
+        },
+        "common_gauge_offsets_wb_per_rad": {
+          "E101163@4.8": -0.080598,
+          "E101163@5.0": -0.067138,
+          "E101163@5.1": -0.084044,
+          "E101011@6.8": -0.439353
+        }
+      },
+      "channels": [
+        {
+          "id": "PSRC/magFluxLp1",
+          "sensor_index": 1,
+          "position_rz_m": [
+            1.8798,
+            2.9331
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:503",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.6173719763755798,
+              "selene_psi_wb_per_rad": -0.009643769732408748,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.6249380707740784,
+              "selene_psi_wb_per_rad": -0.029596411513770786,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.6214160323143005,
+              "selene_psi_wb_per_rad": -0.006036718163465399,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.28042203187942505,
+              "selene_psi_wb_per_rad": 0.3999554176941674,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.00882,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp2",
+          "sensor_index": 2,
+          "position_rz_m": [
+            1.6414,
+            2.5202
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:504",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.14452874660491943,
+              "selene_psi_wb_per_rad": 0.05893136564510456,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.1656375378370285,
+              "selene_psi_wb_per_rad": 0.04112401183569556,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.16698995232582092,
+              "selene_psi_wb_per_rad": 0.058584400377234586,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.10117802023887634,
+              "selene_psi_wb_per_rad": 0.42652236633769686,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.003273,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp3",
+          "sensor_index": 3,
+          "position_rz_m": [
+            1.6262,
+            1.9769
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:505",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.1018407866358757,
+              "selene_psi_wb_per_rad": 0.0871294610443326,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.08019959926605225,
+              "selene_psi_wb_per_rad": 0.07677767241744848,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.07858400046825409,
+              "selene_psi_wb_per_rad": 0.08531578246769034,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.011583738029003143,
+              "selene_psi_wb_per_rad": 0.44119623327057406,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.011236,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp4",
+          "sensor_index": 4,
+          "position_rz_m": [
+            1.6246,
+            1.427
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:506",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.175979346036911,
+              "selene_psi_wb_per_rad": 0.09537160112824676,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.156574547290802,
+              "selene_psi_wb_per_rad": 0.08653799601497611,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.15397614240646362,
+              "selene_psi_wb_per_rad": 0.09347426491260379,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.01492722425609827,
+              "selene_psi_wb_per_rad": 0.4327837038825546,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.015076,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp5",
+          "sensor_index": 5,
+          "position_rz_m": [
+            1.6241,
+            0.9769
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:507",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.15168647468090057,
+              "selene_psi_wb_per_rad": 0.09480169302877198,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.13624565303325653,
+              "selene_psi_wb_per_rad": 0.08265073820044666,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.13290126621723175,
+              "selene_psi_wb_per_rad": 0.09392435840279141,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.04973352700471878,
+              "selene_psi_wb_per_rad": 0.4237669528587088,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.011272,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp6",
+          "sensor_index": 6,
+          "position_rz_m": [
+            1.6237,
+            0.377
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:508",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.04728694260120392,
+              "selene_psi_wb_per_rad": 0.08812722076710458,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.039934948086738586,
+              "selene_psi_wb_per_rad": 0.07105794151652821,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.03719094768166542,
+              "selene_psi_wb_per_rad": 0.08996353867223689,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.05426811799407005,
+              "selene_psi_wb_per_rad": 0.4251590311599707,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.005557,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp7",
+          "sensor_index": 7,
+          "position_rz_m": [
+            1.6229,
+            -0.073
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:509",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.9157377481460571,
+              "selene_psi_wb_per_rad": 0.08720888935668235,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.0857770442962646,
+              "selene_psi_wb_per_rad": 0.06926740736490145,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.1578106880187988,
+              "selene_psi_wb_per_rad": 0.09151736810458273,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 2.691511631011963,
+              "selene_psi_wb_per_rad": 0.4406476945570743,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": 0.427072,
+          "confidence": "undetermined",
+          "family_disagreement": "persistent_reconstruction_disagreement",
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp8",
+          "sensor_index": 8,
+          "position_rz_m": [
+            1.6238,
+            -0.373
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:510",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.03486621752381325,
+              "selene_psi_wb_per_rad": 0.09081917620509014,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.039331018924713135,
+              "selene_psi_wb_per_rad": 0.07351525977074358,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.04192741960287094,
+              "selene_psi_wb_per_rad": 0.0963055997515903,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.08484568446874619,
+              "selene_psi_wb_per_rad": 0.4529184265922706,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.005588,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp9",
+          "sensor_index": 9,
+          "position_rz_m": [
+            1.6238,
+            -0.973
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:511",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.1231669932603836,
+              "selene_psi_wb_per_rad": 0.10267434925440995,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.1261145919561386,
+              "selene_psi_wb_per_rad": 0.08720977777554827,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.1305554062128067,
+              "selene_psi_wb_per_rad": 0.10771165454715109,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.1356165111064911,
+              "selene_psi_wb_per_rad": 0.46193533783028484,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.002889,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp10",
+          "sensor_index": 10,
+          "position_rz_m": [
+            1.6243,
+            -1.423
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:512",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.12678749859333038,
+              "selene_psi_wb_per_rad": 0.10186205110458997,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.11935949325561523,
+              "selene_psi_wb_per_rad": 0.08741468690253777,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.12102349102497101,
+              "selene_psi_wb_per_rad": 0.10414702973632599,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.02607937529683113,
+              "selene_psi_wb_per_rad": 0.444964206301334,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.001461,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp11",
+          "sensor_index": 11,
+          "position_rz_m": [
+            1.6248,
+            -1.7454
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:513",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.09102825820446014,
+              "selene_psi_wb_per_rad": 0.0943034942444331,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.07352106273174286,
+              "selene_psi_wb_per_rad": 0.08041232141597043,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.0717354565858841,
+              "selene_psi_wb_per_rad": 0.09391793464489293,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.10745429992675781,
+              "selene_psi_wb_per_rad": 0.4228258313938432,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.001573,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp12",
+          "sensor_index": 12,
+          "position_rz_m": [
+            1.6918,
+            -2.6883
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:514",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.010851663537323475,
+              "selene_psi_wb_per_rad": 0.07048679638266805,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.05530324578285217,
+              "selene_psi_wb_per_rad": 0.05777443633824039,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.0673060417175293,
+              "selene_psi_wb_per_rad": 0.06292724692940704,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.4979105591773987,
+              "selene_psi_wb_per_rad": 0.354434283603772,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.010405,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp13",
+          "sensor_index": 13,
+          "position_rz_m": [
+            2.0212,
+            -3.0384
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:515",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.2003626674413681,
+              "selene_psi_wb_per_rad": 0.1061949441486566,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.15747027099132538,
+              "selene_psi_wb_per_rad": 0.09273773074128983,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.14719705283641815,
+              "selene_psi_wb_per_rad": 0.09930275245755099,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.3383162319660187,
+              "selene_psi_wb_per_rad": 0.38080442323371444,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.008169,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp14",
+          "sensor_index": 14,
+          "position_rz_m": [
+            2.3023,
+            -3.1209
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:516",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.5829164981842041,
+              "selene_psi_wb_per_rad": 0.17103212727133163,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.5449497699737549,
+              "selene_psi_wb_per_rad": 0.1561749768092884,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.5375053286552429,
+              "selene_psi_wb_per_rad": 0.16578041968185894,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.027245447039604187,
+              "selene_psi_wb_per_rad": 0.4411483835354982,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.003811,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp15",
+          "sensor_index": 15,
+          "position_rz_m": [
+            2.3922,
+            3.1175
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:517",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.7280378937721252,
+              "selene_psi_wb_per_rad": -0.025256270851491555,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.7222691178321838,
+              "selene_psi_wb_per_rad": -0.043206016019887675,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.7122527360916138,
+              "selene_psi_wb_per_rad": -0.018359065287457222,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.23111379146575928,
+              "selene_psi_wb_per_rad": 0.4090093471390263,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.010955,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp16",
+          "sensor_index": 16,
+          "position_rz_m": [
+            2.7756,
+            3.0584
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:518",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.2858784794807434,
+              "selene_psi_wb_per_rad": 0.041902448869504866,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.29724693298339844,
+              "selene_psi_wb_per_rad": 0.02374174045390647,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.2921481430530548,
+              "selene_psi_wb_per_rad": 0.04475329706482379,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.1607270985841751,
+              "selene_psi_wb_per_rad": 0.41909989994675967,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.007206,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp17",
+          "sensor_index": 17,
+          "position_rz_m": [
+            3.4167,
+            2.6996
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:519",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.8138319253921509,
+              "selene_psi_wb_per_rad": 0.20586512464681428,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.7618798017501831,
+              "selene_psi_wb_per_rad": 0.1880486793074147,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.7563378810882568,
+              "selene_psi_wb_per_rad": 0.1991260824222066,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.09129476547241211,
+              "selene_psi_wb_per_rad": 0.45220745174313215,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.005293,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp18",
+          "sensor_index": 18,
+          "position_rz_m": [
+            3.7581,
+            2.3976
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:520",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 1.3333561420440674,
+              "selene_psi_wb_per_rad": 0.28412195950274005,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.2691993713378906,
+              "selene_psi_wb_per_rad": 0.26661750269468387,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.262408971786499,
+              "selene_psi_wb_per_rad": 0.27465648857977465,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.3078104257583618,
+              "selene_psi_wb_per_rad": 0.48176527925408263,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.010307,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp19",
+          "sensor_index": 19,
+          "position_rz_m": [
+            3.966,
+            2.1663
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:521",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 1.494693636894226,
+              "selene_psi_wb_per_rad": 0.3089842535736872,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.4338957071304321,
+              "selene_psi_wb_per_rad": 0.292414095181572,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.4303475618362427,
+              "selene_psi_wb_per_rad": 0.3003699241193779,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.4666845500469208,
+              "selene_psi_wb_per_rad": 0.5043881428929482,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.011321,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp20",
+          "sensor_index": 20,
+          "position_rz_m": [
+            4.2965,
+            1.6801
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:522",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 1.495039939880371,
+              "selene_psi_wb_per_rad": 0.31175130379834187,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.4607027769088745,
+              "selene_psi_wb_per_rad": 0.2981829779422792,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.4708812236785889,
+              "selene_psi_wb_per_rad": 0.3096425928335875,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.792773962020874,
+              "selene_psi_wb_per_rad": 0.5549933075153481,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.010533,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp21",
+          "sensor_index": 21,
+          "position_rz_m": [
+            4.6193,
+            0.8827
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:523",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 1.298949122428894,
+              "selene_psi_wb_per_rad": 0.28961078803242,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.300474762916565,
+              "selene_psi_wb_per_rad": 0.2773625107809356,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.3314276933670044,
+              "selene_psi_wb_per_rad": 0.29757591428949326,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.0970416069030762,
+              "selene_psi_wb_per_rad": 0.6128986285900083,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.003248,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp22",
+          "sensor_index": 22,
+          "position_rz_m": [
+            4.6934,
+            0.5322
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:524",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 1.0964876413345337,
+              "selene_psi_wb_per_rad": 0.26009407088816605,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.097076416015625,
+              "selene_psi_wb_per_rad": 0.24604765431104023,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.1300528049468994,
+              "selene_psi_wb_per_rad": 0.26873722820385226,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.9751129150390625,
+              "selene_psi_wb_per_rad": 0.5998721316624942,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.005325,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp23",
+          "sensor_index": 23,
+          "position_rz_m": [
+            4.2974,
+            -1.676
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:525",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 1.7032239437103271,
+              "selene_psi_wb_per_rad": 0.3486262230921941,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.6652854681015015,
+              "selene_psi_wb_per_rad": 0.32726521727945745,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.6651203632354736,
+              "selene_psi_wb_per_rad": 0.34635932693975713,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.8445402383804321,
+              "selene_psi_wb_per_rad": 0.5786222140354322,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.004911,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp24",
+          "sensor_index": 24,
+          "position_rz_m": [
+            3.9693,
+            -2.1618
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:526",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 2.3242743015289307,
+              "selene_psi_wb_per_rad": 0.4505180937457621,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 2.285287618637085,
+              "selene_psi_wb_per_rad": 0.427660832529014,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 2.2805588245391846,
+              "selene_psi_wb_per_rad": 0.4474941418502456,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.3135790824890137,
+              "selene_psi_wb_per_rad": 0.6513281423114525,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.003192,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp25",
+          "sensor_index": 25,
+          "position_rz_m": [
+            3.7604,
+            -2.3992
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:527",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 2.581425428390503,
+              "selene_psi_wb_per_rad": 0.4935263091259271,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 2.5431809425354004,
+              "selene_psi_wb_per_rad": 0.47038905028619293,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 2.53774356842041,
+              "selene_psi_wb_per_rad": 0.4905361003826289,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.588876485824585,
+              "selene_psi_wb_per_rad": 0.6943318481100695,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.002597,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp26",
+          "sensor_index": 26,
+          "position_rz_m": [
+            3.4971,
+            -2.6243
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:528",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 2.645698070526123,
+              "selene_psi_wb_per_rad": 0.5054807264453584,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 2.608611583709717,
+              "selene_psi_wb_per_rad": 0.48262164034036353,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 2.6031463146209717,
+              "selene_psi_wb_per_rad": 0.5025730192032214,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.7345887422561646,
+              "selene_psi_wb_per_rad": 0.7168211277460301,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.004225,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp27",
+          "sensor_index": 27,
+          "position_rz_m": [
+            2.753,
+            -3.0599
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:529",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 1.5090349912643433,
+              "selene_psi_wb_per_rad": 0.3232382578263223,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 1.473162055015564,
+              "selene_psi_wb_per_rad": 0.3048044670317262,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.467241644859314,
+              "selene_psi_wb_per_rad": 0.3194366337149186,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.8437491059303284,
+              "selene_psi_wb_per_rad": 0.5733953276041053,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.003205,
+          "confidence": "high",
+          "family_disagreement": null,
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; common gauge offset fitted across 27 mapped loops"
+        },
+        {
+          "id": "PSRC/magFluxLp28",
+          "sensor_index": 28,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.1081649661064148,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.07744250446557999,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        },
+        {
+          "id": "PSRC/magFluxLp29",
+          "sensor_index": 29,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.13324932754039764,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.09063102304935455,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        },
+        {
+          "id": "PSRC/magFluxLp30",
+          "sensor_index": 30,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.11811521649360657,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.04877082258462906,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        },
+        {
+          "id": "PSRC/magFluxLp31",
+          "sensor_index": 31,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.0858398824930191,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.018670111894607544,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        },
+        {
+          "id": "PSRC/magFluxLp32",
+          "sensor_index": 32,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.050799716264009476,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.0045704832300543785,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        },
+        {
+          "id": "PSRC/magFluxLp33",
+          "sensor_index": 33,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.06754481047391891,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.027840638533234596,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        },
+        {
+          "id": "PSRC/magFluxLp34",
+          "sensor_index": 34,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.0649200975894928,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.032256364822387695,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        }
+      ]
+    },
+    "pickup_coils": {
+      "catalogued_channels": 23,
+      "mapped_sensor_positions": 17,
+      "family_sign": "undetermined",
+      "channels": [
+        {
+          "id": "PSRC/magPbTC1",
+          "sensor_index": 1,
+          "position_rz_m": [
+            4.7355,
+            -0.0283
+          ],
+          "geometric_axis_angle_deg": 0.28,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:485",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.10563648492097855,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.01113877541542787,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.10806397348642349,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.011943910685302771,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.1081649661064148,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.012395280897617314,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.07744250446557999,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.014671426503666934,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": -0.002728,
+          "two_shot_measured_change_t": 0.030621,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC2",
+          "sensor_index": 2,
+          "position_rz_m": [
+            4.4873,
+            1.2805
+          ],
+          "geometric_axis_angle_deg": 21.2,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:486",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.130469411611557,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.005621439853932972,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.1328572928905487,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.005299965374175458,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.13324932754039764,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.002825339176096439,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.09063102304935455,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.016249180487964407,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": 1,
+          "two_shot_model_change_t": 0.021549,
+          "two_shot_measured_change_t": 0.042226,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC3",
+          "sensor_index": 3,
+          "position_rz_m": [
+            4.1114,
+            1.9694
+          ],
+          "geometric_axis_angle_deg": 34.89,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:487",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.12001875787973404,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.00023070887989178057,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.11873787641525269,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.0017451725496230933,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.11811521649360657,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.0028969648730175143,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.04877082258462906,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.020703819837662788,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": 1,
+          "two_shot_model_change_t": 0.018959,
+          "two_shot_measured_change_t": 0.069967,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC4",
+          "sensor_index": 4,
+          "position_rz_m": [
+            3.4645,
+            2.6539
+          ],
+          "geometric_axis_angle_deg": 50.39,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:488",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.08952063322067261,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.0552643429853755,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.08687176555395126,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.055482449002492835,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.0858398824930191,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.0527103317407836,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.018670111894607544,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.016665846656476732,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": -1,
+          "two_shot_model_change_t": -0.038817,
+          "two_shot_measured_change_t": 0.068202,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC5",
+          "sensor_index": 5,
+          "position_rz_m": [
+            2.4712,
+            3.1004
+          ],
+          "geometric_axis_angle_deg": 85.14,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:489",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.054845161736011505,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.058837039046270204,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.05172288045287132,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.058998924268679406,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.050799716264009476,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.055414302016433756,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.0045704832300543785,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.00952706669800811,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": 1,
+          "two_shot_model_change_t": -0.049472,
+          "two_shot_measured_change_t": -0.047152,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC6",
+          "sensor_index": 6,
+          "position_rz_m": [
+            1.9455,
+            2.9651
+          ],
+          "geometric_axis_angle_deg": 124.41,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:490",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.06939850747585297,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.062052023917385485,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.0677499920129776,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.05977185789454764,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.06754481047391891,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.055992482119852555,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.027840638533234596,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.001180404196128252,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": -1,
+          "two_shot_model_change_t": 0.058591,
+          "two_shot_measured_change_t": -0.039909,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC7",
+          "sensor_index": 7,
+          "position_rz_m": [
+            1.6414,
+            2.3449
+          ],
+          "geometric_axis_angle_deg": 179.06,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:491",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.06738835573196411,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.03345679196712333,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.06580941379070282,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.04301880031898769,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.0649200975894928,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.03156792327774678,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.032256364822387695,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.02005917430665767,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": 1,
+          "two_shot_model_change_t": 0.02296,
+          "two_shot_measured_change_t": 0.033553,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC8",
+          "sensor_index": 8,
+          "position_rz_m": [
+            1.6342,
+            1.1231
+          ],
+          "geometric_axis_angle_deg": 180.01,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:492",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.16561828553676605,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.0032468169549363436,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.1638559252023697,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.00869036634068543,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.16387248039245605,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.0016074205190911204,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.05489552393555641,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.011904834287042908,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": 0.003214,
+          "two_shot_measured_change_t": 0.10896,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC9",
+          "sensor_index": 9,
+          "position_rz_m": [
+            1.6356,
+            -0.0002
+          ],
+          "geometric_axis_angle_deg": 180.21,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:493",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.19426077604293823,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.002695197188345517,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.1935948133468628,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.0028602380187238235,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.1949208676815033,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.0058537728840100545,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.08311271667480469,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.025125912667874145,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": -1,
+          "two_shot_model_change_t": -0.022266,
+          "two_shot_measured_change_t": 0.110482,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC10",
+          "sensor_index": 10,
+          "position_rz_m": [
+            1.635,
+            -1.1277
+          ],
+          "geometric_axis_angle_deg": 180.17,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:494",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.0924539789557457,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.003277793603780389,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.09381389617919922,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.004744999637750287,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.09477030485868454,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.00011363234269472927,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.05735064670443535,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.017647465060143867,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": 1,
+          "two_shot_model_change_t": 0.022392,
+          "two_shot_measured_change_t": 0.036463,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC11",
+          "sensor_index": 11,
+          "position_rz_m": [
+            1.6403,
+            -2.3481
+          ],
+          "geometric_axis_angle_deg": 180.27,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:495",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.04179137572646141,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.01828350674478056,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.04255417361855507,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.017267179264351135,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.04295918345451355,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.023019525774563284,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.04587725177407265,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.0475853473798335,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": 0.030318,
+          "two_shot_measured_change_t": 0.003323,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC12",
+          "sensor_index": 12,
+          "position_rz_m": [
+            1.9318,
+            -2.9645
+          ],
+          "geometric_axis_angle_deg": 234.21,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:496",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": -0.0657830536365509,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.05774649888603919,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": -0.06755213439464569,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.0566922250199649,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.06832251697778702,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.05997073653800342,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.08054091036319733,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.05393052704488685,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": 0.002762,
+          "two_shot_measured_change_t": 0.012989,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC13",
+          "sensor_index": 13,
+          "position_rz_m": [
+            2.4709,
+            -3.0977
+          ],
+          "geometric_axis_angle_deg": 274.28,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:497",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.017967768013477325,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.13327648428845446,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.018133755773305893,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.13009198922990806,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.01831386797130108,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.13462365878946073,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.010160091333091259,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.11586912719279988,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": 0.014223,
+          "two_shot_measured_change_t": 0.007974,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC14",
+          "sensor_index": 14,
+          "position_rz_m": [
+            3.5499,
+            -2.573
+          ],
+          "geometric_axis_angle_deg": 311.04,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:498",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.13908496499061584,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.006007800950905848,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.13871772587299347,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.006438803276283628,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.13852240145206451,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.006012101890816232,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.10040955245494843,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.01441448931159802,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": 0.007976,
+          "two_shot_measured_change_t": 0.038308,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC15",
+          "sensor_index": 15,
+          "position_rz_m": [
+            4.1043,
+            -1.973
+          ],
+          "geometric_axis_angle_deg": 324.55,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:499",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.09350099414587021,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.042342464219723736,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.09314844012260437,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.041624036297883985,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.09275474399328232,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.04211773263447817,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.043363407254219055,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.032029032770767005,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": -0.009595,
+          "two_shot_measured_change_t": 0.049785,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC16",
+          "sensor_index": 16,
+          "position_rz_m": [
+            4.4856,
+            -1.2834
+          ],
+          "geometric_axis_angle_deg": 338.37,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:500",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.07656367868185043,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.03310268410889932,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.07688724249601364,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.03269411405384291,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.07661568373441696,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.03220859557613223,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.03792903944849968,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.013072420419370841,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": -1,
+          "two_shot_model_change_t": -0.019622,
+          "two_shot_measured_change_t": 0.038958,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC17",
+          "sensor_index": 17,
+          "position_rz_m": [
+            4.6747,
+            -0.6201
+          ],
+          "geometric_axis_angle_deg": 350.24,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:501",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 4.8,
+              "measured": 0.08549191802740097,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.010833148688121743,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.0,
+              "measured": 0.08679135143756866,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.01070164173120197,
+              "irc": 0
+            },
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.08663696050643921,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": -0.009525664334517873,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.05408334732055664,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": 0.0022431406612231424,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": -1,
+          "two_shot_model_change_t": -0.012945,
+          "two_shot_measured_change_t": 0.032708,
+          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+        },
+        {
+          "id": "PSRC/magPbTC18",
+          "sensor_index": 18,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.0021793285850435495,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.0038326436188071966,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": null,
+          "two_shot_measured_change_t": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+        },
+        {
+          "id": "PSRC/magPbTC19",
+          "sensor_index": 19,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.003278400981798768,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.003278400981798768,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": null,
+          "two_shot_measured_change_t": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+        },
+        {
+          "id": "PSRC/magPbTC20",
+          "sensor_index": 20,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.0028358895797282457,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.004340429324656725,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": null,
+          "two_shot_measured_change_t": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+        },
+        {
+          "id": "PSRC/magPbTC21",
+          "sensor_index": 21,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.0007550590089522302,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.002145156031474471,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": null,
+          "two_shot_measured_change_t": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+        },
+        {
+          "id": "PSRC/magPbTC22",
+          "sensor_index": 22,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.0022697828244417906,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.0024147434160113335,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": null,
+          "two_shot_measured_change_t": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+        },
+        {
+          "id": "PSRC/magPbTC23",
+          "sensor_index": 23,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.0022687797900289297,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.00031257333466783166,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "candidate_sign_from_two_shot_difference": null,
+          "two_shot_model_change_t": null,
+          "two_shot_measured_change_t": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+        }
+      ]
+    },
+    "ip_rogowski_coils": {
+      "channels": [
+        {
+          "id": "MDAC/curRCP1",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": 994058.6875,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": 1.00107,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": 490347.375,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": 0.99813,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive for clockwise plasma current",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two measured shots against SELENE current; low-amplitude coils left unresolved"
+        },
+        {
+          "id": "MDAC/curRCIP2",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": -984622.0625,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": -0.99157,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": -499738.40625,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": -1.01725,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "negative for clockwise plasma current",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": "opposite_to_clockwise_positive_ip",
+          "evidence": "Two measured shots against SELENE current; low-amplitude coils left unresolved"
+        },
+        {
+          "id": "MDAC/curRCIP3",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": 0.019402964040637016,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": 0.0,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": 0.021676264703273773,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": 0.0,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two measured shots have less than 10% of SELENE current or inconsistent polarity"
+        },
+        {
+          "id": "MDAC/curRCIP4",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": -0.0350966639816761,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": -0.0,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": -0.013277923688292503,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": -0.0,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two measured shots have less than 10% of SELENE current or inconsistent polarity"
+        },
+        {
+          "id": "MDAC/curAVVRC1",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": -890075.375,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": -0.89636,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": -482269.375,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": -0.98169,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "negative for clockwise plasma current",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": "opposite_to_clockwise_positive_ip",
+          "evidence": "Two measured shots against SELENE current; low-amplitude coils left unresolved"
+        },
+        {
+          "id": "MDAC/curAVVRC2",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": -1026462.375,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": -1.03371,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": -555838.875,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": -1.13144,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "negative for clockwise plasma current",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": "opposite_to_clockwise_positive_ip",
+          "evidence": "Two measured shots against SELENE current; low-amplitude coils left unresolved"
+        },
+        {
+          "id": "MDAC/curAVVRC3",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": 9933.5771484375,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": 0.01,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": 12029.0673828125,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": 0.02449,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two measured shots have less than 10% of SELENE current or inconsistent polarity"
+        },
+        {
+          "id": "MDAC/curAVVRC4",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": -1027008.6875,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": -1.03426,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": -560811.125,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": -1.14157,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "negative for clockwise plasma current",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": "opposite_to_clockwise_positive_ip",
+          "evidence": "Two measured shots against SELENE current; low-amplitude coils left unresolved"
+        },
+        {
+          "id": "MDAC/curIVVRC1",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": -0.032461728900671005,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": -0.0,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": -0.012085155583918095,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": -0.0,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two measured shots have less than 10% of SELENE current or inconsistent polarity"
+        },
+        {
+          "id": "MDAC/curIVVRC2",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": -0.012391305528581142,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": -0.0,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": 0.010361132211983204,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": 0.0,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two measured shots have less than 10% of SELENE current or inconsistent polarity"
+        },
+        {
+          "id": "MDAC/curIVVRC3",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": 0.006809224374592304,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": 0.0,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": 0.019959939643740654,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": 0.0,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two measured shots have less than 10% of SELENE current or inconsistent polarity"
+        },
+        {
+          "id": "MDAC/curIVVRC4",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_a": 0.018359551206231117,
+              "selene_ip_a": 992992.9060900304,
+              "measured_to_selene_ratio": 0.0,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_a": 0.005895711947232485,
+              "selene_ip_a": 491265.075,
+              "measured_to_selene_ratio": 0.0,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Two measured shots have less than 10% of SELENE current or inconsistent polarity"
+        }
+      ],
+      "reference_positive_direction": "clockwise Ip in SELENE COCOS 2"
+    },
+    "diamagnetic_loop": {
+      "channels": [
+        {
+          "id": "MDAC/volDmagL1",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.023226112127304077,
+              "unit": "V",
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.004058753605931997,
+              "unit": "V",
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Measured values available, but no diamagnetic sensor geometry or SELENE predicted diamagnetic flux at its position was established"
+        },
+        {
+          "id": "MDAC/volDmagL2",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -1.5430546998977661,
+              "unit": "V",
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -2.3102705478668213,
+              "unit": "V",
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Measured values available, but no diamagnetic sensor geometry or SELENE predicted diamagnetic flux at its position was established"
+        },
+        {
+          "id": "MDAC/volDmagL3",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.3052951693534851,
+              "unit": "V",
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.44562703371047974,
+              "unit": "V",
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Measured values available, but no diamagnetic sensor geometry or SELENE predicted diamagnetic flux at its position was established"
+        },
+        {
+          "id": "PSRC/corDmagL1",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.023222101852297783,
+              "unit": "Wb",
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.004058950114995241,
+              "unit": "Wb",
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": null,
+          "confidence": "undetermined",
+          "family_disagreement": null,
+          "evidence": "Measured values available, but no diamagnetic sensor geometry or SELENE predicted diamagnetic flux at its position was established"
+        }
+      ],
+      "family_sign": "undetermined"
+    },
+    "toroidal_field_measurement": {
+      "channels": [
+        {
+          "id": "PSC/oTFCur",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_ka": 23.18428611755371,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_ka": 23.19527244567871,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive current corresponds to clockwise toroidal field in COCOS 2",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "PID 1625 O293 maps to PSC/oTFCur; positive outeddb.c conversion to BTV; E101011 COCOS02 file BTV agrees with converted current"
+        },
+        {
+          "id": "MDAC/oTFCur",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured_ka": 23.19710350036621,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured_ka": 23.17879295349121,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive current corresponds to clockwise toroidal field in COCOS 2",
+          "two_pi_factor": 1,
+          "confidence": "low",
+          "family_disagreement": null,
+          "evidence": "MDAC current agrees in sign and within 0.08% of PSC current at both shots"
+        }
+      ],
+      "sa_geqdsk_btv_tm": 6.0109148904,
+      "psc_current_converted_btv_tm": 6.010914960631137
+    }
+  },
+  "profile_coordinates": {
+    "source": "/analysis/src/edas2/v2.1.15/edas_share/edas_common/edas_globalvariables.py:177-184",
+    "fit_selector": {
+      "0": "equal psi",
+      "1": "volume average rho",
+      "2": "toroidal flux average rho",
+      "3": "poloidal flux average rho",
+      "9": "poloidal flux with SOL"
+    },
+    "observed_record": {
+      "id": "LCDB/a042181/ate.s001",
+      "shot": 101173,
+      "equilibrium_shot": 75000,
+      "FIT_RHOTYPE": 1,
+      "FIT_coordinate": "volume average rho",
+      "TOPICS_RHOTYPE": 6,
+      "TOPICS_coordinate": null,
+      "XTYPE": 7,
+      "XEXPDATA_range": [
+        0.563115224555649,
+        0.827139254423822
+      ]
+    },
+    "sign_against_selene": null,
+    "confidence": "low",
+    "note": "This record refers to equilibrium shot 75000 rather than either SELENE reference shot; its TOPICS selector 6 is absent from the UI FIT selector map."
+  },
+  "unresolved": [
+    "Seven catalogued flux loops lack a sensor position in the SELENE geometry input.",
+    "Six catalogued pickup coils lack a sensor position; the mapped pickup channels lack a validated vacuum/coil reference for winding polarity.",
+    "The diamagnetic loop has no established sensor geometry or predicted flux at the loop.",
+    "The observed profile record does not use a named SELENE reference equilibrium and TOPICS_RHOTYPE=6 is not decoded by the FIT selector map."
+  ]
+}
