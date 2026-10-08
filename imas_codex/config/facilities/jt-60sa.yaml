@@ -242,71 +242,42 @@ discovery_roots:
   - /analysis/src/getseldata_v4.1
 
 # Wiki/documentation sites
-# JT-60SA documentation is hosted on nakasvr23 behind IFERC VPN.
-# Site 0: Live TWiki Main web - EDAS manuals, API docs, shot reports, daily reports (~5500 topics)
-# Site 1: TWiki static export - analysis code documentation (Code web, ~285 topics)
-# Site 2: Server landing page - hardware, software, login, batch jobs, compilers
-#
-# Access: Use browser URLs from port_forwards section when tunnels are active.
-# Original URLs retained for documentation and direct VPN access.
+# JT-60SA documentation is served on nakasvr26 through the workstation VPN.
+# Site 0: Static Code wiki - analysis code documentation
+# Site 1: Server landing page - hardware, software, login, batch jobs, compilers
+# Access is through the jt-60sa SSH hop; port_forwards supplies browser ports.
 wiki_sites:
-  - name: twiki_main
-    url: http://157.111.10.188/twiki
-    site_type: twiki_raw
-    data_path: /var/www/html/twiki/data/Main
-    pub_path: /var/www/html/twiki/pub/Main
-    web_name: Main
-    access_method: tunnel              # Use port forward (browser.services[twiki_main])
-    auth_type: none
-    ssh_available: true
-    exclude_patterns:
-      - "^OperationStatusReport"   # Very large reports (>1MB each), low value
-      - "^DailyReport"             # Large daily reports, low signal density
-      - "^ShotE\\d"                # Per-shot reports, repetitive
-    description: >-
-      JT-60SA Main TWiki web via live Apache/CGI. Contains EDAS tool manuals
-      (eGIS, eSLICE, eSURF), Eddb API documentation (C/Fortran/Python wrappers),
-      AnalysisDB and ExperimentDB system docs, discharge parameter handbook,
-      daily reports, shot reports, and operational reports.
-      ~5500 topics, ~130 artifacts. Pages discovered via WebTopicList API,
-      artifacts via fd scanning pub/<web>/ on the filesystem.
-    languages:
-      - ja
-      - en
-
   - name: twiki_code
-    url: https://nakasvr23.iferc.org/twiki_html
+    url: https://nakasvr26.iferc.org/wiki
     portal_page: WebHome.html
     site_type: twiki_static
-    pub_path: /var/www/html/twiki_html/rsrc  # Artifact discovery via fd over SSH
-    access_method: tunnel              # Use port forward (browser.services[twiki_code])
+    access_method: tunnel
     auth_type: none
     ssh_available: true
     description: >-
-      JT-60SA Code web - analysis code documentation (standalone archive,
-      no Code web in live TWiki). Contains TOPICS, EDAS, SLICE, equilibrium
-      codes, hardware specs. Static HTML export, ~285 pages, ~644 artifacts.
-      Mixed Japanese/English content.
+      JT-60SA static Code wiki with analysis code documentation, EDAS, SLICE,
+      equilibrium codes and linked attachments. Pages are listed by
+      WebTopicList.html and attachments are linked from their topic pages.
     languages:
       - ja
       - en
 
   - name: server_docs
-    url: https://nakasvr23.iferc.org
+    url: https://nakasvr26.iferc.org
     portal_page: index-en.html
     site_type: static_html
-    access_method: tunnel              # Use port forward (browser.services[server_docs])
+    access_method: tunnel
     auth_type: none
     ssh_available: true
     description: >-
-      JT-60SA data analysis server (nakasvr23) system documentation.
-      Hardware specs, software list, login procedures, batch job usage,
-      compiler configuration, file system layout. Bilingual (JP/EN).
+      JT-60SA data analysis server system documentation. Hardware specs,
+      software list, login procedures, batch job usage, compiler configuration
+      and file system layout. Bilingual (JP/EN).
     languages:
       - ja
       - en
     exclude_prefixes:
-      - /twiki_html      # Separate TWiki site
+      - /wiki            # Separate Code wiki site
       - /matlab          # MATLAB vendor documentation
       - /idl             # IDL vendor documentation
       - /pv-wave         # PV-WAVE vendor documentation
@@ -323,41 +294,26 @@ user_info:
 # =============================================================================
 # Port Forwards - Local SSH tunnels for service access
 # =============================================================================
-# JT-60SA services are behind IFERC VPN. Access from workstation requires:
-# 1. VPN active (OpenVPN to iferc.org)
-# 2. SSH tunnels via autossh systemd service (jt-60sa-twiki-forward.service)
-#
-# Port convention: base 88xx for jt-60sa, last digit = wiki site index
-# wiki_sites[0] -> port 8800, wiki_sites[1] -> port 8801, etc.
-#
-# These forwards terminate on the workstation only. JT-60SA services are never
-# exposed toward ITER: no connection between JT-60SA and ITER is permitted, so
-# JT-60SA discovery runs from the workstation, not from ITER workers.
+# Facility web traffic follows the jt-60sa SSH hop through the workstation VPN.
+# The port suffix matches the wiki_sites index for browser access.
 
 port_forwards:
   port_base: 8800
-  ssh_host: jt-60sa  # SSH to jt-60sa, then LocalForward to wiki servers
+  ssh_host: jt-60sa
   forwards:
-    - name: twiki_main
-      local_port: 8800
-      remote_host: 157.111.10.188
-      remote_port: 80
-      protocol: http
-      description: JT-60SA Main TWiki web (live Apache/CGI, ~5500 topics)
-
     - name: twiki_code
-      local_port: 8801
-      remote_host: nakasvr23.iferc.org
+      local_port: 8800
+      remote_host: nakasvr26.iferc.org
       remote_port: 443
       protocol: https
-      description: JT-60SA Code web static export (~285 pages)
+      description: JT-60SA static Code wiki
 
     - name: server_docs
-      local_port: 8802
-      remote_host: nakasvr23.iferc.org
+      local_port: 8801
+      remote_host: nakasvr26.iferc.org
       remote_port: 443
       protocol: https
-      description: nakasvr23 server documentation (hardware, software, login)
+      description: nakasvr26 server documentation (hardware, software, login)
 
 # =============================================================================
 # Browser URLs - Localhost access with active port forwards
