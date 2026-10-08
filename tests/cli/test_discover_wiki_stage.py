@@ -177,9 +177,10 @@ def test_cli_explicit_min_score_overrides_ingest_gate(engine, monkeypatch) -> No
 def test_min_score_help_names_ingest_gate() -> None:
     result = CliRunner().invoke(wiki, ["--help"])
     assert result.exit_code == 0, result.output
-    assert "--min-score" in result.output
-    assert "Jev ingest gate" in result.output
-    assert "default: 0.5" not in result.output
+    help_text = " ".join(result.output.split())
+    assert "--min-score" in help_text
+    assert "Jev ingest gate" in help_text
+    assert "default: 0.5" not in help_text
 
 
 def test_scan_only_selects_the_seeding_half(engine) -> None:
