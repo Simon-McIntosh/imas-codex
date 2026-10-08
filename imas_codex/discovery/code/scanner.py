@@ -134,10 +134,10 @@ def _scan_remote_paths_batch(
             facility,
             len(remote_paths),
         )
-        return {p: [] for p in remote_paths}
+        raise
     except subprocess.CalledProcessError as e:
         logger.warning("Batch scan failed for %s: %s", facility, e)
-        return {p: [] for p in remote_paths}
+        raise
 
     # Parse JSON output
     try:
@@ -146,7 +146,7 @@ def _scan_remote_paths_batch(
         results_data = json.loads(output)
     except json.JSONDecodeError as e:
         logger.warning("Failed to parse scan output for %s: %s", facility, e)
-        return {p: [] for p in remote_paths}
+        raise
 
     # Convert to file info dicts with enrichment data
     result_map: dict[str, list[dict]] = {}
