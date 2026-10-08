@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured independently by running a comparable base arm and head arm in scratch trees extracted from the reviewed commits: the five pre-existing discovery test files at base f90e2e05 give 102 passed EXIT=0, and the same five plus the new claim test file at head e5daecb1 give 106 passed EXIT=0, so the change adds no failing test. The reviewed run's own manifest carries after_suite but no baseline_suite, so its own evidence cannot support this derivation (see finding 1).",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/review-ingest-W1fWUG/head uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_ingest_claim_once.py tests/discovery/test_code_claims_prefix_scope.py tests/discovery/test_code_relevance.py tests/discovery/test_code_facet_admission.py tests/discovery/test_code_ingest_settles.py tests/discovery/test_claims_honour_exclusions.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T142738664329-review-of-code-ingest-claim-once/head-verify.log",
+    "revision": "e5daecb1e53d6e301d139028608a8b6c9b090592"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/review-ingest-W1fWUG/base uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_claims_prefix_scope.py tests/discovery/test_code_relevance.py tests/discovery/test_code_facet_admission.py tests/discovery/test_code_ingest_settles.py tests/discovery/test_claims_honour_exclusions.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T142738664329-review-of-code-ingest-claim-once/base-verify.log",
+    "revision": "f90e2e0512d58b7d32565a4955fbc8bf7ef7a17b"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py (code_worker, the ingestion claim call and its new keepalive/renewal helpers)"
+  ],
+  "completed_at": "2026-10-08T14:47:02.454Z",
+  "dispatched_at": "2026-10-08T14:27:47Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "959",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries an after_suite object but no baseline_suite, so a reader that derives added failures from the run's own evidence (reckon review annotation) reads a head arm only and records the count as unmeasured rather than zero; the comparable base arm had to be supplied by this review. The manifest also declares a figures write path (docs/figures/jt60sa-discovery-completion/code-ingest-claim-once) for a run that produced no figure."
+    },
+    {
+      "file": "tests/discovery/test_code_ingest_claim_once.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: several gate-log headers name a revision the measured tree was not at. mixed-status-baseline.log, mixed-status-head.log, terminal-status-negative-control.log and live-mixed-renewal.log all open with revision=16cded4a2800e066adc90a8c890a75181cc47ec5, but the head and negative-control runs measured the then-uncommitted working tree (log mtimes 14:11-14:12Z precede the fix commit b1a13fdba at 14:15:48Z), so the green and red measurements cannot be tied to a committed revision from the log alone. The full gate final-test.log does not have this gap: it names revision=e5daecb1 and I reproduced its 106 passed independently."
+    },
+    {
+      "file": "imas_codex/discovery/base/claims.py",
+      "line": "278",
+      "severity": "follow-on",
+      "text": "follow-on (carried from the reviewed run's own follow_ons): claim_batch in imas_codex/discovery/base/claims.py keeps the same two-step SET-then-readback claim pattern that produced the duplicate claims here, because the facility write-lock serialization was applied only to the code-ingestion claim path; duplicate claims through claim_batch were not measured live, and a write-enabled isolated probe would be needed to determine whether it duplicates under contention."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the changed claim path is reached from code_worker in imas_codex/discovery/code/workers.py; the new _keep_ingestion_claims_current is created around the ingest call in the same function and _refresh_ingestion_claims is its only callee; _mark_file_failed has exactly three call sites, all in code_worker, and all three now pass f[\"claim_token\"].",
+    "diff": "six commits against f90e2e05 change one product file (imas_codex/discovery/code/workers.py: a facility write-lock in the claim query, a token-owned _refresh_ingestion_claims, an async keepalive task, thread-offloaded ingestion, and a claim_token guard on _mark_file_failed), one new test file (test_code_ingest_claim_once.py, four tests), and one evidence fragment; no other product code changes.",
+    "done_when": "the plan comment's three clauses are all met at head: test_two_concurrent_claims_take_each_file_once shows two concurrent claims take each file once, test_live_claim_is_renewed_past_timeout holds a claim past a one-second cutoff with zero contender claims, and the fragment names the cause (two workers claiming the same ten-file batch at 15:13:14, before the 300 s timeout, because the token readback ran in a separate transaction).",
+    "goal": "the node establishes the cause of duplicate code-ingestion claims from the retry-failed pass (same-batch duplicate claims, not timeout expiry) and makes each scored file ingested once per pass by serializing claim selection on the facility and renewing an in-flight batch's claim; the resumed commits additionally repair a renewal defect the first head carried.",
+    "manifest": "read at the run directory; it records six commits ending e5daecb1, focused/live/negative-control logs, an after_suite object, empty follow_ons and blockers, and status 'complete'; its worktree is clean at e5daecb1, which I confirmed. It carries no baseline_suite (findings 1).",
+    "write_paths": "the diff touches exactly the declared paths imas_codex/discovery/code/workers.py, tests/discovery/test_code_ingest_claim_once.py and docs/evidence/fragments/jt60sa-discovery-completion/code-ingest-claim-once.html, and nothing else; the reviewed run's worktree is clean at head e5daecb1."
+  },
+  "justifications": {
+    "durability": "both repair paths carry mutation controls: restoring the original claim query makes the concurrent-claim test fail with eight claims for four files, and restoring the scored-status filter in _refresh_ingestion_claims makes the mixed-status test fail (I reproduced the latter: EXIT=1, 'Code ingestion claim changed while its holder was active'), while the fix passes. Failure marking is now guarded by token and scored status, so a lost-claim worker cannot downgrade a file. Residual risk is that both live probes are bounded and neither reproduces a real long ingestion batch, and the shared claim_batch keeps the unfixed two-step pattern.",
+    "evidence": "the head gate (106 passed at e5daecb1) is reproduced by an independent head arm, and a comparable base arm at f90e2e05 (102 passed) closes the added-failure question at zero; the terminal-status defect is independently reproduced by my own mutation and refuted at the fix. Gaps are that the reviewed manifest carries no baseline_suite, and that four gate-log headers name a revision the measured tree was not at.",
+    "fit": "the facility write-lock is a recognisable Neo4j serialization idiom, the renewal helper and guards reuse the existing claim_token and claim-timeout constant, tests are named by mechanism, commits carry conventional subjects with bodies, and no plan, sprint, ticket or author identifier appears in the code, tests, fragment or messages (checked).",
+    "goal_fidelity": "the cause is named from the retry receipt and corroborated by the concurrent-claim test; claim selection is serialized on the facility so two workers take each file once; a working batch renews its own token-checked claim; and the resumed commits repair the terminal-status renewal defect the first head carried, with the mixed-status and lost-token tests now green at the committed head.",
+    "reuse": "the change serializes through the existing Facility node and reuses claim_token, GraphClient, DEFAULT_CLAIM_TIMEOUT_SECONDS and asyncio.to_thread; it introduces no parallel lock service. It does, however, re-implement the claim/renewal shape locally in code/workers.py rather than generalising the shared helpers in discovery/base/claims.py, where claim_batch retains the same two-step pattern.",
+    "scope_discipline": "the reviewed diff stays exactly inside the declared write scope across all six commits and adds no unrelated edits; the earlier partial-run finding (a dirty worktree beyond head 16cded4a recorded 'complete') is resolved by the later commits and the worktree is clean at e5daecb1."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node establishes that the retry pass's 62 events for 46 files were same-batch duplicate claims, not timeout expiry, and makes each scored file ingested once per pass by serializing claim selection on the facility and renewing an in-flight batch's token-checked claim; the resumed commits additionally repair a renewal defect the first head carried.\nVERDICT done_when: all three clauses are met at the committed head e5daecb1 - two concurrent claims take each file once, a held claim survives its cutoff with zero contenders, and the fragment names the cause; the terminal-status renewal defect found by the prior review is also repaired and tested.\nVERDICT write_paths: the diff touches exactly imas_codex/discovery/code/workers.py, tests/discovery/test_code_ingest_claim_once.py and docs/evidence/fragments/jt60sa-discovery-completion/code-ingest-claim-once.html; the worktree is clean at head.\nVERDICT manifest: read; six commits ending e5daecb1, focused/live/negative-control logs, an after_suite object, empty follow_ons and blockers, status complete; it carries no baseline_suite, so a downstream reader cannot derive added failures from the run's own evidence.\nVERDICT diff: read commit by commit against f90e2e05; one product file, one new test file, one fragment, no other product code.\nCALL_SITES: imas_codex/discovery/code/workers.py (code_worker)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: cause named and corroborated, concurrent claims take each file once, and the held-claim clause plus the repaired terminal-status renewal all pass at the committed head.\nSCORE evidence: 15\nJUSTIFICATION evidence: the head gate and a comparable base arm are reproduced independently (106 passed at e5daecb1, 102 passed at f90e2e05, zero added), and the terminal-status fix is independently falsified by mutation; the manifest's missing baseline_suite and four log headers naming the wrong revision are real gaps.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all six commits stay exactly inside the declared write scope and the worktree is clean at e5daecb1.\nSCORE durability: 16\nJUSTIFICATION durability: two mutation controls protect the serialization and the terminal-status renewal (the latter I reproduced failing), failure marking is token-guarded, and live probes confirm ownership; the probes are bounded and claim_batch keeps the unfixed two-step pattern.\nSCORE fit: 19\nJUSTIFICATION fit: a recognisable serialization idiom, mechanism-named tests, conventional commits with bodies, and no plan, sprint or ticket identifier in code or messages.\nSCORE reuse: 17\nJUSTIFICATION reuse: reuses the Facility node, claim_token, GraphClient, the claim-timeout constant and asyncio.to_thread; it re-implements the claim/renewal shape locally rather than generalising the shared helpers.\nFINDING imas_codex/discovery/code/workers.py:959 follow-on: the manifest carries after_suite but no baseline_suite, so the run's own evidence cannot support an added-failure derivation and a reader records it as unmeasured; the comparable base arm was supplied by this review.\nFINDING tests/discovery/test_code_ingest_claim_once.py:1 follow-on: mixed-status-baseline/head, terminal-status-negative-control and live-mixed-renewal logs all name revision=16cded4a while the head and negative-control runs measured the then-uncommitted working tree (mtimes precede b1a13fdba), so those measurements cannot be tied to a commit from the log.\nFINDING imas_codex/discovery/base/claims.py:278 follow-on: claim_batch keeps the same two-step claim pattern that produced the duplicates here; the serialization fix was applied only to the code-ingestion path.\n",
+  "review_run_id": "r-20261008T142738664329-review-of-code-ingest-claim-once",
+  "reviewed_base_sha": "f90e2e0512d58b7d32565a4955fbc8bf7ef7a17b",
+  "reviewed_head_sha": "e5daecb1e53d6e301d139028608a8b6c9b090592",
+  "reviewed_run_id": "r-20261008T134034354652-code-ingest-claim-once",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T14:40:00+00:00",
+  "total": 103,
+  "verdict": "SOUND WITH FINDINGS"
+}
