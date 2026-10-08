@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -264,7 +264,9 @@
       the unmerged registry commit <code>21c0e6d34</code>. Write paths:
       <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
       <code>tests/cli/test_discover_sequence.py</code> and its fragment. The registry's stages become
-      the seven domains, each with a seed half and a drain half. The runner calls each runnable
+      the seven domains. Each has a seed half and a drain half, except <code>candidates</code> and
+      <code>mapping</code>, which only drain what earlier domains seeded. Under <code>--scan-only</code> they
+      read <em>skipped: nothing to seed</em>, rather than reporting a run that did nothing. The runner calls each runnable
       domain's stage function in order, passing the remaining cost and time. A stage that raises is
       recorded as failed, and a domain that reads its output is skipped with that reason, while an
       independent domain still runs. The run ends with one table, one row per domain, giving outcome,
