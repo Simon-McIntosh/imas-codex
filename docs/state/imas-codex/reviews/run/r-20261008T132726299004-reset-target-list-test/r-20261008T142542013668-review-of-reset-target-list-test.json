@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs at its base and head: base-discovery.log ran tests/discovery at revision 21faa85adda406e7a029757435dafb90504264d0 and reports '1 failed, 1437 passed, 3 deselected' EXIT=1 with the single failure tests/discovery/test_reset.py::TestResetSpec::test_get_valid_targets_code; head-discovery.log runs the same selection at revision 0a35841c44c497cdb1e3b405eedd2db01f2d38b8 and reports '1438 passed, 3 deselected' EXIT=0. The head carries no failure id the base does not, and the one base failure is removed at the head, so the added set is empty.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/reset-target-list-test uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/reset-target-list-test/tests/discovery",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T132726299004-reset-target-list-test/head-discovery.log",
+    "revision": "0a35841c44c497cdb1e3b405eedd2db01f2d38b8"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/reset-target-list-test uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/reset-target-list-test/tests/discovery",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/discovery/test_reset.py::TestResetSpec::test_get_valid_targets_code"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T132726299004-reset-target-list-test/base-discovery.log",
+    "revision": "21faa85adda406e7a029757435dafb90504264d0"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/base/reset.py:586"
+  ],
+  "completed_at": "2026-10-08T14:31:00.489Z",
+  "dispatched_at": "2026-10-08T14:25:51Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the expectation under test is get_valid_targets(\"code\") at imas_codex/discovery/base/reset.py:586, which returns sorted(CODE_RESET_SPECS.keys()); CODE_RESET_SPECS carries the retry-failed key added at imas_codex/discovery/base/reset.py:481 in commit 054fc64f4, so the sorted list the assertion fixes is ['content','discovered','ingested','triaged'... ] with 'retry-failed' sitting alphabetically between 'name' and 'scored', which is exactly the position the head inserts.",
+    "diff": "one commit against 21faa85ad, a single inserted line adding \"retry-failed\" to the expected list in tests/discovery/test_reset.py::TestResetSpec::test_get_valid_targets_code; no product source changes.",
+    "done_when": "met: test_reset.py passes 31/31 at the head (head-reset.log) with retry-failed in the code target list, and tests/discovery passes 1438 with 3 deselected and no added failure against 21faa85ad (head-discovery.log, exit 0), the latter definition of the base being the one the node's own done-when names.",
+    "goal": "the node aligns the code reset target-list test with the retry-failed target the preceding commit added to the registry, so get_valid_targets(\"code\") and its assertion agree.",
+    "manifest": "read; it records commit 0a35841c, the focused and discovery gate logs at both revisions, a mutation negative control with its red log path, and empty failure_attribution per the shape contract.",
+    "write_paths": "the commit touches exactly tests/discovery/test_reset.py, the first declared path; the fragment and figure paths declared in orientation are not produced, correctly, because the node's done-when names no artifact and the landing contract permits no evidence prose or figure in that case and the diff is three lines, far under the small-node threshold."
+  },
+  "justifications": {
+    "durability": "the expectation is the guard that a registry drift trips: the node's own negative control removes retry-failed from the list and the test fails with EXIT=1, so the assertion is demonstrably sensitive rather than vacuous; the residual cost is that the list is hardcoded, so every future code reset target re-opens the same edit, which is the codebase's existing style and is what this node repairs rather than redesigns.",
+    "evidence": "the two gate logs name their revisions, trees and commands on their own header lines and bracket the change cleanly (1 failure at the base, 0 at the head), the focused head run shows 31/31, and the negative control shows the red state before restoration; the reviewed run derived its base from 21faa85ad as its done-when directs, and its added-failure set is empty under that base.",
+    "fit": "the commit carries a conventional subject with a body, the assertion keeps the file's existing vocabulary and ordering, no plan, sprint or ticket identifier appears in the diff or the message, and the change is named by what it asserts.",
+    "goal_fidelity": "the goal is to align the target-list test with the retry-failed target and the diff does exactly that, in the alphabetically correct position, with the done-when fully met at the head.",
+    "reuse": "the change adds one element to the existing list literal rather than introducing a new fixture or a dynamic derivation, matching the five sibling target assertions in the same class.",
+    "scope_discipline": "the diff stays inside the single declared test path; no product source, configuration or plan file is touched, and the node wrote neither of the optional fragment or figure artifacts its contract withholds."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node aligns the code reset target-list test with the retry-failed target the preceding registry commit added.\nVERDICT done_when: met; test_reset.py passes 31/31 at the head with retry-failed in the list, and tests/discovery passes 1438 with 3 deselected and exit 0 with no added failure against 21faa85ad.\nVERDICT write_paths: exactly tests/discovery/test_reset.py; the optional fragment and figure are correctly withheld because the done-when names no artifact.\nVERDICT manifest: read; commit 0a35841c, four gate logs, a mutation negative control, empty failure_attribution.\nVERDICT diff: one commit against 21faa85ad, one inserted line in the target-list assertion, no product source change.\nCALL_SITES: imas_codex/discovery/base/reset.py:586\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the diff aligns the target-list test with retry-failed in the correct sorted position and the done-when is fully met and evidenced.\nSCORE evidence: 19\nJUSTIFICATION evidence: base and after gate logs at named revisions bracket the change (1 failure then 0), the focused head run shows 31/31, and the negative control shows the red state and its restoration.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches the single declared test path and nothing else, and the node produces no artifact its contract withholds.\nSCORE durability: 18\nJUSTIFICATION durability: the assertion is a live guard (its removal mutation fails the test) but the hardcoded list re-opens on every new target, which is the existing style rather than this node's defect.\nSCORE fit: 19\nJUSTIFICATION fit: conventional subject with a body, mechanism-named assertion, no plan or ticket identifier leaked.\nSCORE reuse: 19\nJUSTIFICATION reuse: one element added to the existing list literal, matching the sibling target assertions in the class.",
+  "review_run_id": "r-20261008T142542013668-review-of-reset-target-list-test",
+  "reviewed_base_sha": "21faa85adda406e7a029757435dafb90504264d0",
+  "reviewed_head_sha": "0a35841c44c497cdb1e3b405eedd2db01f2d38b8",
+  "reviewed_run_id": "r-20261008T132726299004-reset-target-list-test",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T14:29:40+00:00",
+  "total": 114,
+  "verdict": "SOUND"
+}
