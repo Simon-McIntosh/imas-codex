@@ -2398,12 +2398,9 @@ async def _async_score_with_llm(
     focus: str | None = None,
 ) -> tuple[list[dict], float]:
     """Describe enriched paths, then judge their content with Jev."""
-    import json
-
     from imas_codex.discovery.base.facility import get_facility
     from imas_codex.discovery.base.judgment import judge_rows
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.discovery.paths.models import PathDescriptionBatch
+    from imas_codex.discovery.paths.description import describe_paths
     from imas_codex.discovery.paths.scorer import (
         PURPOSE_SCORE_NAMES,
         build_path_judgment_questions,
@@ -2415,27 +2412,13 @@ async def _async_score_with_llm(
     if not paths:
         return [], 0.0
     description_model = get_model("discovery-score")
-    batch, description_cost, _tokens = await acall_llm_structured(
+    batch, description_cost, _tokens = await describe_paths(
+        paths,
         model=description_model,
-        messages=[
-            {
-                "role": "system",
-                "content": "Describe each directory from its enriched evidence in one factual sentence. Return only path and description; do not score, classify, or decide whether to explore it.",
-            },
-            {
-                "role": "user",
-                "content": json.dumps(
-                    {"focus": focus, "directories": paths}, default=str
-                ),
-            },
-        ],
-        response_model=PathDescriptionBatch,
-        service="facility-discovery",
+        focus=focus,
         reasoning_effort=get_reasoning_effort("discovery-score"),
     )
     descriptions = {item.path: item.description for item in batch.results}
-    if set(descriptions) != {row["path"] for row in paths}:
-        raise ValueError("Path descriptions do not match the enriched paths")
     rows = [{**row, "description": descriptions[row["path"]]} for row in paths]
     facility_config = get_facility(facility) if facility else {}
     model = get_model("discovery-relevance")
