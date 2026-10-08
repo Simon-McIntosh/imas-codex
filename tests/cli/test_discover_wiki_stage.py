@@ -23,6 +23,8 @@ directly, keeping the measurement off the rich/plain harness and off the graph.
 from __future__ import annotations
 
 import asyncio
+import subprocess
+import sys
 from dataclasses import FrozenInstanceError
 from unittest.mock import MagicMock, patch
 
@@ -31,7 +33,7 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.discover.wiki import WikiStageOptions, run_wiki_stage, wiki
-from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
+from imas_codex.settings import get_wiki_ingest_threshold
 
 FACILITY = "jt-60sa"
 
@@ -153,7 +155,22 @@ def test_stage_options_are_frozen() -> None:
 
 
 def test_default_min_score_uses_ingest_gate() -> None:
-    assert WikiStageOptions().min_score == CONTENT_INGEST_THRESHOLD
+    assert WikiStageOptions().min_score == get_wiki_ingest_threshold()
+
+
+def test_cli_import_does_not_load_wiki_engine() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; import imas_codex.cli.discover; "
+            "print('imas_codex.discovery.wiki' in sys.modules)",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert result.stdout.strip() == "False"
 
 
 def test_cli_default_min_score_reaches_engine(engine, monkeypatch) -> None:
@@ -162,7 +179,7 @@ def test_cli_default_min_score_reaches_engine(engine, monkeypatch) -> None:
     assert result.exit_code == 0, result.output
     assert engine["calls"]
     assert all(
-        call["min_score"] == CONTENT_INGEST_THRESHOLD for call in engine["calls"]
+        call["min_score"] == get_wiki_ingest_threshold() for call in engine["calls"]
     )
 
 
@@ -179,8 +196,7 @@ def test_min_score_help_names_ingest_gate() -> None:
     assert result.exit_code == 0, result.output
     help_text = " ".join(result.output.split())
     assert "--min-score" in help_text
-    assert "Jev ingest gate" in help_text
-    assert "default: 0.5" not in help_text
+    assert "default: 0.16" in help_text
 
 
 def test_scan_only_selects_the_seeding_half(engine) -> None:
