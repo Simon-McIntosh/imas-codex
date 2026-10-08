@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from clean arms at the reviewed base and head revisions including the code regression surface: baseline_suite (e4ff44bba7688c71535eeacdd8086c8dc6d5b51a) completed with failure_count 0 (91 passed), after_suite (81517ae3b97c19010a379c8b5fefd59eb956f0e0) completed with failure_count 0 (98 passed), so after minus base is 0 added failures.",
+  "backend": "local",
+  "base_log_revision": "e4ff44bba7688c71535eeacdd8086c8dc6d5b51a",
+  "completed_at": "2026-10-08T07:00:44.517Z",
+  "dispatched_at": "2026-10-08T06:45:08Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/fold-code-stage.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the plan says each fold carries a fragment under docs/evidence/fragments/facility-discovery-sequence/, and the reviewed manifest's orientation_write_paths declares fold-code-stage.html, but no such file exists in the tree or the diff (the directory holds only discover-cli-surface-census.html, fold-candidates-stage.html, fold-documents-stage.html and fold-signals-stage.html). The node's evidence lives only in its manifest, so a later reader of the plan has no fragment for this fold."
+    },
+    {
+      "file": "docs/architecture/discovery.md",
+      "line": "251",
+      "severity": "follow-on",
+      "text": "follow-on: this change repurposes -f/--focus from a free-text topic to a repeatable FacilityPath item list (the free-text steer is now --topic), but the out-of-scope architecture doc still shows 'imas-codex discover code tcv -f equilibrium # Focus on equilibrium code', which now restricts the run to a path named 'equilibrium' instead of steering scoring. The plan assigns caller and prose migration to the retire-domain-subcommands node and this file is outside this node's write scope, so it is recorded rather than repaired. The remaining prose callers (imas_codex/discovery/code/__init__.py:8, imas_codex/ingestion/__init__.py:16, imas_codex/schemas/facility.yaml:656) use the bare 'discover code FACILITY' spelling, which the fold leaves valid."
+    },
+    {
+      "file": "imas_codex/cli/discover/code.py",
+      "line": "180",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest fills after_suite but declares no baseline_suite, and its gate-initial.log carries a revision header of e4ff44bba7688c71535eeacdd8086c8dc6d5b51a while collecting 14 items (the new test file did not exist at that revision), so the base arm ran with the change already in flight and none of the node's arms yields added_failure_count. This review supplies clean arms at the reviewed revisions (base 91 passed, head 98 passed, both EXIT=0), giving 0 added failures."
+    }
+  ],
+  "head_log_revision": "81517ae3b97c19010a379c8b5fefd59eb956f0e0",
+  "item_verdicts": {
+    "call_sites": "run_code_stage has one production caller, the code click command (code.py:153); CodeStageOptions is used only there and in the new test; imas_codex/cli/discover/__init__.py still registers the code subcommand unchanged, which the later retire-domain-subcommands node owns.",
+    "diff": "read against e4ff44bb: code.py gains CodeStageOptions and run_code_stage, the click command shrinks to an 8-line wrapper). The engine-building body is moved verbatim into run_code_stage with local renames (focus=options.topic, path_prefixes=options.focus, max_paths=options.limit, scan_workers zeroed under flush); run_parallel_code_discovery is called with the same keyword set as before, so no engine parameter was invented.",
+    "done_when": "the node's done-when is the stage function plus four behaviours in tests/cli/test_discover_code_stage.py and the old tests passing; the new file proves each: the frozen dataclass (test_options_*), --scan-only/--flush halves (test_scan_only_runs_the_seeding_workers, test_flush_runs_only_the_draining_workers), --topic reaching the engine steer (test_topic_limit_focus_and_path_gate_reach_the_engine asserts focus=='equilibrium'), --limit capping items (same test, max_paths==4), --focus honoured through the path-prefix filter (same test, path_prefixes==[two]) with no plan name or section number in the source or comments.",
+    "goal": "the plan's fold-code-stage node is to turn imas_codex/cli/discover/code.py into run_code_stage(facility, options) with a frozen dataclass of the settled options, leaving the click command as a thin wrapper: code.py:16 freezes CodeStageOptions, code.py:180 exposes run_code_stage, and code.py:153 leaves the click command a thin wrapper that builds CodeStageOptions and calls the stage. The settled option moves are present: --max-paths renamed to --limit, the free-text --focus becomes --topic and --focus becomes a repeatable item list, --path-prefix is kept as a hidden legacy alias folded into the item list, -t is added to --time, and --flush is added (--score-only kept hidden and folded to flush). The default gate is get_path_scan_threshold() rather than the 0.9 default, and --min-score stays with default None, matching the sibling paths fold.",
+    "manifest": "read; it states 14 passed EXIT=0 at 81517ae3 naming changed_paths (two files) and a negative_control_log at EXIT=1; it fills after_suite (head, 0 failures) but omits baseline_suite, and its gate-initial.log carries a revision header of e4ff44bb while collecting 14 items (the new test file), so it ran with the change in flight and is not a clean base arm; the node's own arms therefore do not yield added_failure_count.",
+    "write_paths": "the reviewed manifest declares imas_codex/cli/discover/code.py, tests/cli/test_discover_code_stage.py, a fragment under docs/evidence/fragments/facility-discovery-sequence/ and a figures dir; git diff --stat e4ff44bb..81517ae3 touches exactly the first two (131 insertions, 35 deletions in code.py; 159 in the test), nothing else."
+  },
+  "justifications": {
+    "durability": "the drain-half guard fires: mutating the head stage to drop the flush zeroing (scan_workers = options.scan_workers) fails test_flush_runs_only_the_draining_workers at tests/cli/test_discover_code_stage.py:112 with 'assert 2 == 0' (my own neg-control-review.log, EXIT=1) where the unmutated head gate passes it; the reviewed run's declared negative control records the same test red at EXIT=1; the mutual-exclusion guard is additionally pinned by test_scan_only_and_flush_are_refused_before_the_engine.",
+    "evidence": "the reviewed head gate (14 passed, EXIT=0 at 81517ae3) I reproduced independently in a scratch tree, and I ran the regression surface the node's own arms could not cleanly supply, tests/discovery/test_code_patch.py's CLI tests plus the rest of tests/discovery/test_code_pipeline.py, at both reviewed revisions: base e4ff44bb 91 passed EXIT=0, head 81517ae3 98 passed (91 regression + 7 new) EXIT=0, modules resolving from each scratch tree. The shortfall is on the record: the reviewed manifest declares no baseline_suite, and its gate-initial.log names revision e4ff44bb while collecting 14 items (the new test file did not exist at that revision), so the base arm ran with the change in flight; no node log yields added_failure_count. This review supplies the missing arms.",
+    "fit": "the added symbols CodeStageOptions and run_code_stage are named by what they do with no plan label or section number (verified by grep over both changed files), and code.py follows the sibling discover folds' stage-plus-thin-wrapper idiom; the pre-existing 'discover code' prose in the module docstring and READMEs is left to the later retire-domain-subcommands node, and the removed worked examples are a minor help-text regression, not a naming fault.",
+    "goal_fidelity": "all four done-when behaviours and the settled option spellings are present and named by mechanism: run_code_stage raises click.UsageError when --scan-only and --flush are both given (code.py:189), zeroes num_scan_workers under --flush while keeping the draining workers (code.py:198), routes --topic to the engine free-text focus and --limit to max_paths, and threads --focus items and the hidden --path-prefix list through path_prefixes; the default gate is get_path_scan_threshold(), which the plan required for this fold. The shortfalls are that the plan assigns each fold a fragment under docs/evidence/fragments/facility-discovery-sequence/ and none was produced (only the census, candidates, documents and signals fragments exist), and the command docstring's worked examples were dropped rather than settled, a small CLI-help regression. Neither affects the code contract.",
+    "reuse": "the change reuses run_parallel_code_discovery, get_path_scan_threshold and the whole engine-building body unchanged and forks no engine; the only new code is the frozen options dataclass, the wrapper adapter and the mutual-exclusion check; a search of imas_codex/cli found no earlier owner of a code stage, and the hidden --path-prefix alias reuses the existing path-prefix filter rather than duplicating it.",
+    "scope_discipline": "git diff --stat e4ff44bba7688c71535eeacdd8086c8dc6d5b51a..81517ae3b97c19010a379c8b5fefd59eb956f0e0 touches only imas_codex/cli/discover/code.py and tests/cli/test_discover_code_stage.py, both inside the declared write paths, with no edit to imas_codex/cli/discover/__init__.py, no dependency change and no unrelated file; the declared fragment and figures dir were not produced, an evidence shortfall rather than scope creep."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: code.py:16 freezes CodeStageOptions and code.py:180 exposes run_code_stage; the click command at code.py:153 is a thin wrapper; --max-paths->--limit, free-text --focus->--topic and item --focus, --path-prefix kept hidden, -t added to --time, --flush added, default gate get_path_scan_threshold().\nVERDICT done_when: the new test file shows the frozen dataclass, the --scan-only/--flush halves, --topic to the engine, --limit capping items, and --focus through the path-prefix filter with no plan name; the old tests still pass.\nVERDICT write_paths: git diff e4ff44bb..81517ae3 touches imas_codex/cli/discover/code.py and tests/cli/test_discover_code_stage.py only.\nVERDICT manifest: 14 passed EXIT=0 at 81517ae3; after_suite filled, baseline_suite omitted; gate-initial.log mislabels revision e4ff44bb on a 14-item collection.\nVERDICT diff: read against e4ff44bb; extraction plus option renames, engine body moved verbatim.\nSCORE goal_fidelity: 18\nSCORE evidence: 17\nSCORE scope_discipline: 19\nSCORE durability: 19\nSCORE fit: 19\nSCORE reuse: 19\nFINDING no fragment at docs/evidence/fragments/facility-discovery-sequence/fold-code-stage.html\nFINDING out-of-scope doc caller docs/architecture/discovery.md:251 still shows '-f equilibrium' free-text focus\nFINDING the reviewed manifest omits baseline_suite and gate-initial.log ran with the change in flight; arms at the reviewed revisions show 0 added failures\n",
+  "review_run_id": "r-20261008T064456185995-review-of-fold-code-stage",
+  "reviewed_base_sha": "e4ff44bba7688c71535eeacdd8086c8dc6d5b51a",
+  "reviewed_head_sha": "81517ae3b97c19010a379c8b5fefd59eb956f0e0",
+  "reviewed_run_id": "r-20261008T055757360934-fold-code-stage",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:52:00+00:00",
+  "total": 111,
+  "verdict": "SOUND WITH FINDINGS"
+}
