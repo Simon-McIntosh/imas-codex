@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ingestion/pipeline.py:280",
+    "imas_codex/ingestion/graph.py:75",
+    "imas_codex/llm/search_tools.py:1662"
+  ],
+  "completed_at": "2026-10-08T04:43:09.592Z",
+  "dispatched_at": "2026-10-08T04:33:47Z",
+  "findings": [
+    {
+      "file": "imas_codex/ingestion/extractors/edas.py",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the extractor's _CALL pattern covers only eddbreadTime/One/Para/Header plus _f, while imas_codex/config/facilities/jt-60sa.yaml data_access_patterns.signal_naming records eight further EDDB reads in the same block (_eddbreadPrePro, _eddbreadImage, _eddbreadComment, _eddbreadScore, _eddbreadChInfo, _eddbreadTable, _eddbreadShot, _eddbreadNearTime); the plan's parenthetical names only the four, so this is faithful to the deliverable but leaves most of the configured access surface unextracted."
+    },
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "1878",
+      "severity": "follow-on",
+      "text": "follow-on: _reference_search_code_chunks splits each raw_string on '/' and requires every part to be a substring of the lowercased query, so short category tokens such as EQ or PF match inside unrelated words (the query fragment 'frequency' contains 'eq'), letting an unrelated chunk score 0.9 on a spurious reference match; word-boundary matching would remove the false positives."
+    },
+    {
+      "file": "imas_codex/schemas/facility.yaml",
+      "line": "390",
+      "severity": "follow-on",
+      "text": "follow-on: the lead's 2026-10-08 comment directs the second node editing a shared file to merge origin/main before its last commit; this node did not (the worktree contract forbids a worker merging) and instead recorded that origin/main carried no new schema commit, so the coordinator must confirm at merge that both the Jev deploy's FacilityPath edits and this node's DataReferenceType/DataReference edits are present in HEAD."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit 2a22cb00a..502a9622d against base a8bd354; the extractor, the graph linker, the search surface, the schema declarations, the two tests and the evidence fragment carry the change, and the final commit narrows the literal regex and the search match.",
+    "done_when": "the done-when requires the fragment's per-reference-type chunk count and resolution share, a search_code query returning a chunk that reads a known category and data name, and a test pinning each call form with a negative control; all three are present (fragment edas-data-references.html; search-check-current.log rendered_reference=True; test_edas_extractor.py plus negative-control-current.log).",
+    "goal": "\u00a744 asks for an extractor beside ingestion/extractors/mdsplus.py covering the EDDB reads, the locallib methods, getseldata and the UDDB/PMDB/LCDB/MBDB wrappers, keeping literal category and data name, with new DataReferenceType values and a schema-declared FacilitySignal relationship, run in the ingest path and reused by a backfill; imas_codex/ingestion/extractors/edas.py:19-134 and imas_codex/schemas/facility.yaml implement that and imas_codex/ingestion/pipeline.py:280 wires it into ingestion.",
+    "manifest": "read; it records the gate command with absolute paths and EXIT=0 with 39 passed, an after_suite for revision 502a9622d (complete, 0 failures), a negative control, and the backfill/search-check logs; the status field was repaired from blocked to complete by the coordinator (status-repair.json) because facility.yaml is the lead-directed exception.",
+    "write_paths": "the reviewed manifest declares the extractor, __init__, graph, pipeline, search_tools, the two test files and the evidence fragment; git diff --name-only against a8bd354 lists exactly those eight plus imas_codex/schemas/facility.yaml, which the lead's 2026-10-08 shared-file comment licenses for \u00a744 and which reckon's scope check therefore rejects."
+  },
+  "justifications": {
+    "durability": "negative-control-current.log drops the eddbreadTime pattern and produces EXIT=1 with three failing ids (test_literal_calls[eddbreadTime], test_repeated_call_yields_one_identifier, test_real_code_reference_links_and_missing_count_guard) that the complete 39-passed head gate does not fail, so the guard is shown to fire; the final commit 502a9622d also pins the literal-only rule with a concatenated-expression case in test_dynamic_or_non_call_is_not_a_data_reference, and the graph statements run against the live database in a rolled-back transaction.",
+    "evidence": "docs/evidence/fragments/jt60sa-discovery-completion/edas-data-references.html gives the per-type chunks/mentions/resolved table (EDDB 8/10/0, share 0%) and records a catalog positive control (CAM/DivIRmP15R0 resolves to 1 FacilitySignal against TMS/neyag 0), so the zero is shown to be a genuine absence rather than a blind instrument; the head gate head-gate-current.log exits 0 with 39 passed and the graph test resolves a seeded signal inside a rolled-back live transaction, but the resolution share itself was exercised only against the seeded test signal.",
+    "fit": "EDASReference (imas_codex/ingestion/extractors/edas.py:7) is a NamedTuple beside MDSplusReference in the same extractors package, _arguments/_literal are private module helpers, and neither symbol, filename, comment nor commit subject carries a plan label.",
+    "goal_fidelity": "imas_codex/ingestion/extractors/edas.py:19 recognizes the four named EDDB reads and their _f wrappers, edas.py:106-118 the three get_time_* locallib methods and getseldata, and edas.py:120-128 the UDDB/PMDB/LCDB/MBDB wrappers, each keeping its literal category and data name; facility.yaml adds five DataReferenceType values, the edas_category/edas_data_name properties and the schema-declared resolves_to_facility_signal relationship (relationship_type RESOLVES_TO_FACILITY_SIGNAL), and link_chunks_to_edas_signals is wired into the ingest path at imas_codex/ingestion/pipeline.py:280, so the deliverable is present, but the extractor matches only four _eddbread* forms where jt-60sa.yaml data_access_patterns.signal_naming records twelve in the same block.",
+    "reuse": "the change extends the existing extractor package and reuses _generate_ref_id and the GraphClient idiom in imas_codex/ingestion/graph.py, the existing TestSearchCode and _enrich_code_chunks in imas_codex/llm/search_tools.py, and a search over imas_codex and tests found no other owner of EDAS reference extraction, so no capability was forked.",
+    "scope_discipline": "git diff --stat a8bd35459898de502a4c923159c4e48256f069cf..502a9622d8395d846b70f75b7919ba49115c29be touches nine files; eight are declared in the reviewed manifest's write paths and the ninth, imas_codex/schemas/facility.yaml, is the lead's 2026-10-08 shared-file exception for the DataReferenceType enum and the DataReference class, but the same lead comment directs the second node to merge origin/main before its last commit and the worker did not, on the worktree contract."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a744 asks for an extractor beside ingestion/extractors/mdsplus.py covering the EDDB reads, the locallib methods, getseldata and the UDDB/PMDB/LCDB/MBDB wrappers, keeping literal category and data name, with new DataReferenceType values and a schema-declared FacilitySignal relationship, run in the ingest path and reused by a backfill; imas_codex/ingestion/extractors/edas.py:19-134 and imas_codex/schemas/facility.yaml implement that and imas_codex/ingestion/pipeline.py:280 wires it into ingestion.\nVERDICT done_when: the done-when requires the fragment's per-reference-type chunk count and resolution share, a search_code query returning a chunk that reads a known category and data name, and a test pinning each call form with a negative control; all three are present (fragment edas-data-references.html; search-check-current.log rendered_reference=True; test_edas_extractor.py plus negative-control-current.log).\nVERDICT write_paths: the reviewed manifest declares the extractor, __init__, graph, pipeline, search_tools, the two test files and the evidence fragment; git diff --name-only against a8bd354 lists exactly those eight plus imas_codex/schemas/facility.yaml, which the lead's 2026-10-08 shared-file comment licenses for \u00a744 and which reckon's scope check therefore rejects.\nVERDICT manifest: read; it records the gate command with absolute paths and EXIT=0 with 39 passed, an after_suite for revision 502a9622d (complete, 0 failures), a negative control, and the backfill/search-check logs; the status field was repaired from blocked to complete by the coordinator (status-repair.json) because facility.yaml is the lead-directed exception.\nVERDICT diff: read commit by commit 2a22cb00a..502a9622d against base a8bd354; the extractor, the graph linker, the search surface, the schema declarations, the two tests and the evidence fragment carry the change, and the final commit narrows the literal regex and the search match.\nCALL_SITES: imas_codex/ingestion/pipeline.py:280, imas_codex/ingestion/graph.py:75, imas_codex/llm/search_tools.py:1662\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/ingestion/extractors/edas.py:19 recognizes the four named EDDB reads and their _f wrappers, edas.py:106-118 the three get_time_* locallib methods and getseldata, and edas.py:120-128 the UDDB/PMDB/LCDB/MBDB wrappers, each keeping its literal category and data name; facility.yaml adds five DataReferenceType values, the edas_category/edas_data_name properties and the schema-declared resolves_to_facility_signal relationship (relationship_type RESOLVES_TO_FACILITY_SIGNAL), and link_chunks_to_edas_signals is wired into the ingest path at imas_codex/ingestion/pipeline.py:280, so the deliverable is present, but the extractor matches only four _eddbread* forms where jt-60sa.yaml data_access_patterns.signal_naming records twelve in the same block.\nSCORE evidence: 18\nJUSTIFICATION evidence: docs/evidence/fragments/jt60sa-discovery-completion/edas-data-references.html gives the per-type chunks/mentions/resolved table (EDDB 8/10/0, share 0%) and records a catalog positive control (CAM/DivIRmP15R0 resolves to 1 FacilitySignal against TMS/neyag 0), so the zero is shown to be a genuine absence rather than a blind instrument; the head gate head-gate-current.log exits 0 with 39 passed and the graph test resolves a seeded signal inside a rolled-back live transaction, but the resolution share itself was exercised only against the graph test signal.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat a8bd35459898de502a4c923159c4e48256f069cf..502a9622d8395d846b70f75b7919ba49115c29be touches nine files; eight are declared in the reviewed manifest's write paths and the ninth, imas_codex/schemas/facility.yaml, is the lead's 2026-10-08 shared-file exception for the DataReferenceType enum and the DataReference class, but the same lead comment directs the second node to merge origin/main before its last commit and the worker did not, on the worktree contract.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control-current.log drops the eddbreadTime pattern and produces EXIT=1 with three failing ids that the complete 39-passed head gate does not fail, so the guard is shown to fire; the final commit 502a9622d also pins the literal-only rule with a concatenated-expression case in test_dynamic_or_non_call_is_not_a_data_reference, and the graph statements run against the live database in a rolled-back transaction.\nSCORE fit: 20\nJUSTIFICATION fit: EDASReference (imas_codex/ingestion/extractors/edas.py:7) is a NamedTuple beside MDSplusReference in the same extractors package, _arguments/_literal are private module helpers, and neither symbol, filename, comment nor commit subject carries a plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the existing extractor package and reuses _generate_ref_id and the GraphClient idiom in imas_codex/ingestion/graph.py, the existing TestSearchCode and _enrich_code_chunks in imas_codex/llm/search_tools.py, and a search over imas_codex and tests found no other owner of EDAS reference extraction, so no capability was forked.\nFINDING imas_codex/ingestion/extractors/edas.py:19 follow-on: the _CALL pattern covers only eddbreadTime/One/Para/Header plus _f while jt-60sa.yaml records eight further EDDB reads in the same block, so most of the configured access surface is unextracted.\nFINDING imas_codex/llm/search_tools.py:1878 follow-on: _reference_search_code_chunks ... short category tokens (EQ, PF) match inside unrelated words, letting an unrelated chunk score 0.9 on a spurious reference match.\nFINDING imas_codex/schemas/facility.yaml:390 follow-on: the lead directed the second shared-file node to merge origin/main before its last commit; it did not, so the coordinator must confirm both regions are present in HEAD at merge.\n",
+  "review_run_id": "r-20261008T043326871291-review-of-edas-data-references",
+  "reviewed_base_sha": "a8bd35459898de502a4c923159c4e48256f069cf",
+  "reviewed_head_sha": "502a9622d8395d846b70f75b7919ba49115c29be",
+  "reviewed_run_id": "r-20261008T035903560782-edas-data-references",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T04:40:39+00:00",
+  "total": 113
+}
