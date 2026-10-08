@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured by running the same pre-existing selection at the reviewed base and head in scratch trees: the five pre-existing discovery test files at base f90e2e05 give 102 passed EXIT=0, and the same five plus the new claim test file at head 16cded4a give 104 passed EXIT=0; the two tests the change adds both pass, so no added failure is introduced. The reviewed run's own baseline-test.log (revision f90e2e05) ran only the new test file and shows its two tests failing before the fix (the intended TDD baseline), and its final-test.log (revision 16cded4a) shows 104 passed; both are reproduced independently at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T140617035458-review-of-code-ingest-claim-once/base-verify.log and head-committed-verify.log.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_ingest_claim_once.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_claims_prefix_scope.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_relevance.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_facet_admission.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_ingest_settles.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_claims_honour_exclusions.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/final-test.log",
+    "revision": "16cded4a2800e066adc90a8c890a75181cc47ec5"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_ingest_claim_once.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/discovery/test_code_ingest_claim_once.py::test_two_concurrent_claims_take_each_file_once",
+      "tests/discovery/test_code_ingest_claim_once.py::test_live_claim_is_renewed_past_timeout"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/baseline-test.log",
+    "revision": "f90e2e0512d58b7d32565a4955fbc8bf7ef7a17b"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py (code_worker, the ingestion claim call)"
+  ],
+  "completed_at": "2026-10-08T14:25:47.204Z",
+  "dispatched_at": "2026-10-08T14:06:26Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "957",
+      "severity": "blocking",
+      "text": "blocking: _refresh_ingestion_claims at head 16cded4a renews only claims where sf.status = 'scored', but ingest_files sets each CodeFile status to 'ingested' as it stores the file (imas_codex/ingestion/pipeline.py:288), so a renewal tick that lands during a batch which has already ingested a file finds owned < len(claims) and raises RuntimeError('Code ingestion claim changed while its holder was active'); the raised task is surfaced by keepalive.result() after ingest_files returns, the outer handler treats it as a batch failure, and the batch's remaining files are marked failed. The renewal interval is DEFAULT_CLAIM_TIMEOUT_SECONDS/3 = 100 s (imas_codex/discovery/base/claims.py:50), so the defect is latent for short batches but reachable for any code ingest batch that runs longer than 100 s. It is not hypothetical: the run's own resumed working tree adds the test test_ingested_file_does_not_invalidate_remaining_claim, which fails at head with exactly that error (see head-verify.log), and the uncommitted workers.py change on the worktree rewrites this function to count ownership by claim_token alone and to preserve claimed_at for non-scored files, which is the fix for this defect that the reviewed head lacks."
+    },
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "1144",
+      "severity": "follow-on",
+      "text": "follow-on: _mark_file_failed at the reviewed head takes no claim token and sets status='failed' for a matched CodeFile unconditionally, so a worker that has lost its claim (a competing worker re-claimed the file after the renewal cutoff) can still downgrade a file another worker now owns. The worktree's uncommitted change adds a claim_token parameter and a WHERE sf.status='scored' AND sf.claim_token=$token guard, which the reviewed head does not carry; this is a second defect the resume was addressing and that is absent from the delivered head, though I did not construct an independent reproduction for it."
+    },
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "898",
+      "severity": "follow-on",
+      "text": "follow-on: the node's stated cause is corroborated, not merely asserted: the retry pass's operational-ingest.log lines 45 and 50 record both code workers claiming the same ten files (nbcal2.f, exfus_out.f, pathin.f, ...) at 15:13:14 and both starting 'ingesting 10 code files', finishing 3.9 s and 4.3 s later, so the 62 events for 46 files are same-baseline duplicate claims and not the 300 s timeout; the facility-write-lock serialization the change adds (SET f.name = f.name before the candidate read, one transaction) removes that race, and the concurrent-claim test and the live two-worker probe both support it."
+    },
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "1315",
+      "severity": "follow-on",
+      "text": "follow-on: run r-20261008T134034354652 was resumed after the manifest was written: attempt-1 exited at 14:05:04Z and attempt-2 (attempt_kind='resume') started at 14:07:04Z, and that resume left imas_codex/discovery/code/workers.py and tests/discovery/test_code_ingest_claim_once.py modified in the worktree beyond the recorded head 16cded4a with one new test failing. The manifest, written by attempt-1, records status 'complete' and states 'The worktree is clean', which the current working tree contradicts; the reviewed head 16cded4a itself is clean-scoped and is what this record scores."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "_claim_code_files_for_ingestion is invoked from code_worker in imas_codex/discovery/code/workers.py on each batch; the new renewal helper _keep_ingestion_claims_current is created and cancelled around the ingest call in the same function.",
+    "diff": "four commits against f90e2e05 change one product file (imas_codex/discovery/code/workers.py, +70/-10 region: a facility write-lock in the claim query, a _refresh_ingestion_claims helper, an async renewal loop, and a threaded ingest call), one new test file (136 lines), and one evidence fragment (32 lines); no other product code changes.",
+    "done_when": "the plan comment's done-when is met at head for its literal clauses: the concurrent-claim test shows two workers taking each file once, the live renewal probe holds a claim past a one-second cutoff with zero contender claims, and the fragment names the same-batch claim race; the renewal clause is met in the tested cases but is fragile because a batch that changes a file's status mid-flight aborts renewal.",
+    "goal": "the node establishes the cause of the duplicate ingestion claims in the retry-failed pass and makes each scored file ingested once per pass, by serializing claim selection on the facility and renewing an in-flight batch's claim.",
+    "manifest": "read; it records four commits (8d8203832, dc2a4896a, 49a91f19e, 16cded4a), logs for the focused gate/live probes/negative control, an after_suite object, and empty follow_ons/blockers; its 'complete' status and 'worktree is clean' claim are contradicted by the resumed attempt-2 state.",
+    "write_paths": "the reviewed diff touches exactly the declared paths imas_codex/discovery/code/workers.py, tests/discovery/test_code_ingest_claim_once.py and docs/evidence/fragments/jt60sa-discovery-completion/code-ingest-claim-once.html, and nothing else; the uncommitted worktree state is a separate finding."
+  },
+  "justifications": {
+    "durability": "the fix carries an in-node mutation control (restoring the original claim query fails the concurrent-claim test with eight claims for four files) and a live renewal probe, so the primary duplicate-claim path is protected; but the renewal guard can itself misfire and abort a real batch when ingest_files marks a file ingested mid-flight, and the guard against a lost-claim worker downgrading a file is present only in uncommitted working-tree code, so the delivered head is not durable against the states a long batch produces.",
+    "evidence": "independent reproduction confirms the run's after_suite (104 passed at 16cded4a) and its baseline (the two new tests fail at f90e2e05); the operational-ingest.log lines 45/50 corroborate the same-batch cause; gaps are that the run never ran a base arm of the same pre-existing selection, and neither its gate nor its live probes exercise the ingested-mid-batch status change that its own resumed test shows breaking renewal.",
+    "fit": "the facility-write-lock idiom is a recognisable Neo4j serialization pattern, the renewal helper reuses the existing claim_token, commits carry conventional subjects with bodies, the test is named by mechanism, and no plan, sprint or ticket identifier appears in the code, comments or messages.",
+    "goal_fidelity": "all three of the plan comment's clauses are delivered and verified at head (cause named, concurrent claims take each file once, a held claim survives its cutoff); the shortfall is that the held-claim clause holds only while no file changes status during the batch, a condition real ingestion violates, which the resumed work was still repairing.",
+    "reuse": "the change serializes through the existing Facility node and reuses the claim_token, GraphClient and the claim-timeout constant rather than introducing a new claim table or lock service, and the threaded ingest reuses asyncio.to_thread; it does not duplicate an existing locking mechanism.",
+    "scope_discipline": "the reviewed head diff stays exactly inside the declared write scope and adds no unrelated edits; the additional uncommitted worktree changes are attributed to the resumed attempt, not to the head this record scores, but they do mean the run's total footprint no longer matches a clean single-head delivery."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node establishes the cause of the duplicate code-ingestion claims from the retry-failed pass and makes each scored file ingested once per pass, by serializing claim selection per facility and renewing an in-flight batch's claim.\nVERDICT done_when: the concurrent-claim test shows two workers taking each file once, the live renewal probe holds a claim past a one-second cutoff with zero contender claims, and the fragment names the same-batch claim race; the held-claim clause is verified only for batches that do not change a file's status mid-flight.\nVERDICT write_paths: the reviewed diff touches exactly the declared paths imas_codex/discovery/code/workers.py, tests/discovery/test_code_ingest_claim_once.py and docs/evidence/fragments/jt60sa-discovery-completion/code-ingest-claim-once.html.\nVERDICT manifest: read; four commits, focused/live/negative-control logs, an after_suite object, empty follow_ons and blockers; its 'complete' status and 'worktree is clean' claim are contradicted by the resumed attempt-2 working tree.\nVERDICT diff: read commit by commit against f90e2e05; one product file, one new test file, one fragment, no other product code.\nCALL_SITES: imas_codex/discovery/code/workers.py (code_worker)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: cause named, concurrent claims take each file once, and a held claim survives its cutoff are all delivered and independently reproduced; the held-claim clause fails when a file's status changes mid-batch, which real ingestion does.\nSCORE evidence: 16\nJUSTIFICATION evidence: the after_suite (104 passed at 16cded4a) and the baseline (two new tests fail at f90e2e05) are reproduced, and the operational log corroborates the same-batch cause; the run lacks a base arm of the same pre-existing selection and never exercises the ingested-mid-batch case.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the reviewed head stays exactly inside the declared write scope; the extra uncommitted worktree edits belong to the resumed attempt and are reported rather than scored against the head.\nSCORE durability: 13\nJUSTIFICATION durability: the duplicate-claim path is mutation-controlled, but the renewal guard aborts a real long batch when ingest_files marks a file ingested, and the lost-claim worker guard exists only in uncommitted code.\nSCORE fit: 18\nJUSTIFICATION fit: a recognisable serialization idiom, a mechanism-named test, conventional commits with bodies, and no plan or ticket identifier in code or messages.\nSCORE reuse: 17\nJUSTIFICATION reuse: it serializes on the existing Facility node and reuses the claim_token, GraphClient, the claim-timeout constant and asyncio.to_thread rather than adding a new lock service.\nFINDING imas_codex/discovery/code/workers.py:957 major: _refresh_ingestion_claims requires status='scored', but ingest_files sets files to 'ingested' mid-batch (imas_codex/ingestion/pipeline.py:288), so a renewal tick during a >100 s batch raises RuntimeError('Code ingestion claim changed while its holder was active') and the batch's remaining files are marked failed; the resumed worktree's test test_ingested_file_does_not_invalidate_remaining_claim fails at head with exactly this error, and the uncommitted workers.py change that counts ownership by token is the fix the head lacks.\nFINDING imas_codex/discovery/code/workers.py:1144 major: _mark_file_failed at head takes no claim token and fails a matched CodeFile unconditionally, so a worker whose claim was re-taken can downgrade a file another worker owns; the uncommitted worktree change adds the token and scored-status guard that the head does not carry.\nFINDING imas_codex/discovery/code/workers.py:898 follow-on: the retry pass's operational-ingest.log lines 45/50 show both workers claiming the same ten files at 15:13:14 and both ingesting them, so the 62 events for 46 files are same-batch duplicate claims, not timeout expiry, corroborating the cause the facility write-lock serialization removes.\nFINDING imas_codex/discovery/code/workers.py:1315 follow-on: the run was resumed (attempt-2, 14:07:04Z) and left the worktree modified beyond the recorded head 16cded4a with one new failing test, while the manifest records status complete and states the worktree is clean.",
+  "review_run_id": "r-20261008T140617035458-review-of-code-ingest-claim-once",
+  "reviewed_base_sha": "f90e2e0512d58b7d32565a4955fbc8bf7ef7a17b",
+  "reviewed_head_sha": "16cded4a2800e066adc90a8c890a75181cc47ec5",
+  "reviewed_run_id": "r-20261008T134034354652-code-ingest-claim-once",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T14:25:00+00:00",
+  "total": 96,
+  "verdict": "SOUND WITH FINDINGS"
+}
