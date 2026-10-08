@@ -26,16 +26,27 @@ from imas_codex.llm.search_tools import (
 def _text_search_documents(
     gc: GraphClient, query: str, facility: str, limit: int
 ) -> list[dict[str, Any]]:
-    """Find facility documents by title or description alongside vector hits."""
+    """Find facility documents by declared metadata or attached chunk text."""
     return gc.query(
         """
         MATCH (d:Document)
         WHERE d.facility_id = $facility
-          AND (toLower(d.title) CONTAINS $term
-               OR toLower(d.description) CONTAINS $term)
+          AND (toLower(d.filename) CONTAINS $term
+               OR toLower(d.preview_text) CONTAINS $term
+               OR toLower(d.document_purpose) CONTAINS $term
+               OR toLower(d.path) CONTAINS $term
+               OR EXISTS {
+                   MATCH (d)-[:HAS_CHUNK]->(chunk:WikiChunk)
+                   WHERE toLower(chunk.text) CONTAINS $term
+               })
+        OPTIONAL MATCH (d)-[:HAS_CHUNK]->(chunk:WikiChunk)
+        WHERE toLower(chunk.text) CONTAINS $term
+        WITH d, head(collect(chunk.text)) AS matching_chunk
         OPTIONAL MATCH (p:WikiPage)-[:HAS_DOCUMENT]->(d)
-        RETURN d.id AS id, d.title AS title, d.description AS description,
-               d.url AS url, p.title AS page_title, 0.5 AS score
+        RETURN d.id AS id, coalesce(d.filename, d.path, d.id) AS title,
+               coalesce(matching_chunk, d.preview_text, d.document_purpose,
+                        d.path, '') AS description,
+               d.url AS url, head(collect(p.title)) AS page_title, 0.5 AS score
         LIMIT $limit
         """,
         facility=facility,
