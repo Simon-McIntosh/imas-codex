@@ -710,6 +710,8 @@ class TestConfiguredDatabases:
                 "description": "raw channel",
                 "metadata_source": "uddbreadTable()",
                 "metadata_shot": "",
+                "description_source_shot": "",
+                "unit_source_shot": "",
             }
         ]
 
@@ -733,7 +735,12 @@ class TestConfiguredDatabases:
                 assert pid == "2111UA001"
                 if shot == "E101173":
                     return False, {"irc": 1301, "data": None}
-                assert shot == "E101163"
+                if shot == "E101163":
+                    return True, {
+                        "irc": 0,
+                        "data": 'PID="2111UA001" NAME="coil current" UNIT= STIME=0',
+                    }
+                assert shot == "E080296"
                 return True, {
                     "irc": 0,
                     "data": 'PID="2111UA001" NAME="coil current" UNIT="A" STIME=0',
@@ -746,11 +753,13 @@ class TestConfiguredDatabases:
             sys.modules, "uddb_pwrapper", SimpleNamespace(uddbWrapper=RawCatalogue)
         )
         rows, _ = enumerate_uddb(
-            {"ref_shot": "E101173", "uddb_header_shots": ["E101163"]}
+            {"ref_shot": "E101173", "uddb_header_shots": ["E101163", "E080296"]}
         )
         assert rows[0]["description"] == "coil current"
         assert rows[0]["units"] == "A"
         assert rows[0]["metadata_shot"] == "E101163"
+        assert rows[0]["description_source_shot"] == "E101163"
+        assert rows[0]["unit_source_shot"] == "E080296"
 
     async def test_uddb_catalogue_produces_distinct_raw_signal(self):
         config = {**CONFIG, "databases": ["EDDB", "UDDB"]}

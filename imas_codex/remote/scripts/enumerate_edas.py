@@ -302,18 +302,24 @@ def enumerate_uddb(config):
                     )
                 )
                 for pid in table.get("data") or []:
-                    name = unit = source_shot = ""
+                    name = unit = source_shot = name_shot = unit_shot = ""
                     for shot in shots:
                         header_ok, response = db.uddbreadHeader(shot=shot, pid=pid)
                         if not header_ok:
                             continue
                         source_shot = source_shot or shot
                         header = (response or {}).get("data") or ""
-                        name = name or _uddb_header_value(header, "NAME")
-                        unit = unit or _uddb_header_value(header, "UNIT")
+                        if not name:
+                            name = _uddb_header_value(header, "NAME")
+                            if name:
+                                name_shot = shot
+                        if not unit:
+                            unit = _uddb_header_value(header, "UNIT")
+                            if unit:
+                                unit_shot = shot
                         if name and unit:
                             break
-                    headers[pid] = (name, unit, source_shot)
+                    headers[pid] = (name, unit, source_shot, name_shot, unit_shot)
         finally:
             db.uddbClose()
     except Exception as exc:
@@ -340,7 +346,12 @@ def enumerate_uddb(config):
             continue
         pid = pid.strip()
         alias = (aliases[i] or "").strip() if i < len(aliases) else ""
-        name, unit, source_shot = headers.get(pid, ("", "", ""))
+        name, unit, source_shot, name_shot, unit_shot = headers.get(
+            pid, ("", "", "", "", "")
+        )
+        source_shots = dict.fromkeys(
+            shot for shot in (source_shot, name_shot, unit_shot) if shot
+        )
         rows.append(
             {
                 "database": "UDDB",
@@ -351,11 +362,13 @@ def enumerate_uddb(config):
                 "units": unit,
                 "description": name or (alias if alias != pid else ""),
                 "metadata_source": (
-                    f"uddbreadHeader({source_shot}, {pid})"
-                    if source_shot
+                    "; ".join(f"uddbreadHeader({shot}, {pid})" for shot in source_shots)
+                    if source_shots
                     else "uddbreadTable()"
                 ),
                 "metadata_shot": source_shot,
+                "description_source_shot": name_shot,
+                "unit_source_shot": unit_shot,
             }
         )
     return rows, attempt
