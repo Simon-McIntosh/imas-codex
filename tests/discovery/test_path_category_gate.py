@@ -88,6 +88,8 @@ def test_scored_container_claim_excludes_archive(monkeypatch):
     assert "archive" in params["excluded_purposes"]
     assert "p.children_worth_listing >= $expand_threshold" in claim
     assert "p.scan_relevance" not in claim
+    assert "p.score_composite" not in claim
+    assert "p.triage_composite" not in claim
     assert "p.should_expand" not in claim
 
 
