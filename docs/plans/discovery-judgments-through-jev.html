@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;done&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;done&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;done&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
-<meta name="plan-impl" content="0.714">
-<meta name="plan-version" content="93">
+<meta name="plan-impl" content="0.762">
+<meta name="plan-version" content="94">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -264,23 +264,12 @@ sits in, not a line number), and a test shows that inserting lines above an adju
 five orphaned prompt files are deleted, with the <code>prompt_loader.py</code> examples pointing at prompts that
 exist.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s22">§22 — Map-time document search reads the properties Document declares</h2>
-<section data-reckon="section" data-id="s22" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p><strong>Why.</strong> The lead asked for map-time context to carry Jev-reranked evidence from every source that hybrid
-search collects. The lead then directed on 2026-10-08 that a bug found by the coordinator's merged-head gate be fixed.
-<code>_text_search_documents</code> in <code>imas_codex/ids/slot_context.py</code> matches
-<code>toLower(d.title) CONTAINS $term OR toLower(d.description) CONTAINS $term</code> and returns <code>d.title</code>. The
-<code>Document</code> class declares neither property: its text is in <code>filename</code>, <code>preview_text</code>,
-<code>document_purpose</code> and <code>path</code>. A missing property reads as null in Cypher, so the documents half of map
-context has returned zero rows since it landed, silently. <code>tests/graph/test_cypher_property_check.py</code> flags
-<code>Document.title</code> and fails on main.</p>
-<p><strong>Deliverable.</strong> The document text search reads the properties <code>Document</code> declares, and its result
-row names the document by its declared fields. A test seeds a document whose text appears only in its declared fields,
-and asserts the search returns it. Wiki chunk text attached to the document is in scope where the hybrid search already
-reaches it.</p>
-<p><strong>Done when</strong> the seeded-document test passes, the property check passes on <code>slot_context.py</code>,
-and a live read against the graph returns at least one JT-60SA document for a term known to appear in an ingested
-manual or document preview.</p>
+<section data-reckon="section" data-id="s22" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The map-time document search matches the fields <code>Document</code> declares and the text of its attached chunks, instead of the undeclared <code>title</code> and <code>description</code>. That half of map context had returned no rows since it landed. A live read returns an ingested JT-60SA document, restoring the old predicate fails the seeded test, and the property check passes on <code>slot_context.py</code>. Review 20/19/20/19/19/20. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/slot-context-document-search.html">full record</a></p>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
