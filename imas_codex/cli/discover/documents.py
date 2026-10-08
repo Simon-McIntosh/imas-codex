@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 def _validate_focus(facility: str, prefixes: list[str]) -> None:
-    """Refuse path prefixes that match no Document at this facility."""
+    """Refuse path prefixes that match no image Document at this facility."""
     from imas_codex.graph import GraphClient
 
     with GraphClient() as gc:
         rows = gc.query(
             """
             UNWIND $prefixes AS prefix
-            OPTIONAL MATCH (d:Document {facility_id: $facility})
+            OPTIONAL MATCH (d:Document {facility_id: $facility, document_type: 'image'})
             WHERE d.path STARTS WITH prefix
             RETURN prefix, count(d) AS matches
             """,
@@ -316,7 +316,7 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
     "--focus",
     "focus",
     multiple=True,
-    help="Restrict to named items (not yet supported for documents)",
+    help="Restrict to Document path prefixes",
 )
 @click.option(
     "--time",
