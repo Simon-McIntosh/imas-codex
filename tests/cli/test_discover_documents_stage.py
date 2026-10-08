@@ -193,14 +193,19 @@ def test_limit_caps_items(documents_env) -> None:
     assert documents_env.scan_calls[0]["max_paths"] == 3
 
 
-def test_focus_is_refused_naming_the_plan_section(documents_env) -> None:
+def test_focus_is_refused_with_the_mechanism_message(documents_env) -> None:
     result = CliRunner().invoke(
         discover, ["documents", FACILITY, "--focus", "equilibrium"]
     )
 
     assert result.exit_code != 0
-    assert "facility-discovery-sequence" in result.output
-    assert "§7" in result.output
+    assert "--focus is not supported for documents yet" in result.output
+    assert "the documents claim query takes no item filter" in result.output
+    # The refusal states the mechanism, never a plan name or section number.
+    lowered = result.output.lower()
+    assert "facility-discovery-sequence" not in lowered
+    assert "§" not in result.output
+    assert " plan " not in lowered
 
 
 def test_scan_only_and_flush_together_are_refused(documents_env) -> None:

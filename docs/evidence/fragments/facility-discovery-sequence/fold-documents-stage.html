@@ -9,8 +9,8 @@
     <code>--scan-only</code> and the draining half (image fetch and VLM captioning) by
     <code>--flush</code>; <code>--limit</code> caps scanned items and <code>--topic</code>
     reaches the VLM scorer that the retired free-text <code>--focus</code> reached.
-    <code>--focus</code> ITEMS is refused, naming §7, because this domain has no item
-    filter. Gate: <code>uv run --no-sync pytest
+    <code>--focus</code> ITEMS is refused with a mechanism message, because this
+    domain's claim query takes no item filter. Gate: <code>uv run --no-sync pytest
     tests/cli/test_discover_documents_stage.py tests/test_cli.py -p no:cacheprovider</code>
     at 425dd5620 — 56 passed. Declared mutation (stage ignores <code>--flush</code> and
     runs the seeding half too) turns the gate red (EXIT=1) on

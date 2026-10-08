@@ -58,9 +58,8 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
     """
     if options.focus:
         raise click.UsageError(
-            "--focus ITEMS is not supported by the documents domain, which has "
-            "no item filter. Item scoping is specified in "
-            "facility-discovery-sequence §7."
+            "--focus is not supported for documents yet: the documents claim "
+            "query takes no item filter"
         )
     if options.scan_only and options.flush:
         raise click.UsageError("--scan-only and --flush are mutually exclusive")
@@ -295,7 +294,7 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
     "--focus",
     "focus",
     multiple=True,
-    help="Item filter (unsupported by this domain; see plan §7)",
+    help="Restrict to named items (not yet supported for documents)",
 )
 @click.option(
     "--time",
