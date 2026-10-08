@@ -194,7 +194,7 @@ discovery_roots:
   - /analysis/src/getseldata_v4.1
 
 # Wiki/documentation sites
-# JT-60SA documentation is hosted on nakasvr23 behind IFERC VPN.
+# JT-60SA documentation is served on nakasvr26 through the workstation VPN.
 # Site 0: Static Code wiki - analysis code documentation
 # Site 1: Server landing page - hardware, software, login, batch jobs, compilers
 # Access is through the jt-60sa SSH hop; port_forwards supplies browser ports.
@@ -265,7 +265,7 @@ port_forwards:
       remote_host: nakasvr26.iferc.org
       remote_port: 443
       protocol: https
-      description: nakasvr23 server documentation (hardware, software, login)
+      description: nakasvr26 server documentation (hardware, software, login)
 
 # =============================================================================
 # Browser URLs - Localhost access with active port forwards
