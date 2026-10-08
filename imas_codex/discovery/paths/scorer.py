@@ -42,6 +42,126 @@ suppress_litellm_noise()
 PURPOSE_SCORE_NAMES = PATH_SCORE_DIMENSIONS
 
 
+# Concrete directory situations for each stored FacilityPath facet. The
+# schema supplies the question's subject; these examples anchor its levels.
+_FACET_SITUATIONS = {
+    "score_modeling_code": ("simulation input or launcher", "physics solver source"),
+    "score_analysis_code": (
+        "analysis launcher or configuration",
+        "diagnostic processing or reconstruction source",
+    ),
+    "score_operations_code": (
+        "control-system configuration",
+        "DAQ, timing or feedback source",
+    ),
+    "score_modeling_data": (
+        "model run manifest",
+        "simulation output or parameter scan",
+    ),
+    "score_experimental_data": (
+        "shot index or data catalogue",
+        "measured shot records or database",
+    ),
+    "score_data_access": (
+        "data-system configuration",
+        "measured-data reader or converter source",
+    ),
+    "score_workflow": ("batch configuration", "orchestration or processing scripts"),
+    "score_visualization": ("plot configuration", "plotting or rendering source"),
+    "score_documentation": ("documentation index", "READMEs, tutorials or papers"),
+    "score_imas": (
+        "IMAS configuration or IDS references",
+        "facility-to-IDS mapping source",
+    ),
+    "score_convention": (
+        "unit or coordinate references",
+        "sign, unit or COCOS conversion source",
+    ),
+}
+
+
+def build_path_judgment_questions() -> dict[str, Any]:
+    """Ask Jev for the schema's exclusive purpose and every stored path facet."""
+    from imas_codex.graph.schema import get_schema
+
+    schema = get_schema()
+    purposes = schema.get_enum_with_descriptions("PathPurpose") or []
+    choices = {
+        item["value"]: item["description"]
+        for item in purposes
+        if item["value"] != "empty"
+    }
+    choices["other"] = "A purpose not covered by the listed directory categories"
+    slots = schema.get_all_slots("FacilityPath")
+    questions: dict[str, Any] = {
+        "path_purpose": {
+            "type": "choice",
+            "instructions": "Which single category best describes the directory at `directory.path`?",
+            "criteria": choices,
+        }
+    }
+    for field in PURPOSE_SCORE_NAMES:
+        if field not in slots or field not in _FACET_SITUATIONS:
+            raise ValueError(f"Missing FacilityPath judgment definition: {field}")
+        supporting, direct = _FACET_SITUATIONS[field]
+        questions[field] = {
+            "type": "score",
+            "instructions": f"Does the directory at `directory.path` contain {slots[field]['description'].lower()}? Judge the directory's own contents; a container may be worth listing for its children without having this facet itself.",
+            "criteria": [
+                "No evidence of this content in the directory.",
+                f"Contains {supporting}.",
+                f"Contains {direct}.",
+                f"Is the primary directory for {direct}.",
+            ],
+        }
+    questions["children_worth_listing"] = {
+        "type": "noul",
+        "instructions": "Would listing the immediate child directories of `directory.path` likely reveal facility-specific code, measured data, machine descriptions or useful documentation? Judge children separately from this directory's own content. A container can be worth listing even when its own facet Scores are low.",
+        "criteria": {
+            "true": "listing children is likely to reveal relevant facility content",
+            "false": "children are absent or unlikely to contain relevant facility content",
+        },
+    }
+    return questions
+
+
+def build_path_judgment_state(
+    path_row: dict[str, Any], facility_id: str, facility_config: dict[str, Any]
+) -> dict[str, Any]:
+    """Present the directory evidence used by path scoring as one Jev state."""
+    import json
+
+    from imas_codex.discovery.code.scorer import facility_relevance_block
+
+    def decoded(value: Any, fallback: Any) -> Any:
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                return fallback
+        return value if value is not None else fallback
+
+    return {
+        "facility": facility_relevance_block(facility_id, facility_config),
+        "directory": {
+            "path": path_row["path"],
+            "depth": path_row.get("depth"),
+            "total_files": path_row.get("total_files") or 0,
+            "total_dirs": path_row.get("total_dirs") or 0,
+            "file_type_counts": decoded(path_row.get("file_type_counts"), {}),
+            "child_names": decoded(path_row.get("child_names"), []),
+            "tree_context": (path_row.get("tree_context") or "")[:3000],
+            "has_readme": bool(path_row.get("has_readme")),
+            "has_makefile": bool(path_row.get("has_makefile")),
+            "has_git": bool(path_row.get("has_git")),
+            "vcs_type": path_row.get("vcs_type"),
+            "patterns_detected": decoded(path_row.get("patterns_detected"), []),
+            "numeric_dir_ratio": path_row.get("numeric_dir_ratio") or 0,
+            "description": (path_row.get("description") or "")[:1500],
+        },
+    }
+
+
 def combined_score(
     scores: dict[str, float],
     input_data: dict[str, Any],
