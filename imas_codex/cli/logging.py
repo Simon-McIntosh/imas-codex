@@ -38,6 +38,11 @@ from datetime import UTC, datetime, timedelta
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from imas_codex.logs import (
+    WorkerLogAdapter as WorkerLogAdapter,
+    log_worker_error as log_worker_error,
+)
+
 # Standard log directory follows XDG convention
 LOG_DIR = Path.home() / ".local" / "share" / "imas-codex" / "logs"
 REMOTE_LOG_DIR = "~/.local/share/imas-codex/logs"
@@ -180,84 +185,6 @@ def configure_cli_logging(
         root_logger.setLevel(file_level)
 
     return log_file.parent
-
-
-# =============================================================================
-# Structured Worker Logging
-# =============================================================================
-
-
-class WorkerLogAdapter(logging.LoggerAdapter):
-    """Log adapter that injects worker name and batch ID into log records.
-
-    Usage::
-
-        logger = logging.getLogger(__name__)
-        wlog = WorkerLogAdapter(logger, worker_name="check_worker_2")
-        wlog.info("checked 20 signals (18 success, 2 failed)")
-        # → 2026-03-13 10:15:23 INFO check_worker_2: checked 20 signals ...
-
-        wlog.set_batch("abc123")
-        wlog.info("processing batch")
-        # → 2026-03-13 10:15:24 INFO check_worker_2 [batch=abc123]: processing batch
-    """
-
-    def __init__(
-        self,
-        logger: logging.Logger,
-        worker_name: str,
-        batch_id: str | None = None,
-    ) -> None:
-        super().__init__(logger, {"worker_name": worker_name, "batch_id": batch_id})
-
-    def set_batch(self, batch_id: str | None) -> None:
-        """Update the batch ID for subsequent log messages."""
-        self.extra["batch_id"] = batch_id
-
-    def process(self, msg: str, kwargs: dict) -> tuple[str, dict]:
-        worker = self.extra.get("worker_name", "")
-        batch = self.extra.get("batch_id")
-        batch_str = f" [batch={batch}]" if batch else ""
-        return f"{worker}{batch_str}: {msg}", kwargs
-
-
-def log_worker_error(
-    logger: logging.Logger | logging.LoggerAdapter,
-    *,
-    worker_name: str,
-    signal_id: str | None = None,
-    error: Exception,
-    error_type: str = "application",
-    retry_count: int = 0,
-    max_retries: int = 0,
-    batch_id: str | None = None,
-) -> None:
-    """Log a worker error with consistent structure.
-
-    All worker errors should use this function for uniform log format.
-
-    Args:
-        logger: Logger or LoggerAdapter instance.
-        worker_name: Name of the worker (e.g. "check_worker_2").
-        signal_id: ID of the signal/item being processed.
-        error: The exception that occurred.
-        error_type: Classification: "infrastructure" or "application".
-        retry_count: Current retry attempt number.
-        max_retries: Maximum retries configured.
-        batch_id: Batch identifier if applicable.
-    """
-    parts = [worker_name]
-    if batch_id:
-        parts.append(f"batch={batch_id}")
-    if signal_id:
-        parts.append(f"signal={signal_id}")
-    parts.append(f"type={error_type}")
-    if max_retries > 0:
-        parts.append(f"retry={retry_count}/{max_retries}")
-
-    context = " ".join(parts)
-    level = logging.WARNING if error_type == "infrastructure" else logging.ERROR
-    logger.log(level, "%s: %s", context, error)
 
 
 # =============================================================================

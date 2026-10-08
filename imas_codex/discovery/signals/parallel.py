@@ -45,7 +45,6 @@ from typing import TYPE_CHECKING, Any
 
 from neo4j.exceptions import ClientError
 
-from imas_codex.cli.logging import WorkerLogAdapter, log_worker_error
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
 from imas_codex.discovery.base.progress import WorkerStats
@@ -59,6 +58,7 @@ from imas_codex.graph import GraphClient
 from imas_codex.graph.models import DataAccess, FacilitySignalStatus
 from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.vector_search import build_vector_search
+from imas_codex.logs import WorkerLogAdapter, log_worker_error
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import run_python_script
 
