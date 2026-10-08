@@ -402,9 +402,19 @@ def test_conflicting_options_are_refused(arguments):
 
 
 @pytest.mark.parametrize("selection", [[], ["--only", "paths", "--only", "candidates"]])
-def test_bare_focus_requires_one_domain_before_stages(monkeypatch, selection):
+def test_bare_focus_requires_one_domain_before_stages(
+    monkeypatch, healthy, tmp_path, selection
+):
+    from imas_codex.cli import logging as cli_logging
     from imas_codex.cli.discover import discover
 
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
+    )
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+    )
     stage_function = MagicMock()
     monkeypatch.setattr(sequence, "_stage_function", stage_function)
     result = CliRunner().invoke(discover, ["jt-60sa", *selection, "--focus", "X"])
