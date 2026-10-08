@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
 <meta name="plan-impl" content="0.588">
-<meta name="plan-version" content="65">
+<meta name="plan-version" content="66">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -563,6 +563,9 @@ calls failed 3 of 16. Node 2 builds the category gate.</p></div>
 suffix breaks the repository's naming rule, and the coordinator named the file in this section. Second, run the
 fresh-description arm of the variation measure once the triage worker routes through <code>describe_paths</code>
 (§14 node 2).</p></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-run-r-20261008T073634788007-review-of-path-category-goldens" data-who="reckon-build" data-when="2026-10-08T07:51:07.978Z">
+    <div class="r-comment-body"><p>Review of r-20261008T065131134683-path-category-goldens stored as a parsed six-dimension record (goal_fidelity 17, evidence 19, scope_discipline 20, durability 12, fit 16, reuse 19; total 103) with reviewed_base_sha 1156da5f and reviewed_head_sha 98a046c8d, two follow-on findings, and an unmeasured added-failure count because the reviewed manifest names no baseline_suite or after_suite gate log.</p></div>
 </div>
 <div class="r-comment" data-section="s15" data-id="c-run-r-20261008T060108264897-facility-access-matches" data-who="reckon-build" data-when="2026-10-08T06:44:13Z">
     <div class="r-comment-body"><p>Facility-configured access calls now reach path and both code judgment arms. On 158 labelled JT-60SA paths, fresh AUC was 0.8502 without and 0.8513 with match evidence; at the 0.30 gate TP/FP/FN/TN changed from 87/6/31/34 to 86/6/32/34. Focused gate 106 passed; removing the builder's facility sources failed all four facility cases.</p></div>
