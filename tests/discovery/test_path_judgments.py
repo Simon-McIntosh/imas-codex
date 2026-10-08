@@ -151,6 +151,67 @@ def test_code_scan_claim_uses_judged_facets(monkeypatch):
     assert "p.score_composite >= $min_score" not in claim
 
 
+def test_rescoring_preserves_enriched_metadata(monkeypatch):
+    from imas_codex.discovery.paths.parallel import mark_score_complete
+
+    stored = {
+        "physics_domain": "equilibrium",
+        "keywords": '["plasma", "reconstruction"]',
+        "primary_evidence": '["mdsplus"]',
+        "evidence_summary": "Reader patterns were found",
+        "score_reason": "Enrichment identified a data reader",
+        "description": "Prior description",
+    }
+
+    class FakeGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def query(self, statement, **params):
+            item = params["items"][0]
+            for field, answer in {
+                "physics_domain": "physics_domain",
+                "keywords": "keywords",
+                "primary_evidence": "primary_evidence",
+                "evidence_summary": "evidence_summary",
+                "score_reason": "adjustment_reason",
+                "description": "description",
+            }.items():
+                value = item[answer]
+                if f"p.{field} = coalesce(item.{answer}, p.{field})" in statement:
+                    if value is not None:
+                        stored[field] = value
+                else:
+                    stored[field] = value
+            return []
+
+    monkeypatch.setattr("imas_codex.graph.GraphClient", FakeGraph)
+    mark_score_complete(
+        "jt-60sa",
+        [
+            {
+                "path": "/analysis/example",
+                "score": 0.43,
+                "path_purpose": "analysis_code",
+                "description": "New factual description",
+                "should_expand": True,
+                "judgments": {"scan_relevance": 0.43, "score_data_access": 0.43},
+            }
+        ],
+    )
+    assert stored == {
+        "physics_domain": "equilibrium",
+        "keywords": '["plasma", "reconstruction"]',
+        "primary_evidence": '["mdsplus"]',
+        "evidence_summary": "Reader patterns were found",
+        "score_reason": "Enrichment identified a data reader",
+        "description": "New factual description",
+    }
+
+
 @pytest.mark.parametrize("purpose", ["empty_directory", "other"])
 def test_triage_keeps_judged_purpose_and_uses_text_only_model(monkeypatch, purpose):
     from imas_codex.discovery.base import facility, judgment, llm

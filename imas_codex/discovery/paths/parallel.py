@@ -1034,11 +1034,11 @@ def mark_score_complete(
     for result in score_results:
         path_id = f"{facility}:{result['path']}"
 
-        primary_evidence = result.get("primary_evidence", [])
+        primary_evidence = result.get("primary_evidence")
         if isinstance(primary_evidence, list):
             primary_evidence = json.dumps(primary_evidence)
 
-        keywords = result.get("keywords", [])
+        keywords = result.get("keywords")
         if isinstance(keywords, list):
             keywords = json.dumps(keywords)
 
@@ -1048,10 +1048,10 @@ def mark_score_complete(
             "score": result.get("score"),
             "score_cost": result.get("score_cost", 0.0),
             "scored": PathStatus.scored.value,
-            "adjustment_reason": result.get("adjustment_reason", ""),
+            "adjustment_reason": result.get("adjustment_reason"),
             "primary_evidence": primary_evidence,
-            "evidence_summary": result.get("evidence_summary", ""),
-            "description": result.get("description", ""),
+            "evidence_summary": result.get("evidence_summary"),
+            "description": result.get("description"),
             "keywords": keywords,
             "path_purpose": result.get("path_purpose"),
             "physics_domain": result.get("physics_domain"),
@@ -1088,13 +1088,13 @@ def mark_score_complete(
                 p.scored_at = item.now,
                 p.score_composite = item.score,
                 p.score_cost = coalesce(p.score_cost, 0) + item.score_cost,
-                p.score_reason = item.adjustment_reason,
-                p.primary_evidence = item.primary_evidence,
-                p.evidence_summary = item.evidence_summary,
-                p.description = item.description,
-                p.keywords = item.keywords,
-                p.path_purpose = item.path_purpose,
-                p.physics_domain = item.physics_domain,
+                p.score_reason = coalesce(item.adjustment_reason, p.score_reason),
+                p.primary_evidence = coalesce(item.primary_evidence, p.primary_evidence),
+                p.evidence_summary = coalesce(item.evidence_summary, p.evidence_summary),
+                p.description = coalesce(item.description, p.description),
+                p.keywords = coalesce(item.keywords, p.keywords),
+                p.path_purpose = coalesce(item.path_purpose, p.path_purpose),
+                p.physics_domain = coalesce(item.physics_domain, p.physics_domain),
                 p.should_expand = item.should_expand,
                 p.should_enrich = item.should_enrich,
                 p.claimed_at = null,
@@ -2243,13 +2243,8 @@ async def score_worker(
                     "should_expand": llm_r.get(
                         "should_expand", orig.get("should_expand", True)
                     ),
-                    "adjustment_reason": llm_r.get("adjustment_reason", ""),
-                    "primary_evidence": llm_r.get("primary_evidence", []),
-                    "evidence_summary": llm_r.get("evidence_summary", ""),
-                    "description": llm_r.get("description", ""),
-                    "keywords": llm_r.get("keywords", []),
+                    "description": llm_r.get("description"),
                     "path_purpose": llm_r.get("path_purpose"),
-                    "physics_domain": llm_r.get("physics_domain"),
                     "should_enrich": llm_r.get("should_enrich", False),
                     "judgments": llm_r.get("judgments", {}),
                 }
