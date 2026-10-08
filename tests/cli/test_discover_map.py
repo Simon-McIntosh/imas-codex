@@ -10,7 +10,7 @@ worker passes, proving the loop halts once the run's spend reaches the limit —
 the negative control for the scoped-retrieval assertion lives here as
 ``test_candidate_worker_scopes_retrieval_to_routed_ids``.
 
-The command tests invoke ``discover map`` with the engine replaced, asserting
+The command tests invoke ``discover FACILITY --only candidates`` with the engine replaced, asserting
 the options reach the engine state, and cover the ``status --domain map`` route
 counts and the ``clear --domain map`` removal counts.
 """
@@ -316,6 +316,25 @@ def test_source_limit_bounds_the_loop(monkeypatch):
 # =============================================================================
 
 
+@pytest.fixture(autouse=True)
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
+
+
 @pytest.fixture
 def command_env(monkeypatch):
     monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
@@ -342,15 +361,16 @@ def test_map_command_builds_the_engine_state(monkeypatch, command_env, caplog):
     result = CliRunner().invoke(
         discover,
         [
-            "map",
             FACILITY,
-            "-d",
+            "--only",
+            "candidates",
+            "--physics-domain",
             "magnetics",
-            "-i",
+            "--ids",
             "equilibrium",
             "-c",
             "2.0",
-            "-n",
+            "--limit",
             "50",
             "--time",
             "5",

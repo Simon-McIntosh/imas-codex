@@ -1,4 +1,4 @@
-"""The paths command and stage preserve seed, drain, and item scope."""
+"""The paths stage preserves seed, drain, and item scope through discovery."""
 
 from __future__ import annotations
 
@@ -11,7 +11,30 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover.paths import PathsStageOptions, paths, run_paths_stage
+from imas_codex.cli.discover import discover
+from imas_codex.cli.discover.paths import PathsStageOptions, run_paths_stage
+
+
+@pytest.fixture(autouse=True)
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+    )
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
 
 
 @pytest.fixture
@@ -130,9 +153,11 @@ def test_default_threshold_is_the_calibrated_scan_gate(
 def test_command_builds_options_and_calls_stage() -> None:
     with patch("imas_codex.cli.discover.paths.run_paths_stage") as stage:
         result = CliRunner().invoke(
-            paths,
+            discover,
             [
                 "jet",
+                "--only",
+                "paths",
                 "--flush",
                 "--topic",
                 "equilibrium",

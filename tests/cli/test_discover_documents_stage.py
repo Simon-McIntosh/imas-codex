@@ -1,11 +1,10 @@
-"""Drive the documents discovery stage and its thin click wrapper.
+"""Drive the documents discovery stage through the bare command.
 
 The stage splits the documents pipeline into a seeding half (scan scored
 facility paths and create ``Document`` nodes) and a draining half (fetch the
 image Documents and run VLM captioning and scoring over them). ``--scan-only``
 runs the seeding half and stops; ``--flush`` runs the draining half without
-seeding. The click command is driven through the real ``discover`` group, so a
-wrapper that stopped calling the stage function would fail here.
+seeding. The command runs through the real ``discover`` group and calls the stage.
 """
 
 from __future__ import annotations
@@ -20,8 +19,7 @@ from click.testing import CliRunner
 from imas_codex.cli.discover import discover
 from imas_codex.cli.discover.documents import DocumentsOptions, run_documents_stage
 
-# ``imas_codex.cli.discover.documents`` is shadowed in the package namespace by
-# the click Command of the same name, so patch the module through sys.modules.
+# Resolve the module explicitly so the stage function can be patched.
 _DOCUMENTS_MODULE = importlib.import_module("imas_codex.cli.discover.documents")
 
 FACILITY = "tcv"
@@ -34,6 +32,28 @@ class _Recorder:
     def __init__(self) -> None:
         self.scan_calls: list[dict] = []
         self.pipeline_states: list = []
+
+
+@pytest.fixture(autouse=True)
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+    )
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
 
 
 @pytest.fixture
@@ -144,8 +164,9 @@ def test_command_is_a_thin_wrapper_that_builds_the_options(monkeypatch) -> None:
     result = CliRunner().invoke(
         discover,
         [
-            "documents",
             FACILITY,
+            "--only",
+            "documents",
             "--limit",
             "7",
             "-c",
@@ -168,7 +189,9 @@ def test_command_is_a_thin_wrapper_that_builds_the_options(monkeypatch) -> None:
 
 
 def test_scan_only_runs_one_seeding_half_via_the_command(documents_env) -> None:
-    result = CliRunner().invoke(discover, ["documents", FACILITY, "--scan-only"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "documents", "--scan-only"]
+    )
 
     assert result.exit_code == 0, result.output
     assert [call["facility"] for call in documents_env.scan_calls] == [FACILITY]
@@ -176,7 +199,7 @@ def test_scan_only_runs_one_seeding_half_via_the_command(documents_env) -> None:
 
 
 def test_flush_runs_only_the_draining_half_via_the_command(documents_env) -> None:
-    result = CliRunner().invoke(discover, ["documents", FACILITY, "--flush"])
+    result = CliRunner().invoke(discover, [FACILITY, "--only", "documents", "--flush"])
 
     assert result.exit_code == 0, result.output
     assert documents_env.scan_calls == []
@@ -199,7 +222,7 @@ def test_stage_scan_only_stops_after_the_seeding_half(documents_env) -> None:
 
 def test_topic_reaches_the_scorer(documents_env) -> None:
     result = CliRunner().invoke(
-        discover, ["documents", FACILITY, "--topic", "diagnostics"]
+        discover, [FACILITY, "--only", "documents", "--topic", "diagnostics"]
     )
 
     assert result.exit_code == 0, result.output
@@ -208,7 +231,9 @@ def test_topic_reaches_the_scorer(documents_env) -> None:
 
 
 def test_limit_caps_items(documents_env) -> None:
-    result = CliRunner().invoke(discover, ["documents", FACILITY, "--limit", "3"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "documents", "--limit", "3"]
+    )
 
     assert result.exit_code == 0, result.output
     assert documents_env.scan_calls[0]["max_paths"] == 3
@@ -218,7 +243,8 @@ def test_focus_reaches_the_draining_stage_and_unknown_path_is_refused(
     documents_env,
 ) -> None:
     result = CliRunner().invoke(
-        discover, ["documents", FACILITY, "--flush", "--focus", "/archive/selected"]
+        discover,
+        [FACILITY, "--only", "documents", "--flush", "--focus", "/archive/selected"],
     )
 
     assert result.exit_code == 0, result.output
@@ -227,7 +253,7 @@ def test_focus_reaches_the_draining_stage_and_unknown_path_is_refused(
     assert documents_env.pipeline_states[0].path_prefixes == ("/archive/selected",)
 
     unknown = CliRunner().invoke(
-        discover, ["documents", FACILITY, "--flush", "--focus", "/missing"]
+        discover, [FACILITY, "--only", "documents", "--flush", "--focus", "/missing"]
     )
     assert unknown.exit_code != 0
     assert "/missing" in unknown.output
@@ -236,7 +262,7 @@ def test_focus_reaches_the_draining_stage_and_unknown_path_is_refused(
 
 def test_scan_only_and_flush_together_are_refused(documents_env) -> None:
     result = CliRunner().invoke(
-        discover, ["documents", FACILITY, "--scan-only", "--flush"]
+        discover, [FACILITY, "--only", "documents", "--scan-only", "--flush"]
     )
 
     assert result.exit_code != 0
@@ -245,7 +271,7 @@ def test_scan_only_and_flush_together_are_refused(documents_env) -> None:
 
 
 def test_command_help_lists_settled_spellings() -> None:
-    result = CliRunner().invoke(discover, ["documents", "--help"])
+    result = CliRunner().invoke(discover, [FACILITY, "--help"])
 
     assert result.exit_code == 0, result.output
     for flag in ("--scan-only", "--flush", "--topic", "--limit"):

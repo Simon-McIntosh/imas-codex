@@ -334,7 +334,7 @@ def hpc_run(
     Examples:
         imas-codex hpc run -- imas-codex imas build
         imas-codex hpc run -- imas-codex ingest run tcv
-        imas-codex hpc run -- imas-codex discover wiki jt-60sa -c 25
+        imas-codex hpc run -- imas-codex discover jt-60sa --only wiki -c 25
         imas-codex hpc run -c 2 -m 16 -- uv run pytest tests/
     """
     if not _slurm_available():
@@ -602,8 +602,14 @@ def hpc_info() -> None:
         "  imas build:      -c 4  -m 32  (IO-bound: embed server + Neo4j writes)"
     )
     click.echo("  ingest run:      -c 4  -m 32  (IO-bound: SSH + embed + Neo4j)")
-    click.echo("  discover paths:  -c 4  -m 32  (--scan-workers 2 --score-workers 4)")
-    click.echo("  discover wiki:   -c 4  -m 32  (--score-workers 6 --ingest-workers 8)")
-    click.echo("  discover signal: -c 4  -m 32  (--enrich-workers 4 --check-workers 2)")
+    click.echo(
+        "  discover --only paths:  -c 4  -m 32  (--scan-workers 2 --score-workers 4)"
+    )
+    click.echo(
+        "  discover --only wiki:   -c 4  -m 32  (--score-workers 6 --ingest-workers 8)"
+    )
+    click.echo(
+        "  discover --only signals: -c 4  -m 32  (--enrich-workers 4 --check-workers 2)"
+    )
     click.echo("  cx session:      -c 4  -m 32  (interactive development)")
     click.echo("  pytest:          -c 8  -m 32  (CPU-bound test suite)")

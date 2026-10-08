@@ -1,7 +1,7 @@
 """Wiki CLI commands: Site operations and session management.
 
-These commands are registered under 'discover wiki' subgroup.
-Access via: imas-codex discover wiki <command>
+These site operation helpers are separate from the discovery sequence.
+Run discovery with imas-codex discover FACILITY --only wiki.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ def wiki():
     Session Management:
       session             Manage cached sessions
 
-    Access via: imas-codex discover wiki <command>
+    Run discovery with: imas-codex discover FACILITY --only wiki
     For credential management, use: imas-codex credentials
     """
     pass
@@ -192,7 +192,7 @@ def wiki_test(
 
         elif config.auth_type == "ssh_proxy":
             console.print(
-                "\n[yellow]SSH proxy mode - use 'discover wiki' command[/yellow]"
+                "\n[yellow]SSH proxy mode - use 'discover FACILITY --only wiki'[/yellow]"
             )
             console.print(
                 "Consider switching to auth_type: tequila for better performance"
@@ -203,9 +203,6 @@ def wiki_test(
 
     else:
         console.print(f"[yellow]Unknown site_type: {config.site_type}[/yellow]")
-
-
-# Note: wiki clear is in discover.py's wiki subgroup (discover wiki clear)
 
 
 @wiki.group()

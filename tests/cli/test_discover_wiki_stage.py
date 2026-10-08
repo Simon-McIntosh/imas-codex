@@ -1,16 +1,16 @@
-"""The wiki discovery stage function and its thin click wrapper.
+"""The wiki discovery stage function and bare command routing.
 
 ``run_wiki_stage`` carries the discovery body behind a frozen
-:class:`WikiStageOptions`; the ``wiki`` click command builds those options and
-calls the stage. These tests measure the settled surface:
+:class:`WikiStageOptions`; the discovery sequence builds those options and
+calls the stage. These tests measure the command surface:
 
 - ``--scan-only`` selects the seeding half: the engine gets ``scan_only`` and
   page seeding runs.
 - ``--flush`` selects the draining half: the engine gets ``score_only`` and page
   seeding is skipped.
-- ``--topic`` is the free-text steer the old free-text ``--focus`` reached.
-- ``--limit`` caps pages (the old ``--max-pages``).
-- ``--wiki-site`` selects one configured site (the old ``--source``).
+- ``--topic`` is the free-text steer for scoring.
+- ``--limit`` caps pages.
+- ``--wiki-site`` selects one configured site.
 - ``--focus ITEMS`` is refused with a message stating the mechanism: the wiki
   claim query takes no item filter.
 
@@ -32,7 +32,8 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover.wiki import WikiStageOptions, run_wiki_stage, wiki
+from imas_codex.cli.discover import discover
+from imas_codex.cli.discover.wiki import WikiStageOptions, run_wiki_stage
 from imas_codex.settings import get_wiki_ingest_threshold
 
 FACILITY = "jt-60sa"
@@ -65,6 +66,28 @@ def _graph_client() -> MagicMock:
     context = MagicMock()
     context.__enter__.return_value = instance
     return MagicMock(return_value=context)
+
+
+@pytest.fixture(autouse=True)
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+    )
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
 
 
 @pytest.fixture
@@ -175,7 +198,7 @@ def test_cli_import_does_not_load_wiki_engine() -> None:
 
 def test_cli_default_min_score_reaches_engine(engine, monkeypatch) -> None:
     monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "local")
-    result = CliRunner().invoke(wiki, [FACILITY])
+    result = CliRunner().invoke(discover, [FACILITY, "--only", "wiki"])
     assert result.exit_code == 0, result.output
     assert engine["calls"]
     assert all(
@@ -185,14 +208,16 @@ def test_cli_default_min_score_reaches_engine(engine, monkeypatch) -> None:
 
 def test_cli_explicit_min_score_overrides_ingest_gate(engine, monkeypatch) -> None:
     monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "local")
-    result = CliRunner().invoke(wiki, [FACILITY, "--min-score", "0.3"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "wiki", "--min-score", "0.3"]
+    )
     assert result.exit_code == 0, result.output
     assert engine["calls"]
     assert all(call["min_score"] == 0.3 for call in engine["calls"])
 
 
 def test_min_score_help_names_ingest_gate() -> None:
-    result = CliRunner().invoke(wiki, ["--help"])
+    result = CliRunner().invoke(discover, [FACILITY, "--help"])
     assert result.exit_code == 0, result.output
     help_text = " ".join(result.output.split())
     assert "--min-score" in help_text
@@ -247,7 +272,9 @@ def test_focus_items_are_refused_stating_the_mechanism(engine) -> None:
 
 
 def test_cli_focus_is_refused(engine) -> None:
-    result = CliRunner().invoke(wiki, [FACILITY, "--focus", "MAG/coil"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "wiki", "--focus", "MAG/coil"]
+    )
     assert result.exit_code != 0
     assert "claim query takes no item filter" in result.output
     assert "facility-discovery-sequence" not in result.output
@@ -257,18 +284,19 @@ def test_cli_focus_is_refused(engine) -> None:
 def test_click_command_is_a_thin_wrapper() -> None:
     with patch("imas_codex.cli.discover.wiki.run_wiki_stage") as mock_stage:
         result = CliRunner().invoke(
-            wiki,
+            discover,
             [
                 FACILITY,
+                "--only",
+                "wiki",
                 "--scan-only",
-                "--flush",
                 "--topic",
                 "eq",
                 "--limit",
                 "5",
                 "-c",
                 "2.5",
-                "-s",
+                "--wiki-site",
                 "1",
                 "--max-depth",
                 "3",
@@ -293,7 +321,7 @@ def test_click_command_is_a_thin_wrapper() -> None:
     assert facility == FACILITY
     assert isinstance(options, WikiStageOptions)
     assert options.scan_only is True
-    assert options.flush is True
+    assert options.flush is False
     assert options.topic == "eq"
     assert options.limit == 5
     assert options.cost_limit == 2.5
@@ -304,29 +332,31 @@ def test_click_command_is_a_thin_wrapper() -> None:
     assert options.rescan_documents is True
     assert options.score_workers == 3
     assert options.ingest_workers == 6
-    assert options.time_limit == 7
+    assert 6.9 < options.time_limit <= 7
     assert options.store_images is True
     assert options.min_score == 0.3
     assert options.verbose is True
 
 
-def test_score_only_is_a_deprecated_alias_for_flush() -> None:
-    with patch("imas_codex.cli.discover.wiki.run_wiki_stage") as mock_stage:
-        result = CliRunner().invoke(wiki, [FACILITY, "--score-only"])
-    assert result.exit_code == 0, result.output
-    options = mock_stage.call_args.args[1]
-    assert options.flush is True
+def test_retired_score_alias_is_refused() -> None:
+    result = CliRunner().invoke(discover, [FACILITY, "--only", "wiki", "--score-only"])
+    assert result.exit_code != 0
+    assert "No such option: --score-only" in result.output
 
 
 def test_cli_scan_only_reaches_the_engine(engine) -> None:
-    result = CliRunner().invoke(wiki, [FACILITY, "--scan-only", "-s", "0"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "wiki", "--scan-only", "--wiki-site", "0"]
+    )
     assert result.exit_code == 0, result.output
     assert engine["calls"][-1]["scan_only"] is True
     assert engine["calls"][-1]["score_only"] is False
 
 
 def test_cli_flush_reaches_the_engine(engine) -> None:
-    result = CliRunner().invoke(wiki, [FACILITY, "--flush", "-s", "0"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "wiki", "--flush", "--wiki-site", "0"]
+    )
     assert result.exit_code == 0, result.output
     assert engine["calls"][-1]["score_only"] is True
     assert engine["calls"][-1]["scan_only"] is False

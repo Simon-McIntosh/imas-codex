@@ -188,12 +188,12 @@ class TestCLISubcommands:
         return CliRunner()
 
     def test_discover_paths_help(self, runner):
-        """discover paths subcommand exists."""
+        """The bare command exposes path selection."""
         from imas_codex.cli import main
 
-        result = runner.invoke(main, ["discover", "paths", "--help"])
+        result = runner.invoke(main, ["discover", "tcv", "--only", "paths", "--help"])
         assert result.exit_code == 0
-        assert "directory structure" in result.output.lower()
+        assert "--only" in result.output
 
     def test_imas_dd_build_help(self, runner):
         """imas dd build subcommand exists."""

@@ -209,10 +209,18 @@ def test_discover_hides_the_run_command():
     listed = CliRunner().invoke(discover, ["--help"])
     assert listed.exit_code == 0, listed.output
     assert "run " not in listed.output
+    assert set(discover.commands) == {"run", "status", "clear", "seed", "inspect"}
+    for domain in ("paths", "code", "documents", "wiki", "signals", "map"):
+        assert f"  {domain} " not in listed.output
 
     helped = CliRunner().invoke(sequence.run, ["--help"])
     assert helped.exit_code == 0, helped.output
     assert "--dry-run" in helped.output
+
+    bare_help = CliRunner().invoke(discover, ["jt-60sa", "--help"])
+    assert bare_help.exit_code == 0, bare_help.output
+    assert "--min-score FLOAT" in bare_help.output
+    assert "0.16" in bare_help.output
 
 
 def test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command(

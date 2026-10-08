@@ -222,8 +222,8 @@ def map_run(
     if not available:
         click.echo(
             f"No enriched signal sources found for {facility}. "
-            "Run signal discovery first: imas-codex discover signals "
-            f"{facility}",
+            "Run signal discovery first: imas-codex discover "
+            f"{facility} --only signals",
             err=True,
         )
         raise SystemExit(1)

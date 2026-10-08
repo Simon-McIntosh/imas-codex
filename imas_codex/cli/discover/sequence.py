@@ -13,6 +13,7 @@ from imas_codex.discovery.base.services import (
     ssh_health_check,
     wiki_auth_check,
 )
+from imas_codex.settings import get_wiki_ingest_threshold
 
 # Outcome vocabulary -- every stage ends in one of these, each with a reason.
 RAN = "ran"
@@ -779,7 +780,13 @@ def run_sequence(
 @click.option("--wiki-site")
 @click.option("--threshold", type=float)
 @click.option("--enrich-threshold", type=float)
-@click.option("--min-score", type=float)
+@click.option(
+    "--min-score",
+    type=float,
+    default=get_wiki_ingest_threshold(),
+    show_default=True,
+    help="Minimum wiki ingest relevance score",
+)
 @click.option("--triage-batch-size", type=int)
 @click.option("--rejudge-stale", is_flag=True)
 @click.option("--verbose", "-v", is_flag=True)
