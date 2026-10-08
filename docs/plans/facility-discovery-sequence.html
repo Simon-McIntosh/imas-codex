@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -380,6 +380,16 @@
       passes with tests showing a domain-filtered call includes a cross-domain home of a source in that domain, excludes the
       home of a source outside it, and an explicit <code>--ids</code> list is returned unchanged.
     </p>
+    <p>
+      <code>assignment-work-matches-claim</code> landed (2c9bce091; review 103/120, no added failures). The claim and the
+      pending check now agree, but each still writes the target-IDS fragment itself, so the next edit to one can split them
+      again. <strong>Node</strong> <code>assignment-predicate-shared</code>, role implement, 0.25 h. One private builder in
+      <code>imas_codex/ids/workers.py</code> returns the escalated-source predicate and its parameters, and both
+      <code>claim_sources_for_escalated</code> and <code>has_pending_assignment_work</code> call it. Write paths:
+      <code>imas_codex/ids/workers.py</code>, <code>tests/ids/test_assignment_pending_matches_claim.py</code> and its fragment.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes, the fragment
+      appears once in the module, and a test shows both functions pass the builder's predicate and parameters unchanged.
+    </p>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -560,7 +570,7 @@
     <div class="r-comment-body"><p>Pending assignment now uses the claim's target IDS candidate predicate and the engine passes target IDS names; repeated named gate 514 passed, 5 skipped, 3 deselected.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T084900526645-review-of-assignment-work-matches-claim" data-who="reckon-build" data-when="2026-10-08T09:01:30.497Z">
-    <div class="r-comment-body"><p>Independently reviewed r-20261008T082435236450-assignment-work-matches-claim: the pending check now builds the claim&#x27;s own predicate over target IDS names and the engine passes state.target_ids_list; head gate reproduced 514 passed EXIT=0, base arm reproduced the pre-fix failure EXIT=1, a head mutation restoring the domain filter fails the cross-domain cases EXIT=1; stored a parsed record scoring all six dimensions, total 103/120, 0 added failures.</p></div>
+    <div class="r-comment-body"><p>Independently reviewed r-20261008T082435236450-assignment-work-matches-claim: the pending check now builds the claim's own predicate over target IDS names and the engine passes state.target_ids_list; head gate reproduced 514 passed EXIT=0, base arm reproduced the pre-fix failure EXIT=1, a head mutation restoring the domain filter fails the cross-domain cases EXIT=1; stored a parsed record scoring all six dimensions, total 103/120, 0 added failures.</p></div>
 </div>
 </section>
 </main>
