@@ -1,0 +1,109 @@
+<section id="fledd-equilibrium-read">
+  <h2 id="fledd-equilibrium-read-heading">FLEDD socket equilibria and isolated DBSEL run</h2>
+  <p id="fledd-equilibrium-read-summary">On 2026-10-08, the <code>jt-60sa</code>
+    SSH route reached <code>intr26-2</code>. FLEDD returned full, finite,
+    nonconstant 129 × 129 ψ(R,Z) arrays for FAME IDs 0 and EQDB ID 1.
+    DBSEL reconstructed SELENE shot E101163 at 5.0 s into a scratch-local
+    EQ31 record and the scratch directory was removed. The precise source
+    definitions of return codes 6415 and 6151 remain unverified: the active
+    socket implementation's source is not readable by this account.</p>
+
+  <h3 id="fledd-equilibrium-read-codes">Return codes and source boundary</h3>
+  <p id="fledd-equilibrium-read-source">The readable
+    <code>/analysis/src/safledd/eqlist_get.f:117-134</code> copies a nonzero
+    <code>IRC</code> unchanged into <code>IRET</code>. The readable
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqdblist_rev.f:24</code>
+    forwards the call to <code>SOCKET_EQDBLIST</code>. The active source
+    directories <code>.../eqdbms/S</code> and <code>.../eqdbms/C</code> have
+    mode 700 under another owner; <code>ls .../eqdbms/S</code> exited 2 with
+    “Permission denied”. The older readable <code>defaults.h</code> table
+    contains FTP codes such as <code>CWD_ERROR=1515</code>, but contains
+    neither 6415 nor 6151 and cannot decode these socket-server results.
+    The source commands and exits are in <code>source-codes.log</code> in this
+    run's directory (SSH and source-table reads exited 0).</p>
+  <p id="fledd-equilibrium-read-code-inference">Operationally, 6415 means
+    <em>no time list returned for this shot on IDs 1–4</em>: it appeared for
+    44822, 45218 and 101011, while those same IDs returned code 0 and
+    nonempty lists for 100999 and 101163. Code 6151 means <em>no time list
+    available on IDs 5–8 in every shot tried</em>. These are measured
+    behaviours, not source-verified error names; neither code proves that
+    no local equilibrium file exists. The exact server-side meanings require
+    readable socket/server source or its error-code table.</p>
+
+  <h3 id="fledd-equilibrium-read-lists">Time lists across known shots</h3>
+  <p id="fledd-equilibrium-read-list-command">Command:
+    <code>ssh -T -F ~/.ssh/config jt-60sa 'env PATH=/analysis/lib/JT60SAEQDB/eqdbms:/usr/bin:/bin LD_LIBRARY_PATH=/analysis/lib:/analysis/lib/JT60SAEQDB:/home/ap/intel/oneapi/compiler/2025.3/lib:/home/ap/MATLAB/R2025b/sys/os/glnxa64 python3 -' &lt; list_probe.py</code>.
+    Each child used <code>/usr/bin/python3 -c</code> to call
+    <code>libFLEDDPIC.so:eqlist_get_rev_(id, shot, 1000, nlist, times, iret)</code>
+    with a 15-second timeout. All 42 child processes and the SSH command
+    exited 0. The exact per-call return, count and times are in
+    <code>fledd-lists.log</code> in this run's directory.</p>
+  <table id="fledd-equilibrium-read-list-table">
+    <thead><tr><th>Shot</th><th>FAME 0</th><th>EQDB IDs 1–4</th><th>IDs 5–8</th></tr></thead>
+    <tbody>
+      <tr><td>44822</td><td>0; five times, 1000–1400 ms</td><td>6415; zero each</td><td>6151; zero each</td></tr>
+      <tr><td>45218</td><td>0; 112 times, 3200–14600 ms</td><td>6415; zero each</td><td>6151; zero each</td></tr>
+      <tr><td>100999</td><td>not called</td><td>0; one time, 5650 ms each</td><td>6151; zero each</td></tr>
+      <tr><td>101011</td><td>not called</td><td>6415; zero each</td><td>6151; zero each</td></tr>
+      <tr><td>101163</td><td>not called</td><td>0; five times, 4700, 4700 revision 001, 4800, 5100, 5500 ms each</td><td>6151; zero each</td></tr>
+    </tbody>
+  </table>
+  <p id="fledd-equilibrium-read-positive-control">FAME's 5 and 112 nonempty
+    time lists and EQDB's 1 and 5 nonempty lists are positive controls for
+    the instrument; zero counts on the other calls were not inferred from
+    an empty process output.</p>
+
+  <h3 id="fledd-equilibrium-read-grid">Full 2D data calls</h3>
+  <p id="fledd-equilibrium-read-data-command">Command:
+    <code>ssh -T -F ~/.ssh/config jt-60sa 'env PATH=/analysis/lib/JT60SAEQDB/eqdbms:/usr/bin:/bin LD_LIBRARY_PATH=/analysis/lib:/analysis/lib/JT60SAEQDB:/home/ap/intel/oneapi/compiler/2025.3/lib:/home/ap/MATLAB/R2025b/sys/os/glnxa64 python3 -' &lt; data_probe.py</code>.
+    The script called <code>eqdata_get_</code>, then <code>eqint_get_</code>
+    for NSR and NSZ and <code>eqdbl_get_</code> for all RG, ZG and PSI values.
+    Every FLEDD call returned 0; all 16,641 ψ values in each map were finite
+    and nonconstant. The SSH command exited 0; the temporary working
+    directory was empty and removed. Full receipts and array digests are in
+    <code>fledd-data.log</code> in this run's directory.</p>
+  <table id="fledd-equilibrium-read-grid-table">
+    <thead><tr><th>Database</th><th>Shot</th><th>Time [ms]</th><th>Grid [R × Z]</th><th>ψ range</th><th>ψ SHA-256</th></tr></thead>
+    <tbody>
+      <tr><td>FAME 0</td><td>45218</td><td>3200</td><td>129 × 129</td><td>−0.303183 to 0.279786</td><td><code>aa8f96ac00512f29badce026d0b2e4fa34b8294efa3406aadf9d2b27c77dae2a</code></td></tr>
+      <tr><td>FAME 0</td><td>44822</td><td>1000</td><td>129 × 129</td><td>−0.471622 to 0.564330</td><td><code>ea1cefc5a0d43d3c5b18dc335edeede72d3667ed64c9f8c452a2efba1690e5d2</code></td></tr>
+      <tr><td>EQDB 1</td><td>100999</td><td>5650</td><td>129 × 129</td><td>−0.518879 to 1.528677</td><td><code>255d8e41efa12ca12fbbfcb0cd5e58f08ea620ff28d129e0a95e31a4cd009608</code></td></tr>
+      <tr><td>EQDB 1</td><td>101163</td><td>4700</td><td>129 × 129</td><td>−0.444885 to 1.420676</td><td><code>dc4f1e5749aa1625e8aacb8bea20bb2167827a61ce2441a44678f7188d1ba623</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="fledd-equilibrium-read-dbsel">DBSEL inputs, outputs and cleanup</h3>
+  <p id="fledd-equilibrium-read-dbsel-source"><code>/analysis/bin/dbsel</code>
+    accepts <code>SHOT TIME [1:Display]</code>, calls
+    <code>/analysis/bin/getseldata</code> to read EDDB, links its
+    <code>EFIT95.DATA</code> as <code>fort.95</code>, and runs
+    <code>/analysis/exec/SAselene.ex 0 1 -2 mgt</code> using
+    <code>fort.96</code>. Its SELENE input also needs
+    <code>/analysis/SAdata/EQSLE.DATA</code>; the first scratch run without
+    that file reached EDDB but reported end of file from AAOPT. The
+    <code>-2</code> database argument selects the local EQDSK writer in
+    <code>SAselene_v2.0_forPSRC/eqdbput.f:23-29</code>. The wrapper can exit 0
+    after a failed child, so its process exit alone is insufficient.</p>
+  <p id="fledd-equilibrium-read-dbsel-command">Measured invocation:
+    <code>ssh -T -F ~/.ssh/config jt-60sa 'env TMPDIR=/tmp python3 -' &lt; dbsel_plain.py</code>.
+    The Python harness made a fresh directory under remote <code>$TMPDIR</code>,
+    copied <code>/analysis/SAdata/EQSLE.DATA</code> into it, set both
+    <code>HOME</code> and <code>TMPDIR</code> to it, used it as cwd, and ran
+    <code>/analysis/bin/dbsel E101163 5.0</code>. The SSH process and DBSEL
+    wrapper exited 0. SELENE printed “EQ-DATA REGISTRATION IS SUCCESS” and
+    <code>iret=0</code>; the output also contained a nonfatal
+    <code>ERROR(EQEXTRA): RETURN CODE = 991</code>, so that diagnostic is
+    retained in <code>dbsel-with-input.log</code> rather than suppressed.</p>
+  <p id="fledd-equilibrium-read-dbsel-output">Before cleanup the scratch
+    directory contained five files: the copied <code>EQSLE.DATA</code>
+    (25,764 bytes), <code>EFIT95.DATA</code> (294,084 bytes),
+    <code>fort.96</code> (6,628 bytes), an <code>fort.95</code> symlink,
+    and <code>LOCALDB/EQDSK/10/1011/101163/005000</code>
+    (456,428 bytes). SELENE's output listed <code>PSI 16641</code> for
+    the 129 × 129 grid. The harness removed the scratch tree and verified
+    <code>EXISTS=False</code>. The attempted system-call trace was rejected
+    before DBSEL started by <code>PTRACE_TRACEME: Operation not permitted</code>
+    (<code>dbsel-run.log</code>); the successful run's isolation is evidenced
+    by the scratch-local HOME/cwd, the local-writer source branch, the file
+    inventory and the cleanup receipt.</p>
+</section>
