@@ -1,0 +1,26 @@
+<section>
+  <h2 id="data-access-roots">Data-access directories seeded as JT-60SA discovery roots</h2>
+  <p id="data-access-roots-result">
+    <code>discovery_roots</code> in
+    <code>imas_codex/config/facilities/jt-60sa.yaml</code> gains 24 entries
+    covering the experiment-database download libraries and wrappers, the
+    reconstruction and machine-description trees, and the analysis/data tools
+    named under "Roots to add" in §38 — each as its own entry, never the parent
+    <code>/analysis/src</code>. The count is 24, the number of paths the
+    section's "Roots to add" list actually lists; the goal line's "23" is a
+    miscount of that list. A new
+    <code>test_data_access_root_is_seeded_and_unexcluded</code> in
+    <code>tests/config/test_jt60sa_exclusions.py</code> parametrises over the
+    24 paths and asserts each is a discovery root that no
+    <code>path_prefixes</code> exclusion covers.
+  </p>
+  <p id="data-access-roots-measure">
+    Gate <code>uv run --no-sync pytest tests/config/test_jt60sa_exclusions.py</code>
+    exits <strong>0</strong> — 29 passed (4 existing + 24 parametrised roots + the
+    parent-not-a-root assertion); <code>get_facility("jt-60sa")</code> returns all
+    24. Negative control: removing <code>/analysis/src/eddb</code> from
+    <code>discovery_roots</code> makes the run exit <strong>1</strong> with
+    <code>FAILED ...::test_data_access_root_is_seeded_and_unexcluded[/analysis/src/eddb]</code>.
+    No discovery run was made; operational path/code discovery is §38's second node.
+  </p>
+</section>
