@@ -36,19 +36,20 @@
       "second-shot-comparison.log",
       "other-channels.log",
       "reference-values.log",
-      "stale-grid.log"
+      "stale-grid.log",
+      "mdac-magnetics.log"
     ]
   },
   "method": {
-    "flux": "Bilinear SELENE psi(R,Z) at each geo.in loop position. Compare raw EDDB Wb divided by 2pi after removing the median offset across the 27 mapped loops per shot/time. Residuals test individual channels.",
-    "pickup": "Bilinear derivatives of SELENE psi at each geo.in probe position, Br=(dpsi/dZ)/R and Bz=-(dpsi/dR)/R. With the listed angle, N=(-sin angle, cos angle); all 17 mapped readings follow -B·N. Compare against along-angle and +N controls.",
+    "flux": "Bilinear SELENE psi(R,Z) at each geo.in loop position. Compare PSRC and MDAC raw EDDB Wb separately, each divided by 2pi after removing the source- and shot-specific median offset across 27 mapped loops.",
+    "pickup": "Bilinear derivatives of SELENE psi at each geo.in probe position, Br=(dpsi/dZ)/R and Bz=-(dpsi/dR)/R. With the listed angle, N=(-sin angle, cos angle); all 17 mapped channels from each source follow -B·N.",
     "rogowski": "Compare each raw current with SELENE TTCU or SA G-EQDSK current at the named shot. Sign inference requires at least 10% of reference current in both shots.",
     "toroidal": "PSC/oTFCur is PID 1625 O293; outeddb.c uses positive factor 2.25*2.96/25.7 to produce BTV in T m.",
     "profile": "Read per-record coordinate selector rather than assign one coordinate system to all profiles."
   },
   "families": {
     "flux_loops": {
-      "catalogued_channels": 34,
+      "catalogued_channels": 68,
       "mapped_sensor_positions": 27,
       "factor_test": {
         "raw_divided_by_2pi_median_absolute_deviation_wb_per_rad": {
@@ -62,6 +63,10 @@
           "E101163@5.0": -0.067138,
           "E101163@5.1": -0.084044,
           "E101011@6.8": -0.439353
+        },
+        "mdac_raw_divided_by_2pi_median_absolute_deviation_wb_per_rad": {
+          "E101163@5.1": 0.0058,
+          "E101011@6.8": 0.0041
         }
       },
       "channels": [
@@ -1631,13 +1636,1157 @@
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
           "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 27 loop positions"
+        },
+        {
+          "id": "MDAC/magFlxLp1",
+          "sensor_index": 1,
+          "position_rz_m": [
+            1.8798,
+            2.9331
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:503",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.6336497664451599,
+              "selene_psi_wb_per_rad": -0.006036718163465399,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.29838478565216064,
+              "selene_psi_wb_per_rad": 0.3999554176941674,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.007871,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp2",
+          "sensor_index": 2,
+          "position_rz_m": [
+            1.6414,
+            2.5202
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:504",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.1793832629919052,
+              "selene_psi_wb_per_rad": 0.058584400377234586,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.11771087348461151,
+              "selene_psi_wb_per_rad": 0.42652236633769686,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.00306,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp3",
+          "sensor_index": 3,
+          "position_rz_m": [
+            1.6262,
+            1.9769
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:505",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.06996693462133408,
+              "selene_psi_wb_per_rad": 0.08531578246769034,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.0011276161530986428,
+              "selene_psi_wb_per_rad": 0.44119623327057406,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.012761,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp4",
+          "sensor_index": 4,
+          "position_rz_m": [
+            1.6246,
+            1.427
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:506",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.14543282985687256,
+              "selene_psi_wb_per_rad": 0.09347426491260379,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.026581203565001488,
+              "selene_psi_wb_per_rad": 0.4327837038825546,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.016613,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp5",
+          "sensor_index": 5,
+          "position_rz_m": [
+            1.6241,
+            0.9769
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:507",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.11716097593307495,
+              "selene_psi_wb_per_rad": 0.09392435840279141,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.06765768676996231,
+              "selene_psi_wb_per_rad": 0.4237669528587088,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.011664,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp6",
+          "sensor_index": 6,
+          "position_rz_m": [
+            1.6237,
+            0.377
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:508",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.023325614631175995,
+              "selene_psi_wb_per_rad": 0.08996353867223689,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.0690457671880722,
+              "selene_psi_wb_per_rad": 0.4251590311599707,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.006049,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp7",
+          "sensor_index": 7,
+          "position_rz_m": [
+            1.6229,
+            -0.073
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:509",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.157670259475708,
+              "selene_psi_wb_per_rad": 0.09151736810458273,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 2.6888654232025146,
+              "selene_psi_wb_per_rad": 0.4406476945570743,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": 0.429495,
+          "confidence": "undetermined",
+          "family_disagreement": "persistent_reconstruction_disagreement",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp8",
+          "sensor_index": 8,
+          "position_rz_m": [
+            1.6238,
+            -0.373
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:510",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.02914675697684288,
+              "selene_psi_wb_per_rad": 0.0963055997515903,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.07214806228876114,
+              "selene_psi_wb_per_rad": 0.4529184265922706,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.004726,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp9",
+          "sensor_index": 9,
+          "position_rz_m": [
+            1.6238,
+            -0.973
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:511",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.11433500796556473,
+              "selene_psi_wb_per_rad": 0.10771165454715109,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.11991290748119354,
+              "selene_psi_wb_per_rad": 0.46193533783028484,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.002574,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp10",
+          "sensor_index": 10,
+          "position_rz_m": [
+            1.6243,
+            -1.423
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:512",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.10810793936252594,
+              "selene_psi_wb_per_rad": 0.10414702973632599,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.013021974824368954,
+              "selene_psi_wb_per_rad": 0.444964206301334,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.000695,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp11",
+          "sensor_index": 11,
+          "position_rz_m": [
+            1.6248,
+            -1.7454
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:513",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.05794304981827736,
+              "selene_psi_wb_per_rad": 0.09391793464489293,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.12171107530593872,
+              "selene_psi_wb_per_rad": 0.4228258313938432,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.002245,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp12",
+          "sensor_index": 12,
+          "position_rz_m": [
+            1.6918,
+            -2.6883
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:514",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.0936003252863884,
+              "selene_psi_wb_per_rad": 0.06292724692940704,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.525644838809967,
+              "selene_psi_wb_per_rad": 0.354434283603772,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.009117,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp13",
+          "sensor_index": 13,
+          "position_rz_m": [
+            2.0212,
+            -3.0384
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:515",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.12006858736276627,
+              "selene_psi_wb_per_rad": 0.09930275245755099,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.3670867383480072,
+              "selene_psi_wb_per_rad": 0.38080442323371444,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.006748,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp14",
+          "sensor_index": 14,
+          "position_rz_m": [
+            2.3023,
+            -3.1209
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:516",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.511165201663971,
+              "selene_psi_wb_per_rad": 0.16578041968185894,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.0010164827108383179,
+              "selene_psi_wb_per_rad": 0.4411483835354982,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.002515,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp15",
+          "sensor_index": 15,
+          "position_rz_m": [
+            2.3922,
+            3.1175
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:517",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.7275519371032715,
+              "selene_psi_wb_per_rad": -0.018359065287457222,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.2542264461517334,
+              "selene_psi_wb_per_rad": 0.4090093471390263,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.010493,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp16",
+          "sensor_index": 16,
+          "position_rz_m": [
+            2.7756,
+            3.0584
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:518",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.3068191409111023,
+              "selene_psi_wb_per_rad": 0.04475329706482379,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.18372447788715363,
+              "selene_psi_wb_per_rad": 0.41909989994675967,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.006644,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp17",
+          "sensor_index": 17,
+          "position_rz_m": [
+            3.4167,
+            2.6996
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:519",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.7413360476493835,
+              "selene_psi_wb_per_rad": 0.1991260824222066,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.06563453376293182,
+              "selene_psi_wb_per_rad": 0.45220745174313215,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.005802,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp18",
+          "sensor_index": 18,
+          "position_rz_m": [
+            3.7581,
+            2.3976
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:520",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.2450350522994995,
+              "selene_psi_wb_per_rad": 0.27465648857977465,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.2791052758693695,
+              "selene_psi_wb_per_rad": 0.48176527925408263,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.010438,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp19",
+          "sensor_index": 19,
+          "position_rz_m": [
+            3.966,
+            2.1663
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:521",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.4101027250289917,
+              "selene_psi_wb_per_rad": 0.3003699241193779,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.43601393699645996,
+              "selene_psi_wb_per_rad": 0.5043881428929482,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.010996,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp20",
+          "sensor_index": 20,
+          "position_rz_m": [
+            4.2965,
+            1.6801
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:522",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.4427635669708252,
+              "selene_psi_wb_per_rad": 0.3096425928335875,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.7593985199928284,
+              "selene_psi_wb_per_rad": 0.5549933075153481,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.008065,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp21",
+          "sensor_index": 21,
+          "position_rz_m": [
+            4.6193,
+            0.8827
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:523",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.2907700538635254,
+              "selene_psi_wb_per_rad": 0.29757591428949326,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.0586272478103638,
+              "selene_psi_wb_per_rad": 0.6128986285900083,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.005202,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp22",
+          "sensor_index": 22,
+          "position_rz_m": [
+            4.6934,
+            0.5322
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:524",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.0848325490951538,
+              "selene_psi_wb_per_rad": 0.26873722820385226,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.9340290427207947,
+              "selene_psi_wb_per_rad": 0.5998721316624942,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.00914,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp23",
+          "sensor_index": 23,
+          "position_rz_m": [
+            4.2974,
+            -1.676
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:525",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.615105390548706,
+              "selene_psi_wb_per_rad": 0.34635932693975713,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.8040930032730103,
+              "selene_psi_wb_per_rad": 0.5786222140354322,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.00845,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp24",
+          "sensor_index": 24,
+          "position_rz_m": [
+            3.9693,
+            -2.1618
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:526",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 2.2393808364868164,
+              "selene_psi_wb_per_rad": 0.4474941418502456,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.281307339668274,
+              "selene_psi_wb_per_rad": 0.6513281423114525,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.005205,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp25",
+          "sensor_index": 25,
+          "position_rz_m": [
+            3.7604,
+            -2.3992
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:527",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 2.5046117305755615,
+              "selene_psi_wb_per_rad": 0.4905361003826289,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.5613207817077637,
+              "selene_psi_wb_per_rad": 0.6943318481100695,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.004974,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp26",
+          "sensor_index": 26,
+          "position_rz_m": [
+            3.4971,
+            -2.6243
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:528",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 2.5775656700134277,
+              "selene_psi_wb_per_rad": 0.5025730192032214,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 1.7102526426315308,
+              "selene_psi_wb_per_rad": 0.7168211277460301,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.0054,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp27",
+          "sensor_index": 27,
+          "position_rz_m": [
+            2.753,
+            -3.0599
+          ],
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:529",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 1.442805290222168,
+              "selene_psi_wb_per_rad": 0.3194366337149186,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.8172407150268555,
+              "selene_psi_wb_per_rad": 0.5733953276041053,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": 1,
+          "orientation": "positive COCOS 2 poloidal flux after common gauge subtraction",
+          "raw_to_selene_psi_factor": "1/(2*pi)",
+          "max_abs_residual_wb_per_rad": 0.002866,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp28",
+          "sensor_index": 28,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.5291441082954407,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.6377943158149719,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp29",
+          "sensor_index": 29,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.5197043418884277,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.6547130942344666,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp30",
+          "sensor_index": 30,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.5415441393852234,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.6412206292152405,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp31",
+          "sensor_index": 31,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.5550018548965454,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.6544297933578491,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp32",
+          "sensor_index": 32,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.5249350666999817,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.6427413821220398,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp33",
+          "sensor_index": 33,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.5297673940658569,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.6369995474815369,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
+        },
+        {
+          "id": "MDAC/magFlxLp34",
+          "sensor_index": 34,
+          "position_rz_m": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.5093844532966614,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.6230699419975281,
+              "selene_psi_wb_per_rad": null,
+              "selene_projected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "raw_to_selene_psi_factor": null,
+          "max_abs_residual_wb_per_rad": null,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE geometry; MDAC alias is a distinct acquisition source from PSRC"
         }
-      ]
+      ],
+      "mdac_gauge_offsets_wb_per_rad": {
+        "E101163@5.1": -0.086941,
+        "E101011@6.8": -0.442197
+      },
+      "catalogued_by_source": {
+        "PSRC": 34,
+        "MDAC": 34
+      },
+      "mapped_channel_entries": 54
     },
     "pickup_coils": {
-      "catalogued_channels": 23,
+      "catalogued_channels": 46,
       "mapped_sensor_positions": 17,
-      "family_sign": "negative relative to listed geometric normal for 17 mapped channels",
+      "family_sign": "negative relative to listed geometric normal for 17 mapped sensor indices in each of PSRC and MDAC",
       "channels": [
         {
           "id": "PSRC/magPbTC1",
@@ -2844,6 +3993,908 @@
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
           "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions; the raw field unit is tesla, so no flux normalization applies"
+        },
+        {
+          "id": "MDAC/magPbTC1",
+          "sensor_index": 1,
+          "position_rz_m": [
+            4.7355,
+            -0.0283
+          ],
+          "geometric_axis_angle_deg": 0.28,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:485",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.10776535421609879,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.012395280897617314,
+              "selene_positive_normal_t": -0.080704988,
+              "selene_expected_t": 0.080704988,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.07644542306661606,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.014671426503666934,
+              "selene_positive_normal_t": -0.065252028,
+              "selene_expected_t": 0.065252028,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.02706,
+          "median_opposite_sign_error_t": 0.165084
+        },
+        {
+          "id": "MDAC/magPbTC2",
+          "sensor_index": 2,
+          "position_rz_m": [
+            4.4873,
+            1.2805
+          ],
+          "geometric_axis_angle_deg": 21.2,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:486",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.1334824413061142,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.002825339176096439,
+              "selene_positive_normal_t": -0.117681995,
+              "selene_expected_t": 0.117681995,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.08948775380849838,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.016249180487964407,
+              "selene_positive_normal_t": -0.086643561,
+              "selene_expected_t": 0.086643561,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.0158,
+          "median_opposite_sign_error_t": 0.213648
+        },
+        {
+          "id": "MDAC/magPbTC3",
+          "sensor_index": 3,
+          "position_rz_m": [
+            4.1114,
+            1.9694
+          ],
+          "geometric_axis_angle_deg": 34.89,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:487",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.11766747385263443,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.0028969648730175143,
+              "selene_positive_normal_t": -0.117549281,
+              "selene_expected_t": 0.117549281,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.0482269786298275,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.020703819837662788,
+              "selene_positive_normal_t": -0.049635914,
+              "selene_expected_t": 0.049635914,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.001409,
+          "median_opposite_sign_error_t": 0.16654
+        },
+        {
+          "id": "MDAC/magPbTC4",
+          "sensor_index": 4,
+          "position_rz_m": [
+            3.4645,
+            2.6539
+          ],
+          "geometric_axis_angle_deg": 50.39,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:488",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.08624669164419174,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.0527103317407836,
+              "selene_positive_normal_t": -0.099795935,
+              "selene_expected_t": 0.099795935,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.01821097731590271,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.016665846656476732,
+              "selene_positive_normal_t": -0.022782341,
+              "selene_expected_t": 0.022782341,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.013549,
+          "median_opposite_sign_error_t": 0.113518
+        },
+        {
+          "id": "MDAC/magPbTC5",
+          "sensor_index": 5,
+          "position_rz_m": [
+            2.4712,
+            3.1004
+          ],
+          "geometric_axis_angle_deg": 85.14,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:489",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.052274104207754135,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.055414302016433756,
+              "selene_positive_normal_t": 0.02716935,
+              "selene_expected_t": -0.02716935,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.006048066541552544,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.00952706669800811,
+              "selene_positive_normal_t": -0.000833297,
+              "selene_expected_t": 0.000833297,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.025105,
+          "median_opposite_sign_error_t": 0.042329
+        },
+        {
+          "id": "MDAC/magPbTC6",
+          "sensor_index": 6,
+          "position_rz_m": [
+            1.9455,
+            2.9651
+          ],
+          "geometric_axis_angle_deg": 124.41,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:490",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.06782782822847366,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.055992482119852555,
+              "selene_positive_normal_t": 0.04631486,
+              "selene_expected_t": -0.04631486,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.029010161757469177,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.001180404196128252,
+              "selene_positive_normal_t": 0.022808764,
+              "selene_expected_t": -0.022808764,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.021513,
+          "median_opposite_sign_error_t": 0.082981
+        },
+        {
+          "id": "MDAC/magPbTC7",
+          "sensor_index": 7,
+          "position_rz_m": [
+            1.6414,
+            2.3449
+          ],
+          "geometric_axis_angle_deg": 179.06,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:491",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.06432662904262543,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.03156792327774678,
+              "selene_positive_normal_t": -0.09025325,
+              "selene_expected_t": 0.09025325,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.03148265928030014,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.02005917430665767,
+              "selene_positive_normal_t": -0.037802242,
+              "selene_expected_t": 0.037802242,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.025927,
+          "median_opposite_sign_error_t": 0.111932
+        },
+        {
+          "id": "MDAC/magPbTC8",
+          "sensor_index": 8,
+          "position_rz_m": [
+            1.6342,
+            1.1231
+          ],
+          "geometric_axis_angle_deg": 180.01,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:492",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.1641281098127365,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.0016074205190911204,
+              "selene_positive_normal_t": -0.188217031,
+              "selene_expected_t": 0.188217031,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.054348260164260864,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.011904834287042908,
+              "selene_positive_normal_t": -0.067080249,
+              "selene_expected_t": 0.067080249,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.024089,
+          "median_opposite_sign_error_t": 0.236887
+        },
+        {
+          "id": "MDAC/magPbTC9",
+          "sensor_index": 9,
+          "position_rz_m": [
+            1.6356,
+            -0.0002
+          ],
+          "geometric_axis_angle_deg": 180.21,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:493",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.19660066068172455,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.0058537728840100545,
+              "selene_positive_normal_t": -0.192651977,
+              "selene_expected_t": 0.192651977,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.08540815114974976,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.025125912667874145,
+              "selene_positive_normal_t": -0.092094342,
+              "selene_expected_t": 0.092094342,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.006686,
+          "median_opposite_sign_error_t": 0.283378
+        },
+        {
+          "id": "MDAC/magPbTC10",
+          "sensor_index": 10,
+          "position_rz_m": [
+            1.635,
+            -1.1277
+          ],
+          "geometric_axis_angle_deg": 180.17,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:494",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.09504711627960205,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.00011363234269472927,
+              "selene_positive_normal_t": -0.087798873,
+              "selene_expected_t": 0.087798873,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.05811915174126625,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.017647465060143867,
+              "selene_positive_normal_t": -0.05416204,
+              "selene_expected_t": 0.05416204,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.007248,
+          "median_opposite_sign_error_t": 0.147564
+        },
+        {
+          "id": "MDAC/magPbTC11",
+          "sensor_index": 11,
+          "position_rz_m": [
+            1.6403,
+            -2.3481
+          ],
+          "geometric_axis_angle_deg": 180.27,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:495",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.04321977123618126,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.023019525774563284,
+              "selene_positive_normal_t": 0.048570602,
+              "selene_expected_t": -0.048570602,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.04694830998778343,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.0475853473798335,
+              "selene_positive_normal_t": 0.04823132,
+              "selene_expected_t": -0.04823132,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.005351,
+          "median_opposite_sign_error_t": 0.093485
+        },
+        {
+          "id": "MDAC/magPbTC12",
+          "sensor_index": 12,
+          "position_rz_m": [
+            1.9318,
+            -2.9645
+          ],
+          "geometric_axis_angle_deg": 234.21,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:496",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.06922231614589691,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.05997073653800342,
+              "selene_positive_normal_t": 0.0738588,
+              "selene_expected_t": -0.0738588,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.08076213300228119,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.05393052704488685,
+              "selene_positive_normal_t": 0.082927788,
+              "selene_expected_t": -0.082927788,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.004636,
+          "median_opposite_sign_error_t": 0.153386
+        },
+        {
+          "id": "MDAC/magPbTC13",
+          "sensor_index": 13,
+          "position_rz_m": [
+            2.4709,
+            -3.0977
+          ],
+          "geometric_axis_angle_deg": 274.28,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:497",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.018269171938300133,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.13462365878946073,
+              "selene_positive_normal_t": -0.018403524,
+              "selene_expected_t": 0.018403524,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.010003329254686832,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.11586912719279988,
+              "selene_positive_normal_t": -0.00921704,
+              "selene_expected_t": 0.00921704,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.000786,
+          "median_opposite_sign_error_t": 0.027947
+        },
+        {
+          "id": "MDAC/magPbTC14",
+          "sensor_index": 14,
+          "position_rz_m": [
+            3.5499,
+            -2.573
+          ],
+          "geometric_axis_angle_deg": 311.04,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:498",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.13956007361412048,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.006012101890816232,
+              "selene_positive_normal_t": -0.136929357,
+              "selene_expected_t": 0.136929357,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.10168371349573135,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.01441448931159802,
+              "selene_positive_normal_t": -0.099502086,
+              "selene_expected_t": 0.099502086,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.002631,
+          "median_opposite_sign_error_t": 0.238838
+        },
+        {
+          "id": "MDAC/magPbTC15",
+          "sensor_index": 15,
+          "position_rz_m": [
+            4.1043,
+            -1.973
+          ],
+          "geometric_axis_angle_deg": 324.55,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:499",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.09094559401273727,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.04211773263447817,
+              "selene_positive_normal_t": -0.083244267,
+              "selene_expected_t": 0.083244267,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.043162085115909576,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.032029032770767005,
+              "selene_positive_normal_t": -0.039234334,
+              "selene_expected_t": 0.039234334,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.007701,
+          "median_opposite_sign_error_t": 0.128293
+        },
+        {
+          "id": "MDAC/magPbTC16",
+          "sensor_index": 16,
+          "position_rz_m": [
+            4.4856,
+            -1.2834
+          ],
+          "geometric_axis_angle_deg": 338.37,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:500",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.07596994191408157,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.03220859557613223,
+              "selene_positive_normal_t": -0.059035738,
+              "selene_expected_t": 0.059035738,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.038487449288368225,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.013072420419370841,
+              "selene_positive_normal_t": -0.030327483,
+              "selene_expected_t": 0.030327483,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.016934,
+          "median_opposite_sign_error_t": 0.10191
+        },
+        {
+          "id": "MDAC/magPbTC17",
+          "sensor_index": 17,
+          "position_rz_m": [
+            4.6747,
+            -0.6201
+          ],
+          "geometric_axis_angle_deg": 350.24,
+          "geometry_source": "/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in:501",
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.08624167740345001,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": -0.009525664334517873,
+              "selene_positive_normal_t": -0.062125448,
+              "selene_expected_t": 0.062125448,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.05322374403476715,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": 0.0022431406612231424,
+              "selene_positive_normal_t": -0.042891576,
+              "selene_expected_t": 0.042891576,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
+          "two_pi_factor": 1,
+          "confidence": "medium",
+          "family_disagreement": null,
+          "evidence": "Two MDAC EDDB readings paired with the same indexed SELENE negative-normal model; MDAC alias is a distinct acquisition source from PSRC",
+          "max_abs_residual_t": 0.024116,
+          "median_opposite_sign_error_t": 0.122241
+        },
+        {
+          "id": "MDAC/magPbTC18",
+          "sensor_index": 18,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.015216485597193241,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.03415324166417122,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "MDAC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions",
+          "max_abs_residual_t": null,
+          "median_opposite_sign_error_t": null
+        },
+        {
+          "id": "MDAC/magPbTC19",
+          "sensor_index": 19,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.0037781076971441507,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.009641196578741074,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "MDAC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions",
+          "max_abs_residual_t": null,
+          "median_opposite_sign_error_t": null
+        },
+        {
+          "id": "MDAC/magPbTC20",
+          "sensor_index": 20,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.011177465319633484,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.006726482883095741,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "MDAC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions",
+          "max_abs_residual_t": null,
+          "median_opposite_sign_error_t": null
+        },
+        {
+          "id": "MDAC/magPbTC21",
+          "sensor_index": 21,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": 0.03577117994427681,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.014609701000154018,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "MDAC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions",
+          "max_abs_residual_t": null,
+          "median_opposite_sign_error_t": null
+        },
+        {
+          "id": "MDAC/magPbTC22",
+          "sensor_index": 22,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.009887228719890118,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": -0.036505408585071564,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "MDAC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions",
+          "max_abs_residual_t": null,
+          "median_opposite_sign_error_t": null
+        },
+        {
+          "id": "MDAC/magPbTC23",
+          "sensor_index": 23,
+          "position_rz_m": null,
+          "geometric_axis_angle_deg": null,
+          "geometry_source": null,
+          "measurements": [
+            {
+              "shot": "E101163",
+              "time_s": 5.1,
+              "measured": -0.006727803498506546,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            },
+            {
+              "shot": "E101011",
+              "time_s": 6.8,
+              "measured": 0.003390532685443759,
+              "selene_psi_wb_per_rad": null,
+              "selene_tangent_t": null,
+              "selene_positive_normal_t": null,
+              "selene_expected_t": null,
+              "irc": 0
+            }
+          ],
+          "inferred_sign": null,
+          "orientation": null,
+          "two_pi_factor": 1,
+          "confidence": "undetermined",
+          "family_disagreement": "sensor_position_missing",
+          "evidence": "MDAC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions",
+          "max_abs_residual_t": null,
+          "median_opposite_sign_error_t": null
         }
       ],
       "negative_normal_median_absolute_deviation_t": {
@@ -2854,6 +4905,15 @@
       },
       "excluded_along_angle_median_absolute_deviation_t": {
         "E101163@5.0": 0.0477
+      },
+      "catalogued_by_source": {
+        "PSRC": 23,
+        "MDAC": 23
+      },
+      "mapped_channel_entries": 34,
+      "mdac_negative_normal_median_absolute_deviation_t": {
+        "E101163@5.1": 0.01185,
+        "E101011@6.8": 0.00585
       }
     },
     "ip_rogowski_coils": {
@@ -3371,8 +5431,8 @@
     "note": "This record refers to equilibrium shot 75000 rather than either SELENE reference shot; its TOPICS selector 6 is absent from the UI FIT selector map."
   },
   "unresolved": [
-    "Seven catalogued flux loops lack a sensor position in the SELENE geometry input.",
-    "Six catalogued pickup coils lack a sensor position in the SELENE geometry input.",
+    "Seven sensor indices in each of PSRC and MDAC (14 channel entries) lack a flux-loop position in the SELENE geometry input.",
+    "Six sensor indices in each of PSRC and MDAC (12 channel entries) lack a pickup position in the SELENE geometry input.",
     "The diamagnetic loop has no established sensor geometry or predicted flux at the loop.",
     "The observed profile record does not use a named SELENE reference equilibrium and TOPICS_RHOTYPE=6 is not decoded by the FIT selector map."
   ]
