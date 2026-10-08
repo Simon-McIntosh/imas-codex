@@ -58,6 +58,19 @@ PID_RECORD_RE = re.compile(
 )
 
 
+def _uddb_header_value(header, key):
+    """Read a quoted or bare header value without consuming the next key."""
+    match = re.search(
+        rf"\b{re.escape(key)}[ \t]*=(?:[ \t]*\"([^\"]*)\"|[ \t]*'([^']*)'|([^\s]*))",
+        header,
+    )
+    return (
+        next((value for value in match.groups() if value is not None), "")
+        if match
+        else ""
+    )
+
+
 def main():
     try:
         config = json.load(sys.stdin)
@@ -278,6 +291,35 @@ def enumerate_uddb(config):
             return [], {"database": "UDDB", "call": "uddbOpen()", "return_code": 1}
         try:
             ok, table = db.uddbreadTable()
+            headers = {}
+            if ok:
+                shots = [config.get("ref_shot"), *config.get("uddb_header_shots", [])]
+                shots = list(
+                    dict.fromkeys(
+                        shot if str(shot).startswith("E") else f"E{int(shot):06d}"
+                        for shot in shots
+                        if shot
+                    )
+                )
+                for pid in table.get("data") or []:
+                    name = unit = source_shot = name_shot = unit_shot = ""
+                    for shot in shots:
+                        header_ok, response = db.uddbreadHeader(shot=shot, pid=pid)
+                        if not header_ok:
+                            continue
+                        source_shot = source_shot or shot
+                        header = (response or {}).get("data") or ""
+                        if not name:
+                            name = _uddb_header_value(header, "NAME")
+                            if name:
+                                name_shot = shot
+                        if not unit:
+                            unit = _uddb_header_value(header, "UNIT")
+                            if unit:
+                                unit_shot = shot
+                        if name and unit:
+                            break
+                    headers[pid] = (name, unit, source_shot, name_shot, unit_shot)
         finally:
             db.uddbClose()
     except Exception as exc:
@@ -298,17 +340,37 @@ def enumerate_uddb(config):
         return [], attempt
     aliases = table.get("aliaslist") or []
     ranges = table.get("shotlist") or []
-    rows = [
-        {
-            "database": "UDDB",
-            "category": "UDDB",
-            "data_name": pid.strip(),
-            "alias": (aliases[i] or "").strip() if i < len(aliases) else "",
-            "shot_range": (ranges[i] or "").strip() if i < len(ranges) else "",
-        }
-        for i, pid in enumerate(table.get("data") or [])
-        if pid and pid.strip()
-    ]
+    rows = []
+    for i, pid in enumerate(table.get("data") or []):
+        if not pid or not pid.strip():
+            continue
+        pid = pid.strip()
+        alias = (aliases[i] or "").strip() if i < len(aliases) else ""
+        name, unit, source_shot, name_shot, unit_shot = headers.get(
+            pid, ("", "", "", "", "")
+        )
+        source_shots = dict.fromkeys(
+            shot for shot in (source_shot, name_shot, unit_shot) if shot
+        )
+        rows.append(
+            {
+                "database": "UDDB",
+                "category": "UDDB",
+                "data_name": pid,
+                "alias": alias,
+                "shot_range": (ranges[i] or "").strip() if i < len(ranges) else "",
+                "units": unit,
+                "description": name or (alias if alias != pid else ""),
+                "metadata_source": (
+                    "; ".join(f"uddbreadHeader({shot}, {pid})" for shot in source_shots)
+                    if source_shots
+                    else "uddbreadTable()"
+                ),
+                "metadata_shot": source_shot,
+                "description_source_shot": name_shot,
+                "unit_source_shot": unit_shot,
+            }
+        )
     return rows, attempt
 
 
@@ -334,6 +396,44 @@ def _lcdb_categories(lib, root, shot):
     return [
         ctypes.cast(item, ctypes.c_char_p).value.decode("utf-8") for item in names
     ], 0
+
+
+def _lcdb_file_metadata(path):
+    """Read declared text metadata near the start of a dataset namelist."""
+    try:
+        with path.open(encoding="utf-8", errors="replace") as source:
+            header = source.read(65536)
+    except OSError:
+        return {}
+    fields = {}
+    for match in re.finditer(
+        r"^[ \t]*([A-Za-z][A-Za-z0-9_]*)[ \t]*=[ \t]*(?:'([^']*)'|\"([^\"]*)\"|([^,\r\n]*))",
+        header,
+        re.MULTILINE,
+    ):
+        key = match.group(1).upper()
+        if key.endswith("UNIT") or key in {"COMMENT", "DESCRIPTION", "DESC"}:
+            fields[key] = next(
+                (part.strip() for part in match.groups()[1:] if part is not None), ""
+            )
+    return fields
+
+
+def _lcdb_field_unit(name, metadata):
+    """Apply an axis unit only to the data arrays on that axis."""
+    field = name.upper()
+
+    def declared(value, key):
+        return ("" if value.strip().upper() == "DEBUG" else value), key
+
+    for key in (f"{field}_UNIT", f"{field}UNIT"):
+        if metadata.get(key):
+            return declared(metadata[key], key)
+    if re.match(r"^X(?:EXP|FIT)DATA", field) and metadata.get("XUNIT"):
+        return declared(metadata["XUNIT"], "XUNIT")
+    if re.match(r"^Y(?:EXP|FIT)DATA", field) and metadata.get("YUNIT"):
+        return declared(metadata["YUNIT"], "YUNIT")
+    return "", ""
 
 
 def enumerate_lcdb(config):
@@ -379,8 +479,19 @@ def enumerate_lcdb(config):
                     if not ok:
                         failures += 1
                         continue
+                    source_file = (
+                        Path(root)
+                        / f"{shot // 10000:02d}"
+                        / f"{shot // 100:04d}"
+                        / f"{shot:06d}"
+                        / "lcdb"
+                        / f"{category}.ldb"
+                    )
+                    metadata = _lcdb_file_metadata(source_file)
+                    source_exists = source_file.is_file()
                     for name in names:
                         key = (owner, category, name)
+                        unit, unit_key = _lcdb_field_unit(name, metadata)
                         found[key] = {
                             "database": "LCDB",
                             "category": f"LCDB/{owner}/{category}",
@@ -388,6 +499,17 @@ def enumerate_lcdb(config):
                             "data_name": name,
                             "root": root,
                             "shot": shot,
+                            "units": unit,
+                            "description": (
+                                metadata.get("DESCRIPTION")
+                                or metadata.get("DESC")
+                                or metadata.get("COMMENT")
+                                or ""
+                            ),
+                            "metadata_source": str(source_file),
+                            "metadata_file_present": source_exists,
+                            "unit_source_key": unit_key,
+                            "source_unit_value": metadata.get(unit_key, ""),
                         }
         except Exception:
             failures += 1

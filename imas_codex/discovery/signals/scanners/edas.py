@@ -223,6 +223,11 @@ class EDASScanner:
                     "api_path": api_path,
                     "lib_path": lib_path,
                     "databases": config.get("databases", ["EDDB"]),
+                    "uddb_header_shots": [
+                        item["shot"]
+                        for item in config.get("equilibrium_examples", [])
+                        if item.get("shot")
+                    ],
                     **{
                         key: config[key]
                         for key in (
@@ -292,6 +297,7 @@ class EDASScanner:
             description = raw.get("description", "")
 
             if raw.get("database") == "UDDB":
+                sample_shot = raw.get("metadata_shot") or shot_str
                 signals.append(
                     FacilitySignal(
                         id=f"{facility}:general/uddb_{dname.lower()}",
@@ -299,16 +305,17 @@ class EDASScanner:
                         status=FacilitySignalStatus.discovered,
                         physics_domain="general",
                         name=f"UDDB/{dname}",
-                        accessor=f"uddbreadConvert('{shot_str}', '{dname}', t1, t2)",
+                        accessor=f"uddbreadConvert('{sample_shot}', '{dname}', t1, t2)",
                         data_source_name="UDDB",
                         data_source_path=f"UDDB/{dname}",
+                        unit=units,
                         description=description,
                         data_class=SignalDataClass.time_series,
                         shot_range=raw.get("shot_range") or None,
                         pid=dname,
                         aliases=[raw["alias"]] if raw.get("alias") else None,
                         discovery_source="edas",
-                        example_shot=ref_shot,
+                        example_shot=int(str(sample_shot).removeprefix("E")),
                     )
                 )
                 continue
@@ -328,7 +335,12 @@ class EDASScanner:
                         accessor=f"lcdb_value({shot}, {source_category!r}, [{dname!r}], root={root!r})",
                         data_source_name="LCDB",
                         data_source_path=f"{owner}/{source_category}/{dname}",
-                        description=f"LCDB {source_category} {dname} from {owner}",
+                        unit=units,
+                        description=(
+                            f"Dataset comment: {description}"
+                            if description
+                            else f"LCDB {source_category} {dname} from {owner}"
+                        ),
                         discovery_source="edas",
                         example_shot=shot,
                     )
@@ -597,7 +609,16 @@ class EDASScanner:
                 )
                 continue
             if s.data_source_name == "UDDB" and len(parts) == 2:
-                batch.append({"id": s.id, "database": "UDDB", "pid": parts[1]})
+                batch.append(
+                    {
+                        "id": s.id,
+                        "database": "UDDB",
+                        "pid": parts[1],
+                        "shot": f"E{s.example_shot:06d}"
+                        if s.example_shot
+                        else shot_str,
+                    }
+                )
                 continue
             if len(parts) == 2:
                 data_class = EDDB_LETTER_BY_DATA_CLASS.get(

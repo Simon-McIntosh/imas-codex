@@ -24,6 +24,8 @@ from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph.models import DataAccess, FacilitySignal, SignalDataClass
 from imas_codex.remote.scripts.check_edas import main as check_main
 from imas_codex.remote.scripts.enumerate_edas import (
+    _lcdb_field_unit,
+    _uddb_header_value,
     attempt_database,
     enumerate_lcdb,
     enumerate_mbdb,
@@ -364,9 +366,16 @@ async def test_scanner_access_methods_share_the_existing_persistence_writer():
 
 
 class TestConfiguredDatabases:
-    def test_raw_check_uses_global_catalogue_and_rejects_unknown_pid(
-        self, monkeypatch, capsys
-    ):
+    def test_blank_raw_unit_does_not_consume_the_next_header_key(self):
+        header = 'PID="2811UA001" NAME="P15 co-view" UNIT= STIME=0.000000'
+        assert _uddb_header_value(header, "UNIT") == ""
+
+    def test_analysis_debug_placeholder_is_not_a_physical_unit(self):
+        unit, source_key = _lcdb_field_unit("YFITDATA", {"YUNIT": "DEBUG"})
+        assert unit == ""
+        assert source_key == "YUNIT"
+
+    def test_raw_check_reads_value_and_rejects_unknown_pid(self, monkeypatch, capsys):
         class ProcessedCatalogue:
             def __init__(self, path):
                 pass
@@ -389,6 +398,18 @@ class TestConfiguredDatabases:
                     return True, {"data": [pid], "count": 1, "irc": 0}
                 return False, {"data": [], "count": 0, "irc": 1111}
 
+            def uddbreadHeader(self, shot, pid):
+                if pid == "2111UA001" and shot == "E101163":
+                    return True, {"data": "STIME=0 ETIME=1", "irc": 0}
+                return False, {"data": None, "irc": 1022}
+
+            def uddbreadConvert(self, shot, pid, t1, t2, datavol, ch):
+                assert (shot, pid, ch) == ("E101163", "2111UA001", 1)
+                if datavol == 1:
+                    return False, {"datavol": 50, "irc": 1062}
+                assert datavol == 50
+                return True, {"datavol": 50, "data": [1.23], "irc": 0}
+
             def uddbClose(self):
                 return True
 
@@ -410,8 +431,18 @@ class TestConfiguredDatabases:
                         "api_path": "/analysis/src/eddb",
                         "lib_path": "/analysis/lib/libeddb.so",
                         "signals": [
-                            {"id": "known", "database": "UDDB", "pid": "2111UA001"},
-                            {"id": "unknown", "database": "UDDB", "pid": "NO_SUCH_PID"},
+                            {
+                                "id": "known",
+                                "database": "UDDB",
+                                "pid": "2111UA001",
+                                "shot": "E101163",
+                            },
+                            {
+                                "id": "unknown",
+                                "database": "UDDB",
+                                "pid": "NO_SUCH_PID",
+                                "shot": "E101163",
+                            },
                         ],
                     }
                 )
@@ -420,8 +451,8 @@ class TestConfiguredDatabases:
         check_main()
         results = json.loads(capsys.readouterr().out)["results"]
         assert [result["success"] for result in results] == [True, False]
-        assert results[0]["dtype"] == "raw_catalogue"
-        assert "absent from catalogue" in results[1]["error"]
+        assert results[0]["dtype"] == "raw_value"
+        assert "header unavailable" in results[1]["error"]
 
     def test_mbdb_opened_case_exposes_native_field_list(self, monkeypatch):
         class CaseCatalogue:
@@ -527,6 +558,51 @@ class TestConfiguredDatabases:
         assert {row["data_name"] for row in rows} == {"DNAME", "NFIT"}
         assert all(row["shot"] == 63632 for row in rows)
 
+    def test_lcdb_file_units_follow_the_named_data_axis(self, tmp_path, monkeypatch):
+        owner = tmp_path / "owner"
+        file = owner / "06/0636/063632/lcdb/ane.s001.ldb"
+        file.parent.mkdir(parents=True)
+        file.write_text(
+            "&INFO\n"
+            "  XUNIT='m',\n"
+            "  YUNIT='W',\n"
+            "  COMMENT='heat flux profile',\n"
+            "&END\n"
+            "&DATA\n"
+            "  XEXPDATA(:)=1,\n"
+            "  YFITDATA(:)=2,\n"
+            "  XEXPINDEX(:)=0,\n"
+            "  NFIT=1,\n"
+            "&END\n"
+        )
+
+        class AnalysisCatalogue:
+            def lcdb_shot(self, **kwargs):
+                return True, [63632]
+
+            def lcdb_dname(self, shot, category, **kwargs):
+                return True, ["XEXPDATA", "YFITDATA", "XEXPINDEX", "NFIT"]
+
+        monkeypatch.setitem(
+            sys.modules,
+            "lcdbWrapper",
+            SimpleNamespace(LcdbWrapper=AnalysisCatalogue, lib=object()),
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas._lcdb_categories",
+            lambda lib, root, shot: (["ane.s001"], 0),
+        )
+        rows, _ = enumerate_lcdb({"lcdb_root": str(tmp_path)})
+        by_name = {row["data_name"]: row for row in rows}
+        assert by_name["XEXPDATA"]["units"] == "m"
+        assert by_name["XEXPDATA"]["source_unit_value"] == "m"
+        assert by_name["YFITDATA"]["units"] == "W"
+        assert by_name["YFITDATA"]["description"] == "heat flux profile"
+        assert by_name["XEXPINDEX"]["units"] == ""
+        assert by_name["NFIT"]["units"] == ""
+        assert all(row["metadata_source"] == str(file) for row in rows)
+        assert all(row["metadata_file_present"] for row in rows)
+
     async def test_lcdb_signal_keeps_owner_category_and_shot(self):
         fixture = {
             "signals": [
@@ -537,6 +613,8 @@ class TestConfiguredDatabases:
                     "data_name": "NFIT",
                     "root": "/analysis_DB/EDASDB/owner",
                     "shot": 63632,
+                    "units": "W",
+                    "description": "heat flux profile",
                 }
             ],
             "categories": [],
@@ -551,6 +629,8 @@ class TestConfiguredDatabases:
         assert signal.data_source_path == "owner/ane.s001/NFIT"
         assert signal.example_shot == 63632
         assert "lcdb_value(63632, 'ane.s001', ['NFIT']" in signal.accessor
+        assert signal.unit == "W"
+        assert signal.description == "Dataset comment: heat flux profile"
 
     def test_eddb_only_failure_is_reported_as_error(self, monkeypatch, capsys):
         monkeypatch.setattr(
@@ -626,8 +706,60 @@ class TestConfiguredDatabases:
                 "data_name": "2111UA001",
                 "alias": "raw channel",
                 "shot_range": "E080000-",
+                "units": "",
+                "description": "raw channel",
+                "metadata_source": "uddbreadTable()",
+                "metadata_shot": "",
+                "description_source_shot": "",
+                "unit_source_shot": "",
             }
         ]
+
+    def test_uddb_header_supplies_description_and_unit(self, monkeypatch):
+        class RawCatalogue:
+            def __init__(self, path):
+                pass
+
+            def uddbOpen(self):
+                return True
+
+            def uddbreadTable(self):
+                return True, {
+                    "data": ["2111UA001"],
+                    "aliaslist": ["2111UA001"],
+                    "shotlist": ["E080000-"],
+                    "irc": 0,
+                }
+
+            def uddbreadHeader(self, shot, pid):
+                assert pid == "2111UA001"
+                if shot == "E101173":
+                    return False, {"irc": 1301, "data": None}
+                if shot == "E101163":
+                    return True, {
+                        "irc": 0,
+                        "data": 'PID="2111UA001" NAME="coil current" UNIT= STIME=0',
+                    }
+                assert shot == "E080296"
+                return True, {
+                    "irc": 0,
+                    "data": 'PID="2111UA001" NAME="coil current" UNIT="A" STIME=0',
+                }
+
+            def uddbClose(self):
+                return True
+
+        monkeypatch.setitem(
+            sys.modules, "uddb_pwrapper", SimpleNamespace(uddbWrapper=RawCatalogue)
+        )
+        rows, _ = enumerate_uddb(
+            {"ref_shot": "E101173", "uddb_header_shots": ["E101163", "E080296"]}
+        )
+        assert rows[0]["description"] == "coil current"
+        assert rows[0]["units"] == "A"
+        assert rows[0]["metadata_shot"] == "E101163"
+        assert rows[0]["description_source_shot"] == "E101163"
+        assert rows[0]["unit_source_shot"] == "E080296"
 
     async def test_uddb_catalogue_produces_distinct_raw_signal(self):
         config = {**CONFIG, "databases": ["EDDB", "UDDB"]}
@@ -646,6 +778,9 @@ class TestConfiguredDatabases:
                             "data_name": "2111UA001",
                             "alias": "raw channel",
                             "shot_range": "E080000-",
+                            "units": "A",
+                            "description": "coil current",
+                            "metadata_shot": "E101163",
                         },
                     ],
                 }
@@ -661,7 +796,10 @@ class TestConfiguredDatabases:
             "jt-60sa:general/uddb_2111ua001",
         }
         raw = next(s for s in result.signals if s.data_source_name == "UDDB")
-        assert raw.accessor == "uddbreadConvert('E101173', '2111UA001', t1, t2)"
+        assert raw.accessor == "uddbreadConvert('E101163', '2111UA001', t1, t2)"
+        assert raw.unit == "A"
+        assert raw.description == "coil current"
+        assert raw.example_shot == 101163
 
     async def test_raw_signal_check_uses_uddb_pid(self):
         signal = FacilitySignal(
@@ -680,7 +818,7 @@ class TestConfiguredDatabases:
                 "jt-60sa", "nakasvr26", [signal], CONFIG
             )
         assert remote.call_args.args[1]["signals"] == [
-            {"id": signal.id, "database": "UDDB", "pid": "2111UA001"}
+            {"id": signal.id, "database": "UDDB", "pid": "2111UA001", "shot": "E101173"}
         ]
         assert results[0]["valid"] is True
 
