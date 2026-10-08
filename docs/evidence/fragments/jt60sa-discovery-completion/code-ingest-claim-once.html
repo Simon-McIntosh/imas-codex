@@ -1,0 +1,45 @@
+<section id="code-ingest-claim-once-record">
+  <h2 id="code-ingest-claim-once-title">Code ingestion claims stay with one worker</h2>
+  <p id="code-ingest-claim-once-cause">
+    The retry-failed pass recorded 62 ingestion events for 46 unique files: 16
+    duplicate events. Its log shows both workers claiming a ten-file batch at
+    15:13:14, naming the same first three files, and finishing their batches
+    3.9 and 4.3 seconds later. The claim timeout is 300 seconds, so expiry did
+    not cause this overlap. The two-step claim wrote a token and then read it
+    back in a separate transaction. Each worker could read its own token before
+    the other's claim overwrote it, and both proceeded to fetch and ingest the
+    same files.
+  </p>
+  <p id="code-ingest-claim-once-change">
+    Claim selection now takes a write lock on the facility before reading
+    eligible files, serializing concurrent batches. A working batch renews its
+    own token-checked claim at one-third of the stale-claim timeout, so a long
+    ingest remains owned until its holder finishes. Ingestion runs on a separate
+    thread because its synchronous graph writes can otherwise block the event
+    loop that renews the claim.
+  </p>
+  <p id="code-ingest-claim-once-measure">
+    The new concurrent-claim and held-claim tests pass; 104 adjacent discovery
+    tests pass. A bounded live-graph probe seeded four files, found all four as
+    a positive control, and returned claim counts of 0 and 4 with four unique
+    IDs; it removed all four probe nodes. A second live probe held one claim
+    for 1.4 seconds against a one-second timeout and the contender took zero
+    files; it removed its single probe node. Restoring the original claim query
+    made the concurrent-claim test fail with eight claims for four files.
+    When the test made ingestion block synchronously, the contender reclaimed
+    the held file before the thread change; after it, the contender took none.
+  </p>
+  <p id="code-ingest-claim-once-terminal-ownership">
+    Ingestion itself changes a CodeFile to <code>ingested</code> before its batch
+    ends. A two-file test exposed the resulting failure: after one file became
+    ingested, the status-filtered renewal raised and the batch marked both files
+    failed. Renewal now counts every row still carrying this batch's token and
+    updates the timestamp only while that row remains scored. The test finishes
+    with the first file ingested and the second skipped by its own outcome.
+    Restoring the scored-status filter makes that test fail, EXIT=1. A separate
+    lost-token test shows the error path leaves an already ingested file and a
+    foreign-owned scored file unchanged. A live two-node graph probe confirmed
+    that terminal status retains ownership without changing its timestamp,
+    while a foreign token raises; both probe nodes were removed.
+  </p>
+</section>
