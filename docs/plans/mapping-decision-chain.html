@@ -23,9 +23,9 @@
   <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -75,26 +75,12 @@
   <p class="landed-summary">No IMAS binding exists to measure, so the census covers the 2,958 JT-60SA candidate edges: 398 COCOS-labelled targets, 465 exact pint unit pairs and 1,882 scalar edges (6225aff61). The Jev acceptance threshold is calibrated in §7. <a href="/imas-codex/evidence/archive/mapping-decision-chain-landed.html#s2">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s3">§3 — Typed slots replace the free-form transform</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      A binding's transform becomes a set of typed slots, each with a value, the way it was settled
-      (<em>code</em>, <em>jev</em>, <em>local</em> or <em>escalated</em>) and its evidence: <code>sign</code>,
-      <code>scale_factor</code>, <code>unit_conversion</code>, <code>cocos_label</code> and an index layout. One composer in
-      <code>imas_codex/ids/transforms.py</code> builds the <code>transform_expression</code> from the settled slots, so the
-      expression stored on <code>MAPS_TO_IMAS</code> is always produced by code and always uses names that
-      <code>execute_transform</code> accepts. A binding with any slot still open is not written; it is escalated with the
-      open slots named. The slot set and its kinds come from the §2 census of candidate edges, so the model covers what
-      bindings will need, not a guess.
-    </p>
-    <p>
-      <strong>Node</strong> <code>mapping-slots</code>, role implement, 2 h, after §2. Write paths:
-      <code>imas_codex/ids/models.py</code>, <code>imas_codex/ids/transforms.py</code>,
-      <code>tests/ids/test_mapping_slots.py</code> and its fragment. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests showing every slot combination
-      the census found composes to an expression <code>execute_transform</code> evaluates to the expected value, a binding
-      with an open slot is refused with the slot named, and a COCOS slot composes through <code>cocos_sign</code>.
-    </p>
+<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">A binding's transform is five typed slots with provenance; one composer builds the expression, multiplies a source sign and scale on top of cocos_sign, and refuses an open slot (ab2b46ffe). <a href="/imas-codex/evidence/archive/mapping-decision-chain-landed.html#s3">full record</a></p>
+</section>
 
     <h2 id="s4">§4 — Conventions settle what code can settle</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>

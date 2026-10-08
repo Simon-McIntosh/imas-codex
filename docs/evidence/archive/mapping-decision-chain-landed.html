@@ -25,6 +25,11 @@
     <p>The binding census (84aa7ab5e) found no <code>MAPS_TO_IMAS</code> binding in the live graph; 146 JET sources read <code>validated</code> with none, and 53 legacy JET <code>IMASMapping</code> nodes link only to their sources. The census then moved to the selected or escalated candidate edges (c415a5a29, review 100/120). For JT-60SA's 2,958 edges over 151 sources: 398 targets carry a DD COCOS label, an upper bound on sign, factor and COCOS slots code can settle once source conventions are known; 465 edges have an exact pint unit pair; 1,882 are scalar. pint reads <code>au</code> as an astronomical unit, so unit symbols are checked before any pint transform. No written binding exists, so the Jev acceptance threshold is calibrated in §7.</p>
   </section>
 
+  <section id="s3">
+    <h2>§3 — typed slots replace the free-form transform</h2>
+    <p><code>mapping-slots</code> (ab2b46ffe, review 108/120, no added failures) adds <code>BindingTransformSlots</code> to <code>imas_codex/ids/models.py</code>: five slots, sign, scale factor, unit conversion, COCOS label and index layout, each with its value, the authority that settled it (code, jev, local or escalated) and its evidence. <code>compose_transform</code> in <code>imas_codex/ids/transforms.py</code> builds the stored expression and refuses a binding with an open slot by name. A source-specific sign and constant scale multiply on top of <code>cocos_sign(label, cocos_in, cocos_out)</code> rather than replacing it, so a database sign flip composes with the COCOS conversion. tests/ids: 550 passed.</p>
+  </section>
+
 </main>
 </body>
 </html>
