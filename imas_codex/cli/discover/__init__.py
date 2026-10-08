@@ -31,6 +31,11 @@ class _CleanupGroup(click.Group):
     ``KeyboardInterrupt``.  We clean up SSH and exit quietly.
     """
 
+    def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
+        if args and args[0] not in self.commands and not args[0].startswith("-"):
+            args = ["run", *args]
+        return super().parse_args(ctx, args)
+
     def invoke(self, ctx: click.Context) -> None:
         try:
             super().invoke(ctx)
@@ -126,7 +131,7 @@ def discover_status(facility: str, as_json: bool, domain: str | None) -> None:
     from imas_codex.discovery import get_discovery_stats, get_high_value_paths
     from imas_codex.discovery.signals.parallel import get_data_discovery_stats
     from imas_codex.discovery.wiki.parallel import get_wiki_discovery_stats
-    from imas_codex.settings import get_discovery_threshold
+    from imas_codex.settings import get_path_scan_threshold
 
     use_rich = use_rich_output()
 
@@ -137,7 +142,7 @@ def discover_status(facility: str, as_json: bool, domain: str | None) -> None:
             if domain is None or domain == "paths":
                 stats = get_discovery_stats(facility)
                 high_value = get_high_value_paths(
-                    facility, min_score=get_discovery_threshold(), limit=20
+                    facility, min_score=get_path_scan_threshold(), limit=20
                 )
                 output["paths"] = {"stats": stats, "high_value_paths": high_value}
 
@@ -383,7 +388,7 @@ def discover_inspect(facility: str, scanned: int, scored: int, as_json: bool) ->
     import json
 
     from imas_codex.graph import GraphClient
-    from imas_codex.settings import get_discovery_threshold as _gdt
+    from imas_codex.settings import get_path_scan_threshold as _gdt
 
     console = Console()
 
