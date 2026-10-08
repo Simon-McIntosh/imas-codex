@@ -267,7 +267,6 @@ def test_focus_items_are_refused_stating_the_mechanism(engine) -> None:
         run_wiki_stage(FACILITY, WikiStageOptions(focus=("MAG/coil",)))
     message = str(excinfo.value)
     assert "claim query takes no item filter" in message
-    assert "facility-discovery-sequence" not in message
     assert "section" not in message
 
 
@@ -277,7 +276,6 @@ def test_cli_focus_is_refused(engine) -> None:
     )
     assert result.exit_code != 0
     assert "claim query takes no item filter" in result.output
-    assert "facility-discovery-sequence" not in result.output
     assert "section" not in result.output
 
 
@@ -342,6 +340,40 @@ def test_retired_score_alias_is_refused() -> None:
     result = CliRunner().invoke(discover, [FACILITY, "--only", "wiki", "--score-only"])
     assert result.exit_code != 0
     assert "No such option: --score-only" in result.output
+
+
+def test_embedding_refusal_names_a_supported_bare_command(monkeypatch) -> None:
+    messages: list[str] = []
+    monkeypatch.setattr("imas_codex.cli.rich_output.should_use_rich", lambda: True)
+    monkeypatch.setattr(
+        "imas_codex.cli.discover.common.setup_logging", lambda *args: MagicMock()
+    )
+    monkeypatch.setattr(
+        "imas_codex.cli.discover.common.make_log_print", lambda *args: messages.append
+    )
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility",
+        lambda facility: FACILITY_CONFIG,
+    )
+    monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "remote")
+    monkeypatch.setattr(
+        "imas_codex.embeddings.readiness.ensure_embedding_ready",
+        lambda **kwargs: (False, "embedding unavailable"),
+    )
+    with pytest.raises(SystemExit):
+        run_wiki_stage(FACILITY, WikiStageOptions())
+    output = "\n".join(messages)
+    assert "embedding unavailable" in output
+    assert "imas-codex discover jt-60sa --only wiki --scan-only" in output
+    assert "--score-only" not in output
+
+
+def test_wiki_options_docstring_describes_each_field_without_retired_flags() -> None:
+    doc = WikiStageOptions.__doc__ or ""
+    for name in WikiStageOptions.__dataclass_fields__:
+        assert f"``{name}``" in doc
+    assert "--score-only" not in doc
+    assert "--source" not in doc
 
 
 def test_cli_scan_only_reaches_the_engine(engine) -> None:

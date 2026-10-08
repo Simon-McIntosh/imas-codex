@@ -29,15 +29,25 @@ _FOCUS_REFUSAL = (
 
 @dataclass(frozen=True)
 class WikiStageOptions:
-    """Settled options for the wiki discovery stage.
+    """Options passed to the wiki discovery stage.
 
-    ``wiki_site`` selects one configured site by index or URL substring, the
-    settled spelling of the old ``--source``. ``scan_only`` selects the seeding
-    half; ``flush`` selects the draining half, the settled spelling of the old
-    ``--score-only``. ``topic`` is the free-text steer the scorer reads, the
-    settled spelling of the old free-text ``--focus``. ``focus`` names items
-    and is refused because the wiki claim query takes no item filter.
-    ``limit`` caps pages.
+    ``wiki_site`` selects a configured site by index or URL substring.
+    ``cost_limit`` caps spending on scoring and ingestion.
+    ``limit`` caps the number of pages processed.
+    ``max_depth`` limits how far page discovery follows links.
+    ``topic`` steers the scorer with free text.
+    ``focus`` names items and is refused because the wiki claim query has no item filter.
+    ``scan_only`` runs the page and document seeding half.
+    ``flush`` runs the scoring and ingestion half for existing work.
+    ``rescan`` enumerates pages again even when pages already exist.
+    ``score_workers`` sets the number of page scoring workers.
+    ``ingest_workers`` sets the number of page ingestion workers.
+    ``rescan_documents`` enumerates document attachments again.
+    ``time_limit`` caps runtime in minutes.
+    ``store_images`` saves images found in wiki pages.
+    ``min_score`` is the minimum relevance score for ingestion.
+    ``reset_to`` moves pages back to a named state for reprocessing.
+    ``verbose`` enables detailed logging.
     """
 
     wiki_site: str | None = None
@@ -144,7 +154,8 @@ def run_wiki_stage(facility: str, options: WikiStageOptions) -> dict:
                 else:
                     log_print(f"[red]{rich_escape(msg)}[/red]")
                     log_print(
-                        "[dim]Or use --scan-only / --score-only to skip embedding[/dim]"
+                        f"[dim]Or run imas-codex discover {facility} --only wiki "
+                        "--scan-only to scan without embedding[/dim]"
                     )
                     raise SystemExit(1)
             else:
@@ -202,7 +213,7 @@ def run_wiki_stage(facility: str, options: WikiStageOptions) -> dict:
                 raise SystemExit(1) from None
 
     # ================================================================
-    # Phase 1: Preflight - validate credentials, bulk discovery
+    # Validate credentials before enumerating pages and documents.
     # ================================================================
 
     # Check wiki stats once (facility-level, not per-site)
@@ -696,7 +707,7 @@ def run_wiki_stage(facility: str, options: WikiStageOptions) -> dict:
         raise SystemExit(1)
 
     # ================================================================
-    # Phase 2: Score/ingest all sites with unified progress display
+    # Score and ingest sites with a shared progress display.
     # ================================================================
 
     worker_parts = []

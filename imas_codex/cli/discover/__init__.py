@@ -19,6 +19,17 @@ class _CleanupGroup(click.Group):
     """
 
     def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
+        from imas_codex.cli.discover.sequence import DOMAINS
+
+        if args and args[0] in (*DISCOVERY_DOMAINS, *DOMAINS):
+            domain = "mapping" if args[0] == "map" else args[0]
+            facility = (
+                args[1] if len(args) > 1 and not args[1].startswith("-") else "FACILITY"
+            )
+            raise click.UsageError(
+                f"'{args[0]}' is a discovery domain. "
+                f"Use 'imas-codex discover {facility} --only {domain}'."
+            )
         if args and args[0] not in self.commands and not args[0].startswith("-"):
             args = ["run", *args]
         return super().parse_args(ctx, args)
