@@ -455,6 +455,70 @@ def test_content_arm_marks_scored_with_content_relevance(monkeypatch):
     assert scored_items[0]["score_reason"] == "analysis helper"
 
 
+def test_scoped_stale_ingested_judgment_uses_chunks_without_remote_executor(
+    monkeypatch,
+):
+    """An ordinary score worker updates stored judgment fields in place."""
+    path = "/analysis/src/stored.f"
+    file = _file(path, status="ingested", relevance_stage="content", preview_text="old")
+    requests = []
+    monkeypatch.setattr(
+        "imas_codex.discovery.code.graph_ops.fetch_file_chunk_text",
+        lambda ids: {path: [{"start_line": 1, "text": "stored diagnostic source"}]},
+    )
+
+    def refuse_remote(*args, **kwargs):
+        raise AssertionError("remote executor must not be invoked")
+
+    monkeypatch.setattr("imas_codex.remote.executor.run_python_script", refuse_remote)
+    monkeypatch.setattr(
+        "imas_codex.remote.executor.async_run_python_script", refuse_remote
+    )
+    graph, state, released, descriptions = _run_score(
+        monkeypatch,
+        [file],
+        {path: _answers(0.8, 0.2, 0.1, 0.1)},
+        requests=requests,
+    )
+    assert requests and "stored diagnostic source" in str(requests[0]["state"])
+    assert descriptions == []
+    assert state.score_stats.cost == pytest.approx(COST)
+    assert released == [path]
+    assert graph.items_for(
+        "sf.score_cost = coalesce(sf.score_cost, 0) + item.score_cost"
+    )
+    assert all("sf.status =" not in text for text, _ in graph.queries)
+    assert all("DETACH DELETE" not in text for text, _ in graph.queries)
+
+
+@pytest.mark.parametrize(
+    ("prior_status", "scope", "facets", "expected_status"),
+    [
+        ("scored", 0.1, (0.0, 0.0, 0.0, 0.0), "skipped"),
+        ("skipped", 0.8, (4.0, 3.0, 2.0, 1.0), "scored"),
+    ],
+)
+def test_stale_content_judgment_updates_uningested_status(
+    monkeypatch, prior_status, scope, facets, expected_status
+):
+    path = "/analysis/src/stale.f"
+    file = _file(
+        path, status=prior_status, relevance_stage="content", preview_text="stored text"
+    )
+    answers = {path: _answers(scope, 0.1, 0.1, 0.1, facets=facets)}
+
+    graph, state, released, descriptions = _run_score(monkeypatch, [file], answers)
+
+    items = graph.items_for("sf.status = item.status")
+    assert len(items) == 1
+    assert items[0]["status"] == expected_status
+    assert items[0]["relevance_stage"] == "content"
+    assert items[0]["score_cost"] == pytest.approx(COST)
+    assert descriptions == []
+    assert released == [path]
+    assert state.score_stats.cost == pytest.approx(COST)
+
+
 def test_content_arm_asks_every_content_question(monkeypatch):
     """The content request carries the facet questions and the grade.
 

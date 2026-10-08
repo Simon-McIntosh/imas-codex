@@ -261,3 +261,38 @@ def test_judgment_imports_nothing_from_the_llm_package():
         for module in modules
         if module == "imas_codex.llm" or module.startswith("imas_codex.llm.")
     ], modules
+
+
+async def test_judge_rows_applies_only_answers_and_returns_reported_cost(monkeypatch):
+    rows = [{"id": "answered"}, {"id": "failed"}]
+    applied = []
+
+    async def fake_batch(states, questions, **kwargs):
+        assert [state["id"] for state in states] == ["answered", "failed"]
+        return [({"admit": {"noul": 0.8}}, 0.012), None], 0.012
+
+    monkeypatch.setattr(judgment, "decide_batch", fake_batch)
+
+    def apply(answered, cost):
+        applied.extend(answered)
+        assert cost == 0.012
+        return {"written": len(answered)}
+
+    result, cost, failed = await judgment.judge_rows(
+        rows,
+        lambda row: row,
+        lambda: {"admit": {"type": "noul"}},
+        apply,
+        model=MODEL,
+        service=SERVICE,
+    )
+    assert result == {"written": 1}
+    assert cost == 0.012
+    assert [row["id"] for row in failed] == ["failed"]
+    assert [row[0]["id"] for row in applied] == ["answered"]
+
+
+def test_rerank_pool_is_larger_than_the_returned_search_window():
+    from imas_codex.llm.search_tools import RERANK_POOL
+
+    assert RERANK_POOL > 30

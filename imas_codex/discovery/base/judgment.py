@@ -17,6 +17,7 @@ zero.
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 # One decision result: the validated answers keyed by question name, and the
 # USD cost the endpoint reported for that call.
 DecisionResult = tuple[dict[str, Any], float]
+JudgedRow = tuple[Mapping[str, Any], dict[str, Any], float]
 
 # The decisions endpoint is asked for at most this many judgements at once,
 # matching the triage worker's own bound.
@@ -131,6 +133,49 @@ async def decide_batch(
     return results, total_cost
 
 
+async def judge_rows(
+    rows: Sequence[Mapping[str, Any]],
+    state_for: Callable[[Mapping[str, Any]], Mapping[str, Any]],
+    questions_for: Callable[[], Mapping[str, Any]],
+    apply: Callable[[list[JudgedRow], float], Any],
+    *,
+    model: str,
+    service: str,
+    concurrency: int = _DEFAULT_CONCURRENCY,
+    budget_seconds: float | None = None,
+) -> tuple[Any, float, list[Mapping[str, Any]]]:
+    """Judge claimed rows, apply only successful answers, and return real spend.
+
+    The caller owns its claim and releases failed rows. An unanswered row never
+    reaches ``apply`` and retains its prior judgment and durable status.
+    ``apply`` may be synchronous or asynchronous so a content arm can describe
+    admitted files before persisting the judgment.
+    """
+    if not rows:
+        return None, 0.0, []
+    states = [state_for(row) for row in rows]
+    results, cost = await decide_batch(
+        states,
+        questions_for(),
+        model=model,
+        service=service,
+        concurrency=concurrency,
+        budget_seconds=budget_seconds,
+    )
+    answered = [
+        (row, result[0], result[1])
+        for row, result in zip(rows, results, strict=True)
+        if result is not None
+    ]
+    failed = [row for row, result in zip(rows, results, strict=True) if result is None]
+    if not answered:
+        return None, cost, failed
+    applied = apply(answered, cost)
+    if inspect.isawaitable(applied):
+        applied = await applied
+    return applied, cost, failed
+
+
 async def rerank_pool(
     query: str,
     candidates: Sequence[Mapping[str, Any]],
@@ -218,10 +263,13 @@ async def rerank_pool(
     # Scored candidates fill the slots in embedding order by descending score,
     # and an unscored candidate keeps its own embedding position rather than
     # being read as a zero.
-    scored_order = sorted(
-        (index for index, score in enumerate(scores) if score is not None),
-        key=lambda index: (-scores[index], index),
-    )
+    scored_values = [
+        (index, score) for index, score in enumerate(scores) if score is not None
+    ]
+    scored_order = [
+        index
+        for index, _ in sorted(scored_values, key=lambda item: (-item[1], item[0]))
+    ]
     ordered: list[Mapping[str, Any]] = []
     pointer = 0
     for index, candidate in enumerate(items):

@@ -242,7 +242,7 @@ async def triage_worker(
     import time as _time
 
     from imas_codex.discovery.base.facility import get_facility
-    from imas_codex.discovery.base.llm import acall_decisions
+    from imas_codex.discovery.base.judgment import judge_rows
     from imas_codex.discovery.code.graph_ops import (
         claim_files_for_triage,
         release_file_triage_claims,
@@ -264,14 +264,6 @@ async def triage_worker(
     except Exception as exc:  # noqa: BLE001 - absent facility block is data, not a crash
         logger.warning("triage_worker: facility config unavailable: %s", exc)
         facility_config = {}
-
-    semaphore = asyncio.Semaphore(concurrency)
-
-    async def judge(row: dict[str, Any]):
-        async with semaphore:
-            return await acall_decisions(
-                model, row, questions, service="facility-discovery"
-            )
 
     while not state.should_stop():
         if state.budget_exhausted:
@@ -314,56 +306,56 @@ async def triage_worker(
 
         batch_start = _time.monotonic()
 
-        states = []
-        for f in files:
-            row = dict(f)
-            row["sibling_names"] = siblings_by_parent.get(f.get("parent_path_id"), [])
-            states.append(
-                build_triage_state(
-                    row, state.facility, facility_config, with_content=False
-                )
-            )
-
-        results = await asyncio.gather(
-            *(judge(s) for s in states), return_exceptions=True
-        )
-
         decisions: list[dict[str, Any]] = []
-        failed_ids: list[str] = []
-        for f, res in zip(files, results, strict=True):
-            if isinstance(res, BaseException):
-                logger.warning("triage decision failed for %s: %s", f["path"], res)
-                failed_ids.append(f["id"])
-                continue
-            answers, cost = res
-            decisions.append(
-                {"path": f["path"], "answers": answers, "model": model, "cost": cost}
+
+        def state_for(
+            file: dict[str, Any], siblings_by_parent=siblings_by_parent
+        ) -> dict[str, Any]:
+            row = dict(file)
+            row["sibling_names"] = siblings_by_parent.get(
+                file.get("parent_path_id"), []
+            )
+            return build_triage_state(
+                row, state.facility, facility_config, with_content=False
             )
 
-        batch_cost = sum(d["cost"] for d in decisions)
-        state.triage_stats.cost += batch_cost
+        async def apply(answered, cost, decisions=decisions, file_id_map=file_id_map):
+            decisions.extend(
+                {"path": row["path"], "answers": answers, "model": model, "cost": paid}
+                for row, answers, paid in answered
+            )
+            return await asyncio.to_thread(
+                apply_name_relevance,
+                decisions,
+                file_id_map,
+                threshold=threshold,
+                cost_total=cost,
+            )
 
         triaged = skipped = 0
-        if decisions:
-            try:
-                applied = await asyncio.to_thread(
-                    apply_name_relevance,
-                    decisions,
-                    file_id_map,
-                    threshold=threshold,
-                    cost_total=batch_cost,
-                )
-                triaged = applied["triaged"]
-                skipped = applied["skipped"]
-            except Exception as e:
-                logger.error("Triage persistence failed: %s", e)
-                state.triage_stats.errors += len(decisions)
-                await asyncio.to_thread(
-                    release_file_triage_claims,
-                    [file_id_map[d["path"]] for d in decisions],
-                )
-                if is_infrastructure_error(e):
-                    raise
+        try:
+            applied, batch_cost, failed = await judge_rows(
+                files,
+                state_for,
+                lambda: questions,
+                apply,
+                model=model,
+                service="facility-discovery",
+                concurrency=concurrency,
+            )
+            if applied:
+                triaged, skipped = applied["triaged"], applied["skipped"]
+        except Exception as e:
+            logger.error("Triage persistence failed: %s", e)
+            state.triage_stats.errors += len(files)
+            await asyncio.to_thread(
+                release_file_triage_claims, [f["id"] for f in files]
+            )
+            if is_infrastructure_error(e):
+                raise
+            continue
+        state.triage_stats.cost += batch_cost
+        failed_ids = [f["id"] for f in failed]
 
         batch_total = triaged + skipped
         state.triage_stats.processed += batch_total
@@ -424,9 +416,11 @@ async def score_worker(
     the scorer.
     """
     from imas_codex.discovery.base.facility import get_facility
-    from imas_codex.discovery.base.llm import acall_decisions, call_llm_structured
+    from imas_codex.discovery.base.judgment import judge_rows
+    from imas_codex.discovery.base.llm import call_llm_structured
     from imas_codex.discovery.code.graph_ops import (
         claim_files_for_scoring,
+        fetch_file_chunk_text,
         release_file_score_claims,
     )
     from imas_codex.discovery.code.scorer import (
@@ -435,8 +429,11 @@ async def score_worker(
         _build_score_user_prompt,
         _group_files_by_parent,
         apply_file_scores,
+        apply_ingested_rejudge,
+        apply_stale_content_rejudge,
         build_triage_questions,
         build_triage_state,
+        chunk_content_head,
         content_admits,
         triage_relevance,
     )
@@ -459,14 +456,6 @@ async def score_worker(
     except Exception as exc:  # noqa: BLE001 - absent facility block is data, not a crash
         logger.warning("score_worker: facility config unavailable: %s", exc)
         facility_config = {}
-
-    semaphore = asyncio.Semaphore(concurrency)
-
-    async def judge_content(row: dict[str, Any]):
-        async with semaphore:
-            return await acall_decisions(
-                relevance_model, row, questions, service="facility-discovery"
-            )
 
     import time as _time
 
@@ -524,97 +513,149 @@ async def score_worker(
         batch_start = _time.monotonic()
 
         try:
-            # Content arm first: each file's content relevance is judged from
-            # its evidence and preview, and that judgement decides whether the
-            # file is described, written and claimed. It runs before the local
-            # model is asked for anything, so a below-threshold file costs no
-            # description call.
-            content_states = [
-                build_triage_state(
-                    f, state.facility, facility_config, with_content=True
-                )
-                for f in files
-            ]
-            content_results = await asyncio.gather(
-                *(judge_content(s) for s in content_states), return_exceptions=True
+            ingested_ids = [f["id"] for f in files if f.get("status") == "ingested"]
+            chunks_by_file = await asyncio.to_thread(
+                fetch_file_chunk_text, ingested_ids
             )
-            content_decisions = []
-            failures: list[tuple[str, BaseException]] = []
-            for f, res in zip(files, content_results, strict=True):
-                if isinstance(res, BaseException):
-                    failures.append((f["path"], res))
-                    continue
-                answers, answer_cost = res
-                content_decisions.append(
-                    {
-                        "path": f["path"],
-                        "answers": answers,
-                        "model": relevance_model,
-                        "cost": answer_cost,
-                    }
-                )
-            if failures:
-                first_path, first_exc = failures[0]
-                logger.info(
-                    "content decision failed for %d of %d files in batch; first %s: %s",
-                    len(failures),
-                    len(files),
-                    first_path,
-                    first_exc,
-                )
-            content_cost = sum(d["cost"] for d in content_decisions)
-            state.score_stats.cost += content_cost
-
-            # The local model describes only the files whose content decision
-            # admits them — composite reaches the ingest threshold, or a facet
-            # reaches the facet threshold; the description is written after
-            # the content decision that admitted the file.  Each decision is
-            # paired with its own file by path, never by position, because a
-            # failed decision drops out of ``content_decisions`` and a
-            # positional zip would shift every later file onto the wrong
-            # decision.
+            described_relevance: dict[str, float] = {}
+            parsed_results = []
+            description_cost = 0.0
+            file_by_path = {f["path"]: f for f in files}
             ingest_threshold = get_code_ingest_threshold()
             facet_threshold = get_code_facet_admission_threshold()
-            file_by_path = {f["path"]: f for f in files}
-            described_files = []
-            described_relevance: dict[str, float] = {}
-            for d in content_decisions:
-                if content_admits(d["answers"], ingest_threshold, facet_threshold):
-                    described_files.append(file_by_path[d["path"]])
-                    described_relevance[d["path"]] = triage_relevance(d["answers"])
 
-            description_cost = 0.0
-            parsed_results = []
-            if described_files:
-                described_groups = _group_files_by_parent(
-                    described_files, include_siblings=False
+            def state_for(
+                file: dict[str, Any], chunks_by_file=chunks_by_file
+            ) -> dict[str, Any]:
+                content = (
+                    chunk_content_head(chunks_by_file.get(file["id"], [])) or None
+                    if file.get("status") == "ingested"
+                    else None
                 )
-                score_user_prompt = _build_score_user_prompt(described_groups)
-                parsed_raw, description_cost, _tokens = await asyncio.to_thread(
-                    call_llm_structured,
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": score_system_prompt},
-                        {"role": "user", "content": score_user_prompt},
-                    ],
-                    response_model=FileScoreBatch,
-                    temperature=0.1,
-                    service="facility-discovery",
-                    reasoning_effort=get_reasoning_effort("discovery-score"),
+                return build_triage_state(
+                    file,
+                    state.facility,
+                    facility_config,
+                    with_content=True,
+                    content_head=content,
                 )
-                assert isinstance(parsed_raw, FileScoreBatch)
-                parsed_results = parsed_raw.results
-                state.score_stats.cost += description_cost
 
-            result = await asyncio.to_thread(
-                apply_file_scores,
-                parsed_results,
-                file_id_map,
-                content_decisions,
-                batch_cost=description_cost,
-                content_cost=content_cost,
+            async def apply(
+                answered,
+                cost,
+                file_by_path=file_by_path,
+                ingest_threshold=ingest_threshold,
+                facet_threshold=facet_threshold,
+                described_relevance=described_relevance,
+                score_system_prompt=score_system_prompt,
+                file_id_map=file_id_map,
+            ):
+                nonlocal description_cost, parsed_results
+                decisions = [
+                    {
+                        "path": row["path"],
+                        "answers": answers,
+                        "model": relevance_model,
+                        "cost": paid,
+                    }
+                    for row, answers, paid in answered
+                ]
+                fresh = [
+                    d
+                    for d in decisions
+                    if file_by_path[d["path"]].get("status", "triaged") == "triaged"
+                ]
+                stored = [
+                    d
+                    for d in decisions
+                    if file_by_path[d["path"]].get("status") in {"scored", "skipped"}
+                ]
+                ingested = [
+                    d
+                    for d in decisions
+                    if file_by_path[d["path"]].get("status") == "ingested"
+                ]
+                described_files = []
+                for decision in fresh:
+                    if content_admits(
+                        decision["answers"], ingest_threshold, facet_threshold
+                    ):
+                        described_files.append(file_by_path[decision["path"]])
+                        described_relevance[decision["path"]] = triage_relevance(
+                            decision["answers"]
+                        )
+                if described_files:
+                    groups = _group_files_by_parent(
+                        described_files, include_siblings=False
+                    )
+                    parsed_raw, description_cost, _tokens = await asyncio.to_thread(
+                        call_llm_structured,
+                        model=model,
+                        messages=[
+                            {"role": "system", "content": score_system_prompt},
+                            {
+                                "role": "user",
+                                "content": _build_score_user_prompt(groups),
+                            },
+                        ],
+                        response_model=FileScoreBatch,
+                        temperature=0.1,
+                        service="facility-discovery",
+                        reasoning_effort=get_reasoning_effort("discovery-score"),
+                    )
+                    assert isinstance(parsed_raw, FileScoreBatch)
+                    parsed_results = parsed_raw.results
+                fresh_result = (
+                    await asyncio.to_thread(
+                        apply_file_scores,
+                        parsed_results,
+                        file_id_map,
+                        fresh,
+                        batch_cost=description_cost,
+                        content_cost=sum(d["cost"] for d in fresh),
+                    )
+                    if fresh
+                    else {"scored": 0}
+                )
+                stored_result = (
+                    await asyncio.to_thread(
+                        apply_stale_content_rejudge, stored, file_id_map
+                    )
+                    if stored
+                    else {"scored": 0, "skipped": 0}
+                )
+                if ingested:
+                    await asyncio.to_thread(
+                        apply_ingested_rejudge,
+                        ingested,
+                        file_id_map,
+                        sum(d["cost"] for d in ingested),
+                    )
+                return {
+                    "scored": fresh_result["scored"] + stored_result["scored"],
+                    "skipped": stored_result["skipped"],
+                    "ingested": len(ingested),
+                }
+
+            result, content_cost, failed = await judge_rows(
+                files,
+                state_for,
+                lambda: questions,
+                apply,
+                model=relevance_model,
+                service="facility-discovery",
+                concurrency=concurrency,
             )
-            batch_total = result.get("scored", 0) + result.get("deferred", 0)
+            state.score_stats.cost += content_cost + description_cost
+            if failed:
+                logger.info(
+                    "content decision failed for %d of %d files",
+                    len(failed),
+                    len(files),
+                )
+                state.score_stats.errors += len(failed)
+            result = result or {"scored": 0, "skipped": 0, "ingested": 0}
+            batch_total = sum(result.values())
             state.score_stats.processed += batch_total
             state.score_stats.last_batch_time = _time.monotonic() - batch_start
             state.score_stats.record_batch(batch_total)
@@ -683,7 +724,7 @@ async def rejudge_ingested_files(
     ``cost`` and the number of ``batches``.
     """
     from imas_codex.discovery.base.facility import get_facility
-    from imas_codex.discovery.base.llm import acall_decisions
+    from imas_codex.discovery.base.judgment import judge_rows
     from imas_codex.discovery.code.graph_ops import (
         claim_files_for_scoring,
         fetch_file_chunk_text,
@@ -704,14 +745,6 @@ async def rejudge_ingested_files(
     except Exception as exc:  # noqa: BLE001 - absent facility block is data, not a crash
         logger.warning("rejudge_ingested_files: facility config unavailable: %s", exc)
         facility_config = {}
-
-    semaphore = asyncio.Semaphore(concurrency)
-
-    async def judge(state_row: dict[str, Any]):
-        async with semaphore:
-            return await acall_decisions(
-                model, state_row, questions, service="facility-discovery"
-            )
 
     rejudged = 0
     below_gate: list[str] = []
@@ -746,40 +779,40 @@ async def rejudge_ingested_files(
         chunks_by_file = await asyncio.to_thread(
             fetch_file_chunk_text, [f["id"] for f in batch]
         )
-        states = [
-            build_triage_state(
-                f,
+
+        def state_for(
+            file: dict[str, Any], chunks_by_file=chunks_by_file
+        ) -> dict[str, Any]:
+            return build_triage_state(
+                file,
                 facility,
                 facility_config,
                 with_content=True,
-                content_head=chunk_content_head(chunks_by_file.get(f["id"], [])),
+                content_head=chunk_content_head(chunks_by_file.get(file["id"], []))
+                or None,
             )
-            for f in batch
-        ]
 
-        results = await asyncio.gather(
-            *(judge(s) for s in states), return_exceptions=True
+        async def apply(answered, cost, file_id_map=file_id_map):
+            decisions = [
+                {"path": row["path"], "answers": answers, "model": model, "cost": paid}
+                for row, answers, paid in answered
+            ]
+            return await asyncio.to_thread(
+                apply_ingested_rejudge, decisions, file_id_map, cost
+            )
+
+        applied, batch_cost, failed_rows = await judge_rows(
+            batch,
+            state_for,
+            lambda: questions,
+            apply,
+            model=model,
+            service="facility-discovery",
+            concurrency=concurrency,
         )
-
-        decisions: list[dict[str, Any]] = []
-        failed = 0
-        for f, res in zip(batch, results, strict=True):
-            if isinstance(res, BaseException):
-                logger.warning("re-judge decision failed for %s: %s", f["path"], res)
-                failed += 1
-                continue
-            answers, cost = res
-            decisions.append(
-                {"path": f["path"], "answers": answers, "model": model, "cost": cost}
-            )
-
-        batch_cost = sum(d["cost"] for d in decisions)
         spend += batch_cost
-
-        if decisions:
-            applied = await asyncio.to_thread(
-                apply_ingested_rejudge, decisions, file_id_map, batch_cost
-            )
+        failed = len(failed_rows)
+        if applied:
             rejudged += applied["rejudged"]
             below_gate.extend(applied["below_gate"])
 
