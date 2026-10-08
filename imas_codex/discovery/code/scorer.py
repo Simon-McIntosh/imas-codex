@@ -909,3 +909,56 @@ def apply_ingested_rejudge(
             )
 
     return {"rejudged": len(items), "below_gate": below_gate}
+
+
+def apply_stale_content_rejudge(
+    decisions: list[dict[str, Any]], file_id_map: dict[str, str]
+) -> dict[str, int]:
+    """Replace judgment fields on a stored, un-ingested content-stage row.
+
+    An admitted skip enters normal ingestion as ``scored``. A scored row now
+    below both admission gates becomes skipped. Existing descriptions and
+    other non-judgment fields are retained.
+    """
+    from imas_codex.settings import (
+        get_code_facet_admission_threshold,
+        get_code_ingest_threshold,
+    )
+
+    ingest_threshold = get_code_ingest_threshold()
+    facet_threshold = get_code_facet_admission_threshold()
+    items = []
+    for decision in decisions:
+        file_id = file_id_map.get(decision["path"])
+        if file_id is None:
+            continue
+        item = _relevance_item(
+            file_id,
+            decision["answers"],
+            stage=RELEVANCE_STAGE_CONTENT,
+            model=decision.get("model"),
+            cost=decision["cost"],
+        )
+        item["status"] = (
+            "scored"
+            if content_admits(decision["answers"], ingest_threshold, facet_threshold)
+            else "skipped"
+        )
+        items.append(item)
+    if items:
+        set_clause = _relevance_set_clause(include_content=True)
+        with GraphClient() as gc:
+            gc.query(
+                f"""
+                UNWIND $items AS item
+                MATCH (sf:CodeFile {{id: item.id}})
+                SET sf.status = item.status,
+                    sf.score_cost = coalesce(sf.score_cost, 0) + item.score_cost,
+                    sf.claimed_at = null{set_clause}
+                """,
+                items=items,
+            )
+    return {
+        "scored": sum(item["status"] == "scored" for item in items),
+        "skipped": sum(item["status"] == "skipped" for item in items),
+    }

@@ -24,6 +24,8 @@ from typing import Any
 from imas_codex.config.discovery_config import build_facility_exclusion_filter
 from imas_codex.discovery.base.claims import (
     DEFAULT_CLAIM_TIMEOUT_SECONDS,
+    claim_batch,
+    judgment_selection,
     release_claim,
     release_claims_batch,
     reset_stale_claims,
@@ -40,6 +42,36 @@ from imas_codex.graph.query_builder import build_path_prefix_filter
 logger = logging.getLogger(__name__)
 
 CLAIM_TIMEOUT_SECONDS = DEFAULT_CLAIM_TIMEOUT_SECONDS  # 300s (5 minutes)
+
+
+def triage_judgment_selection(alias: str = "sf") -> tuple[str, str]:
+    """Select new names decisions first, then stored names decisions from another model."""
+    initial = f"{alias}.status = 'discovered' AND {alias}.relevance_stage IS NULL"
+    return judgment_selection(
+        alias,
+        initial=initial,
+        stage=RELEVANCE_STAGE_NAME,
+        text_available=(
+            f"{alias}.status IN ['triaged', 'skipped'] AND {alias}.path IS NOT NULL "
+            f"AND NOT coalesce({alias}.skip_reason, '') STARTS WITH 'duplicate'"
+        ),
+    )
+
+
+def score_judgment_selection(alias: str = "sf") -> tuple[str, str]:
+    """Select new content decisions first, then stored-text decisions from another model."""
+    initial = f"{alias}.status = 'triaged' AND {alias}.is_enriched = true"
+    return judgment_selection(
+        alias,
+        initial=initial,
+        stage=RELEVANCE_STAGE_CONTENT,
+        text_available=(
+            f"{alias}.status IN ['scored', 'skipped', 'ingested'] "
+            f"AND ({alias}.preview_text IS NOT NULL OR EXISTS {{ "
+            f"MATCH ({alias})<-[:FROM_FILE]-(:CodeExample)-[:HAS_CHUNK]->(c:CodeChunk) "
+            "WHERE c.text IS NOT NULL })"
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -309,56 +341,33 @@ def claim_files_for_triage(
     Returns:
         List of dicts with file info + parent path/description
     """
-    cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
-    claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
-    with GraphClient() as gc:
-        # Step 1: Claim with random ordering and unique token
-        gc.query(
-            f"""
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE sf.status = 'discovered'
-              AND sf.relevance_stage IS NULL
-              {prefix_clause}
-              {excluded_clause}
-              AND (sf.claimed_at IS NULL
-                   OR sf.claimed_at < datetime() - duration($cutoff))
-            WITH sf
-            ORDER BY rand()
-            LIMIT $limit
-            SET sf.claimed_at = datetime(), sf.claim_token = $token
-            """,
-            facility=facility,
-            limit=limit,
-            cutoff=cutoff,
-            token=claim_token,
+    selection, order = triage_judgment_selection()
+    from imas_codex.settings import get_model
+
+    return claim_batch(
+        "CodeFile",
+        facility=facility,
+        status_predicate=f"({selection}) {prefix_clause} {excluded_clause}",
+        status_params={
+            "judgment_model": get_model("discovery-relevance"),
             **prefix_params,
             **excluded_params,
-        )
-
-        # Step 2: Read back only files WE successfully claimed
-        result = gc.query(
-            """
-            MATCH (sf:CodeFile {claim_token: $token})-[:AT_FACILITY]->(f:Facility {id: $facility})
-            OPTIONAL MATCH (sf)-[:IN_DIRECTORY]->(p:FacilityPath)
-            RETURN sf.id AS id, sf.path AS path,
-                   sf.language AS language,
-                   p.id AS parent_path_id, p.path AS parent_path,
-                   p.description AS parent_description
-            """,
-            facility=facility,
-            token=claim_token,
-        )
-        files = list(result)
-        if files:
-            logger.debug(
-                "Claimed %d CodeFiles for triage (facility=%s, token=%s)",
-                len(files),
-                facility,
-                claim_token[:8],
-            )
-        return files
+        },
+        batch_size=limit,
+        node_alias="sf",
+        match_clause="MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})",
+        order_key=order,
+        return_clause="OPTIONAL MATCH (sf)-[:IN_DIRECTORY]->(p:FacilityPath)",
+        return_fields=(
+            "sf.id AS id, sf.path AS path, sf.language AS language, "
+            "sf.status AS status, sf.relevance_stage AS relevance_stage, "
+            "p.id AS parent_path_id, p.path AS parent_path, "
+            "p.description AS parent_description"
+        ),
+        graph_client=GraphClient,
+    )
 
 
 def release_file_triage_claim(file_id: str) -> None:
@@ -522,79 +531,52 @@ def claim_files_for_scoring(
     """
     import json as _json
 
-    cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
-    claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
     selection = (
         ingested_rejudge_selection()
         if ingested_rejudge
-        else "sf.status = 'triaged' AND sf.is_enriched = true"
+        else score_judgment_selection()[0]
     )
-    with GraphClient() as gc:
-        # Step 1: Claim with random ordering and unique token
-        gc.query(
-            f"""
-            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE {selection}
-              {prefix_clause}
-              {excluded_clause}
-              AND (sf.claimed_at IS NULL
-                   OR sf.claimed_at < datetime() - duration($cutoff))
-            WITH sf
-            ORDER BY rand()
-            LIMIT $limit
-            SET sf.claimed_at = datetime(), sf.claim_token = $token
-            """,
-            facility=facility,
-            limit=limit,
-            cutoff=cutoff,
-            token=claim_token,
+    from imas_codex.settings import get_model
+
+    rows = claim_batch(
+        "CodeFile",
+        facility=facility,
+        status_predicate=f"({selection}) {prefix_clause} {excluded_clause}",
+        status_params={
+            "judgment_model": get_model("discovery-relevance"),
             **prefix_params,
             **excluded_params,
-        )
-
-        # Step 2: Read back only files WE successfully claimed
-        result = gc.query(
-            """
-            MATCH (sf:CodeFile {claim_token: $token})-[:AT_FACILITY]->(f:Facility {id: $facility})
-            OPTIONAL MATCH (sf)-[:IN_DIRECTORY]->(p:FacilityPath)
-            RETURN sf.id AS id, sf.path AS path,
-                   sf.language AS language,
-                   sf.status AS status,
-                   sf.pattern_categories AS pattern_categories_json,
-                   sf.total_pattern_matches AS total_pattern_matches,
-                   sf.line_count AS line_count,
-                   sf.preview_text AS preview_text,
-                   p.id AS parent_path_id, p.path AS parent_path,
-                   p.description AS parent_description
-            """,
-            facility=facility,
-            token=claim_token,
-        )
-        files = []
-        for row in result:
-            f = dict(row)
-            # Parse pattern_categories JSON
-            pj = f.pop("pattern_categories_json", None)
-            if pj:
-                try:
-                    f["pattern_categories"] = _json.loads(pj)
-                except (_json.JSONDecodeError, TypeError):
-                    f["pattern_categories"] = {}
-            else:
-                f["pattern_categories"] = {}
-            f.setdefault("total_pattern_matches", 0)
-            f.setdefault("line_count", 0)
-            files.append(f)
-        if files:
-            logger.debug(
-                "Claimed %d CodeFiles for scoring (facility=%s, token=%s)",
-                len(files),
-                facility,
-                claim_token[:8],
-            )
-        return files
+        },
+        batch_size=limit,
+        node_alias="sf",
+        match_clause="MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})",
+        order_key=None if ingested_rejudge else score_judgment_selection()[1],
+        return_clause="OPTIONAL MATCH (sf)-[:IN_DIRECTORY]->(p:FacilityPath)",
+        return_fields=(
+            "sf.id AS id, sf.path AS path, sf.language AS language, "
+            "sf.status AS status, sf.relevance_stage AS relevance_stage, "
+            "sf.pattern_categories AS pattern_categories_json, "
+            "sf.total_pattern_matches AS total_pattern_matches, "
+            "sf.line_count AS line_count, sf.preview_text AS preview_text, "
+            "p.id AS parent_path_id, p.path AS parent_path, "
+            "p.description AS parent_description"
+        ),
+        graph_client=GraphClient,
+    )
+    files = []
+    for row in rows:
+        file = dict(row)
+        categories = file.pop("pattern_categories_json", None)
+        try:
+            file["pattern_categories"] = _json.loads(categories) if categories else {}
+        except (_json.JSONDecodeError, TypeError):
+            file["pattern_categories"] = {}
+        file.setdefault("total_pattern_matches", 0)
+        file.setdefault("line_count", 0)
+        files.append(file)
+    return files
 
 
 def release_file_score_claim(file_id: str) -> None:
@@ -705,17 +687,20 @@ def has_pending_score_work(
     """
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
+    selection, _ = score_judgment_selection()
+    from imas_codex.settings import get_model
+
     with GraphClient() as gc:
         result = gc.query(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE sf.status = 'triaged'
-              AND sf.is_enriched = true
+            WHERE {selection}
               {prefix_clause}
               {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
+            judgment_model=get_model("discovery-relevance"),
             **prefix_params,
             **excluded_params,
         )
@@ -732,17 +717,20 @@ def has_pending_triage_work(
     """
     prefix_clause, prefix_params = build_path_prefix_filter("sf", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "sf")
+    selection, _ = triage_judgment_selection()
+    from imas_codex.settings import get_model
+
     with GraphClient() as gc:
         result = gc.query(
             f"""
             MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE sf.status = 'discovered'
-              AND sf.relevance_stage IS NULL
+            WHERE {selection}
               {prefix_clause}
               {excluded_clause}
             RETURN count(sf) > 0 AS has_work
             """,
             facility=facility,
+            judgment_model=get_model("discovery-relevance"),
             **prefix_params,
             **excluded_params,
         )

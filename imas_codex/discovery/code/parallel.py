@@ -39,6 +39,8 @@ from .graph_ops import (
     has_pending_score_work,
     has_pending_triage_work,
     reset_orphaned_file_claims,
+    score_judgment_selection,
+    triage_judgment_selection,
 )
 from .state import FileDiscoveryState
 from .workers import (
@@ -379,6 +381,7 @@ def get_code_discovery_stats(
         get_code_facet_admission_threshold,
         get_code_ingest_threshold,
         get_code_triage_threshold,
+        get_model,
     )
 
     if min_relevance is None:
@@ -390,7 +393,7 @@ def get_code_discovery_stats(
     with GraphClient() as gc:
         result = gc.query(
             """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WITH cf.status AS status, cf.language AS language,
                  cf.score_composite AS score
             RETURN status, language,
@@ -428,13 +431,15 @@ def get_code_discovery_stats(
             stats[lang_key] = stats.get(lang_key, 0) + count
 
         # Pending triage: discovered without name-arm relevance
+        triage_selection, _ = triage_judgment_selection("cf")
         triage_result = gc.query(
-            """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
-            WHERE cf.status = 'discovered' AND cf.relevance_stage IS NULL
+            f"""
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            WHERE {triage_selection}
             RETURN count(cf) AS pending
             """,
             facility=facility,
+            judgment_model=get_model("discovery-relevance"),
         )
         stats["pending_triage"] = triage_result[0]["pending"] if triage_result else 0
 
@@ -452,14 +457,15 @@ def get_code_discovery_stats(
         stats["pending_enrich"] = enrich_pending[0]["pending"] if enrich_pending else 0
 
         # Pending score: triaged + enriched
+        score_selection, _ = score_judgment_selection("cf")
         score_pending = gc.query(
-            """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
-            WHERE cf.status = 'triaged'
-              AND cf.is_enriched = true
+            f"""
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            WHERE {score_selection}
             RETURN count(cf) AS pending
             """,
             facility=facility,
+            judgment_model=get_model("discovery-relevance"),
         )
         stats["pending_score"] = score_pending[0]["pending"] if score_pending else 0
 

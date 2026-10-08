@@ -251,6 +251,29 @@ def release_claims_batch(
 # their own beyond their predicate.
 
 
+def judgment_selection(
+    alias: str,
+    *,
+    initial: str,
+    stage: str,
+    text_available: str,
+    model_param: str = "$judgment_model",
+    stage_field: str = "relevance_stage",
+    model_field: str = "relevance_model",
+) -> tuple[str, str]:
+    """Return a shared predicate and never-judged-first priority.
+
+    A missing model is stale too. The caller supplies the durable statuses and
+    text condition appropriate to its pipeline; claim and count use this pair.
+    """
+    stale = (
+        f"{alias}.{stage_field} = {stage!r} "
+        f"AND coalesce({alias}.{model_field}, '') <> {model_param} "
+        f"AND ({text_available})"
+    )
+    return f"(({initial}) OR ({stale}))", f"CASE WHEN {initial} THEN 0 ELSE 1 END"
+
+
 @retry_on_deadlock()
 def claim_batch(
     label: str,
@@ -265,8 +288,12 @@ def claim_batch(
     return_fields: str = "n.id AS id",
     return_clause: str = "",
     timeout_seconds: int = DEFAULT_CLAIM_TIMEOUT_SECONDS,
+    order_key: str | None = None,
+    node_alias: str = "n",
+    match_clause: str | None = None,
+    graph_client: Any = None,
 ) -> list[dict[str, Any]]:
-    """Claim a random batch of unclaimed or stale rows and read them back.
+    """Claim a batch of unclaimed or expired-claim rows and read them back.
 
     Sets ``claimed_field`` and ``token_field`` on up to ``batch_size`` rows
     matching ``status_predicate`` whose claim is absent or older than
@@ -288,6 +315,11 @@ def claim_batch(
         return_clause: Optional Cypher fragment (e.g. an ``OPTIONAL MATCH``)
             inserted between the token match and the ``RETURN``.
         timeout_seconds: Age at which an existing claim may be reclaimed.
+        order_key: Optional priority expression before the random tie break.
+        node_alias: Alias used by the caller's predicate and projection.
+        match_clause: Facility-scoped ``MATCH`` for graph shapes where the
+            facility is a relationship rather than a node property.
+        graph_client: Optional graph client factory for the caller's module.
 
     Returns:
         One mapping per claimed row, projected by ``return_fields``.
@@ -305,24 +337,27 @@ def claim_batch(
     if status_params:
         params.update(status_params)
 
-    with GraphClient() as gc:
+    alias = node_alias
+    match = match_clause or f"MATCH ({alias}:{label} {{{facility_field}: $facility}})"
+    order = f"{order_key}, rand()" if order_key else "rand()"
+    with (graph_client or GraphClient)() as gc:
         gc.query(
             f"""
-            MATCH (n:{label} {{{facility_field}: $facility}})
+            {match}
             WHERE {status_predicate}
-              AND (n.{claimed_field} IS NULL
-                   OR n.{claimed_field} < datetime() - duration($cutoff))
-            WITH n ORDER BY rand() LIMIT $batch_size
-            SET n.{claimed_field} = datetime(),
-                n.{token_field} = $token
+              AND ({alias}.{claimed_field} IS NULL
+                   OR {alias}.{claimed_field} < datetime() - duration($cutoff))
+            WITH {alias} ORDER BY {order} LIMIT $batch_size
+            SET {alias}.{claimed_field} = datetime(),
+                {alias}.{token_field} = $token
             """,
             **params,
         )
 
         result = gc.query(
             f"""
-            MATCH (n:{label} {{{facility_field}: $facility,
-                                 {token_field}: $token}})
+            {match}
+            WHERE {alias}.{token_field} = $token
             {return_clause}
             RETURN {return_fields}
             """,
