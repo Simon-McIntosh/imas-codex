@@ -1067,6 +1067,17 @@ def get_code_ingest_threshold() -> float:
     return float(_get_section("discovery").get("code-ingest-threshold", 0.5))
 
 
+def get_wiki_ingest_threshold() -> float:
+    """Get the minimum relevance score for wiki content ingestion.
+
+    Priority: IMAS_CODEX_WIKI_INGEST_THRESHOLD env →
+    [discovery].wiki-ingest-threshold → 0.16.
+    """
+    if env := os.getenv("IMAS_CODEX_WIKI_INGEST_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("wiki-ingest-threshold", 0.16))
+
+
 def get_code_facet_admission_threshold() -> float:
     """Get the minimum content-arm facet value that admits a code file.
 

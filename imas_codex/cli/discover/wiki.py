@@ -13,13 +13,13 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import click
 from rich.markup import escape as rich_escape
 
 from imas_codex.cli.discover.common import reset_to_option
-from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
+from imas_codex.settings import get_wiki_ingest_threshold
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class WikiStageOptions:
     rescan_documents: bool = False
     time_limit: int | None = None
     store_images: bool = False
-    min_score: float = CONTENT_INGEST_THRESHOLD
+    min_score: float = field(default_factory=get_wiki_ingest_threshold)
     reset_to: str | None = None
     verbose: bool = False
 
@@ -1258,8 +1258,9 @@ def run_wiki_stage(facility: str, options: WikiStageOptions) -> dict:
 @click.option(
     "--min-score",
     type=float,
-    default=CONTENT_INGEST_THRESHOLD,
-    help="Minimum wiki ingest relevance score (default: Jev ingest gate)",
+    default=get_wiki_ingest_threshold(),
+    show_default=True,
+    help="Minimum wiki ingest relevance score",
 )
 @reset_to_option("wiki")
 def wiki(
