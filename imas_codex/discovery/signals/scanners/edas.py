@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import date
 from typing import Any
 
 from imas_codex.discovery.signals.scanners.base import (
@@ -38,6 +39,17 @@ from imas_codex.graph.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _normalise_dates(value: Any) -> Any:
+    """Keep YAML date values serializable in a remote JSON payload."""
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: _normalise_dates(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_normalise_dates(item) for item in value]
+    return value
 
 
 # EDDB data-class letter -> SignalDataClass value. The catalogue assigns the
@@ -282,6 +294,7 @@ class EDASScanner:
                 stats={"error": "api_path and lib_path required in edas config"}
             )
 
+        config = _normalise_dates(config)
         try:
             output = await async_run_python_script(
                 "enumerate_edas.py",

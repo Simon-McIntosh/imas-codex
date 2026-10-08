@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from datetime import date
 from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
@@ -20,7 +21,7 @@ import yaml
 
 from imas_codex.discovery.signals.parallel import DataDiscoveryState, seed_worker
 from imas_codex.discovery.signals.scanners.base import ScanResult
-from imas_codex.discovery.signals.scanners.edas import EDASScanner
+from imas_codex.discovery.signals.scanners.edas import EDASScanner, _normalise_dates
 from imas_codex.graph.models import DataAccess, FacilitySignal, SignalDataClass
 from imas_codex.remote.scripts.check_edas import main as check_main
 from imas_codex.remote.scripts.enumerate_edas import (
@@ -76,6 +77,21 @@ def _equilibrium_config():
         (root / "imas_codex/config/facilities/jt-60sa.yaml").read_text()
     )
     return root, facility["data_systems"]["edas"]
+
+
+async def test_real_facility_payload_serializes_observation_dates():
+    _, config = _equilibrium_config()
+    assert len(config["database_routes"]) == 9
+    assert all(type(r["observed_on"]) is str for r in config["database_routes"])
+
+    async def remote(_script, payload, **_kwargs):
+        assert len(json.loads(json.dumps(payload))["database_routes"]) == 9
+        return json.dumps(ENUMERATE_FIXTURE)
+
+    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
+    assert "error" not in result.stats
+    assert _normalise_dates([date(2026, 10, 8)]) == ["2026-10-08"]
 
 
 async def test_equilibrium_access_methods_and_inventory_field_signals():
