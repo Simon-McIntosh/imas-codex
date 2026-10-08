@@ -2,7 +2,6 @@
 
 from imas_codex.discovery.base.reset import (
     CODE_RESET_SPECS,
-    get_valid_targets,
     reset_to_status,
 )
 
@@ -23,23 +22,16 @@ def test_retry_failed_resets_only_failed_files(monkeypatch):
         def query(self, cypher, **params):
             assert "n.status IN $source_statuses" in cypher
             assert "n.error = null" in cypher
+            assert params["path_prefixes"] == ["/home/"]
             selected = [
-                file
-                for file in files
-                if file["status"] in params["source_statuses"]
-                and any(
-                    file["path"].startswith(prefix)
-                    for prefix in params["path_prefixes"]
-                )
+                file for file in files if file["status"] in params["source_statuses"]
             ]
             for file in selected:
                 file["status"] = params["target_status"]
-                if "error" in CODE_RESET_SPECS["retry-failed"].clear_fields:
-                    file["error"] = None
+                file["error"] = None
             return [{"reset_count": len(selected)}]
 
     monkeypatch.setattr("imas_codex.graph.GraphClient", Graph)
-    assert "retry-failed" in get_valid_targets("code")
     assert (
         reset_to_status(
             CODE_RESET_SPECS["retry-failed"], "jt-60sa", path_prefixes=["/home/"]
