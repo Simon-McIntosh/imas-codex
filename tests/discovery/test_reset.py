@@ -60,6 +60,7 @@ class TestResetSpec:
             "discovered",
             "ingested",
             "name",
+            "retry-failed",
             "scored",
             "triaged",
         ]
