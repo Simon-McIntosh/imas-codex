@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
-<meta name="plan-impl" content="0.571">
-<meta name="plan-version" content="50">
+<meta name="plan-impl" content="0.533">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -226,6 +226,29 @@ the generic categories. No facility id appears as a literal in code.</p>
 the deploy's widened labels, both now held only in run directories. The fragment reports path-judge AUC and the
 scan-gate confusion counts on that set, with and without the match evidence. The with-evidence arm re-enriches the
 labelled paths through the facility, with Jev spend inside the JT-60SA authorization.</p>
+
+    <h2 id="s16">§16 — Declare what the path code writes, and retire reads of retired properties</h2>
+<section data-reckon="section" data-id="s16" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> The lead asked on 2026-10-08 for the failures in the coordinator's merged-head gate to be
+fixed. Two of them are fallout from the §4 deploy, and both fail with <code>.env</code> linked (measured 2026-10-08 on
+<code>cb3b7e526</code>).</p>
+<ul>
+<li><code>tests/graph/test_cypher_property_check.py</code> fails on two undeclared writes:
+<code>FacilityPath.claim_token</code> in the judgment claim queries of <code>paths/scorer.py</code>, and
+<code>FacilityPath.score_reason</code> at <code>paths/parallel.py</code> around line 1090. It also fails on 27
+runtime adjudications for <code>triage_*</code> and <code>triage_composite</code> reads in <code>paths/frontier.py</code>
+that no longer match a source line. The adjudications in <code>imas_codex/graph/cypher_property_check.py</code> are keyed
+by line, so moved code orphans them.</li>
+<li><code>tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts</code> still expects
+<code>paths/scorer</code> and <code>paths/triage</code>, the prompts the deploy retired.</li>
+</ul>
+<p><strong>Deliverable.</strong> Declare in the schema every property the path code genuinely writes, and stop writing
+any that nothing reads. For each <code>triage_*</code> read in <code>frontier.py</code>, decide whether it still reads a
+value anything writes. A read of a retired property returns nothing, silently, so it is retired or moved to the
+judgment fields rather than re-adjudicated. Bring the prompt-coverage expectation in line with the prompts that still
+exist.</p>
+<p><strong>Done when</strong> both tests pass at the head. Re-adding an undeclared FacilityPath property write fails the
+property check. The fragment lists each <code>triage_*</code> read with its disposition.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>

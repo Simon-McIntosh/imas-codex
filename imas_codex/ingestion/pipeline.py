@@ -20,16 +20,18 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.discovery.base.facility import get_facility
 from imas_codex.graph import GraphClient
 
 if TYPE_CHECKING:
     from imas_codex.embeddings.encoder import Encoder
 
 from .chunkers import chunk_code, chunk_text
+from .extractors import reference_handlers_for_systems
 from .extractors.ids import extract_ids_references, extract_imas_path_references
-from .extractors.mdsplus import extract_mdsplus_paths
 from .graph import (
     link_chunks_to_data_nodes,
+    link_chunks_to_edas_signals,
     link_chunks_to_ids_roots,
     link_chunks_to_imas_paths,
     link_examples_to_facility,
@@ -59,8 +61,8 @@ def _split_and_extract(
 ) -> list[dict[str, Any]]:
     """Split content into chunks and extract metadata.
 
-    Replaces LlamaIndex IngestionPipeline: splits text using tree-sitter
-    or sliding window, then runs IDS and MDSplus extraction.
+    Splits text using tree-sitter or sliding windows, then runs the reference
+    extractors named by the facility's configured data systems.
 
     Args:
         content: Source code text
@@ -89,6 +91,14 @@ def _split_and_extract(
             chunk_lines_overlap=chunk_lines_overlap,
         )
 
+    facility_id = metadata.get("facility_id")
+    handlers = (
+        reference_handlers_for_systems(
+            get_facility(facility_id).get("data_systems") or {}
+        )
+        if facility_id
+        else ()
+    )
     result: list[dict[str, Any]] = []
     for chunk in chunks:
         # Extract IDS references
@@ -96,9 +106,14 @@ def _split_and_extract(
         related_ids = sorted(ids_refs) if ids_refs else []
         imas_paths = extract_imas_path_references(chunk.text, ids_refs)
 
-        # Extract MDSplus paths
-        mdsplus_refs = extract_mdsplus_paths(chunk.text)
-        mdsplus_paths = [r.path for r in mdsplus_refs]
+        mdsplus_paths: list[str] = []
+        edas_ref_count = 0
+        for handler in handlers:
+            refs = handler.extractor(chunk.text)
+            if handler.linker is link_chunks_to_data_nodes:
+                mdsplus_paths = [r.path for r in refs]
+            elif handler.linker is link_chunks_to_edas_signals:
+                edas_ref_count = len(refs)
 
         chunk_dict: dict[str, Any] = {
             "text": chunk.text,
@@ -114,6 +129,8 @@ def _split_and_extract(
         if mdsplus_paths:
             chunk_dict["mdsplus_paths"] = mdsplus_paths
             chunk_dict["mdsplus_ref_count"] = len(mdsplus_paths)
+        if edas_ref_count:
+            chunk_dict["_edas_ref_count"] = edas_ref_count
 
         result.append(chunk_dict)
 
@@ -241,6 +258,9 @@ def _write_file_example(
         ce_id=example_id,
     )
 
+    # The private extraction count selects the linker and is not graph data.
+    edas_ref_count = sum(chunk.pop("_edas_ref_count", 0) for chunk in chunks)
+
     # CodeChunk nodes (relationships handled below)
     graph_client.create_nodes("CodeChunk", chunks, create_relationships=False)
 
@@ -275,9 +295,15 @@ def _write_file_example(
             now=now,
         )
 
-    if mdsplus_ref_count > 0:
-        return link_chunks_to_data_nodes(graph_client, example_ids=[example_id])
-    return 0
+    linked = 0
+    for handler in reference_handlers_for_systems(
+        get_facility(facility).get("data_systems") or {}
+    ):
+        if handler.linker is link_chunks_to_edas_signals and edas_ref_count:
+            handler.linker(graph_client, example_ids=[example_id], facility_id=facility)
+        elif handler.linker is link_chunks_to_data_nodes and mdsplus_ref_count:
+            linked = handler.linker(graph_client, example_ids=[example_id])
+    return linked
 
 
 def _extract_author(path: str) -> str | None:
@@ -676,7 +702,12 @@ async def ingest_files(
     with GraphClient() as graph_client:
         link_chunks_to_ids_roots(graph_client, example_ids=all_example_ids)
         link_chunks_to_imas_paths(graph_client, example_ids=all_example_ids)
-        if stats["mdsplus_paths"] > 0:
+        handlers = reference_handlers_for_systems(
+            get_facility(facility).get("data_systems") or {}
+        )
+        if stats["mdsplus_paths"] > 0 and any(
+            handler.linker is link_chunks_to_data_nodes for handler in handlers
+        ):
             link_chunks_to_data_nodes(graph_client, example_ids=all_example_ids)
         link_examples_to_facility(graph_client, example_ids=all_example_ids)
     t_link_elapsed = _time.monotonic() - t_link_start
