@@ -31,13 +31,6 @@ suppress_litellm_noise()
 # Per-purpose score names — canonical list from shared scoring module
 PURPOSE_SCORE_NAMES = PATH_SCORE_DIMENSIONS
 
-# Scan is a broad discovery gate: visualization and documentation alone do not
-# imply that code or measured data should be scanned.
-SCAN_FACETS = tuple(
-    field
-    for field in PURPOSE_SCORE_NAMES
-    if field not in {"score_visualization", "score_documentation"}
-)
 PATH_EXPAND_THRESHOLD = 0.50
 CODE_BEARING_PURPOSES = frozenset(
     {
@@ -53,11 +46,6 @@ CODE_BEARING_PURPOSES = frozenset(
 )
 DATA_PURPOSES = frozenset({"experimental_data", "modeling_data"})
 SKIPPED_PURPOSES = frozenset({"archive", "build_artifact", "system", "empty_directory"})
-
-
-def path_scan_relevance(scores: dict[str, float]) -> float:
-    """Return the strongest discovery facet in a path judgment."""
-    return max((scores.get(field, 0.0) for field in SCAN_FACETS), default=0.0)
 
 
 def path_category_gate(
