@@ -101,8 +101,11 @@ def test_embed_start_forwards_explicit_gpu_count_to_the_deployer() -> None:
     with (
         patch.object(embed, "_is_compute_target", return_value=True),
         patch.object(embed, "deploy_embed") as deploy_embed,
+        patch.object(embed, "_start_foreground", side_effect=AssertionError),
     ):
-        result = CliRunner().invoke(embed.embed, ["start", "--gpus", "8"])
+        result = CliRunner().invoke(
+            embed.embed, ["start", "--gpus", "8"], env={"SLURM_JOB_ID": ""}
+        )
 
     assert result.exit_code == 0
     deploy_embed.assert_called_once_with(8, None)

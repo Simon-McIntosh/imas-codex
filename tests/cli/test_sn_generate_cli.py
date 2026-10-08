@@ -261,29 +261,23 @@ class TestBackwardCompatibility:
 
     def test_reset_to_drafted_dry_run(self, runner: CliRunner) -> None:
         """--reset-to drafted --dry-run should not call reset (dry_run skips reset)."""
-        # dry_run skips the reset block entirely, so no graph calls are made
-        # before reaching the main pipeline — which we also need to mock
         with (
-            patch("imas_codex.discovery.base.llm.set_litellm_offline_env"),
             patch(
-                "imas_codex.cli.discover.common.use_rich_output",
-                return_value=False,
-            ),
-            patch(
-                "imas_codex.cli.discover.common.setup_logging",
-                return_value=None,
-            ),
-            patch(
-                "imas_codex.cli.discover.common.run_discovery",
-                return_value={"extract_count": 0},
-            ),
-            patch(
-                "imas_codex.cli.discover.common.DiscoveryConfig",
-            ),
+                "imas_codex.standard_names.loop.preview_sn_pools",
+                return_value={
+                    "source": "dd",
+                    "domains": [],
+                    "extraction_candidates": 0,
+                    "pools": [],
+                    "pending": {},
+                },
+            ) as preview,
+            patch("imas_codex.standard_names.graph_ops.reset_standard_names") as reset,
         ):
             result = runner.invoke(
                 sn,
                 ["run", "--reset-to", "drafted", "--dry-run"],
             )
-        # Should not crash — the pipeline may print stats or not, but exit 0
         assert result.exit_code == 0, result.output
+        preview.assert_awaited_once()
+        reset.assert_not_called()
