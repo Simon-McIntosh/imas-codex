@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names neither baseline_suite nor after_suite, so the added-failure count was not taken",
+  "backend": "local",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T13:00:38.723Z",
+  "dispatched_at": "2026-10-08T12:49:36Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "the summary states 397 paths at the 0.30 code-scan gate under the 24 new roots, but the file's own roots table Code gate column sums to 488; 397 is the earlier root-expand-pass.log:3 snapshot, so two numbers in one artifact disagree."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "2,859 of 9,143 stored JT-60SA FacilityPaths carry no Jev judgment and 404 scored /home paths still request expansion, yet the done_when requires every stored path judged and those /home paths expanded; the manifest follow_ons name an owner for the expansion but not for the unjudged remainder."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "six docs(census) commits against 9be6ee0c add one 104-line file, no product code or tests.",
+    "done_when": "the fragment and receipts assert the census, zero triaged and bounded passes, but 2,859 paths unjudged and 404 scored /home paths unexpanded leave two clauses partly met.",
+    "goal": "docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html is the census the Jev-gated run produced; the run receipts are in the manifest.",
+    "manifest": "read; six commits, final receipt 43 scored/685 ingested/USD 0.01, 24 test_logs, baseline_suite and after_suite empty.",
+    "write_paths": "the diff touches only jev-rescan.html of the three declared paths."
+  },
+  "justifications": {
+    "durability": "the change adds no executable behaviour and no test, so nothing can regress and no assertion guards it.",
+    "evidence": "the census figures trace to home-scoring-final.log and the graph counts, but jev-rescan.html:3 quotes a 397 code-window figure that disagrees with its own roots-table column summing to 488.",
+    "fit": "jev-rescan.html:2 opens with an id=\"jt60sa-jev-rescan-outcome\" heading and every element id carries the node-id prefix.",
+    "goal_fidelity": "jev-rescan.html:4 reports 6,284 of 9,143 FacilityPaths Jev-judged and 404 scored /home paths unexpanded, so the done_when universal judging and expansion clauses are only partly met.",
+    "reuse": "the diff adds no definition, so no capability is duplicated; it reuses the existing evidence-fragment shape.",
+    "scope_discipline": "the only path the diff changes is the declared jev-rescan.html; no out-of-scope file is touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is a Jev-gated JT-60SA path and code discovery run over the widened roots; the landed deliverable is the census fragment docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html and the run's receipts are recorded in the manifest's test_logs.\nVERDICT done_when: the done_when names a per-root census, zero triaged CodeFiles, spend within USD 15 and bounded --time 8 passes; the fragment and the CLI receipts in home-scoring-final.log and the manifest artifacts assert each, but two clauses are only partly met (2,859 stored FacilityPaths carry no Jev judgment; 404 scored /home paths remain without expanded_at).\nVERDICT write_paths: the manifest declares three paths; the diff touches exactly one, docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html, and nothing else, so the change is inside the fence.\nVERDICT manifest: read; it records six commits, the final scoring-only pass receipt (43 scored/685 ingested/USD 0.01) and 24 test_logs, and it declares baseline_suite and after_suite empty.\nVERDICT diff: read commit by commit against 9be6ee0c; six docs(census) commits add one new 104-line file, no product code or tests changed.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: jev-rescan.html:4 reports 6,284 of 9,143 FacilityPaths Jev-judged and 404 scored /home paths unexpanded, so the done_when's universal judging and expansion clauses are only partly met.\nSCORE evidence: 15\nJUSTIFICATION evidence: the census figures trace to home-scoring-final.log (receipt 0 scanned/43 scored/685 ingested/USD 0.01) and the graph counts, but jev-rescan.html:3 quotes a 397 code-window figure that disagrees with its own roots-table column summing to 488.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the only path the diff changes is the declared docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html; no out-of-scope file is touched.\nSCORE durability: 12\nJUSTIFICATION durability: the change adds no executable behaviour and no test, declared none with reason in the dispatch; nothing in jev-rescan.html can regress, so no assertion guards it.\nSCORE fit: 18\nJUSTIFICATION fit: jev-rescan.html:2 opens with an id=\"jt60sa-jev-rescan-outcome\" heading and every element id carries the node-id prefix, matching the fragment convention.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition, so no capability is duplicated; it reuses the existing evidence-fragment shape.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html:3 follow-on: the summary states 397 paths at the 0.30 code-scan gate under the 24 new roots, but the file's own roots table Code gate column sums to 488; 397 is the earlier root-expand-pass.log:3 snapshot, so two numbers in one artifact disagree.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/jev-rescan.html:4 follow-on: 2,859 of 9,143 stored JT-60SA FacilityPaths carry no Jev judgment and 404 scored /home paths still request expansion, yet the done_when requires every stored path judged and those /home paths expanded; the manifest follow_ons name an owner for the expansion but not for the unjudged remainder.",
+  "review_run_id": "r-20261008T124924481020-review-of-jt60sa-jev-rescan",
+  "reviewed_base_sha": "9be6ee0cd963bb4d115d0d554c6d1b68e0e0d371",
+  "reviewed_head_sha": "d606e2a06493bc48aa26da7d1c4ac8a2f0162148",
+  "reviewed_run_id": "r-20261008T054432526078-jt60sa-jev-rescan",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T12:59:05.465693+00:00",
+  "total": 97,
+  "verdict": "SOUND WITH FINDINGS"
+}
