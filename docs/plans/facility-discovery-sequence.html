@@ -20,9 +20,9 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="25">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -231,15 +231,30 @@
     </ul>
     <p>
       Each fold is role implement, 1.5 h, with its fragment under
-      <code>docs/evidence/fragments/facility-discovery-sequence/</code>. <strong>Done when</strong> the
-      module exposes the stage function and no click command, and its new test file shows four things.
-      The halves selected by <code>--scan-only</code> and <code>--flush</code> run the right workers.
-      <code>--focus</code> items restrict every claim query of the domain. <code>--topic</code> reaches the
-      scorer or enricher that the old free-text <code>--focus</code> reached. <code>--limit</code> caps
-      items. The tests that drove the old command are moved to the stage function, not deleted. Before
-      deleting anything, each fold greps for every caller of its command, in <code>imas_codex/</code>,
+      <code>docs/evidence/fragments/facility-discovery-sequence/</code>. A fold leaves its click command
+      in place as a thin wrapper that builds the options and calls the stage function. That way no two
+      folds write <code>imas_codex/cli/discover/__init__.py</code>, and nothing breaks before the runner
+      lands. <code>--focus ITEMS</code> is wired where the domain's engine already filters by item:
+      <code>paths</code> through its root filter and <code>code</code> through its path prefix. A domain
+      without one refuses <code>--focus</code> with a message naming §7, and never ignores it silently.
+      <strong>Done when</strong> the module exposes the stage function, and its new test file shows
+      four things. <code>--scan-only</code> and <code>--flush</code> run the seeding and draining
+      workers respectively. <code>--topic</code> reaches the scorer or enricher that the old free-text
+      <code>--focus</code> reached. <code>--limit</code> caps items. <code>--focus</code> is honoured or
+      refused as above. The tests that drove the old command still pass.
+    </p>
+    <p>
+      <strong>Node</strong> <code>retire-domain-subcommands</code>, role implement, 1.5 h, after
+      <code>sequence-runner</code>. It deletes the six thin wrappers and their registrations. It greps for
+      every caller of <code>discover paths</code>, <code>code</code>, <code>documents</code>,
+      <code>wiki</code>, <code>signals</code> and <code>map</code> in <code>imas_codex/</code>,
       <code>tests/</code>, <code>scripts/</code>, <code>docs/</code> and the <code>AGENTS.md</code>
-      files, and updates them to the bare-command spelling. A missed caller is a hidden break.
+      files, and moves each one to the bare-command spelling. The census found code callers in
+      <code>imas_codex/cli/map.py</code>, <code>compute.py</code> and <code>wiki.py</code>, and prose
+      in the facility YAML comments, the READMEs and <code>schemas/common.yaml</code>. A file another
+      session holds at dispatch is named in the fragment and left for that session, never edited
+      under it. <strong>Done when</strong> no caller of a retired subcommand remains outside the files
+      the fragment lists, and the tests that drove the six commands pass through the bare command.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h, after the six folds, built on
@@ -325,6 +340,10 @@
 <section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
   <p class="landed-summary">The census of every discover, map and sn run option is merged; the lead settled one surface from it, recorded in §3. <a href="/imas-codex/evidence/archive/facility-discovery-sequence-landed.html#s6">full record</a></p>
 </section>
+
+    <h2 id="s7">§7 — --focus names items in every domain</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><code>--focus ITEMS</code> restricts a run to named items, or to a manifest file, as on <code>sn run</code>. Paths and code honour it from §3 through filters their engines already have. Signals, wiki, documents and candidates refuse it until their claim queries take an item filter. Signals filters by accessor or SignalSource id, in <code>imas_codex/discovery/signals/parallel.py</code>. Wiki filters by page, in the wiki claim module. Documents filters by document path. Candidates filters by SignalSource id, in <code>claim_sources_for_candidates</code> in <code>imas_codex/ids/workers.py</code>. Each is one node, writing its engine's claim module and a named test file. They dispatch once <code>jt60sa-discovery-completion</code>'s widening releases the signals engine and the facility config. <strong>Done when</strong> each domain's test shows a focused run claiming only the named items, a manifest naming the same items producing the same run, and an unknown item refused with its name.</p>
 
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
