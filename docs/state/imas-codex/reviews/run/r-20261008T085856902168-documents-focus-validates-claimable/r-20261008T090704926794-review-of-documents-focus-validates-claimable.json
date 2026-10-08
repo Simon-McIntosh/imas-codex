@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's after_suite (revision f823bc569, exit_status 0, completed true, failure_count 0, failure_ids []) reports a green head arm, so no test fails at the reviewed head and added_failure_ids = []. The run's baseline_suite key is empty; the run's own baseline.log at revision e8d9cc2f2 records 1 failed / 1 passed (test_non_image_document_path_is_refused DID NOT RAISE) at the pre-fix code, which is the failure the change repairs, not one it introduces. Derivation is therefore added_failure_count = 0 with no added ids. I independently reproduced the head arm at f823bc569 (21 passed, EXIT=0).",
+  "backend": "local",
+  "base_log_revision": "e8d9cc2f2c1351bd7e4458a1d8c7b3798c324444",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/cli/discover/documents.py:_validate_focus",
+    "imas_codex/cli/discover/documents.py:run_documents_stage",
+    "imas_codex/cli/discover/common.py:resolve_focus_items",
+    "imas_codex/discovery/documents/workers.py:_claim_image_documents",
+    "imas_codex/discovery/documents/pipeline.py:has_pending_work"
+  ],
+  "completed_at": "2026-10-08T09:16:02.779Z",
+  "dispatched_at": "2026-10-08T09:07:13Z",
+  "findings": [
+    {
+      "file": "tests/cli/test_discover_documents_focus.py",
+      "line": "56",
+      "severity": "follow-on",
+      "text": "the fake Graph._validate_focus mirrors the real query by testing '\"document_type: '\\''image'\\''\" not in cypher', so the test passes whenever the string appears anywhere in the statement; a semantic change to the real predicate that keeps the string would not be caught. The changed Cypher is therefore asserted by construction rather than validated live."
+    },
+    {
+      "file": "imas_codex/cli/discover/documents.py",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "the image-only predicate is correct for a prefix matching only non-image Documents, but there is no test for a prefix matching a mix of image and non-image Documents; the intended behaviour (count only the images) is unasserted."
+    },
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/documents-focus-validates-claimable.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "declared in the node's orientation_write_paths but no such fragment exists at the reviewed head, and the accompanying docs/figures/facility-discovery-sequence/documents-focus-validates-claimable directory was also not produced; the plan's done-when requires no figure, so these are unused declared paths rather than missing deliverables."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T085856902168-documents-focus-validates-claimable/baseline.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the baseline header names revision=e8d9cc2f2c1351bd7e4458a1d8c7b3798c324444 and tree=..., but that commit does not contain test_non_image_document_path_is_refused (git show e8d9cc2f2:tests/cli/test_discover_documents_focus.py has no such test), so the baseline arm was run from a working tree that already carried the new tests. The recorded revision does not describe the tree under test, and the arm (2 tests) does not match the head arm's command (21 tests)."
+    }
+  ],
+  "gate_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T090704926794-review-of-documents-focus-validates-claimable/review-gate-rerun.log",
+    "result": "21 passed, 1 warning in 5.97s, EXIT=0"
+  },
+  "head_log_revision": "f823bc5697eb135ebf8d81fde0ba70cf55226500",
+  "item_verdicts": {
+    "diff": "one commit; documents.py changes the OPTIONAL MATCH to require document_type: 'image' and rewrites the --focus help from '(not yet supported for documents)' to 'Restrict to Document path prefixes'; the test file adds the pdf Document to the fixture, makes the fake graph honour the image predicate, restricts _selected_documents to image rows, and adds the two new tests.",
+    "done_when": "uv run --no-sync pytest tests/cli/test_discover_documents_focus.py tests/cli/test_discover_documents_stage.py -p no:cacheprovider passes with tests showing a path under which only non-image Documents lie is refused by name (test_non_image_document_path_is_refused, match '/archive/reports') and a whitespace-only --focus token is refused (test_whitespace_focus_names_no_items, match '--focus names no items'). I reproduced the named gate independently at f823bc569: 21 passed, 1 warning, EXIT=0.",
+    "goal": "Plan \u00a77's documents-focus-validates-claimable node asked for two things: validation counts only the Documents the stage can claim, and a whitespace-only token is refused as naming no items. imas_codex/cli/discover/documents.py:23 now matches (d:Document {facility_id: $facility, document_type: 'image'}), matching the fetch claim at imas_codex/discovery/documents/workers.py:47 and the pending check at imas_codex/discovery/documents/pipeline.py:73. The whitespace refusal is delivered by resolve_focus_items at imas_codex/cli/discover/common.py:66 (tokens non-empty, resolved empty -> UsageError '--focus names no items'), which run_documents_stage reaches via options.focus. Both plan requirements are met.",
+    "manifest": "read; status complete, single commit f823bc569, negative_control_log .../negative-control.log (1 failed EXIT=1), after_suite present (revision f823bc569, exit_status 0, completed true, failure_count 0), baseline_suite key empty.",
+    "write_paths": "git show --stat f823bc5697eb135ebf8d81fde0ba70cf55226500 lists exactly imas_codex/cli/discover/documents.py (6 lines) and tests/cli/test_discover_documents_focus.py (29 lines); both are inside the node's declared write scope. The orientation_write_paths also name docs/evidence/fragments/facility-discovery-sequence/documents-focus-validates-claimable.html and docs/figures/facility-discovery-sequence/documents-focus-validates-claimable, neither of which exists at the reviewed head (untracked or committed)."
+  },
+  "justifications": {
+    "durability": "the guarded behaviour now fires: a prefix naming only non-image Documents is refused by name, and the declared mutation reddens the focused test, so the fix is not a no-op. The previously untested '--focus names no items' branch now has a covering test. Docked because the two guards remain mock-verified only, with no live EXPLAIN of the changed statement and no test of a prefix that matches a mix of image and non-image Documents.",
+    "durability_note": "",
+    "evidence": "I reproduced the named gate independently at f823bc569 in the reviewed worktree using the shared environment (21 passed, 1 warning, EXIT=0; review-gate-rerun.log). The reviewed run's negative control is recorded and self-consistent (dropping the image condition makes test_non_image_document_path_is_refused fail with DID NOT RAISE, EXIT=1). Docked because (a) the changed Cypher is validated only against a fake Graph whose _validate_focus replicates the real query by substring-matching \"document_type: 'image'\" in the cypher text, so live parsing/validity is unverified, and (b) the baseline arm is not like-for-like: baseline.log ran only the two new tests at a revision that does not contain them (see findings), so the recorded arm does not measure the same command the head arm does.",
+    "fit": "the changed docstring says 'image Document', the help text now names the real filter, and no plan, stage or ticket label appears in the code, test names, or commit message. Only nit: the fake graph's _validate_focus branch keys off the literal substring \"document_type: 'image'\" in the cypher, so a future reword of the real query would silently stop exercising the predicate.",
+    "goal_fidelity": "the change is the minimum that closes the gap the parent review named: _validate_focus now counts only document_type='image' Documents, which is exactly the predicate every claim and pending check already applies, so a path holding only PDFs is refused instead of passing validation and claiming nothing. The whitespace branch already existed in resolve_focus_items and is now covered rather than reimplemented, which is the correct response to an already-correct guard. Docked one point only because the plan's two requirements are met but the node's own orientation declared an evidence fragment and a figures directory that were never produced.",
+    "reuse": "no new abstraction: the fix edits the one existing _validate_focus query, and the whitespace behaviour reuses resolve_focus_items rather than forking a second check. Both new tests reuse the existing DOCUMENTS fixture and stage fixture.",
+    "scope_discipline": "the commit touches exactly the two files the node declared and nothing else; no dependency, config, plan or unrelated-file change. The declared fragment and figures paths were left unproduced, which is an unused declared path rather than an overreach, exactly as the parent review framed the same omission."
+  },
+  "model": "deepseek-v4.1-flash",
+  "negative_control_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T085856902168-documents-focus-validates-claimable/negative-control.log",
+    "result": "recorded in the reviewed run, not rerun independently: 1 failed EXIT=1 after dropping the image document_type predicate from the validation query"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: _validate_focus now matches document_type='image', aligning validation with the fetch claim (workers.py:47) and the pending check (pipeline.py:73); a PDF-only path is refused by name, and the whitespace-only token is refused by resolve_focus_items (common.py:66). Both \u00a77 requirements met.\nVERDICT done_when: the two new tests assert the PDF-only refusal (match '/archive/reports') and the whitespace refusal (match '--focus names no items'); the named gate reproduced independently at f823bc569, EXIT=0, 21 passed.\nVERDICT write_paths: one commit touching documents.py and the focus test, both in scope; the declared fragment and figures paths were not produced.\nVERDICT manifest: status complete, one commit, negative_control.log 1 failed EXIT=1, after_suite green (0 failures), baseline_suite empty.\nVERDICT diff: OPTIONAL MATCH gains document_type='image'; --focus help corrected; fixture gains a pdf Document and the fake graph honours the predicate.\nSCORE goal_fidelity: 19\nSCORE evidence: 15\nSCORE scope_discipline: 19\nSCORE fit: 18\nSCORE durability: 17\nSCORE reuse: 19",
+  "review_run_id": "r-20261008T090704926794-review-of-documents-focus-validates-claimable",
+  "reviewed_base_sha": "e8d9cc2f2c1351bd7e4458a1d8c7b3798c324444",
+  "reviewed_head_sha": "f823bc5697eb135ebf8d81fde0ba70cf55226500",
+  "reviewed_run_id": "r-20261008T085856902168-documents-focus-validates-claimable",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T09:16:00+00:00",
+  "total": 107,
+  "verdict": "SOUND WITH FINDINGS"
+}
