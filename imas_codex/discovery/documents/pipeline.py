@@ -88,6 +88,16 @@ def _has_pending_image_scores(facility: str) -> bool:
         return result[0]["has_work"] if result else False
 
 
+def has_pending_work(facility: str) -> bool:
+    """Whether document discovery has work: images to fetch or to score.
+
+    True when either private check is true. The private checks raise on a
+    failed query, so a graph fault reaches the caller as an exception rather
+    than as an empty stage.
+    """
+    return _has_pending_image_documents(facility) or _has_pending_image_scores(facility)
+
+
 async def run_document_discovery(
     state: DocumentDiscoveryState,
     *,
