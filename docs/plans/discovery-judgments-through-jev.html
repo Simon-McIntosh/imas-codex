@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
-<meta name="plan-impl" content="0.722">
-<meta name="plan-version" content="78">
+<meta name="plan-impl" content="0.684">
+<meta name="plan-version" content="79">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -259,6 +259,28 @@ neighbourhood fields.</p>
 <section data-reckon="section" data-id="s19" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
   <p class="landed-summary">The discovery engine no longer imports the CLI package: the worker logging helpers live in <code>imas_codex/logs.py</code>, which cleared 31 order-dependent failures and 1 error in tests/discovery. The wiki ingest cutoff reads <code>get_wiki_ingest_threshold()</code>, so the setting is its one source. Reviews 20/17/20/20/20/20 and 20/19/20/19/20/20. Open follow-on: the cutoff test proves an environment override reaches the constant, not that it passes through the shared getter. <a href="/imas-codex/evidence/archive/discovery-judgments-through-jev-landed.html#s19">full record</a></p>
 </section>
+
+    <h2 id="s20">§20 — Stop location resolution from swallowing import failures</h2>
+<section data-reckon="section" data-id="s20" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> §19's import cycle had a second symptom, measured by the session that folded the discover stages
+in worktrees based before <code>9f6515ca0</code>. <code>_find_compute_location('titan')</code> in
+<code>imas_codex/remote/locations.py</code> imports <code>get_facility</code> and <code>list_facilities</code> inside
+<code>try/except Exception: return None</code>. The cycle raised <code>ImportError</code> there, the function returned
+<code>None</code>, and <code>resolve_location('titan')</code> came back with no scheduler instead of slurm. GraphClient then
+took the remote branch and connected to <code>bolt://localhost:17687</code>, which was refused. The main checkout, with the
+same code and config, resolved <code>bolt://98dci4-gpu-0002:7687</code>. Three workers reported "titan does not resolve"
+and skipped live work. An import failure surfaced as a network fault: absence was read as permission.</p>
+<p><strong>Deliverable.</strong> Narrow the three swallowing handlers to the one condition each legitimately expects, a
+facility with no config, using the exception <code>get_facility</code> actually raises for an unknown facility. The three
+handlers are the facility import and the per-facility read in <code>_find_compute_location</code>, and the
+<code>get_facility</code> read in <code>resolve_location</code>. Any other error raises, naming the location being
+resolved.</p>
+<p><strong>Measure first.</strong> Closing a fail-open guard exposes whatever passed only because it swallowed. Run
+<code>tests/remote</code>, <code>tests/graph</code> and <code>tests/discovery</code> under the default markers at the base and
+at the head, and list every added failure with its cause.</p>
+<p><strong>Done when</strong> an injected <code>ImportError</code> at the facility import propagates out of both
+<code>resolve_location</code> and <code>_find_compute_location</code>, and an unknown facility still yields the documented
+fallback. The fragment gives the base and head counts, with the cause of each added failure.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
