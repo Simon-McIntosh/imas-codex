@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mapping-decision-census">
   <meta name="plan-title" content="Mapping decision census">
-  <meta name="plan-summary" content="Live graph census of the transform decisions in written IMAS bindings">
+  <meta name="plan-summary" content="Live graph census of written bindings and the transform slots on selected or escalated mapping candidates">
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-informs" content="mapping-decision-chain">
   <title>Mapping decision census | imas-codex</title>
@@ -142,6 +142,145 @@ ORDER BY facility, source, target;</code></pre>
       extracted binding rows 0. The complete query text and result rows are
       preserved in the run's <code>census_queries.log</code>.
     </p>
+
+    <h2 id="candidate-slots">Decisions on selected or escalated candidates</h2>
+    <p>
+      A second live read at 2026-10-08 10:10 UTC classified the edges the
+      decision chain can actually encounter. The cohort is
+      <code>MAPPING_CANDIDATE</code> edges with <code>r.route = true</code> or
+      <code>SignalSource.candidate_route = 'escalated'</code>. It contains
+      <strong>2,958 JT-60SA edges from 151 sources</strong>: all 2,958 are
+      escalated and none is selected. JET has no edge in this cohort.
+      A row counts opportunities to settle one slot if its candidate becomes
+      a binding, not observed transforms. The same edge contributes to each
+      slot row.
+    </p>
+    <p>
+      “Code” is conditional capacity with a known source convention, including
+      source COCOS and the DD COCOS. A recognised DD
+      <code>cocos_transformation_type</code> makes the COCOS sign, its sign
+      component, and its constant factor computable by
+      <code>cocos_sign</code>. An unlabelled target is conservatively open; it
+      might need an identity transform, but this graph does not establish that.
+      The unit slot is code eligible only when the representative
+      <code>FacilitySignal.unit</code> and <code>IMASNode.unit</code> are
+      nonempty and the project's <code>convert_units</code> accepts both
+      1 and 2 in those raw units. A scalar DD target
+      (<code>ndim = 0</code>) needs no index choice and is code eligible;
+      higher dimensions leave an index-layout judgment. “Judgment” includes
+      absent evidence and does not mean a nonidentity transform is known to
+      be necessary.
+    </p>
+    <table>
+      <thead><tr><th>Facility</th><th>Slot</th><th>Candidate edges</th><th>Code</th><th>Judgment</th><th>Pint exact</th></tr></thead>
+      <tbody>
+        <tr><td>JET</td><td>Sign</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+        <tr><td>JET</td><td>Constant factor</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+        <tr><td>JET</td><td>Unit conversion</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JET</td><td>COCOS sign</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+        <tr><td>JET</td><td>Index</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+        <tr><td>JT-60SA</td><td>Sign</td><td>2,958</td><td>398</td><td>2,560</td><td>—</td></tr>
+        <tr><td>JT-60SA</td><td>Constant factor</td><td>2,958</td><td>398</td><td>2,560</td><td>—</td></tr>
+        <tr><td>JT-60SA</td><td>Unit conversion</td><td>2,958</td><td>465</td><td>2,493</td><td>465</td></tr>
+        <tr><td>JT-60SA</td><td>COCOS sign</td><td>2,958</td><td>398</td><td>2,560</td><td>—</td></tr>
+        <tr><td>JT-60SA</td><td>Index</td><td>2,958</td><td>1,882</td><td>1,076</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/imas-codex/figures/mapping-decision-census/candidate-slot-counts.svg"
+           alt="JT-60SA candidate edges by slot: code 398 and judgment 2,560 for sign, factor and COCOS sign; code 465 and judgment 2,493 for units; code 1,882 and judgment 1,076 for index">
+      <figcaption>
+        Conditional code capacity versus open judgments for the 2,958
+        escalated JT-60SA edges. JET's zero rows remain in the table. The
+        three COCOS-related rows share the same 398 labelled edges and must
+        not be added together.
+      </figcaption>
+    </figure>
+    <p>
+      Positive controls: every cohort edge resolves to a representative
+      <code>FacilitySignal</code>; 1,924 have a nonempty source unit, 2,891
+      have a nonempty DD unit, 398 have a DD COCOS label, and 1,882 have a
+      scalar DD target. Thus 67 target units are empty strings despite the
+      target's <code>unit</code> property being present. Pint accepts 29
+      distinct raw unit pairs spanning 465 edges. This is a mechanical
+      conversion count, not proof that the source's symbol has the meaning
+      Pint assigns it: for example, Pint reads <code>au</code> as an
+      astronomical unit. A source convention must verify such meanings
+      before those conversions are written.
+    </p>
+
+    <h3 id="candidate-reproduction">Candidate census query</h3>
+    <p>
+      The following Cypher returns every numeric table cell, including JET's
+      zero rows. The literal pair list was obtained from the unit-pair query
+      below by calling <code>convert_units(1.0, from, to)</code> and
+      <code>convert_units(2.0, from, to)</code> without aliases or rewritten
+      spellings; both calls had to succeed. The first query returns the
+      positive-control counts. The query and results are preserved in
+      <code>census_probe.log</code> in the run record.
+    </p>
+    <pre><code>MATCH (s:SignalSource)-[r:MAPPING_CANDIDATE]-&gt;(t:IMASNode)
+WHERE r.route = true OR s.candidate_route = 'escalated'
+OPTIONAL MATCH (rep:FacilitySignal {id: s.representative_id})
+RETURN s.facility_id AS facility, count(*) AS edges,
+       count(DISTINCT s) AS sources,
+       sum(CASE WHEN r.route = true THEN 1 ELSE 0 END) AS selected,
+       sum(CASE WHEN s.candidate_route = 'escalated' THEN 1 ELSE 0 END) AS escalated,
+       sum(CASE WHEN rep IS NOT NULL THEN 1 ELSE 0 END) AS with_rep,
+       sum(CASE WHEN rep.unit IS NOT NULL AND trim(rep.unit) &lt;&gt; ''
+                THEN 1 ELSE 0 END) AS with_source_unit,
+       sum(CASE WHEN t.unit IS NOT NULL AND trim(t.unit) &lt;&gt; ''
+                THEN 1 ELSE 0 END) AS with_dd_unit,
+       sum(CASE WHEN t.cocos_transformation_type IS NOT NULL
+                THEN 1 ELSE 0 END) AS labeled,
+       sum(CASE WHEN t.ndim = 0 THEN 1 ELSE 0 END) AS scalar
+ORDER BY facility;
+
+MATCH (s:SignalSource)-[r:MAPPING_CANDIDATE]-&gt;(t:IMASNode)
+WHERE r.route = true OR s.candidate_route = 'escalated'
+OPTIONAL MATCH (rep:FacilitySignal {id: s.representative_id})
+RETURN s.facility_id AS facility, rep.unit AS source_unit,
+       t.unit AS dd_unit, count(*) AS edges
+ORDER BY facility, source_unit, dd_unit;
+
+WITH [['%', '1'], ['A', 'A'], ['DEG', '1'], ['DEG', 'rad'],
+      ['K', 'K'], ['KA', 'A'], ['KV', 'V'], ['Pa', 'Pa'],
+      ['Pa*m3/s', 'Pa.m^3.s^-1'], ['Pam3/s', 'Pa.m^3.s^-1'],
+      ['Pam3/s', 'W'], ['V', 'V'], ['au', 'm'], ['count', 'rad'],
+      ['day', 's'], ['degree', 'rad'], ['degreeC', 'K'],
+      ['g/s', 'kg.s^-1'], ['kA', 'A'], ['kV', 'V'], ['m', 'm'],
+      ['m3', 'm^3'], ['minute', 's'], ['mm', 'm'], ['ms', 's'],
+      ['msec', 's'], ['oC', 'K'], ['sec', 's'], ['uST', '1']]
+  AS exact_pairs
+MATCH (fs:SignalSource) WHERE fs.facility_id IS NOT NULL
+WITH DISTINCT fs.facility_id AS facility, exact_pairs
+UNWIND ['sign', 'constant factor', 'unit conversion',
+        'COCOS sign', 'index'] AS slot
+OPTIONAL MATCH (s:SignalSource {facility_id: facility})
+  -[r:MAPPING_CANDIDATE]-&gt;(t:IMASNode)
+WHERE r.route = true OR s.candidate_route = 'escalated'
+OPTIONAL MATCH (rep:FacilitySignal {id: s.representative_id})
+WITH facility, slot, r, t, rep, exact_pairs,
+     t.cocos_transformation_type IN
+       ['ip_like', 'b0_like', 'tor_angle_like', 'pol_angle_like',
+        'q_like', 'psi_like', 'dodpsi_like', 'one_like'] AS labeled,
+     [rep.unit, t.unit] IN exact_pairs AS pint_exact
+WITH facility, slot, r, pint_exact,
+     CASE slot
+       WHEN 'sign' THEN labeled
+       WHEN 'constant factor' THEN labeled
+       WHEN 'unit conversion' THEN pint_exact
+       WHEN 'COCOS sign' THEN labeled
+       WHEN 'index' THEN t.ndim = 0
+     END AS code_settleable
+RETURN facility, slot, count(r) AS candidate_edges,
+       sum(CASE WHEN r IS NOT NULL AND code_settleable
+                THEN 1 ELSE 0 END) AS code,
+       sum(CASE WHEN r IS NOT NULL AND code_settleable THEN 0
+                WHEN r IS NOT NULL THEN 1 ELSE 0 END) AS judgment,
+       sum(CASE WHEN r IS NOT NULL AND slot = 'unit conversion'
+                    AND pint_exact THEN 1 ELSE 0 END) AS pint_exact
+ORDER BY facility, slot;</code></pre>
   </main>
 </body>
 </html>
