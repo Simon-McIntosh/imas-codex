@@ -1,0 +1,380 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "9770785c1b3f96c3793d2aa9d79e0858c8569c30",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 12871168,
+      "cached_input_tokens_cumulative": 12871168,
+      "input_tokens": 13166974,
+      "input_tokens_cumulative": 13166974,
+      "output_tokens": 49107,
+      "output_tokens_cumulative": 49107,
+      "reasoning_output_tokens": 19710,
+      "reasoning_output_tokens_cumulative": 19710
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 62,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "c928f987d158ae4e1753a0cb76c51bf6f00b618d",
+    "2a9eb46f6ae6d567b6fca14b278b6ff618e159a7"
+  ],
+  "completed_at": "2026-10-08T10:49:25Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T09:37:52Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "imas_codex/config/facilities/jt-60sa.yaml",
+    "enumerate_edas.py",
+    "UDDB/LCDB",
+    "9.94"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.889,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.9601785504522495,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T08:47:35Z, which is after this node's 3600s horizon ending 2026-10-08T10:37:37.318750+00:00",
+    "horizon_ends_at": "2026-10-08T10:37:37.318750+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T09:37:34Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T08:47:35Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 502644,
+    "state": "quiet",
+    "utilisation_pct": 50.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T09:37:34Z",
+    "read_at": "2026-10-08T09:37:37Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 50.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T10:49:25Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md",
+  "member": "disposable-r-20261008T093733679102-jt60sa-signals-stage",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "jt60sa-signals-stage",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2957,
+          "cached_input_tokens": 614412,
+          "input_tokens": 617371,
+          "output_tokens": 1034,
+          "reasoning_output_tokens": 169,
+          "total_tokens": 618405,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "the fragment gives per-database signal counts by status, with units, with descriptions and embedded, before and after, lists the DataAccess routes in the graph, and every UDDB and LCDB signal has left discovered or carries a recorded reason; total LLM spend stays at or below USD 10",
+    "estimated_hours": null,
+    "goal": "run the signals stage over every JT-60SA database with imas-codex discover jt-60sa --only signals",
+    "id": "jt60sa-signals-stage",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T09:37:34Z",
+      "read_at": "2026-10-08T09:37:37Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 50.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md",
+    "negative_control": "",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§55",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-signals-stage.html",
+      "docs/figures/jt60sa-discovery-completion/jt60sa-signals-stage"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.959997592420964,
+      "derived": 0.18581096194411376,
+      "drain_hours": 168.0,
+      "effective_limit": 0.18581096194411376,
+      "elapsed_fraction": 0.16891905631283066,
+      "elapsed_hours": 28.37840146055555,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T09:37:41+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.5,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.5,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.5,
+      "decided_by": "window",
+      "margin": 0.3125,
+      "name": "jt60sa-signals-stage",
+      "score": 0.8125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.5
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.245258,
+        "observed_at": "2026-10-08T09:37:41+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.5,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "jt60sa-signals-stage",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T09:37:41.245258+00:00",
+    "score": 0.8125,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5090.117,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.889,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "2a9eb46f6ae6d567b6fca14b278b6ff618e159a7",
+  "resume_waiver": {
+    "reason": "the node's remaining work, the UDDB and LCDB drain, is now run by the lead directly through discover --until signals on the repaired scanner, so resuming this session would duplicate that run",
+    "session_id": "01a11ae0-77a0-78c3-bbee-f6de1ebd463c",
+    "source": "stream"
+  },
+  "review": null,
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§55",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a11ae0-77a0-78c3-bbee-f6de1ebd463c",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 12871168,
+    "cumulative_input_tokens": 26038142,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 68817
+  },
+  "time_budget": "60m",
+  "tool_steps": 67.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4293,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T10:49:27Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T10:38:12Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 374,
+    "worker_pid": 896860
+  },
+  "worker_seconds": 4293,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-08T10:49:25Z",
+    "session_id": "01a11ae0-77a0-78c3-bbee-f6de1ebd463c",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/jt60sa-signals-stage"
+  }
+}
