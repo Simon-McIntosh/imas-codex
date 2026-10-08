@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T10:19:58.436Z",
+  "dispatched_at": "2026-10-08T10:08:45Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T094630778536-jt60sa-cocos-study/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the gate asserts sources==8, undetermined==7, non-empty evidence for every source and the [2,7,17] indices, but never asserts the per-source confidence field that node 1's done-when also requires, so a source entry could lose its confidence and the gate would stay green."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T094630778536-jt60sa-cocos-study/manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are both left empty, so the harness derives added_failure_count as unmeasured rather than a number for this run."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-conventions.json",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: each source is keyed by a free-form signs string with no per-quantity reference and no declared psi_factor, while the loader contract recorded in plan comment c-20261008-s56-block-scope returns {cocos, psi_factor, quantities:{name:{sign, reference, evidence, confidence}}}, so the persistence node must translate the shape rather than read it back through the loader directly."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 1aeed46e3; 28d38801f adds the proposal json, 4614e02a4 substantiates it with read receipts and equations, 23f762d5f adds the same-shot EDDB/SELENE current cross-check; the change is evidence documentation only, with no runtime code.",
+    "done_when": "node 1's done-when is that the fragment gives each source's convention with evidence and confidence; the run's gate recorded at manifest.md:15 asserts eight sources, seven unknowns, non-empty evidence for every source and the three declared file COCOS indices (2,7,17), and I reproduced it at 23f762d5f with EXIT=0, but it never asserts the per-source confidence the done-when also requires.",
+    "goal": "the node's goal (plan \u00a756 node 1) is to establish, with evidence and confidence, the native convention of each JT-60SA source that mapping will read \u2014 EDDB signals, SELENE and the FAME/EQDB equilibria read through FLEDD, the LOCALDB G-EQDSK writers and DBSEL \u2014 plus the standard machine orientation; docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-cocos-study.html:17-110 covers all eight source entries and names seven undetermined values.",
+    "manifest": "read; status complete, commits [28d38801f, 4614e02a4, 23f762d5f], test_logs names conventions-gate-head.log, and baseline_suite and after_suite are both empty at manifest.md:20-21.",
+    "write_paths": "the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/ and docs/figures/jt60sa-discovery-completion/; git diff --stat 1aeed46e3..23f762d5f touches only the fragment html and the conventions json, both inside the declared scope, and no figure was produced."
+  },
+  "justifications": {
+    "durability": "no committed test reads jt60sa-cocos-study.html or jt60sa-conventions.json; the only assertions are the one-shot gate command recorded in manifest.md:15, so a dropped source or a changed writer index would redden nothing.",
+    "evidence": "the gate command in manifest.md:15 reproduces at 23f762d5f with EXIT=0, but it asserts non-empty evidence and not the per-source confidence the done-when names.",
+    "fit": "the three commits at 28d38801f, 4614e02a4 and 23f762d5f use conventional docs(equilibrium) subjects with bodies carrying no plan or section label, matching the fragment idiom at docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html:1.",
+    "goal_fidelity": "all eight sources named in plan \u00a756 node 2's list appear in jt60sa-conventions.json:17-110 with evidence, and the seven unknowns are named at jt60sa-conventions.json:112-120.",
+    "reuse": "the change adds no definition \u2014 it is evidence documentation \u2014 so no capability is forked, and the json is a proposal for the node-2 loader rather than a second loader.",
+    "scope_discipline": "git diff --stat 1aeed46e3..23f762d5f shows exactly the two declared evidence files with nothing outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal (plan \u00a756 node 1) is to establish, with evidence and confidence, the native convention of each JT-60SA source that mapping will read \u2014 EDDB signals, SELENE and the FAME/EQDB equilibria read through FLEDD, the LOCALDB G-EQDSK writers and DBSEL \u2014 plus the standard machine orientation; docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-cocos-study.html:17-110 covers all eight source entries and names seven undetermined values.\nVERDICT done_when: node 1's done-when is that the fragment gives each source's convention with evidence and confidence; the run's gate recorded at manifest.md:15 asserts eight sources, seven unknowns, non-empty evidence for every source and the three declared file COCOS indices (2,7,17), and I reproduced it at 23f762d5f with EXIT=0, but it never asserts the per-source confidence the done-when also requires.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/ and docs/figures/jt60sa-discovery-completion/; git diff --stat 1aeed46e3..23f762d5f touches only the fragment html and the conventions json, both inside the declared scope, and no figure was produced.\nVERDICT manifest: read; status complete, commits [28d38801f, 4614e02a4, 23f762d5f], test_logs names conventions-gate-head.log, and baseline_suite and after_suite are both empty at manifest.md:20-21.\nVERDICT diff: read commit by commit against base 1aeed46e3; 28d38801f adds the proposal json, 4614e02a4 substantiates it with read receipts and equations, 23f762d5f adds the same-shot EDDB/SELENE current cross-check; the change is evidence documentation only, with no runtime code.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all eight sources named in plan \u00a756 node 2's list appear in jt60sa-conventions.json:17-110 with evidence, and the seven unknowns are named at jt60sa-conventions.json:112-120.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate command in manifest.md:15 reproduces at 23f762d5f with EXIT=0, but it asserts non-empty evidence and not the per-source confidence the done-when names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 1aeed46e3..23f762d5f shows exactly the two declared evidence files with nothing outside the fence.\nSCORE durability: 6\nJUSTIFICATION durability: no committed test reads jt60sa-cocos-study.html or jt60sa-conventions.json; the only assertions are the one-shot gate command recorded in manifest.md:15, so a dropped source or a changed writer index would redden nothing.\nSCORE fit: 18\nJUSTIFICATION fit: the three commits at 28d38801f, 4614e02a4 and 23f762d5f use conventional docs(equilibrium) subjects with bodies carrying no plan or section label, matching the fragment idiom at docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html:1.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition \u2014 it is evidence documentation \u2014 so no capability is forked, and the json is a proposal for the node-2 loader rather than a second loader.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T094630778536-jt60sa-cocos-study/manifest.md:15 follow-on: the gate asserts sources==8, undetermined==7, non-empty evidence for every source and the [2,7,17] indices, but never asserts the per-source confidence field that node 1's done-when also requires, so a source entry could lose its confidence and the gate would stay green.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T094630778536-jt60sa-cocos-study/manifest.md:20 follow-on: baseline_suite and after_suite are both left empty, so the harness derives added_failure_count as unmeasured rather than a number for this run.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-conventions.json:17 follow-on: each source is keyed by a free-form signs string with no per-quantity reference and no declared psi_factor, while the loader contract recorded in plan comment c-20261008-s56-block-scope returns {cocos, psi_factor, quantities:{name:{sign, reference, evidence, confidence}}}, so the persistence node must translate the shape rather than read it back through the loader directly.",
+  "review_run_id": "r-20261008T100837394698-review-of-jt60sa-cocos-study",
+  "reviewed_base_sha": "1aeed46e3ab50e4b1f4c6b26b7653ee192cd9f69",
+  "reviewed_head_sha": "23f762d5f99366000119a8111a18b86145716e5f",
+  "reviewed_run_id": "r-20261008T094630778536-jt60sa-cocos-study",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:20:27.598548+00:00",
+  "total": 98,
+  "verdict": "SOUND WITH FINDINGS"
+}
