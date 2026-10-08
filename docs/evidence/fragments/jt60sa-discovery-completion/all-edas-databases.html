@@ -1,18 +1,19 @@
 <section id="all-edas-databases-landing">
   <h2 id="all-edas-databases-heading">EDAS database catalogue coverage</h2>
-  <p id="all-edas-databases-summary">The native EDDB category-table call returned 73 categories; all 73 produced rows at E101173. The scanner emitted 6,298 EDDB signals and 188 UDDB raw channel signals. The graph contains 6,298 existing <code>edas</code> signals and 188 new <code>UDDB</code> signals after the landing; only UDDB rows were written, preserving the existing EDDB rows and ids. Signal enrichment spend was USD 0.00.</p>
-  <p id="all-edas-databases-control">Before the change, a scanner test requesting EDDB and UDDB failed with <code>KeyError: 'databases'</code>, because the scanner did not pass that list to the remote script. A separate failure probe found that <code>eddbOpen()</code> returning false produced an empty success record; the scanner now receives an error for that case. The repaired test file passed 13 tests. A mutation returning zero UDDB rows produced one failing test, <code>TestConfiguredDatabases::test_uddb_table_rows_are_emitted</code> (exit 1).</p>
-  <p id="all-edas-databases-attempt-context">The calls below are bounded catalogue probes on the analysis server, with their wrapper return codes. A zero landed count for PMDB, LCDB, MBDB or EQDB means this probe did not yield a channel catalogue; it does not assert that the database contains no data. EQDB field signals await a working client read route.</p>
+  <p id="all-edas-databases-summary">The configured scanner reads EDDB, UDDB, PMDB, LCDB, MBDB and EQDB. It found 6,298 EDDB signals in 73 categories, 188 UDDB raw channels and 8,469 distinct LCDB fields. The graph holds those same counts; only the new UDDB and LCDB rows were written, preserving the existing EDDB rows and ids. Signal enrichment spend was USD 0.00.</p>
+  <p id="all-edas-databases-control">Before the change, a scanner test requesting EDDB and UDDB failed with <code>KeyError: 'databases'</code>. A separate failure probe found that <code>eddbOpen()</code> returning false produced an empty success record; the scanner now receives an error for that case. The focused test file passed 15 tests. A mutation returning zero UDDB rows produced one failing test, <code>TestConfiguredDatabases::test_uddb_table_rows_are_emitted</code> (exit 1).</p>
+  <p id="all-edas-databases-lcdb-route">The LCDB wrapper found shots in seven of 217 owner roots under <code>/analysis_DB/EDASDB</code>: 23 shots in all. Its library category list returned 298 category observations, each retaining the revision suffix required by <code>lcdb_dname</code>; those wrapper calls returned 8,469 distinct owner/category/field identities with zero failed catalogue calls. A graph check found <code>jt-60sa:general/lcdb_a042181_ate.s001_device</code> with source path <code>a042181/ate.s001/DEVICE</code>.</p>
+  <p id="all-edas-databases-attempt-context">The calls below are bounded catalogue probes on the analysis server, with their wrapper or operating-system return codes. A zero landed count for PMDB, MBDB or EQDB means this probe did not yield a channel catalogue; it does not assert that the database contains no data. EQDB field signals await a working client read route.</p>
   <table id="all-edas-databases-attempts"><thead><tr><th>Database</th><th>Signals landed</th><th>Call</th><th>Return code</th></tr></thead><tbody>
     <tr><td>EDDB</td><td>6,298</td><td><code>eddbreadCatTable(); eddbreadTable(&#x27;E101173&#x27;, category)</code></td><td>0</td></tr>
     <tr><td>UDDB</td><td>188</td><td><code>uddbreadTable()</code></td><td>0</td></tr>
     <tr><td>PMDB</td><td>0</td><td><code>plantdread(cat=&#x27;&#x27;, dname=&#x27;&#x27;, t1=&#x27;&#x27;, t2=&#x27;&#x27;)</code></td><td>301</td></tr>
-    <tr><td>LCDB</td><td>0</td><td><code>lcdb_shot(root=&#x27;/analysis_DB/EDASDB/public&#x27;)</code></td><td>1</td></tr>
-    <tr><td>MBDB</td><td>0</td><td><code>mbdbROpen(mbdbroot=&#x27;/analysis_DB/MBDB/public&#x27;, caseno=101173, category=&#x27;MBEQ&#x27;)</code></td><td>1012</td></tr>
+    <tr><td>LCDB</td><td>8,469</td><td><code>lcdb_shot(root=owner); lcdbCategoryList(owner, shot); lcdb_dname(shot, category, root=owner) under /analysis_DB/EDASDB</code></td><td>0</td></tr>
+    <tr><td>MBDB</td><td>0</td><td><code>mbdbROpen(mbdbroot=&#x27;/analysis_DB/MBDB&#x27;, caseno=101173, category=&#x27;MBEQ&#x27;)</code></td><td>1012</td></tr>
     <tr><td>EQDB</td><td>0</td><td><code>scandir(&#x27;/analysis_DB/EQDB&#x27;)</code></td><td>2</td></tr>
   </tbody></table>
-  <p id="all-edas-databases-coverage">Categories in the server category table but absent at the reference shot: none. The category-table result has 73 names and all 73 are present in the EDDB row counts below. FAME is an EDDB category with 100 rows, rather than a separate source in this scan.</p>
-  <table id="all-edas-databases-categories"><thead><tr><th>EDDB category</th><th>Signals</th></tr></thead><tbody>
+  <p id="all-edas-databases-coverage">The server category-table API returned 73 EDDB categories and each produced rows at E101173; missing categories: none. FAME is an EDDB category with 100 rows, rather than a separate source in this scan. The table below includes every EDDB and LCDB category plus the UDDB raw-channel group.</p>
+  <table id="all-edas-databases-categories"><thead><tr><th>Source category</th><th>Signals</th></tr></thead><tbody>
     <tr><td>CAM</td><td>37</td></tr>
     <tr><td>CO2</td><td>6</td></tr>
     <tr><td>CS1</td><td>11</td></tr>
@@ -45,6 +46,162 @@
     <tr><td>GAS</td><td>10</td></tr>
     <tr><td>GAU</td><td>11</td></tr>
     <tr><td>GLW</td><td>12</td></tr>
+    <tr><td>LCDB/a042181/ate.s001</td><td>92</td></tr>
+    <tr><td>LCDB/a042181/ate.s002</td><td>94</td></tr>
+    <tr><td>LCDB/a042181/ate.s003</td><td>92</td></tr>
+    <tr><td>LCDB/a048717/ane.s001</td><td>94</td></tr>
+    <tr><td>LCDB/a048717/ane.s002</td><td>96</td></tr>
+    <tr><td>LCDB/a048717/ane.s003</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ane.s004</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ane.s005</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ane.s006</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ane.s007</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ane.s008</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ane.s088</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ane.s888</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s001</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s002</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s003</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s004</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s005</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s006</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s007</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s008</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s009</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s010</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s011</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s012</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/arad.s013</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s001</td><td>94</td></tr>
+    <tr><td>LCDB/a048717/ate.s002</td><td>94</td></tr>
+    <tr><td>LCDB/a048717/ate.s003</td><td>96</td></tr>
+    <tr><td>LCDB/a048717/ate.s004</td><td>96</td></tr>
+    <tr><td>LCDB/a048717/ate.s005</td><td>96</td></tr>
+    <tr><td>LCDB/a048717/ate.s006</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s007</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s008</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s009</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s010</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s011</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s012</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s013</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ate.s111</td><td>76</td></tr>
+    <tr><td>LCDB/a048717/ate.s813</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s001</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s002</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s003</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s004</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s005</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s006</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s007</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s008</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s009</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s010</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s011</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s012</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s013</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ati.s813</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/ofmc.o004</td><td>81</td></tr>
+    <tr><td>LCDB/a048717/ofmc.o009</td><td>80</td></tr>
+    <tr><td>LCDB/a048717/ofmc.o010</td><td>79</td></tr>
+    <tr><td>LCDB/a048717/ofmc.o011</td><td>79</td></tr>
+    <tr><td>LCDB/a048717/ofmc.o012</td><td>79</td></tr>
+    <tr><td>LCDB/a048717/ofmc.o013</td><td>79</td></tr>
+    <tr><td>LCDB/a048717/ofmc.o013_bka</td><td>79</td></tr>
+    <tr><td>LCDB/a048717/zeff.s001</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/zeff.s002</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/zeff.s003</td><td>96</td></tr>
+    <tr><td>LCDB/a048717/zeff.s004</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/zeff.s005</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/zeff.s006</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/zeff.s007</td><td>4</td></tr>
+    <tr><td>LCDB/a048717/zeff.s008</td><td>4</td></tr>
+    <tr><td>LCDB/b240064/ate.s001</td><td>92</td></tr>
+    <tr><td>LCDB/b240064/ate.s002</td><td>92</td></tr>
+    <tr><td>LCDB/b240064/ate.s003</td><td>90</td></tr>
+    <tr><td>LCDB/b240064/ate.s004</td><td>90</td></tr>
+    <tr><td>LCDB/b250062/ane.s001</td><td>92</td></tr>
+    <tr><td>LCDB/b250062/ane.s002</td><td>103</td></tr>
+    <tr><td>LCDB/b250062/ate.s001</td><td>92</td></tr>
+    <tr><td>LCDB/b250062/ate.s002</td><td>94</td></tr>
+    <tr><td>LCDB/b250062/ate.s003</td><td>94</td></tr>
+    <tr><td>LCDB/b250062/ate.s004</td><td>94</td></tr>
+    <tr><td>LCDB/b250062/ate.s005</td><td>92</td></tr>
+    <tr><td>LCDB/b250062/ate.s006</td><td>92</td></tr>
+    <tr><td>LCDB/b250062/ate.s007</td><td>103</td></tr>
+    <tr><td>LCDB/b250062/ate.s008</td><td>92</td></tr>
+    <tr><td>LCDB/b250062/ate.s009</td><td>93</td></tr>
+    <tr><td>LCDB/b260008/ane.s001</td><td>95</td></tr>
+    <tr><td>LCDB/b260008/ane.s002</td><td>96</td></tr>
+    <tr><td>LCDB/b260008/ane.s003</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/arad.s001</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/arad.s002</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/arad.s003</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/ate.s001</td><td>94</td></tr>
+    <tr><td>LCDB/b260008/ate.s002</td><td>95</td></tr>
+    <tr><td>LCDB/b260008/ate.s003</td><td>96</td></tr>
+    <tr><td>LCDB/b260008/ate.s011</td><td>93</td></tr>
+    <tr><td>LCDB/b260008/ati.s001</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/ati.s002</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/ati.s003</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/avp.s001</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/avt.s001</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o001</td><td>82</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o002</td><td>82</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o003</td><td>82</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o004</td><td>82</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o005</td><td>81</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o006</td><td>81</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o007</td><td>191</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o008</td><td>191</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o009</td><td>81</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o010</td><td>191</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o011</td><td>191</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o012</td><td>191</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o013</td><td>81</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o014</td><td>107</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o015</td><td>81</td></tr>
+    <tr><td>LCDB/b260008/ofmc.o016</td><td>107</td></tr>
+    <tr><td>LCDB/b260008/prad.s002</td><td>102</td></tr>
+    <tr><td>LCDB/b260008/prad.s011</td><td>102</td></tr>
+    <tr><td>LCDB/b260008/zeff.s001</td><td>4</td></tr>
+    <tr><td>LCDB/b260008/zeff.s002</td><td>75</td></tr>
+    <tr><td>LCDB/b260008/zeff.s003</td><td>96</td></tr>
+    <tr><td>LCDB/b260008/zeff.s005</td><td>73</td></tr>
+    <tr><td>LCDB/d240034/test.s999</td><td>2</td></tr>
+    <tr><td>LCDB/h060029/ane.s001</td><td>95</td></tr>
+    <tr><td>LCDB/h060029/ane.s002</td><td>95</td></tr>
+    <tr><td>LCDB/h060029/ane.s003</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/arad.s001</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/arad.s002</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/arad.s003</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/ate.s001</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/ate.s002</td><td>95</td></tr>
+    <tr><td>LCDB/h060029/ate.s003</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/ate.s011</td><td>93</td></tr>
+    <tr><td>LCDB/h060029/ati.s001</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/ati.s002</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/ati.s003</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/avp.s001</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/avt.s001</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o001</td><td>82</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o002</td><td>82</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o003</td><td>82</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o004</td><td>82</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o005</td><td>81</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o006</td><td>81</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o007</td><td>191</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o008</td><td>191</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o009</td><td>81</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o010</td><td>191</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o011</td><td>191</td></tr>
+    <tr><td>LCDB/h060029/ofmc.o012</td><td>110</td></tr>
+    <tr><td>LCDB/h060029/prad.s002</td><td>102</td></tr>
+    <tr><td>LCDB/h060029/prad.s011</td><td>102</td></tr>
+    <tr><td>LCDB/h060029/zeff.s001</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/zeff.s002</td><td>75</td></tr>
+    <tr><td>LCDB/h060029/zeff.s003</td><td>4</td></tr>
+    <tr><td>LCDB/h060029/zeff.s005</td><td>73</td></tr>
     <tr><td>LFPPCC</td><td>1</td></tr>
     <tr><td>MAG</td><td>18</td></tr>
     <tr><td>MDAC</td><td>274</td></tr>
@@ -83,9 +240,10 @@
     <tr><td>TF18</td><td>24</td></tr>
     <tr><td>TFC</td><td>4</td></tr>
     <tr><td>TFTIME</td><td>8</td></tr>
+    <tr><td>UDDB</td><td>188</td></tr>
     <tr><td>UFPPCC</td><td>1</td></tr>
     <tr><td>VV</td><td>92</td></tr>
     <tr><td>VVGS</td><td>32</td></tr>
   </tbody></table>
-  <p id="all-edas-databases-limits">The direct category-table API was compared with shot-qualified EDDB enumeration; the underlying <code>db_pdcattable</code> store was not read separately. PMDB returned 301 from an empty-name read, LCDB returned false from the public-root shot list, MBDB returned 1012 opening the candidate MBEQ case, and the candidate EQDB directory returned operating-system code 2. Those routes need database-specific catalogue or client access evidence before signals can be formed.</p>
+  <p id="all-edas-databases-limits">The category-table API was compared with shot-qualified EDDB enumeration; the underlying <code>db_pdcattable</code> store was not read separately. PMDB exposes only keyed reads through <code>plantdread</code> and <code>planthread</code>; an empty-key call returned 301. MBDB requires a valid owner, case and category before <code>mbdbDatanmCount</code> can list fields; the candidate MBEQ open returned 1012. The candidate EQDB directory returned code 2. These are bounded access observations, not empty-database claims.</p>
 </section>
