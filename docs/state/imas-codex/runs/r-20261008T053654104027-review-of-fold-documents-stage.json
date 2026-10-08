@@ -536,6 +536,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "0031d00ac742afe5c1775136cbe19b0e9ee74061",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 9443,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261008T053654104027-review-of-fold-documents-stage",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 9443,
+        "path": "/tmp/reckon-crew-scratch/r-20261008T053654104027-review-of-fold-documents-stage"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/review-of-fold-documents-stage",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
