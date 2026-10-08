@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -213,7 +213,13 @@
       options. The body that builds the engine and calls <code>run_discovery</code>
       (<code>imas_codex/cli/discover/common.py:212</code>) is kept whole, so no engine changes. The click
       subcommand is deleted with its registration. These six folds touch disjoint files, so they run in
-      parallel:
+      parallel, with one exception. <code>discovery-judgments-through-jev</code> §4's node
+      <code>path-jev-deploy</code> is editing <code>paths.py</code> and <code>code.py</code>. It retires
+      the 0.9 composite threshold as the path gate in favour of Jev-calibrated scan, expand and enrich
+      gates, and code-scan path selection stops reading the old threshold. So
+      <code>fold-paths-stage</code> and <code>fold-code-stage</code> dispatch only after that node
+      merges, and they carry its gate options rather than the 0.9 default. Wiki keeps its own
+      <code>--min-score</code>. The other four folds run now:
     </p>
     <ul>
       <li><code>fold-paths-stage</code>: <code>imas_codex/cli/discover/paths.py</code> and <code>tests/cli/test_discover_paths_stage.py</code></li>
