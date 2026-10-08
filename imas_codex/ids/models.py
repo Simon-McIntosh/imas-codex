@@ -16,9 +16,9 @@ import json
 import logging
 import re
 from enum import StrEnum
-from typing import Any
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.ids.graph_ops import write_mapping_binding
@@ -51,7 +51,7 @@ class TargetType(StrEnum):
 
 
 # ---------------------------------------------------------------------------
-# Step 1: Section assignment
+# Section assignment
 # ---------------------------------------------------------------------------
 
 
@@ -88,7 +88,7 @@ class UnassignedSource(BaseModel):
 
 
 class TargetAssignmentBatch(BaseModel):
-    """Batch of target assignments from Step 1."""
+    """Batch of target assignments for one IDS."""
 
     ids_name: str
     assignments: list[TargetAssignment]
@@ -131,7 +131,7 @@ class TargetChoiceBatch(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Step 2: Signal-level mapping
+# Signal-level mapping
 # ---------------------------------------------------------------------------
 
 
@@ -211,6 +211,106 @@ class UnmappedSignal(BaseModel):
     )
 
 
+class SlotResolution(StrEnum):
+    """The authority that settled one transform decision."""
+
+    CODE = "code"
+    JEV = "jev"
+    LOCAL = "local"
+    ESCALATED = "escalated"
+
+
+class TransformSlot[SlotValue](BaseModel):
+    """One transform decision, including its provenance or open state."""
+
+    value: SlotValue | None = None
+    settled_by: SlotResolution | None = None
+    evidence: str | None = None
+
+    @model_validator(mode="after")
+    def require_evidence(self) -> TransformSlot[SlotValue]:
+        if self.settled_by in (
+            SlotResolution.CODE,
+            SlotResolution.JEV,
+            SlotResolution.LOCAL,
+        ):
+            if self.value is None or not self.evidence or not self.evidence.strip():
+                raise ValueError("settled slot requires a value and evidence")
+        return self
+
+
+class CocosLabel(StrEnum):
+    """Recognised DD transformation labels, including an explicit absence."""
+
+    NONE = "none"
+    IP = "ip_like"
+    TOROIDAL_FIELD = "b0_like"
+    TOR_ANGLE = "tor_angle_like"
+    POL_ANGLE = "pol_angle_like"
+    Q = "q_like"
+    PSI = "psi_like"
+    DODPSI = "dodpsi_like"
+    ONE = "one_like"
+
+
+class UnitConversion(BaseModel):
+    """An exact unit pair, or an evidence-backed identity decision."""
+
+    source_unit: str | None = None
+    target_unit: str | None = None
+
+    @model_validator(mode="after")
+    def require_pair(self) -> UnitConversion:
+        if (self.source_unit is None) != (self.target_unit is None):
+            raise ValueError("unit conversion requires both source and target units")
+        if self.source_unit is not None and (
+            not self.source_unit.strip() or not self.target_unit.strip()
+        ):
+            raise ValueError("unit conversion units cannot be empty")
+        return self
+
+
+class IndexLayout(BaseModel):
+    """Select a scalar, one element, or a bounded slice of source data."""
+
+    kind: Literal["scalar", "index", "slice"]
+    index: int | None = Field(default=None, ge=0)
+    start: int | None = Field(default=None, ge=0)
+    stop: int | None = Field(default=None, ge=0)
+    step: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def require_matching_coordinates(self) -> IndexLayout:
+        if self.kind == "scalar" and any(
+            part is not None for part in (self.index, self.start, self.stop, self.step)
+        ):
+            raise ValueError("scalar layout cannot carry indices")
+        if self.kind == "index" and (
+            self.index is None
+            or any(part is not None for part in (self.start, self.stop, self.step))
+        ):
+            raise ValueError("index layout requires only an index")
+        if self.kind == "slice" and self.index is not None:
+            raise ValueError("slice layout cannot carry an index")
+        return self
+
+
+class BindingTransformSlots(BaseModel):
+    """The five decisions needed before a binding expression can be written."""
+
+    sign: TransformSlot[Literal[-1, 1]] = Field(default_factory=TransformSlot)
+    scale_factor: TransformSlot[Annotated[float, Field(gt=0, allow_inf_nan=False)]] = (
+        Field(default_factory=TransformSlot)
+    )
+    unit_conversion: TransformSlot[UnitConversion] = Field(
+        default_factory=TransformSlot
+    )
+    cocos_label: TransformSlot[CocosLabel] = Field(default_factory=TransformSlot)
+    index_layout: TransformSlot[IndexLayout] = Field(default_factory=TransformSlot)
+    cocos_in: int | None = None
+    cocos_out: int | None = None
+
+
 class SignalMappingEntry(BaseModel):
     """Single signal mapping entry with transform details."""
 
@@ -224,6 +324,7 @@ class SignalMappingEntry(BaseModel):
         default="value",
         description="Python expression to transform the source value",
     )
+    transform_slots: BindingTransformSlots | None = None
     source_units: str | None = Field(default=None, description="Source unit")
     target_units: str | None = Field(default=None, description="Target IMAS unit")
     cocos_label: str | None = Field(
@@ -273,6 +374,17 @@ class SignalMappingEntry(BaseModel):
             )
 
         return v
+
+    @model_validator(mode="after")
+    def compose_slots(self) -> SignalMappingEntry:
+        if self.transform_slots is not None:
+            from imas_codex.ids.transforms import compose_transform
+
+            expression = compose_transform(self.transform_slots)
+            if self.transform_expression not in ("value", expression):
+                raise ValueError("transform_expression disagrees with transform_slots")
+            self.transform_expression = expression
+        return self
 
 
 class SignalMappingBatch(BaseModel):
@@ -337,7 +449,7 @@ class AssemblyBatch(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Step 3: Validation + final result
+# Validation and final result
 # ---------------------------------------------------------------------------
 
 
@@ -348,20 +460,32 @@ class ValidatedSignalMapping(BaseModel):
     source_property: str = "value"
     target_id: str
     transform_expression: str = "value"
+    transform_slots: BindingTransformSlots | None = None
     source_units: str | None = None
     target_units: str | None = None
     cocos_label: str | None = None
     confidence: float = Field(ge=0, le=1)
     disposition: MappingDisposition = MappingDisposition.MAPPED
     evidence: str = ""
-    # Staged pipeline fields
+    # Binding origin fields
     mapping_type: str  # "direct" (LLM-matched) or "error_derived" (graph traversal)
     error_type: str | None = None  # "upper", "lower", "index" — only for error_derived
     derived_from: str | None = None  # Parent data path — only for error_derived
 
+    @model_validator(mode="after")
+    def compose_slots(self) -> ValidatedSignalMapping:
+        if self.transform_slots is not None:
+            from imas_codex.ids.transforms import compose_transform
+
+            expression = compose_transform(self.transform_slots)
+            if self.transform_expression not in ("value", expression):
+                raise ValueError("transform_expression disagrees with transform_slots")
+            self.transform_expression = expression
+        return self
+
 
 class ValidatedMappingResult(BaseModel):
-    """Final validated mapping result from Step 3."""
+    """Final validated mapping result."""
 
     facility: str
     ids_name: str
@@ -377,7 +501,7 @@ class ValidatedMappingResult(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Stage 3: IDS metadata population (LLM response)
+# IDS metadata population (LLM response)
 # ---------------------------------------------------------------------------
 
 
