@@ -63,12 +63,11 @@ def test_data_access_root_is_seeded_and_unexcluded(root: str) -> None:
     assert should_exclude is False, f"{root}/child excluded by {reason}"
 
 
-def test_home_subtree_excluded() -> None:
-    """A path under /home is excluded as a path prefix."""
+def test_home_subtree_not_excluded() -> None:
+    """A path under /home remains available for targeted discovery."""
     config = get_exclusion_config_for_facility("jt-60sa")
-    should_exclude, reason = config.should_exclude("/home/u/x")
-    assert should_exclude is True
-    assert reason == "path_prefix:/home"
+    should_exclude, _ = config.should_exclude("/home/u/x")
+    assert should_exclude is False
 
 
 def test_work_edas_subtree_excluded() -> None:
