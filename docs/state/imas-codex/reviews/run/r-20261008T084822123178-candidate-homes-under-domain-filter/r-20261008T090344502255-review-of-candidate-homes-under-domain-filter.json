@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084822123178-candidate-homes-under-domain-filter/committed-suite.log",
+    "revision": "f9d911f88c8ca397cb5a4540b7d4911cf3791e3e"
+  },
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest tests/ids/test_mappable_ids_from_candidates.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 3,
+    "failure_ids": [
+      "tests/ids/test_mappable_ids_from_candidates.py::test_candidate_homes_survive_missing_source_physics_domains",
+      "tests/ids/test_mappable_ids_from_candidates.py::test_domain_filter_includes_only_covered_sources_candidate_homes",
+      "tests/ids/test_mappable_ids_from_candidates.py::test_explicit_ids_filter_does_not_add_candidate_homes"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084822123178-candidate-homes-under-domain-filter/baseline-focused.log",
+    "revision": "967e9d09c0a1419f0bdd9f769dc0ec46fba4b335"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/map.py:211",
+    "imas_codex/cli/discover/sequence.py:489"
+  ],
+  "completed_at": "2026-10-08T09:23:44.049Z",
+  "dispatched_at": "2026-10-08T09:03:54Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/tools.py",
+      "line": "511",
+      "severity": "follow-on",
+      "text": "follow-on: the candidate-home union filters by the caller's requested `domains` verbatim, whereas the IDS branch filters by `valid_domains` (imas_codex/ids/tools.py:433), so a requested domain with no enriched sources leaves available_domains empty while still contributing candidate-home targets \u2014 the two branches validate the domain set differently and a consumer reconciling ids_targets against available_domains sees targets with no reported domain."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "one landed revision f9d911f88c8ca397cb5a4540b7d4911cf3791e3e against base 967e9d09c0a1419f0bdd9f769dc0ec46fba4b335; three files: tools.py +66/-33, the test file +66, and an empty landing-fragment anchor.",
+    "done_when": "the done_when gate is `uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider` covering four named behaviours in tests/ids/test_mappable_ids_from_candidates.py:23,63,76; the manifest records the head result (516 passed) and I re-ran the focused file (4 passed, exit 0).",
+    "goal": "the source goal is that every discover_mappable_ids call, filtered by physics domain or not, includes the selected/escalated candidate homes of the sources it covers; imas_codex/ids/tools.py:507-521 moves the candidate-home union out of the no-filter branch so it now runs whenever no explicit IDS filter is supplied.",
+    "manifest": "read; it reports the gate figure, names its logs, and \u2014 being an unarmed implement node \u2014 leaves baseline_suite/after_suite empty as the contract permits; its landing fragment is an empty anchor section, which its contract allows since the done-when names no artifact.",
+    "write_paths": "the manifest declares imas_codex/ids/tools.py, tests/ids/test_mappable_ids_from_candidates.py, the evidence fragment and a figures dir; the diff touches exactly the first three, all inside scope."
+  },
+  "justifications": {
+    "durability": "tests/ids/test_mappable_ids_from_candidates.py:63 fails if the removed early return is restored and line 86 fails if the candidate union runs under ids_filter, each a distinct regression the change could reintroduce.",
+    "evidence": "the gate the done_when names is recorded in the manifest (516 passed) with its logs under the run directory, the focused file re-ran green, and the base arm's pre-change failures are captured in baseline-focused.log.",
+    "fit": "the new clause composes with an f-string and params exactly as the neighbouring queries do at imas_codex/ids/tools.py:433, and the docstring was rewritten to the mechanism, introducing no plan label.",
+    "goal_fidelity": "imas_codex/ids/tools.py:507-521 runs the candidate-home union for the domain-filtered and no-filter cases and skips it under an explicit ids_filter, exactly the goal.",
+    "reuse": "the change reuses the single existing candidate-home query (imas_codex/ids/tools.py:513-521) and _dd_version_clause rather than adding a second owner for the capability.",
+    "scope_discipline": "every path in the diff (tools.py, tests/ids/test_mappable_ids_from_candidates.py, the fragment) is inside the manifest's declared write paths."
+  },
+  "node": "review-of-candidate-homes-under-domain-filter",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal is that every discover_mappable_ids call, filtered by physics domain or not, includes the selected/escalated candidate homes of the sources it covers; imas_codex/ids/tools.py:507-521 moves the candidate-home union out of the no-filter branch so it now runs whenever no explicit IDS filter is supplied.\nVERDICT done_when: the done_when gate is `uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider` covering four named behaviours in tests/ids/test_mappable_ids_from_candidates.py:23,63,76; the manifest records the head result (516 passed) and I re-ran the focused file (4 passed, exit 0).\nVERDICT write_paths: the manifest declares imas_codex/ids/tools.py, tests/ids/test_mappable_ids_from_candidates.py, the evidence fragment and a figures dir; the diff touches exactly the first three, all inside scope.\nVERDICT manifest: read; it reports the gate figure, names its logs, and \u2014 being an unarmed implement node \u2014 leaves baseline_suite/after_suite empty as the contract permits; its landing fragment is an empty anchor section, which its contract allows since the done-when names no artifact.\nVERDICT diff: one landed revision f9d911f88c8ca397cb5a4540b7d4911cf3791e3e against base 967e9d09c0a1419f0bdd9f769dc0ec46fba4b335; three files: tools.py +66/-33, the test file +66, and an empty landing-fragment anchor.\nCALL_SITES: imas_codex/cli/map.py:211, imas_codex/cli/discover/sequence.py:489\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/ids/tools.py:507-521 runs the candidate-home union for the domain-filtered and no-filter cases and skips it under an explicit ids_filter, exactly the goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate the done_when names is recorded in the manifest (516 passed) with its logs under the run directory, the focused file re-ran green, and the base arm's pre-change failures are captured in baseline-focused.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (tools.py, tests/ids/test_mappable_ids_from_candidates.py, the fragment) is inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/ids/test_mappable_ids_from_candidates.py:63 fails if the removed early return is restored and line 86 fails if the candidate union runs under ids_filter, each a distinct regression the change could reintroduce.\nSCORE fit: 19\nJUSTIFICATION fit: the new clause composes with an f-string and params exactly as the neighbouring queries do at imas_codex/ids/tools.py:433, and the docstring was rewritten to the mechanism, introducing no plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change reuses the single existing candidate-home query (imas_codex/ids/tools.py:513-521) and _dd_version_clause rather than adding a second owner for the capability.\nFINDING imas_codex/ids/tools.py:511 follow-on: the candidate-home union filters by the caller's requested `domains` verbatim, whereas the IDS branch filters by `valid_domains` (imas_codex/ids/tools.py:433), so a requested domain with no enriched sources leaves available_domains empty while still contributing candidate-home targets \u2014 the two branches validate the domain set differently and a consumer reconciling ids_targets against available_domains sees targets with no reported domain.\n",
+  "review_run_id": "r-20261008T090344502255-review-of-candidate-homes-under-domain-filter",
+  "reviewed_base_sha": "967e9d09c0a1419f0bdd9f769dc0ec46fba4b335",
+  "reviewed_head_sha": "f9d911f88c8ca397cb5a4540b7d4911cf3791e3e",
+  "reviewed_run_id": "r-20261008T084822123178-candidate-homes-under-domain-filter",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T09:15:15.723809+00:00",
+  "total": 114
+}
