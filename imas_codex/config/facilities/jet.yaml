@@ -16,7 +16,7 @@ ssh_host: jet
 nice_level: 19
 
 # Data system configuration for signal discovery
-# Used by: imas-codex discover signals jet
+# Used by: imas-codex discover jet --only signals
 data_systems:
   # PPF is JET's primary processed data system.
   # Organized as Owner/DDA/Dtype. Accessed via SAL REST API, ppfget, or getdat.

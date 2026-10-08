@@ -90,12 +90,12 @@ In the `tcv` session (for example):
 
 | Tab        | Command                                         |
 |------------|--------------------------------------------------|
-| `wiki`     | `uv run imas-codex discover wiki tcv`            |
-| `paths`    | `uv run imas-codex discover paths tcv`           |
-| `code`     | `uv run imas-codex discover code tcv`            |
-| `signals`  | `uv run imas-codex discover signals tcv`         |
-| `docs`     | `uv run imas-codex discover documents tcv`       |
-| `map`      | `uv run imas-codex discover status tcv`          |
+| `wiki`     | `uv run imas-codex discover tcv --only wiki`      |
+| `paths`    | `uv run imas-codex discover tcv --only paths`     |
+| `code`     | `uv run imas-codex discover tcv --only code`      |
+| `signals`  | `uv run imas-codex discover tcv --only signals`   |
+| `docs`     | `uv run imas-codex discover tcv --only documents` |
+| `map`      | `uv run imas-codex discover tcv --only candidates,mapping` |
 
 ### 4. Monitor progress
 
