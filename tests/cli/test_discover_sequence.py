@@ -454,6 +454,91 @@ def test_cli_parses_repeated_and_comma_separated_domains(
 
 
 @pytest.mark.parametrize(
+    ("target", "expected"),
+    [
+        ("signals", ["paths", "code", "wiki", "signals scan", "signals enrich"]),
+        ("signals scan", ["signals scan"]),
+        ("code", ["paths", "code"]),
+        (
+            "mapping",
+            [
+                "paths",
+                "code",
+                "wiki",
+                "signals scan",
+                "signals enrich",
+                "candidates",
+                "mapping",
+            ],
+        ),
+    ],
+)
+def test_until_runs_dependency_closure_in_registry_order(
+    monkeypatch, healthy, tmp_path, target, expected
+):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import discover
+
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
+    )
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+    )
+    calls = _recording_stages(monkeypatch)
+
+    result = CliRunner().invoke(discover, ["jt-60sa", "--until", target])
+    assert result.exit_code == 0, result.output
+    assert [name for name, _ in calls] == expected
+
+    calls.clear()
+    dry = CliRunner().invoke(discover, ["jt-60sa", "--until", target, "--dry-run"])
+    assert dry.exit_code == 0, dry.output
+    assert f"Selected stages: {' -> '.join(expected)}" in dry.output
+    assert calls == []
+
+
+def test_until_skip_reports_stale_context(monkeypatch, healthy, caplog):
+    calls = _recording_stages(monkeypatch)
+    outcomes = sequence.run_sequence(
+        "jt-60sa",
+        config=_config(),
+        options=sequence.SequenceOptions(until="signals", skip=("wiki",)),
+    )
+    assert [name for name, _ in calls] == [
+        "paths",
+        "code",
+        "signals scan",
+        "signals enrich",
+    ]
+    assert _outcome(outcomes, "wiki").outcome == sequence.NOT_SELECTED
+    assert "stale context: wiki" in _outcome(outcomes, "signals enrich").reason
+    assert "signals enrich uses stale context: wiki not selected" in caplog.text
+
+
+def test_until_and_only_are_refused_before_stages(monkeypatch):
+    stage_function = MagicMock()
+    monkeypatch.setattr(sequence, "_stage_function", stage_function)
+    result = CliRunner().invoke(
+        sequence.run, ["jt-60sa", "--until", "signals", "--only", "code"]
+    )
+    assert result.exit_code == 2
+    assert "--until and --only are mutually exclusive" in result.output
+    stage_function.assert_not_called()
+
+
+def test_only_signals_warns_about_missing_context(monkeypatch, healthy, caplog):
+    calls = _recording_stages(monkeypatch)
+    outcomes = sequence.run_sequence(
+        "jt-60sa", config=_config(), options=sequence.SequenceOptions(only=("signals",))
+    )
+    assert [name for name, _ in calls] == ["signals scan", "signals enrich"]
+    assert "stale context: wiki, code" in _outcome(outcomes, "signals enrich").reason
+    assert "signals enrich uses stale context: wiki, code not selected" in caplog.text
+
+
+@pytest.mark.parametrize(
     "arguments",
     [
         ["--reset-to", "scanned"],
