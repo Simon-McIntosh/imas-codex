@@ -25,6 +25,7 @@ NOTHING_TO_DO = "skipped: nothing to do"
 DEPENDENCY_FAILED = "skipped: dependency failed"
 NOTHING_TO_SEED = "skipped: nothing to seed"
 NOT_SELECTED = "skipped: not selected"
+NOT_REQUESTED = "skipped: not requested"
 LIMIT_REACHED = "skipped: limit reached"
 DOMAINS = ("paths", "code", "documents", "wiki", "signals", "candidates", "mapping")
 
@@ -533,6 +534,8 @@ def _selected(stage: Stage, options: SequenceOptions) -> tuple[bool, str]:
         return False, "excluded by --only"
     if stage.domain in options.skip:
         return False, "excluded by --skip"
+    if stage.domain == "mapping" and not options.only:
+        return False, "not requested"
     if options.scan_only and stage.domain in {"candidates", "mapping"}:
         return False, "nothing to seed"
     if options.scan_only and stage.name == "signals enrich":
@@ -663,7 +666,13 @@ def run_sequence(
             outcome = StageOutcome(
                 stage.name,
                 stage.domain,
-                NOTHING_TO_SEED if reason == "nothing to seed" else NOT_SELECTED,
+                (
+                    NOTHING_TO_SEED
+                    if reason == "nothing to seed"
+                    else NOT_REQUESTED
+                    if reason == "not requested"
+                    else NOT_SELECTED
+                ),
                 reason,
             )
         else:
