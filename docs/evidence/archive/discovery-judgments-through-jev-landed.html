@@ -25,6 +25,11 @@
     <p>Run r-20261008T073735693842-wiki-threshold-displays, commit <code>fa5123a2e</code>. The wiki runner's pending page and document counts, and the document skipped label, compare against <code>CONTENT_INGEST_THRESHOLD</code> (0.16) instead of a literal 0.5. The scoped gate passed 51 tests, and restoring 0.5 in the pending-ingest count fails the new test. The <code>discover wiki</code> CLI defaults moved to the same constant in <code>8f69fadb2</code>, a node of the session that folded the discover stages.</p>
   </section>
 
+  <section id="s14">
+    <h2>§14 — one describe owner, non-blocking descriptions, one path threshold</h2>
+    <p>Node 1 (run r-20261008T061834979151-path-description-shape, <code>406f44509</code>) gave the describe step one owner, <code>describe_paths</code> in <code>imas_codex/discovery/paths/description.py</code>. Its prompt states the <code>results</code> shape, and a live discovery-score call returned 3 of 3 descriptions. Node 2 (run r-20261008T073136128152-path-triage-describe-owner, <code>dac0f8f4c</code>) moved <code>DirectoryTriager.async_triage_batch</code> onto it. A failed description now leaves the path judged with the description recorded as null. Every path gate under <code>imas_codex/discovery/paths</code> reads <code>get_path_scan_threshold()</code>, and a test fails on <code>get_discovery_threshold()</code> there. 82 focused tests passed, and one live EDDB path stored a Jev judgment. Restoring the triager's own describe call fails the path-keyed replay.</p>
+  </section>
+
 </main>
 </body>
 </html>

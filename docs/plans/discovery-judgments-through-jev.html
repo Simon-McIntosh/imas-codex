@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
-<meta name="plan-impl" content="0.611">
-<meta name="plan-version" content="70">
+<meta name="plan-impl" content="0.667">
+<meta name="plan-version" content="71">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -163,19 +163,12 @@
 <section data-reckon="section" data-id="s13" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
 <p>The search-rerank sweep left two readings unsettled. First, a deeper pool lifts candidates from embedding ranks 31–150 into the top ten, and those candidates carry no hand label. The whole-set nDCG@10 therefore counts every lifted candidate as irrelevant and penalises depth by construction, while the labelled-only nDCG@10 ignores them. The two readings disagree on whether 60 or 150 ranks better: labelled-only gives 0.482 at 60 and 0.653 at 150. Second, the four census answers (<code>eqgrd.f</code>, <code>shtrd.f</code>, <code>use_compiler-en</code>, <code>use_login-en</code>) sit at embedding ranks 159 to 181 for their questions, beyond any pool the 5 s budget can score.</p><p>This section is evidence only. Label every candidate that the reranked order at pools 60 and 150 places in the top ten and that has no label yet, under the prototype's rule, its labels file and its 18 questions, all in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/</code>. Then recompute whole-set nDCG@10 at both pools from the sweep's saved scores in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/search-rerank/sweep.json</code>, with no new Jev calls. For each of the four census answers, record its embedding cosine to the query, whether the full-text index matches it, and the rank it takes under the query reworded in the vocabulary of its own path and title. That says whether the miss is the embedding, the query wording or the absence of a text match.</p><p>Done when the evidence fragment carries the relabelled whole-set table at pools 60 and 150 beside the labelled-only figures, and the four-answer table with cosine, text match and reworded rank. The scripts go in <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/rerank-depth-labels/</code>. Live graph reads only: no graph write, no code change.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s14">§14 — Retire the old path threshold from every path gate</h2>
-<section data-reckon="section" data-id="s14" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p><strong>Why.</strong> Follow-ons from the §4 deploy review: three places still read the retired 0.90 path threshold,
-and one piece of wiring is duplicated. (1) <code>run_parallel_file_discovery</code> defaults <code>min_score</code> to
-<code>get_discovery_threshold()</code> (0.90) when a caller passes none, while the CLI passes the 0.30 Jev gate.
-(2) <code>get_high_value_paths</code> in <code>imas_codex/discovery/paths/frontier.py</code> defaults to the same setting.
-<code>imas_codex/discovery/paths/progress.py</code> (around line 1385) passes its own copy of it, so the status and progress
-surfaces disagree with the gate on which paths are high value. The map session is changing the <code>discover status</code>
-call site in its runner node. (3) The describe-then-judge step is wired twice: in <code>_async_score_with_llm</code> in
-<code>paths/parallel.py</code> and in <code>paths/scorer.py</code>.</p>
-<p><strong>Done when</strong> every path-gating default reads <code>get_path_scan_threshold()</code>, and a test fails if any
-path gate reads <code>get_discovery_threshold()</code>. The describe-then-judge step has one owner that both callers use. The
-focused path tests pass with baseline and after logs.</p>
+<section data-reckon="section" data-id="s14" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The path describe step has one owner, <code>describe_paths</code>, whose prompt states its output shape. Directory triage uses it, and a failed description no longer blocks the Jev judgment. Every path gate in the paths package reads the 0.30 scan threshold, guarded by a test. The <code>discover status</code> and <code>discover inspect</code> views move to the same threshold in the CLI session's <code>eb32cddb1</code>, not yet merged. Reviews 18/16/19/19/19/18 and 19/20/20/19/20/20. <a href="/imas-codex/evidence/archive/discovery-judgments-through-jev-landed.html#s14">full record</a></p>
+</section>
 
     <section class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
@@ -587,6 +580,9 @@ fresh-description arm of the variation measure once the triage worker routes thr
 </div>
 <div class="r-comment" data-section="s17" data-id="c-run-r-20261008T073634788007-review-of-path-category-goldens" data-who="reckon-build" data-when="2026-10-08T07:51:07.978Z">
     <div class="r-comment-body"><p>Review of r-20261008T065131134683-path-category-goldens stored as a parsed six-dimension record (goal_fidelity 17, evidence 19, scope_discipline 20, durability 12, fit 16, reuse 19; total 103) with reviewed_base_sha 1156da5f and reviewed_head_sha 98a046c8d, two follow-on findings, and an unmeasured added-failure count because the reviewed manifest names no baseline_suite or after_suite gate log.</p></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-20261008-s17-from-s14" data-who="reckon-build" data-when="2026-10-08T08:15:00Z">
+    <div class="r-comment-body"><p>Folded from §14's review into node 2. First, <code>TriagedDirectory.description</code> in <code>paths/models.py</code> is typed <code>str</code> but carries <code>None</code> when the description is unobserved, which matches this section's knowledge-front rule. Type it optional. Second, the describe-failure replay does not assert that a failed description records no description cost, so add that assertion.</p></div>
 </div>
 <div class="r-comment" data-section="s15" data-id="c-run-r-20261008T060108264897-facility-access-matches" data-who="reckon-build" data-when="2026-10-08T06:44:13Z">
     <div class="r-comment-body"><p>Facility-configured access calls now reach path and both code judgment arms. On 158 labelled JT-60SA paths, fresh AUC was 0.8502 without and 0.8513 with match evidence; at the 0.30 gate TP/FP/FN/TN changed from 87/6/31/34 to 86/6/32/34. Focused gate 106 passed; removing the builder's facility sources failed all four facility cases.</p></div>
