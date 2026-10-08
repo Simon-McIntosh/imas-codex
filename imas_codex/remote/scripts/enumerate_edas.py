@@ -471,6 +471,7 @@ def enumerate_lcdb(config):
                         / f"{category}.ldb"
                     )
                     metadata = _lcdb_file_metadata(source_file)
+                    source_exists = source_file.is_file()
                     for name in names:
                         key = (owner, category, name)
                         unit, unit_key = _lcdb_field_unit(name, metadata)
@@ -489,6 +490,7 @@ def enumerate_lcdb(config):
                                 or ""
                             ),
                             "metadata_source": str(source_file),
+                            "metadata_file_present": source_exists,
                             "unit_source_key": unit_key,
                         }
         except Exception:

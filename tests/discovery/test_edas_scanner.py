@@ -589,6 +589,7 @@ class TestConfiguredDatabases:
         assert by_name["XEXPINDEX"]["units"] == ""
         assert by_name["NFIT"]["units"] == ""
         assert all(row["metadata_source"] == str(file) for row in rows)
+        assert all(row["metadata_file_present"] for row in rows)
 
     async def test_lcdb_signal_keeps_owner_category_and_shot(self):
         fixture = {
