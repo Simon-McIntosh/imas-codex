@@ -3,13 +3,13 @@
 The candidate stage drains the sources the signals stage seeded; it has no
 seeding half. So ``--scan-only`` runs no worker (there is nothing to seed),
 while ``--flush`` and the default run the single draining worker. ``--limit``
-caps the sources judged this run, ``--focus`` is refused because the claim
-query takes no item filter yet, and ``--topic`` is carried onto the stage for
-a scorer to steer (candidates has no free-text focus target of its own, so the
-topic reaches no worker here).
+caps the sources judged this run. ``--focus`` accepts named SignalSource ids
+or a manifest file; known ids reach the worker, and unknown ids are refused by
+name. ``--topic`` is carried onto the stage for a scorer to steer (candidates
+has no free-text focus target of its own, so the topic reaches no worker here).
 
-``run_discovery`` and ``run_candidate_engine`` are replaced, so each test
-measures which half the stage selects without a live graph or decisions
+``run_discovery`` and ``run_candidate_engine`` are replaced, and focused tests
+stub the graph read, so the stage checks need no live graph or decisions
 endpoint. The negative control lives in the manifest's ``negative_control_log``.
 """
 
