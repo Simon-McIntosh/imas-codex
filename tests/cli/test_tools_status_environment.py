@@ -1,4 +1,4 @@
-"""``tools status`` environment exit codes and the ``discover signals`` refusal.
+"""``tools status`` environment exit codes and the signal discovery refusal.
 
 The probe is stubbed at both probe sites: the tool summary
 (``imas_codex.remote.tools``) and the ``discover`` preflight
@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover.signals import signals
+from imas_codex.cli.discover import discover, sequence
 from imas_codex.cli.tools import tools
 from imas_codex.remote import python as remote_python, tools as remote_tools
 
@@ -123,8 +123,22 @@ def test_status_fails_and_shows_fix_on_unmet_floor(
 
 
 def test_discover_signals_refuses_on_failing_probe(
-    no_ssh: None, monkeypatch: pytest.MonkeyPatch
+    no_ssh: None, monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:
+    from imas_codex.cli import logging as cli_logging
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
     _stub_probe(
         monkeypatch,
         _declared(
@@ -133,7 +147,9 @@ def test_discover_signals_refuses_on_failing_probe(
             [{"name": "numpy", "importable": True, "error": None}],
         ),
     )
-    result = CliRunner().invoke(signals, ["jt-60sa"])
+    result = CliRunner().invoke(
+        discover, ["jt-60sa", "--only", "signals", "--scan-only"]
+    )
     assert result.exit_code != 0
     assert "3.12" in result.output
     assert "module load python/3.12" in result.output

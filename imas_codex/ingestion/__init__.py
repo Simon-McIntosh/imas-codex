@@ -13,7 +13,7 @@ All content types share:
 - VLM captioning for embedded images
 
 Graph-driven workflow:
-1. discover code <facility> → scan + score → CodeFile nodes
+1. discover <facility> --only code → scan + score → CodeFile nodes
 2. ingest run <facility> → fetch + chunk + embed + link
 """
 

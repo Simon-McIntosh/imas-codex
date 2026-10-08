@@ -1,13 +1,13 @@
-"""The signals discovery stage function and its thin click wrapper.
+"""The signals discovery stage function and bare command routing.
 
 ``run_signals_stage`` carries the discovery body behind a frozen
-:class:`SignalsStageOptions`; the ``signals`` click command builds those
-options and calls the stage. These tests measure the settled surface:
+:class:`SignalsStageOptions`; the discovery sequence builds those
+options and calls the stage. These tests measure the command surface:
 
 - ``--scan-only`` selects the seeding half: the engine gets ``discover_only``.
 - ``--flush`` selects the draining half: the engine gets ``enrich_only``.
-- ``--topic`` is the free-text steer the old free-text ``--focus`` reached.
-- ``--limit`` caps items (the old ``--signal-limit``).
+- ``--topic`` is the free-text steer for enrichment.
+- ``--limit`` caps items.
 - ``--focus ITEMS`` is refused with a message stating the mechanism: the
   signals claim query takes no item filter.
 
@@ -27,10 +27,10 @@ import click
 import pytest
 from click.testing import CliRunner
 
+from imas_codex.cli.discover import discover
 from imas_codex.cli.discover.signals import (
     SignalsStageOptions,
     run_signals_stage,
-    signals,
 )
 
 FACILITY = "jet"
@@ -48,6 +48,28 @@ _ENGINE_RESULT = {
     "cost": 0.0,
     "elapsed_seconds": 0.5,
 }
+
+
+@pytest.fixture(autouse=True)
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+    )
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
 
 
 @pytest.fixture
@@ -132,7 +154,9 @@ def test_focus_items_are_refused_stating_the_mechanism(engine) -> None:
 
 
 def test_cli_focus_is_refused(engine) -> None:
-    result = CliRunner().invoke(signals, [FACILITY, "--focus", "MAG/coil"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "signals", "--focus", "MAG/coil"]
+    )
     assert result.exit_code != 0
     assert "claim query takes no item filter" in result.output
     assert "facility-discovery-sequence" not in result.output
@@ -142,18 +166,19 @@ def test_cli_focus_is_refused(engine) -> None:
 def test_click_command_is_a_thin_wrapper() -> None:
     with patch("imas_codex.cli.discover.signals.run_signals_stage") as mock_stage:
         result = CliRunner().invoke(
-            signals,
+            discover,
             [
                 FACILITY,
+                "--only",
+                "signals",
                 "--scan-only",
-                "--flush",
                 "--topic",
                 "eq",
                 "--limit",
                 "5",
                 "-c",
                 "2.5",
-                "-s",
+                "--scanners",
                 "mdsplus",
                 "--category",
                 "MAG,PSRC",
@@ -173,7 +198,7 @@ def test_click_command_is_a_thin_wrapper() -> None:
     assert facility == FACILITY
     assert isinstance(options, SignalsStageOptions)
     assert options.scan_only is True
-    assert options.flush is True
+    assert options.flush is False
     assert options.topic == "eq"
     assert options.limit == 5
     assert options.cost_limit == 2.5
@@ -182,27 +207,32 @@ def test_click_command_is_a_thin_wrapper() -> None:
     assert options.rescan is True
     assert options.enrich_workers == 3
     assert options.check_workers == 6
-    assert options.time_limit == 7
+    assert 6.9 < options.time_limit <= 7
     assert options.reference_shot == 99
 
 
-def test_enrich_only_is_a_deprecated_alias_for_flush() -> None:
-    with patch("imas_codex.cli.discover.signals.run_signals_stage") as mock_stage:
-        result = CliRunner().invoke(signals, [FACILITY, "--enrich-only"])
-    assert result.exit_code == 0, result.output
-    options = mock_stage.call_args.args[1]
-    assert options.flush is True
+def test_retired_enrich_alias_is_refused() -> None:
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "signals", "--enrich-only"]
+    )
+    assert result.exit_code != 0
+    assert "No such option: --enrich-only" in result.output
 
 
 def test_cli_scan_only_reaches_the_engine(engine) -> None:
-    result = CliRunner().invoke(signals, [FACILITY, "--scan-only", "-s", "mdsplus"])
+    result = CliRunner().invoke(
+        discover,
+        [FACILITY, "--only", "signals", "--scan-only", "--scanners", "mdsplus"],
+    )
     assert result.exit_code == 0, result.output
     assert engine["discover_only"] is True
     assert engine["enrich_only"] is False
 
 
 def test_cli_flush_reaches_the_engine(engine) -> None:
-    result = CliRunner().invoke(signals, [FACILITY, "--flush", "-s", "mdsplus"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "signals", "--flush", "--scanners", "mdsplus"]
+    )
     assert result.exit_code == 0, result.output
     assert engine["enrich_only"] is True
     assert engine["discover_only"] is False

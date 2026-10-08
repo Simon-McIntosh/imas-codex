@@ -1,17 +1,4 @@
-"""Discovery CLI: Graph-led facility exploration.
-
-Modular CLI package with domain commands as direct subcommands:
-
-    imas-codex discover paths tcv          # Run paths discovery
-    imas-codex discover wiki jt-60sa        # Run wiki discovery
-    imas-codex discover signals tcv        # Run signals discovery
-    imas-codex discover code tcv           # Run code discovery
-    imas-codex discover documents tcv      # Run document discovery
-    imas-codex discover status tcv         # Status (all domains)
-    imas-codex discover status tcv -d wiki # Status (wiki only)
-    imas-codex discover clear tcv          # Clear (all domains)
-    imas-codex discover clear tcv -d paths # Clear (paths only)
-"""
+"""Discovery CLI: graph-led facility exploration."""
 
 from __future__ import annotations
 
@@ -51,12 +38,8 @@ def discover():
     """Discover facility resources with graph-led exploration.
 
     \b
-    Domain Commands (each runs discovery directly):
-      paths              Directory structure discovery
-      code               Source code discovery from scored paths
-      documents          Document & image discovery
-      wiki               Wiki page discovery and ingestion
-      signals            Facility signal discovery (incl. static MDSplus trees)
+    Run discovery for every domain with a facility argument. Use --only to
+    select one domain.
 
     \b
     Management Commands:
@@ -67,11 +50,9 @@ def discover():
 
     \b
     Examples:
-      imas-codex discover paths jet            # Run paths discovery
-      imas-codex discover wiki jt-60sa          # Run wiki discovery
-      imas-codex discover code tcv             # Code discovery
-      imas-codex discover documents tcv        # Document discovery
-      imas-codex discover signals tcv          # Signal discovery
+      imas-codex discover jet                    # Run every domain
+      imas-codex discover jt-60sa --only wiki    # Run wiki discovery
+      imas-codex discover tcv --only signals     # Run signal discovery
       imas-codex discover status jet           # All domains status
       imas-codex discover status jet -d wiki   # Wiki status only
       imas-codex discover clear jet -d paths   # Clear paths only
@@ -510,24 +491,9 @@ def discover_inspect(facility: str, scanned: int, scored: int, as_json: bool) ->
 
 
 # =============================================================================
-# Register Domain Commands
+# Register Sequence Command
 # =============================================================================
 
-# Import and register domain commands as direct subcommands.
-# Each domain module exposes a single @click.command that runs its pipeline.
-# `discover paths tcv` runs paths discovery directly (no subgroup).
-from imas_codex.cli.discover.code import code  # noqa: E402
-from imas_codex.cli.discover.documents import documents  # noqa: E402
-from imas_codex.cli.discover.map import map_candidates  # noqa: E402
-from imas_codex.cli.discover.paths import paths  # noqa: E402
 from imas_codex.cli.discover.sequence import run as sequence_run  # noqa: E402
-from imas_codex.cli.discover.signals import signals  # noqa: E402
-from imas_codex.cli.discover.wiki import wiki  # noqa: E402
 
-discover.add_command(paths)
-discover.add_command(wiki)
-discover.add_command(signals)
-discover.add_command(code)
-discover.add_command(documents)
-discover.add_command(map_candidates)
 discover.add_command(sequence_run)

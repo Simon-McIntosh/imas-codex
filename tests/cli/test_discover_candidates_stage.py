@@ -1,4 +1,4 @@
-"""Drive the candidate stage function and its thin click wrapper.
+"""Drive the candidate stage function through the bare command.
 
 The candidate stage drains the sources the signals stage seeded; it has no
 seeding half. So ``--scan-only`` runs no worker (there is nothing to seed),
@@ -15,6 +15,7 @@ endpoint. The negative control lives in the manifest's ``negative_control_log``.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 
 import click
@@ -28,6 +29,25 @@ from imas_codex.cli.discover.map import (
 )
 
 FACILITY = "jet"
+
+
+@pytest.fixture(autouse=True)
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
 
 
 @pytest.fixture
@@ -161,7 +181,7 @@ def test_topic_is_carried_to_the_stage(stage_env, engine_calls, caplog):
 
 
 # =============================================================================
-# The click command is a thin wrapper
+# The bare command builds stage options
 # =============================================================================
 
 
@@ -178,15 +198,16 @@ def test_map_command_builds_options_and_delegates(monkeypatch):
     result = CliRunner().invoke(
         discover,
         [
-            "map",
             FACILITY,
-            "-d",
+            "--only",
+            "candidates",
+            "--physics-domain",
             "magnetics",
-            "-i",
+            "--ids",
             "equilibrium",
             "-c",
             "2.0",
-            "-n",
+            "--limit",
             "50",
             "--time",
             "5",
@@ -195,7 +216,9 @@ def test_map_command_builds_options_and_delegates(monkeypatch):
 
     assert result.exit_code == 0, result.output
     assert captured["facility"] == FACILITY
-    assert captured["options"] == CandidatesStageOptions(
+    options = captured["options"]
+    assert 4.9 < options.time_limit <= 5
+    assert dataclasses.replace(options, time_limit=5) == CandidatesStageOptions(
         physics_domain=("magnetics",),
         ids=("equilibrium",),
         cost_limit=2.0,

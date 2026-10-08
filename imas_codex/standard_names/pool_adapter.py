@@ -62,7 +62,7 @@ async def run_explicit_paths(
     # ── Step 1: Seed StandardNameSource nodes ──────────────────────────
     # For explicit paths, create SNS nodes so the compose step has items.
     # For source-based (--source dd without --paths), run extract to
-    # discover paths first.
+    # Scan facility paths first.
     if paths:
         batch_items = await _seed_explicit_paths(paths, force=state.force)
     else:

@@ -2281,7 +2281,7 @@ def _related_path_neighbours(
 ) -> list[dict]:
     """Fetch explicit graph-relationship neighbours for a DD path.
 
-    Calls :func:`related_dd_search` to discover paths related via
+    Calls :func:`related_dd_search` to find paths related via
     cluster membership, shared coordinates, matching units, identifier
     schemas, or COCOS transformation type.  Returns a compact list of
     dicts suitable for Jinja template injection.

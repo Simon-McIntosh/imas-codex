@@ -12,8 +12,6 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.text import Text
 
-from imas_codex.cli.discover.common import reset_to_option
-
 logger = logging.getLogger(__name__)
 
 
@@ -106,150 +104,6 @@ def run_paths_stage(facility: str, options: PathsStageOptions) -> None:
         reset_to=options.reset_to,
         timeout_minutes=options.time_limit,
         triage_batch_size=options.triage_batch_size,
-    )
-
-
-@click.command()
-@click.argument("facility")
-@click.option(
-    "--focus",
-    multiple=True,
-    type=str,
-    help="Restrict discovery to path items or a newline-separated manifest",
-)
-@click.option(
-    "--cost-limit",
-    "-c",
-    type=float,
-    default=10.0,
-    help="Maximum LLM spend in USD (default: $10)",
-)
-@click.option(
-    "--limit",
-    type=int,
-    default=None,
-    help="Stop after this many paths reach terminal state (triaged/scored)",
-)
-@click.option(
-    "--topic",
-    type=str,
-    help="Natural language focus (e.g., 'equilibrium codes')",
-)
-@click.option(
-    "--threshold",
-    default=None,
-    type=float,
-    help="Minimum score for high-value processing (default: from settings)",
-)
-@click.option(
-    "--scan-workers",
-    default=1,
-    type=int,
-    help="Number of scan workers (default: 1, single SSH connection)",
-)
-@click.option(
-    "--triage-workers",
-    default=2,
-    type=int,
-    help="Number of triage workers (default: 2, parallel LLM calls)",
-)
-@click.option(
-    "--scan-only",
-    is_flag=True,
-    default=False,
-    help="SSH scan only, no LLM scoring (fast, requires SSH access)",
-)
-@click.option(
-    "--flush",
-    is_flag=True,
-    default=False,
-    help="Drain existing paths without scanning or expanding new roots",
-)
-@click.option(
-    "--rejudge-stale",
-    is_flag=True,
-    default=False,
-    help="Refresh stale path judgments under exactly one --focus path from stored evidence",
-)
-@click.option(
-    "--add-roots",
-    is_flag=True,
-    default=False,
-    help="Add missing discovery_roots from facility config",
-)
-@click.option(
-    "--enrich-threshold",
-    type=float,
-    default=None,
-    help="Auto-enrich paths scoring >= threshold (default: from settings)",
-)
-@reset_to_option("paths")
-@click.option(
-    "--time",
-    "-t",
-    "time_limit",
-    type=int,
-    default=None,
-    help="Maximum runtime in minutes (e.g., 10). Discovery halts when time expires.",
-)
-@click.option(
-    "--triage-batch-size",
-    type=int,
-    default=None,
-    help="Paths per triage LLM call (default: 50). Tune for cost vs quality.",
-)
-def paths(
-    facility: str,
-    focus: tuple[str, ...],
-    cost_limit: float,
-    limit: int | None,
-    topic: str | None,
-    threshold: float | None,
-    scan_workers: int,
-    triage_workers: int,
-    scan_only: bool,
-    flush: bool,
-    rejudge_stale: bool,
-    add_roots: bool,
-    enrich_threshold: float | None,
-    time_limit: int | None,
-    triage_batch_size: int | None,
-    reset_to: str | None = None,
-) -> None:
-    """Discover and score directory structure at a facility.
-
-    Parallel scan workers enumerate directories via SSH while score workers
-    classify paths using LLM. Both run concurrently with the graph as
-    coordination. Discovery is idempotent - rerun to continue from current state.
-
-    \b
-    Examples:
-      imas-codex discover paths <facility>                 # Default $10 limit
-      imas-codex discover paths <facility> -c 20.0         # $20 limit
-      imas-codex discover paths iter --topic "equilibrium"  # Steer scoring
-      imas-codex discover paths iter --scan-only            # SSH only, no LLM
-      imas-codex discover paths iter --flush                # Drain existing work
-      imas-codex discover paths tcv --focus /home/codes/astra
-    """
-    run_paths_stage(
-        facility,
-        PathsStageOptions(
-            focus=focus,
-            topic=topic,
-            cost_limit=cost_limit,
-            limit=limit,
-            threshold=threshold,
-            scan_workers=scan_workers,
-            triage_workers=triage_workers,
-            scan_only=scan_only,
-            flush=flush,
-            rejudge_stale=rejudge_stale,
-            add_roots=add_roots,
-            enrich_threshold=enrich_threshold,
-            reset_to=reset_to,
-            time_limit=time_limit,
-            triage_batch_size=triage_batch_size,
-        ),
     )
 
 
@@ -348,7 +202,7 @@ def _run_iterative_discovery(
         if triage_only:
             log_print("[red]Error: --flush requires existing paths in the graph.[/red]")
             log_print(
-                f"[yellow]Run 'imas-codex discover paths {facility}' or "
+                f"[yellow]Run 'imas-codex discover {facility} --only paths' or "
                 "'--scan-only' first to populate the graph.[/yellow]"
             )
             raise SystemExit(1)
@@ -729,7 +583,7 @@ def _print_discovery_summary(
     if scan_only:
         console.print()
         console.print(
-            f"[dim]Next step: Run 'imas-codex discover paths {facility} --flush' "
+            f"[dim]Next step: Run 'imas-codex discover {facility} --only paths --flush' "
             "to score listed paths.[/dim]"
         )
         return

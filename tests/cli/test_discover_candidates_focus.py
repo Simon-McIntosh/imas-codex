@@ -111,7 +111,25 @@ def test_unknown_source_is_refused_by_name(focus_env):
     assert "§" not in message
 
 
-def test_map_command_passes_focus_to_the_stage(monkeypatch):
+def test_candidate_selection_passes_focus_to_the_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+    )
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
     received = []
 
     def fake_stage(facility, options):
@@ -119,7 +137,16 @@ def test_map_command_passes_focus_to_the_stage(monkeypatch):
 
     monkeypatch.setattr("imas_codex.cli.discover.map.run_candidates_stage", fake_stage)
     result = CliRunner().invoke(
-        discover, ["map", FACILITY, "--focus", "source-a", "--focus", "source-b"]
+        discover,
+        [
+            FACILITY,
+            "--only",
+            "candidates",
+            "--focus",
+            "source-a",
+            "--focus",
+            "source-b",
+        ],
     )
 
     assert result.exit_code == 0, result.output

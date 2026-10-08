@@ -1,4 +1,4 @@
-"""Exercise the code discovery stage and its command adapter."""
+"""Exercise the code discovery stage through the bare command."""
 
 from __future__ import annotations
 
@@ -10,10 +10,33 @@ from types import SimpleNamespace
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover.code import CodeStageOptions, code, run_code_stage
+from imas_codex.cli.discover import discover
+from imas_codex.cli.discover.code import CodeStageOptions, run_code_stage
 
 _CODE_MODULE = importlib.import_module("imas_codex.cli.discover.code")
 FACILITY = "tcv"
+
+
+@pytest.fixture(autouse=True)
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+    )
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
 
 
 @pytest.fixture
@@ -72,9 +95,11 @@ def test_command_builds_options_and_calls_the_stage(monkeypatch) -> None:
     )
 
     result = CliRunner().invoke(
-        code,
+        discover,
         [
             FACILITY,
+            "--only",
+            "code",
             "--focus",
             "/analysis/src",
             "--topic",
@@ -88,7 +113,9 @@ def test_command_builds_options_and_calls_the_stage(monkeypatch) -> None:
     assert calls == [
         (
             FACILITY,
-            CodeStageOptions(focus=("/analysis/src",), topic="equilibrium", limit=3),
+            CodeStageOptions(
+                focus=("/analysis/src",), topic="equilibrium", limit=3, cost_limit=25.0
+            ),
         )
     ]
 
@@ -104,7 +131,7 @@ def test_scan_only_runs_the_seeding_workers(stage_env) -> None:
 
 
 def test_flush_runs_only_the_draining_workers(stage_env) -> None:
-    result = CliRunner().invoke(code, [FACILITY, "--flush"])
+    result = CliRunner().invoke(discover, [FACILITY, "--only", "code", "--flush"])
 
     assert result.exit_code == 0, result.output
     assert len(stage_env) == 1
@@ -119,7 +146,9 @@ def test_flush_runs_only_the_draining_workers(stage_env) -> None:
 
 
 def test_scan_only_and_flush_are_refused_before_the_engine(stage_env) -> None:
-    result = CliRunner().invoke(code, [FACILITY, "--scan-only", "--flush"])
+    result = CliRunner().invoke(
+        discover, [FACILITY, "--only", "code", "--scan-only", "--flush"]
+    )
 
     assert result.exit_code != 0
     assert stage_env == []
@@ -127,9 +156,11 @@ def test_scan_only_and_flush_are_refused_before_the_engine(stage_env) -> None:
 
 def test_topic_limit_focus_and_path_gate_reach_the_engine(stage_env) -> None:
     result = CliRunner().invoke(
-        code,
+        discover,
         [
             FACILITY,
+            "--only",
+            "code",
             "--focus",
             "/analysis/src/one",
             "--focus",
@@ -151,7 +182,7 @@ def test_topic_limit_focus_and_path_gate_reach_the_engine(stage_env) -> None:
 
 
 def test_command_help_shows_the_settled_spellings() -> None:
-    result = CliRunner().invoke(code, ["--help"])
+    result = CliRunner().invoke(discover, [FACILITY, "--help"])
 
     assert result.exit_code == 0, result.output
     for option in ("--scan-only", "--flush", "--topic", "--limit", "--focus"):
