@@ -1,0 +1,15 @@
+<section id="path-category-gate">
+  <h2 id="path-category-gate-title">Category gate and scored path expansion</h2>
+  <table id="path-category-gate-measures">
+    <thead><tr><th>Measure</th><th>Result</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Source-inspected scan-or-expand AUC</td><td>0.9244; 222 canonical paths, 134 positives; earlier 95% interval 0.8858–0.9608</td><td><code>category-auc.log</code></td></tr>
+      <tr><td>Stored category score refresh</td><td>6,136 JT-60SA paths updated; 6,284 usable distributions and zero mismatches on readback</td><td><code>live-gate-refresh.log</code></td></tr>
+      <tr><td>Scored container expansion</td><td><code>/home/a144017/ACCOME/JT60SA</code>: 20 immediate child directories listed and persisted</td><td><code>live-expansion-modern-python.log</code></td></tr>
+      <tr><td>Scored archive refusal</td><td><code>/home/a048717/tool/plusFORT_bck</code>: zero claims</td><td><code>live-archive-refusal.log</code></td></tr>
+      <tr><td>Focused tests</td><td>12 passed; exclusion claims 46 passed</td><td><code>focused-gate-refresh.log</code>, <code>exclusion-gate.log</code></td></tr>
+      <tr><td>Facet gate mutation</td><td>The scored-container claim test failed; restored head passed</td><td><code>negative-control.log</code>, <code>negative-head-final.log</code></td></tr>
+    </tbody>
+  </table>
+  <p id="path-category-gate-receipts"><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103855443292-path-category-gate/</code></p>
+</section>

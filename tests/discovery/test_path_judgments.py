@@ -8,7 +8,6 @@ from imas_codex.discovery.paths.scorer import (
     build_path_judgment_questions,
     build_path_judgment_state,
     path_judgment_fields,
-    path_scan_relevance,
 )
 from imas_codex.graph.schema import get_schema
 
@@ -115,17 +114,30 @@ def test_typed_path_judgment_stores_distributions_and_computes_gates():
     assert fields["triage_data_access"] == 1.1 / 3
     assert fields["triage_data_access_probs"] == [0.4, 0.2, 0.3, 0.1]
     assert fields["triage_data_access_confidence"] == 0.6
-    assert fields["scan_relevance"] == 1.1 / 3
+    assert fields["scan_relevance"] == 1.0
     assert fields["should_enrich"] is True
-    assert (
-        path_judgment_fields(answers, "test-judge", scan_threshold=0.4)["should_enrich"]
-        is False
+    low_code_answers = {
+        **answers,
+        "path_purpose": {
+            "choice": "other",
+            "probabilities": {
+                name: 0.2
+                if name == "analysis_code"
+                else 0.8
+                if name == "other"
+                else 0.0
+                for name in options
+            },
+            "confidence": 0.91,
+        },
+    }
+    low_code_fields = path_judgment_fields(
+        low_code_answers, "test-judge", scan_threshold=0.4
     )
+    assert low_code_fields["scan_relevance"] == 0.2
+    assert low_code_fields["should_enrich"] is False
     assert fields["should_expand"] is True
     assert fields["judgment_model"] == "test-judge"
-    assert (
-        path_scan_relevance({"score_documentation": 1, "score_data_access": 0.1}) == 0.1
-    )
 
 
 def test_code_scan_claim_uses_judged_facets(monkeypatch):

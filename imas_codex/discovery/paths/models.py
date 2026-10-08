@@ -307,8 +307,8 @@ class TriagedDirectory:
     path_purpose: ResourcePurpose | str
     """Classified purpose of the directory."""
 
-    description: str
-    """One-sentence description of the directory's contents."""
+    description: str | None
+    """One-sentence description, if the description call succeeded."""
 
     evidence: DirectoryEvidence
     """Collected evidence for grounded scoring."""

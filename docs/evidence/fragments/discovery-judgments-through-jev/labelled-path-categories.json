@@ -1,0 +1,7184 @@
+[
+  {
+    "path": "/analysis/data/OFMC",
+    "category": "modeling_data",
+    "canonical_copy": "/analysis/data/OFMC",
+    "source_evidence": "/analysis/data/OFMC/femag.Jikki.control.txt",
+    "observed": "*   FEMAG control.txt   *",
+    "judgment": {
+      "path_purpose_probs": [
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.9,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.82
+    }
+  },
+  {
+    "path": "/analysis/data/TOPICS/IMPACT",
+    "category": "modeling_data",
+    "canonical_copy": "/analysis/data/TOPICS/IMPACT",
+    "source_evidence": "/analysis/data/TOPICS/IMPACT",
+    "observed": "directory entries inspected",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.92,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0
+      ],
+      "children_worth_listing": 0.79
+    }
+  },
+  {
+    "path": "/analysis/lib/JT60SAEQDB",
+    "category": "data_access",
+    "canonical_copy": "/analysis/lib/JT60SAEQDB",
+    "source_evidence": "/analysis/lib/JT60SAEQDB/eqdbms/eqdbget.f",
+    "observed": "SUBROUTINE EQDBGET ( ISH, TIM, NEQDB, IRET )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.96,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.78
+    }
+  },
+  {
+    "path": "/analysis/lib/eqdbms",
+    "category": "data_access",
+    "canonical_copy": "/analysis/lib/eqdbms",
+    "source_evidence": "/analysis/lib/eqdbms/eqdbget.f",
+    "observed": "SUBROUTINE EQDBGET ( ISH, TIM, NEQDB, IRET )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.08,
+        0.0,
+        0.91,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.75
+    }
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l3/GS",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/ECCD/v9l3/GS",
+    "source_evidence": "/analysis/src/ECCD/v9l3/GS/appli/amtre.f",
+    "observed": "subroutine amtre ( x , keta , xr , xb , ib )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.85,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.12,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.85
+    }
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l3/GS/appli",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/ECCD/v9l3/GS/appli",
+    "source_evidence": "/analysis/src/ECCD/v9l3/GS/appli/amtre.f",
+    "observed": "subroutine amtre ( x , keta , xr , xb , ib )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.97,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l3/GS/basic",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/ECCD/v9l3/GS/basic",
+    "source_evidence": "/analysis/src/ECCD/v9l3/GS/basic/arecls.f",
+    "observed": "subroutine arecls",
+    "judgment": {
+      "path_purpose_probs": [
+        0.04,
+        0.95,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l3/GS/lib",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/ECCD/v9l3/GS/lib",
+    "source_evidence": "/analysis/src/ECCD/v9l3/GS/lib/libmygsa.a",
+    "observed": "file present; libmygsa.a",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.54,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.41,
+        0.0,
+        0.02,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l3/lib",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/ECCD/v9l3/lib",
+    "source_evidence": "/analysis/src/ECCD/v9l3/lib/libapl.a",
+    "observed": "file present; libapl.a",
+    "judgment": {
+      "path_purpose_probs": [
+        0.34,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.48,
+        0.0,
+        0.04,
+        0.0,
+        0.09
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l4/GS",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/ECCD/v9l4/GS",
+    "source_evidence": "/analysis/src/ECCD/v9l4/GS/appli/amtre.f",
+    "observed": "subroutine amtre ( x , keta , xr , xb , ib )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.98,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.76
+    }
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l4/GS/appli",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/ECCD/v9l4/GS/appli",
+    "source_evidence": "/analysis/src/ECCD/v9l4/GS/appli/amtre.f",
+    "observed": "subroutine amtre ( x , keta , xr , xb , ib )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/analysis/src/SAeqfame",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/SAeqfame",
+    "source_evidence": "/analysis/src/SAeqfame/eqread/dswt70.f",
+    "observed": "SUBROUTINE DSWT70",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.71,
+        0.0,
+        0.25,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.83
+    }
+  },
+  {
+    "path": "/analysis/src/SAeqfame/eqread",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/SAeqfame/eqread",
+    "source_evidence": "/analysis/src/SAeqfame/eqread/dswt70.f",
+    "observed": "SUBROUTINE DSWT70",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.34,
+        0.0,
+        0.64,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/SAeqfame/selene/plt",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/SAeqfame/selene/plt",
+    "source_evidence": "/analysis/src/SAeqfame/selene/plt/bafldt.f",
+    "observed": "SUBROUTINE BAFLDT(IDIVMD,GX,GY,ISTART,IEND,LINE,NB)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.3,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/analysis/src/SAeqread/inc.bak",
+    "category": "archive",
+    "canonical_copy": "/analysis/src/SAeqread/inc.bak",
+    "source_evidence": "/analysis/src/SAeqread/inc.bak/#AAA",
+    "observed": "C======================================================================= C     #AAA --- #COMDEC  FOR  MEUDAS.F",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.05,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.93,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/SAeqread/selene",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/SAeqread/selene",
+    "source_evidence": "/analysis/src/SAeqread/selene/calc_DL.f",
+    "observed": "SUBROUTINE calc_DL(NS,RS,ZS,DS)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.02,
+        0.97,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.73
+    }
+  },
+  {
+    "path": "/analysis/src/SAeqread/selene.bak",
+    "category": "archive",
+    "canonical_copy": "/analysis/src/SAeqread/selene.bak",
+    "source_evidence": "/analysis/src/SAeqread/selene.bak/selene.list",
+    "observed": "bafldt.f cmchck.f deriv.f diskwt.f distcl.f distcp.f distpl.f divprb.f dtvacu.f eqaxi.f eqerr.f eqextra.f eqgr",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.96,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/analysis/src/SAeqread/u_file.bak_9912",
+    "category": "archive",
+    "canonical_copy": "/analysis/src/SAeqread/u_file.bak_9912",
+    "source_evidence": "/analysis/src/SAeqread/u_file.bak_9912/crspnt.f",
+    "observed": "DOUBLE PRECISION FUNCTION   CRSPNT(X1,X2,Y1,Y2,R1)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.3,
+        0.0,
+        0.53,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.16,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.7
+    }
+  },
+  {
+    "path": "/analysis/src/SAselene_v2.0_forPSRC/RUNTIMESERIES/TIMESERIES/FORT96",
+    "category": "modeling_data",
+    "canonical_copy": "/analysis/src/SAselene_v2.0_forPSRC/RUNTIMESERIES/TIMESERIES/FORT96",
+    "source_evidence": "/analysis/src/SAselene_v2.0_forPSRC/RUNTIMESERIES/TIMESERIES/FORT96/fort.96.n000001",
+    "observed": "&namelist96 TTL='e063632    0.00000', TCUR= 0.00000000e+00, BTV= 6.66000000e+00, TMPW= 0.00000000e+00, DELX= 0",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.14,
+        0.83,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/analysis/src/SAselene_v2.0_forPSRC/extool",
+    "category": "other",
+    "canonical_copy": "/analysis/src/SAselene_v2.0_forPSRC/extool",
+    "source_evidence": "/analysis/src/SAselene_v2.0_forPSRC/extool/README",
+    "observed": "Original and Source",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.06,
+        0.0,
+        0.83,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.11,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/SAselene_v2.0_forPSRC/inc",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/SAselene_v2.0_forPSRC/inc",
+    "source_evidence": "/analysis/src/SAselene_v2.0_forPSRC/inc/#AAA",
+    "observed": "C======================================================================= C     #AAA --- #COMDEC  FOR  MEUDAS.F",
+    "judgment": {
+      "path_purpose_probs": [
+        0.06,
+        0.89,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/analysis/src/SAselene_v2.0_forPSRC/minpack",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/SAselene_v2.0_forPSRC/minpack",
+    "source_evidence": "/analysis/src/SAselene_v2.0_forPSRC/minpack/dpmpar.f",
+    "observed": "double precision function dpmpar(i)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.73,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.27,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/client_eqdbms.EQ32.Rev1",
+    "source_evidence": "/analysis/src/client_eqdbms.EQ32.Rev1/Makefile",
+    "observed": "# EQDBLIB  Makefile",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.27,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.68,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.73
+    }
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB",
+    "source_evidence": "/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB/eqdb_get.f",
+    "observed": "c\teqdb_get.f",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.15,
+        0.0,
+        0.83,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1/eqtrace/eqtrace",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/client_eqdbms.EQ32.Rev1/eqtrace/eqtrace",
+    "source_evidence": "/analysis/src/client_eqdbms.EQ32.Rev1/eqtrace/eqtrace/common.f90",
+    "observed": "module common_params",
+    "judgment": {
+      "path_purpose_probs": [
+        0.16,
+        0.72,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.11,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.32
+    }
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1/eqtrace/eqtrace/mod",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/client_eqdbms.EQ32.Rev1/eqtrace/eqtrace/mod",
+    "source_evidence": "/analysis/src/client_eqdbms.EQ32.Rev1/eqtrace/eqtrace/mod/common_params.mod",
+    "observed": "file present; common_params.mod",
+    "judgment": {
+      "path_purpose_probs": [
+        0.08,
+        0.31,
+        0.0,
+        0.32,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.17,
+        0.0,
+        0.01,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1/inc/F_129",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/client_eqdbms.EQ32.Rev1/inc/F_129",
+    "source_evidence": "/analysis/src/client_eqdbms.EQ32.Rev1/inc/F_129/#AAA.bf",
+    "observed": "C======================================================================= C     INCLUDE #AAA.bf C==============",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.03,
+        0.01,
+        0.73,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.04
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/LICENSE.txt",
+    "observed": "This License applies to the computer program known as \"FastIO",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.89,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.04,
+        0.03,
+        0.01
+      ],
+      "children_worth_listing": 0.32
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/LICENSE.txt",
+    "observed": "This License applies to the computer program known as \"FastIO",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.92,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.08,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.35
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/doc",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/doc",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/doc/BenchMarks.txt",
+    "observed": "equivalently written for each library, that read in a 155-page",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.06
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/examples",
+    "category": "test_suite",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/examples",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/examples/arc/Arcs.c",
+    "observed": "cpdf_setFont(\"Times-Italic\", \"MacRomanEncoding\", 16.0);",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.85,
+        0.0,
+        0.0,
+        0.09,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.06,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/fonts",
+    "category": "other",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/fonts",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/fonts/README.Utopia",
+    "observed": "The Adobe typefaces (Type 1 font program, bitmaps and Adobe Font",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.3,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.14,
+        0.0,
+        0.53
+      ],
+      "children_worth_listing": 0.06
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/source",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/source",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/source/Makefile",
+    "observed": "INCLUDE_DIR=/usr/local/include",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.78,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.22,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/util/t1utils-1.9",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/util/t1utils-1.9",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/util/t1utils-1.9/README.t1utils",
+    "observed": "extract font resources from a Macintosh font file (ATM/Laserwriter).",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.96,
+        0.0,
+        0.04
+      ],
+      "children_worth_listing": 0.06
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/zlibcomp.ext",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/zlibcomp.ext",
+    "source_evidence": "/analysis/src/eagle-v4.05/ClibPDF/ClibPDF/zlibcomp.ext/README",
+    "observed": "other formats from ftp://ftp.uu.net/graphics/png/documents/zlib/zdoc-index.html",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.02,
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.52,
+        0.0,
+        0.4
+      ],
+      "children_worth_listing": 0.07
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/Procon",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/eagle-v4.05/Procon",
+    "source_evidence": "/analysis/src/eagle-v4.05/Procon/Procon.c",
+    "observed": "* FUNCTION        : To fork the Process",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.76,
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.19,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.5
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/Procon/Fork",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/eagle-v4.05/Procon/Fork",
+    "source_evidence": "/analysis/src/eagle-v4.05/Procon/Fork/Procon.c",
+    "observed": "* FUNCTION        : To fork the Process",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.9,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/README",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/eagle-v4.05/README",
+    "source_evidence": "/analysis/src/eagle-v4.05/README/Readme-euc",
+    "observed": "\ufffd\ufffd Control_Bldg._1F                                                \ufffd\ufffd",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.23
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/Tektro4105",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/Tektro4105",
+    "source_evidence": "/analysis/src/eagle-v4.05/Tektro4105/TEK4105F.f",
+    "observed": "subroutine tputtext( x, y, nc, text )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.03,
+        0.41,
+        0.01,
+        0.0,
+        0.26,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.29,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/Xtool",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/eagle-v4.05/Xtool",
+    "source_evidence": "/analysis/src/eagle-v4.05/Xtool/README",
+    "observed": "\ufffd\u8926\ufffd\ufffd\ufffd\ufffd\ufffd\u01a3\u03e3\u04a3\u0523\u04a3\ufffd\ufffd\ufffd \ufffd\u0623\u0523\ufffd\ufffd\ufffd \ufffd\ufffd\ufffd\ufffd\ufffd\u0621\ufffd \t\t\t\t\t\t               \ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\u01ef\ufffd\ufffd\ufffd\ufffd \t\t\t\t\t\t             \ufffd\ufffd\ufffd\ufffd\ufffd\u0225\u07a5\ufffd\ufffd\ufffd\ufffd\u01a5\ufffd \t\t\t\t\t\t     ",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.25,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.75,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.67
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/Xtool/SRC",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/Xtool/SRC",
+    "source_evidence": "/analysis/src/eagle-v4.05/Xtool/SRC/sample/activewin1.f",
+    "observed": "call xlinkdisplay",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.93,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.06,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.68
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/Xtool/SRC/sample",
+    "category": "test_suite",
+    "canonical_copy": "/analysis/src/eagle-v4.05/Xtool/SRC/sample",
+    "source_evidence": "/analysis/src/eagle-v4.05/Xtool/SRC/sample/activewin1.f",
+    "observed": "call xlinkdisplay",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.93,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/appli.clib.x.c",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/appli.clib.x.c",
+    "source_evidence": "/analysis/src/eagle-v4.05/appli.clib.x.c/cpdflib.h",
+    "observed": "#include <time.h>",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.71,
+        0.0,
+        0.09,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.17,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/appli.fork.x.f",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/appli.fork.x.f",
+    "source_evidence": "/analysis/src/eagle-v4.05/appli.fork.x.f/main.f",
+    "observed": "c  FUNCTION",
+    "judgment": {
+      "path_purpose_probs": [
+        0.06,
+        0.06,
+        0.03,
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.79,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/gksp2.x.f",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/gksp2.x.f",
+    "source_evidence": "/analysis/src/eagle-v4.05/gksp2.x.f/gacwk.f",
+    "observed": "subroutine gacwk ( nwkid )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/meta.x.c",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/meta.x.c",
+    "source_evidence": "/analysis/src/eagle-v4.05/meta.x.c/bbufalloc.c",
+    "observed": "/* ************************************************************************ */ /*                             ",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.93,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.07,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/metamerge",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/metamerge",
+    "source_evidence": "/analysis/src/eagle-v4.05/metamerge/main.f",
+    "observed": "write(6,*) ' *** enter meta_file name-1 ***'",
+    "judgment": {
+      "path_purpose_probs": [
+        0.34,
+        0.23,
+        0.0,
+        0.06,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.35000000000000003,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/pswall",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/eagle-v4.05/pswall",
+    "source_evidence": "/analysis/src/eagle-v4.05/pswall/main.f",
+    "observed": "call getarg( iwall+1,name )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.62,
+        0.18,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.19,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP",
+    "category": "container",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/mkfl.f",
+    "observed": "real stime(2000)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.81
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KC__",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KC__",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KC__/KC__001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.29000000000000004,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.62,
+        0.0,
+        0.0,
+        0.01,
+        0.01,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.4
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KDP_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KDP_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KDP_/KDP_001",
+    "observed": "Target Langmuir (electrostatic) probe array is a crucial diagnostics to measure target plasma parameters such ",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.05,
+        0.45,
+        0.0,
+        0.34,
+        0.0,
+        0.04,
+        0.0,
+        0.0,
+        0.09,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.59
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KEC_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KEC_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KEC_/KEC_001",
+    "observed": "Intensity of visible bremsstralung for determination of Zeff is measured using fiber array, fiber array, and p",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.02,
+        0.75,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.04,
+        0.0,
+        0.0,
+        0.04,
+        0.01,
+        0.08
+      ],
+      "children_worth_listing": 0.35
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KEM_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KEM_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KEM_/KEM_001",
+    "observed": "ECE (electron cyclotron emission) diagnostic provides the temporal evolution of local electron temperatures by",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.3,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.6900000000000001,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.58
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KETC",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KETC",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KETC",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KET_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KET_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KET_/KET_001",
+    "observed": "ECE (electron cyclotron emission) diagnostic provides the temporal evolution of local electron temperatures by",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.06,
+        0.0,
+        0.0,
+        0.92,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.63
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KHEP",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KHEP",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KHEP/KHEP001",
+    "observed": "CHARGE-EXCHANGE NEUTRAL PARTICLE diagnostics gives ion energy distributions by counting re-ionized energetic p",
+    "judgment": {
+      "path_purpose_probs": [
+        0.08,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.9,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.66
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KHP_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KHP_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KHP_/KHP_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.25,
+        0.15,
+        0.0,
+        0.0,
+        0.0,
+        0.59,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.76
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KIT_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KIT_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KIT_/KIT_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.18,
+        0.1,
+        0.02,
+        0.01,
+        0.03,
+        0.0,
+        0.1,
+        0.24,
+        0.0,
+        0.06,
+        0.0,
+        0.17,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.02,
+        0.06
+      ],
+      "children_worth_listing": 0.63
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KMSE",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KMSE",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KMSE/KMSE001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.55,
+        0.01,
+        0.0,
+        0.06,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.2,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.12,
+        0.02
+      ],
+      "children_worth_listing": 0.7
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KNGP",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KNGP",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KNGP/KNGP001",
+    "observed": "This diagnostic system determines the neutral gas pressure in Pa at the divertor, at the pumping port, and at ",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.29,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.65,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.76
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KNR_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KNR_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KNR_/KNR_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.18,
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.77,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.8
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KPD_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KPD_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KPD_/KPD_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.06,
+        0.01,
+        0.25,
+        0.0,
+        0.02,
+        0.0,
+        0.32,
+        0.3,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.52
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KPS_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KPS_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KPS_/KPS_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.13,
+        0.14,
+        0.01,
+        0.0,
+        0.0,
+        0.41000000000000003,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.06,
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.09,
+        0.05
+      ],
+      "children_worth_listing": 0.51
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KPVS",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KPVS",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KPVS/KPVS001",
+    "observed": "Not available.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.32,
+        0.02,
+        0.02,
+        0.0,
+        0.0,
+        0.42,
+        0.01,
+        0.0,
+        0.07,
+        0.0,
+        0.07,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.01,
+        0.05
+      ],
+      "children_worth_listing": 0.71
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KRCV",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KRCV",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KRCV/KRCV001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.06,
+        0.09,
+        0.01,
+        0.0,
+        0.0,
+        0.79,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.65
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KRV_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KRV_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KRV_/KRV_001",
+    "observed": "This diagnostic measures ion temperature, toroidal & poloidal rotation velocities and impurity density.  [Prin",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.22,
+        0.0,
+        0.0,
+        0.34,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.41000000000000003,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.74
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KSF_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KSF_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KSF_/KSF_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.16,
+        0.01,
+        0.12,
+        0.0,
+        0.0,
+        0.54,
+        0.0,
+        0.0,
+        0.07,
+        0.0,
+        0.07,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.69
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KSL_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KSL_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KSL_/KSL_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.57,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.39,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0
+      ],
+      "children_worth_listing": 0.64
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KSX_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KSX_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KSX_/KSX_001",
+    "observed": "Soft X-rays emitted as bremsstrahlung by free electrons are detected by two detector (upper, lower) arrays. Ea",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.22,
+        0.03,
+        0.02,
+        0.0,
+        0.0,
+        0.39,
+        0.0,
+        0.0,
+        0.08,
+        0.0,
+        0.17,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.02,
+        0.06
+      ],
+      "children_worth_listing": 0.69
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KTF_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KTF_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KTF_/KTF_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.25,
+        0.03,
+        0.01,
+        0.41,
+        0.0,
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.16,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.02,
+        0.03
+      ],
+      "children_worth_listing": 0.69
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KXP_",
+    "category": "documentation",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/KXP_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/KXP_/KXP_001",
+    "observed": "Nothing.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.06,
+        0.0,
+        0.93,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.64
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZDT_",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZDT_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZDT_",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.18
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZD__",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZD__",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZD__",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZETC",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZETC",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZETC",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0
+      ],
+      "children_worth_listing": 0.17
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZGP_",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZGP_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZGP_",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0
+      ],
+      "children_worth_listing": 0.18
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZNBI",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZNBI",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZNBI",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZNMP",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZNMP",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZNMP",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZTI_",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZTI_",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZTI_",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.18
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/ZTMP",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXP/ZTMP",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXP/ZTMP",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXPBAK",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/PIDEXPBAK",
+    "source_evidence": "/analysis/src/easy-v5.01/PIDEXPBAK",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.07,
+        0.0,
+        0.0,
+        0.0,
+        0.93,
+        0.0
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/kei",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/easy-v5.01/kei",
+    "source_evidence": "/analysis/src/easy-v5.01/kei/coment.f",
+    "observed": "CHARACTER   SHOTNO*7, DATANM*8, UNITNM*8,",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/lib",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/easy-v5.01/lib",
+    "source_evidence": "/analysis/src/easy-v5.01/lib",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/sample",
+    "category": "test_suite",
+    "canonical_copy": "/analysis/src/easy-v5.01/sample",
+    "source_evidence": "/analysis/src/easy-v5.01/sample/coment.f",
+    "observed": "call esyopen( irg, irc )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.51,
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.28,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.15,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14",
+    "category": "container",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_egis/__init__.py",
+    "observed": "directory entries inspected",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.94,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0
+      ],
+      "children_worth_listing": 0.85
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_egis/egis_plugins/jt60u",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_egis/egis_plugins/jt60u",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_egis/egis_plugins/jt60u/dataline_input_params/datalineinputparams_fsmd.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.38,
+        0.0,
+        0.07,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.48,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.01,
+        0.03
+      ],
+      "children_worth_listing": 0.76
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_egis/matplotlib_extended",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_egis/matplotlib_extended",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_egis/matplotlib_extended/egis_custom_classes_matplotlib_figureoptions_EQ.py",
+    "observed": "included in all copies or substantial portions of the Software.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.52
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_data_area",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_data_area",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_data_area/datalineinputparams_externalfile.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.97,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.39
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_plugins/jt60sa/dataline_input_params",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_plugins/jt60sa/dataline_input_params",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_plugins/jt60sa/dataline_input_params/datalineinputparams_mapping.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.04,
+        0.0,
+        0.91,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.54
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_setting",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_setting",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_setting/eslice_setting.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.37
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins",
+    "category": "container",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins/jt60sa/esurf_view_diagnostics_device_setting_area_jt60sa.py",
+    "observed": "The following classes are stored in this module.\\n",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.12,
+        0.0,
+        0.84,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.87
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins/jt60sa",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins/jt60sa",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins/jt60sa/esurf_view_diagnostics_device_setting_area_jt60sa.py",
+    "observed": "The following classes are stored in this module.\\n",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.02,
+        0.02,
+        0.01,
+        0.0,
+        0.93,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.55
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/database_api/setting",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/database_api/setting",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/database_api/setting/edas_easy.ini",
+    "observed": "[DEFAULT]\r ini_version = 1.0.0\r \r [EASY]\r #pid_data_file = LIBS/pid.data.v5.00\r #byte_code = ascii\r \r #E max v",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/edas_data",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/edas_data",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/edas_data/jt60sa.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.01,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.88
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/edas_dummy_data",
+    "category": "experimental_data",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/edas_dummy_data",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/edas_dummy_data/debug_linetrace_0.txt",
+    "observed": "1\t5.1806882264e+00\t2.3843391757e-01\tFalse\t0.3446296296296296\t5.08537037037037\t-4.7407407407407405\t4.7407407407",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.3,
+        0.0,
+        0.0,
+        0.15,
+        0.0,
+        0.0,
+        0.0,
+        0.44,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.08
+      ],
+      "children_worth_listing": 0.45
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/edas_icons",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/edas_icons",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/edas_icons/eGis_logo.png",
+    "observed": "file present; eGis_logo.png",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.27,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.7
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/edas_plugins/jt60sa",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/edas_plugins/jt60sa",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/edas_plugins/jt60sa/edas_device_function_jt60sa.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.39,
+        0.24,
+        0.11,
+        0.0,
+        0.06,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.09,
+        0.0,
+        0.09
+      ],
+      "children_worth_listing": 0.5
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqread_main.py",
+    "observed": "from eqread_pac.default import Eqread as def_Eqread",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.8
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqfame",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqfame",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqfame/eqset.py",
+    "observed": "from math import sqrt",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.32,
+        0.0,
+        0.67,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqread",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqread",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqread/eltg95.py",
+    "observed": "def Eltg95( eqread ):",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/u_file",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/u_file",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/u_file/crspnt.py",
+    "observed": "def Crspnt( x1, x2, y1, y2, r1 ):",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.04,
+        0.0,
+        0.96,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/util",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/util",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/util/Utility.py",
+    "observed": "import inspect, re",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.02,
+        0.0,
+        0.98,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.35
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eslice_esurf",
+    "category": "container",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/eslice_esurf",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/eslice_esurf/db/Adam3.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.25,
+        0.0,
+        0.65,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.02,
+        0.0
+      ],
+      "children_worth_listing": 0.75
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/external_func_api",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/external_func_api",
+    "source_evidence": "/analysis/src/edas2/v2.1.14/edas_share/external_func_api/edas_cdcalc_api.py",
+    "observed": "The following classes are stored in this module.\\n",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.12,
+        0.0,
+        0.85,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.5
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/egis_data_area",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_egis/egis_data_area",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_egis/egis_data_area/datalineinputparams_correctiondiagram.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.83,
+        0.04,
+        0.04,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.43
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jet/dataline_input_params",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jet/dataline_input_params",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jet/dataline_input_params/datalineinputparams_init_setting_jet.py",
+    "observed": "The following classes are stored in this module.\\n",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.02,
+        0.0,
+        0.84,
+        0.0,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.09,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.57
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jt60sa",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jt60sa",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jt60sa/dataline_input_params/datalineinputparams_cameradata.py",
+    "observed": "The following classes are stored in this module.\\n",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.15,
+        0.01,
+        0.46,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.15,
+        0.0,
+        0.14,
+        0.0,
+        0.0,
+        0.0,
+        0.06,
+        0.01,
+        0.02
+      ],
+      "children_worth_listing": 0.73
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/matplotlib_extended",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_egis/matplotlib_extended",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_egis/matplotlib_extended/egis_custom_classes_matplotlib_figureoptions_EQ.py",
+    "observed": "included in all copies or substantial portions of the Software.",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.52
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_plugins/jt60u/dataline_input_params",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_plugins/jt60u/dataline_input_params",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_plugins/jt60u/dataline_input_params/datalineinputparams_mapping.py",
+    "observed": "\u307e\u305f2017\u5e743\u6708\u4ee5\u964d\uff0c\u958b\u767a\u3092\u505c\u6b62\u3057\u3044\u308b\u305f\u3081\uff0c\u73fe\u30d0\u30fc\u30b8\u30e7\u30f3\u306eeDAS\u4e0a\u3067\u306e\u52d5\u4f5c\u4fdd\u8a3c\u306f\u306a\u3044\uff0e",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.03,
+        0.01,
+        0.93,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.58
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_setting",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_setting",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_setting/eslice_setting.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.36
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_custom_class",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_custom_class",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_custom_class/esurf_custom_classes_matplotlib.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.41
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_data_area",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_data_area",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_data_area/esurf_coil_information_view_area.py",
+    "observed": "The following classes are stored in this module.\\n",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.38
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_setting",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_setting",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_setting/esurf_setting.py",
+    "observed": "The following classes are stored in this module.\\n",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.92,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.39
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share",
+    "category": "container",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/database_api/easy_test.sh",
+    "observed": "filename=\"edas_easy_api.py\"",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.84
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/edas_common",
+    "category": "other",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/edas_common",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/edas_common/edas_analysisdb_dataload_dialog.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.11,
+        0.0,
+        0.44,
+        0.0,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.06,
+        0.0,
+        0.0,
+        0.02,
+        0.25,
+        0.0,
+        0.08
+      ],
+      "children_worth_listing": 0.38
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/edas_data",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/edas_data",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/edas_data/jt60sa.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.89
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/edas_dummy_data",
+    "category": "experimental_data",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/edas_dummy_data",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/edas_dummy_data/debug_linetrace_0.txt",
+    "observed": "1\t5.1806882264e+00\t2.3843391757e-01\tFalse\t0.3446296296296296\t5.08537037037037\t-4.7407407407407405\t4.7407407407",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.47000000000000003,
+        0.01,
+        0.0,
+        0.0,
+        0.35,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.11
+      ],
+      "children_worth_listing": 0.54
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/db",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/db",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/db/Fledd.py",
+    "observed": "from eqread_pac.util.Utility import ObjectList",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.45
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/eqread",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/eqread",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/eqread/eltg95.py",
+    "observed": "def Eltg95( eqread ):",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.03,
+        0.0,
+        0.97,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms/alleqdblist.f",
+    "observed": "c\tName\t\t:alleqdblist",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.13,
+        0.0,
+        0.85,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.73
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/inc",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/inc",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/inc/base.inc",
+    "observed": "C======================================================================= C     Include File base.inc C========",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.18,
+        0.0,
+        0.72,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac_org_20170621/eqfame",
+    "category": "archive",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac_org_20170621/eqfame",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac_org_20170621/eqfame/eqset.py",
+    "observed": "from math import sqrt",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.81,
+        0.0,
+        0.18,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/default",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/default",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/default/Adam3.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.44,
+        0.0,
+        0.56,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/esurf_tmp",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/esurf_tmp",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/esurf_tmp/esurf_default_device.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.05,
+        0.0,
+        0.08,
+        0.0,
+        0.86,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.4
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/external_func_api/setting",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/external_func_api/setting",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/external_func_api/setting/edas_cdcalc.ini",
+    "observed": "[DEFAULT] ini_version = 1.0.0  [CDBCALC] #E default value default_interval    = 1",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/remote_tools",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/edas2/v2.1.15/edas_share/remote_tools",
+    "source_evidence": "/analysis/src/edas2/v2.1.15/edas_share/remote_tools/Default.py",
+    "observed": "from eslice_esurf.util.Utility import ObjectList",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.87,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.12,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.37
+    }
+  },
+  {
+    "path": "/analysis/src/getseldata_v4.2",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/getseldata_v4.2",
+    "source_evidence": "/analysis/src/getseldata_v4.2/eddbaccess.h",
+    "observed": "#include <time.h>",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.04,
+        0.0,
+        0.94,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.76
+    }
+  },
+  {
+    "path": "/analysis/src/getseldata_v4.2/UTL/getfame96/FORT96",
+    "category": "empty_directory",
+    "canonical_copy": "/analysis/src/getseldata_v4.2/UTL/getfame96/FORT96",
+    "source_evidence": "/analysis/src/getseldata_v4.2/UTL/getfame96/FORT96",
+    "observed": "directory has no entries",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/analysis/src/getseldata_v4.2/UTL/getseldata",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/getseldata_v4.2/UTL/getseldata",
+    "source_evidence": "/analysis/src/getseldata_v4.2/UTL/getseldata/main.f",
+    "observed": "include 'getseldata.i'",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.28,
+        0.0,
+        0.65,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.07,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/atomic/atdisp",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/atomic/atdisp",
+    "source_evidence": "/analysis/src/topics_release/topics/atomic/atdisp/atdisp.f",
+    "observed": "subroutine atdisp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.16,
+        0.72,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.11,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/common",
+    "category": "container",
+    "canonical_copy": "/analysis/src/topics_release/topics/common",
+    "source_evidence": "/analysis/src/topics_release/topics/common/tool_c/elapsed.c",
+    "observed": "#include<sys/time.h>",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.81,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.09,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.05,
+        0.01
+      ],
+      "children_worth_listing": 0.82
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/impplt/src_ncflux",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/impplt/src_ncflux",
+    "source_evidence": "/analysis/src/topics_release/topics/impact/impplt/src_ncflux/draw.f",
+    "observed": "!ik   SUBROUTINE DRAW(IFIG,   nro,  title,  X,   TIME,",
+    "judgment": {
+      "path_purpose_probs": [
+        0.08,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.89,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/src_den",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/src_den",
+    "source_evidence": "/analysis/src/topics_release/topics/impact/src_den/getalp.f",
+    "observed": "subroutine getalp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.9,
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/src_int",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/src_int",
+    "source_evidence": "/analysis/src/topics_release/topics/impact/src_int/bicub.f",
+    "observed": "subroutine bicube( c, x0, y0, s, sx, sy, sxy, sxx, syy )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.92,
+        0.07,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/src_pel",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/src_pel",
+    "source_evidence": "/analysis/src/topics_release/topics/impact/src_pel/ctrcal.f",
+    "observed": "subroutine ctrcal",
+    "judgment": {
+      "path_purpose_probs": [
+        0.94,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/aamain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/aamain",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/aamain/backup_eq.f",
+    "observed": "subroutine backup_eq( kk )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.77,
+        0.09,
+        0.03,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.48
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/echv9l1",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/echv9l1",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/echv9l1/append_ec.f",
+    "observed": "subroutine append_ec( ird, iwr, ioerr )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.63,
+        0.25,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/eq_fct",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/eq_fct",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/eq_fct/calc_betap.f",
+    "observed": "! change variable from transport to equilibrium by kamata 2020/06/01",
+    "judgment": {
+      "path_purpose_probs": [
+        0.28,
+        0.71,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/eqmain",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/eqmain",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/eqmain/asa047.f90",
+    "observed": "subroutine nelmin ( fn, n, start, xmin, ynewlo, reqmin, step, konvge, kcount, &",
+    "judgment": {
+      "path_purpose_probs": [
+        0.09,
+        0.91,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/loglist",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/loglist",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/loglist/aattl.f",
+    "observed": "subroutine aattl",
+    "judgment": {
+      "path_purpose_probs": [
+        0.06,
+        0.25,
+        0.08,
+        0.25,
+        0.05,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.26,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/rfmain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/rfmain",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/rfmain/rfcal0.f",
+    "observed": "subroutine rfcal0( crfct,rrfpt,drrpt,crfcx,drrpx )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.39,
+        0.04,
+        0.48,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.09,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/trmain/Inc",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/trmain/Inc",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/trmain/Inc/f77_dcomplx.h",
+    "observed": "#ifndef f77_dcomplx      /* cpp code for rename of double complex */ #define f77_dcomplx      /* fortran intri",
+    "judgment": {
+      "path_purpose_probs": [
+        0.06,
+        0.51,
+        0.08,
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.06,
+        0.0,
+        0.17
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/vol2phi",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/vol2phi",
+    "source_evidence": "/analysis/src/topics_release/topics/topics/vol2phi/crspnt.f",
+    "observed": "cik   DOUBLE PRECISION FUNCTION   CRSPNT(X1,X2,Y1,Y2,R1)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.05,
+        0.89,
+        0.0,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/analysis_DB/EDASDB",
+    "category": "experimental_data",
+    "canonical_copy": "/analysis_DB/EDASDB",
+    "source_evidence": "/analysis_DB/EDASDB",
+    "observed": "directory entries inspected",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.89
+    }
+  },
+  {
+    "path": "/home/SharedFolder",
+    "category": "container",
+    "canonical_copy": "/home/SharedFolder",
+    "source_evidence": "/home/SharedFolder/README.txt",
+    "observed": "The sticky bit (1777) protects files inside your subdirectory from",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.95,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.01
+      ],
+      "children_worth_listing": 0.71
+    }
+  },
+  {
+    "path": "/home/SharedFolder/a042181",
+    "category": "container",
+    "canonical_copy": "/home/SharedFolder/a042181",
+    "source_evidence": "/home/SharedFolder/a042181/plasma_shaping_multi_grid.py",
+    "observed": "\u5404\u30d1\u30cd\u30eb: LCFS(\u5b9f\u7dda), Control LCFS(\u7834\u7dda), FB reference(\u25cb),",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.06,
+        0.04,
+        0.18,
+        0.01,
+        0.01,
+        0.17,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.36,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.11
+      ],
+      "children_worth_listing": 0.79
+    }
+  },
+  {
+    "path": "/home/a048717/a008723/anapro/profunc/linknload/old/getpid64",
+    "category": "archive",
+    "canonical_copy": "/home/a048717/a008723/anapro/profunc/linknload/old/getpid64",
+    "source_evidence": "/home/a048717/a008723/anapro/profunc/linknload/old/getpid64/getpid.f",
+    "observed": "SUBROUTINE GETPID(ARGC, ARGP)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.93,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/home/a048717/edas2/v2.1.14/edas_share/database_api/get_data_result",
+    "category": "experimental_data",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/database_api/get_data_result",
+    "source_evidence": "/home/a048717/edas2/v2.1.14/edas_share/database_api/get_data_result/easy_ubuntu_201706081414_.txt",
+    "observed": "\u001b[3;J\u001b[H\u001b[2JEASY :locallib :datatype ZENKEI   :IP       :trial num  0 :len(x)      50004: elapsed_time:    0.3",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.64,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.11,
+        0.0,
+        0.0,
+        0.02,
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.17
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/edas2/v2.1.14/edas_share/edas_icons",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/edas_icons",
+    "source_evidence": "/home/a048717/edas2/v2.1.14/edas_share/edas_icons/eGis_logo.png",
+    "observed": "file present; eGis_logo.png",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.27,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.7
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/home/a048717/edas2/v2.1.14/edas_share/edas_plugins/common",
+    "category": "software_project",
+    "canonical_copy": "/analysis/src/edas2/v2.1.14/edas_share/edas_plugins/common",
+    "source_evidence": "/home/a048717/edas2/v2.1.14/edas_share/edas_plugins/common/edas_device_function.py",
+    "observed": "import os",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.7,
+        0.27,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.48
+    }
+  },
+  {
+    "path": "/home/a048717/exec",
+    "category": "build_artifact",
+    "canonical_copy": "/home/a048717/exec",
+    "source_evidence": "/home/a048717/exec/cntmrg",
+    "observed": "file present; cntmrg",
+    "judgment": {
+      "path_purpose_probs": [
+        0.21000000000000002,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.64,
+        0.0,
+        0.02,
+        0.0,
+        0.08
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/fftw-3.3.10",
+    "category": "software_project",
+    "canonical_copy": "/home/a048717/fftw-3.3.10",
+    "source_evidence": "/home/a048717/fftw-3.3.10/CMakeLists.txt",
+    "observed": "if (NOT DEFINED CMAKE_BUILD_TYPE)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/fuji_test",
+    "category": "test_suite",
+    "canonical_copy": "/home/a048717/fuji_test",
+    "source_evidence": "/home/a048717/fuji_test/test.f90",
+    "observed": "program test",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.02,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.17,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.74
+      ],
+      "children_worth_listing": 0.08
+    }
+  },
+  {
+    "path": "/home/a048717/run/runD_d/LCDB/test_rst",
+    "category": "workflow",
+    "canonical_copy": "/home/a048717/run/runD_d/LCDB/test_rst",
+    "source_evidence": "/home/a048717/run/runD_d/LCDB/test_rst/@@@tail.txt",
+    "observed": "TOTAL CPU TIME =    2389.01300000000",
+    "judgment": {
+      "path_purpose_probs": [
+        0.15,
+        0.02,
+        0.0,
+        0.0,
+        0.8,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.75
+    }
+  },
+  {
+    "path": "/home/a048717/run/runD_d/s2_1",
+    "category": "workflow",
+    "canonical_copy": "/home/a048717/run/runD_d/s2_1",
+    "source_evidence": "/home/a048717/run/runD_d/s2_1/.eagle_env",
+    "observed": "EAGLE_YELLOW=          -1  EAGLE_BGCOLOR=          -1  EAGLE_WIDTH=          -1",
+    "judgment": {
+      "path_purpose_probs": [
+        0.03,
+        0.01,
+        0.0,
+        0.0,
+        0.7,
+        0.01,
+        0.02,
+        0.07,
+        0.0,
+        0.0,
+        0.0,
+        0.08,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.07
+      ],
+      "children_worth_listing": 0.58
+    }
+  },
+  {
+    "path": "/home/a048717/run/runD_d/s2_1_V05",
+    "category": "workflow",
+    "canonical_copy": "/home/a048717/run/runD_d/s2_1_V05",
+    "source_evidence": "/home/a048717/run/runD_d/s2_1_V05/@@@tail.txt",
+    "observed": "TOTAL CPU TIME =    3821.31200000000",
+    "judgment": {
+      "path_purpose_probs": [
+        0.34,
+        0.0,
+        0.0,
+        0.0,
+        0.39,
+        0.0,
+        0.0,
+        0.22,
+        0.0,
+        0.01,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.6
+    }
+  },
+  {
+    "path": "/home/a048717/spot",
+    "category": "software_project",
+    "canonical_copy": "/home/a048717/spot",
+    "source_evidence": "/home/a048717/spot/P_impact",
+    "observed": "cmt     IMPACT plot file GRAPHIC code  ccc  dfs : for dec ccc  ifs : for ICE X ccc  img : for imaging ccc  jfr",
+    "judgment": {
+      "path_purpose_probs": [
+        0.09,
+        0.01,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.28,
+        0.0,
+        0.2,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.35
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/home/a048717/src/eqdbms/eqdbms/UTY",
+    "category": "data_access",
+    "canonical_copy": "/home/a048717/src/eqdbms/eqdbms/UTY",
+    "source_evidence": "/home/a048717/src/eqdbms/eqdbms/UTY/char_put.c",
+    "observed": "FUNCTION",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.88,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.08,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/lib",
+    "category": "build_artifact",
+    "canonical_copy": "/home/a048717/src/lib",
+    "source_evidence": "/home/a048717/src/lib/libGDgcsp2.a",
+    "observed": "file present; libGDgcsp2.a",
+    "judgment": {
+      "path_purpose_probs": [
+        0.19,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.54,
+        0.0,
+        0.11,
+        0.0,
+        0.14
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/Mod",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/topics_release/topics/Mod",
+    "source_evidence": "/home/a048717/src/pjtopics_1133_dt/topics/Mod/a2i_mod.mod",
+    "observed": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000/home/a048717/src/pjtopics_1133_dt/topics/tool/adam2imas/a2i_mod.f\u0000A2I_MOD\u0000+\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b\u0000\u0004\u0000\u0000\u0000\u0010\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.19
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/topics/eq_trc",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/eq_trc",
+    "source_evidence": "/home/a048717/src/pjtopics_1133_dt/topics/topics/eq_trc/eqlin.f",
+    "observed": "! modified 1/1 lines remove control by name of EQ trace by kamata 2017/06/01",
+    "judgment": {
+      "path_purpose_probs": [
+        0.68,
+        0.29,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/topics/gnet",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/gnet",
+    "source_evidence": "/home/a048717/src/pjtopics_1133_dt/topics/topics/gnet/gnetinp.f",
+    "observed": "subroutine gnetinp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.56,
+        0.38,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/topics/icmain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/icmain",
+    "source_evidence": "/home/a048717/src/pjtopics_1133_dt/topics/topics/icmain/ic2trn.f",
+    "observed": "subroutine ic2trn",
+    "judgment": {
+      "path_purpose_probs": [
+        0.41,
+        0.36,
+        0.11,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1135_dek/exec",
+    "category": "other",
+    "canonical_copy": "/home/a048717/src/pjtopics_1135_dek/exec",
+    "source_evidence": "/home/a048717/src/pjtopics_1135_dek/exec/impact.exe_15",
+    "observed": "file present; impact.exe_15",
+    "judgment": {
+      "path_purpose_probs": [
+        0.02,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.94,
+        0.0,
+        0.01,
+        0.0,
+        0.02
+      ],
+      "children_worth_listing": 0.25
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1135_dek/topics/common/tool_f2",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/common/tool_f2",
+    "source_evidence": "/home/a048717/src/pjtopics_1135_dek/topics/common/tool_f2/ugdisp.f",
+    "observed": "subroutine ugdisp(mode)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1135_dek/topics/topics/lhmain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/lhmain",
+    "source_evidence": "/home/a048717/src/pjtopics_1135_dek/topics/topics/lhmain/chkfil.f",
+    "observed": "subroutine chkfil",
+    "judgment": {
+      "path_purpose_probs": [
+        0.92,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.04,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.51
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/impact/src_adas",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/src_adas",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_bf/topics/impact/src_adas/adas_rad.f",
+    "observed": "subroutine adas_rad",
+    "judgment": {
+      "path_purpose_probs": [
+        0.86,
+        0.11,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/impact/src_den",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/src_den",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_bf/topics/impact/src_den/getalp.f",
+    "observed": "subroutine getalp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.9,
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/tool/plot2imas",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/topics_release/topics/tool/plot2imas",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_bf/topics/tool/plot2imas/exwrex.f",
+    "observed": "! added tool to make plot file into IMASDB by kamata 2019/02/22",
+    "judgment": {
+      "path_purpose_probs": [
+        0.03,
+        0.11,
+        0.0,
+        0.67,
+        0.0,
+        0.18,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/topics/Com_mod",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/Com_mod",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_bf/topics/topics/Com_mod/Module.f90",
+    "observed": "moduLe constant_vaLues",
+    "judgment": {
+      "path_purpose_probs": [
+        0.79,
+        0.09,
+        0.06,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/topics/eq_trc",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/eq_trc",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_bf/topics/topics/eq_trc/eqlin.f",
+    "observed": "! modified 1/1 lines remove control by name of EQ trace by kamata 2017/06/01",
+    "judgment": {
+      "path_purpose_probs": [
+        0.68,
+        0.29,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_dt/spot",
+    "category": "data_access",
+    "canonical_copy": "/home/a048717/src/pjtopics_1137_dt/spot",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_dt/spot/adam2imas",
+    "observed": "cmt  ADAM data to IMASDB Mon Feb 04 22:22:22 JST 2019  ccc  sfs : for SGI8600 ccc  ifs : for imaging ccc  jfs ",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.0,
+        0.0,
+        0.98,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.31
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_dt/topics/topics/eqmain",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/eqmain",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_dt/topics/topics/eqmain/asa047.f90",
+    "observed": "subroutine nelmin ( fn, n, start, xmin, ynewlo, reqmin, step, konvge, kcount, &",
+    "judgment": {
+      "path_purpose_probs": [
+        0.09,
+        0.91,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_lcnse/topics/topics/rdmain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/rdmain",
+    "source_evidence": "/home/a048717/src/pjtopics_1137_lcnse/topics/topics/rdmain/cytran_driver.f90",
+    "observed": "module cytran_topics_mod",
+    "judgment": {
+      "path_purpose_probs": [
+        0.96,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1152_ztau/topics/common/tool_f2",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/common/tool_f2",
+    "source_evidence": "/home/a048717/src/pjtopics_1152_ztau/topics/common/tool_f2/ugdisp.f",
+    "observed": "subroutine ugdisp(mode)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_bgb/topics/atomic/atdisp",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/atomic/atdisp",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_bgb/topics/atomic/atdisp/atdisp.f",
+    "observed": "subroutine atdisp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.16,
+        0.72,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.11,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_bgb/topics/topics/crsdat",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/crsdat",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_bgb/topics/topics/crsdat/crsdat.f",
+    "observed": "subroutine crsdat",
+    "judgment": {
+      "path_purpose_probs": [
+        0.84,
+        0.08,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/atomic/atdisp",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/atomic/atdisp",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_rvac_re/topics/atomic/atdisp/atdisp.f",
+    "observed": "subroutine atdisp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.16,
+        0.72,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.11,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/dlvrys",
+    "category": "workflow",
+    "canonical_copy": "/analysis/src/topics_release/topics/dlvrys",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_rvac_re/topics/dlvrys/aamain.f",
+    "observed": "program aamain",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/impplt",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/impplt",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/impplt/src/cntdrw.f",
+    "observed": "subroutine cntdrw( xs0, xe0, xs1, xe1 )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.91,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.08,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0
+      ],
+      "children_worth_listing": 0.74
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/main",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/main",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/main/ascale.f",
+    "observed": "subroutine ascale",
+    "judgment": {
+      "path_purpose_probs": [
+        0.95,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/nclass",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/nclass",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/nclass/fluxav_nclass_i.f",
+    "observed": "subroutine fluxav_nclass_i(",
+    "judgment": {
+      "path_purpose_probs": [
+        0.85,
+        0.12,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/tool/adam2imas",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/topics_release/topics/tool/adam2imas",
+    "source_evidence": "/home/a048717/src/pjtopics_1153_rvac_re/topics/tool/adam2imas/a2i_mod.f",
+    "observed": "! added tool to make ADAM into IMASDB by kamata 2019/02/04",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.97,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1162_in/topics/Mod1",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/topics_release/topics/Mod1",
+    "source_evidence": "/home/a048717/src/pjtopics_1162_in/topics/Mod1/aaa_mod.mod",
+    "observed": "file present; aaa_mod.mod",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.19
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1162_in/topics/tool/efit2imas",
+    "category": "data_access",
+    "canonical_copy": "/analysis/src/topics_release/topics/tool/efit2imas",
+    "source_evidence": "/home/a048717/src/pjtopics_1162_in/topics/tool/efit2imas/e2i_mod.f",
+    "observed": "! added tool to make G EQDSK into IMASDB by kamata 2019/02/21",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.04,
+        0.0,
+        0.96,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1162_in/topics/topplt/excel",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/topplt/excel",
+    "source_evidence": "/home/a048717/src/pjtopics_1162_in/topics/topplt/excel/aamain.f",
+    "observed": "program aamain",
+    "judgment": {
+      "path_purpose_probs": [
+        0.07,
+        0.29,
+        0.02,
+        0.49,
+        0.0,
+        0.11,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1163_kam/topics/impact/src_mon",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/src_mon",
+    "source_evidence": "/home/a048717/src/pjtopics_1163_kam/topics/impact/src_mon/nkclr.f",
+    "observed": "subroutine nkclr",
+    "judgment": {
+      "path_purpose_probs": [
+        0.03,
+        0.92,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1163_kam/topics/topics/bafp",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/bafp",
+    "source_evidence": "/home/a048717/src/pjtopics_1163_kam/topics/topics/bafp/bafp_save_dtime.f",
+    "observed": "subroutine bafp_save_dtime",
+    "judgment": {
+      "path_purpose_probs": [
+        0.9,
+        0.09,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1171_sonic/topics/atomic/Inc",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/topics_release/topics/atomic/Inc",
+    "source_evidence": "/home/a048717/src/pjtopics_1171_sonic/topics/atomic/Inc/KADIEL",
+    "observed": "*comdeck                     kadiel.system c              ----- dielectronic recombination rate coefficient --",
+    "judgment": {
+      "path_purpose_probs": [
+        0.08,
+        0.11,
+        0.02,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.14,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.02,
+        0.15,
+        0.0,
+        0.43
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178/topics/common/tool_f",
+    "category": "other",
+    "canonical_copy": "/analysis/src/topics_release/topics/common/tool_f",
+    "source_evidence": "/home/a048717/src/pjtopics_1178/topics/common/tool_f/chkdir.f",
+    "observed": "subroutine chkdir( cdir, lcdir, lex )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.34,
+        0.08,
+        0.01,
+        0.03,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.38,
+        0.0,
+        0.14
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178/topics/topics/calc",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/calc",
+    "source_evidence": "/home/a048717/src/pjtopics_1178/topics/topics/calc/akima2d.f",
+    "observed": "! added equilibrium mesh expansion by kamata 2015/02/06",
+    "judgment": {
+      "path_purpose_probs": [
+        0.5,
+        0.48,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178/topics/topics/dgmain",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/dgmain",
+    "source_evidence": "/home/a048717/src/pjtopics_1178/topics/topics/dgmain/dgline.f",
+    "observed": "subroutine dgline( rpos, zpos, th1, th2, xx, xint, path )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.17,
+        0.8,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178_kam/topics/Mod",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/topics_release/topics/Mod",
+    "source_evidence": "/home/a048717/src/pjtopics_1178_kam/topics/Mod/a2i_mod.mod",
+    "observed": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000/home/a048717/src/pjtopics_1178_kam/topics/tool/adam2imas/a2i_mod.f\u0000A2I_MOD\u0000+\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b\u0000\u0004\u0000\u0000\u0000\u0010\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.19
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1183_krapi/topics/impact/impplt/src_ncflux",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/impplt/src_ncflux",
+    "source_evidence": "/home/a048717/src/pjtopics_1183_krapi/topics/impact/impplt/src_ncflux/draw.f",
+    "observed": "!ik   SUBROUTINE DRAW(IFIG,   nro,  title,  X,   TIME,",
+    "judgment": {
+      "path_purpose_probs": [
+        0.08,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.89,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_bfps/topics/atomic/Inc",
+    "category": "configuration",
+    "canonical_copy": "/analysis/src/topics_release/topics/atomic/Inc",
+    "source_evidence": "/home/a048717/src/pjtopics_1185_bfps/topics/atomic/Inc/KADIEL",
+    "observed": "*comdeck                     kadiel.system c              ----- dielectronic recombination rate coefficient --",
+    "judgment": {
+      "path_purpose_probs": [
+        0.08,
+        0.11,
+        0.02,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.14,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.02,
+        0.15,
+        0.0,
+        0.43
+      ],
+      "children_worth_listing": 0.15
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_deb/topics/topics/nbmain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/nbmain",
+    "source_evidence": "/home/a048717/src/pjtopics_1185_deb/topics/topics/nbmain/cn_accomef.f",
+    "observed": "! control to read FastIonCurrent.txt",
+    "judgment": {
+      "path_purpose_probs": [
+        0.97,
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_deb/topics/topics/pt_std",
+    "category": "visualization",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/pt_std",
+    "source_evidence": "/home/a048717/src/pjtopics_1185_deb/topics/topics/pt_std/dispdt.f",
+    "observed": "subroutine dispdt",
+    "judgment": {
+      "path_purpose_probs": [
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.98,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_mxm/topics/topics/aamain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/aamain",
+    "source_evidence": "/home/a048717/src/pjtopics_1185_mxm/topics/topics/aamain/backup_eq.f",
+    "observed": "subroutine backup_eq( kk )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.77,
+        0.09,
+        0.03,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.48
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_mxm/topics/topics/rfmain",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/rfmain",
+    "source_evidence": "/home/a048717/src/pjtopics_1185_mxm/topics/topics/rfmain/rfcal0.f",
+    "observed": "subroutine rfcal0( crfct,rrfpt,drrpt,crfcx,drrpx )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.39,
+        0.04,
+        0.48,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.09,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_pub/topics/topics/trmain/MMM95",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/trmain/MMM95",
+    "source_evidence": "/home/a048717/src/pjtopics_1185_pub/topics/topics/trmain/MMM95/calmmm95.f",
+    "observed": "subroutine calmmm95",
+    "judgment": {
+      "path_purpose_probs": [
+        0.97,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/sonic/sonicV4/soldor/inc",
+    "category": "configuration",
+    "canonical_copy": "/home/a048717/src/pjtopics_1194_imal/sonic/sonicV4/soldor/inc",
+    "source_evidence": "/home/a048717/src/pjtopics_1194_imal/sonic/sonicV4/soldor/inc/cmeffz",
+    "observed": "!::impurity effect       integer  mion       real*8   wai(mdsp), wza(mdsp), wma(mdsp)       real*8   wfeb(mdsp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/topics/topics/fp2d",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/fp2d",
+    "source_evidence": "/home/a048717/src/pjtopics_1194_imal/topics/topics/fp2d/aerf.f",
+    "observed": "cik   double precision function aerf(x)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.92,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj",
+    "category": "build_artifact",
+    "canonical_copy": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj",
+    "source_evidence": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj/alpcal1.o",
+    "observed": "file present; alpcal1.o",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.98,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj1",
+    "category": "build_artifact",
+    "canonical_copy": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj1",
+    "source_evidence": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj1/booth9.o",
+    "observed": "file present; booth9.o",
+    "judgment": {
+      "path_purpose_probs": [
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.96,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_release/topics/Mod1",
+    "category": "build_artifact",
+    "canonical_copy": "/home/a048717/src/topics_release/topics/Mod1",
+    "source_evidence": "/home/a048717/src/topics_release/topics/Mod1/aaa_mod.mod",
+    "observed": "file present; aaa_mod.mod",
+    "judgment": {
+      "path_purpose_probs": [
+        0.74,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.13,
+        0.0,
+        0.06,
+        0.0,
+        0.02
+      ],
+      "children_worth_listing": 0.26
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_release/topics/exec",
+    "category": "build_artifact",
+    "canonical_copy": "/home/a048717/src/topics_release/topics/exec",
+    "source_evidence": "/home/a048717/src/topics_release/topics/exec/pretop.exe",
+    "observed": "file present; pretop.exe",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.03,
+        0.86,
+        0.04
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/exec",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/topics_release/topics/exec",
+    "source_evidence": "/home/a048717/src/topics_release_init/topics/exec",
+    "observed": "directory entries inspected",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/eqmain",
+    "category": "analysis_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/eqmain",
+    "source_evidence": "/home/a048717/src/topics_release_init/topics/topics/eqmain/asa047.f90",
+    "observed": "subroutine nelmin ( fn, n, start, xmin, ynewlo, reqmin, step, konvge, kcount, &",
+    "judgment": {
+      "path_purpose_probs": [
+        0.09,
+        0.91,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/func1",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/func1",
+    "source_evidence": "/home/a048717/src/topics_release_init/topics/topics/func1/flux0.f",
+    "observed": "real(rk) function flux0( x )",
+    "judgment": {
+      "path_purpose_probs": [
+        0.88,
+        0.1,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.16
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/gnet",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/gnet",
+    "source_evidence": "/home/a048717/src/topics_release_init/topics/topics/gnet/gnetinp.f",
+    "observed": "subroutine gnetinp",
+    "judgment": {
+      "path_purpose_probs": [
+        0.56,
+        0.38,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/trmain/BgB",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/topics/trmain/BgB",
+    "source_evidence": "/home/a048717/src/topics_release_init/topics/topics/trmain/BgB/mixed_Bohm_gyro_Bohm.f",
+    "observed": "!| % The following lines control how the LaTeX document is typeset",
+    "judgment": {
+      "path_purpose_probs": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/topics_rvac/topics/impact/ncflux",
+    "category": "modeling_code",
+    "canonical_copy": "/analysis/src/topics_release/topics/impact/ncflux",
+    "source_evidence": "/home/a048717/src/topics_rvac/topics/impact/ncflux/elecdt.f",
+    "observed": "subroutine elecdt",
+    "judgment": {
+      "path_purpose_probs": [
+        0.92,
+        0.06,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a048717/src/v9l3/GS/lib",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/ECCD/v9l3/GS/lib",
+    "source_evidence": "/home/a048717/src/v9l3/GS/lib/libmygsa.a",
+    "observed": "file present; libmygsa.a",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.54,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.41,
+        0.0,
+        0.02,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/src/v9l3_fo/lib",
+    "category": "build_artifact",
+    "canonical_copy": "/analysis/src/ECCD/v9l3/lib",
+    "source_evidence": "/home/a048717/src/v9l3_fo/lib/libapl.a",
+    "observed": "file present; libapl.a",
+    "judgment": {
+      "path_purpose_probs": [
+        0.34,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.48,
+        0.0,
+        0.04,
+        0.0,
+        0.09
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/tool/iktool_old/spot/Bck",
+    "category": "archive",
+    "canonical_copy": "/home/a048717/tool/iktool_old/spot/Bck",
+    "source_evidence": "/home/a048717/tool/iktool_old/spot/Bck/clrobj.c",
+    "observed": "/* delete obj directory */  #include <stdio.h> #include <string.h> #include <stdlib.h>  #include \"ex_sptd.h\"  ",
+    "judgment": {
+      "path_purpose_probs": [
+        0.07,
+        0.24000000000000002,
+        0.02,
+        0.01,
+        0.21,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.26,
+        0.0,
+        0.0,
+        0.16,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/a048717/tool/iktool_old/spot/spot.dSYM",
+    "category": "archive",
+    "canonical_copy": "/home/a048717/tool/iktool_old/spot/spot.dSYM",
+    "source_evidence": "/home/a048717/tool/iktool_old/spot/spot.dSYM",
+    "observed": "directory entries inspected",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.96,
+        0.0,
+        0.0,
+        0.0,
+        0.04
+      ],
+      "children_worth_listing": 0.07
+    }
+  },
+  {
+    "path": "/home/a048717/tool/iktool_old/spot/test_src",
+    "category": "archive",
+    "canonical_copy": "/home/a048717/tool/iktool_old/spot/test_src",
+    "source_evidence": "/home/a048717/tool/iktool_old/spot/test_src/test",
+    "observed": "file present; test",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.04,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.81,
+        0.0,
+        0.04,
+        0.0,
+        0.0,
+        0.04,
+        0.0,
+        0.04
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/a048717/tool/kstool_old",
+    "category": "archive",
+    "canonical_copy": "/home/a048717/tool/kstool_old",
+    "source_evidence": "/home/a048717/tool/kstool_old/shell/kset3.sh",
+    "observed": "foreach mset ($setup)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.02,
+        0.01,
+        0.07,
+        0.01,
+        0.35,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.38,
+        0.0,
+        0.0,
+        0.06,
+        0.01,
+        0.03
+      ],
+      "children_worth_listing": 0.66
+    }
+  },
+  {
+    "path": "/home/a048717/tool/wrk_kam/iktool/bjlava",
+    "category": "software_project",
+    "canonical_copy": "/home/a048717/tool/wrk_kam/iktool/bjlava",
+    "source_evidence": "/home/a048717/tool/wrk_kam/iktool/bjlava/bjlava",
+    "observed": "file present; bjlava",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.04,
+        0.01,
+        0.07,
+        0.0,
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.28,
+        0.0,
+        0.54
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/home/a048717/tool/wrk_kam/iktool/getcpu",
+    "category": "software_project",
+    "canonical_copy": "/home/a048717/tool/wrk_kam/iktool/getcpu",
+    "source_evidence": "/home/a048717/tool/wrk_kam/iktool/getcpu/getcpu.f",
+    "observed": "program getcpu",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.08,
+        0.09,
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.01,
+        0.12,
+        0.26,
+        0.0,
+        0.41
+      ],
+      "children_worth_listing": 0.09
+    }
+  },
+  {
+    "path": "/home/a114004/MMS",
+    "category": "archive",
+    "canonical_copy": "/home/a114004/MMS",
+    "source_evidence": "/home/a114004/MMS/OFFMMS_v1.2/099999_MMS_current.txt",
+    "observed": "Counter\t         Time\t           TF\t          CS1\t          CS2\t          CS3\t          CS4\t          EF1\t    ",
+    "judgment": {
+      "path_purpose_probs": [
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.92,
+        0.0,
+        0.0,
+        0.04,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.45
+    }
+  },
+  {
+    "path": "/home/a144017/exp_sa/camdata",
+    "category": "experimental_data",
+    "canonical_copy": "/home/a144017/exp_sa/camdata",
+    "source_evidence": "/home/a144017/exp_sa/camdata/100602_edicam_115.png",
+    "observed": "file present; 100602_edicam_115.png",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/a144017/maginv/TOSCA/eagle-v4.05D/ClibPDF/ClibPDF/util",
+    "category": "software_project",
+    "canonical_copy": "/home/a144017/maginv/TOSCA/eagle-v4.05D/ClibPDF/ClibPDF/util",
+    "source_evidence": "/home/a144017/maginv/TOSCA/eagle-v4.05D/ClibPDF/ClibPDF/util/afm2pfm/afm2pfm.c",
+    "observed": "*  This program is free software; you can redistribute it and/or modify",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.05,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.06,
+        0.0,
+        0.0,
+        0.0,
+        0.36,
+        0.03,
+        0.46
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/a144017/maginv/TOSCA/eagle-v4.05D/ClibPDF/ClibPDF_TEST",
+    "category": "test_suite",
+    "canonical_copy": "/home/a144017/maginv/TOSCA/eagle-v4.05D/ClibPDF/ClibPDF_TEST",
+    "source_evidence": "/home/a144017/maginv/TOSCA/eagle-v4.05D/ClibPDF/ClibPDF_TEST/sample.f",
+    "observed": "call fpdf_setdashu(dashu,7)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.96,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.18
+    }
+  },
+  {
+    "path": "/home/a144017/misc",
+    "category": "other",
+    "canonical_copy": "/home/a144017/misc",
+    "source_evidence": "/home/a144017/misc/WoL.sh",
+    "observed": "default: 255.255.255.255 (broadcast to all IPs)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.17,
+        0.0,
+        0.06,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.24,
+        0.0,
+        0.0,
+        0.12,
+        0.0,
+        0.0,
+        0.4
+      ],
+      "children_worth_listing": 0.08
+    }
+  },
+  {
+    "path": "/home/d200024/ARCHIVE/mypythonlibrary",
+    "category": "archive",
+    "canonical_copy": "/home/d200024/ARCHIVE/mypythonlibrary",
+    "source_evidence": "/home/d200024/ARCHIVE/mypythonlibrary/SAmag/dev_analisi.py",
+    "observed": "import sys",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.01,
+        0.0,
+        0.03,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.01,
+        0.0,
+        0.0,
+        0.87,
+        0.02,
+        0.01
+      ],
+      "children_worth_listing": 0.5
+    }
+  },
+  {
+    "path": "/home/d200024/intel",
+    "category": "system",
+    "canonical_copy": "/home/d200024/intel",
+    "source_evidence": "/home/d200024/intel",
+    "observed": "directory entries inspected",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.04,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.55,
+        0.0,
+        0.0,
+        0.22,
+        0.04,
+        0.08,
+        0.05
+      ],
+      "children_worth_listing": 0.32
+    }
+  },
+  {
+    "path": "/home/d200024/mytools/SAmag",
+    "category": "analysis_code",
+    "canonical_copy": "/home/d200024/mytools/SAmag",
+    "source_evidence": "/home/d200024/mytools/SAmag/dev_analisi.py",
+    "observed": "import sys",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.33
+    }
+  },
+  {
+    "path": "/home/d200025/public/Tools/Jakub",
+    "category": "analysis_code",
+    "canonical_copy": "/home/d200025/public/Tools/Jakub",
+    "source_evidence": "/home/d200025/public/Tools/Jakub/chan_list_softX.txt",
+    "observed": "EDDB",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.95,
+        0.0,
+        0.05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.12
+    }
+  },
+  {
+    "path": "/home/d200025/sharing/IDL_routines/EDICAM/HDF5/tests",
+    "category": "test_suite",
+    "canonical_copy": "/home/d200025/sharing/IDL_routines/EDICAM/HDF5/tests",
+    "source_evidence": "/home/d200025/sharing/IDL_routines/EDICAM/HDF5/tests/hdf5_create_dummy_datafile.pro",
+    "observed": "t_orig=systime(1)",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/d230014/AM_GIT_update/create_tools-main/FluxMapReconstruction/python_standalone",
+    "category": "analysis_code",
+    "canonical_copy": "/home/d230014/AM_GIT_update/create_tools-main/FluxMapReconstruction/python_standalone",
+    "source_evidence": "/home/d230014/AM_GIT_update/create_tools-main/FluxMapReconstruction/python_standalone/FluxMapReconstruction.py",
+    "observed": "# the real-time reconstruction performed by QST.      #",
+    "judgment": {
+      "path_purpose_probs": [
+        0.01,
+        0.99,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.11
+    }
+  },
+  {
+    "path": "/home/d230014/run_mecs_plugin_create_v4",
+    "category": "modeling_data",
+    "canonical_copy": "/home/d230014/run_mecs_plugin_create_v4",
+    "source_evidence": "/home/d230014/run_mecs_plugin_create_v4/CPU_time.txt",
+    "observed": "cal_time       EQGET_time     Int_time",
+    "judgment": {
+      "path_purpose_probs": [
+        0.14,
+        0.06,
+        0.17,
+        0.0,
+        0.01,
+        0.01,
+        0.03,
+        0.55,
+        0.0,
+        0.0,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.1
+    }
+  },
+  {
+    "path": "/home/d230015/idl",
+    "category": "analysis_code",
+    "canonical_copy": "/home/d230015/idl",
+    "source_evidence": "/home/d230015/idl/analisi/leggicsv.pro",
+    "observed": "loadct,39",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.78,
+        0.0,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05,
+        0.0,
+        0.12,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.03
+      ],
+      "children_worth_listing": 0.67
+    }
+  },
+  {
+    "path": "/home/d240034/local",
+    "category": "other",
+    "canonical_copy": "/home/d240034/local",
+    "source_evidence": "/home/d240034/local/pycharm-community-2024.2.3.tar.gz",
+    "observed": "file present; pycharm-community-2024.2.3.tar.gz",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.29,
+        0.04,
+        0.01,
+        0.1,
+        0.04,
+        0.0,
+        0.52
+      ],
+      "children_worth_listing": 0.13
+    }
+  },
+  {
+    "path": "/home/d240036/chease_develop/WK/TESTCASES/D3D",
+    "category": "test_suite",
+    "canonical_copy": "/home/d240036/chease_develop/WK/TESTCASES/D3D",
+    "source_evidence": "/home/d240036/chease_develop/WK/TESTCASES/D3D/README_test",
+    "observed": "# Copyright 2024 SPC-EPFL # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not us",
+    "judgment": {
+      "path_purpose_probs": [
+        0.06,
+        0.01,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.08,
+        0.01,
+        0.0,
+        0.0,
+        0.83,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.19
+    }
+  },
+  {
+    "path": "/home/d240036/chease_develop/WK/TESTCASES/debug",
+    "category": "test_suite",
+    "canonical_copy": "/home/d240036/chease_develop/WK/TESTCASES/debug",
+    "source_evidence": "/home/d240036/chease_develop/WK/TESTCASES/debug/debug_chi.m",
+    "observed": "figure(1);clf",
+    "judgment": {
+      "path_purpose_probs": [
+        0.26,
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.71,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.14
+    }
+  },
+  {
+    "path": "/home/d240044/Code/spyder-env",
+    "category": "configuration",
+    "canonical_copy": "/home/d240044/Code/spyder-env",
+    "source_evidence": "/home/d240044/Code/spyder-env/README.md",
+    "observed": "file present; README.md",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.51,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.47,
+        0.0,
+        0.01
+      ],
+      "children_worth_listing": 0.18
+    }
+  },
+  {
+    "path": "/home/d240044/Code/vcpkg",
+    "category": "software_project",
+    "canonical_copy": "/home/d240044/Code/vcpkg",
+    "source_evidence": "/home/d240044/Code/vcpkg/CONTRIBUTING.md",
+    "observed": "We are happy to accept pull requests for fixes, features, new packages, and updates to existing packages. In o",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "children_worth_listing": 0.07
+    }
+  },
+  {
+    "path": "/home/d240044/bin",
+    "category": "other",
+    "canonical_copy": "/home/d240044/bin",
+    "source_evidence": "/home/d240044/bin/bat",
+    "observed": "file present; bat",
+    "judgment": {
+      "path_purpose_probs": [
+        0.0,
+        0.0,
+        0.0,
+        0.01,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.14,
+        0.0,
+        0.0,
+        0.39,
+        0.0,
+        0.0,
+        0.46
+      ],
+      "children_worth_listing": 0.07
+    }
+  },
+  {
+    "path": "/work",
+    "category": "container",
+    "canonical_copy": "/work",
+    "source_evidence": "/work",
+    "observed": "directory entries inspected"
+  },
+  {
+    "path": "/work/edas",
+    "category": "experimental_data",
+    "canonical_copy": "/work/edas",
+    "source_evidence": "/work/edas/E065667_2821PA100_Rev001.avi",
+    "observed": "file present; E065667_2821PA100_Rev001.avi"
+  },
+  {
+    "path": "/work/edas/e101014.Rev000",
+    "category": "experimental_data",
+    "canonical_copy": "/work/edas/e101014.Rev000",
+    "source_evidence": "/work/edas/e101014.Rev000/e101014.t000310",
+    "observed": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"         \"http://www.w3.o"
+  },
+  {
+    "path": "/work/edas/e101046.Rev000",
+    "category": "experimental_data",
+    "canonical_copy": "/work/edas/e101046.Rev000",
+    "source_evidence": "/work/edas/e101046.Rev000/e101046.t000160",
+    "observed": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"         \"http://www.w3.o"
+  },
+  {
+    "path": "/work/edas/e101162.Rev000",
+    "category": "experimental_data",
+    "canonical_copy": "/work/edas/e101162.Rev000",
+    "source_evidence": "/work/edas/e101162.Rev000/e101162.t000400",
+    "observed": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"         \"http://www.w3.o"
+  },
+  {
+    "path": "/work/edas/e101163.Rev000",
+    "category": "experimental_data",
+    "canonical_copy": "/work/edas/e101163.Rev000",
+    "source_evidence": "/work/edas/e101163.Rev000/e101163.t000140",
+    "observed": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"         \"http://www.w3.o"
+  }
+]

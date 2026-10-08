@@ -1,8 +1,8 @@
 """Directory description and typed path judgments for graph-led discovery.
 
-The language model writes factual descriptions. Jev classifies purpose,
-scores the schema facets, and judges whether children are worth listing.
-Code derives scan, expansion and enrichment decisions from those answers.
+The language model writes factual descriptions. Jev classifies purpose and
+judges whether children are worth listing. Code derives path decisions from
+those answers. Facet answers are stored separately from the path gate.
 """
 
 from __future__ import annotations
@@ -31,19 +31,30 @@ suppress_litellm_noise()
 # Per-purpose score names — canonical list from shared scoring module
 PURPOSE_SCORE_NAMES = PATH_SCORE_DIMENSIONS
 
-# Scan is a broad discovery gate: visualization and documentation alone do not
-# imply that code or measured data should be scanned.
-SCAN_FACETS = tuple(
-    field
-    for field in PURPOSE_SCORE_NAMES
-    if field not in {"score_visualization", "score_documentation"}
-)
 PATH_EXPAND_THRESHOLD = 0.50
+CODE_BEARING_PURPOSES = frozenset(
+    {
+        "modeling_code",
+        "analysis_code",
+        "operations_code",
+        "data_access",
+        "workflow",
+        "visualization",
+        "software_project",
+        "test_suite",
+    }
+)
+DATA_PURPOSES = frozenset({"experimental_data", "modeling_data"})
+SKIPPED_PURPOSES = frozenset({"archive", "build_artifact", "system", "empty_directory"})
 
 
-def path_scan_relevance(scores: dict[str, float]) -> float:
-    """Return the strongest discovery facet in a path judgment."""
-    return max((scores.get(field, 0.0) for field in SCAN_FACETS), default=0.0)
+def path_category_gate(
+    probabilities: dict[str, float], children_worth_listing: float
+) -> tuple[float, float]:
+    """Rank scanning and expansion from purpose probabilities and child evidence."""
+    scan = sum(probabilities.get(purpose, 0.0) for purpose in CODE_BEARING_PURPOSES)
+    expand = max(probabilities.get("container", 0.0), children_worth_listing)
+    return scan, expand
 
 
 def path_judgment_fields(
@@ -72,22 +83,28 @@ def path_judgment_fields(
         "children_worth_listing": float(answers["children_worth_listing"]["noul"]),
         "judgment_model": model,
     }
-    scores: dict[str, float] = {}
     for name in PURPOSE_SCORE_NAMES:
         answer = answers[name]
         levels = len(questions[name]["criteria"])
         value = float(answer["score"]) / (levels - 1)
-        scores[name] = value
         stored = name if prefix == "score" else name.replace("score_", "triage_")
         fields[stored] = value
         fields[f"{stored}_probs"] = [
             float(answer["probabilities"].get(str(i), 0)) for i in range(levels)
         ]
         fields[f"{stored}_confidence"] = float(answer["confidence"])
-    fields["scan_relevance"] = path_scan_relevance(scores)
-    fields["should_expand"] = fields["children_worth_listing"] >= PATH_EXPAND_THRESHOLD
+    distribution = dict(zip(options, fields["path_purpose_probs"], strict=True))
+    scan_relevance, _ = path_category_gate(
+        distribution, fields["children_worth_listing"]
+    )
+    restricted = choice in DATA_PURPOSES | SKIPPED_PURPOSES
+    fields["scan_relevance"] = 0.0 if restricted else scan_relevance
+    fields["should_expand"] = not restricted and (
+        choice == "container"
+        or fields["children_worth_listing"] >= PATH_EXPAND_THRESHOLD
+    )
     minimum = get_path_scan_threshold() if scan_threshold is None else scan_threshold
-    fields["should_enrich"] = fields["scan_relevance"] >= minimum
+    fields["should_enrich"] = not restricted and fields["scan_relevance"] >= minimum
     return fields
 
 

@@ -144,3 +144,4 @@ async def test_triage_judges_when_description_is_path_keyed_or_fails(
     assert result.triaged_dirs[0].to_graph_dict()["description"] == (
         None if description_fails else "EDDB source files"
     )
+    assert result.triaged_dirs[0].score_cost == (0.001 if description_fails else 0.011)
