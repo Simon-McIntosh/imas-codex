@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -236,12 +236,15 @@
       folds write <code>imas_codex/cli/discover/__init__.py</code>, and nothing breaks before the runner
       lands. <code>--focus ITEMS</code> is wired where the domain's engine already filters by item:
       <code>paths</code> through its root filter and <code>code</code> through its path prefix. A domain
-      without one refuses <code>--focus</code> with a message naming §7, and never ignores it silently.
+      without one refuses <code>--focus</code>, and never ignores it silently. The message states the
+      mechanism: this domain's claim query takes no item filter yet. It names no plan or section,
+      because plan references do not belong in source.
       <strong>Done when</strong> the module exposes the stage function, and its new test file shows
       four things. <code>--scan-only</code> and <code>--flush</code> run the seeding and draining
       workers respectively. <code>--topic</code> reaches the scorer or enricher that the old free-text
       <code>--focus</code> reached. <code>--limit</code> caps items. <code>--focus</code> is honoured or
-      refused as above. The tests that drove the old command still pass.
+      refused as above, with no plan name or section number in the message or comments. The tests that
+      drove the old command still pass.
     </p>
     <p>
       <strong>Node</strong> <code>retire-domain-subcommands</code>, role implement, 1.5 h, after
