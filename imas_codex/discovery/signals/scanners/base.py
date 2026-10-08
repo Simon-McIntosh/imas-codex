@@ -53,10 +53,10 @@ class ScanResult:
 
     signals: list[FacilitySignal] = field(default_factory=list)
     data_access: DataAccess | None = None
-    data_accesses: list[DataAccess] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
     stats: dict[str, Any] = field(default_factory=dict)
     wiki_context: dict[str, dict[str, str]] = field(default_factory=dict)
+    data_accesses: list[DataAccess] = field(default_factory=list)
 
 
 @runtime_checkable

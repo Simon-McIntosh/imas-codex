@@ -49,6 +49,106 @@ DATA_CLASS_BY_EDDB_LETTER = {
 }
 EDDB_LETTER_BY_DATA_CLASS = {v: k for k, v in DATA_CLASS_BY_EDDB_LETTER.items()}
 
+EQDB_FIELDS = {
+    "#GEO": ("RG", "ZG", "NSR", "NSZ"),
+    "#EQU": ("PSI",),
+}
+GEQDSK_FIELDS = ("r", "z", "psirz", "COCOS")
+
+
+def _equilibrium_access_methods(facility: str) -> list[DataAccess]:
+    """Describe the two file formats independently of any exemplar path."""
+    connection = "import json\nfrom imas_codex.remote.executor import run_python_script"
+    common = (
+        ", ssh_host='{ssh_host}', timeout=60, python_command='python', "
+        "setup_commands=['module unload python/3.5.6', 'module load python/3.12']"
+        "))\n"
+        "data = result['data']"
+    )
+    eqdb = DataAccess(
+        id=f"{facility}:eqdb:local_record",
+        facility_id=facility,
+        name="EQDB local record fields",
+        description=(
+            "Read the EQ31 or EQ11 record format at the EQDB client's local "
+            "shot/time path. The compiled client's network mode against "
+            "dbsvr17p:/JT60SA_EQ/EQDB is an alternate route when that server "
+            "is reachable; it currently fails during defaults initialization."
+        ),
+        method_type="file",
+        library="JT-60SA EQDB record format",
+        access_type="local",
+        data_source="EQDB",
+        connection_template=connection,
+        data_template=(
+            "result = json.loads(run_python_script('read_equilibrium_file.py', "
+            "dict(format='eqdb_record', root='{root}', shot={shot}, "
+            "time={time}, field='{field}')" + common
+        ),
+        environment_variables="EQDSK_DIR; EQDB_FILE overrides the shot/time path",
+        accesses_geometry="R,Z,psi grid",
+    )
+    geqdsk = DataAccess(
+        id=f"{facility}:equilibrium:g_eqdsk_file",
+        facility_id=facility,
+        name="G-EQDSK file fields",
+        description=(
+            "Read a producer's G-EQDSK file by root, shot, time and its "
+            "filename template; COCOS is returned only when the file declares it."
+        ),
+        method_type="file",
+        library="G-EQDSK",
+        access_type="local",
+        data_source="G-EQDSK",
+        connection_template=connection,
+        data_template=(
+            "result = json.loads(run_python_script('read_equilibrium_file.py', "
+            "dict(format='g_eqdsk', root='{root}', shot={shot}, time={time}, "
+            "filename_template='{filename_template}', field='{field}')" + common
+        ),
+        accesses_geometry="R,Z,psi grid",
+    )
+    return [eqdb, geqdsk]
+
+
+def _equilibrium_signals(
+    facility: str, examples: list[dict[str, Any]], access: list[DataAccess]
+) -> list[FacilitySignal]:
+    """Use inventory examples as evidence for stable code and format fields."""
+    signals = []
+    for example in examples:
+        code = example["code"]
+        is_record = example["format"] in {"selene_eq31", "eq11"}
+        groups = EQDB_FIELDS.items() if is_record else (("G-EQDSK", GEQDSK_FIELDS),)
+        for group, fields in groups:
+            for field in fields:
+                if field == "COCOS" and example.get("cocos") is None:
+                    continue
+                source = "EQDB" if is_record else "G-EQDSK"
+                signals.append(
+                    FacilitySignal(
+                        id=f"{facility}:equilibrium/{source.lower().replace('-', '_')}_{code.lower()}_{field.lower()}",
+                        facility_id=facility,
+                        status=FacilitySignalStatus.discovered,
+                        physics_domain="equilibrium",
+                        name=f"{code} {source} {group}/{field}",
+                        accessor=field,
+                        data_access=access[0 if is_record else 1].id,
+                        data_source_name=source,
+                        data_source_path=f"{code}/{example['format']}/{group}/{field}",
+                        description=(
+                            f"{code} {example['format']} {group}/{field}; inventory "
+                            f"example {example['path']} at shot {example['shot']} "
+                            f"and {example['time']} s, grid {example['grid'][0]} "
+                            f"by {example['grid'][1]}."
+                        ),
+                        cocos=example.get("cocos"),
+                        discovery_source="edas",
+                        example_shot=example["shot"],
+                    )
+                )
+    return signals
+
 
 class EDASScanner:
     """Discover signals from JT-60SA EDAS system.
@@ -327,6 +427,10 @@ class EDASScanner:
                 ssh_host,
             )
 
+        examples = config.get("equilibrium_examples", [])
+        equilibrium_access = _equilibrium_access_methods(facility) if examples else []
+        signals.extend(_equilibrium_signals(facility, examples, equilibrium_access))
+
         logger.info(
             "EDAS scanner: discovered %d signals from %d categories (shot %s)",
             len(signals),
@@ -337,12 +441,14 @@ class EDASScanner:
         return ScanResult(
             signals=signals,
             data_access=data_access,
+            data_accesses=equilibrium_access,
             metadata={
                 "reference_shot": shot_str,
                 "categories": data.get("categories", []),
                 "ncats": data.get("ncats", 0),
                 "database_attempts": data.get("attempts", []),
                 "category_counts": data.get("category_counts", {}),
+                "equilibrium_examples": examples,
             },
             stats={
                 "signals_discovered": len(signals),
@@ -388,12 +494,79 @@ class EDASScanner:
         if not shot_str.startswith("E"):
             shot_str = f"E{ref_shot:06d}"
 
+        equilibrium = [s for s in signals if s.data_source_name in {"EQDB", "G-EQDSK"}]
+        edas_signals = [
+            s for s in signals if s.data_source_name not in {"EQDB", "G-EQDSK"}
+        ]
+        equilibrium_results = []
+        examples = {
+            item["code"]: item for item in config.get("equilibrium_examples", [])
+        }
+        by_code: dict[str, list[FacilitySignal]] = {}
+        for signal in equilibrium:
+            code = (signal.data_source_path or "").split("/", 1)[0]
+            by_code.setdefault(code, []).append(signal)
+        for code, code_signals in by_code.items():
+            example = examples.get(code)
+            error = None
+            record = None
+            if example is None:
+                error = f"no equilibrium inventory example for {code}"
+            else:
+                payload = {
+                    "format": (
+                        "eqdb_record"
+                        if example["format"] in {"selene_eq31", "eq11"}
+                        else "g_eqdsk"
+                    ),
+                    "root": example["root"],
+                    "shot": example["shot"],
+                    "time": example["time"],
+                }
+                if example.get("filename_template"):
+                    payload["filename_template"] = example["filename_template"]
+                try:
+                    output = await async_run_python_script(
+                        "read_equilibrium_file.py",
+                        payload,
+                        ssh_host=ssh_host,
+                        timeout=60,
+                        python_command=config.get("python_command", "python3"),
+                        setup_commands=config.get("setup_commands"),
+                    )
+                    record = json.loads(output.strip().split("\n")[-1])
+                    if record["format"] != example["format"]:
+                        raise ValueError("equilibrium format differs from inventory")
+                    if record["grid"] != example["grid"]:
+                        raise ValueError("equilibrium grid differs from inventory")
+                    if record["path"] != example["path"]:
+                        raise ValueError("equilibrium path differs from inventory")
+                    if (
+                        example.get("cocos") is not None
+                        and record.get("cocos") != example["cocos"]
+                    ):
+                        raise ValueError("COCOS differs from inventory")
+                except Exception as exc:
+                    error = str(exc)[:200]
+            for signal in code_signals:
+                equilibrium_results.append(
+                    {
+                        "signal_id": signal.id,
+                        "valid": error is None,
+                        "dtype": "file_grid" if error is None else None,
+                        "error": error,
+                    }
+                )
+
+        if not edas_signals:
+            return equilibrium_results
+
         # The EDDB catalogue keys a signal by "<category>/<data name>". Read
         # that from data_source_path, which keeps the catalogue path for the
         # life of the row; fall back to name only when the path is absent,
         # since enrichment may replace name with a human-readable label.
         batch = []
-        for s in signals:
+        for s in edas_signals:
             source = s.data_source_path or s.name or ""
             parts = source.split("/")
             if s.data_source_name == "MBDB" and len(parts) == 4:
@@ -461,7 +634,7 @@ class EDASScanner:
                 setup_commands=config.get("setup_commands"),
             )
             response = json.loads(output.strip().split("\n")[-1])
-            return [
+            edas_results = [
                 {
                     "signal_id": r["id"],
                     "valid": r.get("success", False),
@@ -470,12 +643,20 @@ class EDASScanner:
                 }
                 for r in response.get("results", [])
             ]
+            by_id = {
+                item["signal_id"]: item for item in equilibrium_results + edas_results
+            }
+            return [by_id[s.id] for s in signals if s.id in by_id]
         except Exception as e:
             logger.error("EDAS check failed: %s", e)
-            return [
+            edas_results = [
                 {"signal_id": s.id, "valid": False, "error": str(e)[:200]}
-                for s in signals
+                for s in edas_signals
             ]
+            by_id = {
+                item["signal_id"]: item for item in equilibrium_results + edas_results
+            }
+            return [by_id[s.id] for s in signals]
 
 
 # Auto-register on import

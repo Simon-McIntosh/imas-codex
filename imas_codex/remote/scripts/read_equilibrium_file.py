@@ -210,8 +210,11 @@ def resolve_eqdb_path(root, shot, time):
         return Path(explicit_file)
     base = Path(root or os.environ.get("EQDSK_DIR") or Path.home() / "LOCALDB/EQDSK")
     shot_name = f"{int(shot):06d}"
-    time_name = f"{round(float(time) * 1000):06d}"
-    return base / shot_name[:2] / shot_name[:4] / shot_name / time_name
+    time_ms = round(float(time) * 1000)
+    shot_dir = base / shot_name[:2] / shot_name[:4] / shot_name
+    padded = shot_dir / f"{time_ms:06d}"
+    shorter = shot_dir / f"{time_ms:05d}"
+    return shorter if not padded.exists() and shorter.exists() else padded
 
 
 def resolve_geqdsk_path(root, shot, time, filename_template):

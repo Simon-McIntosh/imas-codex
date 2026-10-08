@@ -57,6 +57,49 @@ data_systems:
     # Newest E-shot the catalogue listed on 2026-10-05; valid data starts at
     # E080000 and the scanner formats an integer as E%06d.
     reference_shot: 101173
+    equilibrium_examples:
+      - code: SELENE
+        format: selene_eq31
+        root: /home/a114004/LOCALDB/EQDSK
+        path: /home/a114004/LOCALDB/EQDSK/10/1011/101163/005000
+        shot: 101163
+        time: 5.0
+        grid: [129, 129]
+      - code: TOPICS
+        format: eq11
+        root: /home/a048717/LOCALDB/EQDSK
+        path: /home/a048717/LOCALDB/EQDSK/08/0802/080296/05000
+        shot: 80296
+        time: 5.0
+        grid: [129, 129]
+      - code: SA
+        format: g_eqdsk
+        root: /home/d200024/LOCALDB
+        filename_template: "EQDSK_E{shot:06d}t{time:g}_COCOS02"
+        path: /home/d200024/LOCALDB/EQDSK_E101011t6.8_COCOS02
+        shot: 101011
+        time: 6.8
+        grid: [129, 129]
+        cocos: 2
+      - code: LIUQE
+        inventory_code: LIUQE/MEQ
+        format: g_eqdsk
+        root: /home/d260047/olivier/equil_runs
+        filename_template: "EQDSK_E{shot:06d}t{time:g}_COCOS07"
+        path: /home/d260047/olivier/equil_runs/EQDSK_E101011t6.8_COCOS07
+        shot: 101011
+        time: 6.8
+        grid: [60, 129]
+        cocos: 7
+      - code: CHEASE
+        format: g_eqdsk
+        root: /home/d240036/equil_runs
+        filename_template: "EQDSK_COCOS_17.OUT_E{shot:06d}t{time:.2f}"
+        path: /home/d240036/equil_runs/EQDSK_COCOS_17.OUT_E101025t5.90
+        shot: 101025
+        time: 5.9
+        grid: [129, 128]
+        cocos: 17
 
   # IMAS data available via modules
   imas:
