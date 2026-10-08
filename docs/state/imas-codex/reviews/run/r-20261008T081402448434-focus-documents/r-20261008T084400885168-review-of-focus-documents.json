@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest carries no top-level baseline_suite/after_suite keys and classification.json's manifest.data records both as null, so the arms were read from the run's own gate logs: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T081402448434-focus-documents/baseline.log at revision 886d78a9 reports 75 passed, 0 failed, EXIT=0, and gate-committed-head.log at revision fa8c0ed8 reports 83 passed, 0 failed, EXIT=0. Both arms carry zero failing test ids, so added_failure_ids = [] and added_failure_count = 0; I reproduced the after arm independently at 0403b70b (83 passed, EXIT=0).",
+  "backend": "local",
+  "base_log_revision": "886d78a9bda34f1dfdf52e65175ce0936a35084d",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/cli/discover/common.py:resolve_focus_items",
+    "imas_codex/cli/discover/documents.py:run_documents_stage",
+    "imas_codex/cli/discover/documents.py:_validate_focus",
+    "imas_codex/cli/discover/map.py:run_candidates_stage",
+    "imas_codex/discovery/documents/workers.py:_claim_image_documents",
+    "imas_codex/discovery/documents/pipeline.py:has_pending_work",
+    "imas_codex/discovery/base/image.py:claim_images_for_scoring"
+  ],
+  "completed_at": "2026-10-08T08:56:58.487Z",
+  "dispatched_at": "2026-10-08T08:44:14Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/documents.py",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "_validate_focus counts any facility Document with d.path STARTS WITH prefix, but every consumer (_claim_image_documents, _has_pending_image_documents, _has_pending_image_scores, claim_images_for_scoring) restricts to document_type='image'. A --focus value naming only non-image Documents therefore passes validation and then claims nothing, and no test pins that gap."
+    },
+    {
+      "file": "imas_codex/cli/discover/common.py",
+      "line": "62",
+      "severity": "follow-on",
+      "text": "the new '--focus names no items' UsageError fires when tokens are non-empty but resolve to nothing (for example a whitespace-only token); no test exercises it, so the branch is asserted only by inspection."
+    },
+    {
+      "file": "docs/figures/facility-discovery-sequence/focus-documents",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "declared in orientation_write_paths but no such figure exists at the reviewed head; plan \u00a77's focus-documents done-when requires no figure, so it is an unused declared path rather than a missing deliverable."
+    },
+    {
+      "file": "imas_codex/discovery/base/image.py",
+      "line": "402",
+      "severity": "follow-on",
+      "text": "the EXISTS { MATCH (d:Document {facility_id:$facility})-[:HAS_IMAGE]->(img) WHERE any(prefix IN $path_prefixes WHERE d.path STARTS WITH prefix) } correlated subquery is validated only against a mock that substring-matches the Cypher text; live parsing is unverified and the fragment defers it to a coordinator EXPLAIN."
+    },
+    {
+      "file": "imas_codex/discovery/documents/pipeline.py",
+      "line": "118",
+      "severity": "follow-on",
+      "text": "has_pending_work repeats the path_prefixes-is-None branch that _has_pending_image_documents and _has_pending_image_scores already encode internally; passing path_prefixes through unconditionally would remove the duplication."
+    }
+  ],
+  "gate_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084400885168-review-of-focus-documents/repro-gate-head.log",
+    "result": "83 passed, 1 warning in 6.78s, EXIT=0"
+  },
+  "head_log_revision": "0403b70bddaa77523fcb2e589bae020ad26d9efe",
+  "item_verdicts": {
+    "call_sites": "resolve_focus_items from imas_codex/cli/discover/map.py:run_candidates_stage and imas_codex/cli/discover/documents.py:run_documents_stage; path_prefixes from imas_codex/discovery/documents/workers.py:_claim_image_documents and imas_codex/discovery/documents/pipeline.py:_has_pending_image_documents/_has_pending_image_scores/has_pending_work; the scoring claim from imas_codex/discovery/base/image.py:claim_images_for_scoring.",
+    "diff": "read commit by commit; b503c7176 moves the resolver to common.py and repoints map.py, eb4db622 adds path_prefixes through workers.py, pipeline.py and base/image.py, fa8c0ed8 covers the stage routing, 0403b70b adds only the evidence fragment.",
+    "done_when": "tests/cli/test_discover_documents_focus.py (232 lines) shows a focused fetch claim and scoring claim returning only doc-a/img-a, a manifest in both list and items-key form reaching the stage as ('/archive/selected',), and an unknown path refused by name; tests/cli/test_discover_documents_stage.py::test_focus_reaches_the_draining_stage_and_unknown_path_is_refused drives the same through the CLI. The named gate reproduced independently at 0403b70b: 83 passed, EXIT=0.",
+    "goal": "resolve_focus_items moved from imas_codex/cli/discover/map.py into imas_codex/cli/discover/common.py:36 reads a YAML list or a mapping's 'items' list (the old 'sources' key is gone), splits non-file tokens on whitespace and dedupes first-seen; run_documents_stage honours --focus by resolving prefixes and passing path_prefixes to the pipeline, and the fetch claim, both pending checks and the scoring claim each take an optional path-prefix argument. Plan \u00a77 focus-documents is fully wired.",
+    "manifest": "read; status complete, 4 commits (b503c7176, eb4db622, fa8c0ed8, 0403b70b), negative_control_log negative-control.log (1 failed EXIT=1), and baseline_suite/after_suite absent as top-level keys and null in classification.json's manifest.data, so the arms are read from baseline.log and gate-committed-head.log.",
+    "write_paths": "the manifest declares 11 changed_paths plus a figures dir in orientation_write_paths; git diff --name-only 886d78a9..0403b70b lists exactly those 11 files. docs/figures/facility-discovery-sequence/focus-documents was declared but not produced (only the pre-existing stage-graph.svg sits there)."
+  },
+  "justifications": {
+    "durability": "the focused-claim test reddens under the declared mutation and _validate_focus refuses an unknown path by name with no plan/section wording (asserted at tests/cli/test_discover_candidates_focus.py and test_discover_candidates_stage.py). It is docked because _validate_focus matches any facility Document while every claim filter restricts to document_type='image', so a prefix naming only non-image Documents is accepted and then silently claims nothing - untested - and the new resolve_focus_items 'names no items' branch has no test.",
+    "evidence": "I reproduced the named gate independently in a scratch tree at 0403b70b (83 passed, EXIT=0, repro-gate-head.log) and reproduced the mutation (drop the fetch claim's path predicate -> 1 failed EXIT=1, ['doc-a','doc-b'] == ['doc-a'], repro-negative-control.log). The evidence is docked because the gate is entirely mock-backed: the fragment itself states the five changed Cypher statements are un-EXPLAINed (the node's own GraphClient probe could not reach the graph service), so live Cypher validity rests on the coordinator's EXPLAIN.",
+    "fit": "the added names (resolve_focus_items, path_prefixes, _validate_focus) describe the mechanism with no plan or stage label, the removed '_resolve_focus' private fork is gone, and the --focus help now says 'items' rather than 'sources'. Only nit: has_pending_work duplicates the path_prefixes-is-None branch that the two private checks already carry.",
+    "goal_fidelity": "imas_codex/cli/discover/common.py:36 is the shared resolver \u00a77 names, and imas_codex/cli/discover/documents.py:80 feeds path_prefixes to imas_codex/discovery/documents/workers.py:47, pipeline.py:73/102 and imas_codex/discovery/base/image.py:402, so a named Document path covers every Document whose path starts with it exactly as \u00a77 requires.",
+    "reuse": "the change moves candidates' _resolve_focus into common.py rather than forking a second resolver, extends the existing claim and pending-check owners with an optional argument, and leaves the wiki callers of claim_images_for_scoring (imas_codex/discovery/wiki/workers.py:1206, wiki/image.py) unchanged because the new parameter defaults to None.",
+    "scope_discipline": "git diff --name-only 886d78a9..0403b70b touches exactly the 11 files the manifest declares, every one inside orientation_write_paths; no dependency, config or unrelated-file change. The declared figures path was left unproduced, which is an unused grant rather than an overreach."
+  },
+  "model": "deepseek-v4.1-flash",
+  "negative_control_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084400885168-review-of-focus-documents/repro-negative-control.log",
+    "result": "1 failed EXIT=1 after dropping the fetch path predicate"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: resolve_focus_items is shared in imas_codex/cli/discover/common.py:36 (YAML list or an 'items' mapping), run_documents_stage resolves --focus prefixes and passes path_prefixes to the fetch claim, both pending checks and the scoring claim; \u00a77 focus-documents is wired.\nVERDICT done_when: tests/cli/test_discover_documents_focus.py shows a focused claim returning only doc-a/img-a, both manifest forms reaching the stage as ('/archive/selected',), and an unknown path refused by name; the named gate reproduced at 0403b70b, EXIT=0 83 passed.\nVERDICT write_paths: 11 diff files equal the 11 declared changed_paths; the declared figures path was not produced.\nVERDICT manifest: status complete, 4 commits, negative_control.log 1 failed EXIT=1, baseline_suite/after_suite null so arms read from baseline.log (75 passed) and gate-committed-head.log (83 passed).\nVERDICT diff: resource resolver moved, path_prefixes threaded through workers/pipeline/image, stage routing covered, fragment added.\nVERDICT call_sites: run_documents_stage, _validate_focus, run_candidates_stage, _claim_image_documents, has_pending_work, claim_images_for_scoring.\nSCORE goal_fidelity: 19\nSCORE evidence: 16\nSCORE scope_discipline: 19\nSCORE durability: 16\nSCORE fit: 18\nSCORE reuse: 19",
+  "review_run_id": "r-20261008T084400885168-review-of-focus-documents",
+  "reviewed_base_sha": "886d78a9bda34f1dfdf52e65175ce0936a35084d",
+  "reviewed_head_sha": "0403b70bddaa77523fcb2e589bae020ad26d9efe",
+  "reviewed_run_id": "r-20261008T081402448434-focus-documents",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T08:52:00+00:00",
+  "total": 107,
+  "verdict": "SOUND WITH FINDINGS"
+}

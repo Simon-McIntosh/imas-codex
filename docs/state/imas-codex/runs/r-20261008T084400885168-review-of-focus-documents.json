@@ -1,0 +1,367 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "29a0f37c6cf2c63bd1eb6c18c33730f5a593e511",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3641241,
+      "input_tokens_cumulative": 3641241,
+      "output_tokens": 28877,
+      "output_tokens_cumulative": 28877,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-08T08:56:58.487Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T08:44:14Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "documents.py",
+    "docs/figures/facility-discovery-sequence/focus-documents"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/revhead.kAy2gE uv run --no-sync pytest tests/cli/test_discover_documents_focus.py tests/cli/test_discover_documents_stage.py tests/cli/test_discover_candidates_focus.py tests/cli/test_discover_candidates_stage.py tests/d",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084400885168-review-of-focus-documents/repro-gate-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.375,
+    "plan": "facility-discovery-sequence",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T09:44:02.610674+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T08:44:02Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 7,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 8,
+    "headroom": 4,
+    "mean_context": 123636,
+    "observed_at": "2026-10-08T08:43:55Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 7,
+      "aggregate_tokens_per_second": 533.054,
+      "detail": "",
+      "mean_tokens_per_second": 54.393,
+      "observed_at": "2026-10-08T08:43:55Z",
+      "runs": 9.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T08:56:58.487Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084400885168-review-of-focus-documents/manifest.md",
+  "member": "disposable-r-20261008T084400885168-review-of-focus-documents",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "a review stores its record outside the repository",
+  "node": "review-of-focus-documents",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1828,
+          "cached_input_tokens": 293416,
+          "input_tokens": 295246,
+          "output_tokens": 998,
+          "reasoning_output_tokens": 271,
+          "total_tokens": 296244,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "the review for r-20261008T081402448434-focus-documents stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261008T081402448434-focus-documents",
+    "id": "review-of-focus-documents",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T08:44:02Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 7,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 8,
+      "headroom": 4,
+      "mean_context": 123636,
+      "observed_at": "2026-10-08T08:43:55Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 7,
+        "aggregate_tokens_per_second": 533.054,
+        "detail": "",
+        "mean_tokens_per_second": 54.393,
+        "observed_at": "2026-10-08T08:43:55Z",
+        "runs": 9.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084400885168-review-of-focus-documents/manifest.md",
+    "negative_control": "",
+    "plan": "facility-discovery-sequence",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§7",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T081402448434-focus-documents.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T081402448434-focus-documents.at-0403b70bddaa77523fcb2e589bae020ad26d9efe.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "review-of-focus-documents",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T08:44:07.772426+00:00",
+    "score": 0.625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.394,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "facility-discovery-sequence",
+  "plan_impl_at_dispatch": 0.375,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "1db6d0afdf664bb58086e5d932e325b740a3c116",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261008T084400885168-review-of-focus-documents",
+    "reviewed_base_sha": "886d78a9bda34f1dfdf52e65175ce0936a35084d",
+    "reviewed_head_sha": "0403b70bddaa77523fcb2e589bae020ad26d9efe",
+    "scores": {
+      "durability": 16,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 107
+  },
+  "review_tier": "none",
+  "role": "review",
+  "route_mode": "shadow",
+  "run_id": "r-20261008T084400885168-review-of-focus-documents",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§7",
+  "session": "mapping-20261006",
+  "session_harness": "claude",
+  "session_id": "ea121b2b-549d-441b-8a15-56cc0b602a55",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 3641241,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 757.611,
+    "generated_tokens": 28877,
+    "generation_seconds": 648.352,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 54.9,
+    "machine_seconds": 109.259,
+    "peak_input_tokens": 126278,
+    "tokens_per_second": 44.54,
+    "wall_tokens_per_second": 38.12
+  },
+  "time_budget": "60m",
+  "tool_steps": 41.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 764,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T08:57:04Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-08T08:44:19Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T084400885168-review-of-focus-documents",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5246,
+    "worker_pid": 3560213
+  },
+  "worker_seconds": 742,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
