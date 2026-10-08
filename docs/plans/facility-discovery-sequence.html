@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="70">
+<meta name="plan-version" content="71">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -577,6 +577,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T084900526645-review-of-assignment-work-matches-claim" data-who="reckon-build" data-when="2026-10-08T09:01:30.497Z">
     <div class="r-comment-body"><p>Independently reviewed r-20261008T082435236450-assignment-work-matches-claim: the pending check now builds the claim's own predicate over target IDS names and the engine passes state.target_ids_list; head gate reproduced 514 passed EXIT=0, base arm reproduced the pre-fix failure EXIT=1, a head mutation restoring the domain filter fails the cross-domain cases EXIT=1; stored a parsed record scoring all six dimensions, total 103/120, 0 added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T084822123178-candidate-homes-under-domain-filter" data-who="reckon-build" data-when="2026-10-08T09:03:16Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/facility-discovery-sequence/candidate-homes-under-domain-filter.html#candidate-homes-under-domain-filter — Candidate homes join domain-filtered and unfiltered targets while explicit IDS filters remain unchanged; committed gate 516 passed, 5 skipped, 3 deselected.</p></div>
 </div>
 </section>
 </main>
