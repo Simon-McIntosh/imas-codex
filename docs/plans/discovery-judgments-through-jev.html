@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;done&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="90">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -591,6 +591,9 @@ fresh-description arm of the variation measure once the triage worker routes thr
 </div>
 <div class="r-comment" data-section="s17" data-id="c-run-r-20261008T123108607142-review-of-path-judgment-test-category-gate" data-who="reckon-build" data-when="2026-10-08T12:38:22.175Z">
     <div class="r-comment-body"><p>Stored an independent review of r-20261008T122235560389-path-judgment-test-category-gate at base 4f40b717 head 8936a38ae scoring 114/120 (SOUND): the stale test is aligned to the category-derived scan gate, zero added failures, one file modified.</p></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-run-r-20261008T103855443292-path-category-gate" data-who="reckon-build" data-when="2026-10-08T11:30:40Z">
+    <div class="r-comment-body"><p>Category-derived path actions reproduce scan-or-expand AUC 0.9244 on 222 canonical source-labelled paths (95% interval 0.8858–0.9608). A scored /home container was claimed and its 20 children persisted, while a scored archive was refused; 6,136 stored JT-60SA gates were refreshed and all 6,284 eligible judgments matched on readback. Evidence: /imas-codex/evidence/fragments/discovery-judgments-through-jev/path-category-gate.html.</p></div>
 </div>
 <div class="r-comment" data-section="s15" data-id="c-run-r-20261008T060108264897-facility-access-matches" data-who="reckon-build" data-when="2026-10-08T06:44:13Z">
     <div class="r-comment-body"><p>Facility-configured access calls now reach path and both code judgment arms. On 158 labelled JT-60SA paths, fresh AUC was 0.8502 without and 0.8513 with match evidence; at the 0.30 gate TP/FP/FN/TN changed from 87/6/31/34 to 86/6/32/34. Focused gate 106 passed; removing the builder's facility sources failed all four facility cases.</p></div>
