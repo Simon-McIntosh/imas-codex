@@ -261,6 +261,8 @@ def build_triage_state(
     a re-judge of an ingested file presents its stored chunk text in place of a
     preview it no longer needs — and the file's pattern evidence.
     """
+    from imas_codex.discovery.paths.enrichment import facility_access_matches
+
     state: dict[str, Any] = {
         "facility": facility_relevance_block(facility_id, facility_config),
         "file": {
@@ -269,6 +271,9 @@ def build_triage_state(
             "directory": file_row.get("parent_path") or "",
             "directory_description": file_row.get("parent_description") or "",
             "siblings": file_row.get("sibling_names") or [],
+            "facility_data_access_matches": facility_access_matches(
+                file_row.get("pattern_categories")
+            ),
         },
     }
     if with_content:

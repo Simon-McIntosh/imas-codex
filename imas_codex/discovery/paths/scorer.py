@@ -269,6 +269,7 @@ def build_path_judgment_state(
     import json
 
     from imas_codex.discovery.code.scorer import facility_relevance_block
+    from imas_codex.discovery.paths.enrichment import facility_access_matches
 
     def decoded(value: Any, fallback: Any) -> Any:
         if isinstance(value, str):
@@ -300,6 +301,9 @@ def build_path_judgment_state(
                 "total_lines": path_row.get("total_lines"),
                 "language_breakdown": decoded(path_row.get("language_breakdown"), {}),
                 "pattern_categories": decoded(path_row.get("pattern_categories"), []),
+                "facility_data_access_matches": facility_access_matches(
+                    path_row.get("pattern_categories")
+                ),
                 "read_matches": path_row.get("read_matches"),
                 "write_matches": path_row.get("write_matches"),
                 "is_multiformat": path_row.get("is_multiformat"),

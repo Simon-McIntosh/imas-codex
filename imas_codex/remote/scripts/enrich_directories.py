@@ -40,6 +40,7 @@ Output (JSON on stdout):
 
 import json
 import os
+import re
 import subprocess
 import sys
 from typing import Any, Dict, List, Optional
@@ -118,41 +119,36 @@ def git_base_cmd(repo_path: str) -> List[str]:
     return ["git", "-c", "safe.directory=*", "-C", repo_path]
 
 
-def count_pattern_matches(path: str, pattern: str, timeout: int = 30) -> int:
-    """Count matches for a pattern using rg at current directory level.
-
-    Only searches files directly in ``path`` (--max-depth 1), not in
-    subdirectories.  Subdirectories get their own enrichment pass if
-    they are expanded by the scorer.
-
-    Args:
-        path: Directory to search
-        pattern: Regex pattern to search for
-        timeout: Command timeout in seconds
-
-    Returns:
-        Total match count across all files
-    """
+def count_category_matches(
+    path: str, categories: Dict[str, str], timeout: int = 30
+) -> Dict[str, int]:
+    """Count matching lines per category with one directory scan."""
+    if not categories:
+        return {}
+    compiled = {name: re.compile(pattern) for name, pattern in categories.items()}
+    combined = "|".join("(?:" + pattern + ")" for pattern in categories.values())
     try:
         proc = subprocess.run(
-            ["rg", "-c", "--no-messages", "--max-depth", "1", "-e", pattern, path],
+            ["rg", "--json", "--no-messages", "--max-depth", "1", "-e", combined, path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
             timeout=timeout,
         )
-        if proc.returncode == 0 and proc.stdout.strip():
-            total = 0
-            for line in proc.stdout.strip().split("\n"):
-                if ":" in line:
-                    try:
-                        total += int(line.rsplit(":", 1)[-1])
-                    except ValueError:
-                        pass
-            return total
-    except (subprocess.TimeoutExpired, Exception):
-        pass
-    return 0
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    if proc.returncode not in (0, 1):
+        return {}
+    counts: Dict[str, int] = {}
+    for record in proc.stdout.splitlines():
+        event = json.loads(record)
+        if event.get("type") != "match":
+            continue
+        line = event["data"]["lines"].get("text", "")
+        for name, regex in compiled.items():
+            if regex.search(line):
+                counts[name] = counts.get(name, 0) + 1
+    return counts
 
 
 def enrich_directory(
@@ -253,10 +249,10 @@ def enrich_directory(
             return matched_categories, read_matches, write_matches
 
         cats = pattern_categories or DEFAULT_PATTERN_CATEGORIES
-        for category, pattern in cats.items():
-            matches = count_pattern_matches(path, pattern)
+        for category, matches in count_category_matches(path, cats).items():
             if matches > 0:
                 matched_categories[category] = matches
+                pattern = cats[category]
                 if any(
                     r in pattern.lower()
                     for r in ["read", "load", "open", "get", "from"]

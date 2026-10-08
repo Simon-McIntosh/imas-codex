@@ -57,18 +57,14 @@ def _get_document_extensions_list() -> list[str]:
     return sorted({e.lstrip(".").lower() for e in doc_and_image})
 
 
-def _get_pattern_categories() -> dict[str, str]:
+def _get_pattern_categories(facility: str | None = None) -> dict[str, str]:
     """Get pattern categories from the paths enrichment PATTERN_REGISTRY.
 
     Flattens into category → regex for rg execution on remote host.
     """
-    from imas_codex.discovery.paths.enrichment import PATTERN_REGISTRY
+    from imas_codex.discovery.paths.enrichment import _build_enrich_patterns
 
-    flat: dict[str, str] = {}
-    for _category, (patterns_dict, _score_dim) in PATTERN_REGISTRY.items():
-        for name, regex in patterns_dict.items():
-            flat[name] = regex
-    return flat
+    return _build_enrich_patterns(facility)
 
 
 def _scan_remote_paths_batch(
@@ -119,7 +115,7 @@ def _scan_remote_paths_batch(
         "max_depth": max_depth,
         "max_files_per_path": max_files_per_path,
         "max_file_size": max_file_size,
-        "pattern_categories": _get_pattern_categories(),
+        "pattern_categories": _get_pattern_categories(facility),
     }
 
     try:

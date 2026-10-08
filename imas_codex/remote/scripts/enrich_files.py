@@ -38,9 +38,10 @@ Output (JSON on stdout):
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def count_lines(path: str) -> int:
@@ -87,24 +88,50 @@ def read_preview(path: str, max_lines: int = 40, max_bytes: int = 2000) -> str:
         return ""
 
 
-def run_rg_on_file(pattern: str, path: str) -> int:
-    """Run rg -c on a single file and return match count."""
+def batch_pattern_counts(
+    files: List[str], pattern_categories: Dict[str, str]
+) -> Dict[str, Dict[str, int]]:
+    """Count matching lines per category in one file batch scan."""
+    if not files or not pattern_categories:
+        return {}
+    compiled = {
+        name: re.compile(pattern) for name, pattern in pattern_categories.items()
+    }
+    combined = "|".join(
+        "(?:" + pattern + ")" for pattern in pattern_categories.values()
+    )
     try:
         result = subprocess.run(
-            ["rg", "-c", "--no-filename", pattern, path],
+            ["rg", "--json", "--no-messages", "-e", combined, "--"] + files,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
-            timeout=10,
+            timeout=30,
         )
-        if result.returncode == 0 and result.stdout.strip():
-            return int(result.stdout.strip())
-    except (subprocess.TimeoutExpired, ValueError):
-        pass
-    return 0
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    if result.returncode not in (0, 1):
+        return {}
+    matches: Dict[str, Dict[str, int]] = {}
+    for record in result.stdout.splitlines():
+        event = json.loads(record)
+        if event.get("type") != "match":
+            continue
+        data = event["data"]
+        path = data["path"].get("text", "")
+        line = data["lines"].get("text", "")
+        counts = matches.setdefault(path, {})
+        for name, regex in compiled.items():
+            if regex.search(line):
+                counts[name] = counts.get(name, 0) + 1
+    return matches
 
 
-def enrich_file(path: str, pattern_categories: Dict[str, str]) -> Dict[str, Any]:
+def enrich_file(
+    path: str,
+    pattern_categories: Dict[str, str],
+    matches: Optional[Dict[str, int]] = None,
+) -> Dict[str, Any]:
     """Enrich a single file with pattern matching, line count, and preview."""
     result = {
         "path": path,
@@ -143,23 +170,8 @@ def enrich_file(path: str, pattern_categories: Dict[str, str]) -> Dict[str, Any]
     # Preview text (head of file)
     result["preview_text"] = read_preview(path)
 
-    # Pattern matching — batch all categories via single rg call where possible
-    # For accuracy, run per-category to get per-category counts
-    has_rg = (
-        subprocess.run(
-            ["which", "rg"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        ).returncode
-        == 0
-    )
-
-    if has_rg and pattern_categories:
-        total = 0
-        for category, pattern in pattern_categories.items():
-            count = run_rg_on_file(pattern, path)
-            if count > 0:
-                result["pattern_categories"][category] = count
-                total += count
-        result["total_pattern_matches"] = total
+    result["pattern_categories"] = matches or {}
+    result["total_pattern_matches"] = sum(result["pattern_categories"].values())
 
     return result
 
@@ -168,10 +180,11 @@ def enrich_files_batch(
     files: List[str], pattern_categories: Dict[str, str]
 ) -> List[Dict[str, Any]]:
     """Enrich a batch of files."""
+    match_counts = batch_pattern_counts(files, pattern_categories)
     results = []
     for path in files:
         try:
-            r = enrich_file(path, pattern_categories)
+            r = enrich_file(path, pattern_categories, match_counts.get(path))
             results.append(r)
         except Exception as e:
             results.append(
