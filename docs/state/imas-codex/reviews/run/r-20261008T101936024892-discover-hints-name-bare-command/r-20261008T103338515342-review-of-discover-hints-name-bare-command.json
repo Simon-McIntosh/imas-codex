@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own two full-suite gate logs: gate.log ran the gate at e1604ac253fd4cb9bd8dc94ee3a5a7b445c28be9 (first reviewed commit) and gate-candidates.log at the head c351ce0d434fbe6a46be6afa31a16e2d18cbde44; both report 399 passed, EXIT=0, so zero failures, and the same 399 tests were collected on both arms so no test id is added. The reviewed base 2c484607f0f7cd17f4f7f0762c7c833165e12205 itself was never full-suite gated by the run (only the 5 targeted tests in reproduction.log), and the manifest carries no baseline_suite/after_suite keys, so the base-to-head arm is measured against the run's first commit rather than the branch base; that gap is recorded as a finding.",
+  "after_suite": {
+    "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/discover-hints-name-bare-command UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest tests/cli tests/test_cli.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T101936024892-discover-hints-name-bare-command/gate-candidates.log",
+    "revision": "c351ce0d434fbe6a46be6afa31a16e2d18cbde44"
+  },
+  "backend": "local",
+  "base_log_revision": "e1604ac253fd4cb9bd8dc94ee3a5a7b445c28be9",
+  "base_targeted_revision": "2c484607f0f7cd17f4f7f0762c7c833165e12205",
+  "baseline_suite": {
+    "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/discover-hints-name-bare-command UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest tests/cli tests/test_cli.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T101936024892-discover-hints-name-bare-command/gate.log",
+    "revision": "e1604ac253fd4cb9bd8dc94ee3a5a7b445c28be9"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:24 (_CleanupGroup.parse_args on the discover group, reached by every `imas-codex discover ...` invocation)"
+  ],
+  "completed_at": "2026-10-08T10:41:03.232Z",
+  "dispatched_at": "2026-10-08T10:33:46Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/discover-hints-name-bare-command.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the plan lists this node's evidence fragment as a write path and the manifest orientation_write_paths names it, but no such file exists under docs/evidence/fragments/facility-discovery-sequence/ and the manifest changed_paths omits it, so the node shipped its source change without the fragment the plan attaches to it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T101936024892-discover-hints-name-bare-command/manifest.md",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite or after_suite keys, so the harness cannot derive added_failure_count from the run record itself; the full-suite base arm is the run's first commit e1604ac2 rather than the branch base 2c484607, whose only run record is the 5-test reproduction.log."
+    }
+  ],
+  "head_log_revision": "c351ce0d434fbe6a46be6afa31a16e2d18cbde44",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "one production call site reaches the added guard (the discover group's parse_args, hit by every `imas-codex discover` invocation); no other caller needs changing.",
+    "diff": "read commit by commit against 2c484607f0f7cd17f4f7f0762c7c833165e12205; e1604ac25 adds the retired-domain refusal in _CleanupGroup.parse_args, repoints the wiki embedding hint at the bare command, rewrites the WikiStageOptions docstring and adds the wiki-stage tests; c351ce0d4 maps the retired `map` spelling to the candidates domain and parametrizes the CLI refusal test over paths/wiki/map.",
+    "done_when": "the gate `uv run --no-sync pytest tests/cli tests/test_cli.py -p no:cacheprovider` is met \u2014 399 passed at the head both in the run's gate-candidates.log and in my independent re-run; tests/test_cli.py:204-210 shows `discover paths jt-60sa` refused with `imas-codex discover jt-60sa --only paths` (plus wiki and the map->candidates routing), and tests/cli/test_discover_wiki_stage.py:345-372 shows no wiki stage output naming `--score-only`.",
+    "goal": "the node's goal is to make the wiki stage hint and the WikiStageOptions docstring name only options the bare command accepts, and to refuse a first argument that is a retired discovery domain with the `discover FACILITY --only DOMAIN` spelling; imas_codex/cli/discover/__init__.py:24-31 raises click.UsageError for any of DISCOVERY_DOMAINS or DOMAINS, imas_codex/cli/discover/wiki.py:157-158 prints `discover FACILITY --only wiki --scan-only`, and the dataclass docstring at wiki.py:31-50 names each field.",
+    "manifest": "read; status complete, commits [e1604ac25, c351ce0d4], tests line names the tests/cli + tests/test_cli.py gate at head c351ce0d4, but no baseline_suite/after_suite keys are present and changed_paths omits the fragment.",
+    "write_paths": "the manifest declares imas_codex/cli/discover/wiki.py, imas_codex/cli/discover/__init__.py, tests/cli/test_discover_wiki_stage.py and tests/test_cli.py; git diff --stat 2c484607..c351ce0d touches exactly those four files, all inside the plan's write paths; the plan's fifth write path, the evidence fragment, was not produced."
+  },
+  "justifications": {
+    "durability": "test_retired_discover_domain_is_refused_with_bare_command asserts the exact `--only {selected}` substring and is falsified by removing the routing guard (negative-control-candidates.log: 3 failed, EXIT=1); test_embedding_refusal_names_a_supported_bare_command asserts `--score-only` is absent as well as the accepted spelling present; test_wiki_options_docstring_describes_each_field_without_retired_flags asserts every dataclass field is documented and `--source`/`--score-only` are gone.",
+    "evidence": "I re-ran the gate at c351ce0d434fbe6a46be6afa31a16e2d18cbde44 and got 399 passed with EXIT=0 (independent-gate-head.log, module resolved from the reviewed worktree); the run's reproduction.log shows the 5 targeted tests red at the branch base, negative-control-candidates.log shows the refusal test failing when the routing guard is removed, and both full-suite arms pass 399, but the true branch base was never full-suite gated and no baseline_suite/after_suite keys exist on the manifest.",
+    "fit": "the two commits use conventional fix(discover) subjects with bodies stating the mechanism and carry no plan, section or ticket identifier in message, symbol or comment.",
+    "goal_fidelity": "the refusal in __init__.py:24-31 raises for any retired domain first argument with a facility-first message, wiki.py:157-158 replaces the retired `--score-only` hint with the accepted bare-command form, and the docstring now names each dataclass field by what it does, matching the node's three stated behaviors.",
+    "reuse": "the guard extends the existing _CleanupGroup.parse_args override rather than adding a new mechanism, and it reads the single sources of truth for the domain names (DISCOVERY_DOMAINS in imas_codex/cli/discover/common.py and DOMAINS in imas_codex/cli/discover/sequence.py) rather than re-listing them.",
+    "scope_discipline": "git diff --stat 2c484607f0f7cd17f4f7f0762c7c833165e12205..c351ce0d434fbe6a46be6afa31a16e2d18cbde44 lists only the four declared source/test paths with no out-of-scope edit, but the plan's declared evidence fragment is absent."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the wiki hint, docstring and retired-domain refusal name the accepted facility-first spellings; __init__.py:24-31 raises UsageError for a domain first argument, wiki.py:157 names `discover FACILITY --only wiki --scan-only`, and the docstring names each field.\nVERDICT done_when: gates.candidates 399 passed at head; tests/test_cli.py:204-210 refuses `discover paths jt-60sa` with `imas-codex discover jt-60sa --only paths`; test_discover_wiki_stage.py:345-372 asserts no `--score-only` in wiki output.\nVERDICT write_paths: diff 2c484607..c351ce0d touches exactly the four declared files; the plan's evidence fragment is missing.\nVERDICT manifest: status complete; no baseline_suite/after_suite keys; changed_paths omits the fragment.\nVERDICT diff: e1604ac25 adds the refusal, the wiki hint fix, the docstring rewrite and the wiki tests; c351ce0d4 routes `map` to candidates and parametrizes the CLI test.\nCALL_SITES: imas_codex/cli/discover/__init__.py:24.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: refusal, hint and docstring all match the node's stated behavior.\nSCORE evidence: 16\nJUSTIFICATION evidence: independent head gate 399 passed EXIT=0; base red and a negative control present; branch base never full-suite gated and no baseline_suite/after_suite keys.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: only the four declared paths touched, no overreach, but the declared fragment was not written.\nSCORE durability: 18\nJUSTIFICATION durability: refusal test is falsified by removing the guard; embedding test asserts both accepted-present and retired-absent; docstring test pins every field.\nSCORE fit: 19\nJUSTIFICATION fit: conventional fix(discover) subjects with bodies, no plan/section identifiers.\nSCORE reuse: 18\nJUSTIFICATION reuse: extends the existing parse_args override and reads the domain lists from their single sources of truth.\nFINDING docs/evidence/fragments/facility-discovery-sequence/discover-hints-name-bare-command.html follow-on: declared write path never produced; manifest changed_paths omits it.\nFINDING manifest.md:12 follow-on: no baseline_suite/after_suite keys, so added_failure_count is derived from the run's first commit rather than the branch base.",
+  "review_run_id": "r-20261008T103338515342-review-of-discover-hints-name-bare-command",
+  "reviewed_base_sha": "2c484607f0f7cd17f4f7f0762c7c833165e12205",
+  "reviewed_head_sha": "c351ce0d434fbe6a46be6afa31a16e2d18cbde44",
+  "reviewed_run_id": "r-20261008T101936024892-discover-hints-name-bare-command",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:41:19.606495+00:00",
+  "total": 107,
+  "verdict": "SOUND WITH FINDINGS"
+}
