@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f">
 <meta name="plan-impl" content="0.583">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -334,6 +334,9 @@ them, so path discovery's behaviour does not change until the deploy node.</p></
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-s4-prototype" data-who="reckon-build" data-when="2026-10-08T03:12:00Z">
     <div class="r-comment-body"><p>Prototype node landed; merged as <code>ac2e9a179</code>. <code>imas_codex/discovery/paths/scorer.py</code> carries the question and state builders of the lead's design, not yet wired into path discovery. 142 JT-60SA paths were labelled (70 <code>/analysis</code>, 66 <code>/home</code>, 6 <code>/work</code>). On the 136 paths both judgments cover, the Jev scan gate (maximum of nine facet Scores) scores AUC 0.807, against 0.677 for the language-model composite. That set has only 18 negatives, so the deploy should widen it before fixing operating points. The four known misses score 0.35–0.53 on the Jev gate, so the deployed threshold must sit well below the retired 0.9. Spend USD 0.018. Review 20/20/20/18/19/20. The deploy node needs <code>imas_codex/schemas/facility.yaml</code> for the stored probabilities and confidences, and follows the JT-60SA §43 node that holds it.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T024111667517-review-of-path-jev-prototype" data-who="reckon-build" data-when="2026-10-08T03:10:44.580Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261008T020930881891-path-jev-prototype stored as a parsed record at reviewed base 9542178aab31dd9113a4f051b780c01b6b3fa5ab and head 68818f8ad7ef80771cab85b9237cef0ed30b22f5, scoring goal_fidelity 20, evidence 20, scope_discipline 20, durability 18, fit 19, reuse 20 (total 117), with one follow-on finding on the fragment&#x27;s home-control composite range.</p></div>
 </div>
 </section>
 </main>

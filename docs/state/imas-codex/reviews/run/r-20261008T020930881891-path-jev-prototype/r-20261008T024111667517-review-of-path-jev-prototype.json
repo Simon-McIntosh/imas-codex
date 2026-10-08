@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T03:10:44.580Z",
+  "dispatched_at": "2026-10-08T02:41:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/discovery-judgments-through-jev/path-jev-prototype.html",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the home-control paragraph says the four sampled high-composite /home trees span \"from 0.90 to 0.95\", but the logged set in home-scan-control.log has stored composites 0.95, 0.95, 0.95 and 0.96, so the stated range is wrong at both ends; the zero-CodeFile claim itself is sound because the same bounded query returns 90 rows under the positive control /analysis/src/SAeqread/."
+    }
+  ],
+  "head_log_revision": "68818f8ad7ef80771cab85b9237cef0ed30b22f5",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "two commits 7c73228a0 and 68818f8ad against base 9542178aa add build_path_judgment_questions and build_path_judgment_state to scorer.py, a new tests/discovery/test_path_judgments.py, and the evidence fragment, all inside the declared scope.",
+    "done_when": "the measure asks for the builders without changing what path discovery runs, at least 120 labelled JT-60SA paths including the four named misses and the home trees, a fragment reporting the Jev and composite AUC with the operating point at each threshold, a schema-coverage test that passes and Jev spend under USD 2; the manifest records 2 passed EXIT=0 at 68818f8ad, the fragment reports AUC 0.807 against 0.677 across thresholds 0.2 to 0.9, and the receipt shows 142 judged for USD 0.0177.",
+    "goal": "the node's goal is to prototype the Jev path judgment of the lead's 2026-10-08 \u00a74 design on labelled JT-60SA paths; imas_codex/discovery/paths/scorer.py:83 builds the path_purpose Choice over the schema PathPurpose values, eleven facet Scores and a children Noul, and imas_codex/discovery/paths/scorer.py:128 builds the directory state with the facility data_access_patterns.",
+    "manifest": "read; it names the gate command and records 2 passed EXIT=0 at 68818f8ad, names path-gate-final.log as after_suite (EXIT=0, 0 failures) and path-negative-control.log, but leaves baseline_suite empty so the added-failure derivation is unmeasured.",
+    "write_paths": "the manifest declares imas_codex/discovery/paths/scorer.py, tests/discovery/test_path_judgments.py, the path-jev-prototype fragment and a figures directory; the diff touches the first three and writes no figure."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_path_judgments.py:34 fails when score_imas is dropped from the question set (path-negative-control.log, EXIT=1) and takes its expected sets from the schema rather than the code under test, so it reddens on the regression it guards, though tests/discovery/test_path_judgments.py:72 compares directory values against the same row it passed in.",
+    "evidence": "tests/discovery/test_path_judgments.py:34 pins the question set to the schema's purposes and score fields and passed at 68818f8ad (path-gate-final.log, 2 passed EXIT=0); I recomputed the recorded AUC (0.8067325800376648 and 0.676789077212806) and every operating point from the run's own jev-decisions.jsonl and matched metrics.json exactly.",
+    "fit": "imas_codex/discovery/paths/scorer.py:47 follows the module's existing PATH_SCORE_DIMENSIONS and schema accessors and the sibling build_triage_questions idiom at imas_codex/discovery/code/scorer.py:183, its comments describe mechanism and its added symbols carry no plan label.",
+    "goal_fidelity": "imas_codex/discovery/paths/scorer.py:83 derives the path_purpose Choice and eleven facet Scores from the schema, and I executed both builders against the reviewed worktree (the imported module's __file__ resolved to the reviewed scorer.py), obtaining eleven Score questions, purpose keys matching the schema and a state carrying facility data_access_patterns.",
+    "reuse": "the added builders extend the path judgment owner imas_codex/discovery/paths/scorer.py and reuse facility_relevance_block at imas_codex/discovery/code/scorer.py:199 rather than forking it.",
+    "scope_discipline": "the two commits touch exactly imas_codex/discovery/paths/scorer.py, tests/discovery/test_path_judgments.py and the fragment, all inside the declared write paths, and no production call site imports the new builders."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to prototype the Jev path judgment of the lead's 2026-10-08 \u00a74 design on labelled JT-60SA paths; imas_codex/discovery/paths/scorer.py:83 builds the path_purpose Choice over the schema PathPurpose values, eleven facet Scores and a children Noul, and imas_codex/discovery/paths/scorer.py:128 builds the directory state with the facility data_access_patterns.\nVERDICT done_when: the measure asks for the builders without changing what path discovery runs, at least 120 labelled JT-60SA paths including the four named misses and the home trees, a fragment reporting the Jev and composite AUC with the operating point at each threshold, a schema-coverage test that passes and Jev spend under USD 2; the manifest records 2 passed EXIT=0 at 68818f8ad, the fragment reports AUC 0.807 against 0.677 across thresholds 0.2 to 0.9, and the receipt shows 142 judged for USD 0.0177.\nVERDICT write_paths: the manifest declares imas_codex/discovery/paths/scorer.py, tests/discovery/test_path_judgments.py, the path-jev-prototype fragment and a figures directory; the diff touches the first three and writes no figure.\nVERDICT manifest: read; it names the gate command and records 2 passed EXIT=0 at 68818f8ad, names path-gate-final.log as after_suite (EXIT=0, 0 failures) and path-negative-control.log, but leaves baseline_suite empty so the added-failure derivation is unmeasured.\nVERDICT diff: two commits 7c73228a0 and 68818f8ad against base 9542178aa add build_path_judgment_questions and build_path_judgment_state to scorer.py, a new tests/discovery/test_path_judgments.py, and the evidence fragment, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/discovery/paths/scorer.py:83 derives the path_purpose Choice and eleven facet Scores from the schema, and I executed both builders against the reviewed worktree (the imported module's __file__ resolved to the reviewed scorer.py), obtaining eleven Score questions, purpose keys matching the schema and a state carrying facility data_access_patterns.\nSCORE evidence: 20\nJUSTIFICATION evidence: tests/discovery/test_path_judgments.py:34 pins the question set to the schema's purposes and score fields and passed at 68818f8ad (path-gate-final.log, 2 passed EXIT=0); I recomputed the recorded AUC (0.8067325800376648 and 0.676789077212806) and every operating point from the run's own jev-decisions.jsonl and matched metrics.json exactly.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits touch exactly imas_codex/discovery/paths/scorer.py, tests/discovery/test_path_judgments.py and the fragment, all inside the declared write paths, and no production call site imports the new builders.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_path_judgments.py:34 fails when score_imas is dropped from the question set (path-negative-control.log, EXIT=1) and takes its expected sets from the schema rather than the code under test, so it reddens on the regression it guards, though tests/discovery/test_path_judgments.py:72 compares directory values against the same row it passed in.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/discovery/paths/scorer.py:47 follows the module's existing PATH_SCORE_DIMENSIONS and schema accessors and the sibling build_triage_questions idiom at imas_codex/discovery/code/scorer.py:183, its comments describe mechanism and its added symbols carry no plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the added builders extend the path judgment owner imas_codex/discovery/paths/scorer.py and reuse facility_relevance_block at imas_codex/discovery/code/scorer.py:199 rather than forking it.\nFINDING docs/evidence/fragments/discovery-judgments-through-jev/path-jev-prototype.html:19 follow-on: the home-control paragraph says the four sampled high-composite /home trees span \"from 0.90 to 0.95\", but the logged set in home-scan-control.log has stored composites 0.95, 0.95, 0.95 and 0.96, so the stated range is wrong at both ends; the zero-CodeFile claim itself is sound because the same bounded query returns 90 rows under the positive control /analysis/src/SAeqread/.",
+  "review_run_id": "r-20261008T024111667517-review-of-path-jev-prototype",
+  "reviewed_base_sha": "9542178aab31dd9113a4f051b780c01b6b3fa5ab",
+  "reviewed_head_sha": "68818f8ad7ef80771cab85b9237cef0ed30b22f5",
+  "reviewed_run_id": "r-20261008T020930881891-path-jev-prototype",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T03:01:00.000000+00:00",
+  "total": 117
+}
