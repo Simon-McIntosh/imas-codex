@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="79">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -228,10 +228,11 @@
 
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
-<div class="r-gate" data-id="g-jim-1" data-section="s7" data-gated-sections="s7" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-jim-1" data-section="s7" data-gated-sections="s7" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">imas map run chooses a set of homes for each escalated source and maps each source into every IDS of its selected candidate edges</h4>
     <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
-    </div>
+    <a class="r-gate-evidence" href="mapping-candidate-selection section 8 is done (merge 3c1c0ce8f on main, also the evidence for facility-discovery-sequence g-fds-1): the assign stage picks every listed home for an escalated source and the map stage maps each source into every IDS of its picks, claiming per IDS. Since 2026-10-08 the assign phase&#x27;s pending check also uses the claim&#x27;s target-IDS predicate (2c9bce091, 8bed4a85b).">Evidence</a>
+</div>
 <div class="r-gate" data-id="g-jim-2" data-section="s8" data-gated-sections="s8" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">a shared search-time Jev rerank owner exists for the code and wiki search tools</h4>
     <p class="r-gate-required-evidence">discovery-judgments-through-jev#s9</p>
