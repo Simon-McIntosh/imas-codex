@@ -156,7 +156,7 @@ def _database_access_methods(
     """Describe the native routes used by the catalogued database signals."""
     routes = {route["name"]: route for route in config.get("database_routes", [])}
     methods = {}
-    for name in databases & {"UDDB", "LCDB", "MBDB"}:
+    for name in sorted(databases & {"UDDB", "LCDB", "MBDB"}):
         route = routes.get(name, {})
         if name == "UDDB":
             api = config.get("uddb_api_path", "")
@@ -192,7 +192,10 @@ def _database_access_methods(
                 f"db = mbdbWrapper({library!r})\ndb.mbdbSetDirectory('mbdb')\n"
                 "db.mbdbROpen(mbdbroot='{root}', caseno={case}, category='{category}')"
             )
-            read = "ok, result = db.mbdbRTimes('{data_name}', '{t1}', '{t2}')"
+            read = (
+                "ok, result = (db.mbdbRPoint('{data_name}') if '{data_class}' == 'P' "
+                "else db.mbdbRTimes('{data_name}', '{t1}', '{t2}'))"
+            )
             cleanup = "db.mbdbRClose()"
         methods[name] = DataAccess(
             id=f"{facility}:edas:{name.lower()}",
@@ -299,12 +302,19 @@ class EDASScanner:
                             "uddb_lib_path",
                             "pmdb_api_path",
                             "pmdb_lib_path",
+                            "fsmd_api_path",
+                            "fsmd_lib_path",
+                            "easy_api_path",
+                            "easy_lib_path",
+                            "fledd_lib_path",
+                            "fledd_client_path",
                             "lcdb_api_path",
                             "lcdb_root",
                             "mbdb_api_path",
                             "mbdb_lib_path",
                             "mbdb_root",
                             "eqdb_root",
+                            "database_routes",
                         )
                         if key in config
                     },

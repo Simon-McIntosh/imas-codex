@@ -1,0 +1,20 @@
+<section id="remaining-edas-databases-landing">
+  <h2 id="remaining-edas-databases-heading">JT-60SA database signal routes</h2>
+  <p id="remaining-edas-databases-summary">The facility configuration now records a native read call, catalogue call, metadata source, observed status and access path for EDDB, UDDB, PMDB, FSMD, EASY, LCDB, MBDB, EQDB and the FLEDD equilibrium access layer. The scanner emits DataAccess nodes for UDDB, LCDB and MBDB and binds every signal it emits to a route. Its offline test includes EDDB, UDDB, LCDB, MBDB, EQDB and G-EQDSK rows and refuses an unbound route.</p>
+  <table id="remaining-edas-databases-coverage">
+    <thead><tr><th>Source</th><th>Catalogue or field coverage</th><th>Graph signals at 10:14 UTC</th><th>Graph routes bound</th><th>Observed limit</th></tr></thead>
+    <tbody>
+      <tr><td>EDDB</td><td>6,298 native catalogue rows, including 58 PID-keyed fields; 4,588 with units</td><td>6,338</td><td>6,338</td><td>Additional graph rows exist beyond the native catalogue count</td></tr>
+      <tr><td>UDDB</td><td>188 globally registered PIDs; header supplies units and descriptions when readable</td><td>189</td><td>0</td><td>The reference-shot headers failed; existing graph rows need a safe rescan to acquire the new route</td></tr>
+      <tr><td>LCDB</td><td>8,469 owner/category/field identities; per-dataset files supply descriptions and any declared units</td><td>8,469</td><td>0</td><td>Existing graph rows need a safe rescan to acquire the new route</td></tr>
+      <tr><td>EQDB and G-EQDSK</td><td>22 code and format field signals from five hash-verified file exemplars</td><td>10 and 12</td><td>10 and 12</td><td>Central EQDB mount is absent on the analysis host; local files answer</td></tr>
+      <tr><td>FLEDD</td><td>Time revisions and full 129 by 129 equilibrium grids for FAME 0 and EQDB 1</td><td>0 separate rows</td><td>0</td><td>Its list call exposes time revisions, not a distinct field catalogue; the EQDB file signals carry the field identities</td></tr>
+      <tr><td>PMDB</td><td>No validated channel catalogue</td><td>0</td><td>0</td><td>Keyed and wildcard probes returned 301</td></tr>
+      <tr><td>FSMD</td><td>No validated channel catalogue</td><td>0</td><td>0</td><td>The configured library is absent; a legacy candidate returned ret_cc 10 and ret_ac 1</td></tr>
+      <tr><td>EASY</td><td>No validated channel catalogue</td><td>0</td><td>0</td><td>The configured library is absent; a legacy candidate crashed</td></tr>
+      <tr><td>MBDB</td><td>Field listing requires a readable case</td><td>0</td><td>0</td><td>Two visible case files are zero bytes and both opens returned 1012</td></tr>
+    </tbody>
+  </table>
+  <p id="remaining-edas-databases-measure">The graph query was restricted to FacilitySignal rows with facility_id jt-60sa and the named source set. It returned nonzero EDDB, UDDB, LCDB and equilibrium rows, so its zero rows have a positive control. It wrote nothing. The focused offline gate passed 60 tests, including configuration validation and the scanner route assertions. Removing the new fledd_lib_path schema declaration, then regenerating the ignored config models, made test_no_unknown_keys[jt-60sa] fail on data_systems.edas.fledd_lib_path with EXIT=1; restoration passed.</p>
+  <p id="remaining-edas-databases-boundary">An unscoped signals scan was withheld because another node is repairing a rescan that can reset checked signals to discovered. The 189 UDDB and 8,469 LCDB graph rows currently have no DataAccess edge; this node's offline scanner emits those edges, and a safe scoped rescan must persist them after that repair. Native catalogue counts and graph row counts differ for EDDB and UDDB; the graph read reports both values rather than equating them.</p>
+</section>

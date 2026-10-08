@@ -829,12 +829,24 @@ classes:
         description: EDAS databases to enumerate during signal discovery
         range: string
         multivalued: true
+      database_routes:
+        description: Observed native read, catalogue and metadata routes for each database
+        range: EDASDatabaseRoute
+        multivalued: true
       api_path:
         description: Path to EDAS API source files
       uddb_api_path: {description: Path to the UDDB Python API source, range: string}
       uddb_lib_path: {description: Path to the UDDB shared library, range: string}
       pmdb_api_path: {description: Path to the PMDB Python API source, range: string}
       pmdb_lib_path: {description: Path to the PMDB shared library, range: string}
+      fsmd_api_path: {description: Path to the fast-sampling Python API, range: string}
+      fsmd_lib_path: {description: Configured fast-sampling shared library, range: string}
+      easy_api_path: {description: Path to the EASY Python API, range: string}
+      easy_lib_path: {description: Configured EASY shared library, range: string}
+      fledd_lib_path: {description: Path to the FLEDD socket client library, range: string}
+      fledd_client_path: {description: Path to the linked equilibrium client, range: string}
+      eqdb_root: {description: Candidate central EQDB mount, range: string}
+      dbsel_path: {description: Path to the local equilibrium reconstruction wrapper, range: string}
       lcdb_api_path: {description: Path to the LCDB wrapper API source, range: string}
       lcdb_root: {description: Root directory of LCDB analysis data, range: string}
       mbdb_api_path: {description: Path to the MBDB Python API source, range: string}
@@ -853,6 +865,32 @@ classes:
         description: >-
           Path to the EDAS shared library (e.g., /analysis/lib/libeddb.so).
           Used for ctypes bindings in signal discovery.
+
+  EDASDatabaseRoute:
+    description: Access route and observed catalogue status for an EDAS database
+    class_uri: fc:EDASDatabaseRoute
+    attributes:
+      name:
+        description: Database or access-layer name
+      read_call:
+        description: Native call that reads a value or equilibrium field
+      catalogue_call:
+        description: Native call that lists channel or field identifiers, if available
+      metadata_source:
+        description: Source of units and descriptions, or why they are unavailable
+      status:
+        description: Observed access and enumeration status
+      status_detail:
+        description: Return code or missing prerequisite explaining the status
+      access_path:
+        description: Database root, socket route or native library path
+      observed_on:
+        description: Date on which the access status was measured
+        range: date
+      source_ids:
+        description: Named database identifiers passed to a shared access layer
+        range: string
+        multivalued: true
 
   JPFSubsystem:
     description: >-
