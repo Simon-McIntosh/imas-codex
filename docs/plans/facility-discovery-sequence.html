@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -256,7 +256,7 @@
       <code>imas_codex/cli/map.py</code>, <code>compute.py</code> and <code>wiki.py</code>, and prose
       in the facility YAML comments, the READMEs and <code>schemas/common.yaml</code>. A file another
       session holds at dispatch is named in the fragment and left for that session, never edited
-      under it. <strong>Done when</strong> no caller of a retired subcommand remains outside the files
+      under it. It also rewrites the fold reviews' leftovers. It removes the stage-option docstrings phrased as changelog ("the old <code>--source</code>" in <code>wiki.py</code>) and the <code>--score-only</code> and <code>--enrich-only</code> aliases on the wrappers it deletes. It updates the prose that still names <code>--root</code>, <code>--score-only</code> or <code>--path-limit</code>: <code>imas_codex/llm/prompts/discovery/roots.md</code>, the discovery README, the worker-count hints in <code>compute.py</code>, and the progress comments. <strong>Done when</strong> no caller of a retired subcommand remains outside the files
       the fragment lists, and the tests that drove the six commands pass through the bare command.
     </p>
     <p>
@@ -440,7 +440,7 @@
     <div class="r-comment-body"><p>review of run r-20261008T055729378160-fold-paths-stage stored parsed at total 110 (goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 19, reuse 19), reviewed_base_sha e4ff44bba7688c71535eeacdd8086c8dc6d5b51a, reviewed_head_sha 404da8bd59fa9fb7217764b2dd8823c626ee09bc, added_failure_count 0; four follow-on findings (missing fragment, out-of-scope callers of removed flags, scan-only still starts embed/dedup helpers, reviewed manifest omits its suite arms and never ran the regression surface).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T053800843965-fold-wiki-stage" data-who="reckon-build" data-when="2026-10-08T06:27:11.760Z">
-    <div class="r-comment-body"><p>code only — no figure and no evidence prose, because the node&#x27;s done-when names no artifact; the tests are the measure</p></div>
+    <div class="r-comment-body"><p>code only — no figure and no evidence prose, because the node's done-when names no artifact; the tests are the measure</p></div>
 </div>
 </section>
 </main>
