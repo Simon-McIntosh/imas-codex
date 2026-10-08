@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own manifest: after_suite (revision 444a4eb3520de4f61908217c91fea3b5a9659b4f) reports exit_status 0, completed true, failure_count 0, failure_ids [], so no test fails at the reviewed head and added_failure_ids = []. baseline_suite is present but empty, so no pre-change arm is recorded; the failure this change repairs is the absent one-domain guard, not one it introduces. added_failure_count = 0. I independently reproduced the head arm at 444a4eb35 (84 passed, 1 warning, EXIT=0).",
+  "backend": "local",
+  "base_log_revision": "e8d9cc2f2c1351bd7e4458a1d8c7b3798c324444",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/cli/discover/sequence.py:_validate_options",
+    "imas_codex/cli/discover/sequence.py:run_sequence",
+    "imas_codex/cli/discover/sequence.py:run_mapping_stage",
+    "imas_codex/cli/discover/common.py:resolve_focus_items",
+    "imas_codex/cli/discover/map.py:run_candidates_stage"
+  ],
+  "completed_at": "2026-10-08T09:30:15.848Z",
+  "dispatched_at": "2026-10-08T09:20:19Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T085814094919-focus-needs-one-domain/gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the header names REVISION=e8d9cc2f2c1351bd7e4458a1d8c7b3798c324444 yet the run collects 84 items, but that revision has 26 test functions in tests/cli/test_discover_sequence.py against 31 at the head and the 5 added functions expand to 8 items, so at e8d9cc2 the pair collects 76; the pre-change arm therefore does not describe the revision it records and the run stored no baseline_suite."
+    },
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/focus-needs-one-domain.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the node declared this evidence fragment as a write path but no such file exists at the reviewed head and the sibling focus-documents node left the same path unproduced, so a declared deliverable is missing."
+    },
+    {
+      "file": "imas_codex/cli/discover/common.py",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: swapping the mapping stage's line reader for resolve_focus_items silently drops support for the one-item-per-line text manifest the mapping stage accepted before (a .txt file now parses as a YAML scalar and is refused), which section 7 intends but which no test covers and the missing fragment would have documented."
+    }
+  ],
+  "gate_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T092010954289-review-of-focus-needs-one-domain/review-gate-rerun.log",
+    "result": "84 passed, 1 warning in 6.52s, EXIT=0"
+  },
+  "head_log_revision": "444a4eb3520de4f61908217c91fea3b5a9659b4f",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "two commits; e9bbf113a adds the one-domain guard to _validate_options, drops the mapping stage's Path line reader for resolve_focus_items, and adds the refusal and forwarding tests; 444a4eb35 stubs facility access and CLI logging inside the refusal test so the mutation exposes only the missing rejection.",
+    "done_when": "the named gate is `uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider`; the manifest records it green (after_suite, revision 444a4eb35, exit_status 0, completed true) and I reproduced it independently at 444a4eb35 (84 passed, 1 warning, EXIT=0). The four named behaviours are asserted: test_bare_focus_requires_one_domain_before_stages (no --only, and two --only domains, both refused before _stage_function is called) and test_bare_candidate_focus_reaches_stage (focus reaches run_candidates_stage).",
+    "goal": "the node goal is that a focused sequence run is accepted only with exactly one --only domain and refused otherwise before any stage starts, and that the mapping stage reads focus through the shared resolver; imas_codex/cli/discover/sequence.py:228 adds `if options.focus and len(options.only) != 1: raise click.UsageError(\"--focus requires exactly one --only domain\")` and sequence.py:465 replaces the mapping stage's line reader with resolve_focus_items from imas_codex/cli/discover/common.py:37.",
+    "manifest": "read; status complete, commits [e9bbf113a, 444a4eb35], negative_control_log .../focus-needs-one-domain/negative-control.log (2 failed, EXIT=1), after_suite present (revision 444a4eb35, exit_status 0, completed true, failure_count 0, failure_ids []), baseline_suite key present but empty.",
+    "write_paths": "the run declared imas_codex/cli/discover/sequence.py, tests/cli/test_discover_sequence.py, docs/evidence/fragments/facility-discovery-sequence/focus-needs-one-domain.html and docs/figures/facility-discovery-sequence/focus-needs-one-domain; git show --stat over e8d9cc2..444a4eb touches only sequence.py and the test file, both inside the declared scope, while the declared fragment and figures path were not produced."
+  },
+  "justifications": {
+    "durability": "removing the guard reddens both parametrized refusal cases in tests/cli/test_discover_sequence.py:403 with the stages running, so the guard is shown to fire rather than merely pass.",
+    "evidence": "the named gate is recorded green and reproduced at 444a4eb35, but no baseline_suite was stored and the run's gate.log stamped e8d9cc2 collects 84 items, which that revision cannot reach.",
+    "fit": "the guard mirrors the adjacent --reset-to validation at sequence.py:230 and no commit message or symbol carries a plan or ticket label.",
+    "goal_fidelity": "sequence.py:228 refuses --focus unless len(options.only) == 1 and sequence.py:465 routes mapping focus through resolve_focus_items, so both halves of the node goal land.",
+    "reuse": "the mapping stage's private line reader is deleted in favour of the shared resolve_focus_items at imas_codex/cli/discover/common.py:37 rather than a second parser.",
+    "scope_discipline": "the two commits touch only sequence.py and tests/cli/test_discover_sequence.py, both declared, while the declared evidence fragment and figures path were left unproduced."
+  },
+  "model": "deepseek-v4.1-flash",
+  "negative_control_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T085814094919-focus-needs-one-domain/negative-control.log",
+    "result": "recorded in the reviewed run, not rerun independently: removing the one-domain guard leaves both refusal tests running every stage, 2 failed, EXIT=1"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that a focused sequence run is accepted only with exactly one --only domain and refused otherwise before any stage starts, and that the mapping stage reads focus through the shared resolver; imas_codex/cli/discover/sequence.py:228 adds `if options.focus and len(options.only) != 1: raise click.UsageError(\"--focus requires exactly one --only domain\")` and sequence.py:465 replaces the mapping stage's line reader with resolve_focus_items from imas_codex/cli/discover/common.py:37.\nVERDICT done_when: the named gate is `uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider`; the manifest records it green (after_suite, revision 444a4eb35, exit_status 0, completed true) and I reproduced it independently at 444a4eb35 (84 passed, 1 warning, EXIT=0). The four named behaviours are asserted: test_bare_focus_requires_one_domain_before_stages (no --only, and two --only domains, both refused before _stage_function is called) and test_bare_candidate_focus_reaches_stage (focus reaches run_candidates_stage).\nVERDICT write_paths: the run declared imas_codex/cli/discover/sequence.py, tests/cli/test_discover_sequence.py, docs/evidence/fragments/facility-discovery-sequence/focus-needs-one-domain.html and docs/figures/facility-discovery-sequence/focus-needs-one-domain; git show --stat over e8d9cc2..444a4eb touches only sequence.py and the test file, both inside the declared scope, while the declared fragment and figures path were not produced.\nVERDICT manifest: read; status complete, commits [e9bbf113a, 444a4eb35], negative_control_log .../focus-needs-one-domain/negative-control.log (2 failed, EXIT=1), after_suite present (revision 444a4eb35, exit_status 0, completed true, failure_count 0, failure_ids []), baseline_suite key present but empty.\nVERDICT diff: two commits; e9bbf113a adds the one-domain guard to _validate_options, drops the mapping stage's Path line reader for resolve_focus_items, and adds the refusal and forwarding tests; 444a4eb35 stubs facility access and CLI logging inside the refusal test so the mutation exposes only the missing rejection.\nCALL_SITES: imas_codex/cli/discover/sequence.py:_validate_options, imas_codex/cli/discover/sequence.py:run_sequence, imas_codex/cli/discover/sequence.py:run_mapping_stage, imas_codex/cli/discover/common.py:resolve_focus_items, imas_codex/cli/discover/map.py:run_candidates_stage\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: sequence.py:228 refuses --focus unless len(options.only) == 1 and sequence.py:465 routes mapping focus through resolve_focus_items, so both halves of the node goal land.\nSCORE evidence: 14\nJUSTIFICATION evidence: the named gate is recorded green and reproduced at 444a4eb35, but no baseline_suite was stored and the run's gate.log stamped e8d9cc2 collects 84 items, which that revision cannot reach.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the two commits touch only sequence.py and tests/cli/test_discover_sequence.py, both declared, while the declared evidence fragment and figures path were left unproduced.\nSCORE durability: 18\nJUSTIFICATION durability: removing the guard reddens both parametrized refusal cases in tests/cli/test_discover_sequence.py:403 with the stages running, so the guard is shown to fire rather than merely pass.\nSCORE fit: 20\nJUSTIFICATION fit: the guard mirrors the adjacent --reset-to validation at sequence.py:230 and no commit message or symbol carries a plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the mapping stage's private line reader is deleted in favour of the shared resolve_focus_items at imas_codex/cli/discover/common.py:37 rather than a second parser.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T085814094919-focus-needs-one-domain/gate.log:1 follow-on: the header names REVISION=e8d9cc2f2c1351bd7e4458a1d8c7b3798c324444 yet the run collects 84 items, but that revision has 26 test functions in tests/cli/test_discover_sequence.py against 31 at the head and the 5 added functions expand to 8 items, so at e8d9cc2 the pair collects 76; the pre-change arm therefore does not describe the revision it records and the run stored no baseline_suite.\nFINDING docs/evidence/fragments/facility-discovery-sequence/focus-needs-one-domain.html:0 follow-on: the node declared this evidence fragment as a write path but no such file exists at the reviewed head and the sibling focus-documents node left the same path unproduced, so a declared deliverable is missing.\nFINDING imas_codex/cli/discover/common.py:37 follow-on: swapping the mapping stage's line reader for resolve_focus_items silently drops support for the one-item-per-line text manifest the mapping stage accepted before (a .txt file now parses as a YAML scalar and is refused), which section 7 intends but which no test covers and the missing fragment would have documented.\n",
+  "review_run_id": "r-20261008T092010954289-review-of-focus-needs-one-domain",
+  "reviewed_base_sha": "e8d9cc2f2c1351bd7e4458a1d8c7b3798c324444",
+  "reviewed_head_sha": "444a4eb3520de4f61908217c91fea3b5a9659b4f",
+  "reviewed_run_id": "r-20261008T085814094919-focus-needs-one-domain",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T09:35:00+00:00",
+  "total": 110,
+  "verdict": "SOUND WITH FINDINGS"
+}
