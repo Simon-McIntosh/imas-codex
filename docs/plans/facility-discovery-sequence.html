@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -287,6 +287,17 @@
       retires <code>--root</code>, <code>--score-only</code> and <code>--path-limit</code> from the prose. <strong>Done when</strong>
       no file it owns names a retired subcommand or option, <code>uv run build-models --force</code> succeeds, and
       <code>uv run --no-sync pytest tests/graph/test_schema_context.py tests/test_cli.py -p no:cacheprovider</code> passes.
+    </p>
+    <p>
+      <code>retire-subcommand-prose</code> landed (edbdd465f; review 99/120). Its review found two pages still wrong.
+      <code>docs/architecture/discovery.md</code> documents <code>imas-codex discover static</code> and
+      <code>discover status tcv -d static</code>, but no static command or domain exists. <code>docs/architecture/signals.md</code>
+      gives a cost-limit default of 5.0 where the bare command's is 25.0. The <code>facility.yaml</code> descriptions pass to
+      the session that owns that file. <strong>Node</strong> <code>discovery-prose-matches-cli</code>, role implement, 0.25 h.
+      Write paths: <code>docs/architecture/discovery.md</code>, <code>docs/architecture/signals.md</code> and its fragment.
+      <strong>Done when</strong> every command, domain, option and default either page names exists in
+      <code>imas-codex discover jt-60sa --help</code> or the <code>discover</code> group with the value stated, checked by
+      a grep the fragment records.
     </p>
     <p>
       <strong>Node</strong> <code>wiki-ingest-threshold-setting</code>, role implement, 0.5 h. The wiki stage read its
