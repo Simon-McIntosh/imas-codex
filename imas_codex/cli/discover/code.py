@@ -4,12 +4,37 @@ from __future__ import annotations
 
 import logging
 import time
+from dataclasses import dataclass
 
 import click
 
 from imas_codex.cli.discover.common import reset_to_option
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class CodeStageOptions:
+    """Options shared by the code command and discovery sequence."""
+
+    min_score: float | None = None
+    limit: int = 100
+    focus: tuple[str, ...] = ()
+    topic: str | None = None
+    cost_limit: float = 5.0
+    scan_workers: int = 2
+    triage_workers: int = 2
+    enrich_workers: int = 2
+    score_workers: int = 1
+    code_workers: int = 1
+    scan_only: bool = False
+    flush: bool = False
+    time_limit: int | None = None
+    verbose: bool = False
+    rescan: bool = False
+    triage_batch_size: int | None = None
+    rejudge_ingested: bool = False
+    reset_to: str | None = None
 
 
 @click.command()
@@ -21,7 +46,7 @@ logger = logging.getLogger(__name__)
     help="Minimum FacilityPath score to include (default: from settings)",
 )
 @click.option(
-    "--max-paths",
+    "--limit",
     type=int,
     default=100,
     help="Maximum FacilityPaths to scan per batch (default: 100)",
@@ -29,19 +54,17 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--focus",
     "-f",
-    help="Focus on specific patterns (e.g. 'equilibrium', 'transport')",
+    "focus_items",
+    multiple=True,
+    help="Restrict work to these FacilityPath prefixes (repeatable)",
 )
 @click.option(
     "--path-prefix",
-    "path_prefixes",
+    "legacy_path_prefixes",
     multiple=True,
-    help=(
-        "Restrict scanning to FacilityPaths whose path starts with this prefix "
-        "(repeatable). Without it the scan claims an arbitrary sample of scored "
-        "paths; with it the claim and its has-work predicate cover only the "
-        "named trees."
-    ),
+    hidden=True,
 )
+@click.option("--topic", help="Free-text steer for code scoring")
 @click.option(
     "--cost-limit",
     "-c",
@@ -87,10 +110,13 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--score-only",
     is_flag=True,
-    help="Score already discovered files (skip scanning and ingestion)",
+    hidden=True,
+    help="Drain previously discovered code without scanning",
 )
+@click.option("--flush", is_flag=True, help="Drain discovered work without scanning")
 @click.option(
     "--time",
+    "-t",
     "time_limit",
     type=int,
     default=None,
@@ -127,9 +153,10 @@ logger = logging.getLogger(__name__)
 def code(
     facility: str,
     min_score: float | None,
-    max_paths: int,
-    focus: str | None,
-    path_prefixes: tuple[str, ...],
+    limit: int,
+    focus_items: tuple[str, ...],
+    legacy_path_prefixes: tuple[str, ...],
+    topic: str | None,
     cost_limit: float,
     scan_workers: int,
     triage_workers: int,
@@ -138,6 +165,7 @@ def code(
     code_workers: int,
     scan_only: bool,
     score_only: bool,
+    flush: bool,
     time_limit: int | None,
     verbose: bool,
     rescan: bool,
@@ -145,29 +173,62 @@ def code(
     rejudge_ingested: bool,
     reset_to: str | None = None,
 ) -> None:
-    """Discover and ingest source code from scored facility paths.
+    """Discover and ingest source code from scored facility paths."""
+    if score_only:
+        flush = True
+    run_code_stage(
+        facility,
+        CodeStageOptions(
+            min_score=min_score,
+            limit=limit,
+            focus=(*focus_items, *legacy_path_prefixes),
+            topic=topic,
+            cost_limit=cost_limit,
+            scan_workers=scan_workers,
+            triage_workers=triage_workers,
+            enrich_workers=enrich_workers,
+            score_workers=score_workers,
+            code_workers=code_workers,
+            scan_only=scan_only,
+            flush=flush,
+            time_limit=time_limit,
+            verbose=verbose,
+            rescan=rescan,
+            triage_batch_size=triage_batch_size,
+            rejudge_ingested=rejudge_ingested,
+            reset_to=reset_to,
+        ),
+    )
 
-    Scans for code files (Python, Fortran, MATLAB, Julia, C/C++, IDL, TDI)
-    using tree-sitter for chunking and embedding.
 
-    \b
-    Pipeline stages:
-      SCAN:    SSH to facility, enumerate code files + rg pattern enrichment
-      TRIAGE:  Relevance decision on file identity (discovered → triaged | skipped)
-      SCORE:   Detailed multi-dimensional LLM scoring with pattern evidence
-      INGEST:  Fetch, tree-sitter chunk, embed, extract IDS/MDSplus refs
+def run_code_stage(facility: str, options: CodeStageOptions) -> None:
+    """Run code discovery with item scope and independent seed/drain halves.
 
-    Paths are processed highest-value first using weighted dimension scores
-    (data_access, IMAS, convention, analysis, modeling).
-
-    \b
-    Examples:
-      imas-codex discover code tcv
-      imas-codex discover code tcv --min-score 0.8 --scan-only
-      imas-codex discover code tcv -c 2.0 --code-workers 4
-      imas-codex discover code tcv -f equilibrium --time 10
-      imas-codex discover code tcv --rescan
+    The code engine disables its primary draining workers for scan-only runs.
+    A zero scan worker count disables its seed phase for flush runs while
+    retaining triage, enrichment, scoring, ingestion, and linking.
     """
+    if options.scan_only and options.flush:
+        raise click.UsageError("--scan-only and --flush are mutually exclusive")
+
+    min_score = options.min_score
+    max_paths = options.limit
+    focus = options.topic
+    path_prefixes = options.focus
+    cost_limit = options.cost_limit
+    scan_workers = 0 if options.flush else options.scan_workers
+    triage_workers = options.triage_workers
+    enrich_workers = options.enrich_workers
+    score_workers = options.score_workers
+    code_workers = options.code_workers
+    scan_only = options.scan_only
+    score_only = False
+    time_limit = options.time_limit
+    verbose = options.verbose
+    rescan = options.rescan
+    triage_batch_size = options.triage_batch_size
+    rejudge_ingested = options.rejudge_ingested
+    reset_to = options.reset_to
     from imas_codex.cli.discover.common import (
         DiscoveryConfig,
         ensure_remote_environment,
