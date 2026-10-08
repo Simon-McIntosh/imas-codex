@@ -444,9 +444,9 @@ def mark_images_scored(
     *,
     store_images: bool = False,
 ) -> int:
-    """Mark images as scored with VLM results.
+    """Persist vision text and Jev judgments for captioned images.
 
-    Updates image status to 'captioned' and persists description + scoring fields.
+    Updates image status to 'captioned' and persists caption and judgment fields.
     When store_images is False (default), clears image_data to free graph storage.
     """
     if not results:
@@ -454,41 +454,59 @@ def mark_images_scored(
 
     from imas_codex.graph import GraphClient
 
+    fields = (
+        "mermaid_diagram",
+        "ocr_text",
+        "ocr_mdsplus_paths",
+        "ocr_imas_paths",
+        "ocr_ppf_paths",
+        "ocr_tool_mentions",
+        "description",
+        "purpose",
+        "score_composite",
+        "should_ingest",
+        "score_cost",
+        "judgment_model",
+        "ingest_relevance",
+        "purpose_probs",
+        "purpose_confidence",
+        "score_data_documentation",
+        "score_physics_content",
+        "score_code_documentation",
+        "score_data_access",
+        "score_calibration",
+        "score_imas_relevance",
+    )
+    facets = (
+        "score_data_documentation",
+        "score_physics_content",
+        "score_code_documentation",
+        "score_data_access",
+        "score_calibration",
+        "score_imas_relevance",
+    )
+    fields += tuple(
+        f"{facet}{suffix}" for facet in facets for suffix in ("_probs", "_confidence")
+    )
+    rows = [
+        {"id": result["id"], "fields": {key: result.get(key) for key in fields}}
+        for result in results
+    ]
     clear_data = "" if store_images else ", img.image_data = null"
 
     with GraphClient() as gc:
         gc.query(
             f"""
-            UNWIND $batch AS item
-            MATCH (img:Image {{id: item.id}})
+            UNWIND $rows AS row
+            MATCH (img:Image {{id: row.id}})
+            SET img += row.fields
             SET img.status = 'captioned',
-                img.mermaid_diagram = item.mermaid_diagram,
-                img.ocr_text = item.ocr_text,
-                img.ocr_mdsplus_paths = item.ocr_mdsplus_paths,
-                img.ocr_imas_paths = item.ocr_imas_paths,
-                img.ocr_ppf_paths = item.ocr_ppf_paths,
-                img.ocr_tool_mentions = item.ocr_tool_mentions,
-                img.purpose = item.purpose,
-                img.description = item.description,
-                img.score_composite = item.score_composite,
-                img.score_data_documentation = item.score_data_documentation,
-                img.score_physics_content = item.score_physics_content,
-                img.score_code_documentation = item.score_code_documentation,
-                img.score_data_access = item.score_data_access,
-                img.score_calibration = item.score_calibration,
-                img.score_imas_relevance = item.score_imas_relevance,
-                img.reasoning = item.reasoning,
-                img.keywords = item.keywords,
-                img.physics_domain = item.physics_domain,
-                img.should_ingest = item.should_ingest,
-                img.skip_reason = item.skip_reason,
-                img.score_cost = item.score_cost,
                 img.scored_at = datetime(),
                 img.captioned_at = datetime(),
                 img.claimed_at = null
                 {clear_data}
             """,
-            batch=results,
+            rows=rows,
         )
 
     logger.info(
@@ -628,182 +646,103 @@ async def score_images_batch(
     facility_id: str | None = None,
     reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
-    """Score a batch of images using VLM with structured output.
+    """Caption images with vision, then judge their text with Jev."""
+    if not images:
+        return [], 0.0
 
-    Sends image bytes + context to VLM and receives caption + scoring
-    in a single pass. Uses ImageScoreBatch Pydantic model via the
-    centralized acall_llm_structured() infrastructure.
-
-    Args:
-        images: List of image dicts with id, image_data, page_title, etc.
-        model: Model identifier from get_model()
-        focus: Optional focus area for scoring
-        data_access_patterns: Optional facility-specific data access patterns.
-            When provided, injected into the prompt template so the VLM can
-            recognize facility-specific path formats and tool references.
-        facility_id: Facility identifier for entity extraction (e.g., 'tcv')
-        reasoning_effort: Optional reasoning budget for the VLM seat.
-
-    Returns:
-        (results, cost) tuple
-    """
+    from imas_codex.discovery.base.facility import get_facility
     from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.discovery.wiki.models import (
-        ImageScoreBatch,
-        grounded_image_score,
+    from imas_codex.discovery.wiki.entity_extraction import (
+        FacilityEntityExtractor,
+        extract_facility_tool_mentions,
+        extract_mdsplus_paths,
     )
-    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
+    from imas_codex.discovery.wiki.models import ImageCaptionBatch
+    from imas_codex.discovery.wiki.scoring import judge_content_items
 
-    # Build system prompt
-    context: dict[str, Any] = {}
-    if focus:
-        context["focus"] = focus
-    if data_access_patterns:
-        context["data_access_patterns"] = data_access_patterns
-    system_prompt = render_prompt("wiki/image-captioner", context)
-
-    # Build user message with image content
     user_content: list[dict[str, Any]] = [
         {
             "type": "text",
-            "text": (
-                f"Score and caption these {len(images)} images "
-                f"from fusion facility documentation.\n"
-            ),
+            "text": "For each image return only its ID, factual caption, OCR text, and Mermaid diagram text if it is a schematic.",
         }
     ]
-
-    for i, img in enumerate(images, 1):
-        context_parts = [f"\n## Image {i}", f"ID: {img['id']}"]
-        if img.get("page_title"):
-            context_parts.append(f"Page: {img['page_title']}")
-        if img.get("section"):
-            context_parts.append(f"Section: {img['section']}")
-        if img.get("surrounding_text"):
-            context_parts.append(f"Context: {img['surrounding_text'][:500]}")
-        if img.get("alt_text"):
-            context_parts.append(f"Alt text: {img['alt_text']}")
-
-        user_content.append({"type": "text", "text": "\n".join(context_parts)})
-
-        img_format = img.get("image_format", "webp")
-        mime_type = f"image/{img_format}"
+    if focus:
+        user_content.append({"type": "text", "text": f"Subject: {focus}"})
+    for image in images:
+        user_content.append(
+            {
+                "type": "text",
+                "text": (
+                    f"ID: {image['id']}\nPage: {image.get('page_title') or ''}"
+                    f"\nSection: {image.get('section') or ''}"
+                    f"\nContext: {(image.get('surrounding_text') or '')[:500]}"
+                    f"\nAlt text: {image.get('alt_text') or ''}"
+                ),
+            }
+        )
         user_content.append(
             {
                 "type": "image_url",
                 "image_url": {
-                    "url": f"data:{mime_type};base64,{img['image_data']}",
+                    "url": f"data:image/{image.get('image_format', 'webp')};base64,{image['image_data']}"
                 },
             }
         )
 
-    user_content.append(
-        {
-            "type": "text",
-            "text": "\n\nReturn results for each image in order. "
-            "The response format is enforced by the schema.",
-        }
-    )
-
-    messages: list[dict[str, Any]] = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_content},
-    ]
-
-    batch, total_cost, _ = await acall_llm_structured(
+    batch, vision_cost, _ = await acall_llm_structured(
         model=model,
-        messages=messages,
-        response_model=ImageScoreBatch,
-        max_tokens=32000,
-        temperature=0.3,
-        timeout=180,
-        max_retries=5,
-        retry_base_delay=4.0,
+        messages=[{"role": "user", "content": user_content}],
+        response_model=ImageCaptionBatch,
         service="facility-discovery",
         reasoning_effort=reasoning_effort,
     )
+    captions = {result.id: result for result in batch.results}
+    if any(image["id"] not in captions for image in images):
+        raise ValueError("Vision batch omitted an image")
 
-    llm_results = batch.results
-
-    # Convert to result dicts with grounded scoring
-    cost_per_image = total_cost / len(images) if images else 0.0
-    results: list[dict[str, Any]] = []
-
-    # Load facility key_tools for OCR text pattern matching
-    _facility_key_tools: list[str] | None = None
-    _facility_code_patterns: list[str] | None = None
+    facility_config = get_facility(facility_id) if facility_id else {}
     if data_access_patterns:
-        _facility_key_tools = data_access_patterns.get("key_tools")
-        _facility_code_patterns = data_access_patterns.get("code_import_patterns")
-
-    # Build facility-aware extractor for OCR entity extraction
-    _extractor = None
-    if facility_id:
-        from imas_codex.discovery.wiki.entity_extraction import (
-            FacilityEntityExtractor,
-        )
-
-        _extractor = FacilityEntityExtractor(facility_id)
-    else:
-        from imas_codex.discovery.wiki.entity_extraction import (
-            extract_facility_tool_mentions,
-            extract_mdsplus_paths,
-        )
-
-    for r in llm_results[: len(images)]:
-        scores = {
-            "score_data_documentation": r.score_data_documentation,
-            "score_physics_content": r.score_physics_content,
-            "score_code_documentation": r.score_code_documentation,
-            "score_data_access": r.score_data_access,
-            "score_calibration": r.score_calibration,
-            "score_imas_relevance": r.score_imas_relevance,
+        facility_config = {
+            **facility_config,
+            "data_access_patterns": data_access_patterns,
         }
-        combined_score = grounded_image_score(scores, r.purpose)
+    extractor = FacilityEntityExtractor(facility_id) if facility_id else None
+    captioned = []
+    for image in images:
+        result = captions[image["id"]]
+        item = {
+            **image,
+            "description": result.description,
+            "ocr_text": result.ocr_text,
+            "mermaid_diagram": result.mermaid_diagram,
+        }
+        if extractor:
+            entities = extractor.extract(result.ocr_text)
+            item.update(
+                ocr_mdsplus_paths=entities.mdsplus_paths,
+                ocr_imas_paths=entities.imas_paths,
+                ocr_ppf_paths=entities.ppf_paths,
+                ocr_tool_mentions=entities.tool_mentions,
+            )
+        else:
+            item.update(
+                ocr_mdsplus_paths=extract_mdsplus_paths(result.ocr_text),
+                ocr_imas_paths=[],
+                ocr_ppf_paths=[],
+                ocr_tool_mentions=extract_facility_tool_mentions(
+                    result.ocr_text,
+                    (data_access_patterns or {}).get("key_tools"),
+                    (data_access_patterns or {}).get("code_import_patterns"),
+                ),
+            )
+        captioned.append(item)
 
-        # Extract structured entities from VLM OCR text
-        ocr_mdsplus_paths: list[str] = []
-        ocr_tool_mentions: list[str] = []
-        ocr_imas_paths: list[str] = []
-        ocr_ppf_paths: list[str] = []
-        if r.ocr_text:
-            if _extractor:
-                ocr_entities = _extractor.extract(r.ocr_text)
-                ocr_mdsplus_paths = ocr_entities.mdsplus_paths
-                ocr_imas_paths = ocr_entities.imas_paths
-                ocr_ppf_paths = ocr_entities.ppf_paths
-                ocr_tool_mentions = ocr_entities.tool_mentions
-            else:
-                ocr_mdsplus_paths = extract_mdsplus_paths(r.ocr_text)
-                ocr_tool_mentions = extract_facility_tool_mentions(
-                    r.ocr_text, _facility_key_tools, _facility_code_patterns
-                )
-
-        results.append(
-            {
-                "id": r.id,
-                "mermaid_diagram": r.mermaid_diagram,
-                "ocr_text": r.ocr_text,
-                "ocr_mdsplus_paths": ocr_mdsplus_paths,
-                "ocr_imas_paths": ocr_imas_paths,
-                "ocr_ppf_paths": ocr_ppf_paths,
-                "ocr_tool_mentions": ocr_tool_mentions,
-                "purpose": r.purpose.value,
-                "description": r.description,
-                "score_composite": combined_score,
-                "score_data_documentation": r.score_data_documentation,
-                "score_physics_content": r.score_physics_content,
-                "score_code_documentation": r.score_code_documentation,
-                "score_data_access": r.score_data_access,
-                "score_calibration": r.score_calibration,
-                "score_imas_relevance": r.score_imas_relevance,
-                "reasoning": r.reasoning,
-                "keywords": r.keywords[:5],
-                "physics_domain": r.physics_domain.value if r.physics_domain else None,
-                "should_ingest": r.should_ingest,
-                "skip_reason": r.skip_reason or None,
-                "score_cost": cost_per_image,
-            }
-        )
-
-    return results, total_cost
+    judged, judgment_cost = await judge_content_items(
+        captioned, "image", facility_id or "", facility_config
+    )
+    for item in judged:
+        item["score_composite"] = item["ingest_relevance"]
+        item["should_ingest"] = item["ingest_relevance"] >= CONTENT_INGEST_THRESHOLD
+        item["score_cost"] += vision_cost / len(images)
+    return judged, vision_cost + judgment_cost

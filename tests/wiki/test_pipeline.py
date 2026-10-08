@@ -5,6 +5,27 @@ import pytest
 from imas_codex.discovery.wiki.pipeline import html_to_text
 
 
+@pytest.mark.parametrize(
+    ("function_name", "alias"),
+    [("get_pending_wiki_pages", "wp"), ("get_pending_wiki_documents", "wa")],
+)
+def test_direct_ingest_reads_jev_cutoff(function_name: str, alias: str):
+    from unittest.mock import MagicMock, patch
+
+    from imas_codex.discovery.wiki import pipeline
+    from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
+
+    client = MagicMock()
+    client.__enter__.return_value = client
+    client.query.return_value = []
+    with patch.object(pipeline, "GraphClient", return_value=client):
+        getattr(pipeline, function_name)("tcv")
+    query = client.query.call_args.args[0]
+    assert f"{alias}.ingest_relevance >= $min_score" in query
+    assert f"{alias}.score_composite >= $min_score" not in query
+    assert client.query.call_args.kwargs["min_score"] == CONTENT_INGEST_THRESHOLD
+
+
 class TestHTMLToText:
     """Tests for HTML to text conversion.
 

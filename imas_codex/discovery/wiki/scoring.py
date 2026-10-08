@@ -645,90 +645,17 @@ async def _score_images_batch(
     facility_id: str | None = None,
     reasoning_effort: str | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
-    """Caption images with vision, then judge their text through Jev."""
-    from imas_codex.discovery.base.facility import get_facility
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.discovery.wiki.entity_extraction import FacilityEntityExtractor
-    from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
-    from imas_codex.discovery.wiki.models import ImageCaptionBatch
+    """Use the same caption-then-Jev path as document discovery."""
+    from imas_codex.discovery.base.image import score_images_batch
 
-    user_content: list[dict[str, Any]] = [
-        {
-            "type": "text",
-            "text": "For each image return only its ID, factual caption, OCR text, and Mermaid diagram text if it is a schematic.",
-        }
-    ]
-    for image in images:
-        user_content.append(
-            {
-                "type": "text",
-                "text": f"ID: {image['id']}\nPage: {image.get('page_title') or ''}\nContext: {(image.get('surrounding_text') or '')[:500]}",
-            }
-        )
-        user_content.append(
-            {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/{image.get('image_format', 'webp')};base64,{image['image_data']}"
-                },
-            }
-        )
-    batch, vision_cost, _ = await acall_llm_structured(
-        model=model,
-        messages=[{"role": "user", "content": user_content}],
-        response_model=ImageCaptionBatch,
-        service="facility-discovery",
+    return await score_images_batch(
+        images,
+        model,
+        focus,
+        data_access_patterns,
+        facility_id=facility_id,
         reasoning_effort=reasoning_effort,
     )
-    captions = {result.id: result for result in batch.results}
-    if any(image["id"] not in captions for image in images):
-        raise ValueError("Vision batch omitted an image")
-    facility_config = get_facility(facility_id) if facility_id else {}
-    if data_access_patterns:
-        facility_config = {
-            **facility_config,
-            "data_access_patterns": data_access_patterns,
-        }
-    extractor = FacilityEntityExtractor(facility_id) if facility_id else None
-    captioned = []
-    for image in images:
-        result = captions[image["id"]]
-        item = {
-            **image,
-            "description": result.description,
-            "ocr_text": result.ocr_text,
-            "mermaid_diagram": result.mermaid_diagram,
-        }
-        if extractor:
-            entities = extractor.extract(result.ocr_text)
-            item.update(
-                ocr_mdsplus_paths=entities.mdsplus_paths,
-                ocr_imas_paths=entities.imas_paths,
-                ocr_ppf_paths=entities.ppf_paths,
-                ocr_tool_mentions=entities.tool_mentions,
-            )
-        else:
-            item.update(
-                ocr_mdsplus_paths=[],
-                ocr_imas_paths=[],
-                ocr_ppf_paths=[],
-                ocr_tool_mentions=[],
-            )
-        captioned.append(item)
-    judged, judgment_cost = await judge_content_items(
-        captioned, "image", facility_id or "", facility_config
-    )
-    for item in judged:
-        item.update(
-            score_composite=item["ingest_relevance"],
-            should_ingest=item["ingest_relevance"] >= CONTENT_INGEST_THRESHOLD,
-            reasoning="",
-            keywords=[],
-            physics_domain=None,
-            skip_reason=None,
-        )
-        item["score_cost"] += vision_cost / len(images)
-    return judged, vision_cost + judgment_cost
 
 
 async def _fetch_html(

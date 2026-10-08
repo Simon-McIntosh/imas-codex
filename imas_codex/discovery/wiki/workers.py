@@ -23,6 +23,7 @@ from imas_codex.graph import GraphClient
 from imas_codex.graph.models import WikiPageStatus
 
 from .graph_ops import (
+    CONTENT_INGEST_THRESHOLD,
     IMAGE_DOCUMENT_TYPES,
     INGESTABLE_DOCUMENT_TYPES,
     _release_claimed_images,
@@ -421,7 +422,7 @@ async def score_worker(
 async def ingest_worker(
     state: WikiDiscoveryState,
     on_progress: Callable | None = None,
-    min_score: float = 0.5,
+    min_score: float = CONTENT_INGEST_THRESHOLD,
 ) -> None:
     """Ingest worker: Chunk and embed high-value scored pages.
 

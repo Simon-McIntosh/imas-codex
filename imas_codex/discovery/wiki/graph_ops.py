@@ -2014,52 +2014,12 @@ def mark_images_scored(
     *,
     store_images: bool = False,
 ) -> int:
-    """Mark images as scored with VLM results.
-
-    Updates image status to 'captioned' and persists description + scoring fields.
-    When store_images is False (default), clears image_data to free graph storage.
-    Uses batched UNWIND for efficient graph updates.
-    """
+    """Persist shared vision captions and Jev judgments."""
     from imas_codex.discovery.base.image import (
         mark_images_scored as _mark,
     )
 
-    count = _mark(facility, results, store_images=store_images)
-    judgment_fields = (
-        "judgment_model",
-        "ingest_relevance",
-        "purpose_probs",
-        "purpose_confidence",
-        "score_data_documentation_probs",
-        "score_data_documentation_confidence",
-        "score_physics_content_probs",
-        "score_physics_content_confidence",
-        "score_code_documentation_probs",
-        "score_code_documentation_confidence",
-        "score_data_access_probs",
-        "score_data_access_confidence",
-        "score_calibration_probs",
-        "score_calibration_confidence",
-        "score_imas_relevance_probs",
-        "score_imas_relevance_confidence",
-    )
-    rows = [
-        {
-            "id": result["id"],
-            "fields": {key: result.get(key) for key in judgment_fields},
-        }
-        for result in results
-    ]
-    with GraphClient() as gc:
-        gc.query(
-            """
-            UNWIND $rows AS row
-            MATCH (img:Image {id: row.id})
-            SET img += row.fields
-            """,
-            rows=rows,
-        )
-    return count
+    return _mark(facility, results, store_images=store_images)
 
 
 def _release_claimed_images(image_ids: list[str]) -> None:

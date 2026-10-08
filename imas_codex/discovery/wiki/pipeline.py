@@ -2,8 +2,8 @@
 
 Processes wiki pages and documents through a deterministic pipeline:
 1. Scan: Discover pages/documents via link traversal (creates nodes with status='scanned')
-2. Score: Agent evaluates score_composite (sets status='scored' or 'skipped')
-3. Ingest: Fetch content, chunk, embed, and link to graph (sets status='ingested')
+2. Judge: Jev evaluates ingest relevance (sets status='scored' or 'skipped')
+3. Ingest: Fetch admitted content, chunk, embed, and link to graph
 
 The pipeline is graph-driven and fully deterministic (no LLM calls during ingestion).
 Entity extraction uses regex patterns for MDSplus paths, IMAS paths, units, conventions.
@@ -12,12 +12,12 @@ Example:
     # Step 1: Scan wiki (link extraction, no content fetch)
     # imas-codex wiki scan tcv
 
-    # Step 2: Score pages with LLM agent
+    # Describe pages and judge their ingest relevance
     # imas-codex wiki score tcv
 
-    # Step 3: Ingest high-score pages (deterministic)
+    # Ingest admitted pages (deterministic)
     pipeline = WikiIngestionPipeline(facility_id="tcv")
-    stats = await pipeline.ingest_from_graph(min_score_composite=0.7)
+    stats = await pipeline.ingest_from_graph(min_ingest_relevance=0.7)
     print(f"Created {stats['chunks']} chunks")
 """
 
@@ -34,7 +34,7 @@ from imas_codex.graph import GraphClient
 from imas_codex.graph.models import WikiPageStatus
 from imas_codex.ingestion.chunkers import chunk_text as _chunk_text
 
-from .graph_ops import mark_document_failed_or_deferred
+from .graph_ops import CONTENT_INGEST_THRESHOLD, mark_document_failed_or_deferred
 from .monitor import WikiProgressMonitor, set_current_monitor
 from .scraper import WikiPage, fetch_wiki_page
 
@@ -70,28 +70,27 @@ class PageIngestionStats(TypedDict):
 def get_pending_wiki_pages(
     facility_id: str,
     limit: int | None = None,
-    min_score_composite: float = 0.5,
+    min_ingest_relevance: float = CONTENT_INGEST_THRESHOLD,
 ) -> list[dict]:
     """Get wiki pages pending ingestion from the graph.
 
-    Returns WikiPage nodes with status='scored' (passed agent evaluation),
-    sorted by score_composite descending.
+    Returns Jev-admitted scored pages, sorted by ingest relevance.
 
     Args:
         facility_id: Facility ID
         limit: Maximum pages to return (None for all)
-        min_score_composite: Minimum interest score threshold
+        min_ingest_relevance: Minimum Jev ingest probability
 
     Returns:
-        List of page dicts with id, url, title, score_composite
+        List of page dicts with id, url, title, ingest_relevance
     """
     # Build query with optional LIMIT clause
     query = """
         MATCH (wp:WikiPage {facility_id: $facility_id, status: 'scored'})
-        WHERE wp.score_composite >= $min_score
+        WHERE wp.ingest_relevance >= $min_score
         RETURN wp.id AS id, wp.url AS url, wp.title AS title,
-               wp.score_composite AS score_composite
-        ORDER BY wp.score_composite DESC, wp.discovered_at ASC
+               wp.ingest_relevance AS ingest_relevance
+        ORDER BY wp.ingest_relevance DESC, wp.discovered_at ASC
     """
     if limit is not None:
         query += f"LIMIT {limit}"
@@ -100,7 +99,7 @@ def get_pending_wiki_pages(
         result = gc.query(
             query,
             facility_id=facility_id,
-            min_score=min_score_composite,
+            min_score=min_ingest_relevance,
         )
         return [dict(r) for r in result] if result else []
 
@@ -149,29 +148,28 @@ def get_wiki_queue_stats(facility_id: str) -> dict:
 def get_pending_wiki_documents(
     facility_id: str,
     limit: int | None = None,
-    min_score_composite: float = 0.5,
+    min_ingest_relevance: float = CONTENT_INGEST_THRESHOLD,
 ) -> list[dict]:
     """Get wiki documents pending ingestion from the graph.
 
-    Returns Document nodes with status='scored' (passed agent evaluation),
-    sorted by score_composite descending.
+    Returns Jev-admitted scored documents, sorted by ingest relevance.
 
     Args:
         facility_id: Facility ID
         limit: Maximum documents to return (None for all)
-        min_score_composite: Minimum interest score threshold
+        min_ingest_relevance: Minimum Jev ingest probability
 
     Returns:
-        List of document dicts with id, url, filename, document_type, score_composite
+        List of document dicts with id, url, filename, document_type, ingest_relevance
     """
     # Build query with optional LIMIT clause
     query = """
         MATCH (wa:Document {facility_id: $facility_id, status: 'scored'})
-        WHERE wa.score_composite >= $min_score
+        WHERE wa.ingest_relevance >= $min_score
         RETURN wa.id AS id, wa.url AS url, wa.filename AS filename,
                wa.document_type AS document_type,
-               wa.score_composite AS score_composite
-        ORDER BY wa.score_composite DESC
+               wa.ingest_relevance AS ingest_relevance
+        ORDER BY wa.ingest_relevance DESC
     """
     if limit is not None:
         query += f"LIMIT {limit}"
@@ -180,7 +178,7 @@ def get_pending_wiki_documents(
         result = gc.query(
             query,
             facility_id=facility_id,
-            min_score=min_score_composite,
+            min_score=min_ingest_relevance,
         )
         return [dict(r) for r in result] if result else []
 
@@ -1571,7 +1569,7 @@ class WikiIngestionPipeline:
     async def ingest_from_graph(
         self,
         limit: int | None = None,
-        min_score_composite: float = 0.5,
+        min_ingest_relevance: float = CONTENT_INGEST_THRESHOLD,
         progress_callback: ProgressCallback | None = None,
         rate_limit: float = 0.5,
     ) -> dict[str, int]:
@@ -1585,7 +1583,7 @@ class WikiIngestionPipeline:
 
         Args:
             limit: Maximum pages to process (None for all)
-            min_score_composite: Minimum interest score threshold
+            min_ingest_relevance: Minimum Jev ingest probability
             progress_callback: Optional callback for progress updates
             rate_limit: Minimum seconds between requests
 
@@ -1596,7 +1594,7 @@ class WikiIngestionPipeline:
         pending = get_pending_wiki_pages(
             self.facility_id,
             limit=limit,
-            min_score_composite=min_score_composite,
+            min_ingest_relevance=min_ingest_relevance,
         )
 
         if not pending:
@@ -2632,7 +2630,7 @@ class DocumentPipeline:
     async def ingest_from_graph(
         self,
         limit: int | None = None,
-        min_score_composite: float = 0.5,
+        min_ingest_relevance: float = CONTENT_INGEST_THRESHOLD,
     ) -> dict[str, int]:
         """Ingest documents from the graph queue.
 
@@ -2642,7 +2640,7 @@ class DocumentPipeline:
 
         Args:
             limit: Maximum documents to process (None for all)
-            min_score_composite: Minimum score threshold
+            min_ingest_relevance: Minimum Jev ingest probability
 
         Returns:
             Stats dict
@@ -2658,7 +2656,7 @@ class DocumentPipeline:
         pending = get_pending_wiki_documents(
             self.facility_id,
             limit=limit,
-            min_score_composite=min_score_composite,
+            min_ingest_relevance=min_ingest_relevance,
         )
 
         if not pending:
