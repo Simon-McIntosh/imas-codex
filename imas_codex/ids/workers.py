@@ -458,19 +458,25 @@ def claim_sources_for_escalated(
 
 def has_pending_assignment_work(
     facility: str,
-    domains: list[str] | None = None,
+    ids_names: list[str] | None = None,
 ) -> bool:
-    """Check if escalated sources with a candidate remain unselected."""
-    domain_filter, domain_params = _domain_filter(domains)
+    """Check if escalated sources with a target IDS candidate remain unselected."""
+    ids_clause = ""
+    params: dict[str, Any] = {}
+    if ids_names:
+        ids_clause = (
+            "AND EXISTS { (n)-[r:MAPPING_CANDIDATE]->(:IMASNode) "
+            "WHERE r.ids IN $ids_names } "
+        )
+        params["ids_names"] = list(ids_names)
     return has_pending(
         "SignalSource",
         facility=facility,
         status_predicate=(
             "n.candidate_route = 'escalated' "
-            "AND n.mapping_disposition IS NULL "
-            "AND EXISTS { (n)-[:MAPPING_CANDIDATE]->(:IMASNode) } " + domain_filter
+            "AND n.mapping_disposition IS NULL " + ids_clause
         ),
-        status_params=domain_params,
+        status_params=params,
     )
 
 
@@ -1360,14 +1366,10 @@ async def run_mapping_engine(
     Wires up graph-based phase completion checks, orphan recovery,
     and supervised workers via ``run_discovery_engine``.
     """
-    all_domains = sorted(
-        {d for info in state.target_info for d in info.get("domains", [])}
-    )
-
     # Wire has_work_fn for phase completion detection
     state.assign_phase.set_has_work_fn(
         lambda: (
-            has_pending_assignment_work(state.facility, all_domains)
+            has_pending_assignment_work(state.facility, state.target_ids_list)
             or not state.context_phase.done
         )
     )
