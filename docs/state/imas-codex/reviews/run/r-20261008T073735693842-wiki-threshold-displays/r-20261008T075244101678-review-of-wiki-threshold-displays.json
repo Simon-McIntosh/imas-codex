@@ -1,0 +1,60 @@
+{
+  "absent": {},
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/discover/wiki.py:755",
+    "imas_codex/cli/discover/wiki.py:1123",
+    "imas_codex/cli/discover/__init__.py:145",
+    "imas_codex/discovery/paths/progress.py:1426"
+  ],
+  "completed_at": "2026-10-08T08:01:13.497Z",
+  "dispatched_at": "2026-10-08T07:52:54Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/wiki/parallel.py",
+      "line": "1106",
+      "severity": "follow-on",
+      "text": "follow-on: the document pending-ingest count in get_wiki_discovery_stats was also moved onto CONTENT_INGEST_THRESHOLD (parallel.py:1106), which is correct and consistent with the runner display, but no test exercises that comparison \u2014 test_pending_ingest_uses_content_cutoff stubs the query and never reaches the row-scan branch. Reverting only line 1106 to a literal 0.5 would therefore leave the whole gate green, so the done-when's 'a test fails if either compares against a literal threshold' is met for the query and the document label but not for this third comparison. A stub returning a scored document row with score between 0.16 and 0.5 would pin it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "get_wiki_discovery_stats is called from imas_codex/cli/discover/wiki.py:755 and :1123, imas_codex/cli/discover/__init__.py:145, and imas_codex/discovery/paths/progress.py:1426.",
+    "diff": "read fa5123a2 in full: parallel.py +4/-5 (query binds $min_score, comparison uses the constant, stale docstring line removed), progress.py +5/-2 (import plus label comparison), and a new 33-line tests/wiki/test_wiki_threshold_displays.py carrying the two reproduction tests.",
+    "done_when": "both displays read the constant (parallel.py:1031/1106, progress.py:743) and a test fails against a literal threshold: base arm fails test_pending_ingest_uses_content_cutoff and test_document_label_uses_content_cutoff (baseline-threshold.log EXIT=1), and restoring the runner literal fails (negative-control.log EXIT=1).",
+    "goal": "\u00a718 delivered: the runner pending-ingest query and the document skipped label both read CONTENT_INGEST_THRESHOLD (0.16), and the docstring language describing the retired 0.5 cutoff was retired with them.",
+    "manifest": "read; commits names fa5123a2e, baseline_suite records baseline-threshold.log 2 failed EXIT=1 at f186f51a, after_suite records gate-committed.log 51 passed EXIT=0 at fa5123a2e, negative_control_log reproduces 1 failed EXIT=1; all reconcile with the logs I opened.",
+    "write_paths": "git show --stat fa5123a2 lists exactly the three manifest changed_paths; no other file touched."
+  },
+  "justifications": {
+    "durability": "the guard is shown to fire rather than merely green: the base arm fails the two new tests against the literal-threshold source, and restoring the runner literal 0.5 makes test_pending_ingest_uses_content_cutoff fail (negative-control.log). The runner test asserts the query binds $min_score equal to the shared constant, which pins the binding rather than a value, so a future re-literalisation is caught. Deduction: the second literal comparison the worker also fixed \u2014 the document pending count at parallel.py:1106 \u2014 has no direct test, so reverting only that line to 0.5 would not be caught (recorded as a follow-on).",
+    "evidence": "the reviewed run carries a reproducing baseline (baseline-threshold.log: 2 failed, 1 warning, EXIT=1 at base f186f51a) whose two failures are exactly the two named displays reading the literals, a head gate (gate-committed.log: 51 passed, EXIT=0 at head fa5123a2), and a mutation control (negative-control.log: 1 failed, 1 passed, EXIT=1 restoring literal 0.5 in the runner query). I opened all three logs and independently re-ran the scoped gate at head in the reviewed worktree (reviewer-head.log: 51 passed, EXIT=0), so the head arm reproduces. Deduction: the label half of the negative control rests on the baseline arm rather than a fresh mutation, and the reviewed run's own control mutated only the runner query.",
+    "fit": "the commit subject 'fix(wiki): align progress thresholds with content ingest gate' uses conventional form and carries a body stating what changed and why; the added symbols (test_pending_ingest_uses_content_cutoff, test_document_label_uses_content_cutoff) name the mechanism; the new test filename describes what it tests. No plan, sprint, ticket or phase identifier appears in the diff, message, docstrings or comments, and the commit carries no attribution trailer.",
+    "goal_fidelity": "\u00a718 asks that the wiki runner's pending-ingest status in imas_codex/discovery/wiki/parallel.py and the document skipped label in imas_codex/discovery/wiki/progress.py stop comparing against the retired 0.5 language-model threshold and read CONTENT_INGEST_THRESHOLD instead, with a test that fails if either compares against a literal. The committed query at parallel.py:1028 now binds `wp.score_composite >= $min_score` with min_score=CONTENT_INGEST_THRESHOLD (parallel.py:1031), the same function's document pending count compares r[\"score\"] >= CONTENT_INGEST_THRESHOLD (parallel.py:1106), and the label at progress.py:743 tests document.score_composite < CONTENT_INGEST_THRESHOLD. The constant resolves to 0.16 at graph_ops.py:29, the value \u00a75 moved ingest to. Both done-when clauses hold.",
+    "reuse": "the change routes both displays through the existing single source of truth CONTENT_INGEST_THRESHOLD already imported by parallel.py:31 and defined at graph_ops.py:29, rather than introducing a second constant or a local threshold. The new tests import the same constant, so the test and the code under test cannot drift apart.",
+    "scope_discipline": "git show --stat fa5123a2 lists exactly imas_codex/discovery/wiki/parallel.py, imas_codex/discovery/wiki/progress.py and tests/wiki/test_wiki_threshold_displays.py \u2014 the three paths the manifest declares in changed_paths and orientation_write_paths. No CLI default, facility-independent of the runner, was touched, matching the plan's note that the CLI defaults are a separate node's scope. The worktree is clean at the reviewed head."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a718 delivered \u2014 the runner pending-ingest query (parallel.py:1028) plus the same function's document pending count (parallel.py:1106) and the document skipped label (progress.py:743) all read CONTENT_INGEST_THRESHOLD (0.16) instead of the retired 0.5 literal.\nVERDICT done_when: both displays read the constant and a test fails against a literal: base arm fails both new tests (2 failed, EXIT=1) and restoring the runner literal 0.5 fails test_pending_ingest_uses_content_cutoff (1 failed, EXIT=1).\nVERDICT write_paths: exactly imas_codex/discovery/wiki/parallel.py, imas_codex/discovery/wiki/progress.py, tests/wiki/test_wiki_threshold_displays.py across fa5123a2^..fa5123a2.\nVERDICT manifest: commit fa5123a2e, baseline_suite baseline-threshold.log 2 failed EXIT=1, after_suite gate-committed.log 51 passed EXIT=0, negative_control_log reproduces; records reconcile with the logs.\nVERDICT diff: parallel.py +4/-5, progress.py +5/-2, new 33-line test file with the two reproduction tests; independently re-ran at head (51 passed, EXIT=0).\nCALL_SITES: imas_codex/cli/discover/wiki.py:755, imas_codex/cli/discover/wiki.py:1123, imas_codex/cli/discover/__init__.py:145, imas_codex/discovery/paths/progress.py:1426\nSCORE goal_fidelity: 20\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 19\nSCORE fit: 20\nSCORE reuse: 20\nFINDING imas_codex/discovery/wiki/parallel.py:1106 follow-on: the document pending-count comparison moved onto CONTENT_INGEST_THRESHOLD but is untested; reverting only it to 0.5 would leave the gate green.\n",
+  "review_run_id": "r-20261008T075244101678-review-of-wiki-threshold-displays",
+  "reviewed_base_sha": "f186f51aef37b9eb1dea9fbe4f228919020bdced",
+  "reviewed_head_sha": "fa5123a2e47bc26b482c2102d07fe01710e18ec5",
+  "reviewed_run_id": "r-20261008T073735693842-wiki-threshold-displays",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:56:00+00:00",
+  "total": 118
+}
