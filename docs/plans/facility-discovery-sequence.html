@@ -20,9 +20,9 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -312,84 +312,12 @@
       <li>the three review findings are pinned.</li>
     </ul>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s4">§4 — The mapping stages join the sequence</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>
-      The last two domains run the mapping pipeline. <code>candidates</code> runs the candidate stage
-      that <code>discover map</code> ran, now <code>run_candidates_stage</code>. <code>mapping</code>
-      calls the function behind <code>imas map run FACILITY</code> once. It runs by default under the
-      lead's decision, because its reasoning seat, <code>ids-mapping</code>, is local. Its own target
-      enumeration, <code>discover_mappable_ids</code> (<code>imas_codex/ids/tools.py:376</code>), decides
-      the IDSs, and the sequence keeps no second list. That enumeration picks IDSs by physics-domain
-      overlap today, so it could miss an IDS that holds a source's cross-IDS sibling home. This node
-      extends it: an IDS holding a selected or escalated candidate edge for the facility is a target
-      even when the domain overlap misses it. With the per-IDS map claim from
-      <code>mapping-candidate-selection</code> §8, the one invocation then maps each source into every
-      home it has. <code>imas map run</code> stays as the <code>imas</code> group's own command, because
-      that group is not a discover domain.
-    </p>
-    <p>
-      <strong>Node</strong> <code>sequence-mapping-stages</code>, role implement, 0.75 h, after
-      <code>sequence-runner</code>. Write paths: <code>imas_codex/cli/discover/sequence.py</code>,
-      <code>imas_codex/ids/tools.py</code>, <code>tests/cli/test_discover_sequence.py</code>,
-      <code>tests/ids/test_mappable_ids_from_candidates.py</code> and its fragment. <strong>Done
-      when</strong>
-      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/ids tests/test_cli.py -p no:cacheprovider</code>
-      passes with tests showing three things. The mapping domain runs by default and calls the map
-      pipeline once. <code>discover_mappable_ids</code> includes an IDS that holds a selected candidate
-      edge but has no physics-domain overlap. The domain skips with <em>nothing to do</em> when no
-      source has a route.
-    </p>
-    <p>
-      The candidate-home union lets a target IDS come from a source in another physics domain, which exposes a mismatch in
-      the mapping engine's assign phase. <code>claim_sources_for_escalated</code> claims an escalated source by the run's
-      target IDS names, while <code>has_pending_assignment_work</code>, which decides when the phase is done, filters by the
-      source's <code>physics_domain</code> against the domains of the target IDS nodes. A claimable source in a domain
-      outside that set reads as no work, so the phase can end while it is still unassigned.
-      <strong>Node</strong> <code>assignment-work-matches-claim</code>, role implement, 0.5 h. The pending check takes the
-      target IDS names and uses the claim's own predicate, and <code>run_mapping_engine</code> passes
-      <code>state.target_ids_list</code> instead of the domain union. Write paths: <code>imas_codex/ids/workers.py</code>,
-      <code>tests/ids/test_assignment_pending_matches_claim.py</code> and its fragment. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider</code> passes with a
-      test showing an escalated source whose physics domain is not among the target IDS domains, but whose candidate is in a
-      target IDS, is both claimed and reported as pending, and another showing a source with no candidate in any target IDS
-      is neither.
-    </p>
-    <p>
-      Every §4 gate runs <code>tests/ids</code>, and two tests there,
-      <code>TestPopulateMetadata::test_populate_returns_ids_metadata_result</code> and
-      <code>test_populate_deterministic_fields_always_present</code> in <code>tests/ids/test_metadata.py</code>, call
-      <code>populate_metadata</code> without patching the LLM call, so they reach the live local endpoint and time out when it
-      is slow. Three nodes on 2026-10-08 saw that timeout and passed only on a repeat.
-      <strong>Node</strong> <code>metadata-tests-offline</code>, role implement, 0.25 h, test-only. An autouse fixture in that
-      file makes <code>call_llm_structured</code> raise if called unpatched, and each populate test that needs an LLM answer
-      patches it explicitly. Write paths: <code>tests/ids/test_metadata.py</code> and its fragment. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/ids/test_metadata.py -p no:cacheprovider</code> passes with the guard fixture in
-      place, so no test in the file reaches an endpoint.
-    </p>
-    <p>
-      <code>sequence-mapping-stages</code> landed the candidate-home union only for the unfiltered call (2,958 selected or
-      escalated edges across 59 IDSs give JT-60SA 76 targets, 2.7 s live). Its review found two gaps. A <code>--physics-domain</code>
-      run still picks targets by domain overlap alone, so a source in that domain whose home lies in another domain's IDS is
-      never mapped. And the early return when no enriched source carries a <code>physics_domain</code> skips the union
-      entirely. An explicit <code>--ids</code> list stays as given.
-      <strong>Node</strong> <code>candidate-homes-under-domain-filter</code>, role implement, 0.5 h. Under a domain filter
-      the union adds the candidate homes of sources in those domains, and the union runs before the early return. Write paths:
-      <code>imas_codex/ids/tools.py</code>, <code>tests/ids/test_mappable_ids_from_candidates.py</code> and its fragment.
-      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider</code>
-      passes with tests showing a domain-filtered call includes a cross-domain home of a source in that domain, excludes the
-      home of a source outside it, and an explicit <code>--ids</code> list is returned unchanged.
-    </p>
-    <p>
-      <code>assignment-work-matches-claim</code> landed (2c9bce091; review 103/120, no added failures). The claim and the
-      pending check now agree, but each still writes the target-IDS fragment itself, so the next edit to one can split them
-      again. <strong>Node</strong> <code>assignment-predicate-shared</code>, role implement, 0.25 h. One private builder in
-      <code>imas_codex/ids/workers.py</code> returns the escalated-source predicate and its parameters, and both
-      <code>claim_sources_for_escalated</code> and <code>has_pending_assignment_work</code> call it. Write paths:
-      <code>imas_codex/ids/workers.py</code>, <code>tests/ids/test_assignment_pending_matches_claim.py</code> and its fragment.
-      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes, the fragment
-      appears once in the module, and a test shows both functions pass the builder's predicate and parameters unchanged.
-    </p>
+<section data-reckon="section" data-id="s4" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The mapping domain runs by default in <code>imas-codex discover FACILITY</code> and calls the map pipeline once. Its targets are every IDS holding a selected or escalated candidate home, with or without a domain filter (29a0f37c6, 390dd9403; JT-60SA: 76 targets from 2,958 edges across 59 IDSs, 2.7 s live). The assign phase's pending check uses the claim's own predicate through one builder (2c9bce091, 8bed4a85b), and the IDS metadata tests no longer reach a live LLM (d52629de8). <a href="/imas-codex/evidence/archive/facility-discovery-sequence-landed.html#s4">full record</a></p>
+</section>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>

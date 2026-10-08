@@ -25,6 +25,11 @@
     <p>Merge <code>bdb42163a</code> adds <code>docs/research/discover-cli-surface.html</code>. It tabulates every option on the discover subcommands, on <code>imas map run</code> and on <code>sn run</code>. Two spellings carry two meanings each: <code>--focus</code> (a topic on discover, paths on sn) and <code>--reset-to</code>. Stage selection has nine spellings, the item cap four, and draining none on discover. Every discover stage splits in code into a seed step and a drain step, where the drain step is a status-plus-claim query. That supports <code>--flush</code> with the meaning it has on <code>sn run</code>. The review scored 111/120. Its one minor finding, unqualified file citations, was repaired in <code>f24ebf1ab</code>, and its three follow-ons, flags left without a verdict, are folded into §3. The lead settled the surface from this census.</p>
   </section>
 
+  <section id="s4">
+    <h2>§4 — the mapping stages join the sequence</h2>
+    <p>Six nodes landed for §4. <code>sequence-mapping-stages</code> (29a0f37c6, review 108/120) unions every IDS holding a selected or escalated <code>MAPPING_CANDIDATE</code> edge into <code>discover_mappable_ids</code>; on the live graph JT-60SA gets 76 targets from 2,958 edges across 59 IDSs in 2.7 s. <code>candidate-homes-under-domain-filter</code> (390dd9403, 114/120) extends that to domain-filtered calls and the no-domain early return; filtered and unfiltered statements pass a live EXPLAIN. <code>assignment-work-matches-claim</code> (2c9bce091, 103/120) makes the assign phase's pending check select by target IDS like its claim, so a cross-domain home no longer ends the phase early; <code>assignment-predicate-shared</code> (8bed4a85b) gives both one builder. <code>metadata-tests-offline</code> (d52629de8) guards <code>tests/ids/test_metadata.py</code> against unpatched LLM calls. No node added a failure.</p>
+  </section>
+
 </main>
 </body>
 </html>
