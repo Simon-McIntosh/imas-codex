@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own baseline_suite and after_suite keys. baseline_suite (single-file collection error at base 8004d9dd, failure_ids ['tests/ids/test_slot_context.py::collection']) vs after_suite (tests/ids gate at head 621527529, 554 passed, failure_count 0, failure_ids []): no head-arm failure id is new, so zero ids are added. The two arms run different commands (single file vs whole tests/ids), so the comparison is against the only baseline the reviewed manifest recorded; the reviewed run's own ids-gate.log at 8004d9dd+working-tree is green (EXIT=0), so no full-suite regression is suggested.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/ids-gate-committed.log",
+    "revision": "621527529fdd4c5fb1a0c350e93631c039ded240"
+  },
+  "backend": "local",
+  "base_log_revision": "8004d9dd5dae610386900f74edc36c06586eea45",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/ids/test_slot_context.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 2,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/ids/test_slot_context.py::collection"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/baseline.log",
+    "revision": "8004d9dd5dae610386900f74edc36c06586eea45"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T11:26:56.346Z",
+  "dispatched_at": "2026-10-08T11:17:00Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/baseline.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline arm's header is stamped revision=8004d9dd, but it collects tests/ids/test_slot_context.py, which does not exist at 8004d9dd (git cat-file confirms); the header names the committed HEAD rather than the working tree that actually ran, so no clean full-suite pre-change arm exists and the manifest baseline_suite is a single-file collection error rather than a tests/ids measurement."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/mapping-reranked-context/docs/evidence/fragments/mapping-decision-chain/mapping-reranked-context.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the plan section and the dispatch scope block list an evidence fragment and a figure directory among the node write paths, but the done-when names no artifact and the prompt directs that neither be written unless one is named, so neither was produced; a plan-versus-prompt declaration mismatch, not a worker omission."
+    }
+  ],
+  "head_log_revision": "621527529fdd4c5fb1a0c350e93631c039ded240",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "one commit, 621527529, adds build_slot_context plus its helpers and the test module; the code calls the existing search_tools vector/text/enrich helpers per kind, blends via a local _hybrid_ids, sorts by score, then routes the whole pool through rerank_candidates, which calls judgment.rerank_pool in imas_codex/discovery/base/judgment.py.",
+    "done_when": "the gate `uv run --no-sync pytest tests/ids -p no:cacheprovider` passes at head 621527529 with 554 passed, 5 skipped, 3 deselected, EXIT=0 \u2014 reproduced in my own independent run (independent-head-gate.log) and matching the run's own ids-gate-committed.log; tests cover all four kinds reranked through the shared core, a kind with no hits omitted, and the no-key retrieval-order fallback.",
+    "goal": "the node supplies per-binding evidence from every source kind \u2014 code, wiki, documents and signals \u2014 each labelled with its kind and origin, reranked by Jev through the shared core; build_slot_context in imas_codex/ids/slot_context.py does exactly this.",
+    "manifest": "read; status complete, commits [621527529], changed_paths lists the two source/test files, tests names the tests/ids gate (554 passed), the declared negative_control_log is a real red log (EXIT=1), and baseline_suite records only the single-file collection arm rather than a full pre-change tests/ids arm.",
+    "write_paths": "git diff 8004d9dd..621527529 touches exactly imas_codex/ids/slot_context.py (+214) and tests/ids/test_slot_context.py (+187), the two required paths, with no out-of-scope edit; the plan and prompt also list an evidence fragment and a figure directory, which the prompt directs are written only when the done-when names that artifact, and it names none, so their absence is a declaration mismatch rather than an omission."
+  },
+  "justifications": {
+    "durability": "the four behaviours are pinned by tests \u2014 order changes under the decisions key, a kind with no hits is omitted, the no-key path keeps retrieval order, and lexical hits survive an empty vector index \u2014 and the rerank-removal negative control fails the order test at head.",
+    "evidence": "my independent tests/ids run at head reproduced 554 passed, 5 skipped, 3 deselected, EXIT=0, and the declared negative control is a valid red (EXIT=1, the rerank-order test failing at head 621527529 while the same test passes at the same head in head-arm.log); the shortfall is that the manifest's baseline_suite cites only a single-file collection arm, not a full pre-change tests/ids arm.",
+    "fit": "the commit uses a conventional feat(ids) subject with a mechanism body, and no plan, section or ticket identifier appears in the message, the new symbols (build_slot_context, _hybrid_ids, _text_search_documents, _item) or the comments.",
+    "goal_fidelity": "the module retrieves code, wiki, documents and signals per source, keeps kind and origin on every item, and reranks the combined pool through the shared judgment core, which is the node goal verbatim.",
+    "reuse": "it reuses the existing search_tools vector/text/enrich helpers, _embed and rerank_candidates, and routes through the shared judgment core rather than reimplementing reranking; the hybrid blend rule is duplicated as a local _hybrid_ids helper because the existing searches inline it rather than exposing it, so there is no shared helper to call.",
+    "scope_discipline": "the diff touches only the two required files and includes no unrelated edits or reformatting; the plan- and prompt-listed fragment and figure were not produced, which the prompt's own rule permits because the done-when names no artifact."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node supplies per-binding evidence from every source kind \u2014 code, wiki, documents and signals \u2014 each labelled with its kind and origin, reranked by Jev through the shared core; build_slot_context in imas_codex/ids/slot_context.py does exactly this.\nVERDICT done_when: the gate `uv run --no-sync pytest tests/ids -p no:cacheprovider` passes at head 621527529 with 554 passed, 5 skipped, 3 deselected, EXIT=0 \u2014 reproduced in my own independent run (independent-head-gate.log) and matching the run's own ids-gate-committed.log; tests cover all four kinds reranked through the shared core, a kind with no hits omitted, and the no-key retrieval-order fallback.\nVERDICT write_paths: git diff 8004d9dd..621527529 touches exactly imas_codex/ids/slot_context.py (+214) and tests/ids/test_slot_context.py (+187), the two required paths, with no out-of-scope edit; the plan and prompt also list an evidence fragment and a figure directory, which the prompt directs are written only when the done-when names that artifact, and it names none, so their absence is a declaration mismatch rather than an omission.\nVERDICT manifest: read; status complete, commits [621527529], changed_paths lists the two source/test files, tests names the tests/ids gate (554 passed), the declared negative_control_log is a real red log (EXIT=1), and baseline_suite records only the single-file collection arm rather than a full pre-change tests/ids arm.\nVERDICT diff: one commit, 621527529, adds build_slot_context plus its helpers and the test module; the code calls the existing search_tools vector/text/enrich helpers per kind, blends via a local _hybrid_ids, sorts by score, then routes the whole pool through rerank_candidates, which calls judgment.rerank_pool in imas_codex/discovery/base/judgment.py.\nVERDICT call_sites: build_slot_context is a new public API with no production caller yet, which the run states explicitly \u2014 wiring it into the mapping decision state is the separate judgment node's work.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the module retrieves code, wiki, documents and signals per source, keeps kind and origin on every item, and reranks the combined pool through the shared judgment core, which is the node goal verbatim.\nSCORE evidence: 17\nJUSTIFICATION evidence: my independent tests/ids run at head reproduced 554 passed, 5 skipped, 3 deselected, EXIT=0, and the declared negative control is a valid red (EXIT=1, the rerank-order test failing at head 621527529 while the same test passes at the same head in head-arm.log); the shortfall is that the manifest's baseline_suite cites only a single-file collection arm, not a full pre-change tests/ids arm.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the diff touches only the two required files and includes no unrelated edits or reformatting; the plan- and prompt-listed fragment and figure were not produced, which the prompt's own rule permits because the done-when names no artifact.\nSCORE durability: 18\nJUSTIFICATION durability: the four behaviours are pinned by tests \u2014 order changes under the decisions key, a kind with no hits is omitted, the no-key path keeps retrieval order, and lexical hits survive an empty vector index \u2014 and the rerank-removal negative control fails the order test at head.\nSCORE fit: 19\nJUSTIFICATION fit: the commit uses a conventional feat(ids) subject with a mechanism body, and no plan, section or ticket identifier appears in the message, the new symbols (build_slot_context, _hybrid_ids, _text_search_documents, _item) or the comments.\nSCORE reuse: 18\nJUSTIFICATION reuse: it reuses the existing search_tools vector/text/enrich helpers, _embed and rerank_candidates, and routes through the shared judgment core rather than reimplementing reranking; the hybrid blend rule is duplicated as a local _hybrid_ids helper because the existing searches inline it rather than exposing it, so there is no shared helper to call.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/baseline.log:1 follow-on: the baseline arm's header is stamped revision=8004d9dd, but it collects tests/ids/test_slot_context.py, which does not exist at 8004d9dd (git cat-file confirms); the header names the committed HEAD rather than the working tree that actually ran, so no clean full-suite pre-change arm exists and the manifest baseline_suite is a single-file collection error rather than a tests/ids measurement.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/mapping-reranked-context/docs/evidence/fragments/mapping-decision-chain/mapping-reranked-context.html:1 follow-on: the plan section and the dispatch scope block list an evidence fragment and a figure directory among the node write paths, but the done-when names no artifact and the prompt directs that neither be written unless one is named, so neither was produced; a plan-versus-prompt declaration mismatch, not a worker omission.\nREVIEWED_BASE_SHA: 8004d9dd5dae610386900f74edc36c06586eea45\nREVIEWED_HEAD_SHA: 621527529fdd4c5fb1a0c350e93631c039ded240\n",
+  "review_run_id": "r-20261008T111653010623-review-of-mapping-reranked-context",
+  "reviewed_base_sha": "8004d9dd5dae610386900f74edc36c06586eea45",
+  "reviewed_head_sha": "621527529fdd4c5fb1a0c350e93631c039ded240",
+  "reviewed_run_id": "r-20261008T110514422920-mapping-reranked-context",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T11:25:52.679767+00:00",
+  "total": 109,
+  "verdict": "SOUND WITH FINDINGS"
+}
