@@ -1,0 +1,687 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "f90e2e0512d58b7d32565a4955fbc8bf7ef7a17b",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 38449920,
+      "cached_input_tokens_cumulative": 38449920,
+      "input_tokens": 38724301,
+      "input_tokens_cumulative": 38724301,
+      "output_tokens": 79194,
+      "output_tokens_cumulative": 79194,
+      "reasoning_output_tokens": 31055,
+      "reasoning_output_tokens_cumulative": 31055
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 362,
+    "files": 3,
+    "removed": 14
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 174,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "window_line": 145
+    },
+    {
+      "existing_function": {
+        "line": 215,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "window_line": 145
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "run_function": {
+        "line": 174,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "window_line": 192
+    },
+    {
+      "existing_function": {
+        "line": 215,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "run_function": {
+        "line": 174,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "run_function": {
+        "line": 215,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "window_line": 226
+    },
+    {
+      "existing_function": {
+        "line": 174,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "run_function": {
+        "line": 215,
+        "name": "check",
+        "path": "tests/discovery/test_code_ingest_claim_once.py"
+      },
+      "window_line": 215
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "8d820383273ca21af189db021071e0068c98b9a5",
+    "dc2a4896a0b550b17f740acbe482cec38e9ee30b",
+    "49a91f19e6c8cf4c0b063af9e3cb095bcc5d299e",
+    "16cded4a2800e066adc90a8c890a75181cc47ec5",
+    "b1a13fdba01b969448b49f599ce9155a4f38b755",
+    "e5daecb1e53d6e301d139028608a8b6c9b090592"
+  ],
+  "completed_at": "2026-10-08T14:19:12Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T13:40:52Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "imas_codex/discovery/base/claims.py",
+    "claims.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_ingest_claim_once.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_claims_prefix_scope.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_relevance.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_facet_admission.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_code_ingest_settles.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once/tests/discovery/test_claims_honour_exclusions.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/final-test.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.873,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.1603347696103206,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T08:34:28Z, which is after this node's 2700s horizon ending 2026-10-08T14:25:36.477068+00:00",
+    "horizon_ends_at": "2026-10-08T14:25:36.477068+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-08T13:40:35Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T08:34:28Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 488063,
+    "state": "quiet",
+    "utilisation_pct": 61.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T13:40:35Z",
+    "read_at": "2026-10-08T13:40:36Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 61.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T14:19:12Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/manifest.md",
+  "member": "disposable-r-20261008T134034354652-code-ingest-claim-once",
+  "negative_control": {
+    "added_failure_ids": [
+      "imas_codex.discovery.code.workers:workers.py:1416",
+      "tests/discovery/test_code_ingest_claim_once.py::test_ingested_file_does_not_invalidate_remaining_claim"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "imas_codex.discovery.code.workers:workers.py:1416",
+      "tests/discovery/test_code_ingest_claim_once.py::test_ingested_file_does_not_invalidate_remaining_claim"
+    ],
+    "declaration": "restore the original claim behaviour; the two-concurrent-claims test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/terminal-status-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/terminal-status-negative-control.log",
+    "test_paths": [
+      "tests/discovery/test_code_ingest_claim_once.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "code-ingest-claim-once",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1388,
+          "cached_input_tokens": 824169,
+          "input_tokens": 825559,
+          "output_tokens": 1971,
+          "reasoning_output_tokens": 240,
+          "total_tokens": 827530,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "the fragment names the cause of 62 ingested events for 46 files in the retry-failed pass, a test running two concurrent ingestion claims over one batch shows each file claimed exactly once, and a claim held past its timeout is not re-ingested while its holder still works",
+    "estimated_hours": null,
+    "goal": "ingest each scored code file once per pass under concurrent workers",
+    "id": "code-ingest-claim-once",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T13:40:35Z",
+      "read_at": "2026-10-08T13:40:36Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 61.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/manifest.md",
+    "negative_control": "restore the original claim behaviour; the two-concurrent-claims test must fail",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§41",
+    "spec_level": "guided",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/code/workers.py",
+      "tests/discovery/test_code_ingest_claim_once.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/code-ingest-claim-once.html",
+      "docs/figures/jt60sa-discovery-completion/code-ingest-claim-once"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.1601928736557467,
+      "derived": 0.21232881245750665,
+      "drain_hours": 168.0,
+      "effective_limit": 0.21232881245750665,
+      "elapsed_fraction": 0.19302619314318784,
+      "elapsed_hours": 32.428400448055555,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T13:40:41+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.39,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.61,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.662338,
+      "decided_by": "window",
+      "margin": 0.07516200000000006,
+      "name": "code-ingest-claim-once",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.61
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.241613,
+        "observed_at": "2026-10-08T13:40:41+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.61,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "code-ingest-claim-once",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T13:40:41.241613+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.626,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.873,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "e5daecb1e53d6e301d139028608a8b6c9b090592",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f90e2e0512d58b7d32565a4955fbc8bf7ef7a17b",
+    "reviewed_head_sha": "e5daecb1e53d6e301d139028608a8b6c9b090592",
+    "scores": {
+      "durability": 16,
+      "evidence": 15,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 17,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 103
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T134034354652-code-ingest-claim-once",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§41",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a11bbe-ef77-7811-ae02-4477b5cb3c62",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 4,
+  "throughput": {
+    "cumulative_cached_input_tokens": 38449920,
+    "cumulative_input_tokens": 77174221,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 110249
+  },
+  "time_budget": "45m",
+  "tool_steps": 164.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 7351,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Two scoped EDAS scan attempts failed after different fixes (JSON date serialization; then remote enumerator exit 255); satisfying the node's mandatory stop rule. The scanner failures prevented UDDB and LCDB route persistence; so the drain was not started.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 10951,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T10:49:27Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T10:38:12Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 374,
+          "worker_pid": 896860
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Two scoped EDAS scan attempts failed after different fixes (JSON date serialization; then remote enumerator exit 255); satisfying the node's mandatory stop rule. The scanner failures prevented UDDB and LCDB route persistence; so the drain was not started.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T10:49:27Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 10272,
+        "log_fresh": false,
+        "manifest_commits": [
+          "c928f987d158ae4e1753a0cb76c51bf6f00b618d",
+          "2a9eb46f6ae6d567b6fca14b278b6ff618e159a7"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "34f7d43b222d1fe9775e4ade58cee9d1677cb241c900a1ae3b58522eaaf4a733",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md; resolve the blocker before resuming the run",
+        "node": "jt60sa-signals-stage",
+        "phase": "blocked",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+        "session": "jt60sa-20261005",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+          "session_id": "01a11ae0-77a0-78c3-bbee-f6de1ebd463c",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 10295,
+        "terminal_at": "2026-10-08T10:49:02Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/jt60sa-signals-stage"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 6327,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 9927,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T11:12:01Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T10:55:15Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T105454879301-edas-scan-repair",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 399,
+          "worker_pid": 1123570
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T11:12:01Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 8924,
+        "log_fresh": false,
+        "manifest_commits": [
+          "a4848492cac2d1a53c47acc4523c41ca553ac366",
+          "835784127d1f7c45745ae5918f03180503f07446"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "434f9c1b68fed5b64d0daedca5eef9e651e5012fdd10bebe3a4c9aa004d9e9f1",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --plan jt60sa-discovery-completion --section '§55' --role review --spec-level exact --node review-of-edas-scan-repair --goal 'attach an independent review to run r-20261008T105454879301-edas-scan-repair' --done-when 'the review for r-20261008T105454879301-edas-scan-repair stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T105454879301-edas-scan-repair.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T105454879301-edas-scan-repair.at-835784127d1f7c45745ae5918f03180503f07446.json --time-budget 60m --session jt60sa-20261005 --allow-unreconciled-runs --local",
+        "node": "edas-scan-repair",
+        "phase": "complete",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T105454879301-edas-scan-repair",
+        "session": "jt60sa-20261005",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 8963,
+        "terminal_at": "2026-10-08T11:11:14Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/edas-scan-repair"
+      }
+    ]
+  },
+  "wall_seconds": 2300,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T14:19:16Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T14:07:06Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T134034354652-code-ingest-claim-once",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 638,
+    "worker_pid": 3055659
+  },
+  "worker_seconds": 2300,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
