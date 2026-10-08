@@ -25,8 +25,8 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="37">
-<meta name="plan-modified" content="2026-10-07">
+<meta name="plan-version" content="38">
+<meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
   <main class="plan-doc">
@@ -302,6 +302,50 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s3-judgment-mypy" data-who="reckon-build" data-when="2026-10-07T11:55:00Z">
     <div class="r-comment-body"><p>The return annotation of <code>rerank_pool</code> now matches its triple (merge 55fda9a10). One mypy finding remains in <code>imas_codex/discovery/base/judgment.py</code>. The sort key <code>lambda index: (-scores[index], index)</code> applies unary minus to <code>float | None</code>. It is safe at runtime, because the generator drops the unscored entries first. The node that builds the judge function in this file narrows it to a local <code>float</code> list of scored entries and adds <code>mypy imas_codex/discovery/base/judgment.py</code> to its gate.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261008-s3-critical" data-who="lead" data-when="2026-10-08T02:25:00Z">
+    <div class="r-comment-body"><p>Lead, 2026-10-08: critical path. §4's path judgments run through this judge function, and JT-60SA code discovery waits on both. Dispatch on the codex lane.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261008-s4-design" data-who="lead" data-when="2026-10-08T02:25:00Z">
+    <div class="r-comment-body">
+<p><strong>Lead, 2026-10-08: this is critical-path work.</strong> JT-60SA code discovery now waits on it.
+The lead lifted the <code>/home</code> exclusion and asked for every scan to be rescored with Jev, because core
+applications may live in home directories that the language-model path scores never admitted. Of
+7,667 JT-60SA <code>/home</code> path rows, 3,391 are scored and 1,660 triaged, all by the language model. On
+the old server 230 of 256 homes returned permission denied. On nakasvr26 19 of 147 homes are readable
+(measured 2026-10-08).</p>
+<p><strong>Design (lead): a categorisation plus a score per schema feature.</strong> Each path is one Jev
+request over the state the path scorer already builds: path, depth, directory statistics, child names,
+README, git and Makefile flags, and pattern-match counts. The facility's <code>data_access_patterns</code> are
+injected, as the code arm does. The request carries:</p>
+<ul>
+<li><code>path_purpose</code>, a Choice over the <code>PathPurpose</code> permissible values in
+<code>imas_codex/schemas/facility.yaml</code>, with option text taken from the schema descriptions. The
+duplicate <code>empty</code> alias folds into <code>empty_directory</code>, and an <code>other</code> option is
+added.</li>
+<li>One Score per FacilityPath score field, judged against that field's schema description:
+<code>score_modeling_code</code>, <code>score_analysis_code</code>, <code>score_operations_code</code>,
+<code>score_modeling_data</code>, <code>score_experimental_data</code>, <code>score_data_access</code>,
+<code>score_workflow</code>, <code>score_visualization</code>, <code>score_documentation</code>,
+<code>score_imas</code> and <code>score_convention</code>. Levels describe concrete directory situations,
+never degrees. Each stored value is the Score's position divided by its top level, with its probabilities and
+confidence stored beside it, as the code facets do.</li>
+<li>One Noul, whether this directory's children are worth listing. It drives expansion for containers,
+whose value lies in their children rather than their own content.</li>
+</ul>
+<p>Gates are code, composed from those answers, and the 0.9 composite threshold retires. A directory is
+scanned for code when any discovery-relevant score clears its threshold. Every operating point is calibrated
+on the labelled set. The discovery goal is broad: diagnostic, plant, commissioning and reconstruction data
+and code, not equilibrium alone. The question and state builders live in
+<code>imas_codex/discovery/paths/scorer.py</code>, the path judgment owner, and run through §3's judge
+function.</p>
+<p><strong>Prototype scope.</strong> The Jev spend authorization covers JT-60SA only, so the labelled sample is
+at least 120 JT-60SA paths spanning <code>/analysis</code>, <code>/home</code> and <code>/work</code>. It must
+include the known misses <code>getseldata_v4.2</code>, <code>SAeqfame</code>, <code>eqdbms</code> and
+<code>client_eqdbms</code>, and the home trees the language model scored high but no scan ever listed. The
+prototype measures AUC and operating points against the current composite. It adds the builders without wiring
+them, so path discovery's behaviour does not change until the deploy node.</p>
+</div>
 </div>
 </section>
 </main>
