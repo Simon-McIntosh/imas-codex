@@ -200,6 +200,21 @@ class TestTwikiMarkupToHtml:
         # Should have at least 3 <p><b> blocks
         assert html.count("<b>") >= 3
 
+    def test_form_values_survive_scoring_preview(self):
+        """A filled report form must reach the text presented to the judge."""
+        from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
+        from imas_codex.discovery.wiki.prefetch import extract_text_from_html
+
+        raw = (
+            '%META:FORM{name="SystemDailyReportForm"}%\n'
+            '%META:FIELD{name="Date" title="Date" value="2024-01-15"}%\n'
+            '%META:FIELD{name="Comment" title="Comment" value="coil current check"}%\n'
+        )
+        preview = extract_text_from_html(twiki_markup_to_html(raw), max_chars=1500)
+        assert "2024-01-15" in preview
+        assert "coil current check" in preview
+        assert "SystemDailyReportForm" not in preview
+
     def test_headings(self):
         """TWiki headings should convert to HTML headings."""
         from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
