@@ -5,7 +5,6 @@ from __future__ import annotations
 import importlib
 import time
 from dataclasses import dataclass, fields
-from pathlib import Path
 
 import click
 
@@ -226,6 +225,8 @@ def _domains(items: tuple[str, ...]) -> tuple[str, ...]:
 def _validate_options(options: SequenceOptions) -> None:
     if options.scan_only and options.flush:
         raise click.UsageError("--scan-only and --flush are mutually exclusive")
+    if options.focus and len(options.only) != 1:
+        raise click.UsageError("--focus requires exactly one --only domain")
     if options.reset_to and (len(options.only) != 1 or options.skip):
         raise click.UsageError(
             "--reset-to requires exactly one --only domain and no --skip"
@@ -457,20 +458,11 @@ def run_mapping_stage(
     facility: str, options: SequenceOptions, cost: float, minutes: int | None
 ):
     """Call the existing mapping pipeline with the sequence's remaining limits."""
+    from imas_codex.cli.discover.common import resolve_focus_items
     from imas_codex.cli.map import map_run
     from imas_codex.ids import workers
 
-    focus = []
-    for item in options.focus:
-        path = Path(item)
-        if path.is_file():
-            focus.extend(
-                line.strip()
-                for line in path.read_text().splitlines()
-                if line.strip() and not line.lstrip().startswith("#")
-            )
-        else:
-            focus.append(item)
+    focus = resolve_focus_items(options.focus)
     ids_names = options.ids
     domains = options.physics_domain
     if focus:
