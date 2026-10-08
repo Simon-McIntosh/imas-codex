@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs and confirmed with clean arms at the reviewed revisions. The reviewed run's own logs: gate.log at ad49d924+working (502 passed, 0 failed, EXIT=0) and gate-head.log at 7ff7bf80 (503 passed, 0 failed, EXIT=0). My independent clean arms: base_suite ad49d924d10ce972975339230f51bd72ccd93e62, command 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261008T064515993215-review-of-focus-candidates/scratch/base uv run --no-sync pytest tests/cli/test_discover_candidates_stage.py tests/cli/test_discover_map.py tests/ids -p no:cacheprovider', completed, failure_count 0; after_suite 7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e, command 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261008T064515993215-review-of-focus-candidates/scratch/scratch-head uv run --no-sync pytest tests/cli/test_discover_candidates_focus.py tests/cli/test_discover_candidates_stage.py tests/cli/test_discover_map.py tests/ids -p no:cacheprovider', completed, failure_count 0; after minus base is 0 added failures.",
+  "backend": "local",
+  "base_log_revision": "ad49d924d10ce972975339230f51bd72ccd93e62",
+  "completed_at": "2026-10-08T07:03:54.008Z",
+  "dispatched_at": "2026-10-08T06:45:31Z",
+  "findings": [
+    {
+      "file": "tests/cli/test_discover_candidates_stage.py",
+      "line": "114",
+      "severity": "follow-on",
+      "text": "follow-on: removing the candidates-stage --focus refusal left this pre-existing test passing for the wrong reason and now dependent on a live graph. The test still asserts that run_candidates_stage(FACILITY, CandidatesStageOptions(focus=('equilibrium',))) raises a UsageError carrying '--focus' and 'item filter', but the refusal is gone: the focused id now flows to _validate_focus, which opens a real GraphClient (the stage_env fixture mocks neither the graph nor _validate_focus) and raises 'unknown SignalSource id(s): equilibrium', whose wording happens to satisfy both assertions. I confirmed the test rests on that new wording: stripping '--focus item filter' from the unknown-id message in a scratch probe fails this test (EXIT=1, stale-test-probe.log). The module docstring at lines 6-7 ('--focus is refused because the claim query takes no item filter yet') is stale in the same way. The file is outside the reviewed node's write scope; the reviewed manifest records it as its follow_on."
+    },
+    {
+      "file": "imas_codex/cli/discover/map.py",
+      "line": "275",
+      "severity": "follow-on",
+      "text": "follow-on: the focused pending-work filter is untested. has_pending_candidate_work now takes focus_ids and run_candidate_engine threads state.focus_ids into set_has_work_fn, but the new test replaces the engine with a stub that only calls claim_sources_for_candidates, so nothing exercises the focused pending check (a run could stop early, or never stop, for a focused id set without any test noticing); the manifest-not-found and invalid-manifest branches of _resolve_focus are likewise uncovered. An added test over has_pending_candidate_work with and without focus_ids would pin the remaining surface."
+    },
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/focus-candidates.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's orientation_write_paths declares focus-candidates.html and a figures dir docs/figures/facility-discovery-sequence/focus-candidates, but neither was produced (the fragment directory holds only discover-cli-surface-census.html and the fold-* fragments, and the figures dir holds only stage-graph.svg); the node's evidence lives only in its manifest, so a later reader of the plan has no fragment for this node. The plan's section-7 node spec does not require a fragment here, so this is a record-keeping shortfall."
+    },
+    {
+      "file": "imas_codex/cli/discover/map.py",
+      "line": "120",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest declares no baseline_suite/after_suite, and its own base arm gate.log is labelled 'ad49d924+working' with 502 passed, so the node's logs do not by themselves yield a clean added-failure count. This review supplies the missing arms at the reviewed revisions (base ad49d924 499 passed EXIT=0 over the pre-existing targets; head 7ff7bf80 503 passed EXIT=0 including the new file), so 0 added failures."
+    }
+  ],
+  "head_log_revision": "7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e",
+  "item_verdicts": {
+    "call_sites": "claim_sources_for_candidates has one production caller, candidate_worker in the same module (workers.py:1191); has_pending_candidate_work has one production caller, run_candidate_engine's set_has_work_fn (workers.py:1450); _resolve_focus and _validate_focus are used only by run_candidates_stage (map.py:120-122); the --focus click option is registered only on discover map (map.py:275). No other caller of the changed signatures exists in the tree.",
+    "diff": "read against ad49d924: workers.py gains a focus_ids field on CandidateDiscoveryState and a focus_ids parameter on claim_sources_for_candidates and has_pending_candidate_work, both appending 'AND n.id IN $focus_ids' with a SignalSource-label claim only, and candidate_worker/run_candidate_engine thread state.focus_ids through; the context_worker/validate_worker body edits in the same diff are comment rewrites from the second commit. map.py drops the explicit refusal and adds _resolve_focus, _validate_focus, the --focus multiple option and the focus_ids pass-through to CandidateDiscoveryState.",
+    "done_when": "tests/cli/test_discover_candidates_focus.py proves each of the three behaviours: test_named_sources_are_the_only_claims shows a run focused on source-a claims only ['source-a'] and judges 1 source (line 76), test_manifest_produces_the_same_claims writes a 'sources:' YAML manifest and asserts the same claim list ['source-a'] (line 87), and test_unknown_source_is_refused_by_name asserts click.UsageError matching 'missing-source' with no claim made (line 96); test_map_command_passes_focus_to_the_stage pins the click option forwarding. The plan's write paths (imas_codex/ids/workers.py, imas_codex/cli/discover/map.py, tests/cli/test_discover_candidates_focus.py) match the diff exactly.",
+    "goal": "the plan's focus-candidates node is to make the candidates domain honour --focus by SignalSource id in claim_sources_for_candidates in imas_codex/ids/workers.py (plan facility-discovery-sequence section 7), with done-when of a focused run claiming only the named items, a manifest naming the same items producing the same run, and an unknown item refused with its name; workers.py:296 now takes focus_ids and workers.py:307 builds the predicate fragment 'AND n.id IN $focus_ids', workers.py:501 threads the same filter through has_pending_candidate_work, and imas_codex/cli/discover/map.py:60 _resolve_focus expands ids-or-manifest.yaml into one ordered id list while map.py:93 _validate_focus refuses unknown names before any claim.",
+    "manifest": "read; it declares status complete, two commits (bddacbf94117c74216650213ec0301841d974735 feature and 7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e source-comment cleanup), three changed_paths, a committed-head gate '503 passed, 5 skipped, 3 deselected' EXIT=0 at 7ff7bf80, and a negative_control_log at EXIT=1. It omits baseline_suite and after_suite entirely, so the added-failure count cannot be read from the reviewed manifest; the reviewed run's own gate logs (gate.log at ad49d924+working 502 passed, gate-head.log at 7ff7bf80 503 passed) both carry EXIT=0 and zero failures.",
+    "write_paths": "the reviewed manifest declares the three source/test files; git diff --stat ad49d924d10ce972975339230f51bd72ccd93e62..7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e touches exactly imas_codex/cli/discover/map.py (+82/-... ), imas_codex/ids/workers.py, and tests/cli/test_discover_candidates_focus.py (new, 115 lines), 3 files changed, 215 insertions, 22 deletions, nothing else."
+  },
+  "justifications": {
+    "durability": "the guard fires and I reproduced it independently: dropping the id filter (mutating workers.py:307 so focus_filter is always empty) fails tests/cli/test_discover_candidates_focus.py::test_named_sources_are_the_only_claims (the reproduced mutation run recorded '1 failed' EXIT=1 against a clean head arm that passes the same test (my negative-control-independent.log), and the reviewed run's own negative-control.log records the identical red. The new test also asserts the predicate is well formed ('$domainsAND' not in the predicate), pinning the f-string concatenation of the domain and focus fragments.",
+    "evidence": "I confirmed both of the reviewed run's own gate logs and reproduced the gate independently in scratch trees of the reviewed base and head (git archive of each revision under the run's scratch dir, generated models copied and .env linked, module imported from the scratch tree): base ad49d924 ran tests/cli/test_discover_candidates_stage.py tests/cli/test_discover_map.py tests/ids to '499 passed, 5 skipped, 3 deselected' EXIT=0, and head 7ff7bf80 ran the same plus the new tests/cli/test_discover_candidates_focus.py to '503 passed, 5 skipped, 3 deselected' EXIT=0; the +4 passed difference is the four new tests. The shortfall is on the record, not the code: the reviewed manifest declares no baseline_suite/after_suite, its own base arm (gate.log) is labelled 'ad49d924+working' so it carries the change in flight (502 passed), and only gate-head.log names the clean head revision. The negative control is genuine and I reproduced it.",
+    "fit": "the added symbols focus_ids, _resolve_focus and _validate_focus are named by what they do with no plan label or section number, and map.py follows the sibling discover fold idiom (CandidatesStageOptions plus run_candidates_stage plus a thin click wrapper). The fit shortfall is that removing the stage's --focus refusal left the pre-existing tests/cli/test_discover_candidates_stage.py::test_focus_is_refused_with_a_mechanism_message and that module's docstring assert a refusal that no longer exists in the code; the reviewed manifest flags the test as a follow-on and it is outside the node's write scope, but the node's own change is what made it stale.",
+    "goal_fidelity": "all four done-when behaviours and the plan's named write paths are present and named by mechanism: the claim predicate is filtered by n.id, the pending-work re-check carries the same focus so the worker stops when only focused sources remain unjudged, a YAML manifest is expanded into the same id list, and an unknown id is refused by name from _validate_focus before any claim. The shortfall is that the node's own orientation_write_paths declared a per-node evidence fragment (docs/evidence/fragments/facility-discovery-sequence/focus-candidates.html) and a figures dir (docs/figures/facility-discovery-sequence/focus-candidates) and neither was produced; the plan's section-7 node spec does not require a fragment for this node, so this is a small evidence omission, not a goal miss.",
+    "reuse": "the change reuses claim_batch's existing status_predicate/status_params plumbing and the _domain_filter pattern, and the manifest reader it adds is a small domain-specific one (ids-or-manifest); a search of imas_codex/cli/discover found no earlier owner of a candidates focus filter. imas_codex/standard_names/sources_manifest.py already exposes load_focus_file/expand_focus_tokens, but those dispatch on a 'kind' discriminator and validate against the standard-name schemas, so they are not reusable for a SignalSource-id manifest; the three sibling section-7 focus nodes will each grow their own reader, which is the one reuse smell here.",
+    "scope_discipline": "git diff --stat ad49d924d10ce972975339230f51bd72ccd93e62..7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e touches only imas_codex/ids/workers.py, imas_codex/cli/discover/map.py and tests/cli/test_discover_candidates_focus.py, all inside the declared write paths, with no pyproject/lock change, no edit to the discover CLI registration, and no unrelated file; the declared fragment and figures dir were not produced, which is an evidence shortfall rather than scope creep."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: workers.py:296 claim_sources_for_candidates takes focus_ids and workers.py:307 filters 'AND n.id IN $focus_ids'; has_pending_candidate_work filters the same; map.py:60 _resolve_focus expands ids or a 'sources:' manifest and map.py:93 _validate_focus refuses unknown names.\nVERDICT done_when: tests/cli/test_discover_candidates_focus.py proves focused-only claims, manifest-same-claim, and unknown-refused-by-name; the map click option forwarding is pinned.\nVERDICT write_paths: git diff ad49d924..7ff7bf80 touches workers.py, map.py, tests/cli/test_discover_candidates_focus.py only, 3 files, +215/-22.\nVERDICT manifest: 503 passed EXIT=0 at 7ff7bf80; no baseline_suite/after_suite; base arm labelled ad49d924+working.\nVERDICT diff: read against ad49d924; focus_ids threading plus a manifest reader and the removed refusal.\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 19\nSCORE durability: 19\nSCORE fit: 18\nSCORE reuse: 18\nFINDING the pre-existing stage test test_focus_is_refused_with_a_mechanism_message now passes on the new unknown-id message and needs a live graph (probe reproduced EXIT=1 when the wording is stripped)\nFINDING has_pending_candidate_work focus gating and the _resolve_focus error branches are untested\nFINDING the declared fragment focus-candidates.html and figures dir were not produced\nFINDING the reviewed manifest omits baseline_suite/after_suite and the reviewed base arm ran +working; arms at the reviewed revisions show 0 added failures\n",
+  "review_run_id": "r-20261008T064515993215-review-of-focus-candidates",
+  "reviewed_base_sha": "ad49d924d10ce972975339230f51bd72ccd93e62",
+  "reviewed_head_sha": "7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e",
+  "reviewed_run_id": "r-20261008T061140828099-focus-candidates",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:58:13.788669084Z",
+  "total": 108,
+  "verdict": "SOUND WITH FINDINGS"
+}
