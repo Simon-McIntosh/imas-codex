@@ -111,20 +111,34 @@ def test_stage_options_reach_the_engine_state(stage_env, engine_calls):
     assert state.deadline is not None
 
 
-def test_focus_is_refused_with_a_mechanism_message(stage_env):
-    """--focus is refused, never ignored silently, naming the missing capability.
+def test_focus_accepts_known_ids_and_refuses_unknown_ids(
+    stage_env, engine_calls, monkeypatch
+):
+    """Validate the item scope through a stub graph before running the worker."""
 
-    The message states the mechanism (the claim query takes no item filter)
-    rather than pointing at a plan or section number, which would rot.
-    """
-    with pytest.raises(click.UsageError) as excinfo:
-        run_candidates_stage(FACILITY, CandidatesStageOptions(focus=("equilibrium",)))
+    class Graph:
+        def __enter__(self):
+            return self
 
-    message = str(excinfo.value)
-    assert "--focus" in message
-    assert "item filter" in message
-    assert "facility-discovery-sequence" not in message
-    assert "section" not in message.lower()
+        def __exit__(self, *args):
+            return False
+
+        def query(self, cypher, **params):
+            assert "SignalSource" in cypher
+            assert params["facility"] == FACILITY
+            return [{"id": item} for item in params["ids"] if item == "source-a"]
+
+    monkeypatch.setattr("imas_codex.graph.GraphClient", Graph)
+
+    run_candidates_stage(FACILITY, CandidatesStageOptions(focus=("source-a",)))
+    assert len(engine_calls) == 1
+    assert engine_calls[0].focus_ids == ["source-a"]
+
+    with pytest.raises(click.UsageError, match="missing-source"):
+        run_candidates_stage(
+            FACILITY, CandidatesStageOptions(focus=("source-a", "missing-source"))
+        )
+    assert len(engine_calls) == 1
 
 
 def test_topic_is_carried_to_the_stage(stage_env, engine_calls, caplog):

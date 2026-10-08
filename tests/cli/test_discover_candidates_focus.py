@@ -2,12 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import click
 import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.discover import discover
 from imas_codex.cli.discover.map import CandidatesStageOptions, run_candidates_stage
+from imas_codex.ids.workers import (
+    CandidateDiscoveryState,
+    has_pending_candidate_work,
+    run_candidate_engine,
+)
 
 FACILITY = "jet"
 SOURCES = ({"id": "source-a"}, {"id": "source-b"})
@@ -113,3 +120,56 @@ def test_map_command_passes_focus_to_the_stage(monkeypatch):
 
     assert result.exit_code == 0, result.output
     assert received == [(FACILITY, ("source-a", "source-b"))]
+
+
+def test_pending_work_ignores_unfocused_sources(monkeypatch):
+    unjudged = {"source-a": True, "source-b": True}
+
+    def fake_has_pending(label, **kwargs):
+        assert label == "SignalSource"
+        assert kwargs["facility"] == FACILITY
+        predicate = kwargs["status_predicate"]
+        assert "candidate_route IS NULL" in predicate
+        if "n.id IN $focus_ids" in predicate:
+            ids = kwargs["status_params"]["focus_ids"]
+        else:
+            ids = unjudged
+        return any(unjudged[source_id] for source_id in ids)
+
+    monkeypatch.setattr("imas_codex.ids.workers.has_pending", fake_has_pending)
+
+    assert has_pending_candidate_work(FACILITY, focus_ids=["source-a"])
+    unjudged["source-a"] = False
+    assert not has_pending_candidate_work(FACILITY, focus_ids=["source-a"])
+    assert unjudged["source-b"]
+
+
+def test_candidate_engine_uses_focused_pending_check(monkeypatch):
+    unjudged = {"source-a": True, "source-b": True}
+    done = []
+
+    def fake_has_pending(label, **kwargs):
+        if "n.id IN $focus_ids" in kwargs["status_predicate"]:
+            ids = kwargs["status_params"]["focus_ids"]
+        else:
+            ids = unjudged
+        return any(unjudged[source_id] for source_id in ids)
+
+    async def fake_supervisor(state, workers, **kwargs):
+        phase = state.candidate_phase
+        for _ in range(3):
+            phase.record_idle()
+        phase.refresh_has_work()
+        done.append(phase.done)
+        unjudged["source-a"] = False
+        phase.refresh_has_work()
+        done.append(phase.done)
+
+    monkeypatch.setattr("imas_codex.ids.workers.has_pending", fake_has_pending)
+    monkeypatch.setattr("imas_codex.ids.workers.run_discovery_engine", fake_supervisor)
+
+    state = CandidateDiscoveryState(facility=FACILITY, focus_ids=["source-a"])
+    asyncio.run(run_candidate_engine(state))
+
+    assert done == [False, True]
+    assert unjudged["source-b"]
