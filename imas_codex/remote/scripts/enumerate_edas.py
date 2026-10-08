@@ -61,7 +61,7 @@ PID_RECORD_RE = re.compile(
 def _uddb_header_value(header, key):
     """Read a quoted or bare header value without consuming the next key."""
     match = re.search(
-        rf"\b{re.escape(key)}[ \t]*=[ \t]*(?:\"([^\"]*)\"|'([^']*)'|([^\s]*))",
+        rf"\b{re.escape(key)}[ \t]*=(?:[ \t]*\"([^\"]*)\"|[ \t]*'([^']*)'|([^\s]*))",
         header,
     )
     return (
@@ -409,13 +409,17 @@ def _lcdb_file_metadata(path):
 def _lcdb_field_unit(name, metadata):
     """Apply an axis unit only to the data arrays on that axis."""
     field = name.upper()
+
+    def declared(value, key):
+        return ("" if value.strip().upper() == "DEBUG" else value), key
+
     for key in (f"{field}_UNIT", f"{field}UNIT"):
         if metadata.get(key):
-            return metadata[key], key
+            return declared(metadata[key], key)
     if re.match(r"^X(?:EXP|FIT)DATA", field) and metadata.get("XUNIT"):
-        return metadata["XUNIT"], "XUNIT"
+        return declared(metadata["XUNIT"], "XUNIT")
     if re.match(r"^Y(?:EXP|FIT)DATA", field) and metadata.get("YUNIT"):
-        return metadata["YUNIT"], "YUNIT"
+        return declared(metadata["YUNIT"], "YUNIT")
     return "", ""
 
 
@@ -492,6 +496,7 @@ def enumerate_lcdb(config):
                             "metadata_source": str(source_file),
                             "metadata_file_present": source_exists,
                             "unit_source_key": unit_key,
+                            "source_unit_value": metadata.get(unit_key, ""),
                         }
         except Exception:
             failures += 1

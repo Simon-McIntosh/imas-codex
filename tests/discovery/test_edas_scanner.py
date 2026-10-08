@@ -24,6 +24,8 @@ from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph.models import DataAccess, FacilitySignal, SignalDataClass
 from imas_codex.remote.scripts.check_edas import main as check_main
 from imas_codex.remote.scripts.enumerate_edas import (
+    _lcdb_field_unit,
+    _uddb_header_value,
     attempt_database,
     enumerate_lcdb,
     enumerate_mbdb,
@@ -364,6 +366,15 @@ async def test_scanner_access_methods_share_the_existing_persistence_writer():
 
 
 class TestConfiguredDatabases:
+    def test_blank_raw_unit_does_not_consume_the_next_header_key(self):
+        header = 'PID="2811UA001" NAME="P15 co-view" UNIT= STIME=0.000000'
+        assert _uddb_header_value(header, "UNIT") == ""
+
+    def test_analysis_debug_placeholder_is_not_a_physical_unit(self):
+        unit, source_key = _lcdb_field_unit("YFITDATA", {"YUNIT": "DEBUG"})
+        assert unit == ""
+        assert source_key == "YUNIT"
+
     def test_raw_check_reads_value_and_rejects_unknown_pid(self, monkeypatch, capsys):
         class ProcessedCatalogue:
             def __init__(self, path):
@@ -584,6 +595,7 @@ class TestConfiguredDatabases:
         rows, _ = enumerate_lcdb({"lcdb_root": str(tmp_path)})
         by_name = {row["data_name"]: row for row in rows}
         assert by_name["XEXPDATA"]["units"] == "m"
+        assert by_name["XEXPDATA"]["source_unit_value"] == "m"
         assert by_name["YFITDATA"]["units"] == "W"
         assert by_name["YFITDATA"]["description"] == "heat flux profile"
         assert by_name["XEXPINDEX"]["units"] == ""
