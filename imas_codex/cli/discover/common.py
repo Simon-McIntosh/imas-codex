@@ -345,6 +345,7 @@ def run_discovery(
             install_shutdown_handlers(stop_event=stop_event, display=display)
 
             async def _refresh_graph():
+                logged_errors: set[tuple[type[Exception], str]] = set()
                 while True:
                     try:
                         if not stop_event.is_set():
@@ -359,8 +360,11 @@ def run_discovery(
                                 )
                     except asyncio.CancelledError:
                         raise
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        error = (type(exc), str(exc))
+                        if error not in logged_errors:
+                            logged_errors.add(error)
+                            logger.warning("Graph progress refresh failed: %s", exc)
                     await asyncio.sleep(config.graph_refresh_interval)
 
             async def _tick():
