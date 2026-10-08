@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;done&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
-<meta name="plan-impl" content="0.737">
-<meta name="plan-version" content="82">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="83">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -177,28 +177,12 @@
   <p class="landed-summary">One builder supplies the pattern categories that path enrichment, the code scanner and file enrichment send to the remote matchers. It adds each facility's <code>key_tools</code> and <code>code_import_patterns</code> as escaped literals, one matching pass per directory or file batch, with no facility id in code. The path state and both code-triage arms carry the facility's own matches. A test over the four public facility configs fails when the facility sources are removed. On 158 labelled JT-60SA paths the scan gate scores AUC 0.850 without matches and 0.851 with them, inside run-to-run variation: only 21 labelled directories contain facility calls. Spend USD 0.061. Review 19/18/19/17/18/20. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/facility-access-matches.html">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s16">§16 — Declare what the path code writes, and retire reads of retired properties</h2>
-<section data-reckon="section" data-id="s16" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-<p><strong>Why.</strong> The lead asked on 2026-10-08 for the failures in the coordinator's merged-head gate to be
-fixed. Two of them are fallout from the §4 deploy, and both fail with <code>.env</code> linked (measured 2026-10-08 on
-<code>cb3b7e526</code>).</p>
-<ul>
-<li><code>tests/graph/test_cypher_property_check.py</code> fails on two undeclared writes:
-<code>FacilityPath.claim_token</code> in the judgment claim queries of <code>paths/scorer.py</code>, and
-<code>FacilityPath.score_reason</code> at <code>paths/parallel.py</code> around line 1090. It also fails on 27
-runtime adjudications for <code>triage_*</code> and <code>triage_composite</code> reads in <code>paths/frontier.py</code>
-that no longer match a source line. The adjudications in <code>imas_codex/graph/cypher_property_check.py</code> are keyed
-by line, so moved code orphans them.</li>
-<li><code>tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts</code> still expects
-<code>paths/scorer</code> and <code>paths/triage</code>, the prompts the deploy retired.</li>
-</ul>
-<p><strong>Deliverable.</strong> Declare in the schema every property the path code genuinely writes, and stop writing
-any that nothing reads. For each <code>triage_*</code> read in <code>frontier.py</code>, decide whether it still reads a
-value anything writes. A read of a retired property returns nothing, silently, so it is retired or moved to the
-judgment fields rather than re-adjudicated. Bring the prompt-coverage expectation in line with the prompts that still
-exist.</p>
-<p><strong>Done when</strong> both tests pass at the head. Re-adding an undeclared FacilityPath property write fails the
-property check. The fragment lists each <code>triage_*</code> read with its disposition.</p>
+<section data-reckon="section" data-id="s16" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The FacilityPath claim, triage, timestamp and scoring properties the path code writes are declared in the schema. The <code>triage_*</code> values are still written by <code>mark_paths_triaged</code> and the triage judgment, so their reads stay. 27 stale runtime adjudications are removed, and an undeclared FacilityPath <code>SET</code> now fails the property check. Prompt coverage expects only prompts that still exist, and the wiki document pending-ingest comparison is pinned. Review 18/16/18/17/18/18. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/path-property-declarations.html">full record</a></p>
+</section>
 
     <h2 id="s17">§17 — Correct the goldens, find the variation, and give every judge its graph neighbourhood</h2>
 <section data-reckon="section" data-id="s17" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -266,6 +250,19 @@ neighbourhood fields.</p>
 <section data-reckon="section" data-id="s20" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
   <p class="landed-summary">Location resolution propagates import and config-read errors, naming the location, and an unknown facility keeps its documented fallback. Closing the three handlers exposed nothing. Default-marker counts at base and head: tests/remote 89 to 94 passed (the new tests), tests/graph 582 passed with the same one pre-existing failure (the §16 property check), tests/discovery 1,425 passed. Restoring the broad handler fails the injected-ImportError test. Review 18/16/16/18/18/17. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/location-resolver-fail-closed.html">full record</a></p>
 </section>
+
+    <h2 id="s21">§21 — Key property adjudications on a stable identity, and delete the retired prompts</h2>
+<section data-reckon="section" data-id="s21" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> Two follow-ons from §16's review. First, §16 removed 27 runtime adjudications in
+<code>imas_codex/graph/cypher_property_check.py</code> that moved code had orphaned. The mechanism, entries keyed by
+source line, is unchanged, so the same staleness returns whenever the path code moves. Second, the prompts the Jev
+migration retired, <code>paths/scorer</code>, <code>paths/triage</code>, <code>wiki/scorer</code>,
+<code>wiki/document-scorer</code> and <code>wiki/image-captioner</code>, still exist as <code>.md</code> files under
+<code>imas_codex/llm/prompts</code>. Nothing reaches them except docstring examples in <code>prompt_loader.py</code>.</p>
+<p><strong>Done when</strong> each adjudication is keyed on a stable identity (file, label, property and the statement it
+sits in, not a line number), and a test shows that inserting lines above an adjudicated statement leaves it matched. The
+five orphaned prompt files are deleted, with the <code>prompt_loader.py</code> examples pointing at prompts that
+exist.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -610,7 +607,7 @@ fresh-description arm of the variation measure once the triage worker routes thr
     <div class="r-comment-body"><p>Location resolution propagates import and config-read errors with location context while unknown facilities retain their fallback; default-marker remote tests rose from 89 to 94 passes, graph stayed 582 passes and one pre-existing failure, discovery stayed 1425 passes; evidence at docs/evidence/fragments/discovery-judgments-through-jev/location-resolver-fail-closed.html#location-resolver-fail-closed.</p></div>
 </div>
 <div class="r-comment" data-section="s20" data-id="c-run-r-20261008T091218344998-review-of-location-resolver-fail-closed" data-who="reckon-build" data-when="2026-10-08T09:24:34.546Z">
-    <div class="r-comment-body"><p>Review of r-20261008T084954115009-location-resolver-fail-closed (plan section 20) verdict SOUND WITH FINDINGS; sections 20&#x27;s three swallowing handlers in imas_codex/remote/locations.py are narrowed, done-when behaviours are pinned by tests, and every arm reproduces independently. Two record findings: focused-head.log mislabels its revision as the base commit while exercising the uncommitted head, and a declared figures directory was not produced.</p></div>
+    <div class="r-comment-body"><p>Review of r-20261008T084954115009-location-resolver-fail-closed (plan section 20) verdict SOUND WITH FINDINGS; sections 20's three swallowing handlers in imas_codex/remote/locations.py are narrowed, done-when behaviours are pinned by tests, and every arm reproduces independently. Two record findings: focused-head.log mislabels its revision as the base commit while exercising the uncommitted head, and a declared figures directory was not produced.</p></div>
 </div>
 </section>
 </main>
