@@ -19,7 +19,9 @@ from imas_codex.remote.scripts.enrich_files import batch_pattern_counts
 
 
 @pytest.mark.parametrize("facility", sorted(list_facilities()))
-def test_facility_access_patterns_reach_path_and_code_states(facility: str) -> None:
+def test_facility_access_patterns_reach_path_and_code_states(
+    facility: str, tmp_path
+) -> None:
     config = get_facility(facility)
     access = config.get("data_access_patterns") or {}
     patterns = _build_enrich_patterns(facility)
@@ -39,10 +41,19 @@ def test_facility_access_patterns_reach_path_and_code_states(facility: str) -> N
         key in patterns and regex in patterns[key] for key, regex in expected.items()
     )
 
-    # The matched row models the counted output of either remote matcher.
-    key, regex = next(iter(expected.items()))
-    assert re.search(patterns[key], key.split(":", 1)[1])
-    counts = {key: 2}
+    key, _regex = next(iter(expected.items()))
+    literal = key.split(":", 1)[1]
+    assert re.search(patterns[key], literal)
+    if shutil.which("rg"):
+        source = tmp_path / "reader.py"
+        source.write_text(f"{literal}\n{literal}\n")
+        unmatched = tmp_path / "unmatched.py"
+        unmatched.write_text("zzzz_no_known_access_zzzz\n")
+        counts = batch_pattern_counts([str(source)], {key: patterns[key]})[str(source)]
+        assert batch_pattern_counts([str(unmatched)], {key: patterns[key]}) == {}
+    else:
+        counts = {key: 2}
+    assert counts == {key: 2}
     path_state = build_path_judgment_state(
         {"path": "/source", "pattern_categories": counts}, facility, config
     )
