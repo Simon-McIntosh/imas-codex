@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" font-family="system-ui, sans-serif" font-size="14">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+  </defs>
+  <g fill="#ffffff" stroke="#555" stroke-width="1">
+    <rect x="10" y="30" width="190" height="72" rx="4"/>
+    <rect x="690" y="30" width="200" height="72" rx="4"/>
+    <rect x="245" y="160" width="190" height="72" rx="4"/>
+  </g>
+  <g fill="#ffffff" stroke="#2b6cb0" stroke-width="1">
+    <rect x="350" y="30" width="200" height="72" rx="4"/>
+    <rect x="465" y="160" width="190" height="72" rx="4" stroke-dasharray="4 3"/>
+  </g>
+  <g stroke="#333" stroke-width="1.2" fill="none" marker-end="url(#arrow)">
+    <path d="M200,66 L348,66"/>
+    <path d="M550,66 L688,66"/>
+    <path d="M790,102 L790,196 L657,196"/>
+    <path d="M465,196 L437,196"/>
+    <path d="M245,196 L105,196 L105,104"/>
+  </g>
+  <g fill="#1a1a1a" text-anchor="middle">
+    <text x="105" y="56">conventions or map</text>
+    <text x="105" y="76" font-size="13">judges a source</text>
+    <text x="105" y="94" font-size="13">below threshold</text>
+    <text x="450" y="56" fill="#2b6cb0">SignalFollowup</text>
+    <text x="450" y="76" font-size="13">open question, stage,</text>
+    <text x="450" y="94" font-size="13">Jev distribution</text>
+    <text x="790" y="56">triage</text>
+    <text x="790" y="76" font-size="13">a person or agent reads</text>
+    <text x="790" y="94" font-size="13">context, searches, probes</text>
+    <text x="560" y="186" fill="#2b6cb0">attach evidence</text>
+    <text x="560" y="206" font-size="13">note, reference, declared</text>
+    <text x="560" y="224" font-size="13">value, or a shot to probe</text>
+    <text x="340" y="186">re-queue the source</text>
+    <text x="340" y="206" font-size="13">evidence leads the</text>
+    <text x="340" y="224" font-size="13">next judgment's state</text>
+  </g>
+</svg>

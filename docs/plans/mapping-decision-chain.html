@@ -18,14 +18,14 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-blocks" content="jt60sa-imas-maps">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;jt60sa-discovery-completion#s56&quot;], &quot;s7&quot;: [&quot;jt60sa-discovery-completion#s56&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;signal-cocos-conventions#s3&quot;], &quot;s7&quot;: [&quot;signal-cocos-conventions#s8&quot;], &quot;s8&quot;: [&quot;signal-cocos-conventions#s3&quot;]}">
   <meta name="plan-sprint" content="S17">
   <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
-<meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-version" content="15">
+<meta name="plan-modified" content="2026-10-09">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -85,23 +85,29 @@
     <h2 id="s4">§4 — Conventions settle what code can settle</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      A resolver runs before any model. It reads the source's conventions through the loader
-      <code>jt60sa-discovery-completion</code> §56 adds, planned as
-      <code>get_conventions(facility, source) -&gt; {cocos, psi_factor, quantities: {name: {sign, reference, evidence, confidence}}}</code>.
-      It reads the DD field's <code>cocos_transformation_type</code> and the DD's own COCOS. A COCOS-labelled field whose
-      source COCOS is known gets its sign and factor from <code>cocos_sign</code>. A quantity with a recorded per-quantity
-      sign, such as Ip or Bt direction relative to φ, a flux-loop or pickup-coil normal, or a loop-voltage sign, gets that
-      sign. Units come from pint when the source unit is known. An absent convention leaves its slot open: the loader
-      never defaults a value, and neither does the resolver. Each settled slot records the convention's evidence and
-      confidence beside its value, and the persisted conventions are injected into every later decision's state next to
-      the DD COCOS label, so a Jev decision starts from what is known.
+      A resolver runs before any model. It reads the source's convention from the graph, where
+      <code>signal-cocos-conventions</code> persists it on the <code>SignalSource</code>: its <code>cocos_class</code>,
+      its <code>cocos_survivors</code>, its <code>cocos</code> when the survivors are one convention, its confidence, and
+      its <code>HAS_GEOMETRY</code> sensor geometry. It reads the DD field's <code>cocos_transformation_type</code>,
+      resolved through the field's ancestors because the DD carries a label on a structure such as
+      <code>magnetics/ip</code> rather than on its data leaf, and the DD's own COCOS. A COCOS-labelled field gets its sign
+      and factor from <code>cocos_sign</code> in code when every surviving source convention gives the same factor for
+      that label: a psi_like field settles across survivors {3, 4}, while an ip_like field does not. A source whose class
+      is none, bound to a field with no label or a one_like label, has no COCOS slot; its open slots are unit and index,
+      and pint settles the unit from the source and target units. A per-member channel sign, such as a differential flux
+      loop's, multiplies into the sign slot. An absent or split convention leaves its slot open: the resolver never
+      defaults a value. Each settled slot records the convention's evidence and confidence beside its value, and the
+      persisted conventions are injected into every later decision's state next to the DD COCOS label, so a Jev decision
+      starts from what is known.
     </p>
     <p>
-      <strong>Node</strong> <code>mapping-slot-resolution</code>, role implement, 1.5 h, after §3 and the §56 loader. Write
-      paths: <code>imas_codex/ids/slot_resolution.py</code>, <code>tests/ids/test_slot_resolution.py</code> and its
-      fragment. <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with
-      tests showing a psi_like field with a known source COCOS settles sign and factor in code, a per-quantity sign
-      overrides nothing it should not, an absent convention leaves the slot open, and every settled slot carries its
+      <strong>Node</strong> <code>mapping-slot-resolution</code>, role implement, 1.5 h, after §3 and
+      <code>signal-cocos-conventions</code> §3. Write paths: <code>imas_codex/ids/slot_resolution.py</code>,
+      <code>tests/ids/test_slot_resolution.py</code> and its fragment. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests showing a psi_like field
+      settles sign and factor in code when the survivors are {3, 4}, an ip_like field with the same survivors stays open,
+      a label carried on a structure applies to its data leaf, a none source opens only unit and index slots, a channel
+      sign multiplies into the sign slot, an absent convention leaves the slot open, and every settled slot carries its
       evidence.
     </p>
 
@@ -111,7 +117,9 @@
       Each slot still open becomes one bounded Jev question. The options are the slot's own: 1 or −1 for a sign; 1, 2π or
       1/2π for a factor; the readings pint offers for an ambiguous unit; the candidate layouts for an index. The state is
       the source's detail, the target field's documentation and COCOS label, the injected conventions and the §6 context.
-      Independent slots of one binding go in one request, as Jev runs them in parallel. A slot is accepted when its
+      It also carries what retrieval and judgment already measured for this pair: the candidate's retrieval score and
+      Jev <code>p_same_quantity</code> from its <code>MAPPING_CANDIDATE</code> edge, the source's convention confidence,
+      and its sensor geometry. Independent slots of one binding go in one request, as Jev runs them in parallel. A slot is accepted when its
       answer clears an acceptance threshold. The graph holds no written binding to calibrate against, so the threshold
       starts conservative and the §7 proof calibrates it against the recorded conventions. Below it, the slot goes to escalation with Jev's
       distribution as evidence. A slot that is not a bounded choice, such as an unusual index expression, goes to the
@@ -140,7 +148,7 @@
 <section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Run <code>imas-codex discover jt-60sa --only mapping --limit N</code> on a bounded cohort of IDSs whose sources have
-      persisted conventions, once §4 to §6 and the §56 conventions have landed. The evidence fragment tabulates every
+      persisted conventions, once §4 to §6 and §8 have landed and the conventions stage has run on the cohort. The evidence fragment tabulates every
       slot by how it was settled (code, Jev, local, escalated), lists the escalations with their open slots, and compares
       the signs written against the conventions and against <code>cocos_sign</code>. This is the run that lets the
       <code>mapping-stage-default</code> decision be revisited.
@@ -152,20 +160,47 @@
       disagrees with its source's recorded convention.
     </p>
 
+    <h2 id="s8">§8 — Candidates match the source&#x27;s COCOS class</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>
+      The source's convention class is a strong filter on its targets. A source whose <code>cocos_class</code> is a DD
+      label, at a confidence above the conventions stage's threshold, keeps only candidates whose resolved DD label is the
+      same label: a confident psi_like flux loop is only ever bound to psi_like fields. A source whose class is none keeps
+      only candidates with no label or a one_like label. A source whose class is compound, below threshold, or not yet
+      judged is not filtered; its class enters the Jev pair judgment's state as a soft feature instead. Labels resolve
+      through a field's ancestors, as in §4. The filter runs before the pair judgment in
+      <code>imas_codex/ids/candidates.py</code>, so a filtered candidate costs no Jev call, and again where the assign
+      stage chooses homes, so a candidate written before the source's convention was settled cannot be chosen against
+      it. One-to-many is kept: the filter narrows each home's candidates and never chooses among homes. Each source
+      records how many candidates the filter removed, so a filter that removes a true home shows in the §7 proof rather
+      than silently.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-class-filter</code>, role implement, 2 h, after <code>signal-cocos-conventions</code>
+      §3 and §2. Write paths: <code>imas_codex/ids/candidates.py</code>, <code>imas_codex/ids/mapping.py</code> and
+      <code>tests/ids/test_candidate_class_filter.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests showing a confident psi_like
+      source keeping only psi_like candidates, one of them labelled through a structure ancestor; a none source dropping a
+      psi_like candidate and keeping a one_like one; a below-threshold source left unfiltered with its class in the
+      judgment state; the removed count recorded; and the assign stage refusing a filtered candidate. A check over
+      <code>tests/fixtures/conventions/reference_labels.json</code> shows no imas-ambix reference target removed.
+    </p>
+
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
-<div class="r-gate" data-id="g-mdc-1" data-section="s4" data-gated-sections="s4,s7" data-status="open" data-verdict="">
-    <h4 class="r-gate-measure">a loader returns each JT-60SA source&#x27;s persisted conventions, COCOS index, psi factor and per-quantity signs with evidence, leaving undetermined values absent</h4>
-    <p class="r-gate-required-evidence">jt60sa-discovery-completion#s56</p>
+<div class="r-gate" data-id="g-mdc-1" data-section="s7" data-gated-sections="s7" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the conventions stage has persisted each JT-60SA source&#x27;s class, COCOS survivors and confidence with evidence, leaving undetermined values absent, and its proof compares them with the imas-ambix machine map</h4>
+    <p class="r-gate-required-evidence">signal-cocos-conventions#s8</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mdc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-08" data-recommends-skill="/reckon-build mapping-decision-chain §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mdc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-08" data-recommends-skill="/reckon-build mapping-decision-chain §2" data-resolved-at="2026-10-08T23:44:28+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Measure the decisions inside today&#x27;s bindings</h4>
     <div class="r-fu-body">The census sets the slot kinds §3 models and the acceptance threshold §5 uses.</div>
     <pre class="r-fu-prompt">/reckon-build mapping-decision-chain §2</pre>
+    <p class="r-fu-outcome"><p>The census landed as §2 on 2026-10-08; the remaining work is §4, §5, §7 and §8, reached through <code>/reckon-build mapping-decision-chain</code>.</p></p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -190,6 +225,18 @@
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261008T111653010623-review-of-mapping-reranked-context" data-who="reckon-build" data-when="2026-10-08T11:26:56.346Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T110514422920-mapping-reranked-context at head 621527529: parsed review stored scoring all six dimensions (total 109, verdict SOUND WITH FINDINGS), base/head recorded, added_failure_count 0 over the reviewed run's own baseline_suite and after_suite.</p></div>
 </div>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="draft-binding-context" data-choice="" data-by="" data-when="" data-recommended="inject" data-recommended-by="coordinator">
+    <p class="r-dec-q">Do draft bindings of a source&#x27;s siblings enter later decisions&#x27; state?</p>
+    <p class="r-dec-ctx">A draft binding is a MAPS_TO_IMAS edge under an IMASMapping at status generated. Injecting the drafts of the same sensor family, such as a probe&#x27;s position already drafted to magnetics/b_field_pol_probe(i)/position, keeps a probe&#x27;s measurement and geometry on the same struct-array index and the family&#x27;s signs consistent.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="inject">Inject drafts, labelled as drafts</button>
+      <button class="r-opt" data-value="validated-only">Inject only validated bindings</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 </main>
 </body>

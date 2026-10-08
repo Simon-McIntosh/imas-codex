@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 370" font-family="system-ui, sans-serif" font-size="14">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+  </defs>
+  <g fill="#ffffff" stroke="#555" stroke-width="1">
+    <rect x="10" y="40" width="150" height="72" rx="4"/>
+    <rect x="790" y="40" width="160" height="72" rx="4"/>
+    <rect x="200" y="190" width="150" height="64" rx="4"/>
+    <rect x="790" y="190" width="160" height="72" rx="4"/>
+    <rect x="430" y="190" width="230" height="72" rx="4"/>
+    <rect x="790" y="300" width="160" height="56" rx="4" stroke-dasharray="4 3"/>
+  </g>
+  <g fill="#ffffff" stroke="#2b6cb0" stroke-width="1">
+    <rect x="200" y="40" width="150" height="72" rx="4"/>
+    <rect x="390" y="40" width="170" height="72" rx="4"/>
+    <rect x="600" y="40" width="150" height="72" rx="4"/>
+  </g>
+  <g stroke="#333" stroke-width="1.2" fill="none" marker-end="url(#arrow)">
+    <path d="M160,76 L198,76"/>
+    <path d="M350,76 L388,76"/>
+    <path d="M560,76 L598,76"/>
+    <path d="M750,76 L788,76"/>
+    <path d="M275,112 L275,188"/>
+    <path d="M870,112 L870,188"/>
+    <path d="M790,226 L662,226"/>
+    <path d="M350,222 L428,222"/>
+    <path d="M870,262 L870,298"/>
+  </g>
+  <g fill="#1a1a1a" text-anchor="middle">
+    <text x="85" y="66">enriched source</text>
+    <text x="85" y="86" font-size="13">description, unit,</text>
+    <text x="85" y="104" font-size="13">code, wiki, geometry</text>
+    <text x="275" y="66" fill="#2b6cb0">Jev noul</text>
+    <text x="275" y="86" font-size="13">does its sign or 2π</text>
+    <text x="275" y="104" font-size="13">depend on COCOS?</text>
+    <text x="475" y="66" fill="#2b6cb0">Jev choice</text>
+    <text x="475" y="86" font-size="13">transformation class</text>
+    <text x="475" y="104" font-size="13">options from DD exemplars</text>
+    <text x="675" y="66" fill="#2b6cb0">Jev choice</text>
+    <text x="675" y="86" font-size="13">writer: diagnostic,</text>
+    <text x="675" y="104" font-size="13">a named code, unknown</text>
+    <text x="870" y="66">code: facility probe</text>
+    <text x="870" y="86" font-size="13">signs at reference shots</text>
+    <text x="870" y="104" font-size="13">of both Ip polarities</text>
+    <text x="275" y="218">cocos: none</text>
+    <text x="275" y="238" font-size="13">unit path only</text>
+    <text x="870" y="216">code</text>
+    <text x="870" y="236" font-size="13">class factor unanimous</text>
+    <text x="870" y="254" font-size="13">across COCOS survivors?</text>
+    <text x="545" y="216">persist on SignalSource</text>
+    <text x="545" y="236" font-size="13">class, COCOS, survivors,</text>
+    <text x="545" y="254" font-size="13">confidence, evidence</text>
+    <text x="870" y="324">followup</text>
+    <text x="870" y="344" font-size="13">triage, attach, re-judge</text>
+  </g>
+  <g fill="#444" font-size="13">
+    <text x="360" y="68">yes</text>
+    <text x="283" y="156">no</text>
+    <text x="712" y="218">yes</text>
+    <text x="878" y="286">no</text>
+  </g>
+</svg>

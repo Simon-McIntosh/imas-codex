@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="signal-cocos-conventions">
+  <meta name="plan-title" content="Signal COCOS Conventions Before the Map">
+  <meta name="plan-summary" content="A conventions stage judges each signal's COCOS dependence and class with Jev, validates its convention against facility data, and persists both to the graph">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="22.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-blocks" content="jt60sa-imas-maps">
+  <meta name="plan-sprint" content="S17">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <title>Signal COCOS Conventions Before the Map | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — The convention is a property of the signal, settled before the map</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      The map stage writes a binding's sign and 2π factor from two facts: the target field's COCOS transformation class,
+      which the Data Dictionary (DD) declares on 553 IMASNodes, and the source's own convention, which nothing in the
+      graph declares today. Enrichment writes a free-text <code>sign_convention</code> (86 of 46,872 JET signals and 18 of
+      15,018 JT-60SA signals carry one) and <code>FacilitySignal.cocos</code> is set on 12 JT-60SA signals and no JET
+      signal. <code>mapping-decision-chain</code> §4 settles a slot in code only when the source's convention is known,
+      so without this plan every COCOS-labelled binding becomes an open slot that a model guesses.
+    </p>
+    <p>
+      This plan adds a <strong>conventions stage</strong> between signal enrichment and the candidate stage. It runs a
+      branching network of bounded decisions over each enriched <code>SignalSource</code>. Jev first answers whether the
+      quantity's sign or 2π normalisation depends on the coordinate convention at all. A convention-independent source is
+      recorded as <code>none</code>, and its binding later needs at most a unit translation. For a dependent source, Jev
+      chooses its transformation class among the DD's labels, from options templated with real DD exemplars of each
+      class, and chooses its writer: a raw diagnostic, a named reconstruction code, or unknown. Code then validates the
+      convention against facility data and persists the class, the COCOS survivors, the COCOS when it is unique, a
+      confidence and the evidence. The signal's values are never transformed here; the map applies one transform, once.
+      A result below the acceptance threshold is marked for followup, which <code>signal-evidence-followups</code> turns
+      into a triage loop.
+    </p>
+    <figure>
+      <img src="/imas-codex/figures/signal-cocos-conventions/convention-network.svg"
+           alt="An enriched source passes to a Jev noul on COCOS dependence; no leads to cocos none and the unit path; yes leads to a Jev choice of transformation class, a Jev choice of writer, a code probe of facility data at both Ip polarities, and a code check that the class factor is unanimous across COCOS survivors; yes persists on the SignalSource, no raises a followup">
+      <figcaption>
+        The conventions stage for one source. Blue boxes are Jev judgments asked in one request; grey boxes are code. Both
+        branches persist to the <code>SignalSource</code>; only a class factor that the surviving conventions disagree on,
+        or a confidence below threshold, raises a followup.
+      </figcaption>
+    </figure>
+    <p>
+      <strong>What data can and cannot settle.</strong> imas-ambix measured this on MAST in
+      <code>imas-ambix:machine-map-cocos-transform</code>, and the result bounds what this stage may claim. The sign of
+      σ<sub>Bp</sub> is measurable from raw magnetics: on 56 of 56 channel-shot relations a flux loop's response opposed
+      the measured plasma current. The 2π exponent e<sub>Bp</sub> needs an external declaration such as the units of ψ,
+      because array values cannot establish it. The handedness σ<sub>RφZ</sub> is not determinable from data at all: it is
+      how the facility defines positive φ, so it must be declared. A first verdict there picked COCOS 4 over 3 from the
+      point ordering of a reconstructed boundary, which is a serialisation choice, and was overturned; COCOS 3 and 4 both
+      survive the MAST data. Outputs of a reconstruction code carry the code's convention, not the machine's. A single
+      current polarity cannot separate a convention error from a current-sign error, so both polarities are required.
+    </p>
+    <p>
+      The map does not need the COCOS number, only the factor of the target's class. ψ's factor depends on
+      σ<sub>Bp</sub> and e<sub>Bp</sub> alone, so a psi_like binding is settled when the survivors are {3, 4}, while an
+      ip_like binding is not. This stage therefore persists the survivor set, and the map settles a slot in code exactly
+      when every survivor gives the same factor for that slot's class.
+    </p>
+    <p>
+      <strong>Oriented sensors carry their convention in their geometry.</strong> The DD labels a pickup coil's
+      <code>magnetics/b_field_pol_probe/field</code> one_like and its <code>poloidal_angle</code> pol_angle_like, so a
+      convention change rotates the probe's orientation rather than flipping the field. A flux loop's ψ sign also depends
+      on its orientation. imas-ambix's JT-60SA machine map settles such per-channel signs (its <code>channel_factor</code>)
+      from SELENE-deck geometry, loop-reference fits and vacuum-field predictions from coil currents. §6 puts that
+      geometry in the graph so these judgments and the map can read it.
+    </p>
+    <p>
+      The facility-level prior, the predominant COCOS and the declared machine orientation, comes from the conventions
+      block <code>jt60sa-discovery-completion</code> §56 adds to <code>facility_config.yaml</code>. This stage reads it
+      when present and never treats it as proof: every run checks it against data, and a source whose data disagrees
+      with the prior keeps its own convention.
+    </p>
+
+    <h2 id="s2">§2 — Reference labels from the imas-ambix machine maps</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Calibration needs labelled sources, and imas-ambix holds a hand-validated JT-60SA machine map. Each binding in
+      <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/</code> (<code>magnetics.json</code>,
+      <code>pf_active.json</code>, <code>tf.json</code>, <code>equilibrium.json</code>) names its EDAS
+      <code>source_group</code> and <code>source_array</code>, its <code>target_path</code>, the DD
+      <code>transformation</code>, its <code>source_cocos</code>, a per-channel <code>channel_factor</code>, a
+      <code>validation_state</code> and an evidence string. Those join to imas-codex <code>SignalSource</code> ids through
+      the EDDB accessor arguments. JET has no such reference, so 60 JET sources are labelled by hand, stratified across
+      physics domains.
+    </p>
+    <p>
+      <strong>Node</strong> <code>convention-reference-labels</code>, role implement, 1.5 h. Live graph read through the
+      linked <code>.env</code>; read-only access to the imas-ambix checkout at its absolute path. Write paths:
+      <code>tests/fixtures/conventions/reference_labels.json</code> and
+      <code>docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html</code>.
+      <strong>Done when</strong> the fixture holds one row per imas-ambix JT-60SA binding that joins to a SignalSource,
+      with the source id, target path, DD class, imas-ambix transformation, source_cocos, channel_factor and
+      validation_state, and 60 JET rows each carrying a convention-dependent label, a class and a one-line reason; at least
+      20 of the JET rows are convention-independent quantities such as temperatures, densities and plant voltages, as the
+      negative control; and the fragment states the joined count per class and lists every imas-ambix binding that did
+      not join, with the reason.
+    </p>
+
+    <h2 id="s3">§3 — Convention properties on the signal source</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The <code>SignalSource</code> is the mapping unit, so it carries the convention. It gains
+      <code>convention_dependent</code> with its Jev probability <code>p_convention_dependent</code>;
+      <code>cocos_class</code>, from a new enum holding <code>none</code>, the seven non-trivial DD labels (psi_like,
+      dodpsi_like, ip_like, b0_like, q_like, tor_angle_like, pol_angle_like) and <code>compound</code>;
+      <code>cocos_class_distribution</code>, the Jev choice distribution as JSON; <code>convention_writer</code>;
+      <code>cocos_survivors</code>, an integer list; <code>cocos</code>, set only when the survivors are one convention;
+      <code>cocos_confidence</code>; <code>convention_status</code> from a new enum (judged, probed, settled,
+      needs_followup); <code>convention_question</code>, the open question a followup carries; timestamps; and claim
+      fields for the stage's claim loop. A member whose channel sign differs from its source, such as a differential flux
+      loop, keeps it on <code>FacilitySignal.channel_sign</code>.
+    </p>
+    <p>
+      A new <code>ConventionObservation</code> node records one sign read from facility data: facility, shot, quantity,
+      observed sign, the plasma-current sign of that shot, the DataAccess used and when. It links
+      <code>OBSERVED_FOR</code> to the source, so a later reader can recompute every verdict.
+    </p>
+    <p>
+      <strong>Node</strong> <code>convention-schema</code>, role implement, 1.5 h. Write paths:
+      <code>imas_codex/schemas/facility.yaml</code> and <code>tests/graph/test_signal_convention_schema.py</code>.
+      <strong>Done when</strong> <code>uv run build-models --force</code> regenerates the models and
+      <code>uv run --no-sync pytest tests/graph/test_signal_convention_schema.py tests/graph/test_schema_compliance.py -p no:cacheprovider</code>
+      passes, with tests showing every new property and the observation edge round-trip through the generated models,
+      the class enum refusing a value outside it, and no signal value property touched by the schema change.
+    </p>
+
+    <h2 id="s4">§4 — Jev judges dependence, class and writer</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      One decisions request per source carries four questions, which Jev answers in parallel: a noul on whether the
+      quantity's sign or 2π normalisation depends on the coordinate convention; a choice of transformation class, whose
+      premise is stated as "if it depends"; a noul on whether a reconstruction or analysis code wrote the value rather than
+      a diagnostic measuring it; and a choice of writer among the facility's codes, a raw diagnostic, and unknown. Code
+      consumes the class and writer answers only when the dependence answer applies.
+    </p>
+    <p>
+      Each class option is templated from the DD, not written by hand. Its criteria hold the label's definition from the
+      <code>COCOSLabelTransformation</code> enum and up to five exemplar DD fields of that class, with their documentation
+      and units. The exemplars come from the same graph query the imas-cx <code>get_dd_cocos_fields</code> tool serves,
+      run in process, preferring fields in the source's physics domain and resolving a label carried on a structure to
+      its data leaves. The state holds the source's description, unit, members and free-text sign convention, its
+      reranked code and wiki context through <code>rerank_pool</code>, its geometry from §6 when present, and the facility
+      prior. The answers go to the §3 properties through the shared <code>judge_rows</code> core in
+      <code>imas_codex/discovery/base/judgment.py</code>, on a new <code>signal-conventions</code> seat.
+    </p>
+    <p>
+      <strong>Node</strong> <code>convention-judgment</code>, role implement, 2.5 h, after §3. Write paths:
+      <code>imas_codex/discovery/signals/conventions.py</code>, <code>tests/discovery/test_signal_conventions.py</code>
+      and <code>pyproject.toml</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/discovery/test_signal_conventions.py -p no:cacheprovider</code> passes with
+      tests showing one request per source carrying all four questions, each class option carrying its definition and
+      graph-drawn exemplars, a failed call leaving the source unjudged, the reported cost booked to the run's
+      <code>PipelineCost</code>, the no-key path leaving sources pending with its reason, and a convention-independent
+      answer persisting class <code>none</code> without asking for a writer.
+    </p>
+    <p>
+      <strong>Node</strong> <code>convention-judgment-calibration</code>, role implement, 1 h, after
+      <code>convention-judgment</code> and §2. It judges every §2 reference source live, under a USD 2 cap, and sets the
+      acceptance thresholds as seat keys. Write paths: <code>pyproject.toml</code> and
+      <code>docs/evidence/fragments/signal-cocos-conventions/convention-judgment-calibration.html</code>.
+      <strong>Done when</strong> the fragment states the AUC of <code>p_convention_dependent</code>, class accuracy and
+      writer accuracy at the chosen thresholds, the spend, and every misjudged reference source with its label and Jev's
+      distribution.
+    </p>
+
+    <h2 id="s5">§5 — Facility data validates the convention</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      A convention is accepted only after facility data has been read against it. For each convention-dependent source,
+      code reads signs at reference shots of both plasma-current polarities through the source's DataAccess template:
+      the flat-top sign of an ip_like or b0_like source against the facility's declared Ip and Bt directions, the sign of
+      a raw flux loop's ramp-up response against Ip for σ<sub>Bp</sub>, and the sign of q against Ip·Bt. Angle classes
+      read the §6 geometry instead of a time trace. Each read is a <code>ConventionObservation</code>.
+    </p>
+    <p>
+      The observations score the sixteen canonical conventions (1 to 8 and 11 to 18) through
+      <code>cocos_to_parameters</code>. Each coefficient is classified as measured, measurable only as a product, or
+      requiring a declaration; a declared handedness from the facility prior narrows the survivors, and an undeclared one
+      leaves them split. A set of observations no convention fits is recorded as not COCOS-expressible, never rounded to
+      the nearest. The class factor is unanimous or split across the survivors, and the confidence falls when a polarity
+      is missing.
+    </p>
+    <p>
+      <strong>Node</strong> <code>convention-probe-prototype</code>, role implement, 1.5 h. A first live probe on
+      JT-60SA, the facility being mapped and the one reachable on 2026-10-09: <code>ssh jt-60sa</code> answered, while
+      <code>ssh jet</code> closed at key exchange because its jump through <code>gpc-nx01</code> to
+      <code>localhost:58347</code> was not answering. Find the reference Ip, Bt and flux-loop sources in the graph,
+      find EDAS shots of each plasma-current polarity the facility has run, read their signs through existing DataAccess
+      templates, and report which coefficients came out measured. JT-60SA may have run one polarity only; the prototype
+      states that rather than assuming either. imas-ambix's loop-reference fits
+      (<code>/home/ITER/mcintos/Code/imas-ambix/docs/evidence/fragments/jt60sa-machine-map/</code>) are the cross-check.
+      Remote calls use the ssh wrapper in <code>AGENTS.md</code>. Write path:
+      <code>docs/evidence/fragments/signal-cocos-conventions/convention-probe-prototype.html</code>.
+      <strong>Done when</strong> the fragment gives the observation table per shot and per polarity, states which
+      polarities exist in the data, gives the coefficient classification, the DataAccess templates used, and every read
+      that failed with its error.
+    </p>
+    <p>
+      <strong>Node</strong> <code>cocos-determination-core</code>, role implement, 2 h. Write paths:
+      <code>imas_codex/cocos/determination.py</code> and <code>tests/cocos/test_determination.py</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/cocos -p no:cacheprovider</code> passes with tests
+      showing MAST-like observations without a handedness declaration leave survivors {3, 4} with psi_like unanimous and
+      ip_like split to COCOS 17; the same observations with a declaration leave one survivor; a one-polarity cohort is
+      flagged polarity-incomplete with lowered confidence; and a contradictory set leaves no survivor and reports itself
+      not COCOS-expressible.
+    </p>
+    <p>
+      <strong>Node</strong> <code>convention-probe</code>, role implement, 2.5 h, after the prototype, the core and §3.
+      Write paths: <code>imas_codex/remote/scripts/convention_probe.py</code>,
+      <code>imas_codex/discovery/signals/convention_probe.py</code> and
+      <code>tests/discovery/test_convention_probe.py</code>. The remote script runs through
+      <code>run_python_script</code>, never an inline ssh call. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/discovery/test_convention_probe.py tests/remote -p no:cacheprovider</code>
+      passes with tests on mocked remote output showing observations written per shot, survivors, unanimity and
+      confidence persisted, a failed read recorded as an observation error rather than as a sign, and a source whose
+      data contradicts the facility prior keeping its own survivors.
+    </p>
+
+    <h2 id="s6">§6 — Geometry travels with oriented sensors</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The geometry that fixes an oriented sensor's sign exists, but not where a judgment can read it. JET's device
+      descriptions are in the graph as static FacilitySignals (573 magnetic, 343 structural) whose positions sit in
+      free-text descriptions, joined to no measurement. JT-60SA's lives in SELENE decks on the facility
+      (<code>geo.in</code>, <code>coil_vv_OP1.dat</code>, <code>coil_vv_OP2.dat</code>, <code>EQSLE.DATA</code>), which
+      imas-ambix converted into per-phase machine descriptions under
+      <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/machine_description/</code>. Geometry is a function of shot:
+      OP1 and OP2 differ.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sensor-geometry-inventory</code>, role implement, 1.5 h. Write path:
+      <code>docs/evidence/fragments/signal-cocos-conventions/sensor-geometry-inventory.html</code>.
+      <strong>Done when</strong> the fragment lists, for JET and JT-60SA and per sensor family (pickup coils, flux
+      loops, saddle loops, Rogowski coils, PF coils, passive structures), where the geometry lives as graph ids, facility
+      file paths or the code that reads them, its shot validity, and the count of measurement sources that join their
+      geometry by a deterministic key against the count that do not.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sensor-geometry-graph</code>, role implement, 2.5 h, after the inventory and the
+      <code>geometry-storage</code> decision. A <code>SensorGeometry</code> node holds one sensor's position, orientation
+      angles, area, turns, loop path, unit and frame, with its source file, content hash and valid shot range, linked
+      <code>HAS_GEOMETRY</code> from its measurement source. JET's device descriptions are ingested first. Write paths:
+      <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/static/geometry.py</code> and
+      <code>tests/discovery/test_sensor_geometry.py</code>. <strong>Done when</strong> the tests pass and a live count
+      shows every JET pickup coil and flux loop the inventory joined carrying one <code>HAS_GEOMETRY</code> edge, with a
+      sensor whose key does not join left unlinked and listed.
+    </p>
+    <p>
+      <strong>Node</strong> <code>jt60sa-sensor-geometry</code>, role implement, 2 h, after
+      <code>sensor-geometry-graph</code>. It ingests the SELENE decks from the facility through the same module, and
+      cross-checks the result against the imas-ambix machine descriptions. Write path:
+      <code>docs/evidence/fragments/signal-cocos-conventions/jt60sa-sensor-geometry.html</code> beside the module's
+      deck reader. <strong>Done when</strong> each JT-60SA magnetic sensor the inventory joined carries geometry per
+      operation phase, and the fragment lists every position or angle that differs from imas-ambix beyond 1 mm or 0.1°.
+    </p>
+
+    <h2 id="s7">§7 — The conventions stage in discover</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>imas-codex discover conventions FACILITY</code> claims enriched sources without a convention status, runs
+      the §4 judgment and the §5 probe, and persists the result. It enters the stage registry in
+      <code>imas_codex/cli/discover/sequence.py</code> between <code>signals enrich</code> and <code>candidates</code>,
+      and <code>candidates</code> reads it, so <code>--until candidates</code> runs it. A source below the acceptance
+      thresholds, or whose class factor is split across its survivors, reaches <code>needs_followup</code> with its open
+      question recorded. The stage reports to <code>discover status</code> and clears through
+      <code>discover clear</code>.
+    </p>
+    <p>
+      <strong>Node</strong> <code>conventions-stage</code>, role implement, 2 h, after §4 and §5. Write paths:
+      <code>imas_codex/cli/discover/conventions.py</code>, <code>imas_codex/cli/discover/sequence.py</code>,
+      <code>imas_codex/cli/discover/common.py</code>, <code>imas_codex/cli/discover/__init__.py</code> and
+      <code>tests/cli/test_discover_conventions_stage.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/cli -p no:cacheprovider</code> passes with tests showing the registry order,
+      <code>--until candidates</code> selecting the stage, a second run claiming nothing, a low-confidence source reaching
+      <code>needs_followup</code> with its question, and no write to any signal value property.
+    </p>
+
+    <h2 id="s8">§8 — JT-60SA and JET proof against the references</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Run <code>imas-codex discover conventions</code> on JT-60SA and on JET over the §2 reference sources and the
+      magnetics, PF, TF and equilibrium sources, under a USD 5 cap. Probes go through each facility's ssh route; JET's needs
+      its tunnel restored first. If a facility is unreachable, its judgments are still compared and the probe half records
+      the outage.
+    </p>
+    <p>
+      <strong>Node</strong> <code>conventions-proof</code>, role implement, 1.5 h over resumes. Write path:
+      <code>docs/evidence/fragments/signal-cocos-conventions/conventions-proof.html</code>.
+      <strong>Done when</strong> the fragment holds the class confusion against the reference labels, the survivors per
+      writer against imas-ambix's <code>source_cocos</code>, channel signs against its <code>channel_factor</code>, the
+      followups raised with their questions, and every disagreement with imas-ambix listed beside imas-ambix's evidence
+      string.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="geometry-storage" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Do sensor positions and orientations live in the graph, so every judgment and map prompt can read them?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="graph">SensorGeometry nodes in the graph (recommended)</button>
+          <button class="r-opt" data-value="fetch">Read from facility files at judgment time</button>
+        </p>
+        <p class="r-dec-rat">Recommended: the graph. Geometry is small, static per operation phase, and needed by three readers: the convention judgment, the probe for angle classes, and the map for geometry targets and index consistency. Reading it from the facility at judgment time would make the map depend on facility access, which it must not.</p>
+      </div>
+      <div class="r-dec" data-key="convention-granularity" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where does the convention live: on the SignalSource, or on each FacilitySignal?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="source">SignalSource, with a per-member channel sign (recommended)</button>
+          <button class="r-opt" data-value="signal">Each FacilitySignal</button>
+        </p>
+        <p class="r-dec-rat">Recommended: the SignalSource, which is the unit one binding maps. A channel whose sign differs within a group, such as a differential flux loop, is a per-member sign rather than a different convention.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-scc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build signal-cocos-conventions §2" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Label the reference sources and prototype the facility probe</h4>
+        <div class="r-fu-body">The reference labels calibrate the Jev thresholds, and the JET probe prototype shows which coefficients facility data can settle before the probe is built.</div>
+        <pre class="r-fu-prompt">/reckon-build signal-cocos-conventions §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="signal-evidence-followups">
+  <meta name="plan-title" content="Signal Evidence Followups">
+  <meta name="plan-summary" content="Low-confidence convention and mapping judgments become graph followups that a person or agent triages, attaches evidence to, and re-queues for judgment">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="9.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-sprint" content="S17">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <title>Signal Evidence Followups | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Map, triage, attach, map again</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      The conventions stage (<code>signal-cocos-conventions</code>) and the map's slot decisions
+      (<code>mapping-decision-chain</code> §5) both stop short of guessing: a judgment below its acceptance threshold, or
+      a COCOS class factor the surviving conventions disagree on, is left open. Today an open result is a status on the
+      source and nothing more. Nobody is asked the question, and when someone does find the missing fact, there is
+      nowhere to put it where the next run will read it.
+    </p>
+    <p>
+      This plan makes the open result a <code>SignalFollowup</code> in the graph: the source, the stage that raised it,
+      the open question in plain words, and Jev's distribution. A person, or an agent in an interactive session, triages
+      it with the evidence the pipeline already gathered in view, searches the facility's wiki, code and documents for
+      more, and may read a shot. What they find is attached to the source as evidence, and the source is re-queued. The
+      next judgment reads that evidence first. Mapping therefore improves in rounds: map, triage and attach, map again.
+    </p>
+    <figure>
+      <img src="/imas-codex/figures/signal-evidence-followups/triage-loop.svg"
+           alt="A source judged below threshold by the conventions stage or the map raises a SignalFollowup; triage by a person or agent attaches evidence; the source is re-queued and its next judgment reads the evidence first">
+      <figcaption>
+        One round of the loop. Blue boxes are what this plan adds to the graph: the followup record and the attached
+        evidence. The re-queued source passes through the same stage as before, with the evidence leading its state.
+      </figcaption>
+    </figure>
+    <p>
+      Attached evidence reuses <code>MappingEvidence</code>, which a <code>SignalSource</code> already links through
+      <code>HAS_EVIDENCE</code>, and whose <code>EvidenceType</code> already holds <code>sign_convention</code>,
+      <code>data_validation</code>, <code>expert_knowledge</code> and <code>escalation</code>. One type is added:
+      <code>declared</code>, a value a person states with a reference, such as "positive Ip is clockwise seen from above,
+      from the JT-60SA operations handbook".
+    </p>
+
+    <h2 id="s2">§2 — A followup is a graph record</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      A <code>SignalFollowup</code> carries an id, the facility, the stage that raised it (conventions, candidates or
+      mapping), the open slot or question kind, the question text, Jev's distribution as JSON, a status (open, attached,
+      resolved, dismissed), and when and by whom it was raised and resolved. It links <code>HAS_FOLLOWUP</code> from its
+      source. <code>raise_followup</code> is idempotent on the source, stage and open slot, so a re-run that reaches the
+      same open question updates the record rather than adding a second.
+    </p>
+    <p>
+      <strong>Node</strong> <code>signal-followup-record</code>, role implement, 1.5 h. Write paths:
+      <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/signals/followups.py</code> and
+      <code>tests/discovery/test_signal_followups.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/discovery/test_signal_followups.py tests/graph/test_schema_compliance.py -p no:cacheprovider</code>
+      passes with tests showing a followup round-trips through the generated models, a second raise of the same open
+      slot updates the one record, a raise for a different slot of the same source adds a second, resolving records who
+      and when, and the <code>declared</code> evidence type is accepted.
+    </p>
+
+    <h2 id="s3">§3 — Triage from the terminal and from an agent session</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>imas-codex discover followups FACILITY</code> lists open followups grouped by stage and question kind, with
+      counts. <code>--show ID</code> prints everything a person needs to answer one: the source's description, members,
+      unit and accessor, the question, Jev's distribution, the source's geometry, its candidate DD fields, and its top
+      reranked code, wiki and document hits. <code>imas-codex discover attach SOURCE</code> takes one of
+      <code>--note</code>, <code>--ref</code> (a WikiChunk, CodeChunk or Document id), <code>--declare</code> (a value
+      with its reference) or <code>--probe-shot</code>, writes the evidence, marks the followup attached, and re-queues
+      the source for the stage that raised it.
+    </p>
+    <p>
+      <strong>Node</strong> <code>followup-triage-cli</code>, role implement, 2 h, after §2. Write paths:
+      <code>imas_codex/cli/discover/followups.py</code>, <code>imas_codex/cli/discover/__init__.py</code> and
+      <code>tests/cli/test_discover_followups.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/cli/test_discover_followups.py -p no:cacheprovider</code> passes with tests
+      showing the grouped listing, the show view carrying each context block, each attach form writing one evidence node
+      and re-queuing the source for the raising stage only, and an attach naming an unknown source or reference refused
+      without a write.
+    </p>
+    <p>
+      The same two verbs are MCP tools, so an agent can triage inside an interactive session with the search tools beside
+      it. They are write tools and are absent from a read-only or DD-only server.
+    </p>
+    <p>
+      <strong>Node</strong> <code>followup-triage-mcp</code>, role implement, 1.5 h, after
+      <code>followup-triage-cli</code>. Write paths: <code>imas_codex/llm/followup_tools.py</code>,
+      <code>imas_codex/llm/server.py</code> and <code>tests/llm/test_followup_tools.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/llm/test_followup_tools.py -p no:cacheprovider</code> passes with tests showing
+      <code>list_signal_followups</code> and <code>attach_signal_evidence</code> calling the §2 and §3 functions, and both
+      tools absent when the server runs read-only.
+    </p>
+
+    <h2 id="s4">§4 — The next judgment reads the evidence first</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The conventions stage and the map's slot judgment raise followups through <code>raise_followup</code> instead of
+      only setting a status, and their state builders put a source's attached evidence first, labelled by type and
+      author. A <code>declared</code> value settles its slot with a new <code>SlotResolution.HUMAN</code> authority and
+      keeps its reference as evidence. A probe that later reads data contradicting a declared value raises a new followup
+      and leaves the declaration in place; it never overwrites one.
+    </p>
+    <p>
+      <strong>Node</strong> <code>followup-evidence-in-state</code>, role implement, 1.5 h, after
+      <code>signal-cocos-conventions</code> §7 and <code>mapping-decision-chain</code> §5. Write paths:
+      <code>imas_codex/discovery/signals/conventions.py</code>, <code>imas_codex/ids/slot_judgment.py</code>,
+      <code>imas_codex/ids/models.py</code> and <code>tests/discovery/test_followup_evidence_state.py</code>.
+      <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/discovery/test_followup_evidence_state.py tests/ids -p no:cacheprovider</code>
+      passes with tests showing a below-threshold answer raising one followup, attached evidence leading the next state,
+      a declared value settling its slot as human with its reference, and a contradicting probe raising a new followup
+      while the declaration stands.
+    </p>
+
+    <h2 id="s5">§5 — First triage round on JT-60SA</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Once the conventions proof has run, the lead triages the JT-60SA followups in an interactive session with an agent,
+      through the §3 tools, then re-runs the conventions stage on the attached sources. This round is human work, so it
+      is not dispatched to a worker. It measures whether the loop closes questions.
+    </p>
+    <p>
+      <strong>Done when</strong>
+      <code>docs/evidence/fragments/signal-evidence-followups/jt60sa-first-triage.html</code> states the followups open
+      before the round, how many received evidence and of which type, how many the re-run resolved, how many it left
+      open with their questions, and one followup whose answer changed a source's class or survivors, shown before and
+      after.
+    </p>
+
+    <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-sef-1" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">discover conventions persists a below-threshold source at needs_followup with its open question recorded</h4>
+    <p class="r-gate-required-evidence">signal-cocos-conventions#s7</p>
+    </div>
+<div class="r-gate" data-id="g-sef-2" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the map asks each open slot as one bounded Jev question and escalates a low-confidence answer with its distribution</h4>
+    <p class="r-gate-required-evidence">mapping-decision-chain#s5</p>
+    </div>
+<div class="r-gate" data-id="g-sef-3" data-section="s5" data-gated-sections="s5" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the conventions proof has run on JT-60SA and listed the followups it raised</h4>
+    <p class="r-gate-required-evidence">signal-cocos-conventions#s8</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-sef-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build signal-evidence-followups §2" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Record followups in the graph and build the triage surface</h4>
+        <div class="r-fu-body">The record and the terminal and agent triage verbs do not wait on the conventions stage; only §4 and §5 do.</div>
+        <pre class="r-fu-prompt">/reckon-build signal-evidence-followups §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
