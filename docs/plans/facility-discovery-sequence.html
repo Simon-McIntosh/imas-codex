@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="89">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -270,7 +270,15 @@
       <code>imas_codex/ingestion/__init__.py</code>, <code>imas_codex/standard_names/pool_adapter.py</code> and
       <code>imas_codex/standard_names/workers.py</code>, and the tests that drove the six commands. It waits for
       <code>focus-needs-one-domain</code>, which holds <code>sequence.py</code>. The bare command's <code>--min-score</code> help
-      prints the number, as the wiki wrapper's did. <strong>Node</strong> <code>retire-subcommand-prose</code> takes the prose:
+      prints the number, as the wiki wrapper's did.
+      <strong>Node</strong> <code>mapping-opt-in</code>, role implement, 0.25 h, after <code>retire-domain-subcommands</code>,
+      which holds <code>sequence.py</code>. Under the reversed <code>mapping-stage-default</code> decision, the default domain set
+      drops <code>mapping</code>: it runs only when <code>--only</code> names it, and <code>--skip mapping</code> stays accepted.
+      <code>candidates</code> stays in the default set. The final table lists mapping as <em>skipped: not requested</em>.
+      Write paths: <code>imas_codex/cli/discover/sequence.py</code>, <code>tests/cli/test_discover_sequence.py</code> and its
+      fragment. <strong>Done when</strong> <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
+      passes with tests showing a bare run never calls the map pipeline and reports mapping as not requested,
+      <code>--only mapping</code> calls it once, and a bare run still calls the candidates stage. <strong>Node</strong> <code>retire-subcommand-prose</code> takes the prose:
       <code>docs/architecture/discovery.md</code>, <code>docs/architecture/signals.md</code>, <code>docs/zellij-quickstart.md</code>,
       <code>imas_codex/cli/README.md</code>, <code>imas_codex/discovery/README.md</code>,
       <code>imas_codex/discovery/signals/README.md</code>, <code>imas_codex/llm/prompts/discovery/roots.md</code>, the
@@ -279,6 +287,32 @@
       retires <code>--root</code>, <code>--score-only</code> and <code>--path-limit</code> from the prose. <strong>Done when</strong>
       no file it owns names a retired subcommand or option, <code>uv run build-models --force</code> succeeds, and
       <code>uv run --no-sync pytest tests/graph/test_schema_context.py tests/test_cli.py -p no:cacheprovider</code> passes.
+    </p>
+    <p>
+      <code>retire-subcommand-prose</code> landed (edbdd465f; review 99/120). Its review found two pages still wrong.
+      <code>docs/architecture/discovery.md</code> documents <code>imas-codex discover static</code> and
+      <code>discover status tcv -d static</code>, but no static command or domain exists. <code>docs/architecture/signals.md</code>
+      gives a cost-limit default of 5.0 where the bare command's is 25.0. The <code>facility.yaml</code> descriptions pass to
+      the session that owns that file. <strong>Node</strong> <code>discovery-prose-matches-cli</code>, role implement, 0.25 h.
+      Write paths: <code>docs/architecture/discovery.md</code>, <code>docs/architecture/signals.md</code> and its fragment.
+      <strong>Done when</strong> every command, domain, option and default either page names exists in
+      <code>imas-codex discover jt-60sa --help</code> or the <code>discover</code> group with the value stated, checked by
+      a grep the fragment records.
+    </p>
+    <p>
+      <code>retire-domain-subcommands</code> landed (91939e950; review 112/120, no added failures). Two user-facing leftovers
+      remain. The wiki stage still prints <em>use --scan-only / --score-only</em>, and the bare command rejects
+      <code>--score-only</code>. <code>WikiStageOptions</code> still documents its fields as settled spellings of old flags. And a
+      retired spelling such as <code>discover paths jt-60sa</code> now fails with click's <em>Got unexpected extra argument</em>,
+      because the group reads <code>paths</code> as the facility.
+      <strong>Node</strong> <code>discover-hints-name-bare-command</code>, role implement, 0.25 h. The wiki hint and docstring
+      name only options the bare command accepts and state what each field does. A first word that is a discovery domain is
+      refused with the <code>discover FACILITY --only DOMAIN</code> spelling. Write paths:
+      <code>imas_codex/cli/discover/wiki.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
+      <code>tests/cli/test_discover_wiki_stage.py</code>, <code>tests/test_cli.py</code> and its fragment.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/cli tests/test_cli.py -p no:cacheprovider</code> passes
+      with tests showing <code>discover paths jt-60sa</code> refused with a message naming <code>discover jt-60sa --only paths</code>,
+      and no wiki stage output naming <code>--score-only</code>.
     </p>
     <p>
       <strong>Node</strong> <code>wiki-ingest-threshold-setting</code>, role implement, 0.5 h. The wiki stage read its
@@ -343,21 +377,26 @@
     <h2 id="s5">§5 — JT-60SA proof</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
-      From the ITER host, run <code>imas-codex discover jt-60sa --dry-run</code>. Then run it for real
-      with <code>--only signals --flush</code> under a small cap. The dry run must name every domain,
-      with wiki and documents skipped and their probe results as reasons. The real run must drain
-      signal enrichment without touching the facility. The check half needs SSH, so it reads
-      unreachable or runs, by its probe. The evidence fragment records both tables. When
-      <code>jt60sa-imas-maps</code> §5 is released, its enrichment, candidate and mapping pass runs
-      through this command.
+      From the ITER host, run <code>imas-codex discover jt-60sa --dry-run</code>, then the default run for real
+      under a stated cost cap. The lead set this order on 2026-10-08: the JT-60SA rescan closes
+      <code>jt60sa-discovery-completion</code> §38 and §41 first, then this run executes paths, code, documents, wiki,
+      signals and candidates in one invocation. Mapping is not in it: under the opt-in decision it waits for the
+      per-source conventions that <code>jt60sa-discovery-completion</code> §56 establishes, and then runs as
+      <code>--only mapping</code>. The dry run must name every domain, each with its probe result, and mapping as not
+      requested. The evidence fragment records both tables and the spend against the cap. It also waits for two
+      fixes in <code>jt60sa-discovery-completion</code>. On 2026-10-08 a signals rescan reset 6,053 of 6,295 checked JT-60SA
+      EDDB signals to discovered: the merge in <code>imas_codex/discovery/signals/parallel.py</code> copies the scanned status
+      over progressed signals. Node <code>signal-status-monotonic</code> fixes that, and §51 node 2 gives UDDB and LCDB signals
+      their DataAccess. Until both are on main, any run here passes <code>--skip signals</code>.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-jt60sa-proof</code>, role test, 0.5 h. Write paths:
       <code>docs/evidence/fragments/facility-discovery-sequence/sequence-jt60sa-proof.html</code>.
       <strong>Done when</strong> the fragment holds both tables, and the real run's enriched-signal
-      count rose with zero SSH calls in its log. It waits for the census fragment of
-      <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code>, so that the proof and that
-      rescan never scan the same JT-60SA paths at once.
+      count rose and every stage's outcome and spend is in the final table, within the cap. It waits for the census
+      fragment of <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code> and for
+      <code>mapping-opt-in</code>, so that the proof and that rescan never scan the same JT-60SA paths at once and the
+      run cannot write IMAS mappings.
     </p>
 
     <section class="section-landed">
@@ -398,13 +437,13 @@
       </p>
     <p class="r-dec-rat">The lead chose the bare group, imas-codex discover FACILITY, without a run subcommand, as other groups do: host.py&#x27;s _HostGroup routes an unknown first argument to a hidden subcommand, so imas-codex discover jt-60sa runs the sequence while imas-codex discover signals jt-60sa still reaches its subcommand.</p>
     </div>
-<div class="r-dec" data-key="mapping-stage-default" data-choice="default" data-by="lead" data-when="2026-10-08T02:31:22+00:00" data-recommended="opt-in" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="mapping-stage-default" data-choice="opt-in" data-by="lead" data-when="2026-10-08T09:47:46+00:00" data-recommended="opt-in" data-recommended-by="reckon-build">
     <p class="r-dec-q">Does the sequence run imas map run by default?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="opt-in">only when named in --only</button>
-      <button class="r-opt chosen" data-value="default">always, under the cost cap</button>
+      <button class="r-opt chosen" data-value="opt-in">only when named in --only</button>
+      <button class="r-opt" data-value="default">always, under the cost cap</button>
       </p>
-    <p class="r-dec-rat">The lead chose to run the mapping stage by default; its reasoning seat is now local (ids-mapping), so it spends nothing on OpenRouter, and --skip excludes it when wanted.</p>
+    <p class="r-dec-rat">On 2026-10-08 the lead reversed the earlier choice: the mapping stage runs only when named, as --only mapping, because mapping writes IMAS bindings, it is the critical step and needs more work, and JT-60SA&#x27;s native COCOS is not yet established. Candidates stays in the default run, because it writes candidate routes rather than IMAS mappings and mapping reads them.</p>
     </div>
 </section>
 
@@ -490,6 +529,21 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T080319525814-wiki-ingest-threshold-setting" data-who="reckon-build" data-when="2026-10-08T08:19:50Z">
     <div class="r-comment-body"><p>wiki ingest threshold now comes from leaf settings with 0.16 default and environment override; final gate 634 passed, 0 errors, 0 failures; declared import mutation failed one subprocess test; fragment docs/evidence/fragments/facility-discovery-sequence/wiki-ingest-threshold-setting.html.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T092030551088-retire-subcommand-prose" data-who="reckon-build" data-when="2026-10-08T09:33:52Z">
+    <div class="r-comment-body"><p>Updated retired discover spellings in 12 owned prose files; owned-file grep found 0 lines, build-models exited 0, and the focused pytest gate passed 89 tests; the fragment names imas_codex/schemas/facility.yaml for its holder.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T093432176177-review-of-retire-subcommand-prose" data-who="reckon-build" data-when="2026-10-08T09:59:17.428Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261008T092030551088-retire-subcommand-prose stored (verdict SOUND WITH FINDINGS, total 99/120): goal_fidelity 15, evidence 18, scope_discipline 19, durability 8, fit 19, reuse 20; reviewed_base_sha 73155124ec4c47499c081f2b6f3e5cfa7eac0b74, reviewed_head_sha 747d28608e768f582c09ca3b1e859d4d627d55ca; added_failure_count derived as unmeasured (reviewed manifest leaves baseline_suite and after_suite empty), added_failure_ids []; four follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T095956656889-discovery-prose-matches-cli" data-who="reckon-build" data-when="2026-10-08T10:09:25Z">
+    <div class="r-comment-body"><p>The two architecture pages now name only supported discover commands, domains, options and defaults; grep found 17 stale baseline matches and 0 at the edited head, while the CLI inventory checked 7 command forms, 14 options, 5 domains and 5 defaults with 0 mismatches.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T093047410719-retire-domain-subcommands" data-who="reckon-build" data-when="2026-10-08T09:55:50Z">
+    <div class="r-comment-body"><p>Retired six domain commands and moved owned callers to discover FACILITY --only DOMAIN; final gate 543 passed, owned grep 0 matches, help shows wiki min-score default 0.16, and documents retains default 0.5.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T100011929810-review-of-retire-domain-subcommands" data-who="reckon-build" data-when="2026-10-08T10:18:25.017Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261008T093047410719-retire-domain-subcommands stored parsed at total 112/120 (SOUND WITH FINDINGS): six retired domain wrappers and registrations deleted, code callers and source hints moved to `discover FACILITY --only DOMAIN`, ten test files migrated and the gate green at head 29711e0388534dd19ad0668553e6cdd955e1fddb against base d3bbc51a106e46bac02d5a0d26a6b99b6d83b019; added_failure_count 0, added_failure_ids []; four follow-on findings (wiki.py changelog docstring and a retired --score-only runtime hint, the missing node fragment, and the manifest leaving baseline_suite empty).</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261008T064515993215-review-of-focus-candidates" data-who="reckon-build" data-when="2026-10-08T07:03:54.008Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T061140828099-focus-candidates stored as a parsed record scoring goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 18, reuse 18 (total 108), verdict SOUND WITH FINDINGS, reviewed_base_sha ad49d924d10ce972975339230f51bd72ccd93e62 and reviewed_head_sha 7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e, with added_failure_count 0 derived from clean arms at both revisions; four follow-on findings, no blocker.</p></div>

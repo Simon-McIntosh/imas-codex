@@ -4,34 +4,24 @@ The IMAS Codex CLI follows a hierarchical structure with domain-specific subgrou
 
 ## Discovery Commands
 
-The `discover` group provides facility exploration with three domain subgroups:
+The `discover` command runs facility discovery in stage order. Select domains with `--only`:
 
 ```
 imas-codex discover
+├── <facility>                  # Run the full discovery sequence
+│   ├── --only <domain>         # Run selected domains
+│   └── --flush                 # Drain work already seeded in the graph
 ├── status <facility>           # All domains
 ├── clear <facility>            # All domains (nuclear reset)
 ├── seed <facility>             # Seed root paths
-├── inspect <facility>          # Debug view
-│
-├── paths <facility>            # Directory structure discovery
-│   ├── status <facility>
-│   └── clear <facility>
-│
-├── wiki <facility>             # Wiki page discovery
-│   ├── status <facility>
-│   └── clear <facility>
-│
-└── signals <facility>          # Facility signal discovery
-    ├── status <facility>
-    └── clear <facility>
+└── inspect <facility>          # Debug view
 ```
 
 ## Design Principles
 
-1. **Top-level aggregates**: `discover status` and `discover clear` operate on ALL domains
-2. **Domain subgroups**: Each domain (paths, wiki, signals) runs discovery directly, with status/clear subcommands
-3. **Consistent naming**: `<domain> <facility>` executes discovery, `<domain> status` shows stats
-4. **Single source of truth**: Commands under one group, not duplicated at main level
+1. **One sequence**: `discover <facility>` runs the domains in dependency order.
+2. **Domain selection**: `--only <domain>` limits work to named domains.
+3. **State commands**: `discover status` and `discover clear` inspect and reset discovery data.
 
 ## Examples
 
@@ -39,17 +29,17 @@ imas-codex discover
 # Show status for all domains
 imas-codex discover status tcv
 
-# Show status for specific domain
-imas-codex discover wiki status tcv
+# Show status for a specific domain
+imas-codex discover status tcv -d wiki
 
 # Clear all discovery data
 imas-codex discover clear tcv
 
 # Clear only wiki data
-imas-codex discover wiki clear tcv
+imas-codex discover clear tcv -d wiki
 
 # Run wiki discovery
-imas-codex discover wiki tcv --cost-limit 5.0
+imas-codex discover tcv --only wiki --cost-limit 5.0
 ```
 
 ## Status Output

@@ -5,7 +5,7 @@ scored FacilityPaths, creating Document nodes in the graph. Images
 are fetched, downsampled, and optionally captioned with a VLM.
 
 Pipeline:
-    discover documents <facility>
+    discover <facility> --only documents
       1. SCAN: SSH enumerate document + image files
       2. FETCH: Download images, extract metadata
       3. CAPTION: VLM captioning + relevance scoring (optional)

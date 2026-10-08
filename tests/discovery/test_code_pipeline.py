@@ -1534,17 +1534,32 @@ class TestPathPrefixScan:
         assert stats["total_paths"] == 0
         assert claim.call_args.kwargs["path_prefixes"] == ["/analysis/src/edas2"]
 
-    def test_code_cli_forwards_path_prefixes(self):
+    def test_code_cli_forwards_path_prefixes(self, tmp_path):
         import asyncio
 
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover.code import code
+        from imas_codex.cli.discover import discover, sequence
 
         def fake_run_discovery(_config, async_main):
             return asyncio.run(async_main(asyncio.Event(), None))
 
         with (
+            patch(
+                "imas_codex.cli.discover.sequence.evaluate_stage",
+                side_effect=lambda stage, facility, config: sequence.StageOutcome(
+                    stage.name, stage.domain, sequence.RUNNABLE, "ready"
+                ),
+            ),
+            patch(
+                "imas_codex.cli.discover.sequence._remaining_count",
+                return_value=None,
+            ),
+            patch("imas_codex.cli.logging.configure_cli_logging"),
+            patch(
+                "imas_codex.cli.logging.get_log_file",
+                return_value=tmp_path / "discover.log",
+            ),
             patch(
                 "imas_codex.discovery.base.facility.get_facility",
                 return_value={"ssh_host": "jt-60sa"},
@@ -1569,12 +1584,14 @@ class TestPathPrefixScan:
             ) as run_parallel,
         ):
             result = CliRunner().invoke(
-                code,
+                discover,
                 [
                     "jt-60sa",
-                    "--path-prefix",
+                    "--only",
+                    "code",
+                    "--focus",
                     "/analysis/src/SAselene",
-                    "--path-prefix",
+                    "--focus",
                     "/analysis/src/edas2",
                     "--scan-only",
                 ],
@@ -1586,8 +1603,8 @@ class TestPathPrefixScan:
             "/analysis/src/edas2",
         ]
 
-    def test_code_cli_reset_receives_path_prefixes(self):
-        """--reset-to forwards --path-prefix to reset_to_status.
+    def test_code_cli_reset_receives_path_prefixes(self, tmp_path):
+        """--reset-to forwards focused paths to reset_to_status.
 
         The scan path returns before the reset branch, so a green suite does
         not show the reset is scoped. This reaches the branch and pins that the
@@ -1598,12 +1615,27 @@ class TestPathPrefixScan:
 
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover.code import code
+        from imas_codex.cli.discover import discover, sequence
 
         def fake_run_discovery(_config, async_main):
             return asyncio.run(async_main(asyncio.Event(), None))
 
         with (
+            patch(
+                "imas_codex.cli.discover.sequence.evaluate_stage",
+                side_effect=lambda stage, facility, config: sequence.StageOutcome(
+                    stage.name, stage.domain, sequence.RUNNABLE, "ready"
+                ),
+            ),
+            patch(
+                "imas_codex.cli.discover.sequence._remaining_count",
+                return_value=None,
+            ),
+            patch("imas_codex.cli.logging.configure_cli_logging"),
+            patch(
+                "imas_codex.cli.logging.get_log_file",
+                return_value=tmp_path / "discover.log",
+            ),
             patch(
                 "imas_codex.discovery.base.facility.get_facility",
                 return_value={"ssh_host": "jt-60sa"},
@@ -1632,10 +1664,12 @@ class TestPathPrefixScan:
             ),
         ):
             result = CliRunner().invoke(
-                code,
+                discover,
                 [
                     "jt-60sa",
-                    "--path-prefix",
+                    "--only",
+                    "code",
+                    "--focus",
                     "/analysis/src/SAeqread",
                     "--reset-to",
                     "discovered",

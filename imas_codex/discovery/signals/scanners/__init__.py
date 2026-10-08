@@ -5,7 +5,7 @@ data source type. Scanners are dispatched based on data_systems keys
 in facility config YAML files.
 
 Scanner lifecycle:
-    1. scan() — discover signals from data source (SSH, API calls, parsing)
+    1. scan() — find signals in a data source (SSH, API calls, parsing)
     2. Enrichment — LLM physics domain classification (shared, not per-scanner)
        with wiki context injection for cost savings and quality improvement
     3. check() — validate signals return data for reference shot

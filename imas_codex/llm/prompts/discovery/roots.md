@@ -206,36 +206,37 @@ print(query("""
 
 | Flag | Purpose |
 |------|---------|
-| `--seed` | Adds discovery_roots from config that are NOT already in graph (additive, idempotent) |
-| `-r/--root` | Restricts discovery to specific paths AND adds them to graph if missing |
+| `imas-codex discover seed FACILITY` | Adds discovery_roots from config that are NOT already in graph (additive, idempotent) |
+| `--focus PATH` | Restricts discovery to named paths |
+| `--add-roots` | Adds focused paths to the graph if missing |
 | `--scan-only` | SSH enumeration only, no LLM scoring (fast, requires SSH) |
-| `--score-only` | Score existing paths in graph (offline, no SSH) |
+| `--flush` | Score existing paths in graph (offline, no SSH) |
 
 **Seeding workflow:**
 
 ```bash
 # 1. First time: seed from config (creates FacilityPath nodes with status=discovered)
-uv run imas-codex discover paths {{ facility | default('FACILITY') }} --seed
+uv run imas-codex discover seed {{ facility | default('FACILITY') }}
 
 # 2. After modifying discovery_roots in private YAML:
-uv run imas-codex discover paths {{ facility | default('FACILITY') }} --seed
+uv run imas-codex discover seed {{ facility | default('FACILITY') }}
 # (Only adds NEW roots - existing paths are preserved)
 
 # 3. After the scan has run, re-run to continue (idempotent):
-uv run imas-codex discover paths {{ facility | default('FACILITY') }}
+uv run imas-codex discover {{ facility | default('FACILITY') }} --only paths
 ```
 
-**Targeted deep dives (adds roots AND restricts scope):**
+**Targeted deep dives (focuses on paths and adds missing roots):**
 
 ```bash
 # Deep dive into experimental data
-uv run imas-codex discover paths {{ facility | default('FACILITY') }} -r /tcvssd/trees -c 5.0
+uv run imas-codex discover {{ facility | default('FACILITY') }} --only paths --focus /tcvssd/trees --add-roots -c 5.0
 
 # Deep dive with multiple roots (mixing domains)
-uv run imas-codex discover paths {{ facility | default('FACILITY') }} -r /home/codes/liuqe -r /home/codes/jorek -c 10.0
+uv run imas-codex discover {{ facility | default('FACILITY') }} --only paths --focus /home/codes/liuqe --focus /home/codes/jorek --add-roots -c 10.0
 
 # Explore user workspaces
-uv run imas-codex discover paths {{ facility | default('FACILITY') }} -r /home/users -c 5.0
+uv run imas-codex discover {{ facility | default('FACILITY') }} --only paths --focus /home/users --add-roots -c 5.0
 ```
 
 ## Horizontal Breakout: Finding New Areas

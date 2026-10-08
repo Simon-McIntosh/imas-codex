@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 import click
 
-from imas_codex.cli.discover.common import reset_to_option, resolve_focus_items
+from imas_codex.cli.discover.common import resolve_focus_items
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
     draining half without seeding. Neither flag runs both halves in order.
 
     Args:
-        facility: Facility id to discover documents for.
+        facility: Facility id whose documents are scanned.
         options: Settled stage options.
 
     Raises:
@@ -255,129 +255,3 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
         raise SystemExit(1) from e
 
     log_print("\n[green]Document discovery complete.[/green]")
-
-
-@click.command()
-@click.argument("facility")
-@click.option(
-    "--min-score",
-    type=float,
-    default=0.5,
-    help="Minimum FacilityPath score to include (default: 0.5)",
-)
-@click.option(
-    "--limit",
-    type=int,
-    default=50,
-    help="Maximum number of items to process (default: 50)",
-)
-@click.option(
-    "--cost-limit",
-    "-c",
-    type=float,
-    default=2.0,
-    help="Maximum VLM spend in USD (default: 2.0)",
-)
-@click.option(
-    "--workers",
-    type=int,
-    default=2,
-    help="Number of parallel image fetch workers (default: 2)",
-)
-@click.option(
-    "--vlm-workers",
-    type=int,
-    default=1,
-    help="Number of parallel VLM captioning workers (default: 1)",
-)
-@click.option(
-    "--store-bytes",
-    is_flag=True,
-    default=False,
-    help="Keep image bytes in graph after VLM scoring (default: clear)",
-)
-@click.option(
-    "--scan-only",
-    is_flag=True,
-    help="Only scan for document files, skip image processing",
-)
-@click.option(
-    "--flush",
-    is_flag=True,
-    help="Only process image Documents a previous scan created, skip scanning",
-)
-@click.option(
-    "--topic",
-    type=str,
-    default=None,
-    help="Free-text steer for VLM scoring (e.g. 'diagnostics', 'equilibrium')",
-)
-@click.option(
-    "--focus",
-    "focus",
-    multiple=True,
-    help="Restrict to Document path prefixes",
-)
-@click.option(
-    "--time",
-    "time_limit",
-    default=None,
-    type=int,
-    help="Maximum runtime in minutes",
-)
-@click.option("--verbose", "-v", is_flag=True, help="Show detailed progress")
-@reset_to_option("documents")
-def documents(
-    facility: str,
-    min_score: float,
-    limit: int,
-    cost_limit: float,
-    workers: int,
-    vlm_workers: int,
-    store_bytes: bool,
-    scan_only: bool,
-    flush: bool,
-    topic: str | None,
-    focus: tuple[str, ...],
-    time_limit: int | None,
-    verbose: bool,
-    reset_to: str | None = None,
-) -> None:
-    """Discover documents and images from scored facility paths.
-
-    Scans for document files (PDF, Markdown, notebooks) and images
-    (PNG, JPG, SVG, etc.) in scored FacilityPaths. Images are fetched,
-    downsampled, and optionally captioned with a VLM.
-
-    \b
-    Pipeline stages:
-      SCAN:    SSH enumerate document + image files, create Document nodes
-      FETCH:   Download images via SCP, create Image nodes
-      CAPTION: VLM captioning and relevance scoring
-
-    \b
-    Examples:
-      imas-codex discover documents tcv
-      imas-codex discover documents tcv --scan-only
-      imas-codex discover documents tcv --flush
-      imas-codex discover documents tcv -c 1.0 --vlm-workers 2
-      imas-codex discover documents tcv --topic diagnostics
-    """
-    run_documents_stage(
-        facility,
-        DocumentsOptions(
-            min_score=min_score,
-            limit=limit,
-            cost_limit=cost_limit,
-            workers=workers,
-            vlm_workers=vlm_workers,
-            store_bytes=store_bytes,
-            scan_only=scan_only,
-            flush=flush,
-            topic=topic,
-            focus=focus,
-            time_limit=time_limit,
-            verbose=verbose,
-            reset_to=reset_to,
-        ),
-    )

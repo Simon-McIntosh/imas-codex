@@ -676,15 +676,29 @@ def test_zero_confidence_answer_is_not_reclaimed_on_the_next_pass(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def _invoke_rejudge_cli(monkeypatch, args: list[str]):
-    """Drive ``discover code``'s re-judge branch with its seams stubbed.
+def _invoke_rejudge_cli(monkeypatch, tmp_path, args: list[str]):
+    """Drive the code discovery re-judge branch with its seams stubbed.
 
     The reset owner and the re-judge worker are replaced by recorders, so a test
     reads exactly whether the reset ran and when, without a live graph or LLM.
     """
     from click.testing import CliRunner
 
-    code_mod = importlib.import_module("imas_codex.cli.discover.code")
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import discover, sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
 
     reset_calls: list = []
     rejudge_calls: list = []
@@ -718,14 +732,14 @@ def _invoke_rejudge_cli(monkeypatch, args: list[str]):
         "imas_codex.cli.shutdown.safe_asyncio_run", lambda coro: asyncio.run(coro)
     )
 
-    result = CliRunner().invoke(code_mod.code, args)
+    result = CliRunner().invoke(discover, [args[0], "--only", "code", *args[1:]])
     return result, reset_calls, rejudge_calls
 
 
-def test_rejudge_ingested_alone_does_not_reset(monkeypatch):
+def test_rejudge_ingested_alone_does_not_reset(monkeypatch, tmp_path):
     """A plain ``--rejudge-ingested`` resumes: it never clears recorded answers."""
     result, reset_calls, rejudge_calls = _invoke_rejudge_cli(
-        monkeypatch, ["jt-60sa", "--rejudge-ingested"]
+        monkeypatch, tmp_path, ["jt-60sa", "--rejudge-ingested"]
     )
 
     assert result.exit_code == 0, result.output
@@ -733,12 +747,14 @@ def test_rejudge_ingested_alone_does_not_reset(monkeypatch):
     assert rejudge_calls == ["jt-60sa"]
 
 
-def test_rejudge_ingested_with_reset_to_ingested_resets_once(monkeypatch):
+def test_rejudge_ingested_with_reset_to_ingested_resets_once(monkeypatch, tmp_path):
     """The fresh-request reset rides the explicit ``--reset-to ingested`` step."""
     from imas_codex.discovery.base.reset import CODE_RESET_SPECS
 
     result, reset_calls, rejudge_calls = _invoke_rejudge_cli(
-        monkeypatch, ["jt-60sa", "--reset-to", "ingested", "--rejudge-ingested"]
+        monkeypatch,
+        tmp_path,
+        ["jt-60sa", "--reset-to", "ingested", "--rejudge-ingested"],
     )
 
     assert result.exit_code == 0, result.output

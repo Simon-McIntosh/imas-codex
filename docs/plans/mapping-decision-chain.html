@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mapping-decision-chain">
+  <meta name="plan-title" content="Mapping as a Chain of Bounded Decisions">
+  <meta name="plan-summary" content="The map stage settles sign, factor, unit and index as bounded slots: code from conventions and COCOS labels first, then one Jev decision per open slot">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="9.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-blocks" content="jt60sa-imas-maps">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;jt60sa-discovery-completion#s56&quot;], &quot;s7&quot;: [&quot;jt60sa-discovery-completion#s56&quot;]}">
+  <meta name="plan-sprint" content="S17">
+  <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-08">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why a chain of bounded decisions</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The map stage writes the IMAS bindings, so it is the step whose errors reach a user's data. Today
+      <code>map_signals</code> in <code>imas_codex/ids/mapping.py</code> makes one open-ended reasoning call per target
+      section. That call returns a <code>SignalMappingBatch</code> whose entries carry a free-form Python
+      <code>transform_expression</code>, a <code>cocos_label</code>, units and a confidence. The model therefore settles
+      every part of a binding at once: which field, the sign, any 2π factor, the unit conversion and the index layout. Its
+      prompt carries the source's representative COCOS, the DD's COCOS and the paths that need a flip, but nothing makes
+      the sign it writes agree with them.
+    </p>
+    <p>
+      Most of those parts are not open questions. <code>imas_codex/ids/transforms.py</code> already computes a COCOS sign
+      or factor deterministically, as <code>cocos_sign(label, cocos_in=..., cocos_out=...)</code>, from a DD field's
+      <code>cocos_transformation_type</code> and the two conventions. <code>convert_units</code> converts units through
+      pint. What is missing is the source's own convention, which <code>jt60sa-discovery-completion</code> §56 now
+      establishes per source and per quantity with evidence. Once that is known, the sign and factor of a
+      COCOS-labelled field follow in code. What is left is genuinely uncertain, and each such slot is a bounded choice
+      that Jev answers well: a sign of 1 or −1, a factor of 1, 2π or 1/2π, one of the unit readings pint offers, or one
+      of a few index layouts. A local-lane model handles a slot only when it is not Jev-shaped, and anything still
+      uncertain is escalated rather than guessed.
+    </p>
+    <figure>
+      <img src="/imas-codex/figures/mapping-decision-chain/decision-chain.svg"
+           alt="A selected source and DD field pass to code resolution from conventions and COCOS labels, then one Jev decision per open slot, with a local-lane model for slots that are not Jev-shaped, then a transform composed by code, then validation">
+      <figcaption>
+        The proposed map stage for one binding. Code settles every slot it can from the source's persisted conventions
+        and the DD field's COCOS label; Jev decides each slot still open, reading reranked context from code, wiki,
+        documents and signals; a local-lane model takes only slots that are not Jev-shaped. Code composes the transform
+        from the settled slots, so no model writes an expression.
+      </figcaption>
+    </figure>
+    <p>
+      Candidate selection, which picks the target field, already works this way: Jev judges each candidate and the
+      assign stage chooses among the shortlist. This plan extends the same discipline to the transform. Mapping stays
+      opt-in in <code>imas-codex discover FACILITY</code> until this plan's proof lands, under the
+      <code>mapping-stage-default</code> decision in <code>facility-discovery-sequence</code>.
+    </p>
+
+    <h2 id="s2">§2 — Census of the decisions inside today's bindings</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Before the schema changes, measure what the current bindings decide. For every <code>MAPS_TO_IMAS</code> binding in
+      the graph, the census reads its <code>transform_expression</code>, <code>cocos_label</code>, source and target units,
+      and the target field's <code>cocos_transformation_type</code>. It classifies each expression into the slots it sets:
+      sign, constant factor, unit conversion, COCOS sign call, index or slice, and anything else. Then it counts, per
+      facility and per slot, how many a code resolver could have set from the DD label, pint and a known source convention,
+      and how many need a judgment. It also counts the bindings whose written sign disagrees with
+      <code>cocos_sign</code> for the source's recorded COCOS, where one is recorded, because those are the errors this
+      plan exists to remove.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-decision-census</code>, role test, 1 h, live graph, bounded to
+      <code>MAPS_TO_IMAS</code> and its endpoints. Write paths: <code>docs/research/mapping-decision-census.html</code>,
+      <code>docs/figures/mapping-decision-census</code> and its fragment. <strong>Done when</strong> the research document
+      holds the per-facility, per-slot table of resolvable and judged counts, the count of COCOS sign disagreements with
+      examples, and the Cypher it ran, and every number in it is reproduced by that Cypher on the live graph.
+    </p>
+    <p>
+      <code>mapping-decision-census</code> (84aa7ab5e) found nothing to measure: the live graph holds no
+      <code>MAPS_TO_IMAS</code> binding and no relationship carrying a <code>transform_expression</code>. Re-checked directly on
+      2026-10-08: 0 <code>MAPS_TO_IMAS</code> edges. The 53 <code>IMASMapping</code> nodes, all JET, link only to their sources.
+      146 JET SignalSources read <code>mapping_status = validated</code> with no binding edge, which is stale state. So the
+      census moves to the population the chain will actually decide: the selected or escalated
+      <code>MAPPING_CANDIDATE</code> edges. For JT-60SA there are 2,958 such edges over 151 sources. 398 target fields carry a
+      <code>cocos_transformation_type</code>, the representative signal's <code>unit</code> is set on 1,924 edges, and every
+      target has a DD unit. <strong>Node</strong> <code>mapping-slot-census-candidates</code>, role implement, 0.75 h. It
+      extends <code>docs/research/mapping-decision-census.html</code> with, per facility and per slot, how many candidate
+      edges code can settle given a known source convention, how many need a judgment, and for unit slots how many pint
+      converts exactly. Write paths: <code>docs/research/mapping-decision-census.html</code>,
+      <code>docs/figures/mapping-decision-census</code> and its fragment. <strong>Done when</strong> that table and the Cypher
+      producing it are in the document, every number reproduces on the live graph, and <code>reckon audit-doc</code> reports
+      no error.
+    </p>
+
+    <h2 id="s3">§3 — Typed slots replace the free-form transform</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      A binding's transform becomes a set of typed slots, each with a value, the way it was settled
+      (<em>code</em>, <em>jev</em>, <em>local</em> or <em>escalated</em>) and its evidence: <code>sign</code>,
+      <code>scale_factor</code>, <code>unit_conversion</code>, <code>cocos_label</code> and an index layout. One composer in
+      <code>imas_codex/ids/transforms.py</code> builds the <code>transform_expression</code> from the settled slots, so the
+      expression stored on <code>MAPS_TO_IMAS</code> is always produced by code and always uses names that
+      <code>execute_transform</code> accepts. A binding with any slot still open is not written; it is escalated with the
+      open slots named. The slot set and its kinds come from the §2 census, so the model covers what bindings actually
+      need, not a guess.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-slots</code>, role implement, 2 h, after §2. Write paths:
+      <code>imas_codex/ids/models.py</code>, <code>imas_codex/ids/transforms.py</code>,
+      <code>tests/ids/test_mapping_slots.py</code> and its fragment. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests showing every slot combination
+      the census found composes to an expression <code>execute_transform</code> evaluates to the expected value, a binding
+      with an open slot is refused with the slot named, and a COCOS slot composes through <code>cocos_sign</code>.
+    </p>
+
+    <h2 id="s4">§4 — Conventions settle what code can settle</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      A resolver runs before any model. It reads the source's conventions through the loader
+      <code>jt60sa-discovery-completion</code> §56 adds, planned as
+      <code>get_conventions(facility, source) -&gt; {cocos, psi_factor, quantities: {name: {sign, reference, evidence, confidence}}}</code>.
+      It reads the DD field's <code>cocos_transformation_type</code> and the DD's own COCOS. A COCOS-labelled field whose
+      source COCOS is known gets its sign and factor from <code>cocos_sign</code>. A quantity with a recorded per-quantity
+      sign, such as Ip or Bt direction relative to φ, a flux-loop or pickup-coil normal, or a loop-voltage sign, gets that
+      sign. Units come from pint when the source unit is known. An absent convention leaves its slot open: the loader
+      never defaults a value, and neither does the resolver. Each settled slot records the convention's evidence and
+      confidence beside its value, and the persisted conventions are injected into every later decision's state next to
+      the DD COCOS label, so a Jev decision starts from what is known.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-slot-resolution</code>, role implement, 1.5 h, after §3 and the §56 loader. Write
+      paths: <code>imas_codex/ids/slot_resolution.py</code>, <code>tests/ids/test_slot_resolution.py</code> and its
+      fragment. <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with
+      tests showing a psi_like field with a known source COCOS settles sign and factor in code, a per-quantity sign
+      overrides nothing it should not, an absent convention leaves the slot open, and every settled slot carries its
+      evidence.
+    </p>
+
+    <h2 id="s5">§5 — One Jev decision per open slot</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Each slot still open becomes one bounded Jev question. The options are the slot's own: 1 or −1 for a sign; 1, 2π or
+      1/2π for a factor; the readings pint offers for an ambiguous unit; the candidate layouts for an index. The state is
+      the source's detail, the target field's documentation and COCOS label, the injected conventions and the §6 context.
+      Independent slots of one binding go in one request, as Jev runs them in parallel. A slot is accepted when its
+      answer clears an acceptance threshold set from the §2 census. Below it, the slot goes to escalation with Jev's
+      distribution as evidence. A slot that is not a bounded choice, such as an unusual index expression, goes to the
+      local-lane model with the same state, and its answer must still name one of the composer's slot kinds. When the
+      OpenRouter key is absent, the chain skips Jev and sends open slots to the local model, as the candidate stage
+      already does.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-slot-judgment</code>, role implement, 2 h, after §4. Write paths:
+      <code>imas_codex/ids/slot_judgment.py</code>, <code>imas_codex/ids/mapping.py</code>,
+      <code>tests/ids/test_slot_judgment.py</code> and its fragment. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests showing open slots of one
+      binding asked in one Jev request, a low-confidence answer escalated with its distribution, a non-bounded slot routed
+      to the local model, the no-key path using the local model only, and <code>map_signals</code> no longer asking a
+      model for a transform expression.
+    </p>
+
+    <h2 id="s6">§6 — Reranked context from every source kind</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The map stage's context today is a fixed set of wiki and code snippets gathered per IDS. The decision state instead
+      takes, per source, what the hybrid search finds across code, wiki pages, documents and signals, reranked by Jev
+      against the binding being decided through the shared core in <code>imas_codex/discovery/base/judgment.py</code>.
+      The top items by relevance go into the state, each labelled with its kind and origin, so a sign decision can read
+      the code that writes the signal and the wiki page that defines its direction.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-reranked-context</code>, role implement, 1.25 h, after §3. Write paths:
+      <code>imas_codex/ids/slot_context.py</code>, <code>tests/ids/test_slot_context.py</code> and its fragment.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests
+      showing all four kinds retrieved and reranked through the shared core, a kind with no hits omitted rather than
+      padded, and the no-key path falling back to retrieval order.
+    </p>
+
+    <h2 id="s7">§7 — JT-60SA proof</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Run <code>imas-codex discover jt-60sa --only mapping --limit N</code> on a bounded cohort of IDSs whose sources have
+      persisted conventions, once §4 to §6 and the §56 conventions have landed. The evidence fragment tabulates every
+      slot by how it was settled (code, Jev, local, escalated), lists the escalations with their open slots, and compares
+      the signs written against the conventions and against <code>cocos_sign</code>. This is the run that lets the
+      <code>mapping-stage-default</code> decision be revisited.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-chain-jt60sa-proof</code>, role test, 1 h. Write paths:
+      <code>docs/evidence/fragments/mapping-decision-chain/mapping-chain-jt60sa-proof.html</code>.
+      <strong>Done when</strong> the fragment holds the slot table and the escalation list, and no written binding's sign
+      disagrees with its source's recorded convention.
+    </p>
+
+    <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-mdc-1" data-section="s4" data-gated-sections="s4,s7" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">a loader returns each JT-60SA source&#x27;s persisted conventions, COCOS index, psi factor and per-quantity signs with evidence, leaving undetermined values absent</h4>
+    <p class="r-gate-required-evidence">jt60sa-discovery-completion#s56</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mdc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-08" data-recommends-skill="/reckon-build mapping-decision-chain §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the decisions inside today&#x27;s bindings</h4>
+    <div class="r-fu-body">The census sets the slot kinds §3 models and the acceptance threshold §5 uses.</div>
+    <pre class="r-fu-prompt">/reckon-build mapping-decision-chain §2</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T095318848097-mapping-decision-census" data-who="reckon-build" data-when="2026-10-08T10:01:18Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/mapping-decision-chain/mapping-decision-census.html#mapping-decision-census-result records a live census of 0 MAPS_TO_IMAS bindings, 0 code-settleable and 0 judgment cases in every facility-slot row, and 0 assessable COCOS sign disagreements; 2,958 candidate edges prove the graph contains mapping data.</p></div>
+</div>
+</section>
+</main>
+</body>
+</html>

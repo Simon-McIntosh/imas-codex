@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/discover/sequence.py:run"
+  ],
+  "completed_at": "2026-10-08T09:59:17.428Z",
+  "dispatched_at": "2026-10-08T09:34:40Z",
+  "findings": [
+    {
+      "file": "imas_codex/schemas/facility.yaml",
+      "line": "666",
+      "severity": "follow-on",
+      "text": "follow-on: the file still reads \"are eligible for re-scanning by discover code --rescan\" at the reviewed head; plan section 3 assigns the facility.yaml descriptions to this node alongside common.yaml, and the run changed common.yaml but deferred facility.yaml to a fragment note, so one plan-owned file keeps a retired subcommand spelling."
+    },
+    {
+      "file": "docs/architecture/discovery.md",
+      "line": "191",
+      "severity": "follow-on",
+      "text": "follow-on: the page the node rewrote still documents `imas-codex discover static` (about lines 83, 107, 191, 213-221, 437-438) and `discover status tcv -d static` (lines 222-223), but no `command(\"static\")` is registered in imas_codex/cli/discover/ and `static` is not a value of DISCOVERY_DOMAINS in imas_codex/cli/discover/common.py:33, so the page names a subcommand and a domain value that do not exist."
+    },
+    {
+      "file": "docs/architecture/signals.md",
+      "line": "44",
+      "severity": "follow-on",
+      "text": "follow-on: the options table keeps `--cost-limit ... 5.0` while the documented bare command defaults to 25.0 (imas_codex/cli/discover/sequence.py cost-limit default) and the sibling imas_codex/discovery/signals/README.md was updated to 25.00 in this same run, so one command carries two different documented defaults."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T092030551088-retire-subcommand-prose/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest leaves baseline_suite and after_suite empty while recording its gates only through test_logs, so the harness derives added_failure_count as unmeasured for this run rather than a number."
+    }
+  ],
+  "gate_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093432176177-review-of-retire-subcommand-prose/review-gate-rerun.log",
+    "result": "89 passed, 1 warning in 39.38s, EXIT=0"
+  },
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit against base 73155124e; 516e9280d moves imas_codex/cli/README.md, docs/zellij-quickstart.md, imas_codex/schemas/common.yaml and the four facility YAML comments to the bare command; 9828b4103 rewrites docs/architecture/discovery.md, docs/architecture/signals.md, imas_codex/discovery/README.md, imas_codex/discovery/signals/README.md and imas_codex/llm/prompts/discovery/roots.md; 747d2860 adds the fragment and defers facility.yaml.",
+    "done_when": "the node's done_when is a grep over the files it owns, `uv run build-models --force`, and `uv run --no-sync pytest tests/graph/test_schema_context.py tests/test_cli.py -p no:cacheprovider`; I reproduced the build-models and pytest arms at 747d28608 in a scratch extraction \u2014 build-models EXIT=0 and pytest 89 passed, 1 warning, EXIT=0 \u2014 and the run records grep-head.log MATCHES=0. The grep gate, as scripted, covers only the 12 changed files; facility.yaml is owned but outside its path list.",
+    "goal": "the node owns the retired-subcommand prose in 13 files and must move every mention of the retired `discover paths|code|documents|wiki|signals|map` subcommands, and of `--root`, `--score-only` and `--path-limit`, to the bare `imas-codex discover FACILITY` spelling; at head 747d28608 a grep over the 12 files the run changed finds 0 retired spellings, but imas_codex/schemas/facility.yaml:666 still reads \"are eligible for re-scanning by discover code --rescan\", and plan section 3 assigns facility.yaml to this same node.",
+    "manifest": "read; status complete, commits [516e9280d, 9828b4103, 747d2860], negative_control_log .../retire-subcommand-prose/negative-control.log (restores one retired spelling in a scratch README, grep returns line 21, EXIT=0), baseline_suite and after_suite both empty so the derived added-failure count is unmeasured.",
+    "write_paths": "the run declared the 12 prose files plus docs/evidence/fragments/facility-discovery-sequence/retire-subcommand-prose.html and docs/figures/facility-discovery-sequence/retire-subcommand-prose; git diff --stat 73155124e..747d28608 touches exactly those 12 and the fragment, all inside the declared scope, and no figure was produced."
+  },
+  "justifications": {
+    "durability": "no test guards the prose \u2014 tests/test_cli.py exercises command behaviour, not the documentation text \u2014 so a retired spelling reintroduced into any of the 12 files stays green and the sweep is a one-shot grep rather than a durable guard.",
+    "evidence": "the build-models and pytest arms of the done_when both reproduce at 747d28608 (EXIT=0; 89 passed, 1 warning, EXIT=0) and grep-head.log records MATCHES=0, but the run's manifest leaves baseline_suite and after_suite empty so the added-failure count derives as unmeasured.",
+    "fit": "the three commits use conventional docs(discovery) subjects with bodies that state what changed and why (516e9280d, 9828b4103, 747d2860) with no plan, section or ticket label in the subject, body or symbols, matching the surrounding documentation idiom.",
+    "goal_fidelity": "the 12 files the run changed are clean at head, but imas_codex/schemas/facility.yaml:666 still names the retired `discover code` subcommand and plan section 3 assigns that file's descriptions to this node, so the deliverable is short by one of the 13 files it owns.",
+    "reuse": "the change adds no new command or parser; it moves prose onto the single `imas-codex discover FACILITY` surface the sequence runner already exposes rather than documenting a second interface.",
+    "scope_discipline": "git diff --stat 73155124e..747d28608 touches only the 12 declared prose files and the declared fragment, with nothing outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "negative_control_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T092030551088-retire-subcommand-prose/negative-control.log",
+    "result": "recorded in the reviewed run, not rerun independently: restoring one retired spelling in a scratch imas_codex/discovery/README.md makes grep return line 21 with the retired command, EXIT=0"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node owns the retired-subcommand prose in 13 files and must move every mention of the retired `discover paths|code|documents|wiki|signals|map` subcommands, and of `--root`, `--score-only` and `--path-limit`, to the bare `imas-codex discover FACILITY` spelling; at head 747d28608 a grep over the 12 files the run changed finds 0 retired spellings, but imas_codex/schemas/facility.yaml:666 still reads \"are eligible for re-scanning by discover code --rescan\", and plan section 3 assigns facility.yaml to this same node.\nVERDICT done_when: the node's done_when is a grep over the files it owns, `uv run build-models --force`, and `uv run --no-sync pytest tests/graph/test_schema_context.py tests/test_cli.py -p no:cacheprovider`; I reproduced the build-models and pytest arms at 747d28608 in a scratch extraction \u2014 build-models EXIT=0 and pytest 89 passed, 1 warning, EXIT=0 \u2014 and the run records grep-head.log MATCHES=0. The grep gate, as scripted, covers only the 12 changed files; facility.yaml is owned but outside its path list.\nVERDICT write_paths: the run declared the 12 prose files plus docs/evidence/fragments/facility-discovery-sequence/retire-subcommand-prose.html and docs/figures/facility-discovery-sequence/retire-subcommand-prose; git diff --stat 73155124e..747d28608 touches exactly those 12 and the fragment, all inside the declared scope, and no figure was produced.\nVERDICT manifest: read; status complete, commits [516e9280d, 9828b4103, 747d2860], negative_control_log .../retire-subcommand-prose/negative-control.log (restores one retired spelling in a scratch README, grep returns line 21, EXIT=0), baseline_suite and after_suite both empty so the derived added-failure count is unmeasured.\nVERDICT diff: read commit by commit against base 73155124e; 516e9280d moves imas_codex/cli/README.md, docs/zellij-quickstart.md, imas_codex/schemas/common.yaml and the four facility YAML comments to the bare command; 9828b4103 rewrites docs/architecture/discovery.md, docs/architecture/signals.md, imas_codex/discovery/README.md, imas_codex/discovery/signals/README.md and imas_codex/llm/prompts/discovery/roots.md; 747d2860 adds the fragment and defers facility.yaml.\nCALL_SITES: imas_codex/cli/discover/sequence.py:run\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the 12 files the run changed are clean at head, but imas_codex/schemas/facility.yaml:666 still names the retired `discover code` subcommand and plan section 3 assigns that file's descriptions to this node, so the deliverable is short by one of the 13 files it owns.\nSCORE evidence: 18\nJUSTIFICATION evidence: the build-models and pytest arms of the done_when both reproduce at 747d28608 (EXIT=0; 89 passed, 1 warning, EXIT=0) and grep-head.log records MATCHES=0, but the run's manifest leaves baseline_suite and after_suite empty so the added-failure count derives as unmeasured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 73155124e..747d28608 touches only the 12 declared prose files and the declared fragment, with nothing outside the fence.\nSCORE durability: 8\nJUSTIFICATION durability: no test guards the prose \u2014 tests/test_cli.py exercises command behaviour, not the documentation text \u2014 so a retired spelling reintroduced into any of the 12 files stays green and the sweep is a one-shot grep rather than a durable guard.\nSCORE fit: 19\nJUSTIFICATION fit: the three commits use conventional docs(discovery) subjects with bodies that state what changed and why (516e9280d, 9828b4103, 747d2860) with no plan, section or ticket label in the subject, body or symbols, matching the surrounding documentation idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new command or parser; it moves prose onto the single `imas-codex discover FACILITY` surface the sequence runner already exposes rather than documenting a second interface.\nFINDING imas_codex/schemas/facility.yaml:666 follow-on: the file still reads \"are eligible for re-scanning by discover code --rescan\" at the reviewed head; plan section 3 assigns the facility.yaml descriptions to this node alongside common.yaml, and the run changed common.yaml but deferred facility.yaml to a fragment note, so one plan-owned file keeps a retired subcommand spelling.\nFINDING docs/architecture/discovery.md:191 follow-on: the page the node rewrote still documents `imas-codex discover static` (about lines 83, 107, 191, 213-221, 437-438) and `discover status tcv -d static` (lines 222-223), but no `command(\"static\")` is registered in imas_codex/cli/discover/ and `static` is not a value of DISCOVERY_DOMAINS in imas_codex/cli/discover/common.py:33, so the page names a subcommand and a domain value that do not exist.\nFINDING docs/architecture/signals.md:44 follow-on: the options table keeps `--cost-limit ... 5.0` while the documented bare command defaults to 25.0 (imas_codex/cli/discover/sequence.py cost-limit default) and the sibling imas_codex/discovery/signals/README.md was updated to 25.00 in this same run, so one command carries two different documented defaults.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T092030551088-retire-subcommand-prose/manifest.md:21 follow-on: the reviewed manifest leaves baseline_suite and after_suite empty while recording its gates only through test_logs, so the harness derives added_failure_count as unmeasured for this run rather than a number.\n",
+  "review_run_id": "r-20261008T093432176177-review-of-retire-subcommand-prose",
+  "reviewed_base_sha": "73155124ec4c47499c081f2b6f3e5cfa7eac0b74",
+  "reviewed_head_sha": "747d28608e768f582c09ca3b1e859d4d627d55ca",
+  "reviewed_run_id": "r-20261008T092030551088-retire-subcommand-prose",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T09:57:57+00:00",
+  "total": 99,
+  "verdict": "SOUND WITH FINDINGS"
+}

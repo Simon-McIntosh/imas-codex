@@ -63,7 +63,7 @@ compute_locations:
     service_job_name: codex-neo4j
 
 # Data system configuration for signal discovery
-# Used by: imas-codex discover signals iter
+# Used by: imas-codex discover iter --only signals
 data_systems:
   # IMAS is ITER's native data format.
   imas:

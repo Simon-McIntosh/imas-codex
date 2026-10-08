@@ -1,0 +1,129 @@
+<section id="jt60sa-cocos-study">
+  <h2 id="jt60sa-cocos-study-heading">JT-60SA source conventions for mapping</h2>
+  <p id="jt60sa-cocos-study-summary">Read-only study on 2026-10-08. The proposed
+    <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/jt60sa-conventions.json">conventions block</a>
+    holds eight source entries and seven explicit unknowns. A single facility COCOS
+    would be wrong: three hashed G-EQDSK examples declare indices 2, 7 and 17.
+    The local SELENE writer fits 2; FAME and generic EQDB records have no
+    demonstrated universal index. Raw EDDB signals have signs and sensor geometry,
+    not an equilibrium COCOS.</p>
+
+  <h3 id="jt60sa-cocos-study-machine">Machine orientation and reference frame</h3>
+  <p id="jt60sa-cocos-study-direction">The
+    <a href="https://www.jt60sa.org/wp/wp-content/uploads/2021/02/JT-60SA_Res_Plan-5.pdf">JT-60SA Research Plan, Appendix G</a>
+    specifies <strong>clockwise plasma current and clockwise toroidal field from
+    above</strong> for reference operation, with both reversible. This is high
+    confidence for the standard operating direction, not a promise about every
+    discharge. EDAS's <code>edas_cdcalc_api.py:156</code> describes its beam
+    geometry PHI from the horizontal X axis as anti-clockwise. We propose that
+    counterclockwise φ as the mapping reference (medium confidence, because this
+    one API does not define every writer's native φ). In that reference frame,
+    standard Ip and Bt are negative. R points outward and Z upward.</p>
+  <p id="jt60sa-cocos-study-definition">The
+    <a href="https://www.epfl.ch/research/domains/swiss-plasma-center/wp-content/uploads/2018/10/Sauter_COCOS_Tokamak_Coordinate_Conventions.pdf">COCOS definition, Table I and equations 12–13</a>
+    distinguishes φ direction, the sign of the poloidal field equation,
+    ψ/2π versus full ψ, and q orientation. Indices 2 and 7 use ψ/2π;
+    17 uses full ψ. A positive Ip or Bt in a file is defined relative to
+    that file's φ, so it cannot by itself identify the machine direction.</p>
+
+  <h3 id="jt60sa-cocos-study-measures">Direct read receipts</h3>
+  <table id="jt60sa-cocos-study-equilibria">
+    <thead><tr><th>Source and shot</th><th>Stored Bt proxy / Ip</th><th>ψ edge − axis</th><th>q at axis</th><th>Convention</th></tr></thead>
+    <tbody>
+      <tr><td>FLEDD EQDB 1, E101163, 4.700 s</td><td>BTV +6.660 T m; TTCU +0.994504 MA</td><td>SIV +0.445550</td><td>+1.00667</td><td>SELENE sample: 2, medium</td></tr>
+      <tr><td>FLEDD FAME 0, 45218, 3.200 s</td><td>BTV +5.207183 T m; TTCU +0.436174 MA</td><td>SIV +0.303198</td><td>+0.999963</td><td>positive signs; index unknown, 2 candidate</td></tr>
+      <tr><td>SA G-EQDSK, E101011, 6.800 s</td><td>Bcentr +2.030714 T; current +491265 A</td><td>+0.415981</td><td>+1.000869</td><td>2, high</td></tr>
+      <tr><td>LIUQE/MEQ G-EQDSK, E101011, 6.800 s</td><td>Bcentr +2.030715 T; current +492111 A</td><td>−3.003336</td><td>+1.256678</td><td>7, high</td></tr>
+      <tr><td>CHEASE G-EQDSK, E101025, 5.900 s</td><td>Bcentr +1.6921 T; current +975208 A</td><td>−3.070393</td><td>+1.0012</td><td>17, high</td></tr>
+    </tbody>
+  </table>
+  <p id="jt60sa-cocos-study-fledd-method">Each FLEDD row came from a successful
+    <code>eqdata_get_</code> (IRET=0), followed by successful
+    <code>eqdbl_get_</code> calls for BTV, TTCU, SAXIS, SIV and QQV (five
+    IRET=0 returns per record). The FAME time list and ψ grid had already been
+    positively read in the
+    <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html">FLEDD receipt</a>.
+    <code>/analysis/src/safledd/eqitem_get.f:188–208</code> defines the
+    five field meanings. G-EQDSK numbers are the first 20 numeric header
+    fields and q array of the three
+    <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/file-equilibria-access.html">hash-pinned examples</a>.
+    The CHEASE header says <code>COCOS=17</code>; the other two file names
+    declare 02 and 07. All five reads returned data rather than an empty
+    instrument response. FAME 45218 is a legacy numbered shot, so its signs
+    describe that record's storage rather than a JT-60SA E-shot.</p>
+  <p id="jt60sa-cocos-study-selene">SELENE's
+    <code>SAselene_v2.0_forPSRC/mgfild.f:4–41</code> computes
+    internal BR=(1/R)∂ψ/∂Z and BZ=−(1/R)∂ψ/∂R, then negates
+    them into the measured-field projections;
+    <code>efitout.f:19–30</code> says its ψ is Wb/rad, and
+    <code>eqdbput.f:219–231</code> writes ψ, BTV, TTCU and q without a
+    sign conversion. The projected field signs, clockwise φ, increasing ψ,
+    positive q and ψ/2π fit COCOS 2 (medium confidence for EQ31 because
+    its binary record has no COCOS tag). The SA G-EQDSK writer explicitly carries
+    the same signs and COCOS02 label (high). DBSEL invokes getseldata and
+    <code>SAselene.ex 0 1 -2 mgt</code>; <code>eqdbput.f:23–29</code>
+    routes −2 to the local EQ31 writer, so its output inherits the SELENE
+    convention (medium). FAME's successful BTV/TTCU/SIV/QQV signs support
+    the same candidate but do not establish its φ or BR/BZ equation; keep
+    its COCOS null. Generic FLEDD EQDB also stays null because the interface
+    returns no COCOS tag and other database IDs may have other writers.</p>
+  <p id="jt60sa-cocos-study-native-signs">The LIUQE/MEQ and CHEASE examples
+    have positive current and Bcentr in COCOS 7 and 17 files, whose φ is
+    counterclockwise under Table I. The machine reference is clockwise.
+    The same E101011 shot even has a positive-current COCOS02 SA file.
+    These file-native signs must not be copied into a physical-direction
+    assertion without resolving the writers' sign transformation. Their
+    COCOS labels and ψ trends are established; that transformation is not.</p>
+
+  <h3 id="jt60sa-cocos-study-eddb">EDDB measurements and sensor normals</h3>
+  <p id="jt60sa-cocos-study-eddb-values"><code>eddb_pwrapper.eddbreadTime</code>
+    opened EDDB and returned IRC=0 and 41 samples per channel for E101163,
+    5.000–5.010 s: <code>PSRC/Ip</code> +994088.375 A,
+    <code>calIp</code> +986436.375 A and <code>comIp</code> +1000000 A
+    at the first sample. At the same shot and 5.100 s, raw
+    <code>PSRC/Ip</code> is +993885.9375 A (IRC=0), while FLEDD's
+    SELENE <code>TTCU</code> is +0.992992906 MA (load and getter IRET=0),
+    agreeing in sign and within 0.09% in magnitude. Positive stored Ip
+    therefore tracks SELENE's clockwise-positive COCOS 2 current in this
+    observed discharge; preserve its sign before coordinate conversion.
+    The same call returned <code>magFluxLp1</code> −0.624938 Wb,
+    <code>magFluxLp7</code> +1.085777 Wb and <code>magPbTC1</code>
+    +0.108064 T. Opposite loop signs make a common normal an unsafe
+    inference. <code>getseldata_v4.2/eddbaccess.h:49–54</code> names the
+    raw PID channels. Its <code>outeddb.c:170–176</code> derives BTV
+    from PID <code>1625 O293</code> with the positive scale
+    <code>2.25×2.96/25.7</code>; the PID's actual sign was not read, so
+    raw EDDB Bt polarity remains open.</p>
+  <p id="jt60sa-cocos-study-sensors">The
+    <a href="/imas-codex/evidence/receipts/jt60sa-selene-sensor-order.json">sensor-order receipt</a>
+    joins 27 loop channels to R,Z positions and 17 pickup channels to
+    R,Z,angle rows in <code>getseldata_v4.2/UTL/getseldata/geo.in:484–529</code>.
+    <code>inpgeo.c:108–124</code> reads the third probe column into
+    <code>omeg</code>; <code>outeddb.c:254–288</code> passes it as
+    <code>DMPT0</code>; <code>mgprc.f:13–24</code> converts degrees to
+    radians; and <code>mgfild.f:19–41</code> forms the model's signed
+    radial/vertical projection with cos and sin. This establishes the
+    modeled probe axis in the R–Z plane. It does not establish the
+    cable winding polarity of the measured channel. The loop input has
+    R,Z only: its positive surface normal is not recorded there. The
+    getseldata namelist also omits the normal-probe angles and channels,
+    so they cannot be inferred from its tangential probe list.</p>
+  <p id="jt60sa-cocos-study-flux-scale">There is a live 2π discrepancy in
+    the two getseldata source paths: <code>geteddb.c:598</code> divides
+    each raw flux-loop sample by 2π as Wb → Wb/rad; the
+    <code>outeddb.c:91–92</code> path passes that array unchanged while
+    labelling it Wb/2π. The direct PSRC loop reads above report Wb.
+    Determine which conversion DBSEL actually runs before mapping loop
+    measurements into SELENE ψ.</p>
+
+  <h3 id="jt60sa-cocos-study-open">Values still undetermined</h3>
+  <ol id="jt60sa-cocos-study-unknown-list">
+    <li>FAME's universal COCOS and φ/Bp equation; index 2 is a candidate from one sign-consistent sample.</li>
+    <li>COCOS of every EQDB ID and writer exposed by FLEDD, beyond the observed SELENE record.</li>
+    <li>EDDB PID 1625 O293's measured Bt polarity relative to clockwise operation.</li>
+    <li>Each flux loop's winding polarity and positive surface normal.</li>
+    <li>Each pickup coil's wiring polarity relative to its geometric angle, plus the omitted normal-probe geometry.</li>
+    <li>The active getseldata flux-loop 2π conversion in DBSEL.</li>
+    <li>The LIUQE and CHEASE writers' file-sign transformation relative to physical clockwise Ip and Bt.</li>
+  </ol>
+</section>

@@ -18,11 +18,11 @@ enabling crash recovery and idempotent operations.
 
 ```bash
 # Discover directory structure (foundation)
-uv run imas-codex discover paths tcv --cost-limit 5.0
+uv run imas-codex discover tcv --only paths --cost-limit 5.0
 
-# Phase-separated discovery (scan requires SSH, score is offline)
-uv run imas-codex discover paths tcv --scan-only    # Fast SSH enumeration
-uv run imas-codex discover paths tcv --score-only   # Offline LLM scoring
+# Separate scanning from graph-only scoring
+uv run imas-codex discover tcv --only paths --scan-only    # Fast SSH enumeration
+uv run imas-codex discover tcv --only paths --flush        # Offline LLM scoring
 
 # Check discovery progress
 uv run imas-codex discover status tcv
@@ -39,24 +39,17 @@ uv run imas-codex discover clear tcv --force
 
 ```
 imas-codex discover
-├── paths <facility>    # Scan and score directory structure
-│   ├── --scan-only     # SSH enumeration only (no LLM scoring)
-│   ├── --score-only    # LLM scoring only (no SSH, offline)
-│   ├── --cost-limit    # Maximum LLM spend in USD
-│   ├── --focus         # Natural language focus for scoring
-│   └── --threshold     # Minimum score to expand paths
-├── code <facility>     # Find source files [PLACEHOLDER]
-├── docs <facility>     # Find documentation [PLACEHOLDER]
-├── data <facility>     # Find data sources [PLACEHOLDER]
-├── status <facility>   # Show discovery statistics
-├── inspect <facility>  # Debug view of scanned/scored paths
-├── clear <facility>    # Clear paths (reset discovery)
+├── FACILITY            # Run the sequence in dependency order
+│   ├── --only DOMAIN   # Select domains (repeatable or comma-separated)
+│   ├── --scan-only     # Seed work without judging it
+│   ├── --flush         # Judge work already seeded in the graph
+│   ├── --focus ITEM    # Restrict to named items
+│   └── --topic TEXT    # Guide scoring and enrichment
+├── status FACILITY     # Show discovery statistics
+├── inspect FACILITY    # Debug view of scanned/scored paths
+├── clear FACILITY      # Reset discovery data
+├── seed FACILITY       # Add configured discovery roots
 └── sources             # Manage documentation sources
-    ├── list            # List all sources
-    ├── add             # Add a new source
-    ├── rm              # Remove a source
-    ├── enable          # Enable a paused source
-    └── disable         # Disable a source
 ```
 
 ## Discovery Pipeline
@@ -64,22 +57,21 @@ imas-codex discover
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   PATHS     │     │    CODE     │     │   INGEST    │
-│  discover   │────>│  discover   │────>│   (code)    │
-│   paths     │     │    code     │     │             │
+│   path      │────>│   code      │────>│   (code)    │
+│   stage     │     │   stage     │     │             │
 └─────────────┘     └─────────────┘     └─────────────┘
       │
       │ (parallel)
       ▼
 ┌─────────────┐     ┌─────────────┐
 │    DOCS     │────>│   INGEST    │
-│  discover   │     │   (docs)    │
-│    docs     │     │             │
+│  document   │     │   (docs)    │
+│   stage     │     │             │
 └─────────────┘     └─────────────┘
 ```
 
-Prerequisites:
-- `discover paths` must run first to identify high-value directories
-- `discover wiki` can run in parallel with paths (for wiki sources)
+The full command runs paths before code and documents. Wiki discovery is independent
+of paths. Use `--only` to run one domain when needed.
 
 ## Path Discovery State Machine
 
@@ -270,26 +262,27 @@ RETURN n.id  # Race: another worker may have claimed between SET and RETURN
 
 ## CLI Options
 
-### discover paths
+### Path options for `imas-codex discover FACILITY --only paths`
 
 ```bash
-uv run imas-codex discover paths <facility> [options]
+uv run imas-codex discover FACILITY --only paths [OPTIONS]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--focus TEXT` | (all dims) | Natural language focus for scoring |
-| `--cost-limit` | 10.0 | Maximum LLM cost in USD |
+| `--topic TEXT` | (none) | Natural language steer for scoring |
+| `--focus PATH` | (all paths) | Restrict work to paths under the named path |
+| `--cost-limit` | 25.0 | Maximum LLM cost in USD |
 | `--limit N` | (none) | Maximum paths to process |
 | `--threshold` | 0.7 | Minimum score to expand |
 | `--scan-workers` | 1 | SSH scanner workers (single connection) |
 | `--score-workers` | 4 | Parallel LLM scorer workers |
 | `--scan-only` | False | SSH enumeration only, no LLM scoring |
-| `--score-only` | False | LLM scoring only, no SSH (offline) |
+| `--flush` | False | LLM scoring only, no SSH (offline) |
 
-#### Phase Separation
+#### Scan and drain
 
-The `--scan-only` and `--score-only` flags enable phase-separated discovery:
+The `--scan-only` and `--flush` flags select the seeding and draining halves:
 
 | Phase | Requires | Cost | Use Case |
 |-------|----------|------|----------|
@@ -304,18 +297,18 @@ This is useful when:
 **Workflow:**
 ```bash
 # 1. Fast scan with SSH access (no LLM cost)
-uv run imas-codex discover paths iter --scan-only
+uv run imas-codex discover iter --only paths --scan-only
 
 # 2. Later: score from graph (no SSH needed)
-uv run imas-codex discover paths iter --score-only --cost-limit 20.0
+uv run imas-codex discover iter --only paths --flush --cost-limit 20.0
 
 # 3. Iterate: new scan expands scored paths above threshold
-uv run imas-codex discover paths iter --scan-only
+uv run imas-codex discover iter --only paths --scan-only
 ```
 
 **Notes:**
-- `--score-only` errors if graph is empty (must scan first)
-- `--score-only` only expands paths already scored above threshold
+- `--flush` reads work already seeded in the graph
+- `--flush` only expands paths already scored above threshold
 - Flags are mutually exclusive
 
 ### discover status
@@ -654,9 +647,4 @@ SIGINT/SIGTERM shutdown handlers, background graph refresh + ticker tasks.
 | `base/services.py` | Service health monitoring (graph, embed server, SSH) |
 | `base/transfer.py` | File transfer utilities (SCP, content extraction) |
 
-## Deprecation Notice
-
-The following command groups are deprecated and will be removed:
-
-- `imas-codex wiki` → Use `imas-codex discover wiki` instead
-- `imas-codex scout` → Use `imas-codex discover` instead
+Use `imas-codex discover FACILITY --only wiki` to run wiki discovery alone.

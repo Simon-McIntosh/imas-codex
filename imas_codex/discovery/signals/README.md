@@ -6,7 +6,7 @@ This module discovers, classifies, and validates data signals from fusion facili
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         discover signals <facility>                       │
+│                  imas-codex discover FACILITY --only signals              │
 └────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -147,31 +147,30 @@ Epoch detection results are cached locally:
 ~/.local/share/imas-codex/checkpoints/data/{facility}_{tree}_epochs.json
 ```
 
-Use `--force` to re-detect epochs:
+Use `--rescan` to revisit configured data sources:
 ```bash
-discover signals tcv --force  # Re-runs epoch detection
+imas-codex discover tcv --only signals --rescan
 ```
 
 ## CLI Options
 
 ```bash
-discover signals <facility> [OPTIONS]
+imas-codex discover FACILITY --only signals [OPTIONS]
 ```
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--tree TEXT` | Specific tree(s) to process | All configured |
-| `--shot INT` | Reference shot number | From settings |
-| `--cost-limit FLOAT` | Max LLM cost in USD | 0.50 |
-| `--signal-limit INT` | Max signals to enrich | Unlimited |
+| `--scanners TEXT` | Scanner types to run | All configured |
+| `--reference-shot INT` | Reference shot number | From settings |
+| `--cost-limit FLOAT` | Max LLM cost in USD | 25.00 |
+| `--limit INT` | Max signals to enrich | Unlimited |
 | `--scan-only` | Only run scan worker | False |
-| `--enrich-only` | Only run enrich worker | False |
-| `--force` | Re-detect epochs | False |
-| `--seed` | Run from epoch seeding | False |
+| `--flush` | Drain discovered signals without scanning | False |
+| `--rescan` | Revisit configured data sources | False |
 
 ## Expected Run Output
 
-For a fresh TCV run (`discover signals tcv --seed`):
+For a fresh TCV run (`imas-codex discover tcv --only signals`):
 
 ```
 Phase 1: Epoch Detection

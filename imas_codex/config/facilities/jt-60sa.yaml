@@ -34,7 +34,7 @@ remote_environment:
       path: /analysis/src/eddb
 
 # Data system configuration for signal discovery
-# Used by: imas-codex discover signals jt-60sa
+# Used by: imas-codex discover jt-60sa --only signals
 data_systems:
   # EDAS is JT-60SA's primary experiment data access system.
   # Wraps proprietary data formats with C/Fortran/Python APIs.

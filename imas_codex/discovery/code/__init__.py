@@ -5,7 +5,7 @@ worker architecture (scan → triage → score → code) following the
 same pattern as wiki discovery.
 
 Pipeline:
-    discover code <facility>
+    discover <facility> --only code
       1. SCAN: SSH enumerate code files from scored FacilityPaths
       2. TRIAGE: Per-dimension LLM scoring (discovered → triaged | skipped)
       3. ENRICH: rg pattern matching + preview extraction (triaged → enriched)

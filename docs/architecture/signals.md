@@ -5,31 +5,31 @@
 
 ## CLI Reference
 
-### `imas-codex discover signals <facility>`
+### `imas-codex discover FACILITY --only signals`
 
 Main entry point for signal discovery, enrichment, and validation.
 
 ```bash
 # Full pipeline — scan, enrich, and check
-imas-codex discover signals tcv
+imas-codex discover tcv --only signals
 
-# Scan only — discover signals without LLM enrichment
-imas-codex discover signals tcv --scan-only
+# Scan only — enumerate signals without LLM enrichment
+imas-codex discover tcv --only signals --scan-only
 
 # Enrich only — classify already-discovered signals
-imas-codex discover signals tcv --enrich-only
+imas-codex discover tcv --only signals --flush
 
 # Specific scanners with cost cap
-imas-codex discover signals tcv -s tdi,mdsplus -c 2.0
+imas-codex discover tcv --only signals --scanners tdi,mdsplus -c 2.0
 
 # JET PPF signals with signal limit
-imas-codex discover signals jet -s ppf -n 200
+imas-codex discover jet --only signals --scanners ppf --limit 200
 
 # JT-60SA EDAS signals
-imas-codex discover signals jt-60sa -s edas --scan-only
+imas-codex discover jt-60sa --only signals --scanners edas --scan-only
 
 # Focus on equilibrium signals
-imas-codex discover signals tcv -f equilibrium
+imas-codex discover tcv --only signals --topic equilibrium
 ```
 
 **Options:**
@@ -37,13 +37,13 @@ imas-codex discover signals tcv -f equilibrium
 | Option | Short | Type | Default | Description |
 |--------|-------|------|---------|-------------|
 | `FACILITY` | | arg | required | Facility ID (e.g., `tcv`, `jet`) |
-| `--scanners` | `-s` | str | auto | Comma-separated scanner types |
+| `--scanners` | | str | auto | Comma-separated scanner types |
 | `--scan-only` | | flag | `false` | Only scan, skip enrichment |
-| `--enrich-only` | | flag | `false` | Only enrich discovered signals |
-| `--signal-limit` | `-n` | int | none | Maximum signals to process |
-| `--cost-limit` | `-c` | float | `5.0` | Maximum LLM spend in USD |
+| `--flush` | | flag | `false` | Drain discovered signals without scanning |
+| `--limit` | | int | none | Maximum signals to process |
+| `--cost-limit` | `-c` | float | `25.0` | Maximum LLM spend in USD |
 | `--time` | | int | none | Maximum runtime in minutes |
-| `--focus` | `-f` | str | none | Focus on signal patterns |
+| `--topic` | | str | none | Steer signal enrichment toward a topic |
 | `--enrich-workers` | | int | `2` | Parallel enrichment workers |
 | `--check-workers` | | int | `4` | Parallel check workers |
 | `--reference-shot` | | int | auto | Override reference shot for validation |
@@ -333,9 +333,9 @@ discovery have already populated the graph:
 
 ```
 1. imas dd build          → IMASNode, DDVersion, Unit
-2. discover wiki          → WikiPage, WikiChunk (sign conventions, COCOS)
-2. discover paths/code    → FacilityPath, SourceFile, CodeChunk
-3. discover signals       → FacilitySignal, DataAccess (benefits from above)
+2. imas-codex discover FACILITY --only wiki          → WikiPage, WikiChunk (sign conventions, COCOS)
+3. imas-codex discover FACILITY --only paths,code    → FacilityPath, SourceFile, CodeChunk
+4. imas-codex discover FACILITY --only signals       → FacilitySignal, DataAccess (benefits from above)
 ```
 
 Run wiki and code discovery before signals for best enrichment context.

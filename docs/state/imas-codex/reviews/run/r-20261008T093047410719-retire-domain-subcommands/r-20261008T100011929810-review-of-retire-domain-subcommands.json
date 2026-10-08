@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "after arm complete at 29711e03 with 0 failures; base arm measured at d3bbc51a with 2 unrelated pre-existing test_release failures, so 0 added; the reviewed manifest itself leaves baseline_suite empty.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest tests/cli tests/test_cli.py tests/discovery/test_code_pipeline.py tests/discovery/test_signals_pipeline.py tests/discovery/test_code_ingested_rejudge.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100011929810-review-of-retire-domain-subcommands/review-gate-head.log",
+    "revision": "29711e0388534dd19ad0668553e6cdd955e1fddb"
+  },
+  "backend": "local",
+  "base_log_revision": "d3bbc51a106e46bac02d5a0d26a6b99b6d83b019",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest tests/cli tests/test_cli.py tests/discovery/test_code_pipeline.py tests/discovery/test_signals_pipeline.py tests/discovery/test_code_ingested_rejudge.py -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/cli/test_release.py::TestGitHubReadsUseTheSharedTransport::test_ci_check_reads_check_runs_for_head",
+      "tests/cli/test_release.py::TestGitHubReadsUseTheSharedTransport::test_missing_token_skips_the_ci_check_instead_of_failing"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100011929810-review-of-retire-domain-subcommands/review-gate-base.log",
+    "revision": "d3bbc51a106e46bac02d5a0d26a6b99b6d83b019"
+  },
+  "completed_at": "2026-10-08T10:18:25.017Z",
+  "dispatched_at": "2026-10-08T10:00:20Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/wiki.py",
+      "line": "147",
+      "severity": "follow-on",
+      "text": "follow-on: the wiki stage still prints a user-facing hint \"Or use --scan-only / --score-only to skip embedding\" at the reviewed head, but the wrapper that defined --score-only is deleted and the bare command rejects the flag (tests/cli/test_discover_wiki_stage.py:342 asserts \"No such option: --score-only\"), so the runtime message steers users to a command that errors."
+    },
+    {
+      "file": "imas_codex/cli/discover/wiki.py",
+      "line": "34",
+      "severity": "follow-on",
+      "text": "follow-on: the WikiStageOptions docstring still reads \"the settled spelling of the old ``--source``\" (line 35), \"the settled spelling of the old ``--score-only``\" (line 36) and \"the settled spelling of the old free-text ``--focus``\" (line 38) at the reviewed head; plan section 3 names exactly this changelog phrasing (\"the old --source\" in wiki.py) as something this node removes, and it is byte-identical to the base revision d3bbc51a."
+    },
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/retire-domain-subcommands.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the run's orientation_write_paths names this fragment and docs/figures/facility-discovery-sequence/retire-domain-subcommands, but neither exists at the reviewed head (git diff --stat d3bbc51a..29711e03 lists no docs/ path, and changed_paths omits the fragment), so the node's done-when scoping (\"outside the files the fragment lists\") cannot be checked against the fragment it was to write."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093047410719-retire-domain-subcommands/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest leaves baseline_suite empty and records only the after arm via after_suite (and test_logs), so the added-failure count is unmeasured from the reviewed run alone; I measured the base arm at d3bbc51a myself (2 failures, both pre-existing test_release GitHub-transport tests unrelated to this change) against the head arm (0 failures), giving 0 added."
+    }
+  ],
+  "head_log_revision": "29711e0388534dd19ad0668553e6cdd955e1fddb",
+  "item_aggregate": 4,
+  "item_verdicts": {
+    "diff": "852f6a6c2 deletes the six wrappers/registrations and updates callers and hints; 5090b34d9 migrates the tests; 29711e038 fixes the min-score default so documents keeps 0.5.",
+    "done_when": "1) no caller of a retired subcommand remains outside the fragment's files: verified by grep (0 in code) but the fragment was never written so its list is unavailable; 2) the tests that drove the six commands pass through the bare command: the full gate reproduced 543 passed, EXIT=0 at the reviewed head.",
+    "goal": "six retired wrappers and registrations deleted, code callers and source hints moved to `discover FACILITY --only DOMAIN`, and the ten test files migrated; grep over imas_codex/, tests/ and scripts/ finds 0 retired spellings in code; two named sub-items (wiki.py changelog docstring, wiki.py:147 --score-only hint) remain undone.",
+    "manifest": "status complete; commits 852f6a6c2, 5090b34d9, 29711e038; after_suite complete (543 passed, 0 failed); baseline_suite empty; negative_control_log negative-wrapper-registration.log (EXIT=1, one declared guard test fails).",
+    "write_paths": "git diff --name-only d3bbc51a..29711e03 equals the manifest's 34 changed_paths exactly; nothing outside the declared fence."
+  },
+  "justifications": {
+    "durability": "A test asserts the group exposes only {run,status,clear,seed,inspect}, so a re-registered wrapper fails visibly (the negative control shows it); migrated tests assert the retired flags error.",
+    "evidence": "Head gate reproduced at the reviewed head (543 passed, EXIT=0); base arm measured by the reviewer (2 unrelated pre-existing failures); added 0; help and ruff verified; but the reviewed manifest leaves baseline_suite empty and names a fragment it never wrote.",
+    "fit": "Three conventional commits with bodies, no labels, no AI attribution.",
+    "goal_fidelity": "Primary deliverable complete and verified, but plan section 3 names removing the wiki.py changelog docstring ('the old --source') and it is unchanged, and wiki.py:147 still hints at the retired --score-only.",
+    "reuse": "Deletes six duplicated click definitions and routes all discovery through the one sequence command; no new abstraction.",
+    "scope_discipline": "Diff is exactly the 34 declared changed_paths; nothing outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "negative_control_reproduced": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093047410719-retire-domain-subcommands/negative-wrapper-registration.log",
+    "result": "recorded in the reviewed run, not rerun independently: re-registering the paths wrapper in imas_codex/cli/discover/__init__.py makes tests/cli/test_discover_sequence.py::test_discover_hides_the_run_command fail (extra 'paths' in discover.commands), 1 failed, EXIT=1"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node deletes the six retired per-domain click wrappers and their registrations, moves every code caller (imas_codex/cli/compute.py, map.py, wiki.py) and the user-facing source hints to the bare `discover FACILITY --only DOMAIN` spelling, and migrates the tests that drove the six commands; at head 29711e03 a grep over imas_codex/, tests/ and scripts/ finds 0 retired `discover paths|code|documents|wiki|signals|map` spellings in code, the group help lists only {status, clear, seed, inspect} (run hidden), and the gate passes 543; two named sub-items remain undone \u2014 the wiki.py changelog docstring the plan names and the retired --score-only runtime hint at wiki.py:147.\nVERDICT done_when: plan section 3's done-when is \"no caller of a retired subcommand remains outside the files the fragment lists, and the tests that drove the six commands pass through the bare command\"; I reproduced the full gate at the reviewed head (543 passed, 1 warning, EXIT=0) with the module resolving from the reviewed tree, verified the group/run help, and confirmed the migrated tests invoke FACILITY plus --only; the fragment the scoping references was never written.\nVERDICT write_paths: the run declared 34 write paths; git diff --name-only d3bbc51a..29711e03 is exactly those 34 files (00 outside the fence), all under imas_codex/cli/, imas_codex/discovery/, imas_codex/ingestion/, imas_codex/standard_names/ and tests/.\nVERDICT manifest: read; status complete, commits [852f6a6c2, 5090b34d9, 29711e038], after_suite complete at 29711e03 (543 passed, 0 failed), baseline_suite empty, negative_control_log naming negative-wrapper-registration.log (re-registering the paths wrapper makes test_discover_hides_the_run_command fail, EXIT=1).\nVERDICT diff: read commit by commit against base d3bbc51a; 852f6a6c2 deletes the six wrappers and registrations from imas_codex/cli/discover/{__init__,code,documents,map,paths,signals,wiki}.py and updates compute.py/map.py/wiki.py callers and the discovery/ingestion/standard_names hints; 5090b34d9 migrates the ten test files to the bare command; 29711e038 fixes the min-score default so an omitted --min-score no longer routes the wiki 0.16 into documents (sequence.py drops the value when None).\nCALL_SITES: imas_codex/cli/discover/sequence.py:run\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the primary deliverable is complete and verified (wrappers and registrations gone, callers and hints moved, tests migrated, gate 543 passed), but plan section 3 explicitly names removing the changelog-phrased WikiStageOptions docstring in wiki.py (\"the old --source\") and it is unchanged at head, and a runtime hint at wiki.py:147 still tells users to use the retired --score-only, which the bare command rejects.\nSCORE evidence: 17\nJUSTIFICATION evidence: the head gate reproduces at the reviewed head (543 passed, EXIT=0, module from the reviewed tree), the migrated tests invoke the bare command, the help shows wiki min-score default 0.16, ruff is clean, and the declared negative control is valid; the reviewed manifest leaves baseline_suite empty and names a fragment it never wrote, so I supplied the base arm myself \u2014 2 unrelated pre-existing failures at d3bbc51a against 0 at head, 0 added.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only d3bbc51a..29711e03 is exactly the 34 declared changed_paths with nothing outside the fence; the only discrepancy is orientation_write_paths naming an unwritten fragment and figures dir, which is a planning omission rather than an out-of-scope edit.\nSCORE durability: 19\nJUSTIFICATION durability: the change is guarded \u2014 tests/cli/test_discover_sequence.py::test_discover_hides_the_run_command asserts discover.commands == {run, status, clear, seed, inspect} so re-registering any retired wrapper fails and is visible (the declared negative control demonstrates exactly this), and the migrated tests assert the retired --score-only/--enrich-only flags now error.\nSCORE fit: 20\nJUSTIFICATION fit: three conventional commits (refactor/test/fix, scope discover) each with a body stating what changed and why, no plan/section/ticket label in subjects, bodies or symbols, and no AI attribution \u2014 matching the repository idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change removes six duplicated click command definitions and routes all discovery through the single existing sequence command, deleting code rather than adding an abstraction, and reuses the existing run_<domain>_stage functions unchanged.\nFINDING imas_codex/cli/discover/wiki.py:147 follow-on: the wiki stage still prints a user-facing hint \"Or use --scan-only / --score-only to skip embedding\" at the reviewed head, but the wrapper that defined --score-only is deleted and the bare command rejects the flag (tests/cli/test_discover_wiki_stage.py:342 asserts \"No such option: --score-only\"), so the runtime message steers users to a command that errors.\nFINDING imas_codex/cli/discover/wiki.py:34 follow-on: the WikiStageOptions docstring still reads \"the settled spelling of the old ``--source``\" (line 35), \"the settled spelling of the old ``--score-only``\" (line 36) and \"the settled spelling of the old free-text ``--focus``\" (line 38) at the reviewed head; plan section 3 names exactly this changelog phrasing (\"the old --source\" in wiki.py) as something this node removes, and it is byte-identical to the base revision d3bbc51a.\nFINDING docs/evidence/fragments/facility-discovery-sequence/retire-domain-subcommands.html:0 follow-on: the run's orientation_write_paths names this fragment and docs/figures/facility-discovery-sequence/retire-domain-subcommands, but neither exists at the reviewed head (git diff --stat d3bbc51a..29711e03 lists no docs/ path, and changed_paths omits the fragment), so the node's done-when scoping (\"outside the files the fragment lists\") cannot be checked against the fragment it was to write.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093047410719-retire-domain-subcommands/manifest.md:21 follow-on: the reviewed manifest leaves baseline_suite empty and records only the after arm via after_suite (and test_logs), so the added-failure count is unmeasured from the reviewed run alone; I measured the base arm at d3bbc51a myself (2 failures, both pre-existing test_release GitHub-transport tests unrelated to this change) against the head arm (0 failures), giving 0 added.\n",
+  "review_run_id": "r-20261008T100011929810-review-of-retire-domain-subcommands",
+  "reviewed_base_sha": "d3bbc51a106e46bac02d5a0d26a6b99b6d83b019",
+  "reviewed_head_sha": "29711e0388534dd19ad0668553e6cdd955e1fddb",
+  "reviewed_run_id": "r-20261008T093047410719-retire-domain-subcommands",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:15:35+00:00",
+  "total": 112,
+  "verdict": "SOUND WITH FINDINGS"
+}
