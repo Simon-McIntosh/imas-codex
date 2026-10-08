@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite (a1ae3fd, 1 failure: tests/ids/test_mappable_ids_from_candidates.py::test_selected_and_escalated_candidate_homes_extend_default_ids) and after_suite (1f996327, 0 failures): after minus baseline is 0 added failures. Confirmed with independent arms at the reviewed revision: base-tools a1ae3fd vs head-tools 1f996327 with the focused command, '1 failed' EXIT=1 then '1 passed' EXIT=0; head gate '558 passed, 5 skipped, 3 deselected' EXIT=0.",
+  "backend": "local",
+  "base_log_revision": "a1ae3fd536e7d23b851d0f5e6d08c91b43739a1d",
+  "completed_at": "2026-10-08T08:45:01.594Z",
+  "dispatched_at": "2026-10-08T08:24:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/sequence-mapping-stages.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the plan names 'its fragment' among the sequence-mapping-stages node's write paths and the reviewed manifest's orientation_write_paths declares docs/evidence/fragments/facility-discovery-sequence/sequence-mapping-stages.html and a figures dir docs/figures/facility-discovery-sequence/sequence-mapping-stages, but neither was produced: changed_paths lists only the three code/test files and the fragment directory holds only other nodes' fragments (discover-cli-surface-census, fold-candidates-stage, fold-documents-stage, fold-signals-stage, sequence-stage-registry, wiki-ingest-threshold-setting). The node's evidence lives only in its manifest."
+    },
+    {
+      "file": "manifest.md",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline arm is mislabeled and does not match the shipped test. baseline-cross-ids.log records revision=a1ae3fd536e7d23b851d0f5e6d08c91b43739a1d with no working-tree marker, but tests/ids/test_mappable_ids_from_candidates.py does not exist at a1ae3fd (git show a1ae3fd:tests/ids/test_mappable_ids_from_candidates.py reports 'does not exist in a1ae3fd'), so the arm ran base production code against a test added by 1f996327 while reading as a clean-base run. Its failing test test_selected_and_escalated_candidate_homes_extend_default_ids is also a different test than the shipped test_selected_candidate_home_extends_default_ids the negative control exercised, so the test-first defect evidence and the shipped guard are not the same test. The manifest's baseline_suite and after_suite also run different commands (the focused file versus the full gate), so their direct difference is not a like-for-like added-failure count."
+    },
+    {
+      "file": "imas_codex/ids/tools.py",
+      "line": "514",
+      "severity": "follow-on",
+      "text": "follow-on: the candidate-home union is applied only inside branch C (no domains and no ids_filter), so an IDS holding a selected or escalated candidate edge but no domain overlap is still excluded when --domain or --ids is given, and is skipped entirely by the early return at tools.py:423 when no enriched source carries a physics_domain. The plan's wording ('an IDS holding a selected or escalated candidate edge for the facility is a target even when the domain overlap misses it') is unqualified; the current placement satisfies the default-enumeration case and the node's tests, but the filtered paths do not get the same union."
+    }
+  ],
+  "head_log_revision": "1f9963272f6b82e7983f44babe88d6620b5bb202",
+  "item_verdicts": {
+    "call_sites": "discover_mappable_ids is called at imas_codex/cli/map.py:211 (imas map run) and imas_codex/cli/discover/sequence.py:489 (run_mapping_stage's --limit path). source_count is consumed by no filter - map.py uses plan['ids_targets'] directly and workers.py:79 only documents the shape - so a candidate-home target whose domains fall outside available_domains is scheduled despite source_count 0. The route predicate matches the candidate writer that sets sg.candidate_route ('selected'/'escalated'/'no_candidate') and edge r.route in imas_codex/ids/graph_ops.py:537-549.",
+    "diff": "read against a1ae3fd: tools.py changes the branch-C comment and adds a union loop (tools.py:514-527) that queries SignalSource-[MAPPING_CANDIDATE]->IMASNode with WHERE (r.route = true OR sg.candidate_route = 'escalated') and merges each home into ids_by_name, reusing the same collect(DISTINCT p.physics_domain) idiom as branches A/B; tests/cli/test_discover_sequence.py adds callback.assert_called_once (line 426) and the nothing-to-do test (line 433); tests/ids/test_mappable_ids_from_candidates.py is new (20 lines, one test at line 6).",
+    "done_when": "the plan gate uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/ids tests/test_cli.py -p no:cacheprovider passes and the three bullets are pinned: tests/ids/test_mappable_ids_from_candidates.py::test_selected_candidate_home_extends_default_ids (line 6) shows a candidate home (magnetics) surviving the default enumeration with no domain overlap; tests/cli/test_discover_sequence.py::test_mapping_calls_existing_pipeline_with_remaining_limits (line 415, callback.assert_called_once at line 426) shows the mapping domain calling the pipeline once; tests/cli/test_discover_sequence.py::test_no_candidate_route_skips_mapping_as_nothing_to_do (line 433) shows the domain skipping with nothing to do when no source has a route.",
+    "goal": "the plan's sequence-mapping-stages node (facility-discovery-sequence section 4) makes the mapping stage's target enumeration include an IDS that holds a selected or escalated candidate edge but has no source physics-domain overlap: discover_mappable_ids (imas_codex/ids/tools.py:376) unions a MAPPING_CANDIDATE query into the unfiltered branch (tools.py:514-527), matching the plan's 'an IDS holding a selected or escalated candidate edge for the facility is a target even when the domain overlap misses it'.",
+    "manifest": "read; status complete, one commit (1f9963272f6b82e7983f44babe88d6620b5bb202), three changed_paths, the gate command with 558 passed/5 skipped EXIT=0, a negative_control_log, and baseline_suite (1 failed, EXIT=1) and after_suite (0 failed, EXIT=0). The manifest's own record is sound but its arms are asymmetric: the baseline ran the focused command tests/ids/test_mappable_ids_from_candidates.py at a1ae3fd while the head ran the full gate command at 1f996327, and the baseline failing test is a different test than the shipped one.",
+    "write_paths": "git show --stat 1f9963272 touches imas_codex/ids/tools.py, tests/cli/test_discover_sequence.py and tests/ids/test_mappable_ids_from_candidates.py only, 3 files changed, 46 insertions(+), 1 deletion(-), nothing else. The plan's write paths also name imas_codex/cli/discover/sequence.py, unmodified because the mapping-default and nothing-to-do behaviours already existed from sequence-runner, and 'its fragment' docs/evidence/fragments/facility-discovery-sequence/sequence-mapping-stages.html, which was not produced: the fragment directory holds only other nodes' fragments."
+  },
+  "justifications": {
+    "durability": "the guard fires and I reproduced it independently: removing the union loop from tools.py makes tests/ids/test_mappable_ids_from_candidates.py::test_selected_candidate_home_extends_default_ids fail, EXIT=1, which is the reviewed run's own negative control reproduced. The two tests/cli/test_discover_sequence.py additions (callback.assert_called_once and the nothing-to-do skip) pin the mapping stage's default engagement and its empty-route skip, so a regression in either reddens.",
+    "evidence": "I reproduced both arms and the negative control independently in scratch trees of the reviewed revision (source under /tmp/reckon-crew-scratch/r-20261008T082444866521-review-of-sequence-mapping-stages/arms and .../arms-base, PYTHONPATH at the scratch tree, module.__file__ confirmed at /tmp/reckon-crew-scratch/r-20261008T082444866521-review-of-sequence-mapping-stages/arms/imas_codex/ids/tools.py for the head and .../arms-base/imas_codex/ids/tools.py for the base): head 1f996327 ran the full gate to '558 passed, 5 skipped, 3 deselected' EXIT=0, matching the reviewed run's committed-gate.log; the head focused test ran to '1 passed' EXIT=0 and head with the union loop removed ran it to '1 failed' EXIT=1. The base arm (tools.py at a1ae3fd, focused test) ran to '1 failed' EXIT=1, confirming the recorded defect reproduces. The shortfalls are in the reviewed run's own record: baseline-cross-ids.log labels itself revision=a1ae3fd with no working-tree marker although the test file it ran does not exist at a1ae3fd (the reviewed commit adds it), its failing test test_selected_and_escalated_candidate_homes_extend_default_ids differs from the shipped test test_selected_candidate_home_extends_default_ids whose guard the negative control exercised, and the baseline and head arms run different commands.",
+    "fit": "the added symbols are named by mechanism (no plan labels, section numbers or ticket ids); the union loop reuses the branch-A/B query idiom and the shared dd_clause; the branch-C comment was corrected to describe source domains and candidate homes, and the new test file name names the behaviour, not the plan.",
+    "goal_fidelity": "the three done-when behaviours are present and pinned: the candidate-home union is in tools.py and its test proves a cross-domain home survives the default enumeration; the mapping stage's single pipeline call and its nothing-to-do skip are pinned by the two tests/cli/test_discover_sequence.py additions. The shortfall is that the plan names a node fragment among its write paths and it was not produced, so the node's evidence lives only in the manifest.",
+    "reuse": "the union reuses the existing GraphClient query pattern, the _dd_version_clause helper and the ids_by_name accumulator rather than a parallel enumerator; the two test additions reuse the existing test_discover_sequence.py fixtures (healthy, _stage, _config) and the map_run monkeypatch seam sequence-runner established, adding no new helper.",
+    "scope_discipline": "the commit touches only the declared imas_codex/ids/tools.py and tests/cli/test_discover_sequence.py plus the declared new tests/ids/test_mappable_ids_from_candidates.py - no production file beyond tools.py, no pyproject or lock change, no unrelated edit. sequence.py was correctly left unmodified because the mapping-default and nothing-to-do behaviours predate this node. Declaring the node fragment and figures dir and then not producing them is an evidence shortfall rather than scope creep."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: section 4's sequence-mapping-stages node unions a MAPPING_CANDIDATE query into discover_mappable_ids branch C (tools.py:514-527) so a selected or escalated candidate home is a target without domain overlap.\nVERDICT done_when: the gate passes; test_selected_candidate_home_extends_default_ids pins the cross-domain home, callback.assert_called_once in test_mapping_calls_existing_pipeline_with_remaining_limits pins the single mapping call, and test_no_candidate_route_skips_mapping_as_nothing_to_do pins the empty-route skip; the plan's node fragment was not produced.\nVERDICT write_paths: git show --stat 1f9963272 touches imas_codex/ids/tools.py, tests/cli/test_discover_sequence.py and tests/ids/test_mappable_ids_from_candidates.py only, 3 files, +46/-1; sequence.py and the fragment were not needed/produced.\nVERDICT manifest: 558 passed EXIT=0 at 1f996327; declares baseline_suite and after_suite but with different commands and a mislabeled baseline head.\nVERDICT diff: read against a1ae3fd; the candidate-home union loop and the two test edits.\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 18\nSCORE durability: 19\nSCORE fit: 19\nSCORE reuse: 18\nFINDING the node fragment and figures dir were declared and not produced\nFINDING the baseline arm is mislabeled (revision a1ae3fd with no working-tree marker although the test file is added by 1f996327) and its failing test name differs from the shipped guard test; baseline and head arms run different commands\nFINDING the candidate-home union applies only in the unfiltered branch, so --domain/--ids paths and the empty-available-domains early return do not get it\nNEGCTRL reproduced independently: removing the union loop from head fails test_selected_candidate_home_extends_default_ids EXIT=1\nARMS base-tools 1 failed EXIT=1; head gate 558 passed EXIT=0; added failures 0\n",
+  "review_run_id": "r-20261008T082444866521-review-of-sequence-mapping-stages",
+  "reviewed_base_sha": "a1ae3fd536e7d23b851d0f5e6d08c91b43739a1d",
+  "reviewed_head_sha": "1f9963272f6b82e7983f44babe88d6620b5bb202",
+  "reviewed_run_id": "r-20261008T075819553950-sequence-mapping-stages",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T08:41:00Z",
+  "total": 108,
+  "verdict": "SOUND WITH FINDINGS"
+}
