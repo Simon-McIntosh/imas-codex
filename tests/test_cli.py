@@ -197,7 +197,7 @@ class TestCLISubcommands:
 
     @pytest.mark.parametrize(
         ("domain", "selected"),
-        [("paths", "paths"), ("wiki", "wiki"), ("map", "mapping")],
+        [("paths", "paths"), ("wiki", "wiki"), ("map", "candidates")],
     )
     def test_retired_discover_domain_is_refused_with_bare_command(
         self, runner, domain, selected
