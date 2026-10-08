@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;done&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -584,6 +584,9 @@ fresh-description arm of the variation measure once the triage worker routes thr
 </div>
 <div class="r-comment" data-section="s16" data-id="c-20261008-s16-wiki-pin" data-who="reckon-build" data-when="2026-10-08T08:00:00Z">
     <div class="r-comment-body"><p>Folded from §18's review: the document pending-ingest comparison in <code>get_wiki_discovery_stats</code> (<code>wiki/parallel.py</code> around line 1106) reads the constant, but no test reaches its row-scan branch, so reverting it to 0.5 stays green. Add a stub returning a scored document between 0.16 and 0.5 that pins it.</p></div>
+</div>
+<div class="r-comment" data-section="s16" data-id="c-run-r-20261008T085040481511-path-property-declarations" data-who="reckon-build" data-when="2026-10-08T09:09:22Z">
+    <div class="r-comment-body"><p>Declared the path claim, triage, timestamp and scoring properties and retired stale audit allowances; the committed-head gate passed 21 tests, the wiki 0.2-vs-0.1 document case passed, and an undeclared FacilityPath SET write failed its audit with EXIT=1. Evidence: docs/evidence/fragments/discovery-judgments-through-jev/path-property-declarations.html.</p></div>
 </div>
 <div class="r-comment" data-section="s18" data-id="c-run-r-20261008T073735693842-wiki-threshold-displays" data-who="reckon-build" data-when="2026-10-08T07:50:59Z">
     <div class="r-comment-body"><p>Wiki runner pending page and document counts and document skipped label now use CONTENT_INGEST_THRESHOLD (0.16); the scoped gate passed 51 tests and the restored 0.5 control failed the new pending-ingest test.</p></div>
