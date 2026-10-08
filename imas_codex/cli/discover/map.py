@@ -18,8 +18,11 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
+from pathlib import Path
 
 import click
+from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +33,8 @@ class CandidatesStageOptions:
 
     Field names are the settled spellings the sequence command uses, so a
     domain's options read the same wherever the sequence passes them.
-    ``focus`` is carried so the stage can refuse it explicitly rather than
-    drop it, and ``topic`` is carried for a stage that steers a scorer.
+    ``focus`` names SignalSource identities or a manifest listing them.
+    ``topic`` is carried for a stage that steers a scorer.
     """
 
     physics_domain: tuple[str, ...] = ()
@@ -54,6 +57,57 @@ def clear_facility_candidates(facility: str) -> dict[str, int]:
         return clear_candidates(facility, gc)
 
 
+def _resolve_focus(tokens: tuple[str, ...]) -> list[str]:
+    """Expand source IDs and YAML manifests into one ordered ID list."""
+    resolved: list[str] = []
+    for token in tokens:
+        path = Path(token)
+        if path.is_file():
+            try:
+                content = YAML(typ="safe").load(path.read_text(encoding="utf-8"))
+            except (OSError, YAMLError) as exc:
+                raise click.UsageError(
+                    f"--focus {token}: cannot read manifest: {exc}"
+                ) from exc
+            values = content.get("sources") if isinstance(content, dict) else content
+            if (
+                not isinstance(values, list)
+                or not values
+                or any(
+                    not isinstance(value, str) or not value.strip() for value in values
+                )
+            ):
+                raise click.UsageError(
+                    f"--focus {token}: manifest must list SignalSource ids in 'sources'"
+                )
+            resolved.extend(values)
+        elif path.suffix.lower() in {".yaml", ".yml", ".json"}:
+            raise click.UsageError(f"--focus manifest not found: {token}")
+        else:
+            resolved.extend(token.split())
+    return list(dict.fromkeys(resolved))
+
+
+def _validate_focus(facility: str, ids: list[str]) -> None:
+    """Refuse names that do not identify a source at this facility."""
+    from imas_codex.graph import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            "MATCH (n:SignalSource {facility_id: $facility}) "
+            "WHERE n.id IN $ids RETURN n.id AS id",
+            facility=facility,
+            ids=ids,
+        )
+    found = {row["id"] for row in rows}
+    missing = [source_id for source_id in ids if source_id not in found]
+    if missing:
+        raise click.UsageError(
+            "--focus item filter names unknown SignalSource id(s): "
+            + ", ".join(missing)
+        )
+
+
 def run_candidates_stage(
     facility: str, options: CandidatesStageOptions
 ) -> dict[str, float]:
@@ -62,15 +116,12 @@ def run_candidates_stage(
     The candidates stage drains work the signals stage seeded and seeds
     nothing itself, so ``--scan-only`` has no half to run and returns without
     touching the graph. ``--flush`` and the default both run the draining
-    worker. ``--focus`` is refused because the claim query takes no item
-    filter yet; ``--limit`` caps the sources judged this run.
+    worker. ``--focus`` restricts claims to named SignalSource identities;
+    ``--limit`` caps the sources judged this run.
     """
-    if options.focus:
-        raise click.UsageError(
-            "--focus is not supported for the candidates stage: the candidate claim "
-            "query takes no item filter, so a focused run cannot be honoured. Run "
-            "without --focus."
-        )
+    focus_ids = _resolve_focus(options.focus)
+    if focus_ids:
+        _validate_focus(facility, focus_ids)
 
     from imas_codex.cli.discover.common import (
         DiscoveryConfig,
@@ -103,6 +154,8 @@ def run_candidates_stage(
         log_print(f"  Physics domains: {', '.join(options.physics_domain)}")
     if options.ids:
         log_print(f"  IDS filter: {', '.join(options.ids)}")
+    if focus_ids:
+        log_print(f"  SignalSource focus: {', '.join(focus_ids)}")
     log_print(f"  Cost limit: ${options.cost_limit:.2f}")
     if options.limit:
         log_print(f"  Source limit: {options.limit}")
@@ -141,6 +194,7 @@ def run_candidates_stage(
             facility=facility,
             domains=list(options.physics_domain),
             ids_filter=list(options.ids),
+            focus_ids=focus_ids,
             source_limit=options.limit,
             cost_limit=options.cost_limit,
         )
@@ -218,6 +272,11 @@ def run_candidates_stage(
     default=None,
     help="Maximum runtime in minutes (e.g., 5). Halts when time expires.",
 )
+@click.option(
+    "--focus",
+    multiple=True,
+    help="Restrict claims to SignalSource ids or a YAML manifest listing sources.",
+)
 def map_candidates(
     facility: str,
     physics_domains: tuple[str, ...],
@@ -225,6 +284,7 @@ def map_candidates(
     cost_limit: float,
     signal_limit: int | None,
     time_limit: int | None,
+    focus: tuple[str, ...],
 ) -> None:
     """Judge DD candidates for a facility's signal sources.
 
@@ -239,6 +299,7 @@ def map_candidates(
       imas-codex discover map jet -d magnetics
       imas-codex discover map jet -i equilibrium -i core_profiles -c 2.0
       imas-codex discover map jet -n 50 --time 10
+      imas-codex discover map jet --focus source-id
     """
     options = CandidatesStageOptions(
         physics_domain=tuple(physics_domains),
@@ -246,5 +307,6 @@ def map_candidates(
         cost_limit=cost_limit,
         limit=signal_limit,
         time_limit=time_limit,
+        focus=focus,
     )
     run_candidates_stage(facility, options)
