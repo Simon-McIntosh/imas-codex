@@ -8,8 +8,59 @@ matched nothing), so the absolute entries belong in ``path_prefixes``.
 
 from __future__ import annotations
 
+import pytest
+
 from imas_codex.config.discovery_config import get_exclusion_config_for_facility
 from imas_codex.discovery.base.facility import get_facility
+
+# Data-access directories that must each be seeded as their own discovery root.
+# The parent /analysis/src is deliberately never named: a seed of the parent
+# walks every unseeded child instead of only the intended subtrees.
+DATA_ACCESS_ROOTS = (
+    "/analysis/src/eddb",
+    "/analysis/src/uddb",
+    "/analysis/src/pmdb",
+    "/analysis/src/mbdb",
+    "/analysis/src/lcdbWrapper",
+    "/analysis/src/safledd",
+    "/analysis/src/edas_inf",
+    "/analysis/lib/JT60SAEQDB",
+    "/analysis/src/MagLine2022",
+    "/analysis/src/offlineTCCS",
+    "/analysis/src/offlineTCCS.MAIN",
+    "/analysis/src/SAsetequ",
+    "/analysis/src/setequ",
+    "/analysis/src/SAselene",
+    "/analysis/CCStable",
+    "/analysis/SAdata",
+    "/analysis/src/slice",
+    "/analysis/src/adam3",
+    "/analysis/src/adamwin-v4",
+    "/analysis/src/OFMC",
+    "/analysis/src/accome",
+    "/analysis/src/toolc",
+    "/analysis/src/gdlib",
+    "/analysis/src/getseldata_v4.1",
+)
+
+
+def test_analysis_src_parent_is_not_a_discovery_root() -> None:
+    """The bare parent is never seeded; only its subtrees are."""
+    roots = get_facility("jt-60sa").get("discovery_roots") or []
+    assert "/analysis/src" not in roots
+
+
+@pytest.mark.parametrize("root", DATA_ACCESS_ROOTS)
+def test_data_access_root_is_seeded_and_unexcluded(root: str) -> None:
+    """Every data-access directory is a discovery root no exclude covers."""
+    roots = get_facility("jt-60sa").get("discovery_roots") or []
+    assert root in roots, f"{root} is not a discovery root"
+
+    config = get_exclusion_config_for_facility("jt-60sa")
+    covering = [p for p in config.path_prefixes if root.startswith(p)]
+    assert not covering, f"{root} is covered by exclude prefix(es) {covering}"
+    should_exclude, reason = config.should_exclude(f"{root}/child")
+    assert should_exclude is False, f"{root}/child excluded by {reason}"
 
 
 def test_home_subtree_excluded() -> None:

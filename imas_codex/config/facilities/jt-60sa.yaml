@@ -155,6 +155,34 @@ discovery_roots:
   - /work/edas                     # EDAS work area
   - /analysis_DB/EDASDB            # EDAS database
   - /analysis_DB/MBDB              # MB database
+  # Data-access layer: the experiment-database download libraries and wrappers
+  # every diagnostic loader goes through, the reconstruction and machine
+  # description trees, and the analysis/data tools. Each is its own entry; the
+  # parent /analysis/src is never named.
+  - /analysis/src/eddb
+  - /analysis/src/uddb
+  - /analysis/src/pmdb
+  - /analysis/src/mbdb
+  - /analysis/src/lcdbWrapper
+  - /analysis/src/safledd
+  - /analysis/src/edas_inf
+  - /analysis/lib/JT60SAEQDB
+  - /analysis/src/MagLine2022
+  - /analysis/src/offlineTCCS
+  - /analysis/src/offlineTCCS.MAIN
+  - /analysis/src/SAsetequ
+  - /analysis/src/setequ
+  - /analysis/src/SAselene
+  - /analysis/CCStable
+  - /analysis/SAdata
+  - /analysis/src/slice
+  - /analysis/src/adam3
+  - /analysis/src/adamwin-v4
+  - /analysis/src/OFMC
+  - /analysis/src/accome
+  - /analysis/src/toolc
+  - /analysis/src/gdlib
+  - /analysis/src/getseldata_v4.1
 
 # Wiki/documentation sites
 # JT-60SA documentation is hosted on nakasvr23 behind IFERC VPN.
