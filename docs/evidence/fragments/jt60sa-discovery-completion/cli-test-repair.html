@@ -1,0 +1,42 @@
+<section id="cli-test-repair">
+  <h2 id="cli-test-repair-title">Three CLI failures came from test setup</h2>
+  <p id="cli-test-repair-baseline">
+    At base <code>f186f51aef37b9eb1dea9fbe4f228919020bdced</code>, the three
+    named tests failed in <strong>104.54 s</strong> (<code>base-cli-tests.log</code>,
+    exit 1). The <code>RuntimeError: no running event loop</code> in the dry-run
+    trace is the normal entry to <code>run_async</code>'s synchronous fallback;
+    the failure is the later timeout while the preview reads the live graph.
+  </p>
+  <ul id="cli-test-repair-causes">
+    <li id="cli-test-repair-preflight">
+      <code>test_run_sn_cmd_skips_embed_preflight_for_dry_run</code> had a
+      <strong>test defect</strong>: it mocked the discovery runner, but the dry-run
+      branch now calls <code>preview_sn_pools</code>. The real preview reached a
+      Neo4j query and timed out. The test now mocks the asynchronous preview
+      and asserts that preview ran while embedding preflight did not.
+    </li>
+    <li id="cli-test-repair-deploy">
+      <code>test_embed_start_forwards_explicit_gpu_count_to_the_deployer</code>
+      had a <strong>test defect</strong>: it inherited
+      <code>SLURM_JOB_ID</code> from the compute allocation, so the command
+      entered foreground serving instead of deployment and timed out. The
+      test clears that marker, refuses an unexpected foreground start, and
+      asserts the deployer receives eight GPUs.
+    </li>
+    <li id="cli-test-repair-reset">
+      <code>TestBackwardCompatibility::test_reset_to_drafted_dry_run</code> had
+      a <strong>test defect</strong>: it also mocked the discovery runner while
+      the command entered live graph preview. It now mocks
+      <code>preview_sn_pools</code> and asserts the preview ran and the reset
+      function did not.
+    </li>
+  </ul>
+  <p id="cli-test-repair-result">
+    At head <code>50d81730f27d6a019ca79145088e0e2246911198</code>, all
+    <strong>3 tests passed</strong> in the worktree in <strong>5.67 s</strong>
+    (<code>worktree-head.log</code>, exit 0) and in a git archive with
+    <code>.env</code> linked in <strong>6.03 s</strong>
+    (<code>archive-cli-tests.log</code>, exit 0). The archive log records the
+    extracted tree as the imported module path. No production code changed.
+  </p>
+</section>

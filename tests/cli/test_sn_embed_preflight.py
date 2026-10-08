@@ -61,12 +61,16 @@ def test_run_sn_cmd_skips_embed_preflight_for_dry_run() -> None:
     """Dry runs should not require a live embedding service."""
     with (
         patch("imas_codex.cli.sn._require_embed_ready") as require_embed,
-        patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
-        patch("imas_codex.cli.discover.common.setup_logging", return_value=None),
         patch(
-            "imas_codex.cli.discover.common.run_discovery",
-            return_value={"summary": None},
-        ),
+            "imas_codex.standard_names.loop.preview_sn_pools",
+            return_value={
+                "source": "dd",
+                "domains": [],
+                "extraction_candidates": 0,
+                "pools": [],
+                "pending": {},
+            },
+        ) as preview,
     ):
         _run_sn_cmd(
             cost_limit=1.0,
@@ -77,6 +81,7 @@ def test_run_sn_cmd_skips_embed_preflight_for_dry_run() -> None:
         )
 
     require_embed.assert_not_called()
+    preview.assert_awaited_once()
 
 
 def test_focus_run_preflights_before_graph_mutation() -> None:
