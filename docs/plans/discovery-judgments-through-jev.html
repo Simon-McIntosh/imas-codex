@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
-<meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="55">
+<meta name="plan-impl" content="0.562">
+<meta name="plan-version" content="56">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -90,17 +90,12 @@
   <p class="landed-summary">Path triage and scoring run through Jev: a PathPurpose Choice, eleven facet Scores with distributions and confidence, and a children-worth-listing Noul. Gates are computed in code; the code-scan gate is 0.30, calibrated on 118 positive and 40 negative JT-60SA paths (TP 80, FP 4, FN 38, TN 36, AUC 0.886; the prototype's 0.807 is reproduced). Re-scoring keeps stored enrichment fields. The merged head passes 1,500 tests; spend was USD 0.0034. Re-review 18/18/18/17/18/15. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/path-jev-deploy.html">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s5">§5 — Wiki pages and documents through Jev</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>The same pattern applies, with one open question carried in. At JT-60SA, 3,754 of the 4,476 wiki pages are <code>SystemDailyReport</code> pages. Their previews show only the blank form template, because TWiki stores filled-in form values in <code>%META:FIELD</code> lines that the preview may drop.</p>
-    <p>The node first checks one raw page. If the values are there, the preview builder includes them, before any judgment is re-run.</p>
-    <p>Done when:</p>
-    <ul>
-      <li>Wiki and document ingest are gated on a Jev Noul.</li>
-      <li>The prototype's AUC on a labelled page sample is recorded.</li>
-      <li>The daily-report question is answered from a raw page.</li>
-    </ul>
-    <p>Interface account: the wiki and document pipelines supply §3's three functions and move their judgment claims onto <code>claim_batch</code>. They retire their language-model scoring calls, the score fields of <code>WikiScoreBatch</code> and <code>DocumentScoreBatch</code>, and the scores and decisions of <code>ImageScoreBatch</code>, whose vision model keeps only the caption, OCR and diagram text.</p>
+<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Wiki page and document ingest are gated on Jev judgments through the shared judge function. The language-model scoring calls are retired, and the image vision call keeps only caption, OCR and diagram text. Each state carries the facility's data-access tool matches on the item's own text. On 80 labelled JT-60SA pages the Jev gate scores AUC 0.989, against 0.929 for the stored language-model score, at a 0.16 ingest cutoff. Spend USD 0.015. Review 18/18/19/18/19/19. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/wiki-jev-judgments.html">full record</a></p>
+</section>
 
     <h2 id="s6">§6 — Signal enrichment and DD domain classifications through Jev</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -473,6 +468,9 @@ them, so path discovery's behaviour does not change until the deploy node.</p></
 <div class="r-comment" data-section="s5" data-id="c-20261008-s5-matches" data-who="lead" data-when="2026-10-08T06:00:00Z">
     <div class="r-comment-body"><p>Lead, 2026-10-08: every wiki, document and image Jev state carries the facility's access-pattern matches on the item's own text, found by <code>extract_facility_tool_mentions</code> with the facility's <code>key_tools</code> and <code>code_import_patterns</code>, config-driven for every facility. A test parametrised over every facility config asserts the match, with text that matches none as the negative control. The fragment reports labelled-set AUC with and without the matches.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-s5-landing" data-who="reckon-build" data-when="2026-10-08T07:12:00Z">
+    <div class="r-comment-body"><p>The review raised three follow-ons. First, the with-and-without-matches comparison is unpaired: 60 of 80 rows differ although only 22 carry a match, so the reported 0.003 difference sits inside run-to-run variation, the same finding as §15. Second, the wiki runner's progress status still counts pages above the retired 0.5 (<code>wiki/parallel.py</code> around line 1028). Third, the document progress label still marks scores below 0.5 as skipped (<code>wiki/progress.py</code> line 741). The coordinator found a fourth at integration. <code>discover wiki</code> builds <code>WikiStageOptions.min_score</code> with a default of 0.5 and passes it to <code>run_parallel_wiki_discovery</code>, which overrides the new 0.16 <code>CONTENT_INGEST_THRESHOLD</code> default. Until the CLI default reads that constant, a wiki run without <code>--min-score 0.16</code> ingests at the retired threshold. The CLI belongs to the session that folded the discover stages, which was asked to change it.</p></div>
+</div>
 <div class="r-comment" data-section="s14" data-id="c-20261008-s14-describe-shape" data-who="reckon-build" data-when="2026-10-08T06:25:00Z">
     <div class="r-comment-body"><p><strong>The describe step blocks every JT-60SA path pass</strong> (measured 2026-10-08 08:03 to 08:06 in
 <code>paths_jt-60sa.log</code>). The JT-60SA rescan's root pass over the 24 roots scored none of them. Its single-path
@@ -495,7 +493,7 @@ after §15 releases <code>paths/scorer.py</code>. It moves <code>scorer.py</code
     <div class="r-comment-body"><p>The parallel path describe step uses one reusable owner with an explicit results-shaped prompt and accepts path-keyed answers; focused gate 10 passed and the live discovery-score call returned 3/3 root descriptions.</p></div>
 </div>
 <div class="r-comment" data-section="s14" data-id="c-run-r-20261008T063346870340-review-of-path-description-shape" data-who="reckon-build" data-when="2026-10-08T06:55:56.048Z">
-    <div class="r-comment-body"><p>Review of r-20261008T061834979151-path-description-shape stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T061834979151-path-description-shape.json: the describe-step owner is real and the prompt shape guard fires, with three follow-ons (scorer.py duplicate deferred to the scorer node, the declared evidence fragment absent, and the reviewed manifest&#x27;s null baseline/after suites).</p></div>
+    <div class="r-comment-body"><p>Review of r-20261008T061834979151-path-description-shape stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T061834979151-path-description-shape.json: the describe-step owner is real and the prompt shape guard fires, with three follow-ons (scorer.py duplicate deferred to the scorer node, the declared evidence fragment absent, and the reviewed manifest's null baseline/after suites).</p></div>
 </div>
 <div class="r-comment" data-section="s17" data-id="c-20261008-s17-categorise" data-who="lead" data-when="2026-10-08T06:55:00Z">
     <div class="r-comment-body"><p><strong>Lead, 2026-10-08: categorise before the content is known; score once it is.</strong> At the path stage the
