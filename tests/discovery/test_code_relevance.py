@@ -208,11 +208,13 @@ def _file(path: str, **extra) -> dict:
     return row
 
 
-def _stub_common(monkeypatch, claims: list[dict]):
+def _stub_common(monkeypatch, claims: list[dict], claim_calls: list | None = None):
     """Patch the graph and facility seams every worker test shares."""
     counter = {"n": 0}
 
     def claim_once(*args, **kwargs):
+        if claim_calls is not None:
+            claim_calls.append(kwargs)
         counter["n"] += 1
         return claims if counter["n"] == 1 else []
 
@@ -274,11 +276,19 @@ def _run_triage(monkeypatch, files, answers_by_path, *, released=None):
     return graph, released, state, seen
 
 
-def _run_score(monkeypatch, files, answers_by_path, *, requests: list | None = None):
+def _run_score(
+    monkeypatch,
+    files,
+    answers_by_path,
+    *,
+    requests: list | None = None,
+    path_prefixes: list[str] | None = None,
+    claim_calls: list | None = None,
+):
     graph = _CapturingGraph()
     released: list[str] = []
     description_calls: list[list[str]] = []
-    _stub_common(monkeypatch, list(files))
+    _stub_common(monkeypatch, list(files), claim_calls)
     monkeypatch.setattr(
         llm, "_apost_decisions", _post_by_path(answers_by_path, requests)
     )
@@ -311,7 +321,7 @@ def _run_score(monkeypatch, files, answers_by_path, *, requests: list | None = N
     )
     monkeypatch.setattr("imas_codex.discovery.code.scorer.GraphClient", lambda: graph)
 
-    state = FileDiscoveryState(facility=FACILITY)
+    state = FileDiscoveryState(facility=FACILITY, path_prefixes=path_prefixes)
     state.cost_limit = 1000.0
 
     def on_progress(message, stats, results):
@@ -462,6 +472,7 @@ def test_scoped_stale_ingested_judgment_uses_chunks_without_remote_executor(
     path = "/analysis/src/stored.f"
     file = _file(path, status="ingested", relevance_stage="content", preview_text="old")
     requests = []
+    claim_calls = []
     monkeypatch.setattr(
         "imas_codex.discovery.code.graph_ops.fetch_file_chunk_text",
         lambda ids: {path: [{"start_line": 1, "text": "stored diagnostic source"}]},
@@ -479,7 +490,10 @@ def test_scoped_stale_ingested_judgment_uses_chunks_without_remote_executor(
         [file],
         {path: _answers(0.8, 0.2, 0.1, 0.1)},
         requests=requests,
+        path_prefixes=["/analysis/src"],
+        claim_calls=claim_calls,
     )
+    assert claim_calls[0]["path_prefixes"] == ["/analysis/src"]
     assert requests and "stored diagnostic source" in str(requests[0]["state"])
     assert descriptions == []
     assert state.score_stats.cost == pytest.approx(COST)
