@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="81">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -270,7 +270,15 @@
       <code>imas_codex/ingestion/__init__.py</code>, <code>imas_codex/standard_names/pool_adapter.py</code> and
       <code>imas_codex/standard_names/workers.py</code>, and the tests that drove the six commands. It waits for
       <code>focus-needs-one-domain</code>, which holds <code>sequence.py</code>. The bare command's <code>--min-score</code> help
-      prints the number, as the wiki wrapper's did. <strong>Node</strong> <code>retire-subcommand-prose</code> takes the prose:
+      prints the number, as the wiki wrapper's did.
+      <strong>Node</strong> <code>mapping-opt-in</code>, role implement, 0.25 h, after <code>retire-domain-subcommands</code>,
+      which holds <code>sequence.py</code>. Under the reversed <code>mapping-stage-default</code> decision, the default domain set
+      drops <code>mapping</code>: it runs only when <code>--only</code> names it, and <code>--skip mapping</code> stays accepted.
+      <code>candidates</code> stays in the default set. The final table lists mapping as <em>skipped: not requested</em>.
+      Write paths: <code>imas_codex/cli/discover/sequence.py</code>, <code>tests/cli/test_discover_sequence.py</code> and its
+      fragment. <strong>Done when</strong> <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
+      passes with tests showing a bare run never calls the map pipeline and reports mapping as not requested,
+      <code>--only mapping</code> calls it once, and a bare run still calls the candidates stage. <strong>Node</strong> <code>retire-subcommand-prose</code> takes the prose:
       <code>docs/architecture/discovery.md</code>, <code>docs/architecture/signals.md</code>, <code>docs/zellij-quickstart.md</code>,
       <code>imas_codex/cli/README.md</code>, <code>imas_codex/discovery/README.md</code>,
       <code>imas_codex/discovery/signals/README.md</code>, <code>imas_codex/llm/prompts/discovery/roots.md</code>, the
@@ -343,21 +351,22 @@
     <h2 id="s5">§5 — JT-60SA proof</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
-      From the ITER host, run <code>imas-codex discover jt-60sa --dry-run</code>. Then run it for real
-      with <code>--only signals --flush</code> under a small cap. The dry run must name every domain,
-      with wiki and documents skipped and their probe results as reasons. The real run must drain
-      signal enrichment without touching the facility. The check half needs SSH, so it reads
-      unreachable or runs, by its probe. The evidence fragment records both tables. When
-      <code>jt60sa-imas-maps</code> §5 is released, its enrichment, candidate and mapping pass runs
-      through this command.
+      From the ITER host, run <code>imas-codex discover jt-60sa --dry-run</code>, then the default run for real
+      under a stated cost cap. The lead set this order on 2026-10-08: the JT-60SA rescan closes
+      <code>jt60sa-discovery-completion</code> §38 and §41 first, then this run executes paths, code, documents, wiki,
+      signals and candidates in one invocation. Mapping is not in it: under the opt-in decision it waits for the
+      per-source conventions that <code>jt60sa-discovery-completion</code> §56 establishes, and then runs as
+      <code>--only mapping</code>. The dry run must name every domain, each with its probe result, and mapping as not
+      requested. The evidence fragment records both tables and the spend against the cap.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-jt60sa-proof</code>, role test, 0.5 h. Write paths:
       <code>docs/evidence/fragments/facility-discovery-sequence/sequence-jt60sa-proof.html</code>.
       <strong>Done when</strong> the fragment holds both tables, and the real run's enriched-signal
-      count rose with zero SSH calls in its log. It waits for the census fragment of
-      <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code>, so that the proof and that
-      rescan never scan the same JT-60SA paths at once.
+      count rose and every stage's outcome and spend is in the final table, within the cap. It waits for the census
+      fragment of <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code> and for
+      <code>mapping-opt-in</code>, so that the proof and that rescan never scan the same JT-60SA paths at once and the
+      run cannot write IMAS mappings.
     </p>
 
     <section class="section-landed">
@@ -398,13 +407,13 @@
       </p>
     <p class="r-dec-rat">The lead chose the bare group, imas-codex discover FACILITY, without a run subcommand, as other groups do: host.py&#x27;s _HostGroup routes an unknown first argument to a hidden subcommand, so imas-codex discover jt-60sa runs the sequence while imas-codex discover signals jt-60sa still reaches its subcommand.</p>
     </div>
-<div class="r-dec" data-key="mapping-stage-default" data-choice="default" data-by="lead" data-when="2026-10-08T02:31:22+00:00" data-recommended="opt-in" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="mapping-stage-default" data-choice="opt-in" data-by="lead" data-when="2026-10-08T09:47:46+00:00" data-recommended="opt-in" data-recommended-by="reckon-build">
     <p class="r-dec-q">Does the sequence run imas map run by default?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="opt-in">only when named in --only</button>
-      <button class="r-opt chosen" data-value="default">always, under the cost cap</button>
+      <button class="r-opt chosen" data-value="opt-in">only when named in --only</button>
+      <button class="r-opt" data-value="default">always, under the cost cap</button>
       </p>
-    <p class="r-dec-rat">The lead chose to run the mapping stage by default; its reasoning seat is now local (ids-mapping), so it spends nothing on OpenRouter, and --skip excludes it when wanted.</p>
+    <p class="r-dec-rat">On 2026-10-08 the lead reversed the earlier choice: the mapping stage runs only when named, as --only mapping, because mapping writes IMAS bindings, it is the critical step and needs more work, and JT-60SA&#x27;s native COCOS is not yet established. Candidates stays in the default run, because it writes candidate routes rather than IMAS mappings and mapping reads them.</p>
     </div>
 </section>
 
