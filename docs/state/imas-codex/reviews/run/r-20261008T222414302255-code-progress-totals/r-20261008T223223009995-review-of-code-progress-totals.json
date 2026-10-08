@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Measured independently in scratch trees under $TMPDIR. Base arm at 21c117291 (base package imported from /tmp/review-cpt-1354004/base, run with the head test file) -> 2 failed, EXIT=1. Head arm at aa5834427 (head package from /tmp/review-cpt-1354004/head) -> 2 passed, EXIT=0. Both new tests therefore fail at base and pass at head, so the change adds no failing test. The reviewed run's own manifest carries an EMPTY baseline_suite object (see finding 4), so its own evidence supplies no base arm from which a delta could be derived; its baseline-query.log (1 failed at 21c117291) and final-gate.log (2 passed at aa5834427) are consistent with my arms.",
+  "after_suite": {
+    "command": "PYTHONPATH=/tmp/review-cpt-1354004/head /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -p no:cacheprovider tests/discovery/test_code_discovery_stats.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T223223009995-review-of-code-progress-totals/head-arm.log",
+    "revision": "aa5834427edfb5fdd99c45f930dc3d5ce74e2a96"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "PYTHONPATH=/tmp/review-cpt-1354004/base /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -p no:cacheprovider tests/discovery/test_code_discovery_stats.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/discovery/test_code_discovery_stats.py::test_code_progress_queries_have_single_cypher_braces",
+      "tests/discovery/test_code_discovery_stats.py::test_graph_refresh_logs_each_distinct_error_and_keeps_running"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T223223009995-review-of-code-progress-totals/base-arm.log",
+    "revision": "21c117291151d1686c6da3d00a863b11fd9fa539"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/code/parallel.py (get_code_discovery_stats, first gc.query plain-string Cypher, line 396 (head))",
+    "imas_codex/cli/discover/common.py (run_discovery._run_rich._refresh_graph background loop, line 362 (head))"
+  ],
+  "completed_at": "2026-10-08T22:43:02.449Z",
+  "dispatched_at": "2026-10-08T22:32:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/code-progress-totals.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's declared write scope names docs/evidence/fragments/jt60sa-discovery-completion/code-progress-totals.html and docs/figures/jt60sa-discovery-completion/code-progress-totals, but neither exists at the reviewed head aa5834427 (the fragment file is absent and no code-progress-totals figures directory was created; the diff base..head touches only three files). A declared write path that produced nothing reads as unfinished work or as a scope that over-states the run."
+    },
+    {
+      "file": "tests/discovery/test_code_discovery_stats.py",
+      "line": "32",
+      "severity": "follow-on",
+      "text": "follow-on: the plan's deliverable says 'every query in get_code_discovery_stats is valid Cypher', but the capturing test asserts only that no query contains '{{' or '}}'. A different syntax error (an unbalanced paren, a misspelled clause) would pass. This matches the plan's own done-when wording ('asserts none contains a doubled brace'), so it is a narrowing of the deliverable, not a failure of the clause; a stronger check would parse each captured query with the Cypher parser or spellcheck the intended node/relationship names."
+    },
+    {
+      "file": "imas_codex/cli/discover/common.py",
+      "line": "363",
+      "severity": "follow-on",
+      "text": "follow-on: the dedup key is (type(exc), str(exc)). An exception whose message embeds volatile content -- a file path, a row count, a timestamp, the facility name -- yields a new key on every refresh, so the 'once per distinct error' intent degrades to 'once per distinct message' and the warning can repeat every graph_refresh_interval. The set is also unbounded within a run, though the cardinality is trivial in practice. No test exercises a message with variable content."
+    },
+    {
+      "file": "imas_codex/cli/discover/common.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: evidence hygiene in the reviewed artifact, not a code defect. The reviewed manifest's baseline_suite object is empty, so a reader deriving added failures from the run's own evidence gets a head arm only and cannot compute a delta; the comparable base arm was supplied by this review (base 2 failed -> head 0 failed). Its baseline-query.log is also a partial baseline: it collected one test (the logging test did not yet exist), so it is not a full-file base arm."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "the fixed query is the sole caller of the first stats read and has no other caller; the refresh-loop change is confined to the _refresh_graph coroutine inside run_discovery, which is the only consumer of config.graph_refresh_fn / display.refresh_from_graph. The new warning uses the module logger already defined at imas_codex/cli/discover/common.py:30.",
+    "diff": "two commits against 21c117291 change two product files and add one test file: imas_codex/discovery/code/parallel.py (one character-level change, '{{id: $facility}}' -> '{id: $facility}' in the first, non-f, query string), imas_codex/cli/discover/common.py (the refresh loop's bare 'except Exception: pass' becomes a dedup-and-warn block over a local logged_errors set), and a new tests/discovery/test_code_discovery_stats.py (88 lines, two tests). No other tracked file changed.",
+    "done_when": "each of the plan's three done-when clauses is shown at the committed head. (1) test_code_progress_queries_have_single_cypher... 'captures every query ... through a fake graph client and asserts none contains a doubled brace': it patches GraphClient, records all 8 queries, asserts len==8 and that neither '{{' nor '}}' appears in any. (2) test_graph_refresh_logs_each_distinct_error_and_keeps_running shows the loop logging a raised refresh error: it drives run_discovery with a refresh fn that raises ValueError then RuntimeError and asserts the warning list equals exactly the two distinct messages, with the caller having returned. (3) the declared negative control (restore the doubled brace) fails the first test, 1 failed / 1 passed / EXIT=1 -- I reproduced it independently in /tmp/review-cpt-1354004/nc.",
+    "goal": "the plan's two product deliverables hold at the committed head: the first query in get_code_discovery_stats is now a plain string with single braces ('MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})'), and the refresh loop logs a raised refresh error as a warning once per distinct (type, message) instead of discarding it, while the loop keeps running (the test's main returns normally and no exception escapes).",
+    "manifest": "read at the run directory; status 'complete', two commits ending aa5834427, changed_paths are the three source files above, five logs listed. Its baseline_suite object is EMPTY (finding 4) while its after_suite object is populated (final-gate.log, 0 failures, exit 0). Its declared write scope additionally names a fragment html and a figures directory that the diff never produced (finding 1). The reviewed worktree is clean at aa5834427 (confirmed)."
+  },
+  "justifications": {
+    "durability": "both guards are controls rather than assertions of intent, demonstrated by mutation. The brace guard fails when the doubled brace is restored (reproduced), and the logging guard fails when the swallow is restored (base arm: warnings == []). The dedup state is a per-invocation local set, so a fresh run re-warns, which matches 'once per distinct error'. Residual risk is finding 3: the dedup key is (type(exc), str(exc)), so an error whose message embeds volatile content (a path, a count, a timestamp) will be logged on every refresh rather than once, and no test covers that shape.",
+    "evidence": "an independent base arm (2 failed, EXIT=1) and head arm (2 passed, EXIT=0) close the added-failure question at zero, and the declared negative control is reproduced (1 failed / 1 passed, EXIT=1). The two failures at base are genuine fail->pass transitions: at base the braces test fails on the first query and the refresh test fails with an empty warning list, so both new tests are load-bearing. Gaps: the reviewed manifest's baseline_suite is empty, so the run's own evidence gives no base arm (finding 4); and the run's baseline-query.log header names revision 21c117291 while collecting only the one test that existed then, before the logging test was added.",
+    "fit": "the change is minimal and idiomatic: it uses the module logger already present, keeps the loop's existing CancelledError re-raise ordering, and adds no new abstraction. Commits carry conventional subjects with bodies, and neither the messages, the test file, nor the comments carry plan, sprint, ticket, PR or author identifiers (checked). Tests are named by mechanism.",
+    "goal_fidelity": "the plan's cause is reproduced at base and refuted at head. At base the first query string contains a literal '{{id: $facility}}' (AssertionError: assert '{{' not in '...'), and the refresh loop's 'except Exception: pass' produces an empty warning list; at head the query is valid and the two distinct errors are each logged once. All three done-when clauses (capturing test, logging test, negative control) hold and were independently reproduced. Slight reserve: the deliverable word 'valid Cypher' is stronger than the test, which checks only brace doubling (finding 2).",
+    "reuse": "nothing is re-implemented: the refresh loop's structure, the logger, and the display teardown are unchanged, and the test drives the real run_discovery path with unittest.mock patches rather than a shadow harness. It introduces no parallel helper for query capture because none exists in the repo. The brace fix aligns the first query with the seven sibling query strings in the same function.",
+    "scope_discipline": "the diff stays inside the declared product write scope across both commits (parallel.py, common.py, the new test file) and introduces no unrelated edit; it touches no docs, no plan, and no index. The reserve is that the declared write scope also names docs/evidence/fragments/jt60sa-discovery-completion/code-progress-totals.html and docs/figures/jt60sa-discovery-completion/code-progress-totals, neither of which exists at the reviewed head (finding 1), so the declared scope over-states what the run touched rather than the work exceeding it."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Review of r-20261008T222414302255-code-progress-totals against plan section 59 (jt60sa-discovery-completion). The reviewed diff fixes the first query in get_code_discovery_stats (a non-f plain string with a literal doubled brace that Neo4j rejects) and replaces the refresh loop's silent 'except Exception: pass' with a dedup-and-warn block, plus two tests. I reproduced the head gate (2 passed, EXIT=0), the base defect (2 failed, EXIT=1) and the declared negative control (1 failed / 1 passed, EXIT=1) in independent scratch arms under $TMPDIR; both new tests are genuine fail->pass transitions and the change adds no failing test. An AST scan for the same doubled-brace class in non-f-string literals found only legitimate .format() templates (standard_names/coverage.py) besides the now-fixed site, so no sibling defect is outstanding. Verdict: SOUND WITH FINDINGS.",
+  "review_run_id": "r-20261008T223223009995-review-of-code-progress-totals",
+  "reviewed_base_sha": "21c117291151d1686c6da3d00a863b11fd9fa539",
+  "reviewed_head_sha": "aa5834427edfb5fdd99c45f930dc3d5ce74e2a96",
+  "reviewed_run_id": "r-20261008T222414302255-code-progress-totals",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T22:48:00+00:00",
+  "total": 104,
+  "verdict": "SOUND WITH FINDINGS"
+}
