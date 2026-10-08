@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="86">
+<meta name="plan-version" content="87">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -523,6 +523,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T095956656889-discovery-prose-matches-cli" data-who="reckon-build" data-when="2026-10-08T10:09:25Z">
     <div class="r-comment-body"><p>The two architecture pages now name only supported discover commands, domains, options and defaults; grep found 17 stale baseline matches and 0 at the edited head, while the CLI inventory checked 7 command forms, 14 options, 5 domains and 5 defaults with 0 mismatches.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T093047410719-retire-domain-subcommands" data-who="reckon-build" data-when="2026-10-08T09:55:50Z">
+    <div class="r-comment-body"><p>Retired six domain commands and moved owned callers to discover FACILITY --only DOMAIN; final gate 543 passed, owned grep 0 matches, help shows wiki min-score default 0.16, and documents retains default 0.5.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261008T064515993215-review-of-focus-candidates" data-who="reckon-build" data-when="2026-10-08T07:03:54.008Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T061140828099-focus-candidates stored as a parsed record scoring goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 18, reuse 18 (total 108), verdict SOUND WITH FINDINGS, reviewed_base_sha ad49d924d10ce972975339230f51bd72ccd93e62 and reviewed_head_sha 7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e, with added_failure_count 0 derived from clean arms at both revisions; four follow-on findings, no blocker.</p></div>
