@@ -1,0 +1,28 @@
+<section id="focus-documents">
+  <h2 id="focus-documents-heading">Focused document image claims</h2>
+  <p id="focus-documents-result">
+    Named Document path prefixes now restrict the fetch claim, both pipeline pending
+    checks, and the shared image-scoring claim. The shared resolver accepts YAML
+    lists or mappings with an <code>items</code> list. At committed head
+    <code>fa8c0ed82b2c3e3bbd2f40ec1ac2216922f0978a</code>, the required gate
+    completed with 83 passed, 1 warning, and EXIT=0. Removing the fetch claim's
+    path predicate made the focused-claim test fail with EXIT=1: it claimed the
+    unrelated <code>doc-b</code> alongside <code>doc-a</code>.
+  </p>
+  <table id="focus-documents-cypher">
+    <thead><tr><th>Statement for coordinator EXPLAIN</th><th>Focus condition and parameters</th></tr></thead>
+    <tbody>
+      <tr id="focus-documents-validation"><td><code>imas_codex/cli/discover/documents.py:23</code>, <code>_validate_focus</code></td><td><code>UNWIND $prefixes</code> matches each prefix to a facility Document with <code>d.path STARTS WITH prefix</code>; parameters: <code>facility</code>, <code>prefixes</code>.</td></tr>
+      <tr id="focus-documents-fetch-claim"><td><code>imas_codex/discovery/documents/workers.py:47</code>, <code>_claim_image_documents</code></td><td>The image Document claim includes <code>any(prefix IN $path_prefixes WHERE d.path STARTS WITH prefix)</code>; parameters: <code>facility</code>, <code>limit</code>, <code>token</code>, <code>path_prefixes</code>.</td></tr>
+      <tr id="focus-documents-fetch-pending"><td><code>imas_codex/discovery/documents/pipeline.py:73</code>, <code>_has_pending_image_documents</code></td><td>The pending Document count uses the same path predicate; parameters: <code>facility</code>, <code>path_prefixes</code>.</td></tr>
+      <tr id="focus-documents-score-pending"><td><code>imas_codex/discovery/documents/pipeline.py:102</code>, <code>_has_pending_image_scores</code></td><td>The pending Image count requires a facility Document linked by <code>HAS_IMAGE</code> whose path starts with a prefix; parameters: <code>facility</code>, <code>path_prefixes</code>.</td></tr>
+      <tr id="focus-documents-score-claim"><td><code>imas_codex/discovery/base/image.py:402</code>, <code>claim_images_for_scoring</code></td><td>The scoring claim uses the same linked Document condition; parameters: <code>facility</code>, <code>cutoff</code>, <code>limit</code>, <code>token</code>, <code>path_prefixes</code>.</td></tr>
+    </tbody>
+  </table>
+  <p id="focus-documents-explain-status">
+    The statements are listed for the coordinator's live EXPLAIN. This node's
+    positive GraphClient probe could not reach the graph service, so the passing
+    mock-backed gate establishes filtering behavior but does not establish live
+    Cypher parsing.
+  </p>
+</section>
