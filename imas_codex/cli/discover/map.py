@@ -67,9 +67,9 @@ def run_candidates_stage(
     """
     if options.focus:
         raise click.UsageError(
-            "the candidates stage cannot restrict a run to named items yet: "
-            "its claim query takes no item filter, so --focus is refused "
-            "rather than ignored (facility-discovery-sequence section 7)."
+            "--focus is not supported for the candidates stage: the candidate claim "
+            "query takes no item filter, so a focused run cannot be honoured. Run "
+            "without --focus."
         )
 
     from imas_codex.cli.discover.common import (

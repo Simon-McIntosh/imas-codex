@@ -111,14 +111,20 @@ def test_stage_options_reach_the_engine_state(stage_env, engine_calls):
     assert state.deadline is not None
 
 
-def test_focus_is_refused_naming_section_7(stage_env):
-    """--focus is refused, never ignored silently, and names its plan section."""
+def test_focus_is_refused_with_a_mechanism_message(stage_env):
+    """--focus is refused, never ignored silently, naming the missing capability.
+
+    The message states the mechanism (the claim query takes no item filter)
+    rather than pointing at a plan or section number, which would rot.
+    """
     with pytest.raises(click.UsageError) as excinfo:
         run_candidates_stage(FACILITY, CandidatesStageOptions(focus=("equilibrium",)))
 
     message = str(excinfo.value)
-    assert "facility-discovery-sequence" in message
-    assert "section 7" in message
+    assert "--focus" in message
+    assert "item filter" in message
+    assert "facility-discovery-sequence" not in message
+    assert "section" not in message.lower()
 
 
 def test_topic_is_carried_to_the_stage(stage_env, engine_calls, caplog):
