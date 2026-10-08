@@ -986,9 +986,8 @@ def get_wiki_discovery_stats(facility: str) -> dict[str, int | float]:
     - scored: Pages with status=scored (awaiting ingest or skipped)
     - ingested: Pages with status=ingested (final state)
     - pending_score: Same as scanned count (for progress display)
-    - pending_ingest: Scored pages with score >= 0.5 awaiting ingestion
+    - pending_ingest: Scored pages above the content ingest cutoff
     - accumulated_cost: Total score_cost from all scored/ingested pages
-    - skipped: Pages with status=skipped or score < 0.5
     """
     with GraphClient() as gc:
         # Get status counts
@@ -1021,15 +1020,15 @@ def get_wiki_discovery_stats(facility: str) -> dict[str, int | float]:
                 stats[status] = count
             stats["total"] += count
 
-        # Get pending ingest count (scored pages with score >= 0.5)
         ingest_result = gc.query(
             """
             MATCH (wp:WikiPage {facility_id: $facility})
-            WHERE wp.status = $scored AND wp.score_composite >= 0.5
+            WHERE wp.status = $scored AND wp.score_composite >= $min_score
             RETURN count(wp) AS pending_ingest
             """,
             facility=facility,
             scored=WikiPageStatus.scored.value,
+            min_score=CONTENT_INGEST_THRESHOLD,
         )
         stats["pending_score"] = stats["scanned"]
         stats["pending_ingest"] = (
@@ -1104,7 +1103,7 @@ def get_wiki_discovery_stats(facility: str) -> dict[str, int | float]:
                 st == DocumentStatus.scored.value
                 and atype in ingestable
                 and r["score"] is not None
-                and r["score"] >= 0.5
+                and r["score"] >= CONTENT_INGEST_THRESHOLD
             ):
                 pending_document_ingest += r["cnt"]
 

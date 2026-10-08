@@ -12,7 +12,7 @@ Design principles (matching paths parallel_progress.py):
 
 Display layout: SERVERS → PIPELINE → RESOURCES
   SCORE:  Content-aware LLM scoring (fetches content, scores with LLM)
-  INGEST: Chunk and embed high-value pages (score >= 0.5)
+  INGEST: Chunk and embed pages admitted by the content ingest gate
   FILE:   Score and embed wiki file attachments (PDFs, CSVs, etc.)
   IMAGE:  VLM captioning and scoring of wiki images
 
@@ -47,6 +47,7 @@ from imas_codex.discovery.base.progress import (
     format_time,
 )
 from imas_codex.discovery.base.supervision import WorkerState
+from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
 from imas_codex.embeddings import get_embedding_source
 from imas_codex.embeddings.resilience import get_embed_status
 
@@ -738,7 +739,8 @@ class WikiProgressDisplay(BaseProgressDisplay):
             if document.chunk_count > 0:
                 display_name += f" ({document.chunk_count} chunks)"
             elif (
-                document.score_composite is not None and document.score_composite < 0.5
+                document.score_composite is not None
+                and document.score_composite < CONTENT_INGEST_THRESHOLD
             ):
                 display_name += " (skipped)"
             docs_text = display_name
