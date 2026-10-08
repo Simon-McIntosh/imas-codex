@@ -36,6 +36,11 @@ from imas_codex.discovery.base.supervision import (
     PipelinePhase,
     is_infrastructure_error,
 )
+from imas_codex.discovery.paths.scorer import (
+    DATA_PURPOSES,
+    PATH_EXPAND_THRESHOLD,
+    SKIPPED_PURPOSES,
+)
 from imas_codex.graph.models import PathStatus, TerminalReason
 from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -46,6 +51,24 @@ if TYPE_CHECKING:
     from imas_codex.remote.ssh_worker import SSHWorkerPool
 
 logger = logging.getLogger(__name__)
+
+EXPANSION_GATE = """p.status IN $expand_statuses
+    AND NOT (p.path_purpose IN $excluded_purposes)
+    AND (p.path_purpose = 'container'
+         OR p.children_worth_listing >= $expand_threshold)
+    AND p.expanded_at IS NULL"""
+
+
+def _expansion_gate_params() -> dict[str, Any]:
+    return {
+        "expand_statuses": [
+            PathStatus.triaged.value,
+            PathStatus.scored.value,
+            PathStatus.explored.value,
+        ],
+        "excluded_purposes": sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
+        "expand_threshold": PATH_EXPAND_THRESHOLD,
+    }
 
 
 @dataclass
@@ -115,16 +138,17 @@ class DiscoveryState(DiscoveryStateBase):
 
         with GraphClient() as gc:
             result = gc.query(
-                """
-                MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
+                f"""
+                MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
                 WHERE p.status IN [$triaged, $scored]
-                  AND (p.should_expand = false OR p.expanded_at IS NOT NULL)
+                  AND (NOT ({EXPANSION_GATE}))
                   AND (p.should_enrich = false OR p.is_enriched = true)
                 RETURN count(p) AS terminal_count
                 """,
                 facility=self.facility,
                 triaged=PathStatus.triaged.value,
                 scored=PathStatus.scored.value,
+                **_expansion_gate_params(),
             )
             return result[0]["terminal_count"] if result else 0
 
@@ -220,8 +244,7 @@ def has_pending_work(facility: str) -> bool:
                       THEN 'discovered' ELSE null END AS disc,
                  CASE WHEN p.status = $scanned AND p.triage_composite IS NULL
                       THEN 'scanned' ELSE null END AS scn,
-                 CASE WHEN p.status = $triaged AND p.should_expand = true
-                      AND p.expanded_at IS NULL
+                 CASE WHEN {EXPANSION_GATE}
                       THEN 'expand' ELSE null END AS exp,
                  CASE WHEN p.status = $triaged AND p.should_enrich = true
                       AND (p.is_enriched IS NULL OR p.is_enriched = false)
@@ -243,6 +266,7 @@ def has_pending_work(facility: str) -> bool:
             discovered=PathStatus.discovered.value,
             scanned=PathStatus.scanned.value,
             triaged=PathStatus.triaged.value,
+            **_expansion_gate_params(),
             **excluded_params,
         )
         if result:
@@ -285,7 +309,7 @@ def _has_pending_scan_work(facility: str) -> bool:
 
 
 def _has_pending_expand_work(facility: str) -> bool:
-    """Check if there are triaged paths awaiting expansion."""
+    """Check if a judged path awaits expansion."""
     from imas_codex.graph import GraphClient
 
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
@@ -293,14 +317,12 @@ def _has_pending_expand_work(facility: str) -> bool:
         result = gc.query(
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE p.status = $triaged
-              AND p.should_expand = true
-              AND p.expanded_at IS NULL
+            WHERE {EXPANSION_GATE}
               {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
-            triaged=PathStatus.triaged.value,
+            **_expansion_gate_params(),
             **excluded_params,
         )
         return bool(result and result[0]["has_work"])
@@ -542,9 +564,10 @@ def claim_paths_for_scanning(
 def claim_paths_for_expanding(
     facility: str, limit: int = 50, root_filter: list[str] | None = None
 ) -> list[dict[str, Any]]:
-    """Atomically claim triaged paths for expansion scanning.
+    """Atomically claim judged paths for expansion scanning.
 
-    Claims paths with should_expand=true that haven't been expanded yet.
+    Claims containers and paths whose children are worth listing, including
+    paths whose scoring finished before expansion.
     Uses claim_token pattern with ORDER BY rand() to prevent deadlocks.
 
     Args:
@@ -567,9 +590,7 @@ def claim_paths_for_expanding(
         gc.query(
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE p.status = $triaged
-              AND p.should_expand = true
-              AND p.expanded_at IS NULL
+            WHERE {EXPANSION_GATE}
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               {scope_clause}
               {excluded_clause}
@@ -578,7 +599,7 @@ def claim_paths_for_expanding(
             """,
             facility=facility,
             limit=limit,
-            triaged=PathStatus.triaged.value,
+            **_expansion_gate_params(),
             cutoff=cutoff,
             token=claim_token,
             **scope_params,
@@ -587,13 +608,13 @@ def claim_paths_for_expanding(
         result = gc.query(
             f"""
             MATCH (p:FacilityPath {{claim_token: $token}})-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE p.status = $triaged AND p.should_expand = true
+            WHERE {EXPANSION_GATE}
               {scope_clause}
               {excluded_clause}
             RETURN p.id AS id, p.path AS path, p.depth AS depth, true AS is_expanding
             """,
             facility=facility,
-            triaged=PathStatus.triaged.value,
+            **_expansion_gate_params(),
             token=claim_token,
             **scope_params,
             **excluded_params,
