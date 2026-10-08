@@ -1,0 +1,456 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "4f9c4e87822a41bdf0453c1e3fd55d63b235d567",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 7445632,
+      "cached_input_tokens_cumulative": 7445632,
+      "input_tokens": 7573101,
+      "input_tokens_cumulative": 7573101,
+      "output_tokens": 28086,
+      "output_tokens_cumulative": 28086,
+      "reasoning_output_tokens": 10895,
+      "reasoning_output_tokens_cumulative": 10895
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 220,
+    "files": 3,
+    "removed": 3
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 3552,
+        "name": "enrich_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4160
+    },
+    {
+      "existing_function": {
+        "line": 605,
+        "name": "test_static_signal_gets_all_version_check_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4892,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4938
+    },
+    {
+      "existing_function": {
+        "line": 651,
+        "name": "test_subtree_signal_gets_connection_tree_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4892,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4938
+    },
+    {
+      "existing_function": {
+        "line": 687,
+        "name": "test_tdi_function_gets_reference_shot_only",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4892,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4938
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "a2c4272c0f4bb3fd6ef016faa4b67606cbb504ca",
+    "cdffba4e6bf18f6af0d4afe8fa1c467b7b9df5d7",
+    "7741a325e6f83cae8647955f5602fa7e4d494f56",
+    "10a2828d36084ccbf8f7a1d30e37ad8188ad021c"
+  ],
+  "completed_at": "2026-10-08T10:21:11Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T10:01:53Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_signal_status_monotonic.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100136164400-signal-status-monotonic/head-gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.873,
+    "at_dispatch": 0.873,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "second of §55's nodes; §55 closes when the signals drain persists the UDDB and LCDB bindings and leaves no signal at discovered without a reason",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.035704977847277,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T07:53:19Z, which is after this node's 2700s horizon ending 2026-10-08T10:46:38.526865+00:00",
+    "horizon_ends_at": "2026-10-08T10:46:38.526865+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-08T10:01:37Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T07:53:19Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 501201,
+    "state": "quiet",
+    "utilisation_pct": 52.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T10:01:37Z",
+    "read_at": "2026-10-08T10:01:38Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 52.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T10:21:11Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100136164400-signal-status-monotonic/manifest.md",
+  "member": "disposable-r-20261008T100136164400-signal-status-monotonic",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_signal_status_monotonic.py::test_rescan_preserves_checked_signal_status"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_signal_status_monotonic.py::test_rescan_preserves_checked_signal_status"
+    ],
+    "declaration": "restore ON MATCH SET s += sig unchanged in the signal merge; the rescan test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100136164400-signal-status-monotonic/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100136164400-signal-status-monotonic/negative-control.log",
+    "test_paths": [
+      "tests/discovery/test_signal_status_monotonic.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "signal-status-monotonic",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1553,
+          "cached_input_tokens": 650513,
+          "input_tokens": 652068,
+          "output_tokens": 1063,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 653131,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "a test shows re-merging a checked signal through the scan path leaves it checked, a reconcile in the signals graph code re-derives lagging statuses from checked_at and enriched_at and restores the JT-60SA EDDB signals reset on 2026-10-08, the fragment gives JT-60SA counts by status before and after the reconcile, and reports without writing the lagging counts on every other facility",
+    "estimated_hours": null,
+    "goal": "stop a signal rescan from lowering pipeline status",
+    "id": "signal-status-monotonic",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T10:01:37Z",
+      "read_at": "2026-10-08T10:01:38Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 52.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100136164400-signal-status-monotonic/manifest.md",
+    "negative_control": "restore ON MATCH SET s += sig unchanged in the signal merge; the rescan test must fail",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§55",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/signals/parallel.py",
+      "tests/discovery/test_signal_status_monotonic.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/signal-status-monotonic.html",
+      "docs/figures/jt60sa-discovery-completion/signal-status-monotonic"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.0355637420462642,
+      "derived": 0.18843287395916009,
+      "drain_hours": 168.0,
+      "effective_limit": 0.18843287395916009,
+      "elapsed_fraction": 0.17130261269014552,
+      "elapsed_hours": 28.77883893194445,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T10:01:42+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.48,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.52,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.529984,
+      "decided_by": "window",
+      "margin": 0.11376600000000003,
+      "name": "signal-status-monotonic",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.52
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.820155,
+        "observed_at": "2026-10-08T10:01:42+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.52,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "signal-status-monotonic",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T10:01:42.820155+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5199.312,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.873,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "10a2828d36084ccbf8f7a1d30e37ad8188ad021c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "4f9c4e87822a41bdf0453c1e3fd55d63b235d567",
+    "reviewed_head_sha": "10a2828d36084ccbf8f7a1d30e37ad8188ad021c",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 20,
+      "goal_fidelity": 18,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T100136164400-signal-status-monotonic",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§55",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a11af6-6a09-7923-8730-72522da7d9ea",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 7445632,
+    "cumulative_input_tokens": 15018733,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 38981
+  },
+  "time_budget": "45m",
+  "tool_steps": 113.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1158,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T10:21:16Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T10:01:57Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T100136164400-signal-status-monotonic",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 310,
+    "worker_pid": 349943
+  },
+  "worker_seconds": 1158,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
