@@ -366,6 +366,89 @@ async def test_scanner_access_methods_share_the_existing_persistence_writer():
 
 
 class TestConfiguredDatabases:
+    def test_facility_records_every_database_route_and_loader(self):
+        root, config = _equilibrium_config()
+        facility = yaml.safe_load(
+            (root / "imas_codex/config/facilities/jt-60sa.yaml").read_text()
+        )
+        routes = {route["name"]: route for route in config["database_routes"]}
+        assert set(routes) == set(config["databases"])
+        assert all(
+            route["read_call"]
+            and route["catalogue_call"]
+            and route["metadata_source"]
+            and route["status"]
+            and route["status_detail"]
+            for route in routes.values()
+        )
+        assert routes["PMDB"]["status"] == "catalogue_unavailable"
+        assert routes["FSMD"]["status"] == "missing_library"
+        assert routes["EASY"]["status"] == "missing_library"
+        assert routes["FLEDD"]["status"] == "access_route_only"
+        patterns = facility["data_access_patterns"]
+        for tool in (
+            "libFLEDDPIC",
+            "eqdbms",
+            "dbsel",
+            "eddbreadOne",
+            "eddbreadPara",
+            "get_time_seriese_data",
+            "uddbreadConvert",
+            "plantdread",
+            "lcdb_value",
+            "mbdbRTimes",
+        ):
+            assert tool in patterns["key_tools"]
+            assert tool in patterns["code_import_patterns"]
+
+    async def test_every_database_signal_has_a_persisted_access_method(self):
+        rows = [
+            *ENUMERATE_FIXTURE["signals"],
+            {"database": "UDDB", "category": "UDDB", "data_name": "2111UA001"},
+            {
+                "database": "LCDB",
+                "category": "LCDB/owner/ate.s001",
+                "file_category": "ate.s001",
+                "data_name": "DEVICE",
+                "shot": 101173,
+                "root": "/data/owner",
+            },
+            {
+                "database": "MBDB",
+                "category": "MBDB/owner/12345/data.t001",
+                "data_name": "PSI",
+                "data_kind": "T",
+            },
+        ]
+        config = _equilibrium_config()[1]
+        remote = AsyncMock(return_value=json.dumps({"signals": rows, "ncats": 2}))
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
+
+        assert "error" not in result.stats
+        access = {
+            method.id: method for method in [result.data_access, *result.data_accesses]
+        }
+        assert {signal.data_source_name for signal in result.signals} == {
+            "edas",
+            "UDDB",
+            "LCDB",
+            "MBDB",
+            "EQDB",
+            "G-EQDSK",
+        }
+        assert all(signal.data_access in access for signal in result.signals)
+        for name in ("UDDB", "LCDB", "MBDB"):
+            method = access[f"jt-60sa:edas:{name.lower()}"]
+            assert method.connection_template
+            assert method.data_template
+            assert "Catalogue:" in method.description
+            assert "metadata:" in method.description
+        assert "uddbreadTable()" in access["jt-60sa:edas:uddb"].description
+        assert "Per-dataset description" in access["jt-60sa:edas:lcdb"].description
+        assert "mbdbRPoint" in access["jt-60sa:edas:mbdb"].data_template
+        assert "mbdbRTimes" in access["jt-60sa:edas:mbdb"].data_template
+
     def test_blank_raw_unit_does_not_consume_the_next_header_key(self):
         header = 'PID="2811UA001" NAME="P15 co-view" UNIT= STIME=0.000000'
         assert _uddb_header_value(header, "UNIT") == ""
@@ -673,6 +756,22 @@ class TestConfiguredDatabases:
             side_effect=FileNotFoundError(2, "No such file or directory"),
         ):
             assert attempt_database("EQDB", "E101173", {})["return_code"] == 2
+
+    def test_unlisted_database_routes_record_the_access_constraint(self, monkeypatch):
+        _, config = _equilibrium_config()
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas.os.path.isfile",
+            lambda path: path == config["fledd_lib_path"],
+        )
+        for name in ("FSMD", "EASY"):
+            attempt = attempt_database(name, "E101173", config)
+            assert attempt["status"] == "missing_library"
+            assert attempt["return_code"] == 2
+            assert "configured library" in attempt["reason"]
+        fledd = attempt_database("FLEDD", "E101173", config)
+        assert fledd["status"] == "access_route_only"
+        assert fledd["return_code"] is None
+        assert "eqlist_get_rev_" in fledd["catalogue_call"]
 
     def test_uddb_table_rows_are_emitted(self, monkeypatch):
         class RawCatalogue:

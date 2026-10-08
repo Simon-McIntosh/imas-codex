@@ -622,6 +622,38 @@ def enumerate_mbdb(config):
 
 def attempt_database(database, ref_shot, config):
     """Record a bounded catalogue probe when no usable channel list is exposed."""
+    if database in {"FSMD", "EASY", "FLEDD"}:
+        path_key = {
+            "FSMD": "fsmd_lib_path",
+            "EASY": "easy_lib_path",
+            "FLEDD": "fledd_lib_path",
+        }[database]
+        library = config.get(path_key)
+        route = next(
+            (
+                item
+                for item in config.get("database_routes", [])
+                if item["name"] == database
+            ),
+            {},
+        )
+        present = bool(library and os.path.isfile(library))
+        return {
+            "database": database,
+            "call": f"isfile({library!r})",
+            "return_code": None if present else 2,
+            "status": (
+                "access_route_only" if database == "FLEDD" else "catalogue_unavailable"
+            )
+            if present
+            else "missing_library",
+            "catalogue_call": route.get("catalogue_call"),
+            "reason": (
+                route.get("status_detail", "no native field catalogue")
+                if present
+                else f"configured library {library or path_key} is absent"
+            ),
+        }
     call = "wrapper import"
     try:
         if database == "PMDB":

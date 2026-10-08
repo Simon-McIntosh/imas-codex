@@ -41,19 +41,101 @@ data_systems:
   # The interpreter and module recipe comes from the facility
   # remote_environment block above.
   edas:
-    databases: [EDDB, UDDB, PMDB, LCDB, MBDB, EQDB]
+    databases: [EDDB, UDDB, PMDB, FSMD, EASY, LCDB, MBDB, EQDB, FLEDD]
     api_path: /analysis/src/eddb
     lib_path: /analysis/lib/libeddb.so
     uddb_api_path: /analysis/src/uddb
     uddb_lib_path: /analysis/lib/libuddb.so
     pmdb_api_path: /analysis/src/pmdb
     pmdb_lib_path: /analysis/lib/libpmdb.so
+    fsmd_api_path: /analysis/src/edas2/v2.1.15/edas_share/database_api
+    fsmd_lib_path: /analysis/lib/libfsmdnedb.so
+    easy_api_path: /analysis/src/edas2/v2.1.15/edas_share/database_api
+    easy_lib_path: /analysis/lib/libEASYplus.so
+    fledd_lib_path: /analysis/lib/libFLEDDPIC.so
+    fledd_client_path: /analysis/lib/JT60SAEQDB
+    eqdb_root: /analysis_DB/EQDB
+    dbsel_path: /analysis/bin/dbsel
     lcdb_api_path: /analysis/src/lcdbWrapper
     lcdb_root: /analysis_DB/EDASDB
     mbdb_api_path: /analysis/src/mbdb
     mbdb_lib_path: /analysis/lib/libmbdb.so
     mbdb_root: /analysis_DB/MBDB
     header_path: /analysis/src/edas/include
+    database_routes:
+      - name: EDDB
+        read_call: eddbreadTime(shot, category, data_name, t1, t2); eddbreadOne(shot, category, data_name, pid, step, channel)
+        catalogue_call: eddbreadCatTable(); eddbreadTable(shot, category)
+        metadata_source: eddbreadTable units, English/Japanese descriptions, aliases and shot ranges
+        status: enumerated
+        status_detail: 6,298 signals in 73 categories; 4,588 with units at E101173
+        access_path: /analysis_DB/EDASDB
+        observed_on: 2026-10-08
+      - name: UDDB
+        read_call: uddbreadConvert(shot, pid, t1, t2, datavol, ch)
+        catalogue_call: uddbreadTable()
+        metadata_source: uddbreadTable aliases and shot ranges; uddbreadHeader(shot, pid) when readable
+        status: enumerated
+        status_detail: 188 global registered PIDs; reference-shot headers returned 1301 or 1013
+        access_path: /analysis/lib/libuddb.so
+        observed_on: 2026-10-08
+      - name: PMDB
+        read_call: plantdread(cat, dname, t1, t2, datavol); planthread(cat, dname, t1, descriptor, count)
+        catalogue_call: No channel-list method in PMDB wrapper; wildcard reads are keyed probes
+        metadata_source: No channel inventory; edas_pmdb.ini holds timezone/endian defaults only
+        status: catalogue_unavailable
+        status_detail: Five keyed candidates and wildcard probes returned irc 301; no validated PMDB channel names
+        access_path: /analysis/lib/libpmdb.so
+        observed_on: 2026-10-08
+      - name: FSMD
+        read_call: get_fsmd_from_db(pid, shot_no, start_t, end_t, track, channel)
+        catalogue_call: No separate channel catalogue found; requires validated PID, track and channel
+        metadata_source: No accessible fast-sampling channel descriptions or units
+        status: missing_library
+        status_detail: libfsmdnedb.so absent; legacy libfsmdnedb_nakasvr17.so returned ret_cc 10, ret_ac 1 for a candidate
+        access_path: /analysis/lib/libfsmdnedb.so
+        observed_on: 2026-10-08
+      - name: EASY
+        read_call: esyserd2(shotnum, pid_name, ch_id, kind, tmin, tmax)
+        catalogue_call: No channel-list method found in EASY wrapper
+        metadata_source: No accessible EASY channel descriptions or units
+        status: missing_library
+        status_detail: libEASYplus.so absent; legacy library process exited 255 after a core dump on one candidate
+        access_path: /analysis/lib/libEASYplus.so
+        observed_on: 2026-10-08
+      - name: LCDB
+        read_call: lcdb_value(shot, category, [data_name], root=owner)
+        catalogue_call: lcdb_shot(root=owner); lcdbCategoryList(owner, shot); lcdb_dname(shot, category, root=owner)
+        metadata_source: Per-dataset description file contains field description, dimensions and units
+        status: enumerated
+        status_detail: 8,469 owner/category/field signals across 23 shots and seven owners
+        access_path: /analysis_DB/EDASDB
+        observed_on: 2026-10-08
+      - name: MBDB
+        read_call: mbdbSetDirectory('mbdb'); mbdbROpen(owner, case, category); mbdbRPoint(data_name) or mbdbRTimes(data_name, t1, t2)
+        catalogue_call: mbdbDatanmCount(); mbdbDatanmList() after a successful open
+        metadata_source: Case field list, available only after mbdbROpen succeeds
+        status: no_readable_case
+        status_detail: Two visible case files are zero bytes; both mbdbROpen calls returned 1012
+        access_path: /analysis_DB/MBDB
+        observed_on: 2026-10-08
+      - name: EQDB
+        read_call: read_equilibrium_file.py EQ31/EQ11 record fields or G-EQDSK file fields
+        catalogue_call: Five hash-verified equilibrium exemplars define the code and format fields below
+        metadata_source: EQ31/EQ11 record field tags and G-EQDSK grid headers
+        status: enumerated
+        status_detail: 22 field signals in the graph, including 10 EQDB record and 12 G-EQDSK fields
+        access_path: LOCALDB/EQDSK/{shot}/{time}; central dbsvr17p:/JT60SA_EQ/EQDB not mounted on nakasvr26
+        observed_on: 2026-10-08
+      - name: FLEDD
+        read_call: eqlist_get_rev_(database_id, shot); eqdata_get_(database_id, shot, time_ms); eqint_get_(field); eqdbl_get_(field)
+        catalogue_call: eqlist_get_rev_ lists time revisions for eSurf database identifiers, not signal fields
+        metadata_source: Native equilibrium field tags NSR, NSZ, RG, ZG and PSI; no units or descriptions exposed by the list call
+        status: access_route_only
+        status_detail: FAME 0 and EQDB 1 returned finite 129x129 PSI grids; field signals are represented by EQDB file routes
+        access_path: /analysis/lib/libFLEDDPIC.so -> /analysis/lib/JT60SAEQDB -> 192.168.29.13:65011
+        observed_on: 2026-10-08
+        source_ids: ['-3:LOCALDB/2M', '-2:LOCALDB/EQDSK', '-1:reverse/EQDSK', '0:FAME', '1:EQDB', '2:EQDB_RV', '3:EQDB_PRE', '4:EQDB_EFIT', '5:EQDB_JFT2M', '6:EQDB_CCS', '7:EQDB_TSC']
     # Newest E-shot the catalogue listed on 2026-10-05; valid data starts at
     # E080000 and the scanner formats an integer as E%06d.
     reference_shot: 101173
@@ -135,6 +217,11 @@ data_access_patterns:
     Also: _eddbreadPrePro, _eddbreadImage, _eddbreadComment, _eddbreadScore,
     _eddbreadChInfo, _eddbreadTable, _eddbreadShot, _eddbreadNearTime.
     EDDB_remote_API mirrors local API for remote access.
+    UDDB identifies globally registered raw channels by PID; LCDB identifies
+    an owner, category revision and field within a shot. PMDB needs a plant
+    category and name plus wall-clock interval; FSMD needs PID, track and channel;
+    MBDB needs owner, case and category. FLEDD selects equilibria by database id,
+    shot and time revision; local EQDB records use shot/time paths under EQDSK.
     Higher-level tools: eGIS (graphical viewer), eSLICE (time slicer),
     eSURF (surface viewer) wrap EDAS channels.
   tree_organization: >-
@@ -149,6 +236,23 @@ data_access_patterns:
     - edas_easy_api
     - EDDB_locallib_API
     - EDDB_remote_API
+    - libFLEDDPIC
+    - eqdbms
+    - dbsel
+    - eddbreadOne
+    - eddbreadPara
+    - get_time_seriese_data
+    - uddbreadTable
+    - uddbreadConvert
+    - plantdread
+    - planthread
+    - get_fsmd_from_db
+    - esyserd2
+    - lcdb_dname
+    - lcdb_value
+    - mbdbDatanmList
+    - mbdbRPoint
+    - mbdbRTimes
     - eslice
     - esurf
     - egis
@@ -171,7 +275,10 @@ data_access_patterns:
     - eddb_get
     - eddbreadTime
     - eddbreadHeader
+    - eddbreadOne
+    - eddbreadPara
     - get_time_slice_data
+    - get_time_seriese_data
     - get_time_nearest
     - opendb(
     - closedb(
@@ -179,6 +286,24 @@ data_access_patterns:
     - eslice
     - esurf
     - getseldata
+    - libFLEDDPIC
+    - eqlist_get_rev_
+    - eqdata_get_
+    - eqint_get_
+    - eqdbl_get_
+    - eqdbms
+    - dbsel
+    - uddbreadTable
+    - uddbreadConvert
+    - plantdread
+    - planthread
+    - get_fsmd_from_db
+    - esyserd2
+    - lcdb_dname
+    - lcdb_value
+    - mbdbDatanmList
+    - mbdbRPoint
+    - mbdbRTimes
   notes:
     - "EDAS2 v2.1.15 at /analysis/src/edas2/v2.1.15/ with edas_egis, edas_eslice2, edas_esurf2, edas_share"
     - "8 database API modules at edas_share/database_api/: eddb, easy, fledd, fsmd, lcdb, mbdb, pmdb, uddb"
