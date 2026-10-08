@@ -223,6 +223,11 @@ class EDASScanner:
                     "api_path": api_path,
                     "lib_path": lib_path,
                     "databases": config.get("databases", ["EDDB"]),
+                    "uddb_header_shots": [
+                        item["shot"]
+                        for item in config.get("equilibrium_examples", [])
+                        if item.get("shot")
+                    ],
                     **{
                         key: config[key]
                         for key in (
@@ -302,6 +307,7 @@ class EDASScanner:
                         accessor=f"uddbreadConvert('{shot_str}', '{dname}', t1, t2)",
                         data_source_name="UDDB",
                         data_source_path=f"UDDB/{dname}",
+                        unit=units,
                         description=description,
                         data_class=SignalDataClass.time_series,
                         shot_range=raw.get("shot_range") or None,

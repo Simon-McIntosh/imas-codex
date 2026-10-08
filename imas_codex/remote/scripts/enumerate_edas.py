@@ -58,6 +58,19 @@ PID_RECORD_RE = re.compile(
 )
 
 
+def _uddb_header_value(header, key):
+    """Read a quoted or bare header value without consuming the next key."""
+    match = re.search(
+        rf"\b{re.escape(key)}[ \t]*=[ \t]*(?:\"([^\"]*)\"|'([^']*)'|([^\s]*))",
+        header,
+    )
+    return (
+        next((value for value in match.groups() if value is not None), "")
+        if match
+        else ""
+    )
+
+
 def main():
     try:
         config = json.load(sys.stdin)
@@ -278,6 +291,29 @@ def enumerate_uddb(config):
             return [], {"database": "UDDB", "call": "uddbOpen()", "return_code": 1}
         try:
             ok, table = db.uddbreadTable()
+            headers = {}
+            if ok:
+                shots = [config.get("ref_shot"), *config.get("uddb_header_shots", [])]
+                shots = list(
+                    dict.fromkeys(
+                        shot if str(shot).startswith("E") else f"E{int(shot):06d}"
+                        for shot in shots
+                        if shot
+                    )
+                )
+                for pid in table.get("data") or []:
+                    name = unit = source_shot = ""
+                    for shot in shots:
+                        header_ok, response = db.uddbreadHeader(shot=shot, pid=pid)
+                        if not header_ok:
+                            continue
+                        source_shot = source_shot or shot
+                        header = (response or {}).get("data") or ""
+                        name = name or _uddb_header_value(header, "NAME")
+                        unit = unit or _uddb_header_value(header, "UNIT")
+                        if name and unit:
+                            break
+                    headers[pid] = (name, unit, source_shot)
         finally:
             db.uddbClose()
     except Exception as exc:
@@ -298,17 +334,29 @@ def enumerate_uddb(config):
         return [], attempt
     aliases = table.get("aliaslist") or []
     ranges = table.get("shotlist") or []
-    rows = [
-        {
-            "database": "UDDB",
-            "category": "UDDB",
-            "data_name": pid.strip(),
-            "alias": (aliases[i] or "").strip() if i < len(aliases) else "",
-            "shot_range": (ranges[i] or "").strip() if i < len(ranges) else "",
-        }
-        for i, pid in enumerate(table.get("data") or [])
-        if pid and pid.strip()
-    ]
+    rows = []
+    for i, pid in enumerate(table.get("data") or []):
+        if not pid or not pid.strip():
+            continue
+        pid = pid.strip()
+        alias = (aliases[i] or "").strip() if i < len(aliases) else ""
+        name, unit, source_shot = headers.get(pid, ("", "", ""))
+        rows.append(
+            {
+                "database": "UDDB",
+                "category": "UDDB",
+                "data_name": pid,
+                "alias": alias,
+                "shot_range": (ranges[i] or "").strip() if i < len(ranges) else "",
+                "units": unit,
+                "description": name or (alias if alias != pid else ""),
+                "metadata_source": (
+                    f"uddbreadHeader({source_shot}, {pid})"
+                    if source_shot
+                    else "uddbreadTable()"
+                ),
+            }
+        )
     return rows, attempt
 
 

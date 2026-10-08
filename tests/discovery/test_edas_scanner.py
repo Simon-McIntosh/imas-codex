@@ -626,8 +626,49 @@ class TestConfiguredDatabases:
                 "data_name": "2111UA001",
                 "alias": "raw channel",
                 "shot_range": "E080000-",
+                "units": "",
+                "description": "raw channel",
+                "metadata_source": "uddbreadTable()",
             }
         ]
+
+    def test_uddb_header_supplies_description_and_unit(self, monkeypatch):
+        class RawCatalogue:
+            def __init__(self, path):
+                pass
+
+            def uddbOpen(self):
+                return True
+
+            def uddbreadTable(self):
+                return True, {
+                    "data": ["2111UA001"],
+                    "aliaslist": ["2111UA001"],
+                    "shotlist": ["E080000-"],
+                    "irc": 0,
+                }
+
+            def uddbreadHeader(self, shot, pid):
+                assert pid == "2111UA001"
+                if shot == "E101173":
+                    return False, {"irc": 1301, "data": None}
+                assert shot == "E101163"
+                return True, {
+                    "irc": 0,
+                    "data": 'PID="2111UA001" NAME="coil current" UNIT="A" STIME=0',
+                }
+
+            def uddbClose(self):
+                return True
+
+        monkeypatch.setitem(
+            sys.modules, "uddb_pwrapper", SimpleNamespace(uddbWrapper=RawCatalogue)
+        )
+        rows, _ = enumerate_uddb(
+            {"ref_shot": "E101173", "uddb_header_shots": ["E101163"]}
+        )
+        assert rows[0]["description"] == "coil current"
+        assert rows[0]["units"] == "A"
 
     async def test_uddb_catalogue_produces_distinct_raw_signal(self):
         config = {**CONFIG, "databases": ["EDDB", "UDDB"]}
@@ -646,6 +687,8 @@ class TestConfiguredDatabases:
                             "data_name": "2111UA001",
                             "alias": "raw channel",
                             "shot_range": "E080000-",
+                            "units": "A",
+                            "description": "coil current",
                         },
                     ],
                 }
@@ -662,6 +705,8 @@ class TestConfiguredDatabases:
         }
         raw = next(s for s in result.signals if s.data_source_name == "UDDB")
         assert raw.accessor == "uddbreadConvert('E101173', '2111UA001', t1, t2)"
+        assert raw.unit == "A"
+        assert raw.description == "coil current"
 
     async def test_raw_signal_check_uses_uddb_pid(self):
         signal = FacilitySignal(
