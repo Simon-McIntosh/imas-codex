@@ -2858,12 +2858,18 @@ async def seed_worker(
             # independently of it: the ingest's edge phase MATCHes this node
             # by id and merges the DATA_ACCESS edge, and a thin-client scanner
             # may return access metadata with no signals.
-            if result.data_access:
+            access_methods = (
+                [result.data_access] if result.data_access else []
+            ) + result.data_accesses
+            for data_access in {
+                access.id: access for access in access_methods
+            }.values():
                 try:
-                    await asyncio.to_thread(persist_data_access, result.data_access)
+                    await asyncio.to_thread(persist_data_access, data_access)
                 except Exception as e:
                     logger.warning(
-                        "Failed to ingest DataAccess for %s: %s",
+                        "Failed to ingest DataAccess %s for %s: %s",
+                        data_access.id,
                         scanner_type,
                         e,
                     )

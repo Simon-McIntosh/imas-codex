@@ -1,0 +1,85 @@
+<section id="file-equilibria-access">
+  <h2 id="file-equilibria-access-heading">Equilibrium fields read by format</h2>
+  <p id="file-equilibria-access-summary">The EDAS scanner now returns two
+    additional JT-60SA <code>DataAccess</code> methods alongside its existing
+    EDDB method. <code>ScanResult.data_accesses</code> sends both through the
+    same persistence writer before their signals are ingested. The EQDB method
+    resolves a local record through <code>$EQDB_FILE</code> or a root,
+    shot and time under <code>$EQDSK_DIR</code> or
+    <code>$HOME/LOCALDB/EQDSK</code>; the G-EQDSK method resolves a producer's
+    filename template under its root. Each template takes root, shot, time
+    and field, and the G-EQDSK template also takes the producer's filename
+    template. The EQDB access description records the compiled client's
+    network route through <code>dbsvr17p:/JT60SA_EQ/EQDB</code> as an
+    alternate for when that server becomes reachable.</p>
+  <p id="file-equilibria-access-fields">The scanner creates
+    <strong>22 code-keyed FacilitySignals</strong>: SELENE and TOPICS each
+    have <code>#GEO/RG</code>, <code>#GEO/ZG</code>,
+    <code>#GEO/NSR</code>, <code>#GEO/NSZ</code> and
+    <code>#EQU/PSI</code>, matching the facility's <code>.bf</code>
+    declarations. SA, LIUQE and CHEASE each have G-EQDSK
+    <code>r</code>, <code>z</code>, <code>psirz</code> and the COCOS
+    declared by their example file (2, 7 and 17 respectively). A signal's
+    identity and path name the producing code and format field; the file
+    path is an example in its description, not the signal anchor.</p>
+  <table id="file-equilibria-access-examples">
+    <thead><tr><th>Code and format</th><th>Shot, time</th><th>Grid [R × Z]</th><th>Inventory example</th><th>SHA-256</th></tr></thead>
+    <tbody>
+      <tr><td>SELENE EQ31</td><td>E101163, 5.0 s</td><td>129 × 129</td><td><code>/home/a114004/LOCALDB/EQDSK/10/1011/101163/005000</code></td><td><code>c1b975f893e91c49283115655edf7254dbfcadab8e8347b1cdc144edb4f32089</code></td></tr>
+      <tr><td>TOPICS EQ11</td><td>E080296, 5.0 s</td><td>129 × 129</td><td><code>/home/a048717/LOCALDB/EQDSK/08/0802/080296/05000</code></td><td><code>d3b04dbe821272bab294b27580f297b214cfb35f630bd0d725702bdc13ffd168</code></td></tr>
+      <tr><td>SA G-EQDSK, COCOS 2</td><td>E101011, 6.8 s</td><td>129 × 129</td><td><code>/home/d200024/LOCALDB/EQDSK_E101011t6.8_COCOS02</code></td><td><code>f71d3cb1009e657e841b6d7be22f694921dc9b937278f7a2d4f65ead9c52e1e7</code></td></tr>
+      <tr><td>LIUQE/MEQ G-EQDSK, COCOS 7</td><td>E101011, 6.8 s</td><td>60 × 129</td><td><code>/home/d260047/olivier/equil_runs/EQDSK_E101011t6.8_COCOS07</code></td><td><code>f385641ad9740ed00698cbc03c8329a99577b36c948227bb6543e5888c86cd10</code></td></tr>
+      <tr><td>CHEASE G-EQDSK, COCOS 17</td><td>E101025, 5.9 s</td><td>129 × 128</td><td><code>/home/d240036/equil_runs/EQDSK_COCOS_17.OUT_E101025t5.90</code></td><td><code>962ec0d7b3c5ac22323f16aec8087ac6c01d13bc08bcb463787afb34573c1272</code></td></tr>
+    </tbody>
+  </table>
+  <p id="file-equilibria-access-inventory">All five paths, formats, shots,
+    times and grid sizes come from the
+    <a href="/imas-codex/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.json">validated file inventory</a>.
+    SHA-256 values were computed by re-reading those same files on
+    <code>intr26-2</code> and are pinned in the facility configuration.
+    The scanner's check refuses a changed hash even when path and grid size
+    still match. <code>scripts/check_jt60sa_flux_maps.py</code> and the
+    remote access template now call the same stdlib reader in
+    <code>imas_codex/remote/scripts/read_equilibrium_file.py</code>. On the
+    analysis host, the checker loads a copied reader module beside itself;
+    from a checkout it imports the package module.</p>
+  <p id="file-equilibria-access-read-result">The rendered DataAccess
+    templates read one inventory example per access method. EQ31 returned
+    129 × 129 ψ values for SELENE E101163 at 5.0 s; G-EQDSK returned
+    60 × 129 ψ values and COCOS 7 for LIUQE E101011 at 6.8 s.
+    <strong>The two-read command exited 0.</strong> The bounded scanner check
+    then read all five producer examples and marked <strong>22 of 22</strong>
+    format-field signals valid, also exiting 0. The full command, output and
+    exit receipts are in <code>template-reads.log</code> and
+    <code>all-code-hash-check.log</code> under the run directory.</p>
+  <pre id="file-equilibria-access-command"><code>mkdir -p "$TMPDIR/eqread-sshwrap"
+printf '#!/bin/sh\nexec /usr/bin/ssh -F "$HOME/.ssh/config" -o ControlMaster=no -o ControlPath=none "$@"\n' &gt; "$TMPDIR/eqread-sshwrap/ssh"
+chmod +x "$TMPDIR/eqread-sshwrap/ssh"
+PATH="$TMPDIR/eqread-sshwrap:$PATH" PYTHONPATH="$PWD" uv run --no-sync python - &lt;&lt;'PY'
+from imas_codex.discovery.signals.scanners.edas import _equilibrium_access_methods
+methods = _equilibrium_access_methods('jt-60sa')
+requests = [
+    (methods[0], dict(root='/home/a114004/LOCALDB/EQDSK', shot=101163, time=5.0, field='PSI', ssh_host='jt-60sa'), [129, 129]),
+    (methods[1], dict(root='/home/d260047/olivier/equil_runs', shot=101011, time=6.8, filename_template='EQDSK_E{shot:06d}t{time:g}_COCOS07', field='psirz', ssh_host='jt-60sa'), [60, 129]),
+]
+for access, params, expected in requests:
+    scope = {}
+    exec(access.connection_template + '\n' + access.data_template.format(**params), scope)
+    result = scope['result']
+    assert result['grid'] == expected
+    assert len(scope['data']) == expected[0] * expected[1]
+    print(access.id, result['format'], result['shot'], result['time_s'], result['grid'], result.get('cocos'), result['path'], 'PASS')
+PY
+# output: jt-60sa:eqdb:local_record selene_eq31 101163 5.0 [129, 129] None /home/a114004/LOCALDB/EQDSK/10/1011/101163/005000 PASS
+# output: jt-60sa:equilibrium:g_eqdsk_file g_eqdsk 101011 6.8 [60, 129] 7 /home/d260047/olivier/equil_runs/EQDSK_E101011t6.8_COCOS07 PASS
+# EXIT=0</code></pre>
+  <p id="file-equilibria-access-gates">The final scoped scanner and persistence
+    gate passed <strong>41 tests</strong>, with <code>EXIT=0</code>; the live
+    hash-aware scanner check passed <strong>22 of 22</strong>, also with
+    <code>EXIT=0</code>. A negative control fixed the EQDB template's shot
+    argument to zero: <code>test_eqdb_local_template_uses_requested_shot_and_time</code>
+    failed because the template sent shot 0 instead of 101163, with
+    <code>EXIT=1</code>. Restoring the parameter returned the committed-head
+    gate to passing. The hash guard separately refused a changed
+    example byte digest in its unit test.</p>
+</section>

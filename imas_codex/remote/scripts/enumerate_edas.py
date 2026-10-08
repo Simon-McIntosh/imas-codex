@@ -529,7 +529,7 @@ def attempt_database(database, ref_shot, config):
                 "call": f"scandir('{path}')",
                 "return_code": 0,
                 "count": count,
-                "reason": "no field catalogue or confirmed client read route",
+                "reason": "central EQDB directory probe; local format fields come from configured exemplars",
             }
         else:
             return {

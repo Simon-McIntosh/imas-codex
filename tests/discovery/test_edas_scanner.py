@@ -14,10 +14,14 @@ import sys
 from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import yaml
+
+from imas_codex.discovery.signals.parallel import DataDiscoveryState, seed_worker
+from imas_codex.discovery.signals.scanners.base import ScanResult
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
-from imas_codex.graph.models import FacilitySignal, SignalDataClass
+from imas_codex.graph.models import DataAccess, FacilitySignal, SignalDataClass
 from imas_codex.remote.scripts.check_edas import main as check_main
 from imas_codex.remote.scripts.enumerate_edas import (
     attempt_database,
@@ -26,6 +30,7 @@ from imas_codex.remote.scripts.enumerate_edas import (
     enumerate_uddb,
     main as enumerate_main,
 )
+from imas_codex.remote.scripts.read_equilibrium_file import resolve_eqdb_path
 
 # Two catalogue rows covering the two classes the scanner branches on:
 # a time series with a shot range and no PID, and a one-point row with a PID.
@@ -61,6 +66,301 @@ CONFIG = {
     "api_path": "/opt/edas/api",
     "lib_path": "/opt/edas/libeddb.so",
 }
+
+
+def _equilibrium_config():
+    root = Path(__file__).parents[2]
+    facility = yaml.safe_load(
+        (root / "imas_codex/config/facilities/jt-60sa.yaml").read_text()
+    )
+    return root, facility["data_systems"]["edas"]
+
+
+async def test_equilibrium_access_methods_and_inventory_field_signals():
+    root, config = _equilibrium_config()
+    inventory = json.loads(
+        (
+            root
+            / "docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.json"
+        ).read_text()
+    )
+    by_path = {record["path"]: record for record in inventory["files"]}
+    for example in config["equilibrium_examples"]:
+        recorded = by_path[example["path"]]
+        assert recorded["format"] == example["format"]
+        assert recorded["code"] == example.get("inventory_code", example["code"])
+        assert recorded["shot"] == example["shot"]
+        assert recorded["time_s"] == example["time"]
+        assert recorded["grid"] == example["grid"]
+        assert len(example["sha256"]) == 64
+
+    remote = AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE))
+    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
+
+    assert result.data_access.id == "jt-60sa:edas:eddb"
+    assert {access.id for access in result.data_accesses} == {
+        "jt-60sa:eqdb:local_record",
+        "jt-60sa:equilibrium:g_eqdsk_file",
+    }
+    assert "dbsvr17p" in result.data_accesses[0].description
+    equilibrium = [s for s in result.signals if s.physics_domain == "equilibrium"]
+    assert len(equilibrium) == 22
+    assert {s.data_source_path.split("/")[0] for s in equilibrium} == {
+        "SELENE",
+        "TOPICS",
+        "SA",
+        "LIUQE",
+        "CHEASE",
+    }
+    assert {s.accessor for s in equilibrium if s.data_source_name == "EQDB"} == {
+        "RG",
+        "ZG",
+        "NSR",
+        "NSZ",
+        "PSI",
+    }
+    assert {s.accessor for s in equilibrium if s.data_source_name == "G-EQDSK"} == {
+        "r",
+        "z",
+        "psirz",
+        "COCOS",
+    }
+    assert {s.cocos for s in equilibrium if s.data_source_name == "G-EQDSK"} == {
+        2,
+        7,
+        17,
+    }
+    for signal in equilibrium:
+        example = next(
+            item
+            for item in config["equilibrium_examples"]
+            if item["code"] == signal.data_source_path.split("/")[0]
+        )
+        assert example["path"] in signal.description
+        assert example["sha256"] in signal.description
+        assert signal.example_shot == example["shot"]
+
+
+async def test_eqdb_local_template_uses_requested_shot_and_time():
+    _, config = _equilibrium_config()
+    remote = AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE))
+    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
+    access = result.data_accesses[0]
+    example = config["equilibrium_examples"][0]
+    calls = []
+
+    def fake_run(script, payload, **kwargs):
+        calls.append((script, payload, kwargs))
+        return json.dumps({"data": [1.0], "grid": example["grid"]})
+
+    code = (
+        access.connection_template
+        + "\n"
+        + access.data_template.format(
+            root=example["root"],
+            shot=example["shot"],
+            time=example["time"],
+            field="PSI",
+            ssh_host="nakasvr26",
+        )
+    )
+    with patch("imas_codex.remote.executor.run_python_script", side_effect=fake_run):
+        exec(code, {})
+    assert calls[0][0] == "read_equilibrium_file.py"
+    assert calls[0][1] == {
+        "format": "eqdb_record",
+        "root": example["root"],
+        "shot": example["shot"],
+        "time": example["time"],
+        "field": "PSI",
+    }
+
+    geqdsk = result.data_accesses[1]
+    example = next(
+        item for item in config["equilibrium_examples"] if item["code"] == "LIUQE"
+    )
+    code = (
+        geqdsk.connection_template
+        + "\n"
+        + geqdsk.data_template.format(
+            root=example["root"],
+            shot=example["shot"],
+            time=example["time"],
+            filename_template=example["filename_template"],
+            field="psirz",
+            ssh_host="nakasvr26",
+        )
+    )
+    with patch("imas_codex.remote.executor.run_python_script", side_effect=fake_run):
+        exec(code, {})
+    assert calls[1][1] == {
+        "format": "g_eqdsk",
+        "root": example["root"],
+        "shot": example["shot"],
+        "time": example["time"],
+        "filename_template": example["filename_template"],
+        "field": "psirz",
+    }
+
+
+def test_eqdb_local_path_uses_shot_time_and_single_file_override(tmp_path, monkeypatch):
+    monkeypatch.delenv("EQDB_FILE", raising=False)
+    first = resolve_eqdb_path(str(tmp_path), 101163, 5.0)
+    second = resolve_eqdb_path(str(tmp_path), 101164, 5.0)
+    assert first == tmp_path / "10/1011/101163/005000"
+    assert second == tmp_path / "10/1011/101164/005000"
+    assert first != second
+    shorter = tmp_path / "10/1011/101163/05000"
+    shorter.parent.mkdir(parents=True)
+    shorter.touch()
+    assert resolve_eqdb_path(str(tmp_path), 101163, 5.0) == shorter
+    monkeypatch.setenv("EQDB_FILE", str(tmp_path / "single_record"))
+    assert resolve_eqdb_path(str(tmp_path), 101163, 5.0) == tmp_path / "single_record"
+
+
+async def test_equilibrium_check_reads_each_code_example_once():
+    _, config = _equilibrium_config()
+    scanner = EDASScanner()
+    with patch(
+        "imas_codex.remote.executor.async_run_python_script",
+        AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE)),
+    ):
+        scanned = await scanner.scan("jt-60sa", "nakasvr26", config)
+    equilibrium = [
+        signal
+        for signal in scanned.signals
+        if signal.data_source_name in {"EQDB", "G-EQDSK"}
+    ]
+    reads = []
+
+    async def fake_run(script, payload, **_kwargs):
+        assert script == "read_equilibrium_file.py"
+        example = next(
+            item
+            for item in config["equilibrium_examples"]
+            if item["root"] == payload["root"] and item["shot"] == payload["shot"]
+        )
+        reads.append(example["code"])
+        return json.dumps(
+            {
+                "format": example["format"],
+                "grid": example["grid"],
+                "path": example["path"],
+                "cocos": example.get("cocos"),
+                "sha256": example["sha256"],
+            }
+        )
+
+    with patch("imas_codex.remote.executor.async_run_python_script", fake_run):
+        results = await scanner.check("jt-60sa", "nakasvr26", equilibrium, config)
+    assert len(results) == len(equilibrium)
+    assert all(item["valid"] for item in results)
+    assert sorted(reads) == sorted(
+        example["code"] for example in config["equilibrium_examples"]
+    )
+
+
+async def test_equilibrium_check_refuses_changed_example_bytes():
+    _, config = _equilibrium_config()
+    scanner = EDASScanner()
+    with patch(
+        "imas_codex.remote.executor.async_run_python_script",
+        AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE)),
+    ):
+        scanned = await scanner.scan("jt-60sa", "nakasvr26", config)
+    signal = next(
+        signal
+        for signal in scanned.signals
+        if signal.data_source_path == "SELENE/selene_eq31/#EQU/PSI"
+    )
+    example = config["equilibrium_examples"][0]
+    changed = {
+        "format": example["format"],
+        "grid": example["grid"],
+        "path": example["path"],
+        "sha256": "0" * 64,
+    }
+    with patch(
+        "imas_codex.remote.executor.async_run_python_script",
+        AsyncMock(return_value=json.dumps(changed)),
+    ):
+        checked = await scanner.check("jt-60sa", "nakasvr26", [signal], config)
+    assert checked == [
+        {
+            "signal_id": signal.id,
+            "valid": False,
+            "dtype": None,
+            "error": "equilibrium file hash differs from example",
+        }
+    ]
+
+
+async def test_scanner_access_methods_share_the_existing_persistence_writer():
+    """All access nodes must exist before signal ingestion creates their edges."""
+    methods = [
+        DataAccess(
+            id=f"jt-60sa:edas:access_{name}",
+            facility_id="jt-60sa",
+            method_type="edas",
+            library="test",
+            access_type="local",
+            data_source=name,
+            connection_template="",
+            data_template="",
+        )
+        for name in ("eddb", "eqdb", "g_eqdsk")
+    ]
+    signal = FacilitySignal(
+        id="jt-60sa:equilibrium/test_psi",
+        facility_id="jt-60sa",
+        name="psi",
+        accessor="psi",
+        data_access=methods[-1].id,
+    )
+
+    class Scanner:
+        scanner_type = "edas"
+
+        async def scan(self, **_kwargs):
+            return ScanResult(
+                signals=[signal],
+                data_access=methods[0],
+                data_accesses=[methods[1], methods[2], methods[0]],
+            )
+
+    state = DataDiscoveryState(
+        facility="jt-60sa",
+        ssh_host="nakasvr26",
+        scanner_types=["edas"],
+        facility_config={"data_systems": {"edas": CONFIG}},
+        initial_version_counts={"total": 0},
+        initial_signal_counts={"total": 0},
+        cost_limit=10.0,
+    )
+    events = []
+    graph = MagicMock()
+    graph.__enter__.return_value = graph
+    graph.__exit__.return_value = None
+    graph.query.side_effect = lambda query, **kw: (
+        events.append(kw["id"]) if "MERGE (da:DataAccess" in query else []
+    )
+
+    with (
+        patch(
+            "imas_codex.discovery.signals.scanners.base.get_scanner",
+            return_value=Scanner(),
+        ),
+        patch("imas_codex.discovery.signals.parallel.GraphClient", return_value=graph),
+        patch(
+            "imas_codex.discovery.signals.parallel.ingest_discovered_signals",
+            side_effect=lambda rows: events.append("ingest") or len(rows),
+        ),
+    ):
+        await seed_worker(state)
+
+    assert events == [method.id for method in methods] + ["ingest"]
 
 
 class TestConfiguredDatabases:
