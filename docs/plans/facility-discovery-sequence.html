@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -282,7 +282,7 @@
       <li>each domain receives the remaining cost and time;</li>
       <li><code>--only</code>, <code>--skip</code>, <code>--scan-only</code> and <code>--flush</code>
         select domains and halves;</li>
-      <li><code>--reset-to</code> without exactly one <code>--only</code> domain is refused;</li>
+      <li><code>--reset-to</code> without exactly one <code>--only</code> domain is refused, and so are <code>--scan-only</code> and <code>--flush</code> together, which would ask for seeding only and draining only at once (the signals fold showed nothing else catches it);</li>
       <li>the final table lists every domain;</li>
       <li>the three review findings are pinned.</li>
     </ul>
