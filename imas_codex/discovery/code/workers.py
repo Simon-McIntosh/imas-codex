@@ -45,6 +45,51 @@ def _scan_progress_message(paths: list[dict[str, Any]]) -> str:
     return f"scanning {len(paths)} paths (scores: {', '.join(scores[:3])}...)"
 
 
+# Longest single wait between attempts to reach an unreachable host.
+UNREACHABLE_MAX_BACKOFF = 60.0
+
+
+def _host_unreachable(exc: Exception) -> bool:
+    """True when a remote call failed because SSH could not reach the host.
+
+    ssh exits 255 when it cannot connect, and a timeout means no answer came
+    back. Neither says anything about the paths in the batch, unlike a
+    script error or unparseable output, which would recur on every attempt.
+    """
+    import subprocess
+
+    if isinstance(exc, subprocess.TimeoutExpired):
+        return True
+    return isinstance(exc, subprocess.CalledProcessError) and exc.returncode == 255
+
+
+async def _sleep_unless_stopped(state: FileDiscoveryState, seconds: float) -> None:
+    """Sleep in short steps so a stop request or deadline ends the wait."""
+    loop = asyncio.get_running_loop()
+    until = loop.time() + seconds
+    while not state.should_stop():
+        remaining = until - loop.time()
+        if remaining <= 0:
+            return
+        await asyncio.sleep(min(remaining, 1.0))
+
+
+async def _wait_for_reachable_host(state: FileDiscoveryState, attempt: int) -> None:
+    """Back off after an unreachable host, then hold until the SSH check passes.
+
+    The backoff covers the service monitor's polling lag: right after a drop
+    it may still report the host healthy. Once it reports SSH down, the
+    worker holds until it reports SSH healthy again, however long that takes,
+    so a tunnel outage pauses the scan instead of ending it.
+    """
+    await _sleep_unless_stopped(state, min(2.0**attempt, UNREACHABLE_MAX_BACKOFF))
+    monitor = state.service_monitor
+    if monitor is None:
+        return
+    while not state.should_stop() and not monitor.is_service_healthy("ssh"):
+        await _sleep_unless_stopped(state, 5.0)
+
+
 # ============================================================================
 # Scan Worker
 # ============================================================================
@@ -77,6 +122,7 @@ async def scan_worker(
 
     ssh_retry_count = 0
     max_ssh_retries = 5
+    unreachable_count = 0
 
     while not state.should_stop():
         # Claim paths atomically
@@ -114,8 +160,9 @@ async def scan_worker(
                 ssh_host=state.ssh_host,
             )
 
-            # Reset retry count on success
+            # Reset retry counts on success
             ssh_retry_count = 0
+            unreachable_count = 0
 
             # Process results per path
             for path, files in result_map.items():
@@ -177,19 +224,39 @@ async def scan_worker(
                     await asyncio.to_thread(release_path_file_scan_claim, path_id)
 
         except Exception as e:
-            ssh_retry_count += 1
-            logger.warning(
-                "SSH scan failed (%d/%d): %s", ssh_retry_count, max_ssh_retries, e
-            )
             state.scan_stats.errors += len(paths)
 
             # Release all claims on error
             for p in paths:
                 await asyncio.to_thread(release_path_file_scan_claim, p["id"])
 
+            if _host_unreachable(e):
+                unreachable_count += 1
+                logger.warning(
+                    "SSH scan could not reach %s (%d in a row): %s; waiting "
+                    "for the host",
+                    state.facility,
+                    unreachable_count,
+                    e,
+                )
+                if on_progress:
+                    on_progress(
+                        f"host unreachable, waiting ({unreachable_count})",
+                        state.scan_stats,
+                        None,
+                    )
+                await _wait_for_reachable_host(state, unreachable_count)
+                continue
+
+            ssh_retry_count += 1
+            logger.warning(
+                "SSH scan failed (%d/%d): %s", ssh_retry_count, max_ssh_retries, e
+            )
+
             if ssh_retry_count >= max_ssh_retries:
                 logger.error(
-                    "SSH connection failed after %d attempts. Scan worker stopping.",
+                    "File scan failed %d times with the host reachable. "
+                    "Scan worker stopping.",
                     max_ssh_retries,
                 )
                 state.scan_phase.mark_done()
@@ -208,7 +275,7 @@ async def scan_worker(
                     state.scan_stats,
                     None,
                 )
-            await asyncio.sleep(backoff)
+            await _sleep_unless_stopped(state, backoff)
             continue
 
         await asyncio.sleep(0.1)
