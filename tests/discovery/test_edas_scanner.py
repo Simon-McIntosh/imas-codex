@@ -366,6 +366,53 @@ async def test_scanner_access_methods_share_the_existing_persistence_writer():
 
 
 class TestConfiguredDatabases:
+    async def test_every_database_signal_has_a_persisted_access_method(self):
+        rows = [
+            *ENUMERATE_FIXTURE["signals"],
+            {"database": "UDDB", "category": "UDDB", "data_name": "2111UA001"},
+            {
+                "database": "LCDB",
+                "category": "LCDB/owner/ate.s001",
+                "file_category": "ate.s001",
+                "data_name": "DEVICE",
+                "shot": 101173,
+                "root": "/data/owner",
+            },
+            {
+                "database": "MBDB",
+                "category": "MBDB/owner/12345/data.t001",
+                "data_name": "PSI",
+                "data_kind": "T",
+            },
+        ]
+        config = {
+            **CONFIG,
+            "equilibrium_examples": _equilibrium_config()[1]["equilibrium_examples"],
+        }
+        remote = AsyncMock(return_value=json.dumps({"signals": rows, "ncats": 2}))
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
+
+        assert "error" not in result.stats
+        access = {
+            method.id: method for method in [result.data_access, *result.data_accesses]
+        }
+        assert {signal.data_source_name for signal in result.signals} == {
+            "edas",
+            "UDDB",
+            "LCDB",
+            "MBDB",
+            "EQDB",
+            "G-EQDSK",
+        }
+        assert all(signal.data_access in access for signal in result.signals)
+        for name in ("UDDB", "LCDB", "MBDB"):
+            method = access[f"jt-60sa:edas:{name.lower()}"]
+            assert method.connection_template
+            assert method.data_template
+            assert "Catalogue:" in method.description
+            assert "metadata:" in method.description
+
     def test_blank_raw_unit_does_not_consume_the_next_header_key(self):
         header = 'PID="2811UA001" NAME="P15 co-view" UNIT= STIME=0.000000'
         assert _uddb_header_value(header, "UNIT") == ""

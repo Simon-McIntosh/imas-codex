@@ -150,6 +150,70 @@ def _equilibrium_signals(
     return signals
 
 
+def _database_access_methods(
+    facility: str, config: dict[str, Any], databases: set[str]
+) -> dict[str, DataAccess]:
+    """Describe the native routes used by the catalogued database signals."""
+    routes = {route["name"]: route for route in config.get("database_routes", [])}
+    methods = {}
+    for name in databases & {"UDDB", "LCDB", "MBDB"}:
+        route = routes.get(name, {})
+        if name == "UDDB":
+            api = config.get("uddb_api_path", "")
+            library = config.get("uddb_lib_path", "")
+            connection = (
+                f"import sys\nsys.path.insert(0, {api!r})\n"
+                "from uddb_pwrapper import uddbWrapper\n"
+                f"db = uddbWrapper({library!r})\ndb.uddbOpen()"
+            )
+            read = (
+                "ok, result = db.uddbreadConvert(shot='{shot}', pid='{pid}', "
+                "t1='{t1}', t2='{t2}', datavol=10000, ch=1)"
+            )
+            cleanup = "db.uddbClose()"
+        elif name == "LCDB":
+            api = config.get("lcdb_api_path", "")
+            connection = (
+                f"import sys\nsys.path.insert(0, {api!r})\n"
+                "from lcdbWrapper import LcdbWrapper\ndb = LcdbWrapper()"
+            )
+            read = (
+                "ok, result = db.lcdb_value({shot}, '{category}', "
+                "['{data_name}'], root='{root}')"
+            )
+            cleanup = None
+            library = "lcdbWrapper"
+        else:
+            api = config.get("mbdb_api_path", "")
+            library = config.get("mbdb_lib_path", "")
+            connection = (
+                f"import sys\nsys.path.insert(0, {api!r})\n"
+                "from mbdbWrapper import mbdbWrapper\n"
+                f"db = mbdbWrapper({library!r})\ndb.mbdbSetDirectory('mbdb')\n"
+                "db.mbdbROpen(mbdbroot='{root}', caseno={case}, category='{category}')"
+            )
+            read = "ok, result = db.mbdbRTimes('{data_name}', '{t1}', '{t2}')"
+            cleanup = "db.mbdbRClose()"
+        methods[name] = DataAccess(
+            id=f"{facility}:edas:{name.lower()}",
+            facility_id=facility,
+            name=f"EDAS {name} Access",
+            description=(
+                f"Catalogue: {route.get('catalogue_call', 'configured native wrapper')}; "
+                f"metadata: {route.get('metadata_source', 'native wrapper')}."
+            ),
+            method_type="edas",
+            library=library,
+            access_type="local",
+            data_source=name,
+            connection_template=connection,
+            data_template=read,
+            cleanup_template=cleanup,
+            setup_commands=config.get("setup_commands"),
+        )
+    return methods
+
+
 class EDASScanner:
     """Discover signals from JT-60SA EDAS system.
 
@@ -260,6 +324,11 @@ class EDASScanner:
             return ScanResult(stats={"error": data["error"]})
 
         raw_signals = data.get("signals", [])
+        database_access = _database_access_methods(
+            facility,
+            config,
+            {raw.get("database", "EDDB") for raw in raw_signals},
+        )
 
         # Create DataAccess node
         data_access = DataAccess(
@@ -306,6 +375,7 @@ class EDASScanner:
                         physics_domain="general",
                         name=f"UDDB/{dname}",
                         accessor=f"uddbreadConvert('{sample_shot}', '{dname}', t1, t2)",
+                        data_access=database_access["UDDB"].id,
                         data_source_name="UDDB",
                         data_source_path=f"UDDB/{dname}",
                         unit=units,
@@ -333,6 +403,7 @@ class EDASScanner:
                         physics_domain="general",
                         name=f"LCDB/{owner}/{source_category}/{dname}",
                         accessor=f"lcdb_value({shot}, {source_category!r}, [{dname!r}], root={root!r})",
+                        data_access=database_access["LCDB"].id,
                         data_source_name="LCDB",
                         data_source_path=f"{owner}/{source_category}/{dname}",
                         unit=units,
@@ -362,6 +433,7 @@ class EDASScanner:
                             if kind == "P"
                             else f"mbdbRTimes({dname!r}, t1, t2)"
                         ),
+                        data_access=database_access["MBDB"].id,
                         data_source_name="MBDB",
                         data_source_path=f"{owner}/{case}/{source_category}/{dname}",
                         description=f"MBDB {source_category} {dname} from {owner} case {case}",
@@ -442,6 +514,16 @@ class EDASScanner:
         examples = config.get("equilibrium_examples", [])
         equilibrium_access = _equilibrium_access_methods(facility) if examples else []
         signals.extend(_equilibrium_signals(facility, examples, equilibrium_access))
+        access_methods = [data_access, *database_access.values(), *equilibrium_access]
+        access_ids = {method.id for method in access_methods}
+        missing = [
+            signal.id for signal in signals if signal.data_access not in access_ids
+        ]
+        if missing:
+            logger.error("EDAS scanner: %d signals lack an access method", len(missing))
+            return ScanResult(
+                stats={"error": "signals lack data access", "ids": missing}
+            )
 
         logger.info(
             "EDAS scanner: discovered %d signals from %d categories (shot %s)",
@@ -453,7 +535,7 @@ class EDASScanner:
         return ScanResult(
             signals=signals,
             data_access=data_access,
-            data_accesses=equilibrium_access,
+            data_accesses=[*database_access.values(), *equilibrium_access],
             metadata={
                 "reference_shot": shot_str,
                 "categories": data.get("categories", []),
