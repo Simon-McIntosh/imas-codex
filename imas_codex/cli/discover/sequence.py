@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import logging
 import time
 from dataclasses import dataclass, fields
 
@@ -176,6 +177,7 @@ class SequenceOptions:
     """One invocation's selection, resource limits, and domain tunables."""
 
     only: tuple[str, ...] = ()
+    until: str | None = None
     skip: tuple[str, ...] = ()
     scan_only: bool = False
     flush: bool = False
@@ -225,6 +227,14 @@ def _domains(items: tuple[str, ...]) -> tuple[str, ...]:
 
 
 def _validate_options(options: SequenceOptions) -> None:
+    if options.until and options.only:
+        raise click.UsageError("--until and --only are mutually exclusive")
+    if (
+        options.until
+        and options.until not in DOMAINS
+        and options.until not in {stage.name for stage in STAGES}
+    ):
+        raise click.UsageError(f"unknown discovery stage or domain: {options.until}")
     if options.scan_only and options.flush:
         raise click.UsageError("--scan-only and --flush are mutually exclusive")
     if options.focus and len(options.only) != 1:
@@ -529,12 +539,39 @@ def run_mapping_stage(
     return receipt
 
 
-def _selected(stage: Stage, options: SequenceOptions) -> tuple[bool, str]:
+def _closure(target: str) -> set[str]:
+    """Resolve a stage or domain through the registry's declared dependencies."""
+    by_name = {stage.name: stage for stage in STAGES}
+    targets = [
+        stage.name
+        for stage in STAGES
+        if stage.name == target or (target in DOMAINS and stage.domain == target)
+    ]
+    selected: set[str] = set()
+
+    def include(name: str) -> None:
+        if name in selected:
+            return
+        selected.add(name)
+        stage = by_name[name]
+        for dependency in (*stage.reads, *stage.context):
+            include(dependency)
+
+    for name in targets:
+        include(name)
+    return selected
+
+
+def _selected(
+    stage: Stage, options: SequenceOptions, closure: set[str] | None = None
+) -> tuple[bool, str]:
     if options.only and stage.domain not in options.only:
         return False, "excluded by --only"
+    if closure is not None and stage.name not in closure:
+        return False, "excluded by --until"
     if stage.domain in options.skip:
         return False, "excluded by --skip"
-    if stage.domain == "mapping" and not options.only:
+    if stage.domain == "mapping" and not options.only and closure is None:
         return False, "not requested"
     if options.scan_only and stage.domain in {"candidates", "mapping"}:
         return False, "nothing to seed"
@@ -653,6 +690,17 @@ def run_sequence(
     """Run selected stages in order, isolating failures and sharing limits."""
     options = options or SequenceOptions(dry_run=dry_run)
     _validate_options(options)
+    closure = _closure(options.until) if options.until else None
+    selected_names = {
+        stage.name for stage in STAGES if _selected(stage, options, closure)[0]
+    }
+    if options.dry_run and closure is not None:
+        click.echo(
+            "Selected stages: "
+            + " -> ".join(
+                stage.name for stage in STAGES if stage.name in selected_names
+            )
+        )
     if config is None:
         from imas_codex.discovery.base.facility import get_facility
 
@@ -663,7 +711,18 @@ def run_sequence(
     spent = 0.0
     started = time.monotonic()
     for stage in STAGES:
-        selected, reason = _selected(stage, options)
+        selected, reason = _selected(stage, options, closure)
+        stale_context = (
+            tuple(name for name in stage.context if name not in selected_names)
+            if selected
+            else ()
+        )
+        if stale_context:
+            logging.getLogger(__name__).warning(
+                "%s uses stale context: %s not selected",
+                stage.name,
+                ", ".join(stale_context),
+            )
         if not selected:
             outcome = StageOutcome(
                 stage.name,
@@ -696,6 +755,8 @@ def run_sequence(
             else:
                 outcome = evaluate_stage(stage, facility, config)
         if outcome.outcome != RUNNABLE or options.dry_run:
+            if stale_context:
+                outcome.reason += f"; stale context: {', '.join(stale_context)}"
             outcomes.append(outcome)
             by_name[stage.name] = outcome
             continue
@@ -749,6 +810,8 @@ def run_sequence(
             )
             spent += outcome.cost
         outcome.seconds = time.monotonic() - stage_started
+        if stale_context:
+            outcome.reason += f"; stale context: {', '.join(stale_context)}"
         outcomes.append(outcome)
         by_name[stage.name] = outcome
 
@@ -762,6 +825,7 @@ def run_sequence(
 @click.option(
     "--only", multiple=True, help="Select domains (repeat or comma-separate)."
 )
+@click.option("--until", help="Run a stage or domain with its dependencies.")
 @click.option(
     "--skip", multiple=True, help="Exclude domains (repeat or comma-separate)."
 )
