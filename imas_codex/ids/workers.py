@@ -161,6 +161,8 @@ class CandidateDiscoveryState(DiscoveryStateBase):
     domains: list[str] = field(default_factory=list)
     # Restrict the routed IDSs to this set (None = any).
     ids_filter: list[str] = field(default_factory=list)
+    # Restrict claims to these SignalSource identities (empty = all).
+    focus_ids: list[str] = field(default_factory=list)
     # Maximum sources to judge this run (None = unbounded).
     source_limit: int | None = None
     # Sources claimed and judged per batch.
@@ -291,6 +293,7 @@ def claim_sources_for_candidates(
     facility: str,
     domains: list[str] | None = None,
     batch_size: int = 10,
+    focus_ids: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Claim enriched sources whose candidates have not been judged yet.
 
@@ -300,13 +303,18 @@ def claim_sources_for_candidates(
     claim is stale it is reclaimed and retried.
     """
     domain_filter, domain_params = _domain_filter(domains)
+    focus_filter = "AND n.id IN $focus_ids" if focus_ids else ""
     return claim_batch(
         "SignalSource",
         facility=facility,
         status_predicate=(
-            "n.status = 'enriched' AND n.candidate_route IS NULL " + domain_filter
+            f"n.status = 'enriched' AND n.candidate_route IS NULL "
+            f"{domain_filter} {focus_filter}"
         ),
-        status_params=domain_params,
+        status_params={
+            **domain_params,
+            **({"focus_ids": focus_ids} if focus_ids else {}),
+        },
         batch_size=batch_size,
         return_fields=_CANDIDATE_FIELDS,
         return_clause=_REPRESENTATIVE,
@@ -491,16 +499,22 @@ def has_pending_validation_work(facility: str) -> bool:
 def has_pending_candidate_work(
     facility: str,
     domains: list[str] | None = None,
+    focus_ids: list[str] | None = None,
 ) -> bool:
     """Check if enriched sources remain whose candidates are unjudged."""
     domain_filter, domain_params = _domain_filter(domains)
+    focus_filter = "AND n.id IN $focus_ids" if focus_ids else ""
     return has_pending(
         "SignalSource",
         facility=facility,
         status_predicate=(
-            "n.status = 'enriched' AND n.candidate_route IS NULL " + domain_filter
+            f"n.status = 'enriched' AND n.candidate_route IS NULL "
+            f"{domain_filter} {focus_filter}"
         ),
-        status_params=domain_params,
+        status_params={
+            **domain_params,
+            **({"focus_ids": focus_ids} if focus_ids else {}),
+        },
     )
 
 
@@ -565,7 +579,7 @@ async def context_worker(
         if on_progress:
             on_progress(detail, state.context_stats, [{"detail": detail}])
 
-    # Phase 1: Shared context (sources, embeddings, wiki, code) — done ONCE
+    # Gather source embeddings and external context once for all IDS targets.
     shared = await asyncio.to_thread(
         gather_shared_context,
         state.facility,
@@ -577,7 +591,7 @@ async def context_worker(
 
     state.sources_total = len(shared["groups"])
 
-    # Phase 2: Per-IDS context (vector queries with pre-computed embeddings)
+    # Query each IDS using the shared embeddings.
     for i, ids_name in enumerate(state.target_ids_list):
         if state.should_stop():
             break
@@ -992,7 +1006,7 @@ async def validate_worker(
                 gc=gc,
             )
 
-            # Derive error mappings (Stage 2) unless skipped
+            # Derive error mappings from validated bindings unless skipped.
             if not state.skip_errors:
                 from imas_codex.ids.mapping import derive_error_mappings
 
@@ -1175,11 +1189,11 @@ async def candidate_worker(
                 break
             batch_size = min(batch_size, remaining)
 
+        claim_options = {"domains": state.domains or None, "batch_size": batch_size}
+        if state.focus_ids:
+            claim_options["focus_ids"] = state.focus_ids
         sources = await asyncio.to_thread(
-            claim_sources_for_candidates,
-            state.facility,
-            domains=state.domains or None,
-            batch_size=batch_size,
+            claim_sources_for_candidates, state.facility, **claim_options
         )
         if not sources:
             state.candidate_phase.record_idle()
@@ -1434,7 +1448,9 @@ async def run_candidate_engine(
     recovery releases candidate claims left stale on ``mapping_claimed_at``.
     """
     state.candidate_phase.set_has_work_fn(
-        lambda: has_pending_candidate_work(state.facility, state.domains or None)
+        lambda: has_pending_candidate_work(
+            state.facility, state.domains or None, state.focus_ids or None
+        )
     )
 
     workers = [
