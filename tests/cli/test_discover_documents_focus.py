@@ -27,6 +27,7 @@ FACILITY = "tcv"
 DOCUMENTS = (
     {"id": "doc-a", "path": "/archive/selected/a.png", "document_type": "image"},
     {"id": "doc-b", "path": "/archive/other/b.png", "document_type": "image"},
+    {"id": "doc-pdf", "path": "/archive/reports/a.pdf", "document_type": "pdf"},
 )
 IMAGES = (
     {"id": "img-a", "document_path": DOCUMENTS[0]["path"]},
@@ -52,7 +53,14 @@ class Graph:
             return [
                 {
                     "prefix": prefix,
-                    "matches": sum(doc["path"].startswith(prefix) for doc in DOCUMENTS),
+                    "matches": sum(
+                        doc["path"].startswith(prefix)
+                        and (
+                            "document_type: 'image'" not in cypher
+                            or doc["document_type"] == "image"
+                        )
+                        for doc in DOCUMENTS
+                    ),
                 }
                 for prefix in params["prefixes"]
             ]
@@ -76,11 +84,12 @@ class Graph:
 
     @staticmethod
     def _selected_documents(cypher, params):
+        documents = [doc for doc in DOCUMENTS if doc["document_type"] == "image"]
         if "d.path STARTS WITH prefix" not in cypher:
-            return list(DOCUMENTS)
+            return documents
         prefixes = params["path_prefixes"]
         return [
-            doc for doc in DOCUMENTS if any(doc["path"].startswith(p) for p in prefixes)
+            doc for doc in documents if any(doc["path"].startswith(p) for p in prefixes)
         ]
 
     @staticmethod
@@ -218,6 +227,20 @@ def test_named_path_reaches_the_stage_and_unknown_path_is_refused(stage):
     with pytest.raises(click.UsageError, match="/missing"):
         run_documents_stage(FACILITY, DocumentsOptions(flush=True, focus=("/missing",)))
     assert len(stage) == 1
+
+
+def test_non_image_document_path_is_refused(stage):
+    with pytest.raises(click.UsageError, match="/archive/reports"):
+        run_documents_stage(
+            FACILITY, DocumentsOptions(flush=True, focus=("/archive/reports",))
+        )
+    assert stage == []
+
+
+def test_whitespace_focus_names_no_items(stage):
+    with pytest.raises(click.UsageError, match="--focus names no items"):
+        run_documents_stage(FACILITY, DocumentsOptions(flush=True, focus=(" \t ",)))
+    assert stage == []
 
 
 def test_shared_resolver_preserves_order_and_refuses_invalid_manifest(tmp_path):
