@@ -1,0 +1,1219 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "6517c54412eb52628bc02a2f2df90527e2d55ccb",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 13746048,
+      "cached_input_tokens_cumulative": 13746048,
+      "input_tokens": 13901904,
+      "input_tokens_cumulative": 13901904,
+      "output_tokens": 35874,
+      "output_tokens_cumulative": 35874,
+      "reasoning_output_tokens": 9753,
+      "reasoning_output_tokens_cumulative": 9753
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 456,
+    "files": 3,
+    "removed": 10
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_rejudge_asks_every_content_question",
+        "path": "tests/discovery/test_code_ingested_rejudge.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 536,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 369,
+        "name": "test_facility_records_every_database_route_and_loader",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_name_mode_sets_name_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_docs_mode_sets_docs_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 923,
+        "name": "test_audit_covers_every_attachment_writer",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_all_values_non_empty",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 197
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 990,
+        "name": "_make_mock_state",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 439,
+        "name": "test_prompt_describes_structured_chain",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 547,
+        "name": "test_source_reset_writes_only_source_state_and_non_lifecycle_name_cache",
+        "path": "tests/standard_names/test_provenance_lifecycle.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "test_source_hint_cas_sets_only_steering_fields",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_source_hint_prompt_is_conditional_and_non_authoritative",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "_wipe",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_the_routed_consumers_no_longer_read_it",
+        "path": "tests/standard_names/test_vocab_consumers_see_operators.py"
+      },
+      "run_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "window_line": 198
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "299c9687aa235832d470bc9245927e2dd3a51d60",
+    "407311c9cb750268630f6697a1fe21cc7d7bf34b"
+  ],
+  "completed_at": "2026-10-08T10:52:06Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T10:35:06Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/ids",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest tests/ids -p no:cacheprovider",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/mapping_slots_correction_head_gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.1388888888888889,
+    "plan": "mapping-decision-chain",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.0929322966484523,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T07:24:53Z, which is after this node's 3600s horizon ending 2026-10-08T11:34:51.940312+00:00",
+    "horizon_ends_at": "2026-10-08T11:34:51.940312+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T10:34:51Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T07:24:53Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 499207,
+    "state": "quiet",
+    "utilisation_pct": 54.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T10:34:51Z",
+    "read_at": "2026-10-08T10:34:51Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 54.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T10:52:06Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/manifest.md",
+  "member": "disposable-r-20261008T103450350930-mapping-slots",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/ids/test_mapping_slots.py::test_psi_source_sign_flip_multiplies_cocos_factor",
+      "tests/ids/test_mapping_slots.py::test_sign_and_scale_compose[-1-0.15915494309189535--0.3183098861837907]",
+      "tests/ids/test_mapping_slots.py::test_sign_and_scale_compose[-1-1.0--2.0]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/ids/test_mapping_slots.py::test_psi_source_sign_flip_multiplies_cocos_factor",
+      "tests/ids/test_mapping_slots.py::test_sign_and_scale_compose[-1-0.15915494309189535--0.3183098861837907]",
+      "tests/ids/test_mapping_slots.py::test_sign_and_scale_compose[-1-1.0--2.0]"
+    ],
+    "declaration": "make the composer ignore the sign slot; the sign composition test must then fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/mapping_slots_correction_negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/mapping_slots_correction_negative_control.log",
+    "test_paths": [
+      "tests/ids/test_mapping_slots.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "mapping-slots",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 560,
+          "cached_input_tokens": 530067,
+          "input_tokens": 530629,
+          "output_tokens": 1310,
+          "reasoning_output_tokens": 153,
+          "total_tokens": 531939,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "uv run --no-sync pytest tests/ids -p no:cacheprovider passes with tests/ids/test_mapping_slots.py showing every slot combination the census found (COCOS-labelled sign and factor, exact pint unit pair, scalar and indexed layouts) composes to an expression execute_transform evaluates to the expected value, a binding with an open slot refused with the slot named, a COCOS slot composing through cocos_sign, and each slot carrying its value, how it was settled (code, jev, local or escalated) and its evidence",
+    "estimated_hours": null,
+    "goal": "Represent a binding's transform as typed slots (sign, scale_factor, unit_conversion, cocos_label, index layout) that one composer in imas_codex/ids/transforms.py turns into the stored transform_expression",
+    "id": "mapping-slots",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T10:34:51Z",
+      "read_at": "2026-10-08T10:34:51Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 54.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/manifest.md",
+    "negative_control": "make the composer ignore the sign slot; the sign composition test must then fail",
+    "plan": "mapping-decision-chain",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/ids/models.py",
+      "imas_codex/ids/transforms.py",
+      "tests/ids/test_mapping_slots.py",
+      "docs/evidence/fragments/mapping-decision-chain/mapping-slots.html",
+      "docs/figures/mapping-decision-chain/mapping-slots"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.0927958009109138,
+      "derived": 0.19205923644394846,
+      "drain_hours": 168.0,
+      "effective_limit": 0.19205923644394846,
+      "elapsed_fraction": 0.17459930585813493,
+      "elapsed_hours": 29.33268338416667,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T10:34:56+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.45999999999999996,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.54,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.559872,
+      "decided_by": "window",
+      "margin": 0.08387800000000001,
+      "name": "mapping-slots",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.54
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.660183,
+        "observed_at": "2026-10-08T10:34:56+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.54,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "mapping-slots",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T10:34:56.660183+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "The lead asked for the codex lane to raise throughput; the census is docs/research/mapping-decision-census.html.",
+    "confidence": 0.62,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 1706.434,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2035.052,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1427401.690115,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 58422,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1427401.690115,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 58422,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1427401.690115,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 58422,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 9,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 58422,
+          "headroom_pct": 74.6,
+          "peak_utilisation_p50_pct": 60.1,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 414,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 102,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 1
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 153.646115,
+        "budget_reason": null,
+        "burn_multiple": 3.0923515683227047,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 58422,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.7776268852430555,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 3,
+          "passed": 41,
+          "unknown": 0
+        },
+        "pace_allowance": 0.19208682676471564,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 54.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 153.646115,
+        "budget_reason": null,
+        "burn_multiple": 3.0923515683227047,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 58422,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.7776268852430555,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.19208682676471564,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 54.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 153.646115,
+        "budget_reason": null,
+        "burn_multiple": 3.0923515683227047,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 58422,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.7776268852430555,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.19208682676471564,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 54.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.01,
+      "claude:claude-sonnet-5-5": 0.01,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.3,
+      "hold": 0.01,
+      "local:deepseek-v4.1-flash": 0.67
+    },
+    "rendered_token_estimate": 1938,
+    "usage": {
+      "cost": 0.000226842,
+      "input_tokens": 5401,
+      "output_tokens": 150
+    }
+  },
+  "plan": "mapping-decision-chain",
+  "plan_impl_at_dispatch": 0.1388888888888889,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "407311c9cb750268630f6697a1fe21cc7d7bf34b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "6517c54412eb52628bc02a2f2df90527e2d55ccb",
+    "reviewed_head_sha": "407311c9cb750268630f6697a1fe21cc7d7bf34b",
+    "scores": {
+      "durability": 18,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 108
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T103450350930-mapping-slots",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "mapping-20261006",
+  "session_harness": "codex",
+  "session_id": "01a11b14-d40f-7031-a650-ef2c697400fd",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 12,
+  "throughput": {
+    "cumulative_cached_input_tokens": 13746048,
+    "cumulative_input_tokens": 27647952,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 45627
+  },
+  "time_budget": "60m",
+  "tool_steps": 88.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1020,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T10:52:10Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T10:47:24Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T103450350930-mapping-slots",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 360,
+    "worker_pid": 997047
+  },
+  "worker_seconds": 1020,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
