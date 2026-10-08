@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own full-suite gate logs: mapping_slots_ids_gate.log ran tests/ids at branch base 6517c544 (547 passed, EXIT=0) and mapping_slots_correction_head_gate.log ran the same suite at head 407311c9 (550 passed, EXIT=0); both report zero failures, so zero test ids are added as failures. The reviewed manifest's own baseline_suite key is empty, so the base arm cited here is the run's base-tree log rather than a manifest-recorded arm; that log carries header revision=6517c544 yet collects tests/ids/test_mapping_slots.py, which does not exist at 6517c544, so it was taken on a dirty tree and no clean base-tree arm exists. The zero-added-failure conclusion holds because both arms are green regardless of count.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/mapping-20261006/mapping-slots/tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/mapping_slots_correction_head_gate.log",
+    "revision": "407311c9cb750268630f6697a1fe21cc7d7bf34b"
+  },
+  "backend": "local",
+  "base_log_revision": "6517c54412eb52628bc02a2f2df90527e2d55ccb",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest tests/ids -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/mapping_slots_ids_gate.log",
+    "revision": "6517c54412eb52628bc02a2f2df90527e2d55ccb"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/ids/models.py SignalMappingEntry.compose_slots (pydantic model_validator calling compose_transform at import of ids).",
+    "imas_codex/ids/models.py ValidatedSignalMapping.compose_slots (pydantic model_validator calling compose_transform for the final validated mapping)."
+  ],
+  "completed_at": "2026-10-08T11:09:36.532Z",
+  "dispatched_at": "2026-10-08T10:54:01Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103450350930-mapping-slots/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries an empty baseline_suite, and the base full-suite arm it did leave (mapping_slots_ids_gate.log) is stamped revision=6517c544 while collecting tests/ids/test_mapping_slots.py, a file absent from that commit; git cat-file confirms the path does not exist at 6517c544, so the log's header names the committed HEAD rather than the tree it ran and there is no clean full-suite measurement of the pre-change branch base."
+    },
+    {
+      "file": "docs/evidence/fragments/mapping-decision-chain/mapping-slots.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: plan section 3 lists docs/evidence/fragments/mapping-decision-chain/mapping-slots.html among the node write paths, but the dispatch prompt states the done-when names no artifact and no fragment is required, and no fragment was produced; this is a plan-versus-prompt declaration mismatch, not a worker omission."
+    }
+  ],
+  "head_log_revision": "407311c9cb750268630f6697a1fe21cc7d7bf34b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two pydantic model_validators reach the composer (SignalMappingEntry.compose_slots and ValidatedSignalMapping.compose_slots); both derive transform_expression from transform_slots only when the slots are attached to a binding, so existing free-form callers are unaffected.",
+    "diff": "read commit by commit against 6517c544: 299c9687a adds SlotResolution, TransformSlot[SlotValue], CocosLabel, UnitConversion, IndexLayout and BindingTransformSlots to models.py, adds compose_transform to transforms.py, and adds the test module; 407311c9c makes the source sign and constant scale multiply the COCOS factor instead of being combined into a single slot and tightens the tests.",
+    "done_when": "the gate `uv run --no-sync pytest tests/ids -p no:cacheprovider` passes at head 407311c9 with 550 passed, 5 skipped, 3 deselected, EXIT=0, both in the run's correction_head_gate.log and in my independent re-run (independent_head_gate.log); test_all_census_exact_unit_pairs_execute covers the census pairs, test_open_slot_refuses_binding parametrizes all five slots and matches the composer's named error, and test_cocos_label_uses_cocos_sign asserts cocos_sign appears and evaluates through it.",
+    "goal": "the node goal is to represent a binding transform as typed slots (sign, scale_factor, unit_conversion, cocos_label, index layout) that one composer in imas_codex/ids/transforms.py turns into the stored transform_expression; imas_codex/ids/transforms.py:102 compose_transform builds the expression from settled slots and raises ValueError naming any open ones, and imas_codex/ids/models.py defines the five typed slots with value, authority and evidence.",
+    "manifest": "read; status complete, commits [299c9687a, 407311c9c], tests line names the tests/ids gate at head 407311c9 (550 passed), changed_paths lists the three source/test files but not the plan-declared fragment, and baseline_suite is empty while after_suite cites correction_head_gate.log.",
+    "write_paths": "the manifest declares imas_codex/ids/models.py, imas_codex/ids/transforms.py and tests/ids/test_mapping_slots.py; git diff --stat 6517c544..407311c9 touches exactly those three files (456 insertions, 10 deletions) with no out-of-scope edit; the plan's fourth write path, the evidence fragment, was not produced and the dispatch prompt did not require it."
+  },
+  "justifications": {
+    "durability": "the composer's refusal path is pinned by test_open_slot_refuses_binding parametrized over all five slot names and matching the composer's own error text, test_escalated_slot_refuses_binding_even_with_candidate_value pins the escalated state, test_settled_slot_requires_evidence pins the model validator, and the declared negative control (correction_negative_control.log) makes the composer ignore the sign slot and fails three cases including test_psi_source_sign_flip_multiplies_cocos_factor, none of which fail at the green head.",
+    "evidence": "I re-ran the full tests/ids gate at 407311c9cb750268630f6697a1fe21cc7d7bf34b and got 550 passed, 5 skipped, 3 deselected, EXIT=0 (independent_head_gate.log), matching the run's own head gate; I independently exercised compose_transform at the reviewed head and watched it refuse a wholly open slots object with `open transform slot(s): sign, scale_factor, unit_conversion, cocos_label, index_layout` and compose the psi source-sign case to (value * -1.0) * cocos_sign('psi_like', ...) evaluating 2.0 to -4*pi; the negative control log shows 3 failed, 2 passed, EXIT=1 with the sign cases red; the shortfall is that the pre-change base was never cleanly full-suite gated and the manifest records no baseline_suite.",
+    "fit": "both commits use conventional feat(ids)/fix(ids) subjects with bodies that state the mechanism and the covered cases; neither the messages, the new symbols (SlotResolution, TransformSlot, BindingTransformSlots, compose_transform) nor the test module name carry a plan, section, ticket or version identifier.",
+    "goal_fidelity": "models.py defines exactly the five slots the plan names (sign, scale_factor, unit_conversion, cocos_label, index_layout) each carrying value, settled_by and evidence, and compose_transform in transforms.py builds transform_expression from them; the done-when's three witnesses are present (census coverage, open-slot refusal naming the slot, COCOS through cocos_sign), and the second commit correctly made sign and scale independent multipliers of the COCOS factor rather than folding scale into sign.",
+    "reuse": "compose_transform reuses the existing cocos_sign and convert_units helpers in transforms.py rather than reimplementing them, the slots extend the existing pydantic model style with field and model validators already used in models.py, and the census unit pairs are read from the same source the census produced rather than re-listed in production code.",
+    "scope_discipline": "git diff --stat 6517c544..407311c9 lists only the three declared source/test paths; no other file is touched and no unrelated reformatting is included, so the only scope observation is that the plan-declared evidence fragment was left unwritten, which the dispatch prompt explicitly allowed."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: typed slots (sign, scale_factor, unit_conversion, cocos_label, index_layout) with value/authority/evidence, composed by compose_transform in transforms.py; models.py defines the five slots, transforms.py:102 builds the expression.\nVERDICT done_when: tests/ids 555 selected (550 passed, 5 skipped, 3 deselected), EXIT=0 at head 407311c9 in the run's log and my independent re-run; census pairs, all-five-slot open refusal naming the slot, and cocos_sign composition all present.\nVERDICT write_paths: diff 6517c544..407311c9 touches exactly imas_codex/ids/models.py, imas_codex/ids/transforms.py, tests/ids/test_mapping_slots.py; the plan-declared fragment was not required by the prompt and was not written.\nVERDICT manifest: status complete; baseline_suite empty, after_suite cites correction_head_gate.log; changed_paths lists the three files.\nVERDICT diff: 299c9687a adds slots and composer plus tests; 407311c9c makes source sign and constant scale multiply the COCOS factor.\nCALL_SITES: SignalMappingEntry.compose_slots and ValidatedSignalMapping.compose_slots.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the five typed slots and the single composer match the plan, and all three done-when witnesses are present and verified at head.\nSCORE evidence: 16\nJUSTIFICATION evidence: independent head gate 550 passed EXIT=0 reproduced, negative control valid (3 failed EXIT=1), and an independent composer probe confirmed refusal and COCOS; but no clean pre-change base arm and no manifest baseline_suite.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: only the three declared paths touched with no unrelated edits; the plan-listed fragment was left unwritten but the prompt waived it.\nSCORE durability: 18\nJUSTIFICATION durability: open/escalated/open-slot refusal and evidence requirement are pinned by parametrized tests, and the sign-omission negative control fails the psi source-sign case at head tests.\nSCORE fit: 19\nJUSTIFICATION fit: conventional feat(ids)/fix(ids) subjects with mechanism-worth bodies; no plan, section or ticket identifiers in messages, symbols or comments.\nSCORE reuse: 18\nJUSTIFICATION reuse: reuses existing cocos_sign and convert_units helpers and the census unit pairs rather than reimplementing or re-listing them.\nFINDING manifest.md:16 follow-on: baseline_suite empty and the base arm log carries a revision that does not contain tests/ids/test_mapping_slots.py, so no clean pre-change full-suite arm exists.\nFINDING docs/evidence/fragments/mapping-decision-chain/mapping-slots.html:1 follow-on: plan-declared fragment was not produced; the dispatch prompt waived it, so this is a declaration mismatch.",
+  "review_run_id": "r-20261008T105352182637-review-of-mapping-slots",
+  "reviewed_base_sha": "6517c54412eb52628bc02a2f2df90527e2d55ccb",
+  "reviewed_head_sha": "407311c9cb750268630f6697a1fe21cc7d7bf34b",
+  "reviewed_run_id": "r-20261008T103450350930-mapping-slots",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:58:00.000000+00:00",
+  "total": 108,
+  "verdict": "SOUND WITH FINDINGS"
+}
