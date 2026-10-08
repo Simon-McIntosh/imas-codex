@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "f186f51aef37b9eb1dea9fbe4f228919020bdced",
+  "call_site_count": 8,
+  "call_sites": [
+    "imas_codex/cli/sn.py:945",
+    "imas_codex/cli/sn.py:949",
+    "imas_codex/standard_names/loop.py:1176",
+    "imas_codex/cli/sn.py:2429",
+    "imas_codex/cli/sn.py:2721",
+    "imas_codex/standard_names/graph_ops.py:8498",
+    "imas_codex/cli/embed.py:139",
+    "imas_codex/cli/embed.py:158"
+  ],
+  "completed_at": "2026-10-08T08:24:39.289Z",
+  "dispatched_at": "2026-10-08T08:11:37Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's after_suite revision and the archive gate both name 50d81730f while the run's final head is c610e5bce, so the recorded head arm exercises the code commit but not the later docs-only fragment commit; the code is unchanged between them so this does not hold the node, but a reader keying only on the reviewed head should know the archived gate did not run at it."
+    }
+  ],
+  "head_log_revision": "50d81730f27d6a019ca79145088e0e2246911198",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 8 production call site(s)",
+    "diff": "read commit by commit against f186f51ae; tests/cli/test_sn_embed_preflight.py:64 and tests/cli/test_sn_generate_cli.py:264 replace mocks of the superseded imas_codex.cli.discover.common.run_discovery seam with a mock of imas_codex.standard_names.loop.preview_sn_pools and add preview.assert_awaited_once() plus reset.assert_not_called(), and tests/cli/test_embed_service_footprint.py:104 clears the inherited SLURM_JOB_ID and patches _start_foreground with side_effect=AssertionError; every edit is test-side.",
+    "done_when": "section 54's done-when is that the three pass in a checkout and in an archive with .env linked, and that the fragment names each cause and whether it was a test or a production defect; worktree-head.log and archive-cli-tests.log each record 3 passed EXIT=0, I independently reproduced 3 passed EXIT=0 at head c610e5bce (review-head-gate.log) and again with the graph endpoint unreachable (review-head-gate-nograph.log), and the fragment at docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html names each of the three causes as a test defect, so both clauses hold.",
+    "goal": "section 54's goal is to repair the three tests/cli tests that fail on main \u2014 test_sn_embed_preflight.py::test_run_sn_cmd_skips_embed_preflight_for_dry_run, test_embed_service_footprint.py::test_embed_start_forwards_explicit_gpu_count_to_the_deployer and test_sn_generate_cli.py::TestBackwardCompatibility::test_reset_to_drafted_dry_run \u2014 making any live-service test hermetic and fixing a production defect in production code where one exists; commit 50d81730f repairs all three test-side and the fragment at c610e5bce states none was a production defect, so the goal is met.",
+    "manifest": "read; it names commit 50d81730f, changed_paths of the three tests plus the fragment, test_logs base-cli-tests.log/worktree-head.log/archive-cli-tests.log, and now carries baseline_suite (3 failed, EXIT=1) and after_suite (0 failed, EXIT=0) whose revisions and counts reconcile with the logs I opened.",
+    "write_paths": "the manifest declares imas_codex/cli/utils.py, imas_codex/cli/sn.py, imas_codex/cli/embed.py, the three tests/cli test files, docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html and docs/figures/jt60sa-discovery-completion/cli-test-repair; git show --stat 50d81730f touches only the three test files and c610e5bce adds only the fragment, both inside the declared scope, and no production file changed."
+  },
+  "justifications": {
+    "durability": "tests/cli/test_embed_service_footprint.py:104 patches _start_foreground with side_effect=AssertionError so a regression re-entering foreground serving reddens, tests/cli/test_sn_generate_cli.py:300 asserts reset_standard_names is not called under --dry-run, and tests/cli/test_sn_embed_preflight.py:84 asserts preview_sn_pools is awaited, each failing on the regression it names.",
+    "evidence": "worktree-head.log records 3 passed EXIT=0 and archive-cli-tests.log records 3 passed EXIT=0 with measurement_module /tmp/cli-test-repair.0LUegh/imas_codex/cli/sn.py, the manifest now carries non-empty baseline_suite and after_suite JSON, and I reproduced 3 passed EXIT=0 at head both with the graph reachable and with NEO4J_URI pointed at a dead port.",
+    "fit": "commit 50d81730f follows the surrounding patch context-manager idiom of tests/cli/test_sn_embed_preflight.py:60 and carries a conventional subject with a body naming no plan or ticket identifier in the diff or message.",
+    "goal_fidelity": "the three tests named in section 54 pass at head c610e5bce and the fragment at docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html records each cause and classifies all three as test defects, matching the goal's conditional clause that a production defect is fixed only where one exists.",
+    "reuse": "the change patches the repository's existing owners imas_codex/standard_names/loop.py:1176 preview_sn_pools and imas_codex/standard_names/graph_ops.py:8498 reset_standard_names rather than adding any parallel mock seam or helper.",
+    "scope_discipline": "git show --stat 50d81730f lists only tests/cli/test_sn_embed_preflight.py, tests/cli/test_embed_service_footprint.py and tests/cli/test_sn_generate_cli.py and c610e5bce only the fragment, every path inside the manifest's declared write paths, with no production source touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: section 54's goal is to repair the three tests/cli tests that fail on main \u2014 test_sn_embed_preflight.py::test_run_sn_cmd_skips_embed_preflight_for_dry_run, test_embed_service_footprint.py::test_embed_start_forwards_explicit_gpu_count_to_the_deployer and test_sn_generate_cli.py::TestBackwardCompatibility::test_reset_to_drafted_dry_run \u2014 making any live-service test hermetic and fixing a production defect in production code where one exists; commit 50d81730f repairs all three test-side and the fragment at c610e5bce states none was a production defect, so the goal is met.\nVERDICT done_when: section 54's done-when is that the three pass in a checkout and in an archive with .env linked, and that the fragment names each cause and whether it was a test or a production defect; worktree-head.log and archive-cli-tests.log each record 3 passed EXIT=0, I independently reproduced 3 passed EXIT=0 at head c610e5bce (review-head-gate.log) and again with the graph endpoint unreachable (review-head-gate-nograph.log), and the fragment at docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html names each of the three causes as a test defect, so both clauses hold.\nVERDICT write_paths: the manifest declares imas_codex/cli/utils.py, imas_codex/cli/sn.py, imas_codex/cli/embed.py, the three tests/cli test files, docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html and docs/figures/jt60sa-discovery-completion/cli-test-repair; git show --stat 50d81730f touches only the three test files and c610e5bce adds only the fragment, both inside the declared scope, and no production file changed.\nVERDICT manifest: read; it names commit 50d81730f, changed_paths of the three tests plus the fragment, test_logs base-cli-tests.log/worktree-head.log/archive-cli-tests.log, and now carries baseline_suite (3 failed, EXIT=1) and after_suite (0 failed, EXIT=0) whose revisions and counts reconcile with the logs I opened.\nVERDICT diff: read commit by commit against f186f51ae; tests/cli/test_sn_embed_preflight.py:64 and tests/cli/test_sn_generate_cli.py:264 replace mocks of the superseded imas_codex.cli.discover.common.run_discovery seam with a mock of imas_codex.standard_names.loop.preview_sn_pools and add preview.assert_awaited_once() plus reset.assert_not_called(), and tests/cli/test_embed_service_footprint.py:104 clears the inherited SLURM_JOB_ID and patches _start_foreground with side_effect=AssertionError; every edit is test-side.\nCALL_SITES: imas_codex/cli/sn.py:945, imas_codex/cli/sn.py:949, imas_codex/standard_names/loop.py:1176, imas_codex/cli/sn.py:2429, imas_codex/cli/sn.py:2721, imas_codex/standard_names/graph_ops.py:8498, imas_codex/cli/embed.py:139, imas_codex/cli/embed.py:158\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the three tests named in section 54 pass at head c610e5bce and the fragment at docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html records each cause and classifies all three as test defects, matching the goal's conditional clause that a production defect is fixed only where one exists.\nSCORE evidence: 19\nJUSTIFICATION evidence: worktree-head.log records 3 passed EXIT=0 and archive-cli-tests.log records 3 passed EXIT=0 with measurement_module /tmp/cli-test-repair.0LUegh/imas_codex/cli/sn.py, the manifest now carries non-empty baseline_suite and after_suite JSON, and I reproduced 3 passed EXIT=0 at head both with the graph reachable and with NEO4J_URI pointed at a dead port.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 50d81730f lists only tests/cli/test_sn_embed_preflight.py, tests/cli/test_embed_service_footprint.py and tests/cli/test_sn_generate_cli.py and c610e5bce only the fragment, every path inside the manifest's declared write paths, with no production source touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/cli/test_embed_service_footprint.py:104 patches _start_foreground with side_effect=AssertionError so a regression re-entering foreground serving reddens, tests/cli/test_sn_generate_cli.py:300 asserts reset_standard_names is not called under --dry-run, and tests/cli/test_sn_embed_preflight.py:84 asserts preview_sn_pools is awaited, each failing on the regression it names.\nSCORE fit: 20\nJUSTIFICATION fit: commit 50d81730f follows the surrounding patch context-manager idiom of tests/cli/test_sn_embed_preflight.py:60 and carries a conventional subject with a body naming no plan or ticket identifier in the diff or message.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change patches the repository's existing owners imas_codex/standard_names/loop.py:1176 preview_sn_pools and imas_codex/standard_names/graph_ops.py:8498 reset_standard_names rather than adding any parallel mock seam or helper.\nFINDING manifest.md:20 follow-on: the manifest's after_suite revision and the archive gate both name 50d81730f while the run's final head is c610e5bce, so the recorded head arm exercises the code commit but not the later docs-only fragment commit; the code is unchanged between them so this does not hold the node, but a reader keying only on the reviewed head should know the archived gate did not run at it.",
+  "review_run_id": "r-20261008T081116793899-review-of-cli-test-repair",
+  "reviewed_base_sha": "f186f51aef37b9eb1dea9fbe4f228919020bdced",
+  "reviewed_head_sha": "c610e5bce5cbc31cf5b88221388a4ed6f27dd8b8",
+  "reviewed_run_id": "r-20261008T073654979240-cli-test-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T08:22:50.421876+00:00",
+  "total": 116
+}
