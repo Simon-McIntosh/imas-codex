@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph import GraphClient
 from imas_codex.graph.models import DocumentStatus, WikiPageStatus
+from imas_codex.settings import get_wiki_ingest_threshold
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 # Claim timeout - pages claimed longer than this are reclaimed
 CLAIM_TIMEOUT_SECONDS = 300  # 5 minutes
-CONTENT_INGEST_THRESHOLD = 0.16
+CONTENT_INGEST_THRESHOLD = get_wiki_ingest_threshold()
 
 # Retry configuration for Neo4j transient errors (deadlocks)
 MAX_RETRY_ATTEMPTS = 5
