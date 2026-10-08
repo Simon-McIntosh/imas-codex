@@ -1,0 +1,1108 @@
+[
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eslice_esurf",
+    "label": 1,
+    "scan_relevance": 0.17666666666666667,
+    "children_worth_listing": 0.78,
+    "old_composite": 0.2
+  },
+  {
+    "path": "/analysis/manual/Report",
+    "label": 0,
+    "scan_relevance": 0.016666666666666666,
+    "children_worth_listing": 0.15,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/eqdbms",
+    "label": 1,
+    "scan_relevance": 0.22999999999999998,
+    "children_worth_listing": 0.76,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jt60sa",
+    "label": 1,
+    "scan_relevance": 0.21666666666666667,
+    "children_worth_listing": 0.74,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/kei",
+    "label": 1,
+    "scan_relevance": 0.5933333333333334,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins",
+    "label": 1,
+    "scan_relevance": 0.22666666666666668,
+    "children_worth_listing": 0.88,
+    "old_composite": 0.2
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/vol2phi",
+    "label": 1,
+    "scan_relevance": 0.5766666666666667,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/atomic/atdisp",
+    "label": 0,
+    "scan_relevance": 0.4366666666666667,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.25
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/Procon",
+    "label": 1,
+    "scan_relevance": 0.8566666666666666,
+    "children_worth_listing": 0.5,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/util",
+    "label": 1,
+    "scan_relevance": 0.42,
+    "children_worth_listing": 0.42,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l4.beta2/GS",
+    "label": 1,
+    "scan_relevance": 0.36000000000000004,
+    "children_worth_listing": 0.79,
+    "old_composite": 0.3
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac_org_20170621/eqfame",
+    "label": 1,
+    "scan_relevance": 0.39666666666666667,
+    "children_worth_listing": 0.16,
+    "old_composite": 0.25
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/src_den",
+    "label": 1,
+    "scan_relevance": 0.4166666666666667,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/sample",
+    "label": 1,
+    "scan_relevance": 0.32,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.25
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share",
+    "label": 1,
+    "scan_relevance": 0.31666666666666665,
+    "children_worth_listing": 0.83,
+    "old_composite": 0.35
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/fledd.pac.20160412/inc",
+    "label": 1,
+    "scan_relevance": 0.3,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.3
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/impplt/src_ncflux",
+    "label": 1,
+    "scan_relevance": 0.18999999999999997,
+    "children_worth_listing": 0.11,
+    "old_composite": 0.35
+  },
+  {
+    "path": "/analysis/src/easy-v5.01/PIDEXP/KMSE",
+    "label": 1,
+    "scan_relevance": 0.16666666666666666,
+    "children_worth_listing": 0.68,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/pswall",
+    "label": 1,
+    "scan_relevance": 0.19666666666666666,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/analysis/src/getseldata_v4.2/UTL/getseldata",
+    "label": 1,
+    "scan_relevance": 0.51,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.25
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_egis/egis_plugins/jt60u",
+    "label": 1,
+    "scan_relevance": 0.22,
+    "children_worth_listing": 0.75,
+    "old_composite": 0.2
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/trmain/Inc",
+    "label": 0,
+    "scan_relevance": 0.12666666666666668,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.2
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/db",
+    "label": 1,
+    "scan_relevance": 0.58,
+    "children_worth_listing": 0.49,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eqread_pac/eqread",
+    "label": 1,
+    "scan_relevance": 0.34,
+    "children_worth_listing": 0.18,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/edas_plugins/jt60sa",
+    "label": 1,
+    "scan_relevance": 0.31666666666666665,
+    "children_worth_listing": 0.53,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/data/TOPICS/IMPACT",
+    "label": 1,
+    "scan_relevance": 0.11333333333333334,
+    "children_worth_listing": 0.81,
+    "old_composite": 0.5
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/src_pel",
+    "label": 1,
+    "scan_relevance": 0.2733333333333333,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.65
+  },
+  {
+    "path": "/analysis/src/SAeqread/selene",
+    "label": 1,
+    "scan_relevance": 0.77,
+    "children_worth_listing": 0.71,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/loglist",
+    "label": 1,
+    "scan_relevance": 0.51,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.82
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1/eqdbms/EQDB",
+    "label": 1,
+    "scan_relevance": 0.24333333333333332,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/eslice_esurf/default",
+    "label": 1,
+    "scan_relevance": 0.43333333333333335,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.88
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_setting",
+    "label": 1,
+    "scan_relevance": 0.32666666666666666,
+    "children_worth_listing": 0.36,
+    "old_composite": 0.75
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/gksp2.x.f",
+    "label": 0,
+    "scan_relevance": 0.10333333333333333,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/meta.x.c",
+    "label": 0,
+    "scan_relevance": 0.11666666666666665,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1/eqtrace/eqtrace",
+    "label": 0,
+    "scan_relevance": 0.22333333333333336,
+    "children_worth_listing": 0.33,
+    "old_composite": 0.7
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqfame",
+    "label": 1,
+    "scan_relevance": 0.26333333333333336,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.5
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14",
+    "label": 1,
+    "scan_relevance": 0.2833333333333333,
+    "children_worth_listing": 0.87,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac",
+    "label": 1,
+    "scan_relevance": 0.5766666666666667,
+    "children_worth_listing": 0.82,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_esurf2/esurf_plugins/jt60sa",
+    "label": 1,
+    "scan_relevance": 0.13999999999999999,
+    "children_worth_listing": 0.6,
+    "old_composite": 0.65
+  },
+  {
+    "path": "/analysis/src/SAeqread/u_file.bak_9912",
+    "label": 1,
+    "scan_relevance": 0.5966666666666667,
+    "children_worth_listing": 0.74,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/echv9l1",
+    "label": 1,
+    "scan_relevance": 0.5566666666666666,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/impact/src_int",
+    "label": 1,
+    "scan_relevance": 0.31,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.75
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l3/GS/basic",
+    "label": 1,
+    "scan_relevance": 0.4066666666666667,
+    "children_worth_listing": 0.15,
+    "old_composite": 0.65
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/common",
+    "label": 1,
+    "scan_relevance": 0.12333333333333334,
+    "children_worth_listing": 0.83,
+    "old_composite": 0.75
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/esurf_tmp",
+    "label": 1,
+    "scan_relevance": 0.3,
+    "children_worth_listing": 0.39,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_data_area",
+    "label": 1,
+    "scan_relevance": 0.17333333333333334,
+    "children_worth_listing": 0.41,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_data_area",
+    "label": 1,
+    "scan_relevance": 0.6433333333333333,
+    "children_worth_listing": 0.37,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_eslice2/eslice_plugins/jt60u/dataline_input_params",
+    "label": 1,
+    "scan_relevance": 0.52,
+    "children_worth_listing": 0.53,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/external_func_api",
+    "label": 1,
+    "scan_relevance": 0.20666666666666667,
+    "children_worth_listing": 0.51,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/edas_data",
+    "label": 1,
+    "scan_relevance": 0.43333333333333335,
+    "children_worth_listing": 0.89,
+    "old_composite": 0.96
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_egis/matplotlib_extended",
+    "label": 0,
+    "scan_relevance": 0.08,
+    "children_worth_listing": 0.51,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/edas_common",
+    "label": 1,
+    "scan_relevance": 0.20333333333333334,
+    "children_worth_listing": 0.36,
+    "old_composite": 0.96
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/matplotlib_extended",
+    "label": 0,
+    "scan_relevance": 0.13,
+    "children_worth_listing": 0.51,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/aamain",
+    "label": 1,
+    "scan_relevance": 0.6566666666666666,
+    "children_worth_listing": 0.49,
+    "old_composite": 0.98
+  },
+  {
+    "path": "/analysis/manual/OFMCold",
+    "label": 0,
+    "scan_relevance": 0.03333333333333333,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_eslice2/eslice_plugins/jt60sa/dataline_input_params",
+    "label": 1,
+    "scan_relevance": 0.5866666666666667,
+    "children_worth_listing": 0.59,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/edas_data",
+    "label": 1,
+    "scan_relevance": 0.45333333333333337,
+    "children_worth_listing": 0.88,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.14/edas_share/eqread_pac/eqread",
+    "label": 1,
+    "scan_relevance": 0.35333333333333333,
+    "children_worth_listing": 0.15,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/eqmain",
+    "label": 1,
+    "scan_relevance": 0.4166666666666667,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/eagle-v4.05/appli.clib.x.c",
+    "label": 1,
+    "scan_relevance": 0.2333333333333333,
+    "children_worth_listing": 0.15,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_share/remote_tools",
+    "label": 1,
+    "scan_relevance": 0.2733333333333333,
+    "children_worth_listing": 0.36,
+    "old_composite": 0.92
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/eq_fct",
+    "label": 1,
+    "scan_relevance": 0.5433333333333333,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_esurf2/esurf_custom_class",
+    "label": 1,
+    "scan_relevance": 0.14333333333333334,
+    "children_worth_listing": 0.41,
+    "old_composite": 0.98
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/egis_data_area",
+    "label": 1,
+    "scan_relevance": 0.3066666666666667,
+    "children_worth_listing": 0.42,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/analysis/src/edas2/v2.1.15/edas_egis/egis_plugins/jet/dataline_input_params",
+    "label": 1,
+    "scan_relevance": 0.4666666666666666,
+    "children_worth_listing": 0.56,
+    "old_composite": 0.92
+  },
+  {
+    "path": "/analysis/src/topics_release/topics/topics/rfmain",
+    "label": 1,
+    "scan_relevance": 0.4366666666666667,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178/topics/common/tool_f",
+    "label": 0,
+    "scan_relevance": 0.18999999999999997,
+    "children_worth_listing": 0.34,
+    "old_composite": 0.3
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1171_sonic/topics/atomic/Inc",
+    "label": 0,
+    "scan_relevance": 0.15,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.15
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/sonic/sonicV4/soldor/inc",
+    "label": 1,
+    "scan_relevance": 0.16,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.25
+  },
+  {
+    "path": "/home/d200024/ARCHIVE/mypythonlibrary",
+    "label": 0,
+    "scan_relevance": 0.10666666666666667,
+    "children_worth_listing": 0.48,
+    "old_composite": 0.1
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_bgb/topics/atomic/atdisp",
+    "label": 0,
+    "scan_relevance": 0.39666666666666667,
+    "children_worth_listing": 0.49,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/topics/gnet",
+    "label": 1,
+    "scan_relevance": 0.29,
+    "children_worth_listing": 0.37,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/atomic/atdisp",
+    "label": 0,
+    "scan_relevance": 0.5,
+    "children_worth_listing": 0.5,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/home/d230015/idl",
+    "label": 1,
+    "scan_relevance": 0.31,
+    "children_worth_listing": 0.72,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/edas2/v2.1.14/edas_share/edas_plugins/common",
+    "label": 1,
+    "scan_relevance": 0.2833333333333333,
+    "children_worth_listing": 0.43,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/home/a144017/mecs/IC_linkage",
+    "label": 1,
+    "scan_relevance": 0.5566666666666666,
+    "children_worth_listing": 0.71,
+    "old_composite": 0.35
+  },
+  {
+    "path": "/home/h060029/ADAM/ofmcdbt2",
+    "label": 1,
+    "scan_relevance": 0.26333333333333336,
+    "children_worth_listing": 0.58,
+    "old_composite": 0.3
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178/topics/topics/dgmain",
+    "label": 1,
+    "scan_relevance": 0.8033333333333333,
+    "children_worth_listing": 0.56,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/impplt",
+    "label": 1,
+    "scan_relevance": 0.07333333333333333,
+    "children_worth_listing": 0.66,
+    "old_composite": 0.05
+  },
+  {
+    "path": "/home/d200018/edas/esurf",
+    "label": 1,
+    "scan_relevance": 0.05666666666666667,
+    "children_worth_listing": 0.82,
+    "old_composite": 0.15
+  },
+  {
+    "path": "/home/d200025/public/Tools/Jakub",
+    "label": 1,
+    "scan_relevance": 0.59,
+    "children_worth_listing": 0.11,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/src/eqdbms/eqdbms/UTY",
+    "label": 1,
+    "scan_relevance": 0.05333333333333334,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.35
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_bfps/topics/atomic/Inc",
+    "label": 0,
+    "scan_relevance": 0.09666666666666666,
+    "children_worth_listing": 0.15,
+    "old_composite": 0.2
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1183_krapi/topics/impact/impplt/src_ncflux",
+    "label": 1,
+    "scan_relevance": 0.06,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/func1",
+    "label": 0,
+    "scan_relevance": 0.53,
+    "children_worth_listing": 0.28,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/impact/src_den",
+    "label": 1,
+    "scan_relevance": 0.27,
+    "children_worth_listing": 0.35,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/gnet",
+    "label": 1,
+    "scan_relevance": 0.21,
+    "children_worth_listing": 0.33,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1163_kam/topics/impact/src_mon",
+    "label": 1,
+    "scan_relevance": 0.31666666666666665,
+    "children_worth_listing": 0.34,
+    "old_composite": 0.45
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1162_in/topics/Mod1",
+    "label": 0,
+    "scan_relevance": 0.17666666666666667,
+    "children_worth_listing": 0.29,
+    "old_composite": 0.5
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/dlvrys",
+    "label": 1,
+    "scan_relevance": 0.59,
+    "children_worth_listing": 0.32,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/home/a144017/mecs/IC_low_voltage/case185_04",
+    "label": 1,
+    "scan_relevance": 0.5833333333333334,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1162_in/topics/topplt/excel",
+    "label": 1,
+    "scan_relevance": 0.21,
+    "children_worth_listing": 0.32,
+    "old_composite": 0.78
+  },
+  {
+    "path": "/home/d230014/AM_GIT_update/create_tools-main/FluxMapReconstruction/python_standalone",
+    "label": 1,
+    "scan_relevance": 0.77,
+    "children_worth_listing": 0.1,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178/topics/topics/calc",
+    "label": 0,
+    "scan_relevance": 0.16,
+    "children_worth_listing": 0.27,
+    "old_composite": 0.5
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1152_ztau/topics/common/tool_f2",
+    "label": 1,
+    "scan_relevance": 0.12,
+    "children_worth_listing": 0.45,
+    "old_composite": 0.62
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1135_dek/topics/topics/lhmain",
+    "label": 1,
+    "scan_relevance": 0.4166666666666667,
+    "children_worth_listing": 0.58,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_dt/spot",
+    "label": 1,
+    "scan_relevance": 0.58,
+    "children_worth_listing": 0.33,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/home/a144017/mecs/v2.6.1/voltage_control",
+    "label": 1,
+    "scan_relevance": 0.69,
+    "children_worth_listing": 0.69,
+    "old_composite": 0.6
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/topics/eq_trc",
+    "label": 1,
+    "scan_relevance": 0.4066666666666667,
+    "children_worth_listing": 0.41,
+    "old_composite": 0.82
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1163_kam/topics/topics/bafp",
+    "label": 1,
+    "scan_relevance": 0.2966666666666667,
+    "children_worth_listing": 0.43,
+    "old_composite": 0.7
+  },
+  {
+    "path": "/home/a043064/eddb/dtm/r2f_sx",
+    "label": 1,
+    "scan_relevance": 0.4666666666666666,
+    "children_worth_listing": 0.15,
+    "old_composite": 0.75
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/impact/src_adas",
+    "label": 1,
+    "scan_relevance": 0.29333333333333333,
+    "children_worth_listing": 0.31,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/home/d200024/mytools/SAmag",
+    "label": 1,
+    "scan_relevance": 0.7066666666666667,
+    "children_worth_listing": 0.31,
+    "old_composite": 0.85
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1135_dek/topics/common/tool_f2",
+    "label": 1,
+    "scan_relevance": 0.04,
+    "children_worth_listing": 0.44,
+    "old_composite": 0.6
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_bgb/topics/topics/crsdat",
+    "label": 1,
+    "scan_relevance": 0.49,
+    "children_worth_listing": 0.51,
+    "old_composite": 0.55
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_mxm/topics/topics/rfmain",
+    "label": 1,
+    "scan_relevance": 0.39666666666666667,
+    "children_worth_listing": 0.46,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/topics/eq_trc",
+    "label": 1,
+    "scan_relevance": 0.4066666666666667,
+    "children_worth_listing": 0.35,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/topics/topics/fp2d",
+    "label": 1,
+    "scan_relevance": 0.6366666666666666,
+    "children_worth_listing": 0.31,
+    "old_composite": 0.65
+  },
+  {
+    "path": "/home/a048717/src/topics_rvac/topics/impact/ncflux",
+    "label": 1,
+    "scan_relevance": 0.3566666666666667,
+    "children_worth_listing": 0.43,
+    "old_composite": 0.75
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/topics/icmain",
+    "label": 1,
+    "scan_relevance": 0.47,
+    "children_worth_listing": 0.42,
+    "old_composite": 0.8
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/trmain/BgB",
+    "label": 1,
+    "scan_relevance": 0.5366666666666667,
+    "children_worth_listing": 0.29,
+    "old_composite": 0.94
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_mxm/topics/topics/aamain",
+    "label": 1,
+    "scan_relevance": 0.8533333333333334,
+    "children_worth_listing": 0.65,
+    "old_composite": 0.96
+  },
+  {
+    "path": "/home/a144017/mecs/v2.6.1/rampdown_pp/run044",
+    "label": 1,
+    "scan_relevance": 0.71,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/a144017/mecs/v2.5.5/vv_mod/run019",
+    "label": 1,
+    "scan_relevance": 0.7400000000000001,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/main",
+    "label": 1,
+    "scan_relevance": 0.5133333333333333,
+    "children_worth_listing": 0.33,
+    "old_composite": 0.92
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_deb/topics/topics/nbmain",
+    "label": 1,
+    "scan_relevance": 0.35000000000000003,
+    "children_worth_listing": 0.65,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/tool/plot2imas",
+    "label": 1,
+    "scan_relevance": 0.7333333333333334,
+    "children_worth_listing": 0.5,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/tool/adam2imas",
+    "label": 1,
+    "scan_relevance": 0.6666666666666666,
+    "children_worth_listing": 0.42,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1153_rvac_re/topics/impact/nclass",
+    "label": 1,
+    "scan_relevance": 0.3433333333333333,
+    "children_worth_listing": 0.4,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/d210009/IMAS",
+    "label": 1,
+    "scan_relevance": 0.63,
+    "children_worth_listing": 0.7,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a144017/mecs/IC_low_voltage/case200_01_350kA",
+    "label": 1,
+    "scan_relevance": 0.7433333333333333,
+    "children_worth_listing": 0.75,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/a144017/exp_sa/camdata",
+    "label": 1,
+    "scan_relevance": 0.016666666666666666,
+    "children_worth_listing": 0.14,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_lcnse/topics/topics/rdmain",
+    "label": 1,
+    "scan_relevance": 0.48,
+    "children_worth_listing": 0.33,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_dt/topics/topics/eqmain",
+    "label": 1,
+    "scan_relevance": 0.7966666666666667,
+    "children_worth_listing": 0.5,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1162_in/topics/tool/efit2imas",
+    "label": 1,
+    "scan_relevance": 0.6699999999999999,
+    "children_worth_listing": 0.38,
+    "old_composite": 0.92
+  },
+  {
+    "path": "/home/a144017/mecs/v2.5.5/vv_mod/n2/270deg_0.2",
+    "label": 1,
+    "scan_relevance": 0.6466666666666666,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/topics/eqmain",
+    "label": 1,
+    "scan_relevance": 0.44,
+    "children_worth_listing": 0.34,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1137_bf/topics/topics/Com_mod",
+    "label": 1,
+    "scan_relevance": 0.4466666666666667,
+    "children_worth_listing": 0.36,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_pub/topics/topics/trmain/MMM95",
+    "label": 1,
+    "scan_relevance": 0.4666666666666666,
+    "children_worth_listing": 0.11,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/d230014/run_mecs_plugin_create_v4",
+    "label": 1,
+    "scan_relevance": 0.5633333333333334,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/home/a048717/run/runD_d_d_d_d_d/s2_1_V05_jfrs/wrk_of",
+    "label": 1,
+    "scan_relevance": 0.5866666666666667,
+    "children_worth_listing": 0.15,
+    "old_composite": 0.95
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1185_deb/topics/topics/pt_std",
+    "label": 1,
+    "scan_relevance": 0.2966666666666667,
+    "children_worth_listing": 0.57,
+    "old_composite": 0.9
+  },
+  {
+    "path": "/analysis/src/getseldata_v4.2",
+    "label": 1,
+    "scan_relevance": 0.49666666666666665,
+    "children_worth_listing": 0.77,
+    "old_composite": 0.75
+  },
+  {
+    "path": "/analysis/src/SAeqfame",
+    "label": 1,
+    "scan_relevance": 0.5333333333333333,
+    "children_worth_listing": 0.82,
+    "old_composite": 0.6
+  },
+  {
+    "path": "/analysis/lib/eqdbms",
+    "label": 1,
+    "scan_relevance": 0.3466666666666667,
+    "children_worth_listing": 0.79,
+    "old_composite": 0.7
+  },
+  {
+    "path": "/analysis/src/client_eqdbms.EQ32.Rev1",
+    "label": 1,
+    "scan_relevance": 0.36333333333333334,
+    "children_worth_listing": 0.77,
+    "old_composite": 0.3
+  },
+  {
+    "path": "/home/d240044/bin",
+    "label": 0,
+    "scan_relevance": 0.0033333333333333335,
+    "children_worth_listing": 0.07,
+    "old_composite": 0.1
+  },
+  {
+    "path": "/home/d240044/Code/vcpkg",
+    "label": 0,
+    "scan_relevance": 0.26333333333333336,
+    "children_worth_listing": 0.07,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/d240044/Code/spyder-env",
+    "label": 0,
+    "scan_relevance": 0.06333333333333334,
+    "children_worth_listing": 0.17,
+    "old_composite": 0.3
+  },
+  {
+    "path": "/home/d200024/intel",
+    "label": 0,
+    "scan_relevance": 0.06,
+    "children_worth_listing": 0.33,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/a048717/fftw-3.3.10",
+    "label": 0,
+    "scan_relevance": 0.13333333333333333,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/a048717/exec",
+    "label": 0,
+    "scan_relevance": 0.10333333333333333,
+    "children_worth_listing": 0.1,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1135_dek/exec",
+    "label": 0,
+    "scan_relevance": 0.07333333333333333,
+    "children_worth_listing": 0.23,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1178_kam/topics/Mod",
+    "label": 0,
+    "scan_relevance": 0.14333333333333334,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.1
+  },
+  {
+    "path": "/home/a043064/pypackages",
+    "label": 0,
+    "scan_relevance": 0.0033333333333333335,
+    "children_worth_listing": 0.11,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/d240034/local",
+    "label": 0,
+    "scan_relevance": 0.0,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/a043064/odat-se/sx/stdout",
+    "label": 0,
+    "scan_relevance": 0.0033333333333333335,
+    "children_worth_listing": 0.08,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/a048717/tool/wrk_kam/iktool/getcpu",
+    "label": 0,
+    "scan_relevance": 0.03333333333333333,
+    "children_worth_listing": 0.09,
+    "old_composite": 0.1
+  },
+  {
+    "path": "/home/c240055/local",
+    "label": 0,
+    "scan_relevance": 0.04,
+    "children_worth_listing": 0.49,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l3/GS/lib",
+    "label": 0,
+    "scan_relevance": 0.06666666666666667,
+    "children_worth_listing": 0.11,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l4_dbg/GS/lib",
+    "label": 0,
+    "scan_relevance": 0.05666666666666667,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.1
+  },
+  {
+    "path": "/analysis/src/ECCD/v9l4.beta2/GS/lib",
+    "label": 0,
+    "scan_relevance": 0.03666666666666667,
+    "children_worth_listing": 0.12,
+    "old_composite": 0.1
+  },
+  {
+    "path": "/home/a048717/src/topics_release_init/topics/exec",
+    "label": 0,
+    "scan_relevance": 0.02,
+    "children_worth_listing": 0.24,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/a048717/src/topics_release/topics/exec",
+    "label": 0,
+    "scan_relevance": 0.006666666666666667,
+    "children_worth_listing": 0.16,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/a048717/src/topics_release/topics/Mod1",
+    "label": 0,
+    "scan_relevance": 0.17333333333333334,
+    "children_worth_listing": 0.27,
+    "old_composite": 0.4
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj",
+    "label": 0,
+    "scan_relevance": 0.06999999999999999,
+    "children_worth_listing": 0.13,
+    "old_composite": 0.0
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1194_imal/topics/topics/trmain/obj1",
+    "label": 0,
+    "scan_relevance": 0.06999999999999999,
+    "children_worth_listing": 0.11,
+    "old_composite": 0.05
+  },
+  {
+    "path": "/home/a048717/src/pjtopics_1133_dt/topics/Mod",
+    "label": 0,
+    "scan_relevance": 0.22333333333333336,
+    "children_worth_listing": 0.22,
+    "old_composite": 0.3
+  }
+]
