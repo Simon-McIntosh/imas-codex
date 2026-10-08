@@ -478,6 +478,12 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
         source_statuses=["ingested", "failed"],
         clear_fields=["ingested_at", "error", "skip_reason"],
     ),
+    "retry-failed": ResetSpec(
+        label="CodeFile",
+        target_status="scored",
+        source_statuses=["failed"],
+        clear_fields=["ingested_at", "error", "skip_reason"],
+    ),
     "content": ResetSpec(
         label="CodeFile",
         target_status="triaged",
