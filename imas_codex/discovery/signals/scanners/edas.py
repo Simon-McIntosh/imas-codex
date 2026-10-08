@@ -122,6 +122,23 @@ class EDASScanner:
                     "ref_shot": shot_str,
                     "api_path": api_path,
                     "lib_path": lib_path,
+                    "databases": config.get("databases", ["EDDB"]),
+                    **{
+                        key: config[key]
+                        for key in (
+                            "uddb_api_path",
+                            "uddb_lib_path",
+                            "pmdb_api_path",
+                            "pmdb_lib_path",
+                            "lcdb_api_path",
+                            "lcdb_root",
+                            "mbdb_api_path",
+                            "mbdb_lib_path",
+                            "mbdb_root",
+                            "eqdb_root",
+                        )
+                        if key in config
+                    },
                 },
                 ssh_host=ssh_host,
                 timeout=180,
@@ -173,6 +190,80 @@ class EDASScanner:
             dname = raw["data_name"]
             units = raw.get("units", "")
             description = raw.get("description", "")
+
+            if raw.get("database") == "UDDB":
+                signals.append(
+                    FacilitySignal(
+                        id=f"{facility}:general/uddb_{dname.lower()}",
+                        facility_id=facility,
+                        status=FacilitySignalStatus.discovered,
+                        physics_domain="general",
+                        name=f"UDDB/{dname}",
+                        accessor=f"uddbreadConvert('{shot_str}', '{dname}', t1, t2)",
+                        data_source_name="UDDB",
+                        data_source_path=f"UDDB/{dname}",
+                        description=description,
+                        data_class=SignalDataClass.time_series,
+                        shot_range=raw.get("shot_range") or None,
+                        pid=dname,
+                        aliases=[raw["alias"]] if raw.get("alias") else None,
+                        discovery_source="edas",
+                        example_shot=ref_shot,
+                    )
+                )
+                continue
+
+            if raw.get("database") == "LCDB":
+                owner = raw["category"].split("/", 2)[1]
+                source_category = raw["file_category"]
+                shot = int(raw["shot"])
+                root = raw["root"]
+                signals.append(
+                    FacilitySignal(
+                        id=f"{facility}:general/lcdb_{owner}_{source_category}_{dname}".lower(),
+                        facility_id=facility,
+                        status=FacilitySignalStatus.discovered,
+                        physics_domain="general",
+                        name=f"LCDB/{owner}/{source_category}/{dname}",
+                        accessor=f"lcdb_value({shot}, {source_category!r}, [{dname!r}], root={root!r})",
+                        data_source_name="LCDB",
+                        data_source_path=f"{owner}/{source_category}/{dname}",
+                        description=f"LCDB {source_category} {dname} from {owner}",
+                        discovery_source="edas",
+                        example_shot=shot,
+                    )
+                )
+                continue
+
+            if raw.get("database") == "MBDB":
+                _, owner, case, source_category = raw["category"].split("/", 3)
+                kind = raw.get("data_kind")
+                signals.append(
+                    FacilitySignal(
+                        id=f"{facility}:general/mbdb_{owner}_{case}_{source_category}_{dname}".lower(),
+                        facility_id=facility,
+                        status=FacilitySignalStatus.discovered,
+                        physics_domain="general",
+                        name=f"MBDB/{owner}/{case}/{source_category}/{dname}",
+                        accessor=(
+                            f"mbdbRPoint({dname!r})"
+                            if kind == "P"
+                            else f"mbdbRTimes({dname!r}, t1, t2)"
+                        ),
+                        data_source_name="MBDB",
+                        data_source_path=f"{owner}/{case}/{source_category}/{dname}",
+                        description=f"MBDB {source_category} {dname} from {owner} case {case}",
+                        data_class=(
+                            SignalDataClass.one_point
+                            if kind == "P"
+                            else SignalDataClass.time_series
+                            if kind == "T"
+                            else None
+                        ),
+                        discovery_source="edas",
+                    )
+                )
+                continue
 
             # A PID-keyed one-point row is its own signal group: EDDB addresses
             # it by the nine-character PID No. rather than by the catalogue
@@ -250,11 +341,14 @@ class EDASScanner:
                 "reference_shot": shot_str,
                 "categories": data.get("categories", []),
                 "ncats": data.get("ncats", 0),
+                "database_attempts": data.get("attempts", []),
+                "category_counts": data.get("category_counts", {}),
             },
             stats={
                 "signals_discovered": len(signals),
                 "categories_found": data.get("ncats", 0),
                 "reference_shot": shot_str,
+                "database_attempts": data.get("attempts", []),
             },
         )
 
@@ -302,6 +396,34 @@ class EDASScanner:
         for s in signals:
             source = s.data_source_path or s.name or ""
             parts = source.split("/")
+            if s.data_source_name == "MBDB" and len(parts) == 4:
+                batch.append(
+                    {
+                        "id": s.id,
+                        "database": "MBDB",
+                        "owner": parts[0],
+                        "case": int(parts[1]),
+                        "category": parts[2],
+                        "data_name": parts[3],
+                        "data_class": getattr(s.data_class, "value", s.data_class),
+                    }
+                )
+                continue
+            if s.data_source_name == "LCDB" and len(parts) == 3:
+                batch.append(
+                    {
+                        "id": s.id,
+                        "database": "LCDB",
+                        "owner": parts[0],
+                        "category": parts[1],
+                        "data_name": parts[2],
+                        "shot": s.example_shot,
+                    }
+                )
+                continue
+            if s.data_source_name == "UDDB" and len(parts) == 2:
+                batch.append({"id": s.id, "database": "UDDB", "pid": parts[1]})
+                continue
             if len(parts) == 2:
                 data_class = EDDB_LETTER_BY_DATA_CLASS.get(
                     getattr(s.data_class, "value", s.data_class), ""
@@ -325,6 +447,13 @@ class EDASScanner:
                     "ref_shot": shot_str,
                     "api_path": api_path,
                     "lib_path": lib_path,
+                    "uddb_api_path": config.get("uddb_api_path"),
+                    "uddb_lib_path": config.get("uddb_lib_path"),
+                    "lcdb_api_path": config.get("lcdb_api_path"),
+                    "lcdb_root": config.get("lcdb_root"),
+                    "mbdb_api_path": config.get("mbdb_api_path"),
+                    "mbdb_lib_path": config.get("mbdb_lib_path"),
+                    "mbdb_root": config.get("mbdb_root"),
                 },
                 ssh_host=ssh_host,
                 timeout=180,

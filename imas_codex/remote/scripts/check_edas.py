@@ -122,7 +122,93 @@ def main():
     results = []
     for sig in signals:
         try:
-            # A check reads data, not the catalogue: a time series through
+            if sig.get("database") == "MBDB":
+                sys.path.insert(0, config.get("mbdb_api_path") or "/analysis/src/mbdb")
+                from mbdbWrapper import mbdbWrapper
+
+                db = mbdbWrapper(
+                    config.get("mbdb_lib_path") or "/analysis/lib/libmbdb.so"
+                )
+                base = config.get("mbdb_root") or "/analysis_DB/MBDB"
+                db.mbdbSetDirectory("mbdb")
+                opened, response = db.mbdbROpen(
+                    mbdbroot=f"{base}/{sig['owner']}",
+                    caseno=int(sig["case"]),
+                    category=sig["category"],
+                )
+                if not opened:
+                    results.append(
+                        {
+                            "id": sig["id"],
+                            "success": False,
+                            "error": f"MBDB open failed (irtn={response.get('irtn')})",
+                        }
+                    )
+                    continue
+                try:
+                    if sig.get("data_class") == "one_point":
+                        ok, _value = db.mbdbRPoint(sig["data_name"])
+                    else:
+                        ok, _value = db.mbdbRTimes(sig["data_name"], "0", "0.01")
+                finally:
+                    db.mbdbRClose()
+                results.append(
+                    {
+                        "id": sig["id"],
+                        "success": bool(ok),
+                        "dtype": "analysis" if ok else None,
+                        "error": None if ok else "MBDB value unavailable",
+                    }
+                )
+                continue
+            if sig.get("database") == "LCDB":
+                sys.path.insert(
+                    0, config.get("lcdb_api_path") or "/analysis/src/lcdbWrapper"
+                )
+                from lcdbWrapper import LcdbWrapper
+
+                root = config.get("lcdb_root") or "/analysis_DB/EDASDB"
+                ok, _values = LcdbWrapper().lcdb_value(
+                    int(sig["shot"]),
+                    sig["category"],
+                    [sig["data_name"]],
+                    root=f"{root}/{sig['owner']}",
+                )
+                results.append(
+                    {
+                        "id": sig["id"],
+                        "success": bool(ok),
+                        "dtype": "analysis" if ok else None,
+                        "error": None if ok else "LCDB value unavailable",
+                    }
+                )
+                continue
+            if sig.get("database") == "UDDB":
+                sys.path.insert(0, config.get("uddb_api_path") or "/analysis/src/uddb")
+                from uddb_pwrapper import uddbWrapper
+
+                raw = uddbWrapper(
+                    config.get("uddb_lib_path") or "/analysis/lib/libuddb.so"
+                )
+                opened = raw.uddbOpen()
+                if opened:
+                    ok, rtn = raw.uddbreadTable(pid=sig["pid"])
+                    raw.uddbClose()
+                else:
+                    ok, rtn = False, {}
+                registered = ok and sig["pid"] in (rtn.get("data") or [])
+                results.append(
+                    {
+                        "id": sig["id"],
+                        "success": bool(registered),
+                        "dtype": "raw_catalogue" if registered else None,
+                        "error": None
+                        if registered
+                        else f"UDDB PID absent from catalogue (irc={rtn.get('irc')})",
+                    }
+                )
+                continue
+            # An EDDB check reads data, not the catalogue: a time series through
             # eddbreadTime over a short window (string bounds), a one-point
             # datum through eddbreadOne. A catalogue hit says a name is
             # registered, not that the shot carries it.

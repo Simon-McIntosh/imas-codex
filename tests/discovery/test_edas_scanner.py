@@ -10,10 +10,22 @@ from __future__ import annotations
 
 import json
 import re
+import sys
+from io import StringIO
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph.models import FacilitySignal, SignalDataClass
+from imas_codex.remote.scripts.check_edas import main as check_main
+from imas_codex.remote.scripts.enumerate_edas import (
+    attempt_database,
+    enumerate_lcdb,
+    enumerate_mbdb,
+    enumerate_uddb,
+    main as enumerate_main,
+)
 
 # Two catalogue rows covering the two classes the scanner branches on:
 # a time series with a shot range and no PID, and a one-point row with a PID.
@@ -49,6 +61,328 @@ CONFIG = {
     "api_path": "/opt/edas/api",
     "lib_path": "/opt/edas/libeddb.so",
 }
+
+
+class TestConfiguredDatabases:
+    def test_raw_check_uses_global_catalogue_and_rejects_unknown_pid(
+        self, monkeypatch, capsys
+    ):
+        class ProcessedCatalogue:
+            def __init__(self, path):
+                pass
+
+            def eddbOpen(self):
+                return True
+
+            def eddbClose(self):
+                return True
+
+        class RawCatalogue:
+            def __init__(self, path):
+                pass
+
+            def uddbOpen(self):
+                return True
+
+            def uddbreadTable(self, pid):
+                if pid == "2111UA001":
+                    return True, {"data": [pid], "count": 1, "irc": 0}
+                return False, {"data": [], "count": 0, "irc": 1111}
+
+            def uddbClose(self):
+                return True
+
+        monkeypatch.setitem(
+            sys.modules,
+            "eddb_pwrapper",
+            SimpleNamespace(eddbWrapper=ProcessedCatalogue),
+        )
+        monkeypatch.setitem(
+            sys.modules, "uddb_pwrapper", SimpleNamespace(uddbWrapper=RawCatalogue)
+        )
+        monkeypatch.setattr(
+            sys,
+            "stdin",
+            StringIO(
+                json.dumps(
+                    {
+                        "ref_shot": "E101173",
+                        "api_path": "/analysis/src/eddb",
+                        "lib_path": "/analysis/lib/libeddb.so",
+                        "signals": [
+                            {"id": "known", "database": "UDDB", "pid": "2111UA001"},
+                            {"id": "unknown", "database": "UDDB", "pid": "NO_SUCH_PID"},
+                        ],
+                    }
+                )
+            ),
+        )
+        check_main()
+        results = json.loads(capsys.readouterr().out)["results"]
+        assert [result["success"] for result in results] == [True, False]
+        assert results[0]["dtype"] == "raw_catalogue"
+        assert "absent from catalogue" in results[1]["error"]
+
+    def test_mbdb_opened_case_exposes_native_field_list(self, monkeypatch):
+        class CaseCatalogue:
+            def __init__(self, path):
+                self.mbdb = object()
+
+            def mbdbSetDirectory(self, name):
+                assert name == "mbdb"
+                return True, {"irtn": 0}
+
+            def mbdbROpen(self, **kwargs):
+                assert kwargs["caseno"] == 12345
+                assert kwargs["category"] == "data.t001"
+                return True, {"irtn": 0}
+
+            def mbdbRClose(self):
+                return True, {"irtn": 0}
+
+        monkeypatch.setitem(
+            sys.modules, "mbdbWrapper", SimpleNamespace(mbdbWrapper=CaseCatalogue)
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas.Path.glob",
+            lambda self, pattern: [
+                Path("/analysis_DB/MBDB/owner/01/0123/012345/mbdb/data.t001.ldb")
+            ],
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas._mbdb_data_names",
+            lambda lib: ([("PSI", "T")], 0),
+        )
+        rows, attempt = enumerate_mbdb({})
+        assert attempt["return_code"] == 0
+        assert attempt["count"] == 1
+        assert rows[0]["category"] == "MBDB/owner/12345/data.t001"
+        assert rows[0]["data_name"] == "PSI"
+
+    async def test_mbdb_signal_keeps_case_and_field(self):
+        fixture = {
+            "signals": [
+                {
+                    "database": "MBDB",
+                    "category": "MBDB/owner/12345/data.t001",
+                    "file_category": "data.t001",
+                    "data_name": "PSI",
+                    "data_kind": "T",
+                    "case": 12345,
+                    "root": "/analysis_DB/MBDB/owner",
+                }
+            ],
+            "categories": [],
+            "ncats": 0,
+        }
+        remote = AsyncMock(return_value=json.dumps(fixture))
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", CONFIG)
+        signal = result.signals[0]
+        assert signal.id == "jt-60sa:general/mbdb_owner_12345_data.t001_psi"
+        assert signal.data_source_name == "MBDB"
+        assert signal.data_source_path == "owner/12345/data.t001/PSI"
+        assert signal.data_class == SignalDataClass.time_series
+        check_remote = AsyncMock(
+            return_value=json.dumps({"results": [{"id": signal.id, "success": True}]})
+        )
+        with patch("imas_codex.remote.executor.async_run_python_script", check_remote):
+            checked = await EDASScanner().check(
+                "jt-60sa", "nakasvr26", [signal], CONFIG
+            )
+        sent = check_remote.call_args.args[1]["signals"][0]
+        assert (sent["database"], sent["case"], sent["category"]) == (
+            "MBDB",
+            12345,
+            "data.t001",
+        )
+        assert checked[0]["valid"] is True
+
+    def test_lcdb_wrapper_catalogue_is_enumerated(self, monkeypatch):
+        class AnalysisCatalogue:
+            def lcdb_shot(self, **kwargs):
+                assert kwargs["root"] == "/analysis_DB/EDASDB/owner"
+                return True, [63632]
+
+            def lcdb_dname(self, shot, category, **kwargs):
+                assert (shot, category) == (63632, "ane.s001")
+                return True, ["DNAME", "NFIT"]
+
+        monkeypatch.setitem(
+            sys.modules,
+            "lcdbWrapper",
+            SimpleNamespace(LcdbWrapper=AnalysisCatalogue, lib=object()),
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas.os.scandir",
+            lambda path: [SimpleNamespace(path=f"{path}/owner", is_dir=lambda: True)],
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas._lcdb_categories",
+            lambda lib, root, shot: (["ane.s001"], 0),
+        )
+        rows, attempt = enumerate_lcdb({"lcdb_root": "/analysis_DB/EDASDB"})
+        assert attempt["return_code"] == 0
+        assert attempt["count"] == 2
+        assert {row["data_name"] for row in rows} == {"DNAME", "NFIT"}
+        assert all(row["shot"] == 63632 for row in rows)
+
+    async def test_lcdb_signal_keeps_owner_category_and_shot(self):
+        fixture = {
+            "signals": [
+                {
+                    "database": "LCDB",
+                    "category": "LCDB/owner/ane.s001",
+                    "file_category": "ane.s001",
+                    "data_name": "NFIT",
+                    "root": "/analysis_DB/EDASDB/owner",
+                    "shot": 63632,
+                }
+            ],
+            "categories": [],
+            "ncats": 0,
+        }
+        remote = AsyncMock(return_value=json.dumps(fixture))
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", CONFIG)
+        signal = result.signals[0]
+        assert signal.id == "jt-60sa:general/lcdb_owner_ane.s001_nfit"
+        assert signal.data_source_name == "LCDB"
+        assert signal.data_source_path == "owner/ane.s001/NFIT"
+        assert signal.example_shot == 63632
+        assert "lcdb_value(63632, 'ane.s001', ['NFIT']" in signal.accessor
+
+    def test_eddb_only_failure_is_reported_as_error(self, monkeypatch, capsys):
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas.enumerate_eddb",
+            lambda *args: (
+                [],
+                [],
+                [{"database": "EDDB", "call": "eddbOpen()", "return_code": 1}],
+            ),
+        )
+        monkeypatch.setattr(
+            sys,
+            "stdin",
+            StringIO(json.dumps({"ref_shot": "E101173", **CONFIG})),
+        )
+        enumerate_main()
+        assert "error" in json.loads(capsys.readouterr().out)
+
+    def test_other_database_attempts_keep_wrapper_return_codes(self, monkeypatch):
+        class PlantCatalogue:
+            def __init__(self, path):
+                assert path.endswith("libpmdb.so")
+
+            def plantdread(self, **kwargs):
+                assert kwargs["cat"] == "*"
+                return False, {"irc": 301}
+
+            def planthread(self, **kwargs):
+                assert kwargs["dname"] == "*"
+                return False, {"irc": 301}
+
+        monkeypatch.setitem(
+            sys.modules, "pmdb_wrapper", SimpleNamespace(pmdbWrapper=PlantCatalogue)
+        )
+        plant_attempt = attempt_database("PMDB", "E101173", {})
+        assert plant_attempt["return_code"] == 301
+        assert plant_attempt["header_return_code"] == 301
+        with patch(
+            "imas_codex.remote.scripts.enumerate_edas.os.scandir",
+            side_effect=FileNotFoundError(2, "No such file or directory"),
+        ):
+            assert attempt_database("EQDB", "E101173", {})["return_code"] == 2
+
+    def test_uddb_table_rows_are_emitted(self, monkeypatch):
+        class RawCatalogue:
+            def __init__(self, path):
+                assert path == "/analysis/lib/libuddb.so"
+
+            def uddbOpen(self):
+                return True
+
+            def uddbreadTable(self):
+                return True, {
+                    "data": ["2111UA001"],
+                    "aliaslist": ["raw channel"],
+                    "shotlist": ["E080000-"],
+                    "irc": 0,
+                }
+
+            def uddbClose(self):
+                return True
+
+        monkeypatch.setitem(
+            sys.modules, "uddb_pwrapper", SimpleNamespace(uddbWrapper=RawCatalogue)
+        )
+        rows, attempt = enumerate_uddb({})
+        assert attempt["return_code"] == 0
+        assert attempt["count"] == 1
+        assert rows == [
+            {
+                "database": "UDDB",
+                "category": "UDDB",
+                "data_name": "2111UA001",
+                "alias": "raw channel",
+                "shot_range": "E080000-",
+            }
+        ]
+
+    async def test_uddb_catalogue_produces_distinct_raw_signal(self):
+        config = {**CONFIG, "databases": ["EDDB", "UDDB"]}
+        received = {}
+
+        async def remote_run(script, payload, **kwargs):
+            received.update(payload)
+            return json.dumps(
+                {
+                    **ENUMERATE_FIXTURE,
+                    "signals": [
+                        *ENUMERATE_FIXTURE["signals"],
+                        {
+                            "database": "UDDB",
+                            "category": "UDDB",
+                            "data_name": "2111UA001",
+                            "alias": "raw channel",
+                            "shot_range": "E080000-",
+                        },
+                    ],
+                }
+            )
+
+        with patch("imas_codex.remote.executor.async_run_python_script", remote_run):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
+
+        assert received["databases"] == ["EDDB", "UDDB"]
+        assert {s.id for s in result.signals} == {
+            "jt-60sa:general/mag_coilcur",
+            "jt-60sa:general/mdac_status",
+            "jt-60sa:general/uddb_2111ua001",
+        }
+        raw = next(s for s in result.signals if s.data_source_name == "UDDB")
+        assert raw.accessor == "uddbreadConvert('E101173', '2111UA001', t1, t2)"
+
+    async def test_raw_signal_check_uses_uddb_pid(self):
+        signal = FacilitySignal(
+            id="jt-60sa:general/uddb_2111ua001",
+            facility_id="jt-60sa",
+            name="UDDB/2111UA001",
+            accessor="uddbreadConvert('E101173', '2111UA001', t1, t2)",
+            data_source_name="UDDB",
+            data_source_path="UDDB/2111UA001",
+        )
+        remote = AsyncMock(
+            return_value=json.dumps({"results": [{"id": signal.id, "success": True}]})
+        )
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            results = await EDASScanner().check(
+                "jt-60sa", "nakasvr26", [signal], CONFIG
+            )
+        assert remote.call_args.args[1]["signals"] == [
+            {"id": signal.id, "database": "UDDB", "pid": "2111UA001"}
+        ]
+        assert results[0]["valid"] is True
 
 
 class TestEdasScanTypedSlots:
@@ -229,6 +563,8 @@ class TestEdasPidKeyedGroup:
         )
         assert empty.pid is None
         assert empty.data_class == SignalDataClass.one_point
+
+
 class TestEdasCheckReadsCategoryFromSourcePath:
     """check() keys the catalogue off data_source_path, not a rewritten name."""
 
