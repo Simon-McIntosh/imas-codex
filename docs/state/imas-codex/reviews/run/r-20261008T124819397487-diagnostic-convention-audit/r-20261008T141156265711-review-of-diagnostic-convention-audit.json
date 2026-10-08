@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest's baseline_suite and after_suite are both empty and the run directory holds no baseline or after suite log, so no added-failure count could be derived for this run",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T14:20:14.541Z",
+  "dispatched_at": "2026-10-08T14:12:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-diagnostic-conventions.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the artifact is a schema-versioned JSON (schema jt60sa-diagnostic-conventions/1) that records per-channel sign, orientation, 2\u03c0 factor and confidence, but no committed test reads it back, so its shape is uncontracted; a solitary committed reader (node 2's loader test) would make a dropped channel or a renamed key visible."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T124819397487-diagnostic-convention-audit/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are both empty, so the harness derives added_failure_count as unmeasured for this run rather than a number; the node is evidence-only and names no base gate log."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/diagnostic-convention-audit.html",
+      "line": "161",
+      "severity": "follow-on",
+      "text": "follow-on: the profile-coordinate section is the only family without a numeric comparison \u2014 its single LCDB record reports equilibrium shot 75000 against profile shot 101173 and TOPICS_RHOTYPE=6 is absent from the selector map, so both the coordinate sign and the TOPICS axis are recorded low-confidence and unverified; the plan asks each profile coordinate convention be checked, not only enumerated."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found; the artifact is a per-channel evidence fragment and JSON, not imported code, so there is no in-tree caller to diverge.",
+    "diff": "read commit by commit against base 9db53ba0f; the seven commits build the audit incrementally \u2014 measurements, pickup orientation, sensor audit, acquisition-source channels, both-source comparison, correction against the COCOS 17 bundle rules, and the head commit's reconciliation of the absolute reference loop and differential comparison; the change is evidence documentation only, with no runtime code and no committed test.",
+    "done_when": "the run's committed-head gate at 4ca4f6506 asserts 132 channels, 54 flux mapped disagreements, 34 pickup mapped agreements and 26 unmapped entries; I reproduced all four counts independently (review-repro-gate.log EXIT=0) and matched the HTML data-row count (137 <tr> minus 5 thead = 132).",
+    "goal": "the node's goal is the per-diagnostic convention audit of plan \u00a756 (lead comment c-20261008-s56-selene-cocos2): using SELENE COCOS 2 as reference, compare each magnetic diagnostic family's measured values at reference shots with the SELENE reconstruction at the sensor positions and record sign, orientation and 2\u03c0 factor with evidence and confidence, for flux loops, pickup coils, the Ip Rogowski coils, the diamagnetic loop and the toroidal-field measurement, plus each profile coordinate convention; docs/evidence/fragments/jt60sa-discovery-completion/diagnostic-convention-audit.html covers all five magnetic families and the profile coordinates across 132 channel entries.",
+    "manifest": "read; status complete, commits [7ffd1a5a2, 8a12305d0, 705ab2a10, ead7c9ea, a12126ba5, fbe4cbd31, 4ca4f650]; baseline_suite and after_suite are both empty at manifest.md:21-22, so no added-failure count is derivable for this run.",
+    "write_paths": "the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/ and docs/figures/jt60sa-discovery-completion/; git diff --stat 9db53ba0..4ca4f650 touches only diagnostic-convention-audit.html and jt60sa-diagnostic-conventions.json, both inside the declared scope, and no figure was produced."
+  },
+  "justifications": {
+    "durability": "the artifact is a schema-versioned JSON (schema jt60sa-diagnostic-conventions/1) plus an HTML fragment, but no committed test or loader reads either; the only assertions are the run's own one-shot inline gate recorded at manifest.md:15, so a dropped channel, a changed factor or a schema change would redden nothing until node 2's loader test exists.",
+    "evidence": "the committed-head gate reproduces: my independent recount of the JSON gives 132 channels, 54 flux mapped disagree, 34 pickup mapped agree, 26 unmapped, and the HTML carries exactly 132 data rows (review-repro-gate.log EXIT=0); the artifact cites two shots with SELENE receipts and the versioned imas-alambic-jt60sa v0.2.0-rc3 bundle by hashes, but several values are legitimately left undetermined (diamagnetic geometry, extra DD indices, profile coordinate sign) and the toroidal-field amplitude agreement is specific to the E101011 example, so the evidence covers the audited quantities without closing every value.",
+    "fit": "the seven commits use conventional docs(magnetics)/docs subjects with bodies that state the mechanism and carry no plan, section or ticket label, matching the evidence-fragment idiom at docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-cocos-study.html.",
+    "goal_fidelity": "all five magnetic families named in the plan (flux loops, pickup coils, Ip Rogowski, diamagnetic loop, toroidal-field measurement) and the profile coordinates appear in jt60sa-diagnostic-conventions.json:families and the html sections at lines 6, 80, 131, 147, 155 and 161; every entry carries a confidence and an evidence field.",
+    "reuse": "the audit reads flux-loop and pickup identities, DD geometry and the COCOS 17 rules from the read-only imas-alambic-jt60sa bundle rather than re-deriving them, per plan comment c-20261008-s56-ambix-authority, and adds no loader or mapping capability of its own; its own SELENE snapshot measurements fill only the Rogowski, diamagnetic, toroidal and profile gaps the bundle leaves.",
+    "scope_discipline": "git diff --stat 9db53ba0..4ca4f650 shows exactly the two declared evidence files, 7764 insertions, nothing outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is the per-diagnostic convention audit of plan \u00a756 (lead comment c-20261008-s56-selene-cocos2): using SELENE COCOS 2 as reference, compare each magnetic diagnostic family's measured values at reference shots with the SELENE reconstruction at the sensor positions and record sign, orientation and 2\u03c0 factor with evidence and confidence, for flux loops, pickup coils, the Ip Rogowski coils, the diamagnetic loop and the toroidal-field measurement, plus each profile coordinate convention; docs/evidence/fragments/jt60sa-discovery-completion/diagnostic-convention-audit.html covers all five magnetic families and the profile coordinates across 132 channel entries.\nVERDICT done_when: the run's committed-head gate at 4ca4f6506 asserts 132 channels, 54 flux mapped disagreements, 34 pickup mapped agreements and 26 unmapped entries; I reproduced all four counts independently (review-repro-gate.log EXIT=0) and matched the HTML data-row count (137 <tr> minus 5 thead = 132).\nVERDICT write_paths: the manifest declares docs/evidence/fragments/jt60sa-discovery-completion/ and docs/figures/jt60sa-discovery-completion/; git diff --stat 9db53ba0..4ca4f650 touches only diagnostic-convention-audit.html and jt60sa-diagnostic-conventions.json, both inside the declared scope, and no figure was produced.\nVERDICT manifest: read; status complete, commits [7ffd1a5a2, 8a12305d0, 705ab2a10, ead7c9ea, a12126ba5, fbe4cbd31, 4ca4f650]; baseline_suite and after_suite are both empty at manifest.md:21-22, so no added-failure count is derivable for this run.\nVERDICT diff: read commit by commit against base 9db53ba0f; the seven commits build the audit incrementally \u2014 measurements, pickup orientation, sensor audit, acquisition-source channels, both-source comparison, correction against the COCOS 17 bundle rules, and the head commit's reconciliation of the absolute reference loop and differential comparison; the change is evidence documentation only, with no runtime code and no committed test.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all five magnetic families named in the plan (flux loops, pickup coils, Ip Rogowski, diamagnetic loop, toroidal-field measurement) and the profile coordinates appear in jt60sa-diagnostic-conventions.json:families and the html sections at lines 6, 80, 131, 147, 155 and 161; every entry carries a confidence and an evidence field.\nSCORE evidence: 17\nJUSTIFICATION evidence: the committed-head gate reproduces: my independent recount of the JSON gives 132 channels, 54 flux mapped disagree, 34 pickup mapped agree, 26 unmapped, and the HTML carries exactly 132 data rows (review-repro-gate.log EXIT=0); the artifact cites two shots with SELENE receipts and the versioned imas-alambic-jt60sa v0.2.0-rc3 bundle by hashes, but several values are legitimately left undetermined (diamagnetic geometry, extra DD indices, profile coordinate sign) and the toroidal-field amplitude agreement is specific to the E101011 example, so the evidence covers the audited quantities without closing every value.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 9db53ba0..4ca4f650 shows exactly the two declared evidence files, 7764 insertions, nothing outside the fence.\nSCORE durability: 8\nJUSTIFICATION durability: the artifact is a schema-versioned JSON (schema jt60sa-diagnostic-conventions/1) plus an HTML fragment, but no committed test or loader reads either; the only assertions are the run's own one-shot inline gate recorded at manifest.md:15, so a dropped channel, a changed factor or a schema change would redden nothing until node 2's loader test exists.\nSCORE fit: 20\nJUSTIFICATION fit: the seven commits use conventional docs(magnetics)/docs subjects with bodies that state the mechanism and carry no plan, section or ticket label, matching the evidence-fragment idiom at docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-cocos-study.html.\nSCORE reuse: 19\nJUSTIFICATION reuse: the audit reads flux-loop and pickup identities, DD geometry and the COCOS 17 rules from the read-only imas-alambic-jt60sa bundle rather than re-deriving them, per plan comment c-20261008-s56-ambix-authority, and adds no loader or mapping capability of its own; its own SELENE snapshot measurements fill only the Rogowski, diamagnetic, toroidal and profile gaps the bundle leaves.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-diagnostic-conventions.json:1 follow-on: the artifact is a schema-versioned JSON (schema jt60sa-diagnostic-conventions/1) that records per-channel sign, orientation, 2\u03c0 factor and confidence, but no committed test reads it back, so its shape is uncontracted; a solitary committed reader (node 2's loader test) would make a dropped channel or a renamed key visible.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T124819397487-diagnostic-convention-audit/manifest.md:21 follow-on: baseline_suite and after_suite are both empty, so the harness derives added_failure_count as unmeasured for this run rather than a number; the node is evidence-only and names no base gate log.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/diagnostic-convention-audit.html:161 follow-on: the profile-coordinate section is the only family without a numeric comparison \u2014 its single LCDB record reports equilibrium shot 75000 against profile shot 101173 and TOPICS_RHOTYPE=6 is absent from the selector map, so both the coordinate sign and the TOPICS axis are recorded low-confidence and unverified; the plan asks each profile coordinate convention be checked, not only enumerated.",
+  "review_run_id": "r-20261008T141156265711-review-of-diagnostic-convention-audit",
+  "reviewed_base_sha": "9db53ba0fb9bcf8be07f0e04ea839cbaef3b9923",
+  "reviewed_head_sha": "4ca4f6506348637009c56675d49510242db88bb3",
+  "reviewed_run_id": "r-20261008T124819397487-diagnostic-convention-audit",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T14:24:40.372233+00:00",
+  "total": 102,
+  "verdict": "SOUND WITH FINDINGS"
+}
