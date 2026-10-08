@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/discovery/test_reset.py::TestResetSpec::test_get_valid_targets_code"
+  ],
+  "added_failures_note": "measured by running the same focused selection at the reviewed base and head in scratch trees: tests/discovery/test_reset.py at 4ac20c26 gives 31 passed EXIT=0, at 21faa85ad gives 1 failed/30 passed EXIT=1; the single added failure is the pre-existing target-list test, which the reviewed run also recorded in its own precommit-tests.log",
+  "after_suite": null,
+  "backend": "local",
+  "baseline_suite": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/discover/code.py:148"
+  ],
+  "completed_at": "2026-10-08T13:40:41.985Z",
+  "dispatched_at": "2026-10-08T13:27:12Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_reset.py",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "adding the retry-failed key to CODE_RESET_SPECS changes get_valid_targets(\"code\"), so the pre-existing test that asserts the fixed target list now fails; the reviewed head reproduces it (1 failed/30 passed) while the base passes (31 passed), and both the reviewed run's precommit-tests.log and the manifest follow_ons name it. The file is outside the node's declared write scope and sibling run r-20261008T132726299004-reset-target-list-test is repairing it, so this is an added failure the node correctly reported rather than fixed."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T130243220026-code-retry-failed-reset/manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "the two-worker code pass logged 62 ingested events (10+10+10+10+10+10+2) for 46 unique target paths after duplicate same-batch claims, which the graph check then collapses to 46 unique ingested paths; the duplicate work is redundant LLM/embedding spend and risks double CodeChunks, and the node declares it as a follow-on rather than owning the claiming fix."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the target is consumed at imas_codex/cli/discover/code.py:148 via CODE_RESET_SPECS[reset_to] and surfaced through click.Choice(get_valid_targets(\"code\")) in imas_codex/cli/discover/common.py, so --reset-to retry-failed reaches the spec without further wiring.",
+    "diff": "two commits against 4ac20c26 add a 6-line retry-failed ResetSpec (target scored, source failed only, clearing ingested_at/error/skip_reason) and one 44-line test; no other product code changes.",
+    "done_when": "the plan comment's done-when is met: a test shows failed moved and ingested untouched, and all 46 JT-60SA files were reset to scored and re-ingested with errors cleared, verified against the graph.",
+    "goal": "the node adds a code reset target taking only failed files back to scored through the shared reset specs, exposed as --reset-to retry-failed, and reprocesses the 46 /home CodeFiles left at failed by a transient SSH drop.",
+    "manifest": "read; it records two commits (054fc64f4, 21faa85ad), the focused/operational/graph logs, a mutation negative control, and empty baseline_suite/after_suite.",
+    "write_paths": "the diff touches exactly two of the declared paths, imas_codex/discovery/base/reset.py and tests/discovery/test_code_retry_failed_reset.py, and nothing else; the evidence-fragment path declared in orientation is not produced by these commits."
+  },
+  "justifications": {
+    "durability": "the new target is guarded by a test that fails under a declared mutation (adding ingested to the source statuses makes the count 2 instead of 1), so the failed-only behaviour cannot silently regress inside this node; the repository suite is nonetheless left red because the added key breaks an out-of-scope test that the node cannot touch.",
+    "evidence": "baseline/after focused logs, the operational reset and ingest receipts, and a graph check that proves 46 unique targets ingested with empty errors all trace the claim, but the pre-registered baseline test asserting get_valid_targets was dropped in 21faa85ad so the base and after arms do not run the same test, and the initial 5,002-ingested figure is asserted in evidence_inputs without a log behind it.",
+    "fit": "the spec key follows the existing CODE_RESET_SPECS vocabulary, the commits carry conventional subjects with bodies, the test is named by mechanism, and no plan, sprint or ticket identifier appears in the code or messages.",
+    "goal_fidelity": "the target, the CLI exposure, the failed-only filter and the 46-file reprocess are all present and verified; the only unfulfilled clause is the plan's optional error-text filter, omitted legitimately since the plan marks it optional.",
+    "reuse": "the change reuses reset_to_status and the shared ResetSpec mechanism rather than adding a bespoke path, and the new spec restates the field set of the neighbouring scored spec as every spec in the block does.",
+    "scope_discipline": "the diff stays inside the declared write scope; the one broken test and the duplicate-claim behaviour are both outside it and are reported as follow-ons rather than edited."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node adds a code reset target that takes only failed CodeFiles back to scored through the shared reset specs, exposed as --reset-to retry-failed, and uses it to reprocess the 46 JT-60SA /home files left at failed by a transient SSH drop.\nVERDICT done_when: the plan comment's done-when is met; a test shows the target moves failed files and leaves ingested ones untouched (verified and mutation-controlled), and the operational run reset 46 files and left all 46 unique targets ingested with empty errors per the graph check.\nVERDICT write_paths: the diff touches exactly two declared paths, imas_codex/discovery/base/reset.py and tests/discovery/test_code_retry_failed_reset.py, and nothing else.\nVERDICT manifest: read; it records two commits 054fc64f4 and 21faa85ad, focused/operational/graph logs, a mutation negative control, and empty baseline_suite and after_suite.\nVERDICT diff: read commit by commit against 4ac20c26; one 6-line ResetSpec addition and one new 44-line test, no other product code.\nCALL_SITES: imas_codex/cli/discover/code.py:148\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the target, CLI exposure, failed-only filter and 46-file reprocess are all present and verified; the only unfulfilled clause is the optional error-text filter, which the plan marks optional.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline/after logs, operational receipts and the graph check trace every claim, but the pre-registered baseline test asserting get_valid_targets was dropped in 21faa85ad so the base and after arms are not the same test, and the initial 5,002-ingested figure is asserted without a log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff stays inside the declared write scope; the broken target-list test and the duplicate-claim behaviour are outside it and reported as follow-ons.\nSCORE durability: 15\nJUSTIFICATION durability: the new target is guarded by a mutation-controlled test, but the added key leaves the repository suite red through an out-of-scope test the node cannot touch.\nSCORE fit: 19\nJUSTIFICATION fit: the spec key follows the existing CODE_RESET_SPECS vocabulary, the commits carry bodies, the test is named by mechanism, and no plan or ticket identifier leaks into code or messages.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change reuses reset_to_status and ResetSpec rather than adding a bespoke path, restating the scored spec's fields exactly as the surrounding specs do.\nFINDING tests/discovery/test_reset.py:58 follow-on: adding the retry-failed key changes get_valid_targets(\"code\") and breaks the pre-existing target-list test; the reviewed head reproduces the failure while the base passes, the reviewed run's own precommit log and manifest follow_ons name it, and sibling run r-20261008T132726299004-reset-target-list-test is repairing it outside this node's write scope.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T130243220026-code-retry-failed-reset/manifest.md:22 follow-on: the two-worker pass logged 62 ingested events for 46 unique paths after duplicate same-batch claims, redundant spend that risks double CodeChunks; the node declares it rather than owning the claiming fix.",
+  "review_run_id": "r-20261008T132702624714-review-of-code-retry-failed-reset",
+  "reviewed_base_sha": "4ac20c2620535b223d0fe9f5ea64f35bf70b7d0f",
+  "reviewed_head_sha": "21faa85adda406e7a029757435dafb90504264d0",
+  "reviewed_run_id": "r-20261008T130243220026-code-retry-failed-reset",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T13:42:00+00:00",
+  "total": 106,
+  "verdict": "SOUND WITH FINDINGS"
+}
