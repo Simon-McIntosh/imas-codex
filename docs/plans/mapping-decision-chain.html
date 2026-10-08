@@ -23,13 +23,14 @@
   <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-08">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
     <h2 id="s1">§1 — Why a chain of bounded decisions</h2>
-<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The map stage writes the IMAS bindings, so it is the step whose errors reach a user's data. Today
       <code>map_signals</code> in <code>imas_codex/ids/mapping.py</code> makes one open-ended reasoning call per target
@@ -67,41 +68,12 @@
       <code>mapping-stage-default</code> decision in <code>facility-discovery-sequence</code>.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s2">§2 — Census of the decisions inside today's bindings</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>
-      Before the schema changes, measure what the current bindings decide. For every <code>MAPS_TO_IMAS</code> binding in
-      the graph, the census reads its <code>transform_expression</code>, <code>cocos_label</code>, source and target units,
-      and the target field's <code>cocos_transformation_type</code>. It classifies each expression into the slots it sets:
-      sign, constant factor, unit conversion, COCOS sign call, index or slice, and anything else. Then it counts, per
-      facility and per slot, how many a code resolver could have set from the DD label, pint and a known source convention,
-      and how many need a judgment. It also counts the bindings whose written sign disagrees with
-      <code>cocos_sign</code> for the source's recorded COCOS, where one is recorded, because those are the errors this
-      plan exists to remove.
-    </p>
-    <p>
-      <strong>Node</strong> <code>mapping-decision-census</code>, role test, 1 h, live graph, bounded to
-      <code>MAPS_TO_IMAS</code> and its endpoints. Write paths: <code>docs/research/mapping-decision-census.html</code>,
-      <code>docs/figures/mapping-decision-census</code> and its fragment. <strong>Done when</strong> the research document
-      holds the per-facility, per-slot table of resolvable and judged counts, the count of COCOS sign disagreements with
-      examples, and the Cypher it ran, and every number in it is reproduced by that Cypher on the live graph.
-    </p>
-    <p>
-      <code>mapping-decision-census</code> (84aa7ab5e) found nothing to measure: the live graph holds no
-      <code>MAPS_TO_IMAS</code> binding and no relationship carrying a <code>transform_expression</code>. Re-checked directly on
-      2026-10-08: 0 <code>MAPS_TO_IMAS</code> edges. The 53 <code>IMASMapping</code> nodes, all JET, link only to their sources.
-      146 JET SignalSources read <code>mapping_status = validated</code> with no binding edge, which is stale state. So the
-      census moves to the population the chain will actually decide: the selected or escalated
-      <code>MAPPING_CANDIDATE</code> edges. For JT-60SA there are 2,958 such edges over 151 sources. 398 target fields carry a
-      <code>cocos_transformation_type</code>, the representative signal's <code>unit</code> is set on 1,924 edges, and every
-      target has a DD unit. <strong>Node</strong> <code>mapping-slot-census-candidates</code>, role implement, 0.75 h. It
-      extends <code>docs/research/mapping-decision-census.html</code> with, per facility and per slot, how many candidate
-      edges code can settle given a known source convention, how many need a judgment, and for unit slots how many pint
-      converts exactly. Write paths: <code>docs/research/mapping-decision-census.html</code>,
-      <code>docs/figures/mapping-decision-census</code> and its fragment. <strong>Done when</strong> that table and the Cypher
-      producing it are in the document, every number reproduces on the live graph, and <code>reckon audit-doc</code> reports
-      no error.
-    </p>
+<section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">No IMAS binding exists to measure, so the census covers the 2,958 JT-60SA candidate edges: 398 COCOS-labelled targets, 465 exact pint unit pairs and 1,882 scalar edges (6225aff61). The Jev acceptance threshold is calibrated in §7. <a href="/imas-codex/evidence/archive/mapping-decision-chain-landed.html#s2">full record</a></p>
+</section>
 
     <h2 id="s3">§3 — Typed slots replace the free-form transform</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -112,8 +84,8 @@
       <code>imas_codex/ids/transforms.py</code> builds the <code>transform_expression</code> from the settled slots, so the
       expression stored on <code>MAPS_TO_IMAS</code> is always produced by code and always uses names that
       <code>execute_transform</code> accepts. A binding with any slot still open is not written; it is escalated with the
-      open slots named. The slot set and its kinds come from the §2 census, so the model covers what bindings actually
-      need, not a guess.
+      open slots named. The slot set and its kinds come from the §2 census of candidate edges, so the model covers what
+      bindings will need, not a guess.
     </p>
     <p>
       <strong>Node</strong> <code>mapping-slots</code>, role implement, 2 h, after §2. Write paths:
@@ -154,7 +126,8 @@
       1/2π for a factor; the readings pint offers for an ambiguous unit; the candidate layouts for an index. The state is
       the source's detail, the target field's documentation and COCOS label, the injected conventions and the §6 context.
       Independent slots of one binding go in one request, as Jev runs them in parallel. A slot is accepted when its
-      answer clears an acceptance threshold set from the §2 census. Below it, the slot goes to escalation with Jev's
+      answer clears an acceptance threshold. The graph holds no written binding to calibrate against, so the threshold
+      starts conservative and the §7 proof calibrates it against the recorded conventions. Below it, the slot goes to escalation with Jev's
       distribution as evidence. A slot that is not a bounded choice, such as an unusual index expression, goes to the
       local-lane model with the same state, and its answer must still name one of the composer's slot kinds. When the
       OpenRouter key is absent, the chain skips Jev and sends open slots to the local model, as the candidate stage
