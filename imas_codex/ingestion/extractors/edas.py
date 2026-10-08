@@ -19,7 +19,7 @@ _CALL = re.compile(
     r"(?:uddb|pmdb|lcdb|mbdb)(?:read|_)[A-Za-z_0-9]*))\s*\(",
     re.IGNORECASE,
 )
-_LITERAL = re.compile(r"(?s)^\s*(?:[uUbBrR]|[uU][rR])?(['\"])(.*?)\1\s*$")
+_LITERAL = re.compile(r"^\s*(?:[uUbBrR]|[uU][rR])?(?:'([^']*)'|\"([^\"]*)\")\s*$")
 _KEYWORD = re.compile(r"^\s*([A-Za-z_]\w*)\s*=\s*(.*)$", re.DOTALL)
 
 
@@ -58,7 +58,7 @@ def _literal(value: str | None) -> str | None:
     if value is None:
         return None
     match = _LITERAL.fullmatch(value)
-    return match.group(2) if match else None
+    return (match.group(1) or match.group(2)) if match else None
 
 
 def extract_edas_references(text: str) -> list[EDASReference]:

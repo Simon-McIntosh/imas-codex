@@ -74,6 +74,7 @@ def test_literal_calls(source, kind, category, data_name):
         "db.eddbreadTime(shot, cat, dname, t1, t2)",
         "db.get_time_slice_data(inp_category=category, inp_dname=data_name)",
         "db.uddbreadConvert(shot, pid, t1, t2)",
+        "db.eddbreadTime('E101173', 'TMS', 'ne' + 'yag', t1, t2)",
         "def eddbreadTime(self, shot, cat, dname): pass",
         "# db.eddbreadTime('E101173', 'TMS', 'neyag', t1, t2)",
     ],

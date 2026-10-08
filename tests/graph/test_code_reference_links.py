@@ -105,7 +105,7 @@ def test_real_code_reference_links_and_missing_count_guard():
             )
 
             hits = _reference_search_code_chunks(
-                graph, f"{category} {known}", "jt-60sa", 10
+                graph, f"Find code reading {category} {known}", "jt-60sa", 10
             )
             assert [hit["id"] for hit in hits] == [chunk_id]
             assert (

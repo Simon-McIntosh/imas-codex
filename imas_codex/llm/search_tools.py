@@ -13,7 +13,6 @@ in ``server.py`` via ``@self.mcp.tool()``.
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any
 
 from neo4j.exceptions import ClientError, DatabaseError, ServiceUnavailable
@@ -1869,20 +1868,20 @@ def _reference_search_code_chunks(
     gc: GraphClient, query: str, facility: str | None, k: int
 ) -> list[dict[str, Any]]:
     """Find code by literal EDAS category and signal name on linked references."""
-    terms = [term.lower() for term in re.findall(r"[A-Za-z0-9_]+", query)]
-    if not terms:
+    if not query.strip():
         return []
     return gc.query(
         """
         MATCH (cc:CodeChunk)-[:CONTAINS_REF]->(dr:DataReference)
         WHERE dr.ref_type STARTS WITH 'edas_'
           AND ($facility IS NULL OR cc.facility_id = $facility)
-          AND all(term IN $terms WHERE toLower(dr.raw_string) CONTAINS term)
+          AND all(part IN split(toLower(dr.raw_string), '/')
+                  WHERE $query_lower CONTAINS part)
         RETURN DISTINCT cc.id AS id, 0.9 AS score
         LIMIT $limit
         """,
         facility=facility,
-        terms=terms,
+        query_lower=query.lower(),
         limit=k * 2,
     )
 
