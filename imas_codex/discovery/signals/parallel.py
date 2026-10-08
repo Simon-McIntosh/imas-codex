@@ -2596,10 +2596,11 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
                     """
                     UNWIND $signals AS sig
                     MERGE (s:FacilitySignal {id: sig.id})
-                    ON CREATE SET s += sig,
-                                  s.discovered_at = datetime()
-                    ON MATCH SET s += sig,
-                                 s.claimed_at = null
+                    ON CREATE SET s.discovered_at = datetime()
+                    WITH s, sig, s.status AS existing_status
+                    SET s += sig,
+                        s.status = coalesce(existing_status, sig.status),
+                        s.claimed_at = null
                     WITH s, sig
                     MATCH (f:Facility {id: sig.facility_id})
                     MERGE (s)-[:AT_FACILITY]->(f)
@@ -2645,6 +2646,59 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
             "Failed to ingest signals (ingested %d/%d): %s", ingested, len(signals), e
         )
         return ingested
+
+
+def reconcile_signal_statuses(
+    facility: str | None = None, *, apply: bool = False
+) -> dict[str, Any]:
+    """Find statuses behind their recorded stages and optionally repair one facility.
+
+    A check timestamp outranks enrichment; an enrichment timestamp outranks
+    discovery. Failed and skipped signals retain their deliberate statuses.
+    """
+    if apply and facility is None:
+        raise ValueError("A facility is required to apply signal status repairs")
+
+    selection = """
+        MATCH (s:FacilitySignal)
+        WHERE $facility IS NULL OR s.facility_id = $facility
+        WITH s, CASE
+            WHEN s.checked_at IS NOT NULL THEN $checked
+            WHEN s.enriched_at IS NOT NULL THEN $enriched
+            ELSE null
+        END AS target
+        WHERE (target = $checked AND s.status IN [$discovered, $enriched, $underspecified])
+           OR (target = $enriched AND s.status = $discovered)
+    """
+    params = {
+        "facility": facility,
+        "checked": FacilitySignalStatus.checked.value,
+        "enriched": FacilitySignalStatus.enriched.value,
+        "discovered": FacilitySignalStatus.discovered.value,
+        "underspecified": FacilitySignalStatus.underspecified.value,
+    }
+    with GraphClient() as gc:
+        candidates = gc.query(
+            selection
+            + """
+            RETURN s.facility_id AS facility, s.status AS status,
+                   target, count(s) AS count
+            ORDER BY facility, status, target
+            """,
+            **params,
+        )
+        updated = 0
+        if apply:
+            rows = gc.query(
+                selection
+                + """
+                SET s.status = target
+                RETURN count(s) AS updated
+                """,
+                **params,
+            )
+            updated = rows[0]["updated"] if rows else 0
+    return {"candidates": candidates, "updated": updated}
 
 
 def persist_data_access(data_access: DataAccess) -> None:
