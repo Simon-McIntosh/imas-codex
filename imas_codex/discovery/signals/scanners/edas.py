@@ -447,6 +447,8 @@ class EDASScanner:
                     "ref_shot": shot_str,
                     "api_path": api_path,
                     "lib_path": lib_path,
+                    "uddb_api_path": config.get("uddb_api_path"),
+                    "uddb_lib_path": config.get("uddb_lib_path"),
                     "lcdb_api_path": config.get("lcdb_api_path"),
                     "lcdb_root": config.get("lcdb_root"),
                     "mbdb_api_path": config.get("mbdb_api_path"),

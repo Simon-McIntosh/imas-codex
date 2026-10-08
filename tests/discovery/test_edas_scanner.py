@@ -18,6 +18,7 @@ from unittest.mock import AsyncMock, patch
 
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph.models import FacilitySignal, SignalDataClass
+from imas_codex.remote.scripts.check_edas import main as check_main
 from imas_codex.remote.scripts.enumerate_edas import (
     attempt_database,
     enumerate_lcdb,
@@ -63,6 +64,65 @@ CONFIG = {
 
 
 class TestConfiguredDatabases:
+    def test_raw_check_uses_global_catalogue_and_rejects_unknown_pid(
+        self, monkeypatch, capsys
+    ):
+        class ProcessedCatalogue:
+            def __init__(self, path):
+                pass
+
+            def eddbOpen(self):
+                return True
+
+            def eddbClose(self):
+                return True
+
+        class RawCatalogue:
+            def __init__(self, path):
+                pass
+
+            def uddbOpen(self):
+                return True
+
+            def uddbreadTable(self, pid):
+                if pid == "2111UA001":
+                    return True, {"data": [pid], "count": 1, "irc": 0}
+                return False, {"data": [], "count": 0, "irc": 1111}
+
+            def uddbClose(self):
+                return True
+
+        monkeypatch.setitem(
+            sys.modules,
+            "eddb_pwrapper",
+            SimpleNamespace(eddbWrapper=ProcessedCatalogue),
+        )
+        monkeypatch.setitem(
+            sys.modules, "uddb_pwrapper", SimpleNamespace(uddbWrapper=RawCatalogue)
+        )
+        monkeypatch.setattr(
+            sys,
+            "stdin",
+            StringIO(
+                json.dumps(
+                    {
+                        "ref_shot": "E101173",
+                        "api_path": "/analysis/src/eddb",
+                        "lib_path": "/analysis/lib/libeddb.so",
+                        "signals": [
+                            {"id": "known", "database": "UDDB", "pid": "2111UA001"},
+                            {"id": "unknown", "database": "UDDB", "pid": "NO_SUCH_PID"},
+                        ],
+                    }
+                )
+            ),
+        )
+        check_main()
+        results = json.loads(capsys.readouterr().out)["results"]
+        assert [result["success"] for result in results] == [True, False]
+        assert results[0]["dtype"] == "raw_catalogue"
+        assert "absent from catalogue" in results[1]["error"]
+
     def test_mbdb_opened_case_exposes_native_field_list(self, monkeypatch):
         class CaseCatalogue:
             def __init__(self, path):
