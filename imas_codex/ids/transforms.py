@@ -140,23 +140,16 @@ def compose_transform(slots: BindingTransformSlots) -> str:
     label = slots.cocos_label.value
     sign = slots.sign.value
     scale = slots.scale_factor.value
+    multiplier = sign * scale
+    if multiplier != 1:
+        expression = f"({expression} * {multiplier!r})"
     if label != CocosLabel.NONE:
         if slots.cocos_in is None or slots.cocos_out is None:
             raise ValueError("cocos_label requires cocos_in and cocos_out")
-        factor = cocos_sign(
-            label.value, cocos_in=slots.cocos_in, cocos_out=slots.cocos_out
-        )
-        if sign != (-1 if factor < 0 else 1) or not math.isclose(
-            scale, abs(factor), rel_tol=1e-12
-        ):
-            raise ValueError("sign or scale_factor disagrees with cocos_label")
         expression = (
             f"({expression} * cocos_sign({label.value!r}, "
             f"cocos_in={slots.cocos_in}, cocos_out={slots.cocos_out}))"
         )
-    elif sign != 1 or scale != 1:
-        multiplier = sign * scale
-        expression = f"({expression} * {multiplier!r})"
     return expression
 
 

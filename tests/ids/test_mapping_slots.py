@@ -102,29 +102,54 @@ def test_sign_and_scale_compose(sign, factor, expected):
 
 
 @pytest.mark.parametrize(
-    ("label", "sign", "scale"),
+    ("label", "cocos_factor"),
     [
-        ("ip_like", 1, 1.0),
-        ("b0_like", 1, 1.0),
-        ("tor_angle_like", 1, 1.0),
-        ("pol_angle_like", -1, 1.0),
-        ("q_like", -1, 1.0),
-        ("psi_like", 1, 2 * math.pi),
-        ("dodpsi_like", 1, 1 / (2 * math.pi)),
-        ("one_like", 1, 1.0),
+        ("ip_like", 1.0),
+        ("b0_like", 1.0),
+        ("tor_angle_like", 1.0),
+        ("pol_angle_like", -1.0),
+        ("q_like", -1.0),
+        ("psi_like", 2 * math.pi),
+        ("dodpsi_like", 1 / (2 * math.pi)),
+        ("one_like", 1.0),
     ],
 )
-def test_cocos_label_uses_cocos_sign(label, sign, scale):
+def test_cocos_label_uses_cocos_sign(label, cocos_factor):
     decision = slots(
-        sign=settled(sign),
-        scale_factor=settled(scale),
         cocos_label=settled(CocosLabel(label)),
         cocos_in=3,
         cocos_out=17,
     )
     expression = compose_transform(decision)
     assert "cocos_sign(" in expression
-    assert execute_transform(2.0, expression) == pytest.approx(2 * sign * scale)
+    assert execute_transform(2.0, expression) == pytest.approx(2 * cocos_factor)
+
+
+def test_psi_source_sign_flip_multiplies_cocos_factor():
+    decision = slots(
+        sign=settled(-1),
+        cocos_label=settled(CocosLabel.PSI),
+        cocos_in=3,
+        cocos_out=17,
+    )
+    expression = binding(decision).transform_expression
+    assert (
+        expression
+        == "((value * -1.0) * cocos_sign('psi_like', cocos_in=3, cocos_out=17))"
+    )
+    assert execute_transform(2.0, expression) == pytest.approx(-4 * math.pi)
+
+
+def test_ip_source_identity_sign_uses_cocos_alone():
+    decision = slots(
+        sign=settled(1),
+        cocos_label=settled(CocosLabel.IP),
+        cocos_in=11,
+        cocos_out=17,
+    )
+    expression = binding(decision).transform_expression
+    assert expression == "(value * cocos_sign('ip_like', cocos_in=11, cocos_out=17))"
+    assert execute_transform(2.0, expression) == -2.0
 
 
 @pytest.mark.parametrize(
@@ -216,10 +241,19 @@ def test_settled_slot_requires_evidence():
         TransformSlot(value=-1, settled_by=SlotResolution.CODE)
 
 
-def test_cocos_decomposition_must_agree_with_sign_and_factor():
-    decision = slots(cocos_label=settled(CocosLabel.PSI), cocos_in=3, cocos_out=17)
-    with pytest.raises(ValueError, match="scale_factor"):
-        compose_transform(decision)
+def test_constant_scale_multiplies_cocos_factor():
+    decision = slots(
+        scale_factor=settled(2.0),
+        cocos_label=settled(CocosLabel.PSI),
+        cocos_in=3,
+        cocos_out=17,
+    )
+    expression = compose_transform(decision)
+    assert (
+        expression
+        == "((value * 2.0) * cocos_sign('psi_like', cocos_in=3, cocos_out=17))"
+    )
+    assert execute_transform(2.0, expression) == pytest.approx(8 * math.pi)
 
 
 def test_mapping_entry_stores_composed_expression():
