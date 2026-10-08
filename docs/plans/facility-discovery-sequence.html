@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -545,6 +545,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T082444866521-review-of-sequence-mapping-stages" data-who="reckon-build" data-when="2026-10-08T08:45:01.594Z">
     <div class="r-comment-body"><p>Independently reviewed r-20261008T075819553950-sequence-mapping-stages: head gate reproduced 558 passed EXIT=0, base arm reproduced the pre-fix failure EXIT=1, and a head mutation dropping the candidate-home union fails the guard test EXIT=1; stored a parsed record scoring all six dimensions, total 108/120, 0 added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T084742943262-metadata-tests-offline" data-who="reckon-build" data-when="2026-10-08T08:54:50Z">
+    <div class="r-comment-body"><p>Autouse guard and explicit LLM patches keep metadata tests offline; named gate 46 passed, 0 failed, and removing the answer patch produced 1 guard error with EXIT=1.</p></div>
 </div>
 </section>
 </main>
