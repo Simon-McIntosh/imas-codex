@@ -17,7 +17,7 @@ import logging
 from typing import Any
 
 from imas_codex.discovery.base.facility import get_facility
-from imas_codex.discovery.paths.enrichment import PATTERN_REGISTRY
+from imas_codex.discovery.paths.enrichment import _build_enrich_patterns
 from imas_codex.graph import GraphClient
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import async_run_python_script
@@ -75,17 +75,13 @@ async def _run_enrich_batch(
     raise TypeError(f"Unexpected enrichment result type: {type(result)!r}")
 
 
-def _build_flat_patterns() -> dict[str, str]:
+def _build_flat_patterns(facility: str | None = None) -> dict[str, str]:
     """Flatten PATTERN_REGISTRY into category → regex for rg.
 
     Combines all sub-patterns within each category into a single regex,
     keeping individual sub-categories for granular counts.
     """
-    flat: dict[str, str] = {}
-    for _category, (patterns_dict, _score_dim) in PATTERN_REGISTRY.items():
-        for name, regex in patterns_dict.items():
-            flat[name] = regex
-    return flat
+    return _build_enrich_patterns(facility)
 
 
 async def enrich_files(
@@ -117,7 +113,7 @@ async def enrich_files(
     python_command = environment.python_command
     setup_commands = list(environment.setup_commands)
 
-    patterns = _build_flat_patterns()
+    patterns = _build_flat_patterns(facility)
 
     try:
         return await _run_enrich_batch(

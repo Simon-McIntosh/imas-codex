@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -263,7 +264,7 @@ def enrich_paths(
     input_data = {
         "paths": paths,
         "path_purposes": path_purposes or {},
-        "pattern_categories": _build_enrich_patterns(),
+        "pattern_categories": _build_enrich_patterns(facility),
     }
 
     try:
@@ -297,7 +298,7 @@ def enrich_paths(
     return _parse_enrich_output(output, paths)
 
 
-def _build_enrich_patterns() -> dict[str, str]:
+def _build_enrich_patterns(facility: str | None = None) -> dict[str, str]:
     """Build pattern categories for remote enrichment.
 
     Merges YAML-config patterns (data systems + physics domains) with
@@ -322,7 +323,33 @@ def _build_enrich_patterns() -> dict[str, str]:
             if key not in patterns:
                 patterns[key] = pattern
 
+    if facility:
+        access = get_facility(facility).get("data_access_patterns") or {}
+        for source, prefix in (
+            ("key_tools", "facility_tool:"),
+            ("code_import_patterns", "facility_import:"),
+        ):
+            for value in access.get(source) or []:
+                if value:
+                    patterns[f"{prefix}{value}"] = re.escape(value)
+
     return patterns
+
+
+def facility_access_matches(categories: dict[str, int] | str | None) -> dict[str, int]:
+    """Keep counted facility access calls separate from generic matches."""
+    if isinstance(categories, str):
+        try:
+            categories = json.loads(categories)
+        except json.JSONDecodeError:
+            categories = {}
+    if not isinstance(categories, dict):
+        return {}
+    return {
+        name: count
+        for name, count in categories.items()
+        if name.startswith(("facility_tool:", "facility_import:")) and count
+    }
 
 
 def _build_enrich_input(
@@ -344,7 +371,7 @@ def _build_enrich_input(
     input_data = {
         "paths": paths,
         "path_purposes": path_purposes or {},
-        "pattern_categories": _build_enrich_patterns(),
+        "pattern_categories": _build_enrich_patterns(facility),
     }
     return ssh_host, input_data
 
