@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -421,6 +421,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T043424229971-fold-candidates-stage" data-who="reckon-build" data-when="2026-10-08T05:31:33.458Z">
     <div class="r-comment-body"><p>fold-candidates-stage - run_candidates_stage(facility, options) with a frozen CandidatesStageOptions dataclass extracted from the discover map click command, now a thin wrapper. tests/cli/test_discover_candidates_stage.py plus the old tests/cli/test_discover_map.py pass 18 of 18 (gate EXIT=0), and the negative control fails 1 (test_flush_runs_the_draining_worker) when the stage is mutated to treat --flush as the seeding half (EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T050059413025-fold-documents-stage" data-who="reckon-build" data-when="2026-10-08T05:30:12.775Z">
+    <div class="r-comment-body"><p>Extracted run_documents_stage(facility, options) and frozen DocumentsOptions from the documents click command, leaving a thin wrapper; --scan-only runs the seeding half, --flush the draining half, --limit caps items, --topic reaches the VLM scorer, --focus ITEMS is refused with a mechanism message (the claim query takes no item filter, no plan reference); gate 56 passed, declared mutation red on 2 flush tests.</p></div>
 </div>
 </section>
 </main>
