@@ -28,7 +28,7 @@ The pipelines form a **dependency graph** — some domains produce graph nodes a
     └──────┬───────┘   └──────┬───────┘
            │                  │
            │ FacilityPath     │ WikiChunk
-           │ (scored ≥0.7)    │ wiki_chunk_embedding
+           │ (scored ≥0.3)    │ wiki_chunk_embedding
            │                  │ mdsplus_paths_mentioned
            ▼                  ▼
     ┌──────────────┐   ┌──────────────┐
@@ -54,7 +54,7 @@ The pipelines form a **dependency graph** — some domains produce graph nodes a
 
 | Consumer | Depends On | What It Uses | Impact If Missing |
 |----------|-----------|--------------|-------------------|
-| `imas-codex discover FACILITY --only code` | `imas-codex discover FACILITY --only paths` | Scored FacilityPath nodes (≥0.7) | No paths to scan for files |
+| `imas-codex discover FACILITY --only code` | `imas-codex discover FACILITY --only paths` | Scored FacilityPath nodes (≥0.3) | No paths to scan for files |
 | `imas-codex discover FACILITY --only signals` (enrich) | `imas-codex discover FACILITY --only wiki` | WikiChunk nodes, `wiki_chunk_embedding` index | No wiki descriptions/units injected into signal enrichment prompts → more LLM hallucination |
 | `imas-codex discover FACILITY --only signals` (enrich) | `imas-codex discover FACILITY --only code` | `code_chunk_embedding` index | No source code usage patterns in enrichment prompts |
 | `imas-codex discover FACILITY --only documents` | `imas-codex discover FACILITY --only paths` | Scored FacilityPath nodes (≥0.5) | No paths to scan for documents/images |
@@ -103,7 +103,7 @@ imas-codex discover tcv --only signals --flush   # Benefits from code chunks in 
 | 0 | `imas dd build` | Nothing | IMASNode, clusters, embeddings |
 | 1a | `imas-codex discover FACILITY --only paths` | Facility config | FacilityPath (scored) |
 | 1b | `imas-codex discover FACILITY --only wiki` | Wiki URLs in config | WikiPage, WikiChunk, WikiArtifact, Image |
-| 2a | `imas-codex discover FACILITY --only code` | Scored FacilityPaths (≥0.7) | CodeFile, SourceFile, CodeChunk |
+| 2a | `imas-codex discover FACILITY --only code` | Scored FacilityPaths (≥0.3) | CodeFile, SourceFile, CodeChunk |
 | 2b | `imas-codex discover FACILITY --only documents` | Scored FacilityPaths (≥0.5) | Document, Image |
 | 3a | `imas-codex discover FACILITY --only signals` | Wiki + code + IMAS (optional but improves quality) | FacilitySignal, DataAccess |
 | 3b | `imas-codex discover FACILITY --only signals --flush` | SignalNode + code context | Enriched SignalNode descriptions |
@@ -190,7 +190,7 @@ imas-codex discover tcv --only wiki --store-images     # Keep image bytes in gra
 
 **Purpose:** Discover, score, and ingest source code files from high-value paths.
 
-**Depends on:** Scored FacilityPath nodes from `imas-codex discover FACILITY --only paths` (default `min_score ≥ 0.7`)
+**Depends on:** Scored FacilityPath nodes from `imas-codex discover FACILITY --only paths` (default `min_score ≥ 0.3`)
 
 **Internal pipeline:** `scan → triage → score → ingest`
 
