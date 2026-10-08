@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's gate logs. The reviewed run's manifest records baseline_suite as empty; its own base-arm log focused-gate.log carries revision=47df56a2710a289c6b0f3c592b4935c41dca49b4 and reports '48 passed' EXIT=0, and its after_suite (final-gate.log) carries revision=00a9856539ae16880b3b81cb3bea0d7839c3cfe0 and reports '49 passed' EXIT=0. Both arms report zero failure ids, so the added set is empty. Caveat recorded as a finding: the base revision's test blob (1e67f11450a514a290f37aa19151b9a677cba06f, identical to main 210281b30) collects 42 items, not the 48 focused-gate.log reports, so that log was taken against a working tree already carrying the new tests and is not a clean baseline; the conclusion is unaffected because the head arm has no failure id at all.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/discover-until-option uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/discover-until-option/tests/cli/test_discover_sequence.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T143749148843-discover-until-option/final-gate.log",
+    "revision": "00a9856539ae16880b3b81cb3bea0d7839c3cfe0"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/cli/test_discover_sequence.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T143749148843-discover-until-option/focused-gate.log",
+    "revision": "47df56a2710a289c0b0f3a592b4935c41dca49b4"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/discover/sequence.py:542 _closure",
+    "imas_codex/cli/discover/sequence.py:695 run_sequence",
+    "imas_codex/cli/discover/sequence.py:828 run --until"
+  ],
+  "completed_at": "2026-10-08T15:01:17.404Z",
+  "dispatched_at": "2026-10-08T14:46:48Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/sequence.py",
+      "impact": "evidence",
+      "line": 227,
+      "severity": "follow-on",
+      "summary": "the base-arm gate log is a dirty-tree run: focused-gate.log records revision 47df56a2 but collected 48 items, while that revision's committed test blob (1e67f114) collects 42; the reviewed run has no clean baseline arm, so its own base-vs-head comparison is not self-consistent."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the --until path runs through sequence.py:542 _closure (registry-only closure), sequence.py:695 run_sequence (selection, stale-context warning/reason, dry-run list), and the run command option at sequence.py:828 wired through **kwargs into SequenceOptions.",
+    "diff": "two commits against 47df56a2: aa0e40b adds the --until option, _validate_options guards, _closure over the registry reads/context fields, a stale-context warning and reason, a dry-run listing, and focused tests; 00a9856 adds one parametrize case for a stage-name target. sequence.py gains _closure and the closure argument to _selected and the CLI option; the test file gains six collected ids.",
+    "done_when": "met: --until signals selects paths, code, wiki, signals scan, signals enrich and never candidates or mapping; --until code selects paths, code; --until mapping selects the full chain; --until signals --skip wiki drops wiki and reports stale context on signals enrich; --until with --only is refused with exit 2; --only signals logs the missing-context warning without refusing. All are claimed by the head tests, independently re-run by this reviewer at 49 passed EXIT=0, and confirmed by direct _closure membership probes.",
+    "goal": "the lead needs an overnight JT-60SA run to reach signal enrichment with the night's code and wiki context without hand-chained --only commands; \u00a757 asks for a --until STAGE option that resolves the target's reads+context closure in registry order.",
+    "manifest": "read; records two commits, changed_paths of exactly the two source paths, a mutation negative control with its red log path, after_suite pointing to final-gate.log, and an EMPTY baseline_suite. The empty baseline_suite is the one evidence gap: the node supplies a base-arm log (focused-gate.log) whose collected count does not match its stated revision.",
+    "write_paths": "the commits touch exactly imas_codex/cli/discover/sequence.py and tests/cli/test_discover_sequence.py, the two declared paths; the orientation fragment and figure paths are produced by neither and are correctly withheld because the done-when names no artifact."
+  },
+  "justifications": {
+    "durability": "the closure reads the registry's own reads and context fields, so adding a stage edge changes --until with no second edit, which is exactly the spec's single-source-of-truth requirement; the guard is live rather than vacuous, since removing the context edges fails the --until signals test (independently reproduced). The residual is the single-source property itself: a future stage whose dependency is declared only by name in reads/context will KeyError in _closure rather than fail loudly at registry load, a latent fragility the spec does not require this node to close.",
+    "evidence": "the head arm is strong: the reviewer independently re-ran tests/cli/test_discover_sequence.py at the reviewed head and got 49 passed EXIT=0, and independently reproduced the negative control (a context-stripped closure yields 2 stages, not the required 5, so the assertion is load-bearing). The deduction is the reviewed run's own baseline: baseline_suite is empty in its manifest and its base-arm log records a collected count of 48 that matches the post-change file, not the 42 its stated base revision collects, so its base/head comparison is not self-consistent. The head arm carries zero failures, so no failure id can be added regardless.",
+    "fit": "conventional commit subjects with bodies, mechanism-named symbols (_closure, --until, stale context), no plan/sprint/ticket identifier in the diff or messages, and no AI attribution.",
+    "goal_fidelity": "the implementation matches \u00a757 point by point: the closure is derived from the registry Stage.reads and Stage.context fields and never a second table; --until signals and --until code resolve to exactly the named sets; mapping stays opt-in (only --until mapping or --until candidates reach it); --skip drops and the consuming stage reports stale context; --until with --only is a UsageError; --only logs the missing-context warning without refusing; --dry-run prints the run order. Verified by re-running the head arm and by direct _closure probes.",
+    "reuse": "the change reuses the existing Stage registry fields, the existing _selected predicate (adding one closure argument), and the existing report path; it introduces no second dependency table and no new abstraction beyond the closure helper the spec requires.",
+    "scope_discipline": "the diff stays inside the two declared source paths; no configuration, plan or unrelated module is touched, and the optional evidence fragment and figure are correctly omitted because the done-when names no artifact."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node adds a --until STAGE option that runs a target stage with every stage it depends on through the registry reads and context edges, in registry order.\nVERDICT done_when: met; --until signals -> paths, code, wiki, signals scan, signals enrich (never candidates/mapping); --until code -> paths, code; --until mapping -> full chain; --until signals --skip wiki drops wiki and reports stale context; --until with --only refused exit 2; --only signals warns. Head arm re-run 49 passed EXIT=0.\nVERDICT write_paths: exactly imas_codex/cli/discover/sequence.py and tests/cli/test_discover_sequence.py; optional fragment/figure correctly withheld.\nVERDICT manifest: read; two commits, mutation negative control with red log, after_suite present, baseline_suite EMPTY and its base-arm log is a dirty-tree run (48 collected vs 42 for the stated base blob).\nVERDICT diff: two commits against 47df56a2; --until option, _closure over reads/context, stale-context warning and reason, dry-run. \nCALL_SITES: imas_codex/cli/discover/sequence.py:542\nCALL_SITES: imas_codex/cli/discover/sequence.py:695\nCALL_SITES: imas_codex/cli/discover/sequence.py:828\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every clause of the deliverable is implemented and independently confirmed; --until signals and --until code resolve to exactly the named sets, mapping stays opt-in, --skip reports stale context, --until with --only is refused, --only warns without refusing, and --dry-run prints the run order.\nSCORE evidence: 16\nJUSTIFICATION evidence: the head arm is independently re-run at 49 passed EXIT=0 and the negative control independently reproduced, but the reviewed run's baseline is empty and its base-arm log is a dirty-tree run (48 collected vs the 42 its stated base revision collects), so its own base/head comparison is not self-consistent; the head carries no failure id, so the added set is empty regardless.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff is confined to the two declared source paths and the optional evidence fragment and figure are correctly withheld because the done-when names no artifact.\nSCORE durability: 19\nJUSTIFICATION durability: the closure derives from the registry reads and context fields so a new edge needs no second table, and removing the context edges fails the test, making the guard load-bearing; a dependency named only in reads/context would KeyError in _closure rather than fail at registry load, a latent fragility outside this node's scope.\nSCORE fit: 19\nJUSTIFICATION fit: conventional subjects with bodies, mechanism-named symbols, no plan or ticket identifier, no AI attribution.\nSCORE reuse: 19\nJUSTIFICATION reuse: reuses the Stage registry fields and the existing _selected predicate and report path, adding only the closure helper the spec requires and no second dependency table.\n",
+  "review_run_id": "r-20261008T144638074419-review-of-discover-until-option",
+  "reviewed_base_sha": "47df56a2710a289c6b0f3c592b4935c41dca49b4",
+  "reviewed_head_sha": "00a9856539ae16880b3b81cb3bea0d7839c3cfe0",
+  "reviewed_run_id": "r-20261008T143749148843-discover-until-option",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T14:58:00+00:00",
+  "total": 112,
+  "verdict": "SOUND"
+}
