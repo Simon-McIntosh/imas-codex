@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -191,7 +191,7 @@
         <tr><td><code>--topic TEXT</code></td><td>A free-text steer for stages that score or enrich.</td><td>the free-text <code>--focus</code> on every discover domain</td></tr>
         <tr><td><code>-c</code>, <code>--cost-limit USD</code></td><td>The invocation's spend cap. Each domain receives what remains.</td><td>same meaning, kept</td></tr>
         <tr><td><code>-t</code>, <code>--time MINUTES</code></td><td>The invocation's wall-clock cap. Each domain receives what remains. The short form now matches <code>sn run -t</code>.</td><td><code>--time</code>, kept</td></tr>
-        <tr><td><code>--limit N</code></td><td>Item cap for each selected domain, as on <code>sn run --limit</code>.</td><td><code>--path-limit</code>, <code>--max-paths</code>, <code>--signal-limit</code> and <code>-n</code></td></tr>
+        <tr><td><code>--limit N</code></td><td>Item cap for each selected domain, as on <code>sn run --limit</code>.</td><td><code>--path-limit</code>, <code>--max-paths</code>, <code>--signal-limit</code>, <code>wiki --max-pages</code> and <code>-n</code></td></tr>
         <tr><td><code>--dry-run</code></td><td>Print every stage with its outcome and reason, and invoke nothing.</td><td>new; no discover domain had one</td></tr>
         <tr><td><code>--reset-to TARGET</code></td><td>The per-domain reset target. It needs exactly one <code>--only</code> domain, because targets differ per domain.</td><td>per-domain <code>--reset-to</code></td></tr>
         <tr><td><code>--rescan</code></td><td>Re-discover items already scanned, in the domains that scan.</td><td>per-domain <code>--rescan</code></td></tr>
@@ -201,7 +201,7 @@
       Domain tunables move onto the one command unchanged, among them worker counts, thresholds,
       <code>--category</code>, <code>--scanners</code>, <code>--reference-shot</code>,
       <code>--physics-domain</code>, <code>--ids</code>, <code>--rejudge-ingested</code> and
-      <code>--rescan-documents</code>. A tunable whose name another domain or <code>sn run</code>
+      <code>--rescan-documents</code>, <code>--add-roots</code>, <code>--store-bytes</code>, <code>--max-depth</code> and <code>--store-images</code>. <code>code --min-score</code> gives way to the Jev-calibrated gates described below. A tunable whose name another domain or <code>sn run</code>
       already uses with a different meaning takes the domain as a prefix. <code>wiki --source</code>
       becomes <code>--wiki-site</code>, because <code>sn run --source</code> is an extraction source.
       Two deprecated aliases are deleted: <code>paths --reset-scored</code> and
