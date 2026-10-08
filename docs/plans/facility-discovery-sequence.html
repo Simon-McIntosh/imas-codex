@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="facility-discovery-sequence">
   <meta name="plan-title" content="Facility Discovery Sequence">
   <meta name="plan-summary" content="One command runs a facility&#x27;s discovery stages in dependency order, probing each stage&#x27;s access and skipping the unreachable with a recorded reason">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="5.5">
   <meta name="plan-capability-version" content="1.0">
@@ -20,8 +20,8 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
-<meta name="plan-modified" content="2026-10-07">
+<meta name="plan-version" content="12">
+<meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
@@ -256,33 +256,30 @@
 
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
-<div class="r-gate" data-id="g-fds-1" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-fds-1" data-section="s4" data-gated-sections="s4" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">imas map run claims each source per IDS of its selected candidate edges, so one invocation per IDS maps every home</h4>
     <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
-    </div>
+    <a class="r-gate-evidence" href="mapping-candidate-selection section 8 landed (merge 3c1c0ce8f on main): the assign stage picks every listed home for an escalated source and the map stage maps each source into every IDS of its picks, claiming per IDS.">Evidence</a>
+</div>
 </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="command-name" data-choice="" data-by="" data-when="" data-recommended="discover-run" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="command-name" data-choice="discover-run" data-by="lead" data-when="2026-10-08T02:18:50+00:00" data-recommended="discover-run" data-recommended-by="reckon-build">
     <p class="r-dec-q">What is the sequence command called?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="discover-run">imas-codex discover run FACILITY</button>
+      <button class="r-opt chosen" data-value="discover-run">imas-codex discover run FACILITY</button>
       <button class="r-opt" data-value="discover-all">imas-codex discover all FACILITY</button>
       </p>
-    <p class="r-dec-rat">The recommendation is discover run . It reads as an action
-          beside discover status and discover clear , and it does not promise
-          that every stage runs, which a skipped stage would contradict.</p>
+    <p class="r-dec-rat">The lead named the command imas-codex discover run; it reads as an action beside discover status and discover clear and does not promise that every stage runs.</p>
     </div>
-<div class="r-dec" data-key="mapping-stage-default" data-choice="" data-by="" data-when="" data-recommended="opt-in" data-recommended-by="reckon-build">
+<div class="r-dec" data-key="mapping-stage-default" data-choice="opt-in" data-by="lead" data-when="2026-10-08T02:18:50+00:00" data-recommended="opt-in" data-recommended-by="reckon-build">
     <p class="r-dec-q">Does the sequence run imas map run by default?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="opt-in">only when named in --only</button>
+      <button class="r-opt chosen" data-value="opt-in">only when named in --only</button>
       <button class="r-opt" data-value="default">always, under the cost cap</button>
       </p>
-    <p class="r-dec-rat">The recommendation is opt-in. The mapping stage spends on the reasoning
-          seat and writes bindings a person validates. Discovery up to candidates is cheap and safe to
-          repeat.</p>
+    <p class="r-dec-rat">Accepted with the plan&#x27;s recommendation when the lead asked for the command to be built: the mapping stage writes bindings a person validates, so it runs only when named in --only, while discovery up to candidates is safe to repeat.</p>
     </div>
 </section>
 

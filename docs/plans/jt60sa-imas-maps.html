@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="jt-60sa,signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-imas-maps#s3&quot;, &quot;jt60sa-imas-maps#s9&quot;], &quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;, &quot;jt60sa-imas-maps#s11&quot;, &quot;jt60sa-discovery-completion#s38&quot;, &quot;jt60sa-discovery-completion#s39&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;jt60sa-imas-maps#s10&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-imas-maps#s3&quot;, &quot;jt60sa-imas-maps#s9&quot;], &quot;s5&quot;: [&quot;jt60sa-imas-maps#s2&quot;, &quot;jt60sa-imas-maps#s11&quot;, &quot;jt60sa-discovery-completion#s38&quot;, &quot;jt60sa-discovery-completion#s39&quot;, &quot;jt60sa-discovery-completion#s41&quot;], &quot;s6&quot;: [&quot;jt60sa-imas-maps#s5&quot;], &quot;s7&quot;: [&quot;jt60sa-imas-maps#s4&quot;, &quot;jt60sa-imas-maps#s6&quot;, &quot;jt60sa-imas-maps#s10&quot;, &quot;mapping-candidate-selection#s8&quot;], &quot;s8&quot;: [&quot;discovery-judgments-through-jev#s9&quot;]}">
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -103,9 +103,9 @@
       seeded before: the EDAS database download libraries <code>eddb</code>, <code>uddb</code>,
       <code>pmdb</code>, <code>mbdb</code> and <code>lcdbWrapper</code>, offline TCCS, MagLine2022,
       and others. §39 extends signal discovery from EDDB alone to UDDB, PMDB, LCDB, MBDB and EQDB.
-      The lead chose to wait for both to land and then run the mapping stages once. That avoids
+      On 2026-10-08 the widening grew. §41 lifts the <code>/home</code> exclusion and scans home-directory code. Every code scan now waits on Jev path scores (<code>discovery-judgments-through-jev</code> §3 and §4), because the language-model path scorer and its 0.9 cut-off kept <code>getseldata</code>, <code>SAeqfame</code>, <code>eqdbms</code> and <code>client_eqdbms</code> out. The lead chose to wait for the widening to land and then run the mapping stages once. That avoids
       re-enriching twice, and §38's code is the context the EDDB descriptions lack. Gate g-jim-6
-      holds this section until both sections land.
+      holds this section until §38, §39 and §41 land.
     </p>
     <p>
       <strong>Node</strong> <code>jt60sa-reenrich-after-code</code>, role implement, 1 h, once
