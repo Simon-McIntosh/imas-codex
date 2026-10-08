@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -298,6 +298,21 @@
       <strong>Done when</strong> every command, domain, option and default either page names exists in
       <code>imas-codex discover jt-60sa --help</code> or the <code>discover</code> group with the value stated, checked by
       a grep the fragment records.
+    </p>
+    <p>
+      <code>retire-domain-subcommands</code> landed (91939e950; review 112/120, no added failures). Two user-facing leftovers
+      remain. The wiki stage still prints <em>use --scan-only / --score-only</em>, and the bare command rejects
+      <code>--score-only</code>. <code>WikiStageOptions</code> still documents its fields as settled spellings of old flags. And a
+      retired spelling such as <code>discover paths jt-60sa</code> now fails with click's <em>Got unexpected extra argument</em>,
+      because the group reads <code>paths</code> as the facility.
+      <strong>Node</strong> <code>discover-hints-name-bare-command</code>, role implement, 0.25 h. The wiki hint and docstring
+      name only options the bare command accepts and state what each field does. A first word that is a discovery domain is
+      refused with the <code>discover FACILITY --only DOMAIN</code> spelling. Write paths:
+      <code>imas_codex/cli/discover/wiki.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
+      <code>tests/cli/test_discover_wiki_stage.py</code>, <code>tests/test_cli.py</code> and its fragment.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/cli tests/test_cli.py -p no:cacheprovider</code> passes
+      with tests showing <code>discover paths jt-60sa</code> refused with a message naming <code>discover jt-60sa --only paths</code>,
+      and no wiki stage output naming <code>--score-only</code>.
     </p>
     <p>
       <strong>Node</strong> <code>wiki-ingest-threshold-setting</code>, role implement, 0.5 h. The wiki stage read its
