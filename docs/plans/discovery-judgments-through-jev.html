@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
-<meta name="plan-impl" content="0.562">
-<meta name="plan-version" content="57">
+<meta name="plan-impl" content="0.625">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -177,50 +177,12 @@ call site in its runner node. (3) The describe-then-judge step is wired twice: i
 path gate reads <code>get_discovery_threshold()</code>. The describe-then-judge step has one owner that both callers use. The
 focused path tests pass with baseline and after logs.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s15">§15 — Give every judge its facility&#x27;s own access-pattern matches</h2>
-<section data-reckon="section" data-id="s15" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-<p><strong>Why.</strong> The lead asked on 2026-10-08 that every Jev judge, the wiki judge included, receive all of its
-relevant context, and that the judges match known data-access patterns and data loaders in the items they judge. The
-deployed path judge scores AUC 0.886 on the widened JT-60SA labelled set, with 38 false negatives against 80 true
-positives at the scan gate. The lead also directed that this is a durable multi-machine tool: each facility's patterns
-must be wired when discovery runs on that facility, with JT-60SA the current focus.</p>
-<p><strong>What each judge receives today</strong> (read from the code on 2026-10-08):</p>
-<table>
-<thead><tr><th>Judge</th><th>Facility patterns as reference text</th><th>Matches of those patterns in the judged item</th></tr></thead>
-<tbody>
-<tr><td>Path (<code>build_path_judgment_state</code>, <code>paths/scorer.py</code>)</td><td>yes, through
-<code>facility_relevance_block</code></td><td>no: <code>pattern_categories</code> come from one global registry
-(MDSplus, PPF, UFILE, HDF5, NetCDF, EQDSK, IMAS, conventions), built by <code>_build_enrich_patterns</code> in
-<code>paths/enrichment.py</code></td></tr>
-<tr><td>Code triage (<code>build_triage_state</code>, <code>code/scorer.py</code>)</td><td>yes</td><td>no: the code
-scanner's <code>_get_pattern_categories</code> in <code>code/scanner.py</code> reads only
-<code>PATTERN_REGISTRY</code>, a second registry that differs from the path one; the path-only arm carries no pattern
-evidence at all</td></tr>
-<tr><td>Wiki pages and documents (§5)</td><td>yes, in the prompt</td><td>no: <code>extract_facility_tool_mentions</code>
-runs at ingest, after scoring; §5's node now puts its matches in the wiki state</td></tr>
-</tbody></table>
-<p>So no facility's own loaders are ever counted. Every facility config that declares <code>data_access_patterns</code>
-(TCV, JET, ITER, JT-60SA) lists <code>key_tools</code> and <code>code_import_patterns</code>, and none of them reaches
-pattern matching. For JT-60SA, <code>eddbreadTime</code>, <code>getseldata</code> and the EDAS API imports are invisible
-to the judge except where they happen to fall in the first 1,500 characters of a file.</p>
-<p><strong>Deliverable.</strong> One builder owns the pattern categories that path enrichment and the code scanner send to
-the remote matcher. It takes the facility id, and it adds that facility's <code>key_tools</code> and
-<code>code_import_patterns</code> from its config, escaped as literals, to the shared registry. Matching stays one pass per
-directory or file batch rather than one per pattern, and it records which of the facility's patterns matched, with counts.
-The path state and both code-triage arms carry those matches, labelled as the facility's own data-access calls, beside
-the generic categories. No facility id appears as a literal in code.</p>
-<p><strong>Done when</strong> a test parametrised over every facility config under
-<code>imas_codex/config/facilities</code> (excluding <code>*_private.yaml</code>) asserts four things:</p>
-<ul>
-<li>The builder's categories for that facility include its own patterns.</li>
-<li>The path state and the content-arm triage state built from a row matching one of them carry the match.</li>
-<li>A row matching none carries no match, as the negative control.</li>
-<li>Another facility's patterns are absent.</li>
-</ul>
-<p>The labelled JT-60SA path set is committed beside the fragment: the prototype's <code>labelled-paths.json</code> and
-the deploy's widened labels, both now held only in run directories. The fragment reports path-judge AUC and the
-scan-gate confusion counts on that set, with and without the match evidence. The with-evidence arm re-enriches the
-labelled paths through the facility, with Jev spend inside the JT-60SA authorization.</p>
+<section data-reckon="section" data-id="s15" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">One builder supplies the pattern categories that path enrichment, the code scanner and file enrichment send to the remote matchers. It adds each facility's <code>key_tools</code> and <code>code_import_patterns</code> as escaped literals, one matching pass per directory or file batch, with no facility id in code. The path state and both code-triage arms carry the facility's own matches. A test over the four public facility configs fails when the facility sources are removed. On 158 labelled JT-60SA paths the scan gate scores AUC 0.850 without matches and 0.851 with them, inside run-to-run variation: only 21 labelled directories contain facility calls. Spend USD 0.061. Review 19/18/19/17/18/20. <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/facility-access-matches.html">full record</a></p>
+</section>
 
     <h2 id="s16">§16 — Declare what the path code writes, and retire reads of retired properties</h2>
 <section data-reckon="section" data-id="s16" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -525,6 +487,28 @@ confidence intervals, for two gates: the current maximum-of-facets gate and the 
 the variation with three frozen-state and three fresh-description judgments per path.</li>
 <li><strong>Node 2</strong> implements the category gate and the file roll-up, and adds the graph neighbourhood to
 each judge's state, measured against node 1's labels.</li>
+</ul></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-20261008-s17-knowledge-front" data-who="lead" data-when="2026-10-08T07:20:00Z">
+    <div class="r-comment-body"><p><strong>Lead, 2026-10-08: the knowledge front.</strong> When a facility is scanned for the first time, forward
+information is not yet in the graph: child paths, files under a directory, their judgments, copies and wiki links appear
+only as the scan advances. Every method this section adds must work for a new facility's first discovery, not only for
+a facility the graph already knows. Concretely:</p>
+<ul>
+<li><strong>Unknown is not empty.</strong> Each neighbourhood field in a judge's state records whether that
+neighbourhood has been observed. For example, children not yet listed is distinct from no children, and files not yet
+scanned is distinct from no code files. The question text tells the judge that an unobserved field is no evidence
+either way. A missing property reads as nothing in Cypher, so an unset field must never reach the state as zero or as
+an empty list.</li>
+<li><strong>The category gate stands without the graph.</strong> The path-stage decision (category plus
+children-worth-listing) uses only what the scanner sees at that directory. Graph context may raise confidence once it
+exists, but no gate depends on it.</li>
+<li><strong>Measure a cold-start arm.</strong> Node 2 reports AUC on node 1's labels with the graph context stripped to
+what a first scan holds at each path, beside the full-context arm. It also runs one bounded first-discovery pass, on a
+facility subtree with no FacilityPaths yet or a scratch facility id, to show the gates admit and expand from an empty
+graph.</li>
+<li><strong>Roll-ups name their evidence.</strong> A path facet value rolled up from files records how many judged
+files it rests on, and is absent rather than zero before any file under it is judged.</li>
 </ul></div>
 </div>
 </section>
