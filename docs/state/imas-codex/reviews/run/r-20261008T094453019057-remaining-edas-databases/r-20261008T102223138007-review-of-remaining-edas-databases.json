@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: baseline-suite.log (57 passed, EXIT=0, 0 failures at 901491f7) and committed-head-absolute-gate.log (90 passed, EXIT=0, 0 failures at 4219c6f); the after arm collects tests/config as well as tests/discovery, so the added test count is 33 and the added failures are none. Independently reproduced at the reviewed head 9758dc5a with EXIT=0, 90 passed.",
+  "backend": "local",
+  "base_log_revision": "901491f7cf88db47d60dd4752ea63af962097405",
+  "call_site_count": 2,
+  "call_sites": [
+    "_database_access_methods is called once from EDASScanner.scan to build DataAccess nodes for UDDB, LCDB and MBDB (edas.py:337)",
+    "the new missing-route guard runs once after equilibrium signals are appended, before ScanResult is returned (edas.py:527-536)"
+  ],
+  "completed_at": "2026-10-08T10:32:39.024Z",
+  "dispatched_at": "2026-10-08T10:22:33Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/scanners/edas.py",
+      "line": "529",
+      "severity": "follow-on",
+      "text": "follow-on: the new fail-closed guard that returns ScanResult(stats={'error': 'signals lack data access'}) when any emitted signal's data_access is not among the built access ids (edas.py:529-536) is never exercised by a test; test_every_database_signal_has_a_persisted_access_method asserts only 'error' not in result.stats, and no test drives a signal to an unbound route, so the refusal the commit message calls 'reject scanner output with an unbound route' is unverified and a regression that let the guard stop firing would redden nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/remaining-edas-databases.html",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the focused offline gate passed 60 tests, matching the earlier route-config-final-gate.log run, while the committed-head gate recorded as after_suite collected and passed 90; the landing evidence understates the gate it cites and should carry the committed-head number."
+    },
+    {
+      "file": "imas_codex/config/facilities/jt-60sa.yaml",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: the scanner now emits jt-60sa:edas:uddb and jt-60sa:edas:uddb-scoped DataAccess bindings and binds its UDDB/LCDB/MBDB signals to them, but the scoped graph read at 99b0308 shows 189 UDDB and 8,469 LCDB FacilitySignal rows with 0 bound routes, so the plan done-when is only met once a scoped rescan persists those edges; the run names this in follow_ons and withholds an unscoped scan, which is the correct call."
+    }
+  ],
+  "head_log_revision": "4219c6f81523ff1e7d1c98e975dd4a0675adc559",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two sites, both inside the scanner: _database_access_methods is built from config at edas.py:337 and consumed by the new route guard at edas.py:527-536 before the ScanResult is returned",
+    "diff": "read commit by commit against base 901491f7; 99b0308 adds _database_access_methods and the unbound-route guard plus 47 test lines, 4219c6f adds the nine database_routes and was 127 lines in jt-60sa.yaml and 38 in facility_config.yaml and 60 test lines, and 9758dc5a is a clean merge of the run work (4219c6f) with mainline (11a062ea4); the run touched exactly the six declared files and nothing else",
+    "done_when": "plan section 51's done-when is that each answering JT-60SA database has its signals in the graph with units and descriptions where provided, coverage counts sit in the fragment, and the facility config records every access route and status with tests/config passing; the config, schema and route records are complete and the scoped counts are in the fragment table, but the UDDB/LCDB DataAccess edges are not yet persisted (0 bound), so that half of the done-when is deferred to the rescan node the manifest names",
+    "goal": "the node's goal (plan section 51 node 2) is to enumerate FLEDD/EQDB, PMDB, FSMD, EASY and the fast-sampling database with metadata, land the equilibrium field signals, and persist every database's read call, catalogue call, metadata and status in data_systems and data_access_patterns of jt-60sa.yaml with new keys declared in facility_config.yaml; all nine databases carry a database_routes record with read_call, catalogue_call, metadata_source, status and status_detail, and the equilibrium signals were already in the graph",
+    "manifest": "read; status complete, commits [99b0308, 4219c6f, 9758dc5a], after_suite records revision 4219c6f with 90 passed EXIT=0, baseline_suite is left empty though the baseline gate log exists beside it, and follow_ons names the UDDB/LCDB rescan and the separately dispatched test node",
+    "write_paths": "the manifest declares imas_codex/discovery/signals/scanners/edas.py, imas_codex/remote/scripts/enumerate_edas.py, imas_codex/schemas/facility_config.yaml, imas_codex/config/facilities/jt-60sa.yaml, tests/discovery/test_edas_scanner.py, the fragment html and the figures dir; git diff --stat 901491f7..4219c6f shows exactly those six files (figures dir unused) and nothing outside the fence"
+  },
+  "justifications": {
+    "durability": "three committed tests guard the new behaviour: test_facility_records_every_database_route_and_loader, test_every_database_signal_has_a_persisted_access_method and test_unlisted_database_routes_record_the_access_constraint, plus the pre-existing test_no_unknown_keys which the schema declaration rides on; the one gap is the fail-closed unbound-route refusal, which no test drives.",
+    "evidence": "I reproduced the gate at the reviewed head 9758dc5a with EXIT=0 and 90 passed (repro-gate.log), matching the recorded after_suite; the negative control is real (negative-control.log shows test_no_unknown_keys[jt-60sa] failing EXIT=1 on the removed schema key) and the scoped graph read carries a positive control for its zero rows, but the fragment cites 60 tests rather than the committed 90.",
+    "fit": "commits use conventional feat(signals) and fix(signals) subjects with bodies that state what changed and why and carry no plan, sprint or ticket identifiers, matching the fragment idiom and the surrounding scanners.",
+    "goal_fidelity": "all nine configured databases have a persisted route record and the scanner binds its database signals to access methods, which is node 2's persistence goal, but the graph-side half (UDDB/LCDB DataAccess edges) is deferred and the equilibrium signals were already present rather than newly landed.",
+    "reuse": "the change reuses the existing DataAccess model and the shared persistence writer, extends the existing attempt_database probe rather than forking a new one, and merges mainline rather than duplicating its route work.",
+    "scope_discipline": "git diff --stat 901491f7..4219c6f touches only the six declared source paths, the declared-but-unused check_edas.py and figures dir are untouched, and the final commit is a merge of the run work back into mainline."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal (plan section 51 node 2) is to enumerate FLEDD/EQDB, PMDB, FSMD, EASY and the fast-sampling database with metadata, land the equilibrium field signals, and persist every database's read call, catalogue call, metadata and status in data_systems and data_access_patterns of jt-60sa.yaml with new keys declared in facility_config.yaml; all nine databases carry a database_routes record with read_call, catalogue_call, metadata_source, status and status_detail, and the equilibrium signals were already in the graph.\nVERDICT done_when: plan section 51's done-when is that each answering JT-60SA database has its signals in the graph with units and descriptions where provided, coverage counts sit in the fragment, and the facility config records every access route and status with tests/config passing; the config, schema and route records are complete and the scoped counts are in the fragment table, but the UDDB/LCDB DataAccess edges are not yet persisted (0 bound), so that half of the done-when is deferred to the rescan node the manifest names.\nVERDICT write_paths: the manifest declares imas_codex/discovery/signals/scanners/edas.py, imas_codex/remote/scripts/enumerate_edas.py, imas_codex/schemas/facility_config.yaml, imas_codex/config/facilities/jt-60sa.yaml, tests/discovery/test_edas_scanner.py, the fragment html and the figures dir; git diff --stat 901491f7..4219c6f shows exactly those six files (figures dir unused) and nothing outside the fence.\nVERDICT manifest: read; status complete, commits [99b0308, 4219c6f, 9758dc5a], after_suite records revision 4219c6f with 90 passed EXIT=0, baseline_suite is left empty though the baseline gate log exists beside it, and follow_ons names the UDDB/LCDB rescan and the separately dispatched test node.\nVERDICT diff: read commit by commit against base 901491f7; 99b0308 adds _database_access_methods and the unbound-route guard plus 47 test lines, 4219c6f adds the nine database_routes and was 127 lines in jt-60sa.yaml and 38 in facility_config.yaml and 60 test lines, and 9758dc5a is a clean merge of the run work (4219c6f) with mainline (11a062ea4); the run touched exactly the six declared files and nothing else.\nCALL_SITES: two sites, both inside the scanner: _database_access_methods is built from config at edas.py:337 and consumed by the new route guard at edas.py:527-536 before the ScanResult is returned\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: all nine configured databases have a persisted route record and the scanner binds its database signals to access methods, which is node 2's persistence goal, but the graph-side half (UDDB/LCDB DataAccess edges) is deferred and the equilibrium signals were already present rather than newly landed.\nSCORE evidence: 16\nJUSTIFICATION evidence: I reproduced the gate at the reviewed head 9758dc5a with EXIT=0 and 90 passed (repro-gate.log), matching the recorded after_suite; the negative control is real (negative-control.log shows test_no_unknown_keys[jt-60sa] failing EXIT=1 on the removed schema key) and the scoped graph read carries a positive control for its zero rows, but the fragment cites 60 tests rather than the committed 90.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 901491f7..4219c6f touches only the six declared source paths, the declared-but-unused check_edas.py and figures dir are untouched, and the final commit is a merge of the run work back into mainline.\nSCORE durability: 13\nJUSTIFICATION durability: three committed tests guard the new behaviour: test_facility_records_every_database_route_and_loader, test_every_database_signal_has_a_persisted_access_method and test_unlisted_database_routes_record_the_access_constraint, plus the pre-existing test_no_unknown_keys which the schema declaration rides on; the one gap is the fail-closed unbound-route refusal, which no test drives.\nSCORE fit: 19\nJUSTIFICATION fit: commits use conventional feat(signals) and fix(signals) subjects with bodies that state what changed and why and carry no plan, sprint or ticket identifiers, matching the fragment idiom and the surrounding scanners.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change reuses the existing DataAccess model and the shared persistence writer, extends the existing attempt_database probe rather than forking a new one, and merges mainline rather than duplicating its route work.\nFINDING imas_codex/discovery/signals/scanners/edas.py:529 follow-on: the new fail-closed guard that returns ScanResult(stats={'error': 'signals lack data access'}) when any emitted signal's data_access is not among the built access ids (edas.py:529-536) is never exercised by a test; test_every_database_signal_has_a_persisted_access_method asserts only 'error' not in result.stats, and no test drives a signal to an unbound route, so the refusal the commit message calls 'reject scanner output with an unbound route' is unverified and a regression that let the guard stop firing would redden nothing.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/remaining-edas-databases.html:18 follow-on: the fragment states the focused offline gate passed 60 tests, matching the earlier route-config-final-gate.log run, while the committed-head gate recorded as after_suite collected and passed 90; the landing evidence understates the gate it cites and should carry the committed-head number.\nFINDING imas_codex/config/facilities/jt-60sa.yaml:65 follow-on: the scanner now emits jt-60sa:edas:uddb and jt-60sa:edas:lcdb DataAccess bindings and binds its UDDB/LCDB/MBDB signals to them, but the scoped graph read at 99b0308 shows 189 UDDB and 8,469 LCDB FacilitySignal rows with 0 bound routes, so the plan done-when is only met once a scoped rescan persists those edges; the run names this in follow_ons and withholds an unscoped scan, which is the correct call.",
+  "review_run_id": "r-20261008T102223138007-review-of-remaining-edas-databases",
+  "reviewed_base_sha": "901491f7cf88db47d60dd4752ea63af962097405",
+  "reviewed_head_sha": "9758dc5a29797fca719fc88178d2296d23591d20",
+  "reviewed_run_id": "r-20261008T094453019057-remaining-edas-databases",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 15,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:37:29.914265+00:00",
+  "total": 101,
+  "verdict": "SOUND WITH FINDINGS"
+}
