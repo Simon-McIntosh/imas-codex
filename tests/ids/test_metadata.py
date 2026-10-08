@@ -1,4 +1,4 @@
-"""Tests for IDS metadata population (Stage 3 of mapping pipeline)."""
+"""Tests for IDS metadata population in the mapping pipeline."""
 
 from __future__ import annotations
 
@@ -17,6 +17,16 @@ from imas_codex.ids.metadata import (
     populate_metadata,
 )
 from imas_codex.ids.models import MetadataPopulationResponse
+
+
+@pytest.fixture(autouse=True)
+def _block_unpatched_llm():
+    with patch(
+        "imas_codex.discovery.base.llm.call_llm_structured",
+        side_effect=AssertionError("Unpatched LLM call in metadata test"),
+    ) as unpatched_call:
+        yield
+    unpatched_call.assert_not_called()
 
 
 class TestMetadataContext:
@@ -372,7 +382,11 @@ class TestPopulateMetadata:
         params = json.loads(result.deterministic_fields["code/parameters"])
         assert params["custom"] == "config"
 
-    def test_populate_returns_ids_metadata_result(self):
+    @patch(
+        "imas_codex.discovery.base.llm.call_llm_structured",
+        return_value=(MetadataPopulationResponse(comment="Test metadata"), 0.0, 0),
+    )
+    def test_populate_returns_ids_metadata_result(self, _mock_llm):
         """Test that populate_metadata returns an IDSMetadataResult."""
         gc = MagicMock()
         gc.query.return_value = []
@@ -389,7 +403,11 @@ class TestPopulateMetadata:
         assert result.ids_name == "pf_active"
         assert result.dd_version == "4.0.0"
 
-    def test_populate_deterministic_fields_always_present(self):
+    @patch(
+        "imas_codex.discovery.base.llm.call_llm_structured",
+        side_effect=Exception("test LLM unavailable"),
+    )
+    def test_populate_deterministic_fields_always_present(self, _mock_llm):
         """Test deterministic fields are populated even with LLM errors."""
         gc = MagicMock()
         gc.query.side_effect = Exception("graph down")
@@ -563,7 +581,11 @@ class TestPopulateMetadata:
         assert result.facility == "jet"
         assert result.ids_name == "pf_active"
 
-    def test_populate_dd_version_in_result(self):
+    @patch(
+        "imas_codex.discovery.base.llm.call_llm_structured",
+        side_effect=Exception("test LLM unavailable"),
+    )
+    def test_populate_dd_version_in_result(self, _mock_llm):
         """Test that dd_version from input appears in the result."""
         gc = MagicMock()
         gc.query.return_value = []
