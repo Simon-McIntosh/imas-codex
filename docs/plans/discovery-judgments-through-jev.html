@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
 <meta name="plan-impl" content="0.625">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -463,6 +463,22 @@ after §15 releases <code>paths/scorer.py</code>. It moves <code>scorer.py</code
 <div class="r-comment" data-section="s14" data-id="c-run-r-20261008T063346870340-review-of-path-description-shape" data-who="reckon-build" data-when="2026-10-08T06:55:56.048Z">
     <div class="r-comment-body"><p>Review of r-20261008T061834979151-path-description-shape stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T061834979151-path-description-shape.json: the describe-step owner is real and the prompt shape guard fires, with three follow-ons (scorer.py duplicate deferred to the scorer node, the declared evidence fragment absent, and the reviewed manifest's null baseline/after suites).</p></div>
 </div>
+<div class="r-comment" data-section="s14" data-id="c-20261008-s14-node2-scope" data-who="reckon-build" data-when="2026-10-08T07:35:00Z">
+    <div class="r-comment-body"><p><strong>Node 2 scope, now on the critical path</strong> (the JT-60SA rescan blocks on it). The triage worker,
+<code>DirectoryTriager.async_triage_batch</code> in <code>paths/scorer.py</code>, still sends its own shape-less
+describe prompt. The resumed rescan reproduced <code>PathDescriptionBatch results Field required</code> on main and
+scored 0. Node 2:</p>
+<ul>
+<li>moves that caller onto <code>describe_paths</code>, so the describe step has one owner;</li>
+<li>makes a description failure non-blocking: the path is judged with its description recorded as unobserved, never as
+an empty string. The category gate does not need the description, and §17 node 1 measured single-path describe calls
+failing 3 of 16 even through the fixed owner;</li>
+<li>retires the 0.90 defaults this section names, so every path gate reads <code>get_path_scan_threshold()</code>.</li>
+</ul>
+<p>Done when a triage-worker test replays a path-keyed and a failed describe answer and both reach a Jev judgment, a test
+fails if any path gate reads <code>get_discovery_threshold()</code>, and a bounded live triage of
+<code>/analysis/src/eddb</code> reaches a stored Jev judgment.</p></div>
+</div>
 <div class="r-comment" data-section="s17" data-id="c-20261008-s17-categorise" data-who="lead" data-when="2026-10-08T06:55:00Z">
     <div class="r-comment-body"><p><strong>Lead, 2026-10-08: categorise before the content is known; score once it is.</strong> At the path stage the
 judge sees names, counts, child names, file types and a description generated from that same metadata. 20 of the 32
@@ -513,6 +529,19 @@ graph.</li>
 <li><strong>Roll-ups name their evidence.</strong> A path facet value rolled up from files records how many judged
 files it rests on, and is absent rather than zero before any file under it is judged.</li>
 </ul></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-20261008-s17-node1-result" data-who="reckon-build" data-when="2026-10-08T07:35:00Z">
+    <div class="r-comment-body"><p><strong>Node 1 result (run <code>path-category-goldens</code>, delivered 2026-10-08).</strong> 244 JT-60SA paths
+carry a <code>PathPurpose</code> category from source inspection on the facility, and 51 carry a canonical-copy
+binding. On the 222 canonical paths, the scan-or-expand decision scores:</p>
+<ul>
+<li>AUC <strong>0.924</strong> (95% interval 0.886 to 0.961) for the category-derived gate;</li>
+<li>AUC 0.667 (0.590 to 0.741) for the current maximum-of-facets gate;</li>
+<li>accuracy 0.62 and macro-F1 0.55 for the Choice itself.</li>
+</ul>
+<p>The categorise-first design is confirmed on independent labels. Three frozen-state calls per path changed the Choice on
+14 of 228 paths. The fresh-description arm could not run: the production describe batch failed 8 of 8, and single-path
+calls failed 3 of 16. Node 2 builds the category gate.</p></div>
 </div>
 <div class="r-comment" data-section="s15" data-id="c-run-r-20261008T060108264897-facility-access-matches" data-who="reckon-build" data-when="2026-10-08T06:44:13Z">
     <div class="r-comment-body"><p>Facility-configured access calls now reach path and both code judgment arms. On 158 labelled JT-60SA paths, fresh AUC was 0.8502 without and 0.8513 with match evidence; at the 0.30 gate TP/FP/FN/TN changed from 87/6/31/34 to 86/6/32/34. Focused gate 106 passed; removing the builder's facility sources failed all four facility cases.</p></div>
