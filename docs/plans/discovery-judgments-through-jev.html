@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
-<meta name="plan-impl" content="0.588">
-<meta name="plan-version" content="66">
+<meta name="plan-impl" content="0.647">
+<meta name="plan-version" content="67">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -253,16 +253,12 @@ repeat-call evidence, and the scan-or-expand AUC under both labellings. Node 2's
 without graph context, and a test parametrised over every facility config asserts each judge's state carries its
 neighbourhood fields.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s18">§18 — Retire the 0.5 wiki threshold from the runner status and the document label</h2>
-<section data-reckon="section" data-id="s18" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p><strong>Why.</strong> §5 moved wiki and document ingest to a Jev gate at <code>CONTENT_INGEST_THRESHOLD</code> = 0.16.
-Its review found two displays still keyed to the retired 0.5 language-model threshold. The wiki runner's progress
-status in <code>imas_codex/discovery/wiki/parallel.py</code>, around line 1028, counts pending ingest as
-<code>wp.status = $scored AND wp.score_composite >= 0.5</code>, which under-reports the pages the ingest claim takes.
-The document progress display in <code>imas_codex/discovery/wiki/progress.py</code>, line 741, labels a document
-skipped below 0.5. The CLI defaults are a separate node owned by the session that folded the discover stages.</p>
-<p><strong>Done when</strong> both read <code>CONTENT_INGEST_THRESHOLD</code>, and a test fails if either compares
-against a literal threshold.</p>
+<section data-reckon="section" data-id="s18" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The wiki runner's pending counts and the document skipped label read <code>CONTENT_INGEST_THRESHOLD</code> (0.16), and a restored literal 0.5 fails the new test. The CLI defaults read the same constant since <code>8f69fadb2</code>. Review 20/19/20/19/20/20. <a href="/imas-codex/evidence/archive/discovery-judgments-through-jev-landed.html#s18">full record</a></p>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -572,6 +568,9 @@ fresh-description arm of the variation measure once the triage worker routes thr
 </div>
 <div class="r-comment" data-section="s15" data-id="c-run-r-20261008T065718829262-review-of-facility-access-matches" data-who="reckon-build" data-when="2026-10-08T07:12:01.431Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T060108264897-facility-access-matches stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T060108264897-facility-access-matches.json and its .at-5dfbd3150420f3955dc69584ce926849f9cd513e.json sibling. Verdict SOUND WITH FINDINGS: scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 20 (total 111); four follow-on findings, no blocking finding. This node made no repository commits (its deliverable is the review record, written outside any checkout).</p></div>
+</div>
+<div class="r-comment" data-section="s16" data-id="c-20261008-s16-wiki-pin" data-who="reckon-build" data-when="2026-10-08T08:00:00Z">
+    <div class="r-comment-body"><p>Folded from §18's review: the document pending-ingest comparison in <code>get_wiki_discovery_stats</code> (<code>wiki/parallel.py</code> around line 1106) reads the constant, but no test reaches its row-scan branch, so reverting it to 0.5 stays green. Add a stub returning a scored document between 0.16 and 0.5 that pins it.</p></div>
 </div>
 </section>
 </main>
