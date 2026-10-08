@@ -122,6 +122,7 @@ class EDASScanner:
                     "ref_shot": shot_str,
                     "api_path": api_path,
                     "lib_path": lib_path,
+                    "databases": config.get("databases", ["EDDB"]),
                 },
                 ssh_host=ssh_host,
                 timeout=180,
@@ -173,6 +174,28 @@ class EDASScanner:
             dname = raw["data_name"]
             units = raw.get("units", "")
             description = raw.get("description", "")
+
+            if raw.get("database") == "UDDB":
+                signals.append(
+                    FacilitySignal(
+                        id=f"{facility}:general/uddb_{dname.lower()}",
+                        facility_id=facility,
+                        status=FacilitySignalStatus.discovered,
+                        physics_domain="general",
+                        name=f"UDDB/{dname}",
+                        accessor=f"uddbreadConvert('{shot_str}', '{dname}', t1, t2)",
+                        data_source_name="UDDB",
+                        data_source_path=f"UDDB/{dname}",
+                        description=description,
+                        data_class=SignalDataClass.time_series,
+                        shot_range=raw.get("shot_range") or None,
+                        pid=dname,
+                        aliases=[raw["alias"]] if raw.get("alias") else None,
+                        discovery_source="edas",
+                        example_shot=ref_shot,
+                    )
+                )
+                continue
 
             # A PID-keyed one-point row is its own signal group: EDDB addresses
             # it by the nine-character PID No. rather than by the catalogue
@@ -250,11 +273,14 @@ class EDASScanner:
                 "reference_shot": shot_str,
                 "categories": data.get("categories", []),
                 "ncats": data.get("ncats", 0),
+                "database_attempts": data.get("attempts", []),
+                "category_counts": data.get("category_counts", {}),
             },
             stats={
                 "signals_discovered": len(signals),
                 "categories_found": data.get("ncats", 0),
                 "reference_shot": shot_str,
+                "database_attempts": data.get("attempts", []),
             },
         )
 
@@ -302,6 +328,9 @@ class EDASScanner:
         for s in signals:
             source = s.data_source_path or s.name or ""
             parts = source.split("/")
+            if s.data_source_name == "UDDB" and len(parts) == 2:
+                batch.append({"id": s.id, "database": "UDDB", "pid": parts[1]})
+                continue
             if len(parts) == 2:
                 data_class = EDDB_LETTER_BY_DATA_CLASS.get(
                     getattr(s.data_class, "value", s.data_class), ""

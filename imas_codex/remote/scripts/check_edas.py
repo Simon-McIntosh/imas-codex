@@ -122,6 +122,30 @@ def main():
     results = []
     for sig in signals:
         try:
+            if sig.get("database") == "UDDB":
+                sys.path.insert(0, config.get("uddb_api_path", "/analysis/src/uddb"))
+                from uddb_pwrapper import uddbWrapper
+
+                raw = uddbWrapper(
+                    config.get("uddb_lib_path", "/analysis/lib/libuddb.so")
+                )
+                opened = raw.uddbOpen()
+                if opened:
+                    ok, rtn = raw.uddbreadHeader(ref_shot, sig["pid"])
+                    raw.uddbClose()
+                else:
+                    ok, rtn = False, {}
+                results.append(
+                    {
+                        "id": sig["id"],
+                        "success": bool(ok),
+                        "dtype": "raw_channel" if ok else None,
+                        "error": None
+                        if ok
+                        else f"UDDB header unavailable (irc={rtn.get('irc')})",
+                    }
+                )
+                continue
             # A check reads data, not the catalogue: a time series through
             # eddbreadTime over a short window (string bounds), a one-point
             # datum through eddbreadOne. A catalogue hit says a name is

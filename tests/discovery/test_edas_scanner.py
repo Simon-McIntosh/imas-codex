@@ -10,10 +10,13 @@ from __future__ import annotations
 
 import json
 import re
+import sys
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph.models import FacilitySignal, SignalDataClass
+from imas_codex.remote.scripts.enumerate_edas import enumerate_uddb
 
 # Two catalogue rows covering the two classes the scanner branches on:
 # a time series with a shot range and no PID, and a one-point row with a PID.
@@ -49,6 +52,98 @@ CONFIG = {
     "api_path": "/opt/edas/api",
     "lib_path": "/opt/edas/libeddb.so",
 }
+
+
+class TestConfiguredDatabases:
+    def test_uddb_table_rows_are_emitted(self, monkeypatch):
+        class RawCatalogue:
+            def __init__(self, path):
+                assert path == "/analysis/lib/libuddb.so"
+
+            def uddbOpen(self):
+                return True
+
+            def uddbreadTable(self):
+                return True, {
+                    "data": ["2111UA001"],
+                    "aliaslist": ["raw channel"],
+                    "shotlist": ["E080000-"],
+                    "irc": 0,
+                }
+
+            def uddbClose(self):
+                return True
+
+        monkeypatch.setitem(
+            sys.modules, "uddb_pwrapper", SimpleNamespace(uddbWrapper=RawCatalogue)
+        )
+        rows, attempt = enumerate_uddb({})
+        assert attempt["return_code"] == 0
+        assert attempt["count"] == 1
+        assert rows == [
+            {
+                "database": "UDDB",
+                "category": "UDDB",
+                "data_name": "2111UA001",
+                "alias": "raw channel",
+                "shot_range": "E080000-",
+            }
+        ]
+
+    async def test_uddb_catalogue_produces_distinct_raw_signal(self):
+        config = {**CONFIG, "databases": ["EDDB", "UDDB"]}
+        received = {}
+
+        async def remote_run(script, payload, **kwargs):
+            received.update(payload)
+            return json.dumps(
+                {
+                    **ENUMERATE_FIXTURE,
+                    "signals": [
+                        *ENUMERATE_FIXTURE["signals"],
+                        {
+                            "database": "UDDB",
+                            "category": "UDDB",
+                            "data_name": "2111UA001",
+                            "alias": "raw channel",
+                            "shot_range": "E080000-",
+                        },
+                    ],
+                }
+            )
+
+        with patch("imas_codex.remote.executor.async_run_python_script", remote_run):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
+
+        assert received["databases"] == ["EDDB", "UDDB"]
+        assert {s.id for s in result.signals} == {
+            "jt-60sa:general/mag_coilcur",
+            "jt-60sa:general/mdac_status",
+            "jt-60sa:general/uddb_2111ua001",
+        }
+        raw = next(s for s in result.signals if s.data_source_name == "UDDB")
+        assert raw.accessor == "uddbreadConvert('E101173', '2111UA001', t1, t2)"
+
+    async def test_raw_signal_check_uses_uddb_pid(self):
+        signal = FacilitySignal(
+            id="jt-60sa:general/uddb_2111ua001",
+            facility_id="jt-60sa",
+            name="UDDB/2111UA001",
+            accessor="uddbreadConvert('E101173', '2111UA001', t1, t2)",
+            data_source_name="UDDB",
+            data_source_path="UDDB/2111UA001",
+        )
+        remote = AsyncMock(
+            return_value=json.dumps({"results": [{"id": signal.id, "success": True}]})
+        )
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            results = await EDASScanner().check(
+                "jt-60sa", "nakasvr26", [signal], CONFIG
+            )
+        assert remote.call_args.args[1]["signals"] == [
+            {"id": signal.id, "database": "UDDB", "pid": "2111UA001"}
+        ]
+        assert results[0]["valid"] is True
 
 
 class TestEdasScanTypedSlots:
@@ -229,6 +324,8 @@ class TestEdasPidKeyedGroup:
         )
         assert empty.pid is None
         assert empty.data_class == SignalDataClass.one_point
+
+
 class TestEdasCheckReadsCategoryFromSourcePath:
     """check() keys the catalogue off data_source_path, not a rewritten name."""
 
