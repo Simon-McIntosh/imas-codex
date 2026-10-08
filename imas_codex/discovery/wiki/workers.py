@@ -1,11 +1,11 @@
 """Async workers for parallel wiki discovery.
 
 Five supervised workers that process wiki content through the pipeline:
-- score_worker: LLM content-aware scoring (scanned → scored)
+- score_worker: describe and judge pages (scanned → scored)
 - ingest_worker: Chunk and embed high-value pages (scored → ingested)
 - docs_worker: Download and ingest scored documents (scored → ingested)
-- docs_score_worker: LLM scoring for documents (discovered → scored)
-- image_score_worker: VLM captioning and scoring (ingested → captioned)
+- docs_score_worker: describe and judge documents (discovered → scored)
+- image_score_worker: vision captioning and Jev judgment (ingested → captioned)
 
 Workers are supervised via base.supervision for automatic restart on crash.
 They coordinate through graph_ops claim/mark functions using claimed_at timestamps.
@@ -64,13 +64,12 @@ async def score_worker(
     state: WikiDiscoveryState,
     on_progress: Callable | None = None,
 ) -> None:
-    """Score worker: Content-aware LLM scoring in single pass.
+    """Score worker: Describe fetched pages and judge their content.
 
     Transitions: scanned → scored
 
-    Fetches page content preview, then scores with LLM.
-    Uses centralized LLM access via get_model().
-    Cost is tracked from actual OpenRouter response.
+    Fetches page content previews, generates descriptions, then asks Jev for
+    typed judgments. Costs come from both service receipts.
     """
     from imas_codex.settings import get_model, get_reasoning_effort
 
@@ -346,7 +345,7 @@ async def score_worker(
             on_progress(f"scoring {len(pages_with_content)} pages", state.score_stats)
 
         try:
-            # Step 2: Score batch with LLM (only pages that have content)
+            # Describe fetched pages, then judge their content with Jev.
             model = get_model("discovery-score")
             logger.debug(f"score_worker {worker_id}: starting LLM scoring...")
             results, cost = await _score_pages_batch(
@@ -1051,7 +1050,7 @@ async def docs_score_worker(
             )
 
         try:
-            # Step 2: Score batch with LLM (only documents that have content)
+            # Describe fetched documents, then judge their content with Jev.
             model = get_model("discovery-score")
             results, cost = await _score_documents_batch(
                 documents_to_score,
@@ -1067,7 +1066,7 @@ async def docs_score_worker(
                 matching = next(
                     (a for a in documents_to_score if a["id"] == r["id"]), {}
                 )
-                r["preview_text"] = matching.get("preview_text", "")[:500]
+                r["preview_text"] = matching.get("preview_text", "")[:1500]
                 r["score_cost"] = cost / len(results) if results else 0.0
 
             # Persist scores to graph

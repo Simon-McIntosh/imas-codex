@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 # Claim timeout - pages claimed longer than this are reclaimed
 CLAIM_TIMEOUT_SECONDS = 300  # 5 minutes
+CONTENT_INGEST_THRESHOLD = 0.16
 
 # Retry configuration for Neo4j transient errors (deadlocks)
 MAX_RETRY_ATTEMPTS = 5
@@ -467,7 +468,7 @@ def has_pending_document_work(facility: str, *, base_url: str | None = None) -> 
 
     Documents are pending when:
     - status = 'discovered' (needs LLM scoring or direct ingestion)
-    - status = 'scored' AND score >= 0.5 AND ingestable type (needs ingestion)
+    - status = 'scored' with an admitted Jev Noul and ingestable type
 
     Uses ``claimed_at`` filter for multi-worker coordination.
     When ``base_url`` is provided, matches documents by linked page URL
@@ -481,6 +482,7 @@ def has_pending_document_work(facility: str, *, base_url: str | None = None) -> 
             "discovered": DocumentStatus.discovered.value,
             "scored": DocumentStatus.scored.value,
             "ingestable": list(INGESTABLE_DOCUMENT_TYPES),
+            "min_score": CONTENT_INGEST_THRESHOLD,
             "cutoff": cutoff,
         }
         params.update(_base_url_params(base_url))
@@ -488,7 +490,7 @@ def has_pending_document_work(facility: str, *, base_url: str | None = None) -> 
             f"""
             MATCH (wa:Document {{facility_id: $facility}})
             WHERE ((wa.status = $discovered)
-               OR (wa.status = $scored AND wa.ingest_relevance >= 0.5
+               OR (wa.status = $scored AND wa.ingest_relevance >= $min_score
                    AND wa.document_type IN $ingestable))
               AND (wa.claimed_at IS NULL
                    OR wa.claimed_at < datetime() - duration($cutoff))
@@ -554,7 +556,7 @@ def has_pending_document_ingest_work(
     """Check if there are documents awaiting ingestion.
 
     Returns True if there are documents with:
-    - status = 'scored' AND score >= 0.5 AND ingestable type
+    - status = 'scored' with an admitted Jev Noul and ingestable type
     - status = 'discovered' AND score_exempt = true (bypass LLM scoring)
 
     Uses ``claimed_at`` filter for multi-worker coordination.
@@ -569,6 +571,7 @@ def has_pending_document_ingest_work(
             "scored": DocumentStatus.scored.value,
             "discovered": DocumentStatus.discovered.value,
             "types": list(INGESTABLE_DOCUMENT_TYPES),
+            "min_score": CONTENT_INGEST_THRESHOLD,
             "cutoff": cutoff,
         }
         params.update(_base_url_params(base_url))
@@ -576,7 +579,7 @@ def has_pending_document_ingest_work(
             f"""
             MATCH (wa:Document {{facility_id: $facility}})
             WHERE (
-                (wa.status = $scored AND wa.ingest_relevance >= 0.5
+                (wa.status = $scored AND wa.ingest_relevance >= $min_score
                  AND wa.document_type IN $types)
                 OR (wa.status = $discovered AND wa.score_exempt = true)
               )
@@ -626,7 +629,7 @@ def has_pending_work(facility: str, *, base_url: str | None = None) -> bool:
 
     Work exists if there are:
     - scanned pages awaiting scoring (unclaimed or orphaned)
-    - scored pages with score >= 0.5 awaiting ingest (unclaimed or orphaned)
+    - scored pages admitted by Jev awaiting ingest (unclaimed or orphaned)
 
     The ``claimed_at`` filter is essential for multi-worker coordination:
     it prevents a stop-condition from counting in-flight pages as
@@ -645,6 +648,7 @@ def has_pending_work(facility: str, *, base_url: str | None = None) -> bool:
             "facility": facility,
             "scanned": WikiPageStatus.scanned.value,
             "scored": WikiPageStatus.scored.value,
+            "min_score": CONTENT_INGEST_THRESHOLD,
             "cutoff": cutoff,
         }
         if base_url:
@@ -653,7 +657,7 @@ def has_pending_work(facility: str, *, base_url: str | None = None) -> bool:
             f"""
             MATCH (wp:WikiPage {{facility_id: $facility}})
             WHERE (wp.status = $scanned
-                   OR (wp.status = $scored AND wp.ingest_relevance >= 0.5))
+                   OR (wp.status = $scored AND wp.ingest_relevance >= $min_score))
               AND (wp.claimed_at IS NULL
                    OR wp.claimed_at < datetime() - duration($cutoff))
               {url_filter}
@@ -711,8 +715,7 @@ def has_pending_scan_work(facility: str, *, base_url: str | None = None) -> bool
 def has_pending_ingest_work(facility: str, *, base_url: str | None = None) -> bool:
     """Check if there's pending ingest work in the graph.
 
-    Returns True if there are scored pages with score >= 0.5 or
-    should_ingest=true awaiting ingestion (unclaimed or orphaned).
+    Returns True if scored pages admitted by Jev await ingestion.
 
     When ``base_url`` is provided, only counts pages matching the site
     URL prefix.
@@ -723,6 +726,7 @@ def has_pending_ingest_work(facility: str, *, base_url: str | None = None) -> bo
         params: dict = {
             "facility": facility,
             "scored": WikiPageStatus.scored.value,
+            "min_score": CONTENT_INGEST_THRESHOLD,
             "cutoff": cutoff,
         }
         if base_url:
@@ -731,7 +735,7 @@ def has_pending_ingest_work(facility: str, *, base_url: str | None = None) -> bo
             f"""
             MATCH (wp:WikiPage {{facility_id: $facility}})
             WHERE wp.status = $scored
-              AND wp.ingest_relevance >= 0.5
+              AND wp.ingest_relevance >= $min_score
               AND (wp.claimed_at IS NULL
                    OR wp.claimed_at < datetime() - duration($cutoff))
               {url_filter}
@@ -869,18 +873,17 @@ def claim_pages_for_scoring(
 @retry_on_deadlock()
 def claim_pages_for_ingesting(
     facility: str,
-    min_score: float = 0.5,
+    min_score: float = CONTENT_INGEST_THRESHOLD,
     limit: int = 10,
     *,
     base_url: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Claim scored pages for ingestion (chunking and embedding).
+    """Claim Jev-admitted scored pages for ingestion (chunking and embedding).
 
-    Workflow: scored + (score >= min_score OR should_ingest) + unclaimed → set claimed_at
+    Workflow: scored + ingest Noul >= min_score + unclaimed → set claimed_at
     After ingest: update status to 'ingested'.
 
-    Pages are claimed if their composite score meets the threshold OR if
-    the LLM explicitly flagged them with should_ingest=true.
+    Pages are claimed when their stored ingest Noul meets the threshold.
 
     Uses claim token pattern to handle race conditions between workers.
     When ``base_url`` is provided, only claims pages matching the site
@@ -953,14 +956,12 @@ def claim_pages_for_ingesting(
 def mark_pages_scored(
     facility: str,
     results: list[dict[str, Any]],
-    skip_threshold: float = 0.5,
+    skip_threshold: float = CONTENT_INGEST_THRESHOLD,
 ) -> int:
-    """Mark pages as scored or skipped based on score threshold.
+    """Mark pages as scored or skipped from the Jev ingest Noul.
 
-    Pages with score >= skip_threshold get status='scored' (proceed to ingest).
-    Pages with score < skip_threshold get status='skipped' (filtered out).
-    Pages where the LLM set should_ingest=True are always scored regardless
-    of composite score.
+    Pages at or above ``skip_threshold`` proceed to ingest; lower values are
+    skipped. Already-ingested content retains its status on a re-judgment.
 
     Uses batched UNWIND for O(1) graph operations instead of O(n) individual queries.
     """
@@ -1680,7 +1681,7 @@ def claim_documents_for_scoring(
 @retry_on_deadlock()
 def claim_documents_for_ingesting(
     facility: str,
-    min_score: float = 0.5,
+    min_score: float = CONTENT_INGEST_THRESHOLD,
     limit: int = 5,
     *,
     base_url: str | None = None,
@@ -1796,7 +1797,7 @@ def mark_documents_scored(
                 "reasoning": r.get("reasoning"),
                 "keywords": r.get("keywords"),
                 "physics_domain": r.get("physics_domain"),
-                "preview_text": r.get("preview_text", "")[:500],
+                "preview_text": r.get("preview_text", "")[:1500],
                 "score_data_documentation": r.get("score_data_documentation", 0.0),
                 "score_physics_content": r.get("score_physics_content", 0.0),
                 "score_code_documentation": r.get("score_code_documentation", 0.0),

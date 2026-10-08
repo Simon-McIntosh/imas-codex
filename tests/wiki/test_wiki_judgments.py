@@ -1,5 +1,6 @@
 """The wiki ingest decision uses typed judgments and local content evidence."""
 
+import asyncio
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -59,7 +60,9 @@ def test_ingest_claim_reads_jev_judgment(function_name: str, node_alias: str):
     assert f"{node_alias}.score_composite >= $min_score" not in claim_query
 
 
-@pytest.mark.parametrize("function_name", ["claim_pages_for_scoring", "claim_documents_for_scoring"])
+@pytest.mark.parametrize(
+    "function_name", ["claim_pages_for_scoring", "claim_documents_for_scoring"]
+)
 def test_judgment_claim_includes_stale_model(function_name: str):
     from imas_codex.discovery.wiki import graph_ops
 
@@ -83,14 +86,35 @@ def test_low_jev_judgment_refuses_high_legacy_score():
     with patch.object(graph_ops, "GraphClient", return_value=client):
         graph_ops.mark_pages_scored(
             "tcv",
-            [{
-                "id": "tcv:old-high-score",
-                "preview_text": "Only an administrative notice",
-                "score_composite": 0.99,
-                "ingest_relevance": 0.01,
-            }],
+            [
+                {
+                    "id": "tcv:old-high-score",
+                    "preview_text": "Only an administrative notice",
+                    "score_composite": 0.99,
+                    "ingest_relevance": 0.01,
+                }
+            ],
         )
     assert client.query.call_args.kwargs["status"] == "skipped"
+
+
+def test_calibrated_gate_admits_relevant_page_below_legacy_cutoff():
+    from imas_codex.discovery.wiki import graph_ops
+
+    client = MagicMock()
+    client.__enter__.return_value = client
+    with patch.object(graph_ops, "GraphClient", return_value=client):
+        graph_ops.mark_pages_scored(
+            "tcv",
+            [
+                {
+                    "id": "tcv:measured-data-guide",
+                    "preview_text": "Guide to measured diagnostic signals",
+                    "ingest_relevance": 0.2,
+                }
+            ],
+        )
+    assert client.query.call_args.kwargs["status"] == "scored"
 
 
 def test_language_model_response_models_contain_text_only():
@@ -103,5 +127,105 @@ def test_language_model_response_models_contain_text_only():
     assert set(WikiScoreResult.model_fields) == {"id", "description"}
     assert set(DocumentScoreResult.model_fields) == {"id", "description"}
     assert set(ImageCaptionResult.model_fields) == {
-        "id", "description", "ocr_text", "mermaid_diagram"
+        "id",
+        "description",
+        "ocr_text",
+        "mermaid_diagram",
     }
+
+
+def test_document_preview_keeps_judged_span_for_rejudgment():
+    from imas_codex.discovery.wiki import graph_ops
+
+    client = MagicMock()
+    client.__enter__.return_value = client
+    preview = "x" * 1500
+    with patch.object(graph_ops, "GraphClient", return_value=client):
+        graph_ops.mark_documents_scored(
+            "tcv", [{"id": "tcv:manual", "preview_text": preview}]
+        )
+    stored = client.query.call_args.kwargs["batch"][0]["preview_text"]
+    assert stored == preview
+
+
+def test_page_description_is_followed_by_jev_judgment():
+    from imas_codex.discovery.wiki import scoring
+    from imas_codex.discovery.wiki.models import WikiScoreBatch, WikiScoreResult
+
+    async def describe(**kwargs):
+        assert kwargs["response_model"] is WikiScoreBatch
+        return (
+            WikiScoreBatch(
+                results=[WikiScoreResult(id="tcv:manual", description="Signal manual")]
+            ),
+            0.02,
+            0,
+        )
+
+    async def judge(items, kind, facility, config):
+        assert kind == "page" and facility == "tcv"
+        assert items[0]["description"] == "Signal manual"
+        return [{**items[0], "ingest_relevance": 0.2, "score_cost": 0.001}], 0.001
+
+    with (
+        patch("imas_codex.discovery.base.llm.acall_llm_structured", describe),
+        patch.object(scoring, "judge_content_items", judge),
+    ):
+        results, cost = asyncio.run(
+            scoring._score_pages_batch(
+                [{"id": "tcv:manual", "preview_text": "A diagnostic signal manual"}],
+                "description-model",
+                facility="tcv",
+            )
+        )
+    assert results[0]["should_ingest"] is True
+    assert results[0]["score_composite"] == 0.2
+    assert cost == pytest.approx(0.021)
+
+
+def test_image_vision_returns_text_before_jev_judgment():
+    from imas_codex.discovery.wiki import scoring
+    from imas_codex.discovery.wiki.models import ImageCaptionBatch, ImageCaptionResult
+
+    tool = get_facility("tcv")["data_access_patterns"]["key_tools"][0]
+
+    async def caption(**kwargs):
+        assert kwargs["response_model"] is ImageCaptionBatch
+        return (
+            ImageCaptionBatch(
+                results=[
+                    ImageCaptionResult(
+                        id="tcv:figure",
+                        description="Signal diagram",
+                        ocr_text=tool,
+                    )
+                ]
+            ),
+            0.03,
+            0,
+        )
+
+    async def judge(items, kind, facility, config):
+        assert kind == "image" and facility == "tcv"
+        assert (
+            tool
+            in scoring.build_content_judgment_state(items[0], kind, facility, config)[
+                "resource"
+            ]["data_access_tool_matches"]
+        )
+        return [{**items[0], "ingest_relevance": 0.3, "score_cost": 0.001}], 0.001
+
+    with (
+        patch("imas_codex.discovery.base.llm.acall_llm_structured", caption),
+        patch.object(scoring, "judge_content_items", judge),
+    ):
+        results, cost = asyncio.run(
+            scoring._score_images_batch(
+                [{"id": "tcv:figure", "image_data": "abc"}],
+                "vision-model",
+                facility_id="tcv",
+            )
+        )
+    assert results[0]["ocr_text"] == tool
+    assert results[0]["should_ingest"] is True
+    assert cost == pytest.approx(0.031)

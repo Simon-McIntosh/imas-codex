@@ -1,9 +1,8 @@
-"""Scoring functions for wiki discovery.
+"""Content description and typed judgments for wiki discovery.
 
-LLM-based scoring for wiki pages, documents, and images:
-- Page scoring: content preview + LLM structured output
-- Document scoring: text extraction + LLM structured output
-- Image scoring: VLM captioning + structured output
+- Page and document descriptions come from the language model.
+- Jev judges fetched page, document, and image text.
+- Vision supplies image captions, OCR, and diagram text.
 - HTML fetching: SSH proxy, Tequila, Keycloak, HTTP Basic auth
 - Heuristic fallback scoring for non-LLM path
 
@@ -577,6 +576,7 @@ async def _describe_and_judge_content(
     """Generate descriptions, then ask Jev to judge the same fetched text."""
     from imas_codex.discovery.base.facility import get_facility
     from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
     from imas_codex.discovery.wiki.models import DocumentScoreBatch, WikiScoreBatch
 
     response_model = WikiScoreBatch if kind == "page" else DocumentScoreBatch
@@ -613,7 +613,7 @@ async def _describe_and_judge_content(
     )
     for item in judged:
         item["score_composite"] = item["ingest_relevance"]
-        item["should_ingest"] = item["ingest_relevance"] >= 0.5
+        item["should_ingest"] = item["ingest_relevance"] >= CONTENT_INGEST_THRESHOLD
         item["score_cost"] += description_cost / len(items)
         if kind == "document":
             item["document_purpose"] = item["purpose"]
@@ -649,6 +649,7 @@ async def _score_images_batch(
     from imas_codex.discovery.base.facility import get_facility
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.discovery.wiki.entity_extraction import FacilityEntityExtractor
+    from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
     from imas_codex.discovery.wiki.models import ImageCaptionBatch
 
     user_content: list[dict[str, Any]] = [
@@ -720,7 +721,7 @@ async def _score_images_batch(
     for item in judged:
         item.update(
             score_composite=item["ingest_relevance"],
-            should_ingest=item["ingest_relevance"] >= 0.5,
+            should_ingest=item["ingest_relevance"] >= CONTENT_INGEST_THRESHOLD,
             reasoning="",
             keywords=[],
             physics_domain=None,
