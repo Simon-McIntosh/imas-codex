@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/discovery/test_path_judgments.py"
+  ],
+  "added_failures_note": "Delta review of 4d6919fdf..4f40b7175 (one commit: the removal of path_scan_relevance and SCAN_FACETS from imas_codex/discovery/paths/scorer.py). The reviewed run's manifest records neither baseline_suite nor after_suite, so I built paired arms independently from `git archive` of both revisions, run under the shared environment with PYTHONPATH shadowing the scratch tree (module.__file__ confirmed to be each scratch tree's own scorer.py, not the main checkout's editable install). Base 4d6919fdf: `uv run --no-sync pytest -p no:cacheprovider --continue-on-collection-errors tests/discovery` -> 1 failed, 1434 passed, 3 deselected, EXIT=1 (indep-delta-base.log), reproducing the prior review's figure exactly. Head 4f40b7175: same command -> 1428 passed, 3 deselected, 1 error, EXIT=2 (indep-delta-head.log). Added failure: tests/discovery/test_path_judgments.py, which now fails collection with `ImportError: cannot import name 'path_scan_relevance' from imas_codex.discovery.paths.scorer` because it imports the symbol the commit removed. Under pytest's default the collection error interrupts the whole tests/discovery session and no test runs (indep-delta-head-natural.log, 1 error in 8.68s, EXIT=2). The base arm's single failing id tests/discovery/test_path_judgments.py::test_typed_path_judgment_stores_distributions_and_computes_gates is absorbed by that collection error, so the net added count is one and the file is outside the reviewed run's write grant and is declared in its manifest as a follow-on.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider --continue-on-collection-errors tests/discovery",
+    "completed": true,
+    "exit_status": 2,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/discovery/test_path_judgments.py"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122454835855-review-of-path-category-gate/indep-delta-head.log",
+    "revision": "4f40b717526698bdd0cbee423b6c4d1193724dce"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider --continue-on-collection-errors tests/discovery",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/discovery/test_path_judgments.py::test_typed_path_judgment_stores_distributions_and_computes_gates"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122454835855-review-of-path-category-gate/indep-delta-base.log",
+    "revision": "4d6919fdf45727941f33b60febf80243caafbc34"
+  },
+  "completed_at": "2026-10-08T12:48:54.579Z",
+  "dispatched_at": "2026-10-08T12:25:02Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_path_judgments.py",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on (added failure): this module imports path_scan_relevance at line 11, so the delta commit's removal turns its single test failure into a collection error `ImportError: cannot import name 'path_scan_relevance'`. Under pytest's default the error interrupts the whole tests/discovery collection (EXIT=2, 3 deselected, 1 error in 8.68s, zero tests run, indep-delta-head-natural.log); with --continue-on-collection-errors the suite completes at 1428 passed, 1 error (indep-delta-head.log). This is the only added failure against a base arm of 1434 passed, 1 failed. The file is outside the reviewed node's write grant and its manifest already declares this repair as a follow-on, so the fix belongs to the coordinator, not to this run's fault."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103855443292-path-category-gate/repair-focused.log",
+      "line": "1",
+      "severity": "note",
+      "text": "note: the run's 12-passed focused gate carries REVISION=4d6919fdf in its header, and no pytest run in the reviewed run's logs is stamped with the declared head 4f40b7175; the head is covered only by the helper absence check (repair-negative-control.log) and the inventory check (repair-path-inventory.log). The removal is nevertheless safe for the in-scope tests: I ran the same focused gate at head myself and it passes (12 passed, EXIT=0, indep-delta-head-focused.log), so the gap is evidential rather than a defect."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "one commit, 4f40b7175, touching a single path: imas_codex/discovery/paths/scorer.py loses SCAN_FACETS (the PURPOSE_SCORE_NAMES faccet tuple excluding visualization/documentation) and the path_scan_relevance() helper, 12 deletions, zero insertions, no other file changed (git diff --stat 4d6919fdf..4f40b7175).",
+    "done_when": "the delta goal was to remove the uncalled maximum-facets helper so the source carries one production gate. Verified: at head, grep over imas_codex/ returns zero references to path_scan_relevance or SCAN_FACETS; the only remaining references anywhere are the import and one call in tests/discovery/test_path_judgments.py, which is outside the node's write grant.",
+    "goal": "the removals are correct and complete. path_scan_relevance and SCAN_FACETS were the retired maximum-of-facets gate; production path decisions now flow through path_category_gate (purpose distribution plus children-worth-listing) reached from path_judgment_fields, and path_scan_relevance had no production caller. The commit body states the mechanism (one production gate) and matches the diff.",
+    "manifest": "read; status complete, commits end 4f40b7175. Committed at its head; the delta diff is confined to scorer.py. baseline_suite and after_suite are both empty in the manifest, so this record's arms are independently constructed. The manifest's follow_ons already names the out-of-scope test repair and the reason collection now needs its stale import removed.",
+    "tests": "independent paired arms of tests/discovery: base 4d6919fdf 1434 passed, 1 failed (EXIT=1), head 4f40b7175 1428 passed, 1 error (EXIT=2) under --continue-on-collection-errors; the node's own focused gate passes at head (12 passed, EXIT=0).",
+    "write_paths": "git diff --stat 4d6919fdf..4f40b7175 touches exactly one path, imas_codex/discovery/paths/scorer.py, which is inside the reviewed node's declared grant; no unrelated reformatting or incidental edits."
+  },
+  "justifications": {
+    "durability": "the deletion is complete and pinned by a negative control the run recorded (repair-negative-control.log: helper absent at head, present on the one-commit-reverted source, EXIT=1), and the in-scope focused gate passes at head. The shortfall is that the delivered tree is not self-contained: tests/discovery no longer collects until the out-of-scope test drops its stale import, and under pytest's default the whole suite is interrupted (EXIT=2) rather than merely reporting one failure. The repair is declared as a follow-on and lies outside the write grant, which bounds the fault but leaves the tree red.",
+    "evidence": "I reproduced the whole-suite arms independently from git archive at both revisions with the shared environment, confirmed each arm imported its own scratch scorer.py (module.__file__), reproduced the prior review's base figure (1434 passed, 1 failed), and ran the node's focused gate at head (12 passed). The reviewed run's own negative control is sound and falsifiable. The gap is that no pytest run in the run's logs is stamped with the declared head 4f40b7175; the head carries only the absence and inventory checks.",
+    "fit": "the commit uses a conventional `refactor(discovery): remove unused facet path gate` subject with a body stating what was removed and why (one production gate), no plan, section, ticket or version identifier appears in the message, the symbol names removed are self-describing, and the retained module docstring explanation of the facet/gate split is accurate.",
+    "goal_fidelity": "the commit does exactly what its message says: it removes the uncalled maximum-facets helper and its facet tuple, leaving path_category_gate as the sole production path gate, and it resolves the dead-production-code finding the prior review raised at scorer.py:58. The residual is that the removal is not safe in isolation for the full tests/discovery suite because an out-of-scope test still imports the symbol.",
+    "reuse": "the change strengthens the single-source-of-truth property the prior review asked for: the maximum-facets gate no longer persists as a second, uncalled decision path beside the category gate, and no caller has to choose between them. The legacy combined_score/max_composite path in the same module is untouched and would be the next consolidation, but it is outside this commit's scope.",
+    "scope_discipline": "the diff is a single file and twelve deletions with no additions, no unrelated reformatting and no incidental edits; the out-of-scope test that the change breaks was correctly left untouched and declared as a follow-on rather than edited from outside the grant."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: commit 4f40b7175 removes the retired maximum-facets path helper (path_scan_relevance) and its SCAN_FACETS tuple from imas_codex/discovery/paths/scorer.py, 12 deletions, one file.\nVERDICT done_when: at head, imas_codex/ has zero references to path_scan_relevance or SCAN_FACETS; the only remaining references are in tests/discovery/test_path_judgments.py, which is outside the node's grant and declared as a follow-on.\nVERDICT write_paths: the delta diff touches exactly imas_codex/discovery/paths/scorer.py, which is inside the run's declared grant.\nVERDICT manifest: status complete, head 4f40b7175; baseline_suite and after_suite empty, so both arms are independently constructed here.\nVERDICT diff: one commit, removal of the uncalled facet helper and its facet list, leaving one production gate.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the commit does what it says and resolves the prior dead-code finding, but is not safe in isolation because an out-of-scope test still imports the removed symbol.\nSCORE evidence: 18\nJUSTIFICATION evidence: independent paired arms reproduced the base figure and the added collection error, and the node's negative control is sound; but no pytest run in the reviewed logs is stamped with the head commit.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: single-file twelve-line deletion with no unrelated edits and the out-of-scope test left untouched and declared.\nSCORE durability: 14\nJUSTIFICATION durability: deletion complete and pinned by a negative control and the head focused gate, but the delivered tree no longer collects tests/discovery under pytest's default (EXIT=2) until the declared out-of-scope repair lands.\nSCORE fit: 19\nJUSTIFICATION fit: conventional refactor subject with mechanism body; no plan, section, ticket or version identifiers.\nSCORE reuse: 18\nJUSTIFICATION reuse: removes a redundant second decision path so the category gate is the only one; legacy combined_score path in the same module remains.\nFINDING tests/discovery/test_path_judgments.py:11 follow-on: module fails collection with ImportError on path_scan_relevance, interrupting the whole tests/discovery collection (EXIT=2); file is out of grant and declared.\nFINDING repair-focused.log:1 note: run's 12-passed focused gate is stamped 4d6919fdf, not the declared head; I reran it at head green.",
+  "review_run_id": "r-20261008T122454835855-review-of-path-category-gate",
+  "reviewed_base_sha": "4d6919fdf45727941f33b60febf80243caafbc34",
+  "reviewed_head_sha": "4f40b717526698bdd0cbee423b6c4d1193724dce",
+  "reviewed_run_id": "r-20261008T103855443292-path-category-gate",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T12:40:00.000000+00:00",
+  "total": 107,
+  "verdict": "SOUND WITH FINDINGS"
+}
