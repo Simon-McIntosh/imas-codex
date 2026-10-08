@@ -195,7 +195,7 @@ def link_chunks_to_data_nodes(
 
         link_times: dict[str, float] = {}
 
-        # Step 1: Create DataReference nodes from mdsplus_paths
+        # Materialize DataReference nodes from chunk path strings.
         t_s = _time.monotonic()
         if scoped:
             create_refs_simple = """
@@ -239,7 +239,7 @@ def link_chunks_to_data_nodes(
         link_times["create_refs"] = _time.monotonic() - t_s
         logger.info("Created/matched %d DataReference nodes", refs_created)
 
-        # Step 2: Create CONTAINS_REF relationships
+        # Connect each chunk to its extracted path references.
         t_s = _time.monotonic()
         if scoped:
             contains_ref = """
@@ -271,7 +271,7 @@ def link_chunks_to_data_nodes(
         link_times["contains_ref"] = _time.monotonic() - t_s
         logger.info("Created %d CONTAINS_REF relationships", contains_count)
 
-        # Step 2.5: Compute normalized_path for new refs only
+        # Normalize only references in this batch.
         t_s = _time.monotonic()
         if scoped:
             # Only normalize refs we just created/matched
@@ -311,13 +311,13 @@ def link_chunks_to_data_nodes(
             logger.info("Computed normalized_path for %d refs", len(updates))
         link_times["normalize"] = _time.monotonic() - t_s
 
-        # Step 3: Create RESOLVES_TO_NODE relationships
+        # Resolve references to facility signal nodes.
         # Two-phase: exact match first (uses path+facility_id index),
         # then fuzzy match for remaining (facility-scoped to avoid
         # catastrophic O(all_refs × all_signals) cross-product).
         t_s = _time.monotonic()
         if scoped:
-            # Phase 1: Exact path match (index-friendly)
+            # Exact path matching uses the facility and path index.
             resolve_exact = """
                 MATCH (c:CodeChunk)
                 WHERE c.code_example_id IN $example_ids
@@ -329,7 +329,7 @@ def link_chunks_to_data_nodes(
                 MERGE (d)-[:RESOLVES_TO_NODE]->(t)
                 RETURN count(*) AS resolved
             """
-            # Phase 2: Fuzzy match for remaining (facility-scoped).
+            # Fuzzy matching stays within unresolved facility references.
             # Uses CALL {} subquery with LIMIT 1 per DataReference to avoid
             # O(refs × signals) cross-product that caused 14-26s stalls.
             resolve_fuzzy = """
@@ -351,7 +351,7 @@ def link_chunks_to_data_nodes(
                 RETURN count(*) AS resolved
             """
         else:
-            # Phase 1: Exact path match (index-friendly)
+            # Exact path matching uses the facility and path index.
             resolve_exact = """
                 MATCH (d:DataReference {ref_type: 'mdsplus_path'})
                 WHERE NOT (d)-[:RESOLVES_TO_NODE]->()
@@ -360,7 +360,7 @@ def link_chunks_to_data_nodes(
                 MERGE (d)-[:RESOLVES_TO_NODE]->(t)
                 RETURN count(*) AS resolved
             """
-            # Phase 2: Fuzzy match for remaining (facility-scoped).
+            # Fuzzy matching stays within unresolved facility references.
             # Uses CALL {} subquery with LIMIT 1 per DataReference.
             resolve_fuzzy = """
                 MATCH (d:DataReference {ref_type: 'mdsplus_path'})
@@ -392,7 +392,7 @@ def link_chunks_to_data_nodes(
             fuzzy_count,
         )
 
-        # Step 4: Create RESOLVES_TO_IMAS_PATH via SignalNode → IMASMapping → IMASNode
+        # Carry resolved signal mappings through to IMAS paths.
         t_s = _time.monotonic()
         if scoped:
             imas_q = """
@@ -418,7 +418,7 @@ def link_chunks_to_data_nodes(
         if imas_linked:
             logger.info("Created %d RESOLVES_TO_IMAS_PATH relationships", imas_linked)
 
-        # Step 5: Create CALLS_TDI_FUNCTION for TDI call references
+        # Connect TDI call references to function nodes.
         t_s = _time.monotonic()
         if scoped:
             tdi_q = """
@@ -514,7 +514,7 @@ def link_example_mdsplus_paths(
     refs_created = result[0]["refs_created"] if result else 0
 
     # Resolve to DataNodes (facility-scoped, two-phase)
-    # Phase 1: Exact match (uses path+facility_id index)
+    # Exact matching uses the facility and path index.
     graph_client.query(
         """
         MATCH (e:CodeExample {id: $example_id})-[:HAS_CHUNK]->(c:CodeChunk)
@@ -526,7 +526,7 @@ def link_example_mdsplus_paths(
         """,
         example_id=example_id,
     )
-    # Phase 2: Fuzzy match for remaining (facility-scoped)
+    # Fuzzy matching stays within unresolved facility references.
     graph_client.query(
         """
         MATCH (e:CodeExample {id: $example_id})-[:HAS_CHUNK]->(c:CodeChunk)
