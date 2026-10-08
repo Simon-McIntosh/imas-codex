@@ -14,6 +14,18 @@
       <tr><th>Total</th><th>8 (0.24% of chunks)</th><th>10</th><th>0 (0%)</th></tr>
     </tbody>
   </table>
+  <table id="edas-data-references-routing">
+    <caption>Code reference handlers selected by public facility data systems</caption>
+    <thead>
+      <tr><th>Facility</th><th>Declared reference systems</th><th>Handlers run once</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>JT-60SA</td><td>edas, imas</td><td>EDAS</td></tr>
+      <tr><td>TCV</td><td>tdi, mdsplus</td><td>Shared MDSplus/TDI handler once</td></tr>
+      <tr><td>JET</td><td>mdsplus among other data systems</td><td>MDSplus</td></tr>
+      <tr><td>ITER</td><td>imas</td><td>None</td></tr>
+    </tbody>
+  </table>
   <table id="edas-data-references-checks">
     <caption>Stored-graph controls after backfill</caption>
     <tbody>
@@ -21,6 +33,7 @@
       <tr><th>Extracted TMS/neyag exact lookup</th><td>0 FacilitySignal</td></tr>
       <tr><th>Code search for TMS neyag</th><td>Matched EDAS reading chunks and rendered <code>edas_eddb: TMS/neyag</code></td></tr>
       <tr><th>Graph verification</th><td>Live rollback transaction: 1 passed; missing IDS root refused</td></tr>
+      <tr><th>Config routing gate</th><td>All 4 public facility configs selected their declared reference handlers</td></tr>
     </tbody>
   </table>
 </section>
