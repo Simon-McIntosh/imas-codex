@@ -29,4 +29,17 @@
     When the test made ingestion block synchronously, the contender reclaimed
     the held file before the thread change; after it, the contender took none.
   </p>
+  <p id="code-ingest-claim-once-terminal-ownership">
+    Ingestion itself changes a CodeFile to <code>ingested</code> before its batch
+    ends. A two-file test exposed the resulting failure: after one file became
+    ingested, the status-filtered renewal raised and the batch marked both files
+    failed. Renewal now counts every row still carrying this batch's token and
+    updates the timestamp only while that row remains scored. The test finishes
+    with the first file ingested and the second skipped by its own outcome.
+    Restoring the scored-status filter makes that test fail, EXIT=1. A separate
+    lost-token test shows the error path leaves an already ingested file and a
+    foreign-owned scored file unchanged. A live two-node graph probe confirmed
+    that terminal status retains ownership without changing its timestamp,
+    while a foreign token raises; both probe nodes were removed.
+  </p>
 </section>
