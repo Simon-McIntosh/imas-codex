@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
-<meta name="plan-impl" content="0.615">
-<meta name="plan-version" content="48">
+<meta name="plan-impl" content="0.571">
+<meta name="plan-version" content="49">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -181,6 +181,51 @@ call site in its runner node. (3) The describe-then-judge step is wired twice: i
 <p><strong>Done when</strong> every path-gating default reads <code>get_path_scan_threshold()</code>, and a test fails if any
 path gate reads <code>get_discovery_threshold()</code>. The describe-then-judge step has one owner that both callers use. The
 focused path tests pass with baseline and after logs.</p>
+
+    <h2 id="s15">§15 — Give every judge its facility&#x27;s own access-pattern matches</h2>
+<section data-reckon="section" data-id="s15" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> The lead asked on 2026-10-08 that every Jev judge, the wiki judge included, receive all of its
+relevant context, and that the judges match known data-access patterns and data loaders in the items they judge. The
+deployed path judge scores AUC 0.886 on the widened JT-60SA labelled set, with 38 false negatives against 80 true
+positives at the scan gate. The lead also directed that this is a durable multi-machine tool: each facility's patterns
+must be wired when discovery runs on that facility, with JT-60SA the current focus.</p>
+<p><strong>What each judge receives today</strong> (read from the code on 2026-10-08):</p>
+<table>
+<thead><tr><th>Judge</th><th>Facility patterns as reference text</th><th>Matches of those patterns in the judged item</th></tr></thead>
+<tbody>
+<tr><td>Path (<code>build_path_judgment_state</code>, <code>paths/scorer.py</code>)</td><td>yes, through
+<code>facility_relevance_block</code></td><td>no: <code>pattern_categories</code> come from one global registry
+(MDSplus, PPF, UFILE, HDF5, NetCDF, EQDSK, IMAS, conventions), built by <code>_build_enrich_patterns</code> in
+<code>paths/enrichment.py</code></td></tr>
+<tr><td>Code triage (<code>build_triage_state</code>, <code>code/scorer.py</code>)</td><td>yes</td><td>no: the code
+scanner's <code>_get_pattern_categories</code> in <code>code/scanner.py</code> reads only
+<code>PATTERN_REGISTRY</code>, a second registry that differs from the path one; the path-only arm carries no pattern
+evidence at all</td></tr>
+<tr><td>Wiki pages and documents (§5)</td><td>yes, in the prompt</td><td>no: <code>extract_facility_tool_mentions</code>
+runs at ingest, after scoring; §5's node now puts its matches in the wiki state</td></tr>
+</tbody></table>
+<p>So no facility's own loaders are ever counted. Every facility config that declares <code>data_access_patterns</code>
+(TCV, JET, ITER, JT-60SA) lists <code>key_tools</code> and <code>code_import_patterns</code>, and none of them reaches
+pattern matching. For JT-60SA, <code>eddbreadTime</code>, <code>getseldata</code> and the EDAS API imports are invisible
+to the judge except where they happen to fall in the first 1,500 characters of a file.</p>
+<p><strong>Deliverable.</strong> One builder owns the pattern categories that path enrichment and the code scanner send to
+the remote matcher. It takes the facility id, and it adds that facility's <code>key_tools</code> and
+<code>code_import_patterns</code> from its config, escaped as literals, to the shared registry. Matching stays one pass per
+directory or file batch rather than one per pattern, and it records which of the facility's patterns matched, with counts.
+The path state and both code-triage arms carry those matches, labelled as the facility's own data-access calls, beside
+the generic categories. No facility id appears as a literal in code.</p>
+<p><strong>Done when</strong> a test parametrised over every facility config under
+<code>imas_codex/config/facilities</code> (excluding <code>*_private.yaml</code>) asserts four things:</p>
+<ul>
+<li>The builder's categories for that facility include its own patterns.</li>
+<li>The path state and the content-arm triage state built from a row matching one of them carry the match.</li>
+<li>A row matching none carries no match, as the negative control.</li>
+<li>Another facility's patterns are absent.</li>
+</ul>
+<p>The labelled JT-60SA path set is committed beside the fragment: the prototype's <code>labelled-paths.json</code> and
+the deploy's widened labels, both now held only in run directories. The fragment reports path-judge AUC and the
+scan-gate confusion counts on that set, with and without the match evidence. The with-evidence arm re-enriches the
+labelled paths through the facility, with Jev spend inside the JT-60SA authorization.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -355,6 +400,9 @@ them, so path discovery's behaviour does not change until the deploy node.</p></
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261008-s5-lead" data-who="lead" data-when="2026-10-08T05:40:00Z">
     <div class="r-comment-body"><p><strong>Lead, 2026-10-08: rescore the wiki pages with Jev, JT-60SA first.</strong> Dispatch on the codex lane. <code>imas_codex/schemas/facility.yaml</code> is a shared file, resolved by merge (lead direction recorded on jt60sa-discovery-completion §44). This node edits only the WikiPage, Document and Image classes, merges origin/main before its last commit, and the coordinator accepts the path at promotion. Its JT-60SA consumer is jt60sa-discovery-completion §52. The live JT-60SA wiki is the nakasvr26 Code wiki (238 pages ingested, all 5,812 chunks embedded). The Main web, which holds the SystemDailyReport pages, is unreachable while nakasvr23 refuses SSH, so the daily-report check reads one of the stored raw pages, or records that none can be read.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-s5-matches" data-who="lead" data-when="2026-10-08T06:00:00Z">
+    <div class="r-comment-body"><p>Lead, 2026-10-08: every wiki, document and image Jev state carries the facility's access-pattern matches on the item's own text, found by <code>extract_facility_tool_mentions</code> with the facility's <code>key_tools</code> and <code>code_import_patterns</code>, config-driven for every facility. A test parametrised over every facility config asserts the match, with text that matches none as the negative control. The fragment reports labelled-set AUC with and without the matches.</p></div>
 </div>
 </section>
 </main>
