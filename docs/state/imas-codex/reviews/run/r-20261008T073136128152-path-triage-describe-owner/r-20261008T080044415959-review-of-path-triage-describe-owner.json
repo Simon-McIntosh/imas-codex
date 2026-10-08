@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "e7464580a459406f969f35f19c8a056538486550",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/paths/parallel.py:1959",
+    "imas_codex/discovery/paths/parallel.py:1754",
+    "imas_codex/cli/discover/__init__.py:140"
+  ],
+  "completed_at": "2026-10-08T08:15:20.927Z",
+  "dispatched_at": "2026-10-08T08:01:00Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/__init__.py",
+      "line": "129",
+      "severity": "follow-on",
+      "text": "follow-on: the discover_status path view still imports get_discovery_threshold and passes it to get_high_value_paths (imas_codex/discovery/paths/frontier.py:1467), a path gate, so \u00a714's section done-when 'every path-gating default reads get_path_scan_threshold()' holds inside imas_codex/discovery/paths but not at this call site; the new guard scans only imas_codex/discovery/paths/*.py so a re-introduction here would not be caught. The \u00a714 node-2 comment assigns this call site to the map session's runner node, so it is out of this node's scope."
+    },
+    {
+      "file": "imas_codex/discovery/paths/models.py",
+      "line": "310",
+      "severity": "follow-on",
+      "text": "follow-on: TriagedDirectory.description is annotated `str` but the triager now passes None when a description is unobserved (scorer.py:391), so to_graph_dict() emits a null description and the annotation misdescribes runtime; the dataclass does not validate, so this is a stale type rather than a crash."
+    },
+    {
+      "file": "tests/discovery/test_path_description.py",
+      "line": "88",
+      "severity": "follow-on",
+      "text": "follow-on: the replay test asserts a Jev judgment and the description value but not that a failed describe left the batch's cost/statistics unset; the swallowed exception at scorer.py:385 is measured only by the two parametrised arms, so a regression that also recorded a nonzero description_cost on failure would pass this test."
+    }
+  ],
+  "head_log_revision": "dac0f8f4c5aa333ed4a608ade2337fa631de2610",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read dac0f8f4 against its parent e7464580 in full \u2014 scorer.py +45/-26 replaces the direct acall_llm_structured call with describe_paths under a try/except and preserves null descriptions in build_path_judgment_state, plus a 58-line replay test, a 32-line threshold guard and a one-line assertion relaxation.",
+    "done_when": "the node-2 done-when names three checks; tests/discovery/test_path_description.py::test_triage_judges_when_description_is_path_keyed_or_fails[path-keyed] and [failed] reach a Jev judgment (manifest after_suite, head-arm-verified.log 82 passed EXIT=0), tests/discovery/test_path_scan_threshold.py fails if any imas_codex/discovery/paths module reads get_discovery_threshold, and live-eddb-triage.log records a stored Jev judgment for /analysis/src/eddb.",
+    "goal": "the \u00a714 node-2 scope is to give the describe-then-judge step one caller-shared owner and make a description failure non-blocking, judging the path with its description recorded as unobserved; imas_codex/discovery/paths/scorer.py:372-392 now imports describe_paths and judges with descriptions.get(row[\"path\"]) so a failed describe yields description=None rather than aborting the batch.",
+    "manifest": "read; it records commits dac0f8f4, baseline_suite base-arm-verified.log 10 passed EXIT=0 at e7464580, after_suite head-arm-verified.log 82 passed EXIT=0 at dac0f8f4, negative_control_log negative-control-mutated.log 2 failed EXIT=1, and the live EDDB run; I re-ran the named files at head (reviewer-head.log 13 passed EXIT=0) and they reconcile.",
+    "write_paths": "git show --stat dac0f8f4 lists exactly imas_codex/discovery/paths/scorer.py, tests/discovery/test_path_description.py, tests/discovery/test_path_judgments.py and tests/discovery/test_path_scan_threshold.py, the paths the manifest declares in changed_paths and orientation_write_paths."
+  },
+  "justifications": {
+    "durability": "the added assertions are independent of the code under test \u2014 test_triage_judges_when_description_is_path_keyed_or_fails compares rows[0][\"description\"] to a constant from its own description_fails parameter, and reverting scorer.py to the direct call reddens both arms (negative-control-mutated.log 2 failed EXIT=1) \u2014 while the one relaxation, test_path_judgments.py:224 from `is` to `issubclass`, slightly loosens what that assertion pins.",
+    "evidence": "the done-when's three checks are each recorded \u2014 the replay test (head-arm-verified.log 82 passed EXIT=0), the threshold guard, and live-eddb-triage.log STORED judgment_model typesafe/jev-1.13 COMPLETE=1 \u2014 and I reproduced the head arm (reviewer-head.log 13 passed) and falsified the threshold guard (reviewer-threshold-guard-red.log 1 failed EXIT=1).",
+    "fit": "the try/except with logger.warning(..., exc_info=True) at scorer.py:385 follows the module's logging idiom, the commit subject 'fix(discovery): keep path judgments running after description errors' is conventional with a body, and test_path_scan_threshold.py is named for what it tests with no plan, ticket or phase identifier in the diff.",
+    "goal_fidelity": "scorer.py:378 now routes DirectoryTriager.async_triage_batch through the owner describe_paths and scorer.py:385-391 keeps judging on a describe failure, and both describe callers (scorer.py:378, parallel.py:2415) share the one owner.",
+    "reuse": "scorer.py:378 deletes its own describe request and calls the existing owner imas_codex/discovery/paths/description.py:36, which parallel.py:2415 already uses, so no capability is forking.",
+    "scope_discipline": "git show --stat dac0f8f4 names only the four declared write paths, and the CLI path gate left untouched is explicitly another node's scope per the \u00a714 node-2 comment."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the \u00a714 node-2 scope is to give the describe-then-judge step one caller-shared owner and make a description failure non-blocking, judging the path with its description recorded as unobserved; imas_codex/discovery/paths/scorer.py:372-392 now imports describe_paths and judges with descriptions.get(row[\"path\"]) so a failed describe yields description=None rather than aborting the batch.\nVERDICT done_when: the node-2 done-when names three checks; tests/discovery/test_path_description.py::test_triage_judges_when_description_is_path_keyed_or_fails[path-keyed] and [failed] reach a Jev judgment (manifest after_suite, head-arm-verified.log 82 passed EXIT=0), tests/discovery/test_path_scan_threshold.py fails if any imas_codex/discovery/paths module reads get_discovery_threshold, and live-eddb-triage.log records a stored Jev judgment for /analysis/src/eddb.\nVERDICT write_paths: git show --stat dac0f8f4 lists exactly imas_codex/discovery/paths/scorer.py, tests/discovery/test_path_description.py, tests/discovery/test_path_judgments.py and tests/discovery/test_path_scan_threshold.py, the paths the manifest declares in changed_paths and orientation_write_paths.\nVERDICT manifest: read; it records commits dac0f8f4, baseline_suite base-arm-verified.log 10 passed EXIT=0 at e7464580, after_suite head-arm-verified.log 82 passed EXIT=0 at dac0f8f4, negative_control_log negative-control-mutated.log 2 failed EXIT=1, and the live EDDB run; I re-ran the named files at head (reviewer-head.log 13 passed EXIT=0) and they reconcile.\nVERDICT diff: read dac0f8f4 against its parent e7464580 in full \u2014 scorer.py +45/-26 replaces the direct acall_llm_structured call with describe_paths under a try/except and preserves null descriptions in build_path_judgment_state, plus a 58-line replay test, a 32-line threshold guard and a one-line assertion relaxation.\nCALL_SITES: imas_codex/discovery/paths/parallel.py:1959, imas_codex/discovery/paths/parallel.py:1754, imas_codex/cli/discover/__init__.py:140\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scorer.py:378 now routes DirectoryTriager.async_triage_batch through the owner describe_paths and scorer.py:385-391 keeps judging on a describe failure, and both describe callers (scorer.py:378, parallel.py:2415) share the one owner.\nSCORE evidence: 20\nJUSTIFICATION evidence: the done-when's three checks are each recorded \u2014 the replay test (head-arm-verified.log 82 passed EXIT=0), the threshold guard, and live-eddb-triage.log STORED judgment_model typesafe/jev-1.13 COMPLETE=1 \u2014 and I reproduced the head arm (reviewer-head.log 13 passed) and falsified the threshold guard (reviewer-threshold-guard-red.log 1 failed EXIT=1).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat dac0f8f4 names only the four declared write paths, and the CLI path gate left untouched is explicitly another node's scope per the \u00a714 node-2 comment.\nSCORE durability: 19\nJUSTIFICATION durability: the added assertions are independent of the code under test \u2014 test_triage_judges_when_description_is_path_keyed_or_fails compares rows[0][\"description\"] to a constant from its own description_fails parameter, and reverting scorer.py to the direct call reddens both arms (negative-control-mutated.log 2 failed EXIT=1) \u2014 while the one relaxation, test_path_judgments.py:224 from `is` to `issubclass`, slightly loosens what that assertion pins.\nSCORE fit: 20\nJUSTIFICATION fit: the try/except with logger.warning(..., exc_info=True) at scorer.py:385 follows the module's logging idiom, the commit subject 'fix(discovery): keep path judgments running after description errors' is conventional with a body, and test_path_scan_threshold.py is named for what it tests with no plan, ticket or phase identifier in the diff.\nSCORE reuse: 20\nJUSTIFICATION reuse: scorer.py:378 deletes its own describe request and calls the existing owner imas_codex/discovery/paths/description.py:36, which parallel.py:2415 already uses, so no capability is forking.\nFINDING imas_codex/cli/discover/__init__.py:129 follow-on: the discover_status path view still imports get_discovery_threshold and passes it to get_high_value_paths (imas_codex/discovery/paths/frontier.py:1467), a path gate, so \u00a714's section done-when 'every path-gating default reads get_path_scan_threshold()' holds inside imas_codex/discovery/paths but not at this call site; the new guard scans only imas_codex/discovery/paths/*.py so a re-introduction here would not be caught. The \u00a714 node-2 comment assigns this call site to the map session's runner node, so it is out of this node's scope.\nFINDING imas_codex/discovery/paths/models.py:310 follow-on: TriagedDirectory.description is annotated `str` but the triager now passes None when a description is unobserved (scorer.py:391), so to_graph_dict() emits a null description and the annotation misdescribes runtime; the dataclass does not validate, so this is a stale type rather than a crash.\nFINDING tests/discovery/test_path_description.py:88 follow-on: the replay test asserts a Jev judgment and the description value but not that a failed describe left the batch's cost/statistics unset; the swallowed exception at scorer.py:385 is measured only by the two parametrised arms, so a regression that also recorded a nonzero description_cost on failure would pass this test.",
+  "review_run_id": "r-20261008T080044415959-review-of-path-triage-describe-owner",
+  "reviewed_base_sha": "e7464580a459406f969f35f19c8a056538486550",
+  "reviewed_head_sha": "dac0f8f4c5aa333ed4a608ade2337fa631de2610",
+  "reviewed_run_id": "r-20261008T073136128152-path-triage-describe-owner",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T08:12:53.444243+00:00",
+  "total": 118
+}

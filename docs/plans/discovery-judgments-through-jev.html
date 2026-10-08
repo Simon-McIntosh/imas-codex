@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
 <meta name="plan-impl" content="0.667">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -506,6 +506,9 @@ fails if any path gate reads <code>get_discovery_threshold()</code>, and a bound
 </div>
 <div class="r-comment" data-section="s14" data-id="c-run-r-20261008T073136128152-path-triage-describe-owner" data-who="reckon-build" data-when="2026-10-08T07:53:03Z">
     <div class="r-comment-body"><p>Directory triage now shares describe_paths and judges paths even when description fails, recording unobserved descriptions as null; 82 focused tests passed and 1/1 live EDDB path stored a Jev judgment.</p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-run-r-20261008T080044415959-review-of-path-triage-describe-owner" data-who="reckon-build" data-when="2026-10-08T08:15:20.927Z">
+    <div class="r-comment-body"><p>Independent review of r-20261008T073136128152-path-triage-describe-owner stored: status parsed, six dimensions scored (goal 19, evidence 20, scope 20, durability 19, fit 20, reuse 20, total 118), base e7464580 head dac0f8f4, added_failure_count 0, three follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s17" data-id="c-20261008-s17-categorise" data-who="lead" data-when="2026-10-08T06:55:00Z">
     <div class="r-comment-body"><p><strong>Lead, 2026-10-08: categorise before the content is known; score once it is.</strong> At the path stage the
