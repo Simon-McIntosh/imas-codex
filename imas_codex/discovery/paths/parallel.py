@@ -195,7 +195,6 @@ class DiscoveryState(DiscoveryStateBase):
                 triaged=PathStatus.triaged.value,
                 scored=PathStatus.scored.value,
                 minimum=get_path_scan_threshold(),
-                excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
                 **_expansion_gate_params(),
             )
             return result[0]["terminal_count"] if result else 0
@@ -319,7 +318,6 @@ def has_pending_work(facility: str) -> bool:
             scanned=PathStatus.scanned.value,
             triaged=PathStatus.triaged.value,
             minimum=get_path_scan_threshold(),
-            excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             **_expansion_gate_params(),
             **excluded_params,
         )
