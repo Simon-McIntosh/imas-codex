@@ -4,7 +4,7 @@ Multi-domain facility exploration and content discovery for the IMAS knowledge g
 
 ## Overview
 
-The discovery system comprises **six domain pipelines** that populate the knowledge graph with facility-specific code, documentation, data signals, and metadata. Each domain has its own CLI command under `imas-codex discover <domain>`, plus supporting commands under `imas-codex imas dd`.
+The discovery system comprises domain pipelines that populate the knowledge graph with facility-specific code, documentation, data signals, and metadata. `imas-codex discover FACILITY` runs them in dependency order; `--only DOMAIN` selects specific domains. Supporting commands live under `imas-codex imas dd`.
 
 The pipelines form a **dependency graph** — some domains produce graph nodes and embeddings that other domains consume as dynamic LLM prompt context. Running them in the optimal order maximizes context quality and minimizes LLM cost.
 
@@ -44,7 +44,7 @@ The pipelines form a **dependency graph** — some domains produce graph nodes a
            │                  │ imas_node_embedding
            └──────────────────┘
     ┌──────────────┐
-    │  ENRICH      │  imas-codex discover signals --enrich-only
+    │  ENRICH      │  imas-codex discover FACILITY --only signals --flush
     │  NODES       │  (SignalNode metadata)
     │  (agentic)   │  Uses code + graph context
     └──────────────┘
@@ -54,13 +54,16 @@ The pipelines form a **dependency graph** — some domains produce graph nodes a
 
 | Consumer | Depends On | What It Uses | Impact If Missing |
 |----------|-----------|--------------|-------------------|
-| `discover code` | `discover paths` | Scored FacilityPath nodes (≥0.7) | No paths to scan for files |
-| `discover signals` (enrich) | `discover wiki` | WikiChunk nodes, `wiki_chunk_embedding` index | No wiki descriptions/units injected into signal enrichment prompts → more LLM hallucination |
-| `discover signals` (enrich) | `discover code` | `code_chunk_embedding` index | No source code usage patterns in enrichment prompts |
-| `discover documents` | `discover paths` | Scored FacilityPath nodes (≥0.5) | No paths to scan for documents/images |
-| `discover signals --enrich-only` | `discover code` + graph | CodeChunk, SignalNode siblings | Less context for SignalNode physics descriptions |
+| `imas-codex discover FACILITY --only code` | `imas-codex discover FACILITY --only paths` | Scored FacilityPath nodes (≥0.7) | No paths to scan for files |
+| `imas-codex discover FACILITY --only signals` (enrich) | `imas-codex discover FACILITY --only wiki` | WikiChunk nodes, `wiki_chunk_embedding` index | No wiki descriptions/units injected into signal enrichment prompts → more LLM hallucination |
+| `imas-codex discover FACILITY --only signals` (enrich) | `imas-codex discover FACILITY --only code` | `code_chunk_embedding` index | No source code usage patterns in enrichment prompts |
+| `imas-codex discover FACILITY --only documents` | `imas-codex discover FACILITY --only paths` | Scored FacilityPath nodes (≥0.5) | No paths to scan for documents/images |
+| `imas-codex discover FACILITY --only signals --flush` | `imas-codex discover FACILITY --only code` + graph | CodeChunk, SignalNode siblings | Less context for SignalNode physics descriptions |
 
 ## Optimal Discovery Sequence
+
+`imas-codex discover tcv` runs the facility stages in dependency order. The
+individual selections below are useful when running or inspecting one domain.
 
 ### Phase 0: Foundation (no facility dependency)
 
@@ -75,23 +78,23 @@ Populates IMASNode, DDVersion, Unit, IMASSemanticCluster nodes. Creates `imas_no
 These three pipelines have **no cross-dependencies** and can run simultaneously:
 
 ```bash
-imas-codex discover paths tcv       # Directory structure → FacilityPath nodes
-imas-codex discover wiki tcv        # Wiki pages → WikiPage, WikiChunk nodes
+imas-codex discover tcv --only paths       # Directory structure → FacilityPath nodes
+imas-codex discover tcv --only wiki        # Wiki pages → WikiPage, WikiChunk nodes
 imas-codex discover static tcv      # Static MDSplus trees → SignalNode nodes
 ```
 
 ### Phase 2: Dependent Pipelines (requires Phase 1)
 
 ```bash
-imas-codex discover code tcv        # Requires scored paths from Phase 1
-imas-codex discover documents tcv   # Requires scored paths from Phase 1
+imas-codex discover tcv --only code        # Requires scored paths from Phase 1
+imas-codex discover tcv --only documents   # Requires scored paths from Phase 1
 ```
 
 ### Phase 3: Fully Enriched (requires Phase 1 + 2)
 
 ```bash
-imas-codex discover signals tcv     # Benefits from wiki + code + IMAS context
-imas-codex discover signals tcv --enrich-only   # Benefits from code chunks in graph
+imas-codex discover tcv --only signals     # Benefits from wiki + code + IMAS context
+imas-codex discover tcv --only signals --flush   # Benefits from code chunks in graph
 ```
 
 ### Quick Reference
@@ -99,19 +102,19 @@ imas-codex discover signals tcv --enrich-only   # Benefits from code chunks in g
 | Order | Command | Requires | Produces |
 |-------|---------|----------|----------|
 | 0 | `imas dd build` | Nothing | IMASNode, clusters, embeddings |
-| 1a | `discover paths` | Facility config | FacilityPath (scored) |
-| 1b | `discover wiki` | Wiki URLs in config | WikiPage, WikiChunk, WikiArtifact, Image |
+| 1a | `imas-codex discover FACILITY --only paths` | Facility config | FacilityPath (scored) |
+| 1b | `imas-codex discover FACILITY --only wiki` | Wiki URLs in config | WikiPage, WikiChunk, WikiArtifact, Image |
 | 1c | `discover static` | MDSplus static_trees config | StructuralEpoch, SignalNode |
-| 2a | `discover code` | Scored FacilityPaths (≥0.7) | CodeFile, SourceFile, CodeChunk |
-| 2b | `discover documents` | Scored FacilityPaths (≥0.5) | Document, Image |
-| 3a | `discover signals` | Wiki + code + IMAS (optional but improves quality) | FacilitySignal, DataAccess |
-| 3b | `discover signals --enrich-only` | SignalNode + code context | Enriched SignalNode descriptions |
+| 2a | `imas-codex discover FACILITY --only code` | Scored FacilityPaths (≥0.7) | CodeFile, SourceFile, CodeChunk |
+| 2b | `imas-codex discover FACILITY --only documents` | Scored FacilityPaths (≥0.5) | Document, Image |
+| 3a | `imas-codex discover FACILITY --only signals` | Wiki + code + IMAS (optional but improves quality) | FacilitySignal, DataAccess |
+| 3b | `imas-codex discover FACILITY --only signals --flush` | SignalNode + code context | Enriched SignalNode descriptions |
 
 ---
 
 ## Domain Pipelines
 
-### 1. Paths Discovery (`discover paths`)
+### 1. Paths Discovery (`imas-codex discover FACILITY --only paths`)
 
 **Purpose:** Walk remote filesystem to discover and classify directories.
 
@@ -138,19 +141,19 @@ imas-codex discover signals tcv --enrich-only   # Benefits from code chunks in g
 
 **Dynamic context injected at runtime:**
 - `dimension_calibration` — Sampled examples at 5 score levels per dimension from existing scored paths (cross-facility calibration)
-- `focus` — Optional natural language focus from `--focus` flag
+- `focus` — Optional natural language steer from `--topic`
 
 **Refine prompt:` `discovery/refiner` receives enrichment evidence (pattern match counts, LOC, language breakdown) to correct initial scores.
 
 ```bash
-imas-codex discover paths tcv                    # Full pipeline
-imas-codex discover paths tcv --scan-only        # SSH only, no LLM cost
-imas-codex discover paths tcv --score-only       # Refine from graph
-imas-codex discover paths tcv -f "equilibrium"   # Focus scoring
-imas-codex discover paths tcv --enrich-threshold 0.75  # Auto-enrich high-value
+imas-codex discover tcv --only paths                    # Full pipeline
+imas-codex discover tcv --only paths --scan-only        # SSH only, no LLM cost
+imas-codex discover tcv --only paths --flush       # Refine from graph
+imas-codex discover tcv --only paths --topic "equilibrium"   # Focus scoring
+imas-codex discover tcv --only paths --enrich-threshold 0.75  # Auto-enrich high-value
 ```
 
-### 2. Wiki Discovery (`discover wiki`)
+### 2. Wiki Discovery (`imas-codex discover FACILITY --only wiki`)
 
 **Purpose:** Scrape, score, and ingest facility wiki documentation.
 
@@ -179,10 +182,10 @@ imas-codex discover paths tcv --enrich-threshold 0.75  # Auto-enrich high-value
 - `wiki_chunk_embedding` vector index — Semantic search for signal enrichment
 
 ```bash
-imas-codex discover wiki tcv                    # Full pipeline
-imas-codex discover wiki tcv --scan-only        # Discover pages only
-imas-codex discover wiki tcv --score-only       # Score discovered pages
-imas-codex discover wiki tcv --store-images     # Keep image bytes in graph
+imas-codex discover tcv --only wiki                    # Full pipeline
+imas-codex discover tcv --only wiki --scan-only        # Discover pages only
+imas-codex discover tcv --only wiki --flush       # Score discovered pages
+imas-codex discover tcv --only wiki --store-images     # Keep image bytes in graph
 ```
 
 ### 3. Static Tree Discovery (`discover static`)
@@ -220,11 +223,11 @@ imas-codex discover status tcv -d static           # Static domain status
 imas-codex discover clear tcv -d static            # Clear static data
 ```
 
-### 4. Code Discovery (`discover code`)
+### 4. Code Discovery (`imas-codex discover FACILITY --only code`)
 
 **Purpose:** Discover, score, and ingest source code files from high-value paths.
 
-**Depends on:** Scored FacilityPath nodes from `discover paths` (default `min_score ≥ 0.7`)
+**Depends on:** Scored FacilityPath nodes from `imas-codex discover FACILITY --only paths` (default `min_score ≥ 0.7`)
 
 **Internal pipeline:** `scan → triage → score → ingest`
 
@@ -245,13 +248,13 @@ imas-codex discover clear tcv -d static            # Clear static data
 **Path selection:** FacilityPaths are processed highest-value first using weighted dimension scores (`data_access`, `imas`, `convention`, `analysis`, `modeling`).
 
 ```bash
-imas-codex discover code tcv                    # Full pipeline
-imas-codex discover code tcv --min-score 0.8    # Only highest-value paths
-imas-codex discover code tcv --scan-only        # SSH enumeration only
-imas-codex discover code tcv -f equilibrium     # Focus on equilibrium code
+imas-codex discover tcv --only code                    # Full pipeline
+imas-codex discover tcv --only code --min-score 0.8    # Only highest-value paths
+imas-codex discover tcv --only code --scan-only        # SSH enumeration only
+imas-codex discover tcv --only code --topic equilibrium     # Focus on equilibrium code
 ```
 
-### 5. Signal Discovery (`discover signals`)
+### 5. Signal Discovery (`imas-codex discover FACILITY --only signals`)
 
 **Purpose:** Discover and classify facility data signals across all data sources.
 
@@ -320,18 +323,18 @@ The enrichment worker detects these patterns automatically and enriches **one re
 **Savings:** For TCV, pattern matching reduces ~7,300 LLM enrichment calls to ~2,500 (66% reduction).
 
 ```bash
-imas-codex discover signals tcv                            # Full pipeline
-imas-codex discover signals tcv --scan-only                # Enumerate only
-imas-codex discover signals tcv --enrich-only              # Enrich discovered signals
-imas-codex discover signals tcv -s tdi,mdsplus             # Specific scanners
-imas-codex discover signals tcv --reference-shot 84000     # Override test shot
+imas-codex discover tcv --only signals                            # Full pipeline
+imas-codex discover tcv --only signals --scan-only                # Enumerate only
+imas-codex discover tcv --only signals --flush              # Enrich discovered signals
+imas-codex discover tcv --only signals --scanners tdi,mdsplus             # Specific scanners
+imas-codex discover tcv --only signals --reference-shot 84000     # Override test shot
 ```
 
-### 6. Document Discovery (`discover documents`)
+### 6. Document Discovery (`imas-codex discover FACILITY --only documents`)
 
 **Purpose:** Discover document and image files from scored paths.
 
-**Depends on:** Scored FacilityPath nodes from `discover paths` (default `min_score ≥ 0.5`)
+**Depends on:** Scored FacilityPath nodes from `imas-codex discover FACILITY --only paths` (default `min_score ≥ 0.5`)
 
 **Internal pipeline:** `scan → fetch → caption`
 
@@ -342,8 +345,8 @@ imas-codex discover signals tcv --reference-shot 84000     # Override test shot
 | Caption | VLM | `wiki/image-captioner` | Physics-aware captioning + scoring |
 
 ```bash
-imas-codex discover documents tcv                # Full pipeline
-imas-codex discover documents tcv --scan-only    # Enumeration only
+imas-codex discover tcv --only documents                # Full pipeline
+imas-codex discover tcv --only documents --scan-only    # Enumeration only
 ```
 
 ---
@@ -421,22 +424,22 @@ See [facility.yaml](../../imas_codex/schemas/facility.yaml) for complete schema 
 
 | Node Type | Created By | Description |
 |-----------|-----------|-------------|
-| `FacilityPath` | `discover paths` | Directory with multi-dimensional scores |
-| `WikiPage` | `discover wiki` | Wiki page metadata + scores |
-| `WikiChunk` | `discover wiki` | Embedded page segment with extracted paths |
-| `WikiArtifact` | `discover wiki` | PDF/presentation attached to wiki pages |
-| `Image` | `discover wiki/documents` | Captioned image with VLM description |
-| `CodeFile` | `discover code` | Discovered source file with per-file enrichment |
-| `SourceFile` | `discover code` (ingest) | Fetched + parsed source file |
-| `CodeChunk` | `discover code` (ingest) | Tree-sitter parsed code segment with embedding |
-| `FacilitySignal` | `discover signals` | Classified data signal with physics domain |
-| `DataAccess` | `discover signals` | Data access method template |
+| `FacilityPath` | `imas-codex discover FACILITY --only paths` | Directory with multi-dimensional scores |
+| `WikiPage` | `imas-codex discover FACILITY --only wiki` | Wiki page metadata + scores |
+| `WikiChunk` | `imas-codex discover FACILITY --only wiki` | Embedded page segment with extracted paths |
+| `WikiArtifact` | `imas-codex discover FACILITY --only wiki` | PDF/presentation attached to wiki pages |
+| `Image` | `imas-codex discover FACILITY --only wiki,documents` | Captioned image with VLM description |
+| `CodeFile` | `imas-codex discover FACILITY --only code` | Discovered source file with per-file enrichment |
+| `SourceFile` | `imas-codex discover FACILITY --only code` (ingest) | Fetched + parsed source file |
+| `CodeChunk` | `imas-codex discover FACILITY --only code` (ingest) | Tree-sitter parsed code segment with embedding |
+| `FacilitySignal` | `imas-codex discover FACILITY --only signals` | Classified data signal with physics domain |
+| `DataAccess` | `imas-codex discover FACILITY --only signals` | Data access method template |
 | `StructuralEpoch` | `discover static` | Static tree version metadata |
 | `SignalNode` | `discover static` | MDSplus tree node with physics description |
-| `Document` | `discover documents` | Document file (PDF, etc.) |
-| `Evidence` | `discover paths` | LLM scoring rationale (content-addressed) |
-| `FacilityUser` | `discover paths` | User account (GECOS-parsed) |
-| `Person` | `discover paths` | Cross-facility identity |
+| `Document` | `imas-codex discover FACILITY --only documents` | Document file (PDF, etc.) |
+| `Evidence` | `imas-codex discover FACILITY --only paths` | LLM scoring rationale (content-addressed) |
+| `FacilityUser` | `imas-codex discover FACILITY --only paths` | User account (GECOS-parsed) |
+| `Person` | `imas-codex discover FACILITY --only paths` | Cross-facility identity |
 
 ### Key Relationships
 

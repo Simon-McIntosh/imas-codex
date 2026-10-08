@@ -344,9 +344,9 @@ enums:
       - Manual entry uses "manual"
     permissible_values:
       discover_paths:
-        description: "CLI: imas-codex discover paths"
+        description: "CLI: imas-codex discover FACILITY --only paths"
       discover_wiki:
-        description: "CLI: imas-codex discover wiki"
+        description: "CLI: imas-codex discover FACILITY --only wiki"
       ingest_code:
         description: "CLI: imas-codex ingest run (code ingestion)"
       clusters_build:

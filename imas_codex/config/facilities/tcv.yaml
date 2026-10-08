@@ -37,7 +37,7 @@ discovery_roots:
   - /videodata                     # Video data
 
 # Data system configuration for signal discovery
-# Used by: imas-codex discover signals tcv
+# Used by: imas-codex discover tcv --only signals
 data_systems:
   # TDI functions are the primary data access layer for TCV.
   # These .fun files define physics-level accessor functions that abstract
