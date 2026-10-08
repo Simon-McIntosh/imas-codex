@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log (baseline_suite empty at manifest.md:21), so the added-failure count was not taken; after_suite records failure_count 0",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:2943 (ingest_discovered_signals in the signals discover loop)"
+  ],
+  "completed_at": "2026-10-08T10:34:59.967Z",
+  "dispatched_at": "2026-10-08T10:21:53Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "2660",
+      "severity": "follow-on",
+      "text": "follow-on: reconcile_signal_statuses has no production call site \u2014 no CLI or pipeline invokes it, so the JT-60SA repair ran only through a manual python -c and no repeatable command exists for the Jet-style repair it reports."
+    },
+    {
+      "file": "imas_codex/graph/dd_models.py",
+      "line": "409",
+      "severity": "follow-on",
+      "text": "follow-on: the reconcile promotes underspecified signals that carry checked_at to checked, but dd_models.py:409 documents underspecified as a status downstream mapping should not consume, so the promotion is only correct when the check postdates the insufficient enrichment."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100136164400-signal-status-monotonic/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite is left empty, so the harness derives added_failure_count as unmeasured rather than a number for this run."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "one production call site reaches the changed ingest (parallel.py:2943); the added reconcile_signal_statuses has none",
+    "diff": "read commit by commit against 4f9c4e87822a41bdf0453c1e3fd55d63b235d567; a2c4272c0 adds the rescan test, cdffba4e6 makes the match update omit status and adds reconcile_signal_statuses, 7741a325e adds the counts fragment, 10a2828d3 passes the status-free map to the matched-node SET and extends the test.",
+    "done_when": "the four clauses are a test that a rescan of a checked signal leaves it checked, the reconcile restoring the JT-60SA EDDB statuses, before and after counts in the fragment, and the other facilities' counts reported; tests/discovery/test_signal_status_monotonic.py:38 covers the first, reconcile-apply.log's repair_receipt records updated 6,018 with EDDB checked 281 to 6,296, docs/evidence/fragments/jt60sa-discovery-completion/signal-status-monotonic.html carries both counts tables, and the Jet read-only counts appear in the third table.",
+    "goal": "the node's goal (plan \u00a755 node 2 of the status-regression note) is to make a rescan never lower a signal's pipeline status and to add a reconcile that re-derives a lagging status from recorded stage timestamps; imas_codex/discovery/signals/parallel.py:2593 now passes a status-free scan map on match and a new reconcile_signal_statuses at parallel.py:2660 derives checked/enriched from checked_at/enriched_at.",
+    "manifest": "read; status complete, commits [a2c4272c0, cdffba4e6, 7741a325e, 10a2828d3], the tests line names the live-graph gate, after_suite records failure_count 0, and baseline_suite is left empty at manifest.md:21.",
+    "write_paths": "the manifest declares imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_status_monotonic.py and docs/evidence/fragments/jt60sa-discovery-completion/signal-status-monotonic.html; git diff --stat 4f9c4e8..10a2828d3 touches exactly those three files."
+  },
+  "justifications": {
+    "durability": "test_rescan_preserves_checked_signal_status fails when ON MATCH SET s += sig is restored (negative-control.log, EXIT=1) and test_reconcile_uses_stage_timestamps_without_reopening_terminal_signals asserts the resulting status map against literals independent of the created input.",
+    "evidence": "I re-ran the gate at 10a2828d3 and got 2 passed with EXIT=0, reproduction.log shows the pre-fix red at 4f9c4e8 and negative-control.log refutes the guard, but baseline_suite is empty so no suite-regression arm was measured.",
+    "fit": "the three feature commits a2c4272c0, cdffba4e6 and 10a2828d3 use conventional fix/test/discovery subjects with bodies and carry no plan or section label.",
+    "goal_fidelity": "parallel.py:2593 strips status from the match update and parallel.py:2660 adds the timestamp reconciliation, matching the node's stated behavior.",
+    "reuse": "a search over imas_codex for a status-derivation mechanism found none (the cli/sn.py:1106 --reconcile path is DD-version, unrelated), so reconcile_signal_statuses is the first owner of that capability.",
+    "scope_discipline": "git diff --stat 4f9c4e87822a41bdf0453c1e3fd55d63b235d567..10a2828d36084ccbf8f7a1d30e37ad8188ad021c lists only parallel.py, the test file and the fragment, all inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal (plan \u00a755 node 2 of the status-regression note) is to make a rescan never lower a signal's pipeline status and to add a reconcile that re-derives a lagging status from recorded stage timestamps; imas_codex/discovery/signals/parallel.py:2593 now passes a status-free scan map on match and a new reconcile_signal_statuses at parallel.py:2660 derives checked/enriched from checked_at/enriched_at.\nVERDICT done_when: the four clauses are a test that a rescan of a checked signal leaves it checked, the reconcile restoring the JT-60SA EDDB statuses, before and after counts in the fragment, and the other facilities' counts reported; tests/discovery/test_signal_status_monotonic.py:38 covers the first, reconcile-apply.log's repair_receipt records updated 6,018 with EDDB checked 281 to 6,296, docs/evidence/fragments/jt60sa-discovery-completion/signal-status-monotonic.html carries both counts tables, and the Jet read-only counts appear in the third table.\nVERDICT write_paths: the manifest declares imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_status_monotonic.py and docs/evidence/fragments/jt60sa-discovery-completion/signal-status-monotonic.html; git diff --stat 4f9c4e8..10a2828d3 touches exactly those three files.\nVERDICT manifest: read; status complete, commits [a2c4272c0, cdffba4e6, 7741a325e, 10a2828d3], the tests line names the live-graph gate, after_suite records failure_count 0, and baseline_suite is left empty at manifest.md:21.\nVERDICT diff: read commit by commit against 4f9c4e87822a41bdf0453c1e3fd55d63b235d567; a2c4272c0 adds the rescan test, cdffba4e6 makes the match update omit status and adds reconcile_signal_statuses, 7741a325e adds the counts fragment, 10a2828d3 passes the status-free map to the matched-node SET and extends the test.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:2943 (ingest_discovered_signals in the signals discover loop); reconcile_signal_statuses has no production call site.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: parallel.py:2593 strips status from the match update and parallel.py:2660 adds the timestamp reconciliation, matching the node's stated behavior.\nSCORE evidence: 16\nJUSTIFICATION evidence: I re-ran the gate at 10a2828d3 and got 2 passed with EXIT=0, reproduction.log shows the pre-fix red at 4f9c4e8 and negative-control.log refutes the guard, but baseline_suite is empty so no suite-regression arm was measured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 4f9c4e87822a41bdf0453c1e3fd55d63b235d567..10a2828d36084ccbf8f7a1d30e37ad8188ad021c lists only parallel.py, the test file and the fragment, all inside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: test_rescan_preserves_checked_signal_status fails when ON MATCH SET s += sig is restored (negative-control.log, EXIT=1) and test_reconcile_uses_stage_timestamps_without_reopening_terminal_signals asserts the resulting status map against literals independent of the created input.\nSCORE fit: 20\nJUSTIFICATION fit: the three feature commits a2c4272c0, cdffba4e6 and 10a2828d3 use conventional fix/test/discovery subjects with bodies and carry no plan or section label.\nSCORE reuse: 19\nJUSTIFICATION reuse: a search over imas_codex for a status-derivation mechanism found none (the cli/sn.py:1106 --reconcile path is DD-version, unrelated), so reconcile_signal_statuses is the first owner of that capability.\nFINDING imas_codex/discovery/signals/parallel.py:2660 follow-on: reconcile_signal_statuses has no production call site \u2014 no CLI or pipeline invokes it, so the JT-60SA repair ran only through a manual python -c and no repeatable command exists for the Jet-style repair it reports.\nFINDING imas_codex/graph/dd_models.py:409 follow-on: the reconcile promotes underspecified signals that carry checked_at to checked, but dd_models.py:409 documents underspecified as a status downstream mapping should not consume, so the promotion is only correct when the check postdates the insufficient enrichment.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100136164400-signal-status-monotonic/manifest.md:21 follow-on: baseline_suite is left empty, so the harness derives added_failure_count as unmeasured rather than a number for this run.",
+  "review_run_id": "r-20261008T102140294961-review-of-signal-status-monotonic",
+  "reviewed_base_sha": "4f9c4e87822a41bdf0453c1e3fd55d63b235d567",
+  "reviewed_head_sha": "10a2828d36084ccbf8f7a1d30e37ad8188ad021c",
+  "reviewed_run_id": "r-20261008T100136164400-signal-status-monotonic",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:37:46.846761+00:00",
+  "total": 110,
+  "verdict": "SOUND WITH FINDINGS"
+}
