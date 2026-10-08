@@ -2590,21 +2590,31 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
         with GraphClient() as gc:
             for i in range(0, len(signals), batch_size):
                 batch = signals[i : i + batch_size]
+                scan_rows = [
+                    {
+                        "signal": sig,
+                        "scanned": {
+                            key: value for key, value in sig.items() if key != "status"
+                        },
+                    }
+                    for sig in batch
+                ]
 
                 # Phase 1: Create/update signal nodes + AT_FACILITY edge
                 gc.query(
                     """
-                    UNWIND $signals AS sig
+                    UNWIND $rows AS row
+                    WITH row.signal AS sig, row.scanned AS scanned
                     MERGE (s:FacilitySignal {id: sig.id})
                     ON CREATE SET s += sig,
                                   s.discovered_at = datetime()
-                    ON MATCH SET s += sig,
+                    ON MATCH SET s += scanned,
                                  s.claimed_at = null
                     WITH s, sig
                     MATCH (f:Facility {id: sig.facility_id})
                     MERGE (s)-[:AT_FACILITY]->(f)
                     """,
-                    signals=batch,
+                    rows=scan_rows,
                 )
 
                 # Phase 2: Create DATA_ACCESS edges for signals with data_access
@@ -2645,6 +2655,59 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
             "Failed to ingest signals (ingested %d/%d): %s", ingested, len(signals), e
         )
         return ingested
+
+
+def reconcile_signal_statuses(
+    facility: str | None = None, *, apply: bool = False
+) -> dict[str, Any]:
+    """Find statuses behind their recorded stages and optionally repair one facility.
+
+    A check timestamp outranks enrichment; an enrichment timestamp outranks
+    discovery. Failed and skipped signals retain their deliberate statuses.
+    """
+    if apply and facility is None:
+        raise ValueError("A facility is required to apply signal status repairs")
+
+    selection = """
+        MATCH (s:FacilitySignal)
+        WHERE $facility IS NULL OR s.facility_id = $facility
+        WITH s, CASE
+            WHEN s.checked_at IS NOT NULL THEN $checked
+            WHEN s.enriched_at IS NOT NULL THEN $enriched
+            ELSE null
+        END AS target
+        WHERE (target = $checked AND s.status IN [$discovered, $enriched, $underspecified])
+           OR (target = $enriched AND s.status = $discovered)
+    """
+    params = {
+        "facility": facility,
+        "checked": FacilitySignalStatus.checked.value,
+        "enriched": FacilitySignalStatus.enriched.value,
+        "discovered": FacilitySignalStatus.discovered.value,
+        "underspecified": FacilitySignalStatus.underspecified.value,
+    }
+    with GraphClient() as gc:
+        candidates = gc.query(
+            selection
+            + """
+            RETURN s.facility_id AS facility, s.status AS status,
+                   target, count(s) AS count
+            ORDER BY facility, status, target
+            """,
+            **params,
+        )
+        updated = 0
+        if apply:
+            rows = gc.query(
+                selection
+                + """
+                SET s.status = target
+                RETURN count(s) AS updated
+                """,
+                **params,
+            )
+            updated = rows[0]["updated"] if rows else 0
+    return {"candidates": candidates, "updated": updated}
 
 
 def persist_data_access(data_access: DataAccess) -> None:

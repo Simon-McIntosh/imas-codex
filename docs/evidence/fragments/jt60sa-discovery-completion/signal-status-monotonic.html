@@ -1,0 +1,35 @@
+<section>
+  <h2 id="signal-status-monotonic">Signal status reconciliation</h2>
+  <table id="signal-status-monotonic-jt-counts">
+    <caption>JT-60SA FacilitySignal statuses, before and after the scoped reconciliation</caption>
+    <thead><tr><th>Status</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><th>discovered</th><td>14,515</td><td>8,501</td></tr>
+      <tr><th>enriched</th><td>0</td><td>3</td></tr>
+      <tr><th>checked</th><td>497</td><td>6,512</td></tr>
+      <tr><th>underspecified</th><td>6</td><td>2</td></tr>
+      <tr><th>Total</th><td>15,018</td><td>15,018</td></tr>
+    </tbody>
+  </table>
+  <table id="signal-status-monotonic-eddb-counts">
+    <caption>JT-60SA EDDB signals, selected by data_access = jt-60sa:edas:eddb</caption>
+    <thead><tr><th>Status</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><th>discovered</th><td>6,053</td><td>39</td></tr>
+      <tr><th>enriched</th><td>0</td><td>3</td></tr>
+      <tr><th>checked</th><td>281</td><td>6,296</td></tr>
+      <tr><th>underspecified</th><td>4</td><td>0</td></tr>
+      <tr><th>Total</th><td>6,338</td><td>6,338</td></tr>
+    </tbody>
+  </table>
+  <table id="signal-status-monotonic-other-facilities">
+    <caption>Other facilities: lagging status counts before and after, read only</caption>
+    <thead><tr><th>Facility</th><th>Current status</th><th>Recorded stage</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><th>jet</th><td>discovered</td><td>checked</td><td>29,014</td><td>29,014</td></tr>
+      <tr><th>jet</th><td>discovered</td><td>enriched</td><td>6</td><td>6</td></tr>
+      <tr><th>jet</th><td>enriched</td><td>checked</td><td>164</td><td>164</td></tr>
+      <tr><th>jet</th><td>underspecified</td><td>checked</td><td>94</td><td>94</td></tr>
+    </tbody>
+  </table>
+</section>
