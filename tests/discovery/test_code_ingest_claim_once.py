@@ -98,11 +98,12 @@ def test_live_claim_is_renewed_past_timeout():
     async def check():
         graph = ClaimGraph(count=1, timeout=0.2)
         state = FileDiscoveryState(facility="test")
-        started = asyncio.Event()
+        started = threading.Event()
 
         async def ingest_files(**_kwargs):
             started.set()
-            await asyncio.sleep(0.55)
+            # The real pipeline makes synchronous graph calls while ingesting.
+            time.sleep(0.55)
             state.stop_requested = True
             return {
                 "files": 1,
@@ -124,7 +125,7 @@ def test_live_claim_is_renewed_past_timeout():
             ),
         ):
             worker = asyncio.create_task(workers.code_worker(state, batch_size=1))
-            await asyncio.wait_for(started.wait(), timeout=2)
+            await asyncio.wait_for(asyncio.to_thread(started.wait), timeout=2)
             await asyncio.sleep(0.4)
             contender = await asyncio.to_thread(
                 _claim_code_files_for_ingestion, "test", limit=1

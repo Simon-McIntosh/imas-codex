@@ -1315,10 +1315,15 @@ async def code_worker(
         try:
             keepalive = asyncio.create_task(_keep_ingestion_claims_current(files))
             try:
-                ingest_stats = await ingest_files(
-                    facility=state.facility,
-                    remote_paths=remote_paths,
-                    force=False,
+                # Ingestion makes synchronous graph calls. Run its event loop
+                # off this worker's loop so claim renewal can keep running.
+                ingest_stats = await asyncio.to_thread(
+                    asyncio.run,
+                    ingest_files(
+                        facility=state.facility,
+                        remote_paths=remote_paths,
+                        force=False,
+                    ),
                 )
                 if keepalive.done():
                     keepalive.result()
