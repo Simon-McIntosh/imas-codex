@@ -160,8 +160,8 @@ async def rejudge_stale_paths(
             )
         return len(items)
 
-    facility_config = get_facility(facility)
     try:
+        facility_config = get_facility(facility)
         count, cost, failed = await judge_rows(
             rows,
             lambda row: build_path_judgment_state(row, facility, facility_config),
@@ -494,11 +494,7 @@ class DirectoryTriager:
                     ],
                     doc_indicators=["README"] if row.get("has_readme") else [],
                 )
-                purpose = (
-                    fields["path_purpose"]
-                    if fields["path_purpose"] == "other"
-                    else parse_path_purpose(fields["path_purpose"])
-                )
+                purpose = fields["path_purpose"]
                 scores = {
                     name: fields[name.replace("score_", "triage_")]
                     for name in PURPOSE_SCORE_NAMES

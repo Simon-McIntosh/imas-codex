@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
+
+import pytest
+
 from imas_codex.discovery.paths.scorer import (
     build_path_judgment_questions,
     build_path_judgment_state,
@@ -143,3 +147,54 @@ def test_code_scan_claim_uses_judged_facets(monkeypatch):
     claim = next(query for query in queries if "SET p.files_claimed_at" in query)
     assert "p.scan_relevance >= $min_score" in claim
     assert "p.score_composite >= $min_score" not in claim
+
+
+@pytest.mark.parametrize("purpose", ["empty_directory", "other"])
+def test_triage_keeps_judged_purpose_and_uses_text_only_model(monkeypatch, purpose):
+    from imas_codex.discovery.base import facility, judgment, llm
+    from imas_codex.discovery.paths.models import PathDescription, PathDescriptionBatch
+    from imas_codex.discovery.paths.scorer import DirectoryTriager
+
+    path = "/analysis/example"
+
+    async def describe(*, response_model, **_kwargs):
+        assert response_model is PathDescriptionBatch
+        assert set(PathDescription.model_fields) == {"path", "description"}
+        return (
+            PathDescriptionBatch(
+                results=[PathDescription(path=path, description="Stored text")]
+            ),
+            0.01,
+            12,
+        )
+
+    async def judge(rows, state_for, questions_for, apply, **_kwargs):
+        assert state_for(rows[0])["directory"]["description"] == "Stored text"
+        questions = questions_for()
+        options = list(questions["path_purpose"]["criteria"])
+        answers = {
+            "path_purpose": {
+                "choice": purpose,
+                "probabilities": {name: float(name == purpose) for name in options},
+                "confidence": 1,
+            },
+            "children_worth_listing": {"noul": 0},
+        }
+        for name in questions:
+            if name.startswith("score_"):
+                answers[name] = {
+                    "score": 0,
+                    "probabilities": {"0": 1, "1": 0, "2": 0, "3": 0},
+                    "confidence": 1,
+                }
+        return apply([(rows[0], answers, 0.001)], 0.001), 0.001, []
+
+    monkeypatch.setattr(llm, "acall_llm_structured", describe)
+    monkeypatch.setattr(judgment, "judge_rows", judge)
+    monkeypatch.setattr(facility, "get_facility", lambda _facility: {})
+    result = asyncio.run(
+        DirectoryTriager(facility="jt-60sa").async_triage_batch(
+            [{"path": path, "total_files": 0, "total_dirs": 0}]
+        )
+    )
+    assert result.triaged_dirs[0].to_graph_dict()["path_purpose"] == purpose
