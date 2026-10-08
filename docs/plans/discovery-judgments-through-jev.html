@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f,4ec0b2f22749957aa10132f694b740ad5f53b796">
-<meta name="plan-impl" content="0.647">
-<meta name="plan-version" content="69">
+<meta name="plan-impl" content="0.611">
+<meta name="plan-version" content="70">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -259,6 +259,31 @@ neighbourhood fields.</p>
 <section data-reckon="section" data-id="s18" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
   <p class="landed-summary">The wiki runner's pending counts and the document skipped label read <code>CONTENT_INGEST_THRESHOLD</code> (0.16), and a restored literal 0.5 fails the new test. The CLI defaults read the same constant since <code>8f69fadb2</code>. Review 20/19/20/19/20/20. <a href="/imas-codex/evidence/archive/discovery-judgments-through-jev-landed.html#s18">full record</a></p>
 </section>
+
+    <h2 id="s19">§19 — Break the discovery engine&#x27;s import cycle through the CLI package</h2>
+<section data-reckon="section" data-id="s19" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> A merged-head gate on 2026-10-08 showed 13 errors on main under
+<code>pytest -n 8 tests/wiki tests/cli/test_discover_wiki_stage.py</code>. Run serially, the same files pass. The
+traceback runs <code>cli/discover/__init__.py</code> → <code>cli/discover/wiki.py</code> →
+<code>discovery/wiki/__init__.py</code> → <code>wiki/parallel.py</code> → <code>discovery/base/engine.py</code> →
+<code>ImportError: cannot import name 'OrphanRecoverySpec' from partially initialized module
+'imas_codex.discovery.base.supervision'</code>. The cycle's root is in <code>discovery/base/supervision.py</code>, which
+imports <code>WorkerLogAdapter</code> and <code>log_worker_error</code> from <code>imas_codex.cli.logging</code> at module
+level. That loads the CLI package, whose subcommands import the discovery engines, which import <code>supervision</code>
+again while it is still initialising. The session that folded the discover stages is removing one trigger, its
+module-level threshold import in <code>cli/discover/wiki.py</code>. The cycle itself remains for any other entry
+point.</p>
+<p><strong>Node 1.</strong> Move the worker logging helpers into a leaf module, <code>imas_codex/logs.py</code>, that
+imports nothing from <code>imas_codex.cli</code> or <code>imas_codex.discovery</code>. <code>cli/logging.py</code>
+re-exports them, so its other importers are unchanged. <code>discovery/base/supervision.py</code> and
+<code>discovery/signals/parallel.py</code> import from the leaf. Done when a subprocess test shows that importing
+<code>imas_codex.discovery.base.engine</code> in a fresh interpreter leaves <code>imas_codex.cli</code> out of
+<code>sys.modules</code>. A second subprocess test imports <code>imas_codex.cli.discover</code> and then the wiki,
+paths and code engines without error. Restoring the CLI import in <code>supervision.py</code> fails the first
+test.</p>
+<p><strong>Node 2, after the setting merges.</strong> <code>discovery/wiki/graph_ops.py</code> sets
+<code>CONTENT_INGEST_THRESHOLD = get_wiki_ingest_threshold()</code> from <code>imas_codex.settings</code>, so the setting
+is the one source of the number.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
