@@ -1005,15 +1005,20 @@ def get_llm_scheduler() -> str:
 
 
 def get_discovery_threshold() -> float:
-    """Get the minimum score threshold for high-value path processing.
-
-    Used by enrichment auto-threshold, refinement gate, and code CLI default.
+    """Get the legacy discovery threshold used by non-path pipelines.
 
     Priority: IMAS_CODEX_DISCOVERY_THRESHOLD env → [discovery].threshold → 0.90.
     """
     if env := os.getenv("IMAS_CODEX_DISCOVERY_THRESHOLD"):
         return float(env)
     return float(_get_section("discovery").get("threshold", 0.90))
+
+
+def get_path_scan_threshold() -> float:
+    """Get the calibrated path facet gate for code and data scanning."""
+    if env := os.getenv("IMAS_CODEX_PATH_SCAN_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("path-scan-threshold", 0.30))
 
 
 def get_triage_threshold() -> float:
@@ -1077,9 +1082,7 @@ def get_code_facet_admission_threshold() -> float:
     """
     if env := os.getenv("IMAS_CODEX_CODE_FACET_ADMISSION_THRESHOLD"):
         return float(env)
-    return float(
-        _get_section("discovery").get("code-facet-admission-threshold", 0.85)
-    )
+    return float(_get_section("discovery").get("code-facet-admission-threshold", 0.85))
 
 
 @dataclass(frozen=True, slots=True)

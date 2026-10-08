@@ -131,6 +131,17 @@ class TriageBatch(BaseModel):
     )
 
 
+class PathDescription(BaseModel):
+    """Text supplied by the language model; decisions are judged separately."""
+
+    path: str
+    description: str
+
+
+class PathDescriptionBatch(BaseModel):
+    results: list[PathDescription]
+
+
 # ============================================================================
 # LLM Scoring Models (Second Pass)
 # ============================================================================
@@ -293,7 +304,7 @@ class TriagedDirectory:
     path: str
     """Absolute path to the directory."""
 
-    path_purpose: ResourcePurpose
+    path_purpose: ResourcePurpose | str
     """Classified purpose of the directory."""
 
     description: str
@@ -363,6 +374,9 @@ class TriagedDirectory:
     score_cost: float = 0.0
     """LLM cost in USD for scoring this path (batch cost / batch size)."""
 
+    judgments: dict[str, Any] = field(default_factory=dict)
+    """Typed decision values, distributions, confidence and model provenance."""
+
     def to_graph_dict(self) -> dict[str, Any]:
         """Convert to dictionary for graph persistence.
 
@@ -374,7 +388,9 @@ class TriagedDirectory:
 
         return {
             "path": self.path,
-            "path_purpose": self.path_purpose.value,
+            "path_purpose": self.path_purpose.value
+            if isinstance(self.path_purpose, ResourcePurpose)
+            else self.path_purpose,
             "description": self.description,
             "evidence": json.dumps(self.evidence.to_dict()),
             "triage_modeling_code": self.score_modeling_code,
@@ -399,6 +415,7 @@ class TriagedDirectory:
             "skip_reason": self.skip_reason,
             "enrich_skip_reason": self.enrich_skip_reason,
             "score_cost": self.score_cost,
+            "judgments": self.judgments,
         }
 
 

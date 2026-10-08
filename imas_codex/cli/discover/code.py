@@ -178,10 +178,10 @@ def code(
     )
     from imas_codex.discovery.base.facility import get_facility
     from imas_codex.discovery.base.services import llm_health_check_with_decisions
-    from imas_codex.settings import get_discovery_threshold
+    from imas_codex.settings import get_path_scan_threshold
 
     if min_score is None:
-        min_score = get_discovery_threshold()
+        min_score = get_path_scan_threshold()
 
     use_rich = use_rich_output()
     console = setup_logging("code", facility, use_rich, verbose=verbose)

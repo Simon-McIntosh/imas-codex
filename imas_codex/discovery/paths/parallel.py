@@ -55,7 +55,7 @@ class DiscoveryState(DiscoveryStateBase):
 
     path_limit: int | None = None
     focus: str | None = None
-    threshold: float | None = None  # Uses get_discovery_threshold() when None
+    threshold: float | None = None  # Uses the calibrated path gate when None
     root_filter: list[str] | None = None  # Restrict work to these roots
     auto_enrich_threshold: float | None = None  # Also enrich paths scoring >= this
 
@@ -225,7 +225,6 @@ def has_pending_work(facility: str) -> bool:
                       AND p.expanded_at IS NULL
                       THEN 'expand' ELSE null END AS exp,
                  CASE WHEN p.status = $triaged AND p.should_enrich = true
-                      AND p.triage_composite >= 0.15
                       AND (p.is_enriched IS NULL OR p.is_enriched = false)
                       THEN 'enrich' ELSE null END AS enr,
                  CASE WHEN p.is_enriched = true
@@ -339,7 +338,6 @@ def _has_pending_enrich_work(facility: str) -> bool:
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
               AND p.should_enrich = true
-              AND p.triage_composite >= 0.15
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
               {excluded_clause}
             RETURN count(p) > 0 AS has_work
@@ -749,10 +747,9 @@ def claim_paths_for_enriching(
     )
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
 
-    min_enrich_score = 0.15
     if auto_enrich_threshold is not None:
         enrich_clause = (
-            "(p.should_enrich = true OR p.triage_composite >= $auto_enrich_threshold)"
+            "(p.should_enrich = true OR p.scan_relevance >= $auto_enrich_threshold)"
         )
     else:
         enrich_clause = "p.should_enrich = true"
@@ -765,7 +762,6 @@ def claim_paths_for_enriching(
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
               AND {enrich_clause}
-              AND p.triage_composite >= $min_enrich_score
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               AND (p.total_dirs IS NULL OR p.total_dirs <= 500)
@@ -779,7 +775,6 @@ def claim_paths_for_enriching(
             triaged=PathStatus.triaged.value,
             cutoff=cutoff,
             auto_enrich_threshold=auto_enrich_threshold,
-            min_enrich_score=min_enrich_score,
             token=claim_token,
             **scope_params,
             **excluded_params,
@@ -841,7 +836,7 @@ def claim_paths_for_scoring(
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.is_enriched = true
-              AND p.triage_composite >= $min_score
+              AND p.scan_relevance >= $min_score
               AND p.scored_at IS NULL
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               {scope_clause}
@@ -1061,6 +1056,8 @@ def mark_score_complete(
             "path_purpose": result.get("path_purpose"),
             "physics_domain": result.get("physics_domain"),
             "should_expand": result.get("should_expand", True),
+            "should_enrich": result.get("should_enrich", False),
+            "judgments": result.get("judgments", {}),
         }
         for dim in SCORE_DIMENSIONS:
             item[dim] = result.get(dim)
@@ -1099,6 +1096,7 @@ def mark_score_complete(
                 p.path_purpose = item.path_purpose,
                 p.physics_domain = item.physics_domain,
                 p.should_expand = item.should_expand,
+                p.should_enrich = item.should_enrich,
                 p.claimed_at = null,
                 p.score_modeling_code = coalesce(item.score_modeling_code, p.score_modeling_code),
                 p.score_analysis_code = coalesce(item.score_analysis_code, p.score_analysis_code),
@@ -1110,7 +1108,8 @@ def mark_score_complete(
                 p.score_visualization = coalesce(item.score_visualization, p.score_visualization),
                 p.score_documentation = coalesce(item.score_documentation, p.score_documentation),
                 p.score_imas = coalesce(item.score_imas, p.score_imas),
-                p.score_convention = coalesce(item.score_convention, p.score_convention)
+                p.score_convention = coalesce(item.score_convention, p.score_convention),
+                p += item.judgments
             """,
             items=items,
         )
@@ -1981,8 +1980,12 @@ async def triage_worker(
                 {
                     "path": d.path,
                     "score": d.score,
-                    "label": d.path_purpose.value if d.path_purpose else "",
-                    "path_purpose": d.path_purpose.value if d.path_purpose else "",
+                    "label": getattr(d.path_purpose, "value", d.path_purpose)
+                    if d.path_purpose
+                    else "",
+                    "path_purpose": getattr(d.path_purpose, "value", d.path_purpose)
+                    if d.path_purpose
+                    else "",
                     "description": d.description,
                     "physics_domain": (
                         d.physics_domain.value if d.physics_domain else ""
@@ -2225,7 +2228,6 @@ async def score_worker(
             # Add should_expand from original data and cost tracking
             score_results = []
             failed_count = 0
-            cost_per_path = cost / len(paths) if paths else 0.0
             for llm_r in llm_results:
                 # Skip failed results — don't corrupt graph with stale scores
                 if llm_r.get("_failed"):
@@ -2237,7 +2239,7 @@ async def score_worker(
                     "path": llm_r["path"],
                     "score": llm_r["score"],
                     "previous_score": orig.get("triage_composite"),
-                    "score_cost": cost_per_path,
+                    "score_cost": llm_r.get("score_cost", 0.0),
                     "should_expand": llm_r.get(
                         "should_expand", orig.get("should_expand", True)
                     ),
@@ -2248,6 +2250,8 @@ async def score_worker(
                     "keywords": llm_r.get("keywords", []),
                     "path_purpose": llm_r.get("path_purpose"),
                     "physics_domain": llm_r.get("physics_domain"),
+                    "should_enrich": llm_r.get("should_enrich", False),
+                    "judgments": llm_r.get("judgments", {}),
                 }
                 # Copy per-dimension scores from LLM results
                 for dim in [
@@ -2274,6 +2278,10 @@ async def score_worker(
                     len(llm_results),
                 )
                 state.score_stats.errors += failed_count
+                _revert_path_claims(
+                    state.facility,
+                    [row["path"] for row in llm_results if row.get("_failed")],
+                )
 
             state.score_stats.last_batch_time = time.time() - start
             state.score_stats.cost += cost
@@ -2305,6 +2313,7 @@ async def score_worker(
         except Exception as e:
             logger.exception(f"Score error: {e}")
             state.score_stats.errors += len(paths)
+            _revert_path_claims(state.facility, [row["path"] for row in paths])
             if is_infrastructure_error(e):
                 raise
 
@@ -2456,186 +2465,79 @@ async def _async_score_with_llm(
     facility: str | None = None,
     focus: str | None = None,
 ) -> tuple[list[dict], float]:
-    """Score paths using LLM with enrichment data (async/cancellable).
-
-    Uses acall_llm_structured for native async LLM calls that respond to
-    asyncio.cancel().
-
-    CRITICAL: Does NOT show numeric triage scores to the LLM — only
-    enrichment evidence. This eliminates anchoring bias.
-
-    Args:
-        paths: List of path dicts with enrichment data
-        facility: Current facility for preferring same-facility examples
-        focus: Optional focus string for scoring
-
-    Returns:
-        Tuple of (score_results, cost)
-    """
+    """Describe enriched paths, then judge their content with Jev."""
     import json
 
-    from imas_codex.discovery.paths.frontier import (
-        sample_dimension_calibration_examples,
-        sample_enriched_paths,
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.judgment import judge_rows
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.paths.models import PathDescriptionBatch
+    from imas_codex.discovery.paths.scorer import (
+        PURPOSE_SCORE_NAMES,
+        build_path_judgment_questions,
+        build_path_judgment_state,
+        path_judgment_fields,
     )
-    from imas_codex.discovery.paths.models import ScoreBatch
-    from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import get_model, get_reasoning_effort
 
-    # Build prompt context with enriched examples
-    context: dict = {}
-
-    # Sample enriched paths for calibration (cross-facility)
-    enriched_examples = sample_enriched_paths(
-        facility=facility,
-        per_category=2,
-        cross_facility=True,
-    )
-    has_examples = any(enriched_examples.get(cat) for cat in enriched_examples)
-    if has_examples:
-        context["score_calibration"] = enriched_examples
-
-    # Add per-dimension calibration examples (cached with 60s TTL)
-    # phase='score' draws from scored peers (2nd-pass dimensions).
-    dimension_calibration = sample_dimension_calibration_examples(
-        facility=facility,
-        per_level=5,
-        tolerance=0.1,
-        phase="score",
-    )
-    has_dim_calibration = any(
-        any(examples for examples in dim_levels.values())
-        for dim_levels in dimension_calibration.values()
-    )
-    if has_dim_calibration:
-        context["dimension_calibration"] = dimension_calibration
-
-    if focus:
-        context["focus"] = focus
-
-    # Render prompt with examples
-    system_prompt = render_prompt("paths/scorer", context)
-
-    # Build user prompt with enrichment data but NO numeric triage scores
-    lines_prompt = ["Score these directories using their enrichment evidence:\n"]
-    for p in paths:
-        # Parse language breakdown if it's a JSON string
-        lang = p.get("language_breakdown")
-        if isinstance(lang, str):
-            try:
-                lang = json.loads(lang)
-            except json.JSONDecodeError:
-                lang = {}
-
-        lines_prompt.append(f"\n## Path: {p['path']}")
-        lines_prompt.append(f"Depth: {p.get('depth', 0)}")
-
-        # Qualitative context from triage (no numeric scores)
-        lines_prompt.append(f"Purpose: {p.get('path_purpose', 'unknown')}")
-        if p.get("physics_domain"):
-            lines_prompt.append(f"Physics domain: {p['physics_domain']}")
-        if p.get("description"):
-            lines_prompt.append(f"Description: {p['description']}")
-        if p.get("keywords"):
-            keywords = p["keywords"]
-            if isinstance(keywords, list):
-                keywords = ", ".join(keywords)
-            lines_prompt.append(f"Keywords: {keywords}")
-        if p.get("expansion_reason"):
-            lines_prompt.append(f"Expansion reason: {p['expansion_reason']}")
-
-        # Filesystem structure
-        total_files = p.get("total_files")
-        total_dirs = p.get("total_dirs")
-        if total_files is not None or total_dirs is not None:
-            lines_prompt.append(f"Files: {total_files or 0}, Dirs: {total_dirs or 0}")
-        file_types = p.get("file_type_counts")
-        if file_types:
-            if isinstance(file_types, str):
-                lines_prompt.append(f"File types: {file_types}")
-            else:
-                lines_prompt.append(f"File types: {file_types}")
-        for indicator in ["has_readme", "has_makefile", "vcs_type"]:
-            val = p.get(indicator)
-            if val:
-                lines_prompt.append(f"  {indicator}: {val}")
-
-        # Child contents (truncated) - helps understand what's in the directory
-        child_names = p.get("child_names")
-        if child_names:
-            if isinstance(child_names, str):
-                # Truncate long child lists
-                if len(child_names) > 200:
-                    child_names = child_names[:200] + "..."
-            lines_prompt.append(f"Contents: {child_names}")
-
-        # Enrichment metrics (concrete evidence for scoring)
-        lines_prompt.append("\nEnrichment data:")
-        lines_prompt.append(f"  Total lines: {p.get('total_lines') or 0}")
-        lines_prompt.append(f"  Total bytes: {p.get('total_bytes') or 0}")
-        lines_prompt.append(f"  Language breakdown: {lang or {}}")
-        lines_prompt.append(f"  Is multiformat: {p.get('is_multiformat', False)}")
-
-        # Pattern match evidence (key data for scoring)
-        pattern_cats = p.get("pattern_categories")
-        if isinstance(pattern_cats, str):
-            try:
-                pattern_cats = json.loads(pattern_cats)
-            except json.JSONDecodeError:
-                pattern_cats = {}
-        if pattern_cats:
-            lines_prompt.append(f"  Pattern categories: {pattern_cats}")
-        lines_prompt.append(f"  Read matches: {p.get('read_matches') or 0}")
-        lines_prompt.append(f"  Write matches: {p.get('write_matches') or 0}")
-
-        # Enrichment warnings (tokei timeout, etc.)
-        enrich_warnings = p.get("enrich_warnings")
-        if enrich_warnings:
-            if isinstance(enrich_warnings, str):
-                lines_prompt.append(f"  Enrichment warnings: {enrich_warnings}")
-                lines_prompt.append(
-                    "  Note: Some metrics may be incomplete due to timeouts on large directories."
-                )
-
-    user_prompt = "\n".join(lines_prompt)
-
-    # Get model
-    model = get_model("discovery-score")
-
-    # Call LLM with shared retry+parse loop — retries on both API errors
-    # and JSON/validation errors (same resilience as wiki pipeline).
-    from imas_codex.discovery.base.llm import acall_llm_structured
-
-    try:
-        batch, cost, _tokens = await acall_llm_structured(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            response_model=ScoreBatch,
-            service="facility-discovery",
-            reasoning_effort=get_reasoning_effort("discovery-score"),
-        )
-    except ValueError:
-        # All retries exhausted — mark all as failed so they're skipped
-        return [
+    if not paths:
+        return [], 0.0
+    description_model = get_model("discovery-score")
+    batch, description_cost, _tokens = await acall_llm_structured(
+        model=description_model,
+        messages=[
             {
-                "path": p["path"],
-                "score": p.get("triage_composite", 0.5),
-                "adjustment_reason": "parse error",
-                "_failed": True,
-            }
-            for p in paths
-        ], 0.0
+                "role": "system",
+                "content": "Describe each directory from its enriched evidence in one factual sentence. Return only path and description; do not score, classify, or decide whether to explore it.",
+            },
+            {
+                "role": "user",
+                "content": json.dumps(
+                    {"focus": focus, "directories": paths}, default=str
+                ),
+            },
+        ],
+        response_model=PathDescriptionBatch,
+        service="facility-discovery",
+        reasoning_effort=get_reasoning_effort("discovery-score"),
+    )
+    descriptions = {item.path: item.description for item in batch.results}
+    if set(descriptions) != {row["path"] for row in paths}:
+        raise ValueError("Path descriptions do not match the enriched paths")
+    rows = [{**row, "description": descriptions[row["path"]]} for row in paths]
+    facility_config = get_facility(facility) if facility else {}
+    model = get_model("discovery-relevance")
 
-    results = _build_score_results(batch, paths)
-    return results, cost
+    def apply(answered, _cost):
+        results = []
+        for row, answers, paid in answered:
+            fields = path_judgment_fields(answers, model)
+            results.append(
+                {
+                    "path": row["path"],
+                    "score": fields["scan_relevance"],
+                    "description": row["description"],
+                    "path_purpose": fields["path_purpose"],
+                    "should_expand": fields["should_expand"],
+                    "should_enrich": fields["should_enrich"],
+                    "score_cost": paid + description_cost / len(rows),
+                    "judgments": fields,
+                    **{name: fields[name] for name in PURPOSE_SCORE_NAMES},
+                }
+            )
+        return results
 
-
-# ============================================================================
-# SSH Preflight Check
-# ============================================================================
+    results, judgment_cost, failed = await judge_rows(
+        rows,
+        lambda row: build_path_judgment_state(row, facility or "", facility_config),
+        build_path_judgment_questions,
+        apply,
+        model=model,
+        service="facility-discovery",
+    )
+    return (results or []) + [
+        {"path": row["path"], "_failed": True} for row in failed
+    ], description_cost + judgment_cost
 
 
 def check_ssh_connectivity(facility: str, timeout: int = 10) -> tuple[bool, str]:
@@ -2903,15 +2805,15 @@ async def run_parallel_discovery(
         seed_facility_roots(facility)
 
     # Resolve thresholds from settings when not explicitly provided
-    from imas_codex.settings import get_discovery_threshold
+    from imas_codex.settings import get_path_scan_threshold
 
     resolved_threshold = (
-        threshold if threshold is not None else get_discovery_threshold()
+        threshold if threshold is not None else get_path_scan_threshold()
     )
     resolved_enrich = (
         auto_enrich_threshold
         if auto_enrich_threshold is not None
-        else get_discovery_threshold()
+        else get_path_scan_threshold()
     )
 
     # Create shared state

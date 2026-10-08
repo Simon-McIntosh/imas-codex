@@ -281,7 +281,7 @@ def get_discovery_stats(facility: str) -> dict[str, Any]:
                 sum(CASE WHEN p.terminal_reason = $excluded_reason THEN 1 ELSE 0 END) AS excluded,
                 sum(CASE WHEN p.claimed_at IS NOT NULL THEN 1 ELSE 0 END) AS claimed,
                 sum(CASE WHEN p.status = $triaged AND p.should_expand = true AND p.expanded_at IS NULL THEN 1 ELSE 0 END) AS expansion_ready,
-                sum(CASE WHEN p.status = $triaged AND p.should_enrich = true AND p.triage_composite >= 0.15 AND (p.is_enriched IS NULL OR p.is_enriched = false) THEN 1 ELSE 0 END) AS enrichment_ready,
+                sum(CASE WHEN p.status = $triaged AND p.should_enrich = true AND (p.is_enriched IS NULL OR p.is_enriched = false) THEN 1 ELSE 0 END) AS enrichment_ready,
                 sum(CASE WHEN p.is_enriched = true THEN 1 ELSE 0 END) AS enriched,
                 sum(CASE WHEN p.status = $triaged THEN 1 ELSE 0 END) AS triaged,
                 sum(CASE WHEN p.status = $explored THEN 1 ELSE 0 END) AS explored,
@@ -1292,6 +1292,7 @@ def mark_paths_triaged(
                 "now": now,
                 "triaged": PathStatus.triaged.value,
                 "triage_composite": score_data.get("triage_composite"),
+                "judgments": score_data.get("judgments", {}),
                 "triage_modeling_code": score_data.get("triage_modeling_code"),
                 "triage_analysis_code": score_data.get("triage_analysis_code"),
                 "triage_operations_code": score_data.get("triage_operations_code"),
@@ -1380,7 +1381,8 @@ def mark_paths_triaged(
                     p.skip_reason = item.skip_reason,
                     p.terminal_reason = item.terminal_reason,
                     p.enrich_skip_reason = item.enrich_skip_reason,
-                    p.score_cost = coalesce(p.score_cost, 0) + item.score_cost
+                    p.score_cost = coalesce(p.score_cost, 0) + item.score_cost,
+                    p += item.judgments
                 WITH p, item
                 OPTIONAL MATCH (e:Evidence {id: item.evidence_id})
                 FOREACH (_ IN CASE WHEN e IS NOT NULL THEN [1] ELSE [] END |
@@ -1459,18 +1461,18 @@ def get_high_value_paths(
         List of dicts with path info and scores
     """
     from imas_codex.graph import GraphClient
-    from imas_codex.settings import get_discovery_threshold
+    from imas_codex.settings import get_path_scan_threshold
 
     if min_score is None:
-        min_score = get_discovery_threshold()
+        min_score = get_path_scan_threshold()
 
     with GraphClient() as gc:
         result = gc.query(
             """
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
-            WHERE coalesce(p.score_composite, p.triage_composite) >= $min_score
+            WHERE p.scan_relevance >= $min_score
             RETURN p.id AS id, p.path AS path,
-                   coalesce(p.score_composite, p.triage_composite) AS score,
+                   p.scan_relevance AS score,
                    p.description AS description, p.path_purpose AS path_purpose,
                    coalesce(p.score_modeling_code, p.triage_modeling_code) AS score_modeling_code,
                    coalesce(p.score_analysis_code, p.triage_analysis_code) AS score_analysis_code,

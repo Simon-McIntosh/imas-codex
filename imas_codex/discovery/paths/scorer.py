@@ -25,13 +25,14 @@ from imas_codex.discovery.base.llm import suppress_litellm_noise
 from imas_codex.discovery.base.scoring import PATH_SCORE_DIMENSIONS, max_composite
 from imas_codex.discovery.paths.models import (
     DirectoryEvidence,
+    PathDescriptionBatch,
     ResourcePurpose,
     TriageBatch,
     TriagedBatch,
     TriagedDirectory,
     parse_path_purpose,
 )
-from imas_codex.settings import get_model, get_reasoning_effort
+from imas_codex.settings import get_model, get_path_scan_threshold, get_reasoning_effort
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,147 @@ suppress_litellm_noise()
 
 # Per-purpose score names — canonical list from shared scoring module
 PURPOSE_SCORE_NAMES = PATH_SCORE_DIMENSIONS
+
+# Scan is a broad discovery gate: visualization and documentation alone do not
+# imply that code or measured data should be scanned.
+SCAN_FACETS = tuple(
+    field
+    for field in PURPOSE_SCORE_NAMES
+    if field not in {"score_visualization", "score_documentation"}
+)
+PATH_EXPAND_THRESHOLD = 0.50
+
+
+def path_scan_relevance(scores: dict[str, float]) -> float:
+    """Return the strongest discovery facet in a path judgment."""
+    return max((scores.get(field, 0.0) for field in SCAN_FACETS), default=0.0)
+
+
+def path_judgment_fields(
+    answers: dict[str, Any], model: str, *, prefix: str = "score"
+) -> dict[str, Any]:
+    """Validate and flatten a complete typed Jev answer for graph storage."""
+    questions = build_path_judgment_questions()
+    missing = set(questions) - set(answers)
+    if missing:
+        raise ValueError(f"Path judgment missing answers: {sorted(missing)}")
+    purpose = answers["path_purpose"]
+    options = list(questions["path_purpose"]["criteria"])
+    choice = purpose["choice"]
+    if choice not in options:
+        raise ValueError(f"Unknown path purpose: {choice}")
+    fields: dict[str, Any] = {
+        "path_purpose": choice,
+        "path_purpose_probs": [
+            float(purpose["probabilities"].get(x, 0)) for x in options
+        ],
+        "path_purpose_confidence": float(purpose["confidence"]),
+        "children_worth_listing": float(answers["children_worth_listing"]["noul"]),
+        "judgment_model": model,
+    }
+    scores: dict[str, float] = {}
+    for name in PURPOSE_SCORE_NAMES:
+        answer = answers[name]
+        levels = len(questions[name]["criteria"])
+        value = float(answer["score"]) / (levels - 1)
+        scores[name] = value
+        stored = name if prefix == "score" else name.replace("score_", "triage_")
+        fields[stored] = value
+        fields[f"{stored}_probs"] = [
+            float(answer["probabilities"].get(str(i), 0)) for i in range(levels)
+        ]
+        fields[f"{stored}_confidence"] = float(answer["confidence"])
+    fields["scan_relevance"] = path_scan_relevance(scores)
+    fields["should_expand"] = fields["children_worth_listing"] >= PATH_EXPAND_THRESHOLD
+    fields["should_enrich"] = fields["scan_relevance"] >= get_path_scan_threshold()
+    return fields
+
+
+async def rejudge_stale_paths(
+    facility: str, prefix: str, *, limit: int = 25
+) -> tuple[int, float]:
+    """Refresh stored judgments under one prefix from graph evidence alone."""
+    import uuid
+
+    from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.discovery.base.judgment import judge_rows
+    from imas_codex.graph import GraphClient
+
+    model = get_model("discovery-relevance")
+    token = str(uuid.uuid4())
+    with GraphClient() as gc:
+        claimed = list(
+            gc.query(
+                """
+            MATCH (p:FacilityPath {facility_id: $facility})
+            WHERE (p.path = $prefix OR p.path STARTS WITH $child_prefix)
+              AND p.status IN ['triaged', 'scored', 'explored']
+              AND (p.judgment_model IS NULL OR p.judgment_model <> $model)
+              AND p.claimed_at IS NULL
+            WITH p ORDER BY rand() LIMIT $limit
+            SET p.claimed_at = datetime(), p.claim_token = $token
+            RETURN properties(p) AS row
+            """,
+                facility=facility,
+                prefix=prefix.rstrip("/"),
+                child_prefix=prefix.rstrip("/") + "/",
+                model=model,
+                limit=limit,
+                token=token,
+            )
+        )
+    rows = [dict(item["row"]) for item in claimed]
+    if not rows:
+        return 0, 0.0
+
+    def apply(answered, _cost):
+        items = []
+        for row, answers, paid in answered:
+            fields = path_judgment_fields(
+                answers,
+                model,
+                prefix="score" if row["status"] in {"scored", "explored"} else "triage",
+            )
+            if row["status"] in {"scored", "explored"}:
+                fields["score_composite"] = fields["scan_relevance"]
+            else:
+                fields["triage_composite"] = fields["scan_relevance"]
+            fields["score_cost"] = float(row.get("score_cost") or 0) + paid
+            items.append({"id": row["id"], "fields": fields})
+        with GraphClient() as gc:
+            gc.query(
+                """
+                UNWIND $items AS item
+                MATCH (p:FacilityPath {id: item.id, claim_token: $token})
+                SET p += item.fields, p.claimed_at = null, p.claim_token = null
+                """,
+                items=items,
+                token=token,
+            )
+        return len(items)
+
+    facility_config = get_facility(facility)
+    try:
+        count, cost, failed = await judge_rows(
+            rows,
+            lambda row: build_path_judgment_state(row, facility, facility_config),
+            build_path_judgment_questions,
+            apply,
+            model=model,
+            service="facility-discovery",
+        )
+    finally:
+        with GraphClient() as gc:
+            gc.query(
+                """
+                MATCH (p:FacilityPath {claim_token: $token})
+                SET p.claimed_at = null, p.claim_token = null
+                """,
+                token=token,
+            )
+    if failed:
+        logger.warning("Path re-judge left %d unanswered rows", len(failed))
+    return count or 0, cost
 
 
 # Concrete directory situations for each stored FacilityPath facet. The
@@ -158,6 +300,15 @@ def build_path_judgment_state(
             "patterns_detected": decoded(path_row.get("patterns_detected"), []),
             "numeric_dir_ratio": path_row.get("numeric_dir_ratio") or 0,
             "description": (path_row.get("description") or "")[:1500],
+            "enrichment": {
+                "total_bytes": path_row.get("total_bytes"),
+                "total_lines": path_row.get("total_lines"),
+                "language_breakdown": decoded(path_row.get("language_breakdown"), {}),
+                "pattern_categories": decoded(path_row.get("pattern_categories"), []),
+                "read_matches": path_row.get("read_matches"),
+                "write_matches": path_row.get("write_matches"),
+                "is_multiformat": path_row.get("is_multiformat"),
+            },
         },
     }
 
@@ -286,74 +437,102 @@ class DirectoryTriager:
         focus: str | None = None,
         threshold: float = 0.7,
     ) -> TriagedBatch:
-        """Async version of triage_batch using acall_llm_structured.
+        """Describe paths with the language model and judge them with Jev."""
+        import json
 
-        Fully cancellable — no thread executors, uses litellm.acompletion().
-        """
-        import time as time_mod
-
+        from imas_codex.discovery.base.facility import get_facility
+        from imas_codex.discovery.base.judgment import judge_rows
         from imas_codex.discovery.base.llm import acall_llm_structured
 
         if not directories:
-            return TriagedBatch(
-                triaged_dirs=[],
-                total_cost=0.0,
-                model=self.model,
-                tokens_used=0,
-            )
+            return TriagedBatch([], 0.0, self.model or "", 0)
 
-        t0 = time_mod.monotonic()
-        system_prompt = self._build_system_prompt(focus)
-        t1 = time_mod.monotonic()
-        user_prompt = self._build_user_prompt(directories)
-        t2 = time_mod.monotonic()
-
-        sys_chars = len(system_prompt)
-        usr_chars = len(user_prompt)
-        logger.debug(
-            "Triage prompt built in %.1fs (system=%.1fs/%dk chars, "
-            "user=%.1fs/%dk chars) for %d dirs",
-            t2 - t0,
-            t1 - t0,
-            sys_chars // 1000,
-            t2 - t1,
-            usr_chars // 1000,
-            len(directories),
-        )
-
-        t_llm_start = time_mod.monotonic()
-        batch, cost, total_tokens = await acall_llm_structured(
+        batch, description_cost, tokens = await acall_llm_structured(
             model=self.model,
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
+                {
+                    "role": "system",
+                    "content": "Describe each directory in one factual sentence. Return only its path and description; do not score, classify, or decide whether to explore it.",
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(
+                        {"focus": focus, "directories": directories}, default=str
+                    ),
+                },
             ],
-            response_model=TriageBatch,
+            response_model=PathDescriptionBatch,
             service="facility-discovery",
             reasoning_effort=get_reasoning_effort("discovery-triage"),
         )
-        t_llm_end = time_mod.monotonic()
-        logger.info(
-            "Triage LLM call: %.1fs, %d tokens, $%.4f for %d dirs "
-            "(%.1fs/dir, %d tok/dir)",
-            t_llm_end - t_llm_start,
-            total_tokens,
-            cost,
-            len(directories),
-            (t_llm_end - t_llm_start) / max(len(directories), 1),
-            total_tokens // max(len(directories), 1),
-        )
+        descriptions = {item.path: item.description for item in batch.results}
+        if set(descriptions) != {row["path"] for row in directories}:
+            raise ValueError("Path descriptions do not match the claimed directories")
+        rows = [
+            {**row, "description": descriptions[row["path"]]} for row in directories
+        ]
+        facility_config = get_facility(self.facility) if self.facility else {}
+        model = get_model("discovery-relevance")
 
-        cost_per_path = cost / len(directories) if directories else 0.0
-        triaged_dirs = self._map_triaged_directories(
-            batch, directories, threshold, cost_per_path
-        )
+        def apply(answered, _cost):
+            triaged = []
+            for row, answers, paid in answered:
+                fields = path_judgment_fields(answers, model, prefix="triage")
+                file_types = row.get("file_type_counts") or {}
+                if isinstance(file_types, str):
+                    file_types = json.loads(file_types)
+                evidence = DirectoryEvidence(
+                    code_indicators=[
+                        key
+                        for key in file_types
+                        if key.lower() in {"py", "f", "f90", "c", "cpp", "h"}
+                    ],
+                    data_indicators=[
+                        key
+                        for key in file_types
+                        if key.lower() in {"h5", "nc", "dat", "mat"}
+                    ],
+                    doc_indicators=["README"] if row.get("has_readme") else [],
+                )
+                purpose = (
+                    fields["path_purpose"]
+                    if fields["path_purpose"] == "other"
+                    else parse_path_purpose(fields["path_purpose"])
+                )
+                scores = {
+                    name: fields[name.replace("score_", "triage_")]
+                    for name in PURPOSE_SCORE_NAMES
+                }
+                triaged.append(
+                    TriagedDirectory(
+                        path=row["path"],
+                        path_purpose=purpose,
+                        description=row["description"],
+                        evidence=evidence,
+                        **scores,
+                        score=fields["scan_relevance"],
+                        should_expand=fields["should_expand"],
+                        should_enrich=fields["should_enrich"],
+                        score_cost=paid + description_cost / len(rows),
+                        judgments=fields,
+                    )
+                )
+            return triaged
 
+        triaged, judgment_cost, failed = await judge_rows(
+            rows,
+            lambda row: build_path_judgment_state(
+                row, self.facility or "", facility_config
+            ),
+            build_path_judgment_questions,
+            apply,
+            model=model,
+            service="facility-discovery",
+        )
+        if failed:
+            raise ValueError(f"Path judgments incomplete for {len(failed)} directories")
         return TriagedBatch(
-            triaged_dirs=triaged_dirs,
-            total_cost=cost,
-            model=self.model,
-            tokens_used=total_tokens,
+            triaged or [], description_cost + judgment_cost, model, tokens
         )
 
     def _build_system_prompt(self, focus: str | None = None) -> str:
