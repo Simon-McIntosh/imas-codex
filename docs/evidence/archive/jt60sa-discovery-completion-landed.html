@@ -155,6 +155,21 @@
     <p>Run r-20261008T064247613775-vector-index-test-repair, commit <code>abb02d6a0</code>. <code>tests/graph/test_dd_aux_streaming.py</code> and <code>tests/graph/test_vector_quantization.py</code> used fakes that predate <code>GraphClient.ensure_vector_indexes</code>. With the fakes returning what the owner returns, 9 tests pass. Disabling the dimension-mismatch drop fails both <code>TestDimensionMismatchDetection</code> tests, so the production drop is what the tests guard.</p>
   </section>
 
+  <section id="s57">
+    <h2>§57 — discover --until landed</h2>
+    <p>Node <code>discover-until-option</code> added <code>--until</code> to <code>imas_codex/cli/discover/sequence.py</code>. The closure follows each stage's own <code>reads</code> and <code>context</code> fields, so <code>--until signals</code> runs paths, code, wiki, signals scan and signals enrich, and never candidates or mapping. The worker's focused gate passed 49 sequence tests; removing the context edges failed the signals and mapping closure cases. Coordinator gate of the merged head over <code>tests/cli</code>, from an archive with <code>.env</code> linked: 359 passed against 352 at base, and the same two archive-only <code>test_release</code> failures at both.</p>
+  </section>
+
+  <section id="s58">
+    <h2>§58 — a failed code scan is never recorded as empty</h2>
+    <p>Node <code>code-scan-failure-not-empty</code> made the three failure branches of <code>_scan_remote_paths_batch</code> raise. The scan worker's existing exception path then releases every path claim and retries with backoff. Worker gate at the head: 8 passed; restoring the swallowed exception marked both paths scanned with zero files and failed the exit-255 test. Coordinator gate of the merged head over <code>tests/discovery</code> and <code>tests/ingestion</code>, from an archive with <code>.env</code> linked: 1,570 passed against 1,566 at base, with no failures. Review follow-on: a non-255 script failure now also retries, then stops the scan worker, where the paths scanner records it as a per-path error. That fails closed rather than recording a false empty.</p>
+  </section>
+
+  <section id="s59">
+    <h2>§59 — code progress totals restored</h2>
+    <p>Node <code>code-progress-totals</code> fixed the first stats query, which had f-string braces in a plain string, and replaced the refresh loop's silent <code>except Exception: pass</code> with a warning. Read against the live graph through the fixed function on 2026-10-09: 65,013 code files, 8,602 ingested, 189 waiting for scoring, 32,494 chunks with 13,059 embedded. Coordinator gate of the merged head over <code>tests/discovery</code> and <code>tests/cli</code>, from an archive with <code>.env</code> linked: 1,808 passed against 1,806 at base, with the same two archive-only <code>test_release</code> failures at both. Review follow-ons: the test asserts brace balance rather than full Cypher validity, and the warning's dedup key includes the message text.</p>
+  </section>
+
 </main>
 </body>
 </html>
