@@ -1,0 +1,404 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "27475fc3934c62569e56639fb3a2aadb215715a7",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 3728768,
+      "cached_input_tokens_cumulative": 3728768,
+      "input_tokens": 3871352,
+      "input_tokens_cumulative": 3871352,
+      "output_tokens": 17716,
+      "output_tokens_cumulative": 17716,
+      "reasoning_output_tokens": 6923,
+      "reasoning_output_tokens_cumulative": 6923
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 76,
+    "files": 2,
+    "removed": 11
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "f1528ef1fffb14ca70023624a3169f71761cd97c"
+  ],
+  "completed_at": "2026-10-08T08:40:01Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T08:24:54Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/ids",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/ids/test_metadata.py::TestPopulateMetadata::test_populate_returns_ids_metadata_result"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T082435236450-assignment-work-matches-claim/named-gate-repeat.log"
+  },
+  "impl_move": {
+    "at_complete": 0.375,
+    "at_dispatch": 0.375,
+    "plan": "facility-discovery-sequence",
+    "reason": "section 4 stays open for the filtered candidate-home union",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.968981069554812,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T07:50:49Z, which is after this node's 2400s horizon ending 2026-10-08T09:04:38.284129+00:00",
+    "horizon_ends_at": "2026-10-08T09:04:38.284129+00:00",
+    "horizon_seconds": 2400,
+    "metered": true,
+    "observed_at": "2026-10-08T08:24:37Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T07:50:49Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 507021,
+    "state": "quiet",
+    "utilisation_pct": 48.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T08:24:37Z",
+    "read_at": "2026-10-08T08:24:38Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 48.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T08:40:01Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T082435236450-assignment-work-matches-claim/manifest.md",
+  "member": "disposable-r-20261008T082435236450-assignment-work-matches-claim",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/ids/test_assignment_pending_matches_claim.py::test_pending_matches_claim_for_target_candidate[candidate_ids0-True]",
+      "tests/ids/test_assignment_pending_matches_claim.py::test_pending_matches_claim_for_target_candidate[candidate_ids1-False]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/ids/test_assignment_pending_matches_claim.py::test_pending_matches_claim_for_target_candidate[candidate_ids0-True]",
+      "tests/ids/test_assignment_pending_matches_claim.py::test_pending_matches_claim_for_target_candidate[candidate_ids1-False]"
+    ],
+    "declaration": "restore the physics_domain filter in has_pending_assignment_work; the cross-domain pending test must then fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T082435236450-assignment-work-matches-claim/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T082435236450-assignment-work-matches-claim/negative-control.log",
+    "test_paths": [
+      "tests/ids/test_assignment_pending_matches_claim.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "assignment-work-matches-claim",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 464,
+          "cached_input_tokens": 262988,
+          "input_tokens": 263454,
+          "output_tokens": 812,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 264266,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider passes with tests/ids/test_assignment_pending_matches_claim.py showing an escalated source whose physics domain is outside the target IDS domains but whose candidate lies in a target IDS is both claimed and reported pending, and a source with no candidate in any target IDS is neither, and run_mapping_engine passing state.target_ids_list to the pending check",
+    "estimated_hours": null,
+    "goal": "Make has_pending_assignment_work in imas_codex/ids/workers.py select escalated sources by the run's target IDS names with the same predicate claim_sources_for_escalated uses",
+    "id": "assignment-work-matches-claim",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T08:24:37Z",
+      "read_at": "2026-10-08T08:24:38Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 48.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T082435236450-assignment-work-matches-claim/manifest.md",
+    "negative_control": "restore the physics_domain filter in has_pending_assignment_work; the cross-domain pending test must then fail",
+    "plan": "facility-discovery-sequence",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "40m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/ids/workers.py",
+      "tests/ids/test_assignment_pending_matches_claim.py",
+      "docs/evidence/fragments/facility-discovery-sequence/assignment-work-matches-claim.html",
+      "docs/figures/facility-discovery-sequence/assignment-work-matches-claim"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.9688096465830283,
+      "derived": 0.17784905832804243,
+      "drain_hours": 168.0,
+      "effective_limit": 0.17784905832804243,
+      "elapsed_fraction": 0.1616809621164022,
+      "elapsed_hours": 27.162401635555568,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T08:24:43+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.52,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.48,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.470016,
+      "decided_by": "window",
+      "margin": 0.17373400000000006,
+      "name": "assignment-work-matches-claim",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.48
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.645888,
+        "observed_at": "2026-10-08T08:24:43+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.48,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "assignment-work-matches-claim",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T08:24:43.645888+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Repairs an assign-phase completion mismatch exposed by the candidate-home union; the lead asked for the codex lane to raise throughput.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5085.871,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "facility-discovery-sequence",
+  "plan_impl_at_dispatch": 0.375,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f1528ef1fffb14ca70023624a3169f71761cd97c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "27475fc3934c62569e56639fb3a2aadb215715a7",
+    "reviewed_head_sha": "f1528ef1fffb14ca70023624a3169f71761cd97c",
+    "scores": {
+      "durability": 18,
+      "evidence": 15,
+      "fit": 18,
+      "goal_fidelity": 17,
+      "reuse": 17,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 103
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T082435236450-assignment-work-matches-claim",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "mapping-20261006",
+  "session_harness": "codex",
+  "session_id": "01a11a9d-adaa-7901-9bf3-5f9497f7e562",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 3728768,
+    "cumulative_input_tokens": 7600120,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 24639
+  },
+  "time_budget": "40m",
+  "tool_steps": 84.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 907,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T08:40:05Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T08:25:01Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T082435236450-assignment-work-matches-claim",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 226,
+    "worker_pid": 3373155
+  },
+  "worker_seconds": 907,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
