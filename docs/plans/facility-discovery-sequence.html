@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -339,6 +339,21 @@
       pipeline once. <code>discover_mappable_ids</code> includes an IDS that holds a selected candidate
       edge but has no physics-domain overlap. The domain skips with <em>nothing to do</em> when no
       source has a route.
+    </p>
+    <p>
+      The candidate-home union lets a target IDS come from a source in another physics domain, which exposes a mismatch in
+      the mapping engine's assign phase. <code>claim_sources_for_escalated</code> claims an escalated source by the run's
+      target IDS names, while <code>has_pending_assignment_work</code>, which decides when the phase is done, filters by the
+      source's <code>physics_domain</code> against the domains of the target IDS nodes. A claimable source in a domain
+      outside that set reads as no work, so the phase can end while it is still unassigned.
+      <strong>Node</strong> <code>assignment-work-matches-claim</code>, role implement, 0.5 h. The pending check takes the
+      target IDS names and uses the claim's own predicate, and <code>run_mapping_engine</code> passes
+      <code>state.target_ids_list</code> instead of the domain union. Write paths: <code>imas_codex/ids/workers.py</code>,
+      <code>tests/ids/test_assignment_pending_matches_claim.py</code> and its fragment. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids tests/cli/test_discover_sequence.py -p no:cacheprovider</code> passes with a
+      test showing an escalated source whose physics domain is not among the target IDS domains, but whose candidate is in a
+      target IDS, is both claimed and reported as pending, and another showing a source with no candidate in any target IDS
+      is neither.
     </p>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
