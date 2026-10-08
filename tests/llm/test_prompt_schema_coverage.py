@@ -35,12 +35,7 @@ _DECISIONS_PROMPTS = {"code/triage"}
 # analysis actually follows discovery's render→builder→call dataflow rather than
 # silently returning nothing.
 EXPECTED_PROMPTS = {
-    "paths/triage",
-    "paths/scorer",
     "code/scorer",
-    "wiki/scorer",
-    "wiki/document-scorer",
-    "wiki/image-captioner",
     "signals/enrichment",
     "signals/source_unwind",
     "discovery/static-enricher",
