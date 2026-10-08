@@ -6,169 +6,17 @@ under /home and /analysis_DB, and never follows directory symlinks.
 
 import argparse
 import json
-import math
 import os
 import pwd
 import re
 import struct
 from collections import Counter
 
-FLOAT = re.compile(r"[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[EeDd][-+]?\d+)?")
-SHOT = re.compile(r"(?<!\d)(\d{5,6})(?!\d)")
+from imas_codex.remote.scripts.read_equilibrium_file import (
+    read_grid as read_equilibrium_grid,
+)
+
 GEQDSK_NAME = re.compile(r"(?:eqdsk|geqdsk|^g\d{6})", re.I)
-
-
-def _finite_grid(values):
-    if not values or not all(math.isfinite(value) for value in values):
-        raise ValueError("nonfinite or empty flux grid")
-    if max(values) <= min(values):
-        raise ValueError("constant flux grid")
-
-
-def _shot_time(header, path):
-    match = SHOT.search(header) or SHOT.search(os.path.basename(path))
-    shot = int(match.group(1)) if match else None
-    match = re.search(r"t\s*=\s*(\d+(?:\.\d+)?)", header, re.I)
-    if match:
-        return shot, float(match.group(1))
-    match = re.search(r"(\d+)\s*ms", header, re.I)
-    if match:
-        return shot, int(match.group(1)) / 1000.0
-    match = re.search(r"[tT](\d+(?:\.\d+)?)", os.path.basename(path))
-    return shot, float(match.group(1)) if match else None
-
-
-def _binary_record(data, offset):
-    if offset + 8 > len(data):
-        raise ValueError("truncated record marker")
-    size = struct.unpack_from(">I", data, offset)[0]
-    end = offset + size + 8
-    if end > len(data) or struct.unpack_from(">I", data, end - 4)[0] != size:
-        raise ValueError("Fortran record markers disagree")
-    return data[offset + 4 : end - 4], end
-
-
-def _selene(data, path, include_grid):
-    header, offset = _binary_record(data, 0)
-    body, offset = _binary_record(data, offset)
-    while offset < len(data):
-        _, offset = _binary_record(data, offset)
-    if len(header) < 12 or len(body) < 24:
-        raise ValueError("short SELENE header or body")
-    shot = struct.unpack_from(">i", header, 0)[0]
-    time = struct.unpack_from(">d", header, 4)[0]
-    nr, nz = struct.unpack_from(">6i", body, 0)[-2:]
-    if not 4 <= nr <= 2048 or not 4 <= nz <= 2048:
-        raise ValueError("implausible SELENE grid dimensions")
-    needed = 24 + 8 * (nr + nz + nr * nz)
-    if len(body) < needed:
-        raise ValueError("short SELENE flux grid")
-    r = struct.unpack_from(f">{nr}d", body, 24)
-    z = struct.unpack_from(f">{nz}d", body, 24 + 8 * nr)
-    psi = struct.unpack_from(f">{nr * nz}d", body, 24 + 8 * (nr + nz))
-    if not all(a < b for a, b in zip(r, r[1:], strict=False)) or not all(
-        a < b for a, b in zip(z, z[1:], strict=False)
-    ):
-        raise ValueError("SELENE coordinate axis is not increasing")
-    _finite_grid(psi)
-    result = {
-        "format": "selene_eq31",
-        "code": "SELENE",
-        "shot": shot,
-        "time_s": time,
-        "grid": [nr, nz],
-        "psi_range": [min(psi), max(psi)],
-    }
-    if include_grid:
-        result.update(r=list(r), z=list(z), psi=list(psi))
-    return result
-
-
-def _eq11(data, path, include_grid):
-    header, offset = _binary_record(data, 0)
-    body, offset = _binary_record(data, offset)
-    while offset < len(data):
-        _, offset = _binary_record(data, offset)
-    nr, nz = struct.unpack_from(">2i", body)
-    if not 4 <= nr <= 2048 or not 4 <= nz <= 2048:
-        raise ValueError("implausible EQ11 grid dimensions")
-    needed = 8 + 8 * (nr + nz + nr * nz)
-    if len(body) < needed:
-        raise ValueError("short EQ11 flux grid")
-    r = struct.unpack_from(f">{nr}d", body, 8)
-    z = struct.unpack_from(f">{nz}d", body, 8 + 8 * nr)
-    psi = struct.unpack_from(f">{nr * nz}d", body, 8 + 8 * (nr + nz))
-    if not all(a < b for a, b in zip(r, r[1:], strict=False)) or not all(
-        a < b for a, b in zip(z, z[1:], strict=False)
-    ):
-        raise ValueError("EQ11 coordinate axis is not increasing")
-    _finite_grid(psi)
-    title = header[12:].decode("ascii", "replace").strip()
-    parent = os.path.basename(os.path.dirname(path))
-    shot = int(parent) if SHOT.fullmatch(parent) else None
-    time = struct.unpack_from(">d", header, 4)[0]
-    result = {
-        "format": "eq11",
-        "code": "TOPICS" if "topics" in title.lower() else "unidentified EQ11",
-        "shot": shot,
-        "time_s": time,
-        "grid": [nr, nz],
-        "psi_range": [min(psi), max(psi)],
-        "header": title,
-    }
-    if include_grid:
-        result.update(r=list(r), z=list(z), psi=list(psi))
-    return result
-
-
-def _geqdsk(data, path, include_grid):
-    lines = data.decode("ascii").splitlines()
-    fields = lines[0].split()
-    nr, nz = int(fields[-2]), int(fields[-1])
-    if not 4 <= nr <= 2048 or not 4 <= nz <= 2048:
-        raise ValueError("implausible G EQDSK grid dimensions")
-    numbers = [
-        float(x.replace("D", "E").replace("d", "e"))
-        for x in FLOAT.findall("\n".join(lines[1:]))
-    ]
-    offset = 20 + 4 * nr
-    psi = numbers[offset : offset + nr * nz]
-    if len(psi) != nr * nz:
-        raise ValueError("short G EQDSK flux grid")
-    _finite_grid(psi)
-    header = lines[0]
-    shot, time = _shot_time(header, path)
-    if "LIUQE" in header.upper() or "MEQ" in header.upper():
-        code = "LIUQE/MEQ"
-        basis = "header"
-    elif "CHEASE" in header.upper():
-        code = "CHEASE"
-        basis = "header"
-    elif header.lstrip().upper().startswith("EFIT"):
-        code = "EFIT"
-        basis = "header"
-    elif header.lstrip().startswith("SA"):
-        code = "SA"
-        basis = "header"
-    elif "input_sa.txt" in header.lower() or "/work_sa/" in path.lower():
-        code = "SA"
-        basis = "header/path"
-    else:
-        code = "unidentified G EQDSK"
-        basis = "unidentified"
-    result = {
-        "format": "g_eqdsk",
-        "code": code,
-        "shot": shot,
-        "time_s": time,
-        "grid": [nr, nz],
-        "psi_range": [min(psi), max(psi)],
-        "header": header,
-        "code_basis": basis,
-    }
-    if include_grid:
-        result.update(psi=psi)
-    return result
 
 
 def facility_basis(result):
@@ -188,22 +36,7 @@ def facility_basis(result):
 
 
 def read_grid(path, include_grid=False):
-    with open(path, "rb") as stream:
-        data = stream.read()
-    if len(data) < 64:
-        raise ValueError("file too short for an equilibrium grid")
-    if struct.unpack_from(">I", data)[0] == 252:
-        title = data[16:20]
-        if title == b"EQ31":
-            result = _selene(data, path, include_grid)
-        elif title == b"EQ11":
-            result = _eq11(data, path, include_grid)
-        else:
-            raise ValueError("unrecognised Fortran equilibrium record")
-    else:
-        result = _geqdsk(data, path, include_grid)
-    result["path"] = path
-    result["bytes"] = len(data)
+    result = read_equilibrium_grid(path, include_grid=include_grid)
     result["owner"] = pwd.getpwuid(os.stat(path).st_uid).pw_name
     result["facility_basis"] = facility_basis(result)
     return result
