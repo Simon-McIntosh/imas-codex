@@ -953,13 +953,16 @@ def _refresh_ingestion_claims(claims: list[dict[str, str]]) -> None:
             """
             UNWIND $claims AS claim
             MATCH (sf:CodeFile {id: claim.id})
-            WHERE sf.claim_token = claim.token AND sf.status = 'scored'
-            SET sf.claimed_at = datetime()
-            RETURN count(sf) AS refreshed
+            WHERE sf.claim_token = claim.token
+            SET sf.claimed_at = CASE
+                WHEN sf.status = 'scored' THEN datetime()
+                ELSE sf.claimed_at
+            END
+            RETURN count(sf) AS owned
             """,
             claims=claims,
         )
-    if not result or result[0]["refreshed"] != len(claims):
+    if not result or result[0]["owned"] != len(claims):
         raise RuntimeError("Code ingestion claim changed while its holder was active")
 
 
@@ -1138,14 +1141,15 @@ def _mark_files_ingested(file_ids: list[str]) -> int:
         return result[0]["updated"] if result else 0
 
 
-def _mark_file_failed(file_id: str, error: str) -> None:
-    """Mark a single CodeFile as failed."""
+def _mark_file_failed(file_id: str, error: str, claim_token: str) -> None:
+    """Fail only a scored CodeFile still owned by this ingestion batch."""
     from imas_codex.graph import GraphClient
 
     with GraphClient() as gc:
         gc.query(
             """
             MATCH (sf:CodeFile {id: $id})
+            WHERE sf.status = 'scored' AND sf.claim_token = $token
             SET sf.status = 'failed',
                 sf.error = $error,
                 sf.claimed_at = null,
@@ -1153,6 +1157,7 @@ def _mark_file_failed(file_id: str, error: str) -> None:
             """,
             id=file_id,
             error=error[:200],
+            token=claim_token,
         )
 
 
@@ -1347,7 +1352,10 @@ async def code_worker(
                 outcome = outcomes.get(f["path"])
                 if outcome is None:
                     await asyncio.to_thread(
-                        _mark_file_failed, f["id"], "no ingestion outcome recorded"
+                        _mark_file_failed,
+                        f["id"],
+                        "no ingestion outcome recorded",
+                        f["claim_token"],
                     )
                 elif outcome["status"] == "ingested":
                     ingested_ids.append(f["id"])
@@ -1360,6 +1368,7 @@ async def code_worker(
                         _mark_file_failed,
                         f["id"],
                         outcome.get("reason", "unknown failure"),
+                        f["claim_token"],
                     )
             if ingested_ids:
                 await asyncio.to_thread(_mark_files_ingested, ingested_ids)
@@ -1408,7 +1417,9 @@ async def code_worker(
             state.code_stats.errors += 1
             # Mark individual files as failed
             for f in files:
-                await asyncio.to_thread(_mark_file_failed, f["id"], str(e)[:200])
+                await asyncio.to_thread(
+                    _mark_file_failed, f["id"], str(e)[:200], f["claim_token"]
+                )
 
         await asyncio.sleep(0.1)
 

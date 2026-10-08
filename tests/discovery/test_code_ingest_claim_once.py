@@ -26,8 +26,33 @@ class ClaimGraph:
         return False
 
     def query(self, cypher, **params):
-        if "RETURN count(sf) AS refreshed" in cypher:
-            return self._refresh(params)
+        if "SET sf.status = 'failed'" in cypher:
+            row = next(row for row in self.rows if row["id"] == params["id"])
+            eligible = (
+                "sf.status = 'scored'" not in cypher or row["status"] == "scored"
+            ) and (
+                "sf.claim_token = $token" not in cypher
+                or row.get("claim_token") == params["token"]
+            )
+            if eligible:
+                row["status"] = "failed"
+            return []
+        if "SET sf.status = 'skipped'" in cypher:
+            row = next(row for row in self.rows if row["id"] == params["id"])
+            row["status"] = "skipped"
+            return []
+        if "SET sf.status = 'ingested'" in cypher:
+            for row in self.rows:
+                if row["id"] in params["ids"]:
+                    row["status"] = "ingested"
+            return [{"updated": len(params["ids"])}]
+        if "SET dup.status = 'skipped'" in cypher:
+            return []
+        if (
+            "RETURN count(sf) AS owned" in cypher
+            or "RETURN count(sf) AS refreshed" in cypher
+        ):
+            return self._refresh(cypher, params)
         if "SET sf.claimed_at" in cypher:
             if "SET f.name = f.name" in cypher:
                 with self.lock:
@@ -67,14 +92,19 @@ class ClaimGraph:
         self._write_claims(self._eligible(params), params["token"])
         return []
 
-    def _refresh(self, params):
-        refreshed = 0
+    def _refresh(self, cypher, params):
+        owned = 0
         for claim in params["claims"]:
             row = next(row for row in self.rows if row["id"] == claim["id"])
-            if row.get("claim_token") == claim["token"] and row["status"] == "scored":
+            if row.get("claim_token") != claim["token"]:
+                continue
+            if "AND sf.status = 'scored'" in cypher and row["status"] != "scored":
+                continue
+            owned += 1
+            if row["status"] == "scored":
                 row["claimed_at"] = time.monotonic()
-                refreshed += 1
-        return [{"refreshed": refreshed}]
+        key = "owned" if "AS owned" in cypher else "refreshed"
+        return [{key: owned}]
 
 
 def test_two_concurrent_claims_take_each_file_once():
@@ -134,3 +164,79 @@ def test_live_claim_is_renewed_past_timeout():
             await asyncio.wait_for(worker, timeout=2)
 
     asyncio.run(check())
+
+
+def test_ingested_file_does_not_invalidate_remaining_claim(caplog):
+    from imas_codex.discovery.base import claims as claim_settings
+    from imas_codex.discovery.code import workers
+    from imas_codex.discovery.code.state import FileDiscoveryState
+
+    async def check():
+        graph = ClaimGraph(count=2, timeout=0.2)
+        state = FileDiscoveryState(facility="test")
+
+        async def ingest_files(**_kwargs):
+            graph.rows[0]["status"] = "ingested"
+            await asyncio.sleep(0.25)
+            state.stop_requested = True
+            return {
+                "files": 1,
+                "skipped": 1,
+                "chunks": 1,
+                "outcomes": {
+                    "/source/0.py": {"status": "ingested"},
+                    "/source/1.py": {"status": "skipped", "reason": "no chunks"},
+                },
+            }
+
+        with (
+            patch("imas_codex.graph.GraphClient", return_value=graph),
+            patch.object(claim_settings, "DEFAULT_CLAIM_TIMEOUT_SECONDS", 0.15),
+            patch.object(workers, "_settle_unclaimable_files", return_value=0),
+            patch.object(
+                workers, "_filter_duplicates", side_effect=lambda files: files
+            ),
+            patch(
+                "imas_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
+            ),
+        ):
+            await asyncio.wait_for(workers.code_worker(state, batch_size=2), timeout=2)
+        assert [row["status"] for row in graph.rows] == ["ingested", "skipped"]
+
+    asyncio.run(check())
+    assert "Code ingestion claim changed" not in caplog.text
+
+
+def test_lost_claim_does_not_downgrade_ingested_file(caplog):
+    from imas_codex.discovery.base import claims as claim_settings
+    from imas_codex.discovery.code import workers
+    from imas_codex.discovery.code.state import FileDiscoveryState
+
+    async def check():
+        graph = ClaimGraph(count=2, timeout=0.2)
+        state = FileDiscoveryState(facility="test")
+
+        async def ingest_files(**_kwargs):
+            graph.rows[0]["status"] = "ingested"
+            graph.rows[1]["claim_token"] = "another-holder"
+            await asyncio.sleep(0.25)
+            state.stop_requested = True
+            return {"files": 2, "outcomes": {}}
+
+        with (
+            patch("imas_codex.graph.GraphClient", return_value=graph),
+            patch.object(claim_settings, "DEFAULT_CLAIM_TIMEOUT_SECONDS", 0.15),
+            patch.object(workers, "_settle_unclaimable_files", return_value=0),
+            patch.object(
+                workers, "_filter_duplicates", side_effect=lambda files: files
+            ),
+            patch(
+                "imas_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
+            ),
+        ):
+            await asyncio.wait_for(workers.code_worker(state, batch_size=2), timeout=2)
+        assert [row["status"] for row in graph.rows] == ["ingested", "scored"]
+        assert graph.rows[1]["claim_token"] == "another-holder"
+
+    asyncio.run(check())
+    assert "Code ingestion claim changed" in caplog.text
