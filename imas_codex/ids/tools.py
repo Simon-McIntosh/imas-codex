@@ -383,11 +383,10 @@ def discover_mappable_ids(
 ) -> dict[str, Any]:
     """Discover IDS targets achievable from available signal sources.
 
-    Filtering uses union semantics:
-      --domain selects IDS whose IMASNodes touch those physics domains
-      --ids selects those IDS names directly
-      Both flags produce the union of both result sets
-      Neither flag discovers all IDS with matching signal source domains
+    Domain selection includes IDS whose IMASNodes touch those domains and
+    selected candidate homes of sources in those domains. Without filters,
+    all source domains and selected candidate homes contribute targets.
+    An explicit IDS filter adds only direct domain and named IDS matches.
 
     Args:
         facility: Facility identifier.
@@ -419,13 +418,6 @@ def discover_mappable_ids(
     )
     available_domains = [r["domain"] for r in source_rows]
     source_counts = {r["domain"]: r["cnt"] for r in source_rows}
-
-    if not available_domains:
-        return {
-            "available_domains": [],
-            "ids_targets": [],
-            "total_sources": 0,
-        }
 
     from imas_codex.tools.graph_search import _dd_version_clause
 
@@ -488,38 +480,46 @@ def discover_mappable_ids(
                     "domains": set(r["domains"]),
                 }
 
-    # Branch C: no filters — discover IDS from source domains and candidate homes
+    # Branch C: no filters — discover IDS from source domains
     if not domains and not ids_filter:
-        all_rows = gc.query(
-            f"""
-            MATCH (p:IMASNode)
-            WHERE p.physics_domain IN $available_domains
-              AND p.ids IS NOT NULL
-              AND p.ids <> ''
-              {dd_clause}
-            WITH DISTINCT p.ids AS ids_name,
-                 collect(DISTINCT p.physics_domain) AS domains
-            RETURN ids_name, domains
-            ORDER BY ids_name
-            """,
-            available_domains=available_domains,
-            **dd_params,
-        )
-        for r in all_rows:
-            ids_by_name[r["ids_name"]] = {
-                "ids_name": r["ids_name"],
-                "domains": set(r["domains"]),
-            }
+        if available_domains:
+            all_rows = gc.query(
+                f"""
+                MATCH (p:IMASNode)
+                WHERE p.physics_domain IN $available_domains
+                  AND p.ids IS NOT NULL
+                  AND p.ids <> ''
+                  {dd_clause}
+                WITH DISTINCT p.ids AS ids_name,
+                     collect(DISTINCT p.physics_domain) AS domains
+                RETURN ids_name, domains
+                ORDER BY ids_name
+                """,
+                available_domains=available_domains,
+                **dd_params,
+            )
+            for r in all_rows:
+                ids_by_name[r["ids_name"]] = {
+                    "ids_name": r["ids_name"],
+                    "domains": set(r["domains"]),
+                }
 
+    if not ids_filter:
+        source_domain_clause = (
+            "AND sg.physics_domain IN $filter_domains" if domains else ""
+        )
+        source_domain_params = {"filter_domains": domains} if domains else {}
         for r in gc.query(
             f"""
             MATCH (sg:SignalSource {{facility_id: $facility}})-[r:MAPPING_CANDIDATE]->(p:IMASNode)
             WHERE (r.route = true OR sg.candidate_route = 'escalated')
+              {source_domain_clause}
               AND p.ids IS NOT NULL AND p.ids <> ''
               {dd_clause}
             RETURN p.ids AS ids_name, collect(DISTINCT p.physics_domain) AS domains
             """,
             facility=facility,
+            **source_domain_params,
             **dd_params,
         ):
             name = r["ids_name"]
