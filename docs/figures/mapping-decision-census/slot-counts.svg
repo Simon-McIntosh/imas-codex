@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 390" role="img" aria-labelledby="title desc">
+  <title id="title">Observed transform-slot counts</title>
+  <desc id="desc">For all six slots, both code-settleable and judgment counts are zero because no MAPS_TO_IMAS binding exists.</desc>
+  <g font-family="system-ui, sans-serif" fill="#20252b">
+    <path d="M105 255H1300" fill="none" stroke="#30363d" stroke-width="2"/>
+    <text x="70" y="263" font-size="27" text-anchor="end">0</text>
+    <g font-size="25" text-anchor="middle">
+      <text x="205" y="310">Sign</text>
+      <text x="415" y="310">Factor</text>
+      <text x="625" y="310">Units</text>
+      <text x="835" y="310">COCOS call</text>
+      <text x="1045" y="310">Index/slice</text>
+      <text x="1255" y="310">Other</text>
+    </g>
+    <g fill="#376b83" stroke="#376b83" stroke-width="3">
+      <circle cx="190" cy="255" r="8"/><circle cx="400" cy="255" r="8"/>
+      <circle cx="610" cy="255" r="8"/><circle cx="820" cy="255" r="8"/>
+      <circle cx="1030" cy="255" r="8"/><circle cx="1240" cy="255" r="8"/>
+    </g>
+    <g fill="none" stroke="#555e66" stroke-width="3">
+      <path d="M212 247l16 16m0-16l-16 16 M422 247l16 16m0-16l-16 16 M632 247l16 16m0-16l-16 16 M842 247l16 16m0-16l-16 16 M1052 247l16 16m0-16l-16 16 M1262 247l16 16m0-16l-16 16"/>
+    </g>
+    <circle cx="445" cy="95" r="8" fill="#376b83"/>
+    <text x="465" y="104" font-size="27">Code-settleable</text>
+    <path d="M750 87l16 16m0-16l-16 16" fill="none" stroke="#555e66" stroke-width="3"/>
+    <text x="782" y="104" font-size="27">Needs judgment</text>
+  </g>
+</svg>
