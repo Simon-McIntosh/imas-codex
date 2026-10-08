@@ -41,6 +41,7 @@ data_systems:
   # The interpreter and module recipe comes from the facility
   # remote_environment block above.
   edas:
+    databases: [EDDB, UDDB, PMDB, LCDB, MBDB, EQDB]
     api_path: /analysis/src/eddb
     lib_path: /analysis/lib/libeddb.so
     header_path: /analysis/src/edas/include
