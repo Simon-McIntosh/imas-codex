@@ -8,7 +8,8 @@ options and calls the stage. These tests measure the settled surface:
 - ``--flush`` selects the draining half: the engine gets ``enrich_only``.
 - ``--topic`` is the free-text steer the old free-text ``--focus`` reached.
 - ``--limit`` caps items (the old ``--signal-limit``).
-- ``--focus ITEMS`` is refused with a message naming plan section 7.
+- ``--focus ITEMS`` is refused with a message stating the mechanism: the
+  signals claim query takes no item filter.
 
 The engine is replaced at its single entry point
 (``run_parallel_data_discovery``) so the kwargs it receives are the subject of
@@ -121,19 +122,21 @@ def test_limit_caps_items(engine) -> None:
     assert engine["signal_limit"] == 7
 
 
-def test_focus_items_are_refused_naming_section_7(engine) -> None:
+def test_focus_items_are_refused_stating_the_mechanism(engine) -> None:
     with pytest.raises(click.UsageError) as excinfo:
         run_signals_stage(FACILITY, SignalsStageOptions(focus=("MAG/coil",)))
     message = str(excinfo.value)
-    assert "facility-discovery-sequence" in message
-    assert "section 7" in message
+    assert "claim query takes no item filter" in message
+    assert "facility-discovery-sequence" not in message
+    assert "section 7" not in message
 
 
 def test_cli_focus_is_refused(engine) -> None:
     result = CliRunner().invoke(signals, [FACILITY, "--focus", "MAG/coil"])
     assert result.exit_code != 0
-    assert "facility-discovery-sequence" in result.output
-    assert "section 7" in result.output
+    assert "claim query takes no item filter" in result.output
+    assert "facility-discovery-sequence" not in result.output
+    assert "section 7" not in result.output
 
 
 def test_click_command_is_a_thin_wrapper() -> None:

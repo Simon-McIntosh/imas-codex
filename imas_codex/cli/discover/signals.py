@@ -26,12 +26,12 @@ from imas_codex.cli.discover.common import reset_to_option
 
 logger = logging.getLogger(__name__)
 
-# Message for the --focus refusal. Signals has no item-level claim filter yet,
-# so naming items cannot be honoured; see plan section 7 for the wiring, which
-# filters by accessor or SignalSource id in the signals engine.
+# Message for the --focus refusal. The signals claim query takes no item
+# filter — it cannot select by accessor or SignalSource id — so naming items
+# cannot be honoured.
 _FOCUS_REFUSAL = (
-    "--focus is not wired for signals yet: its claim query takes no item "
-    "filter. See facility-discovery-sequence section 7 (§7)."
+    "--focus is not supported for signals yet: the signals claim query takes "
+    "no item filter."
 )
 
 
@@ -42,7 +42,7 @@ class SignalsStageOptions:
     Field names follow the settled discover option surface: ``scan_only`` and
     ``flush`` select the seeding and draining halves, ``topic`` is the
     free-text steer the enricher reads, ``focus`` names items and is refused
-    (see section 7), and ``limit`` caps items.
+    because the claim query takes no item filter, and ``limit`` caps items.
     """
 
     scan_only: bool = False
@@ -412,8 +412,8 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
     "focus_items",
     multiple=True,
     default=(),
-    help="Restrict to named items or a manifest file. Not wired for signals "
-    "yet, so it is refused; see facility-discovery-sequence section 7.",
+    help="Restrict to named items or a manifest file. Not supported for "
+    "signals yet, so it is refused: the claim query takes no item filter.",
 )
 @click.option(
     "--category",
