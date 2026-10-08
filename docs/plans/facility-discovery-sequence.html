@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -274,7 +274,10 @@
       It also fixes the registry review's three findings. Each signals half resolves to the signals
       stage function with its half selected, not to the bare command. The mapping stage's seat is
       <code>ids-mapping</code>, a key of <code>MODEL_SECTIONS</code>. The wiki probe tests every
-      configured site, and the stage reads unreachable if any site is down.
+      configured site, and the stage reads unreachable if any site is down. <code>discover status</code> marks high-value paths at the Jev scan gate,
+      <code>get_path_scan_threshold()</code>, rather than the old 0.90. Only the call site in
+      <code>imas_codex/cli/discover/__init__.py</code> changes; <code>discovery-judgments-through-jev</code>
+      fixes the default inside <code>get_high_value_paths</code>.
       <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
       passes with tests showing the following:
@@ -336,7 +339,9 @@
       <strong>Node</strong> <code>sequence-jt60sa-proof</code>, role test, 0.5 h. Write paths:
       <code>docs/evidence/fragments/facility-discovery-sequence/sequence-jt60sa-proof.html</code>.
       <strong>Done when</strong> the fragment holds both tables, and the real run's enriched-signal
-      count rose with zero SSH calls in its log.
+      count rose with zero SSH calls in its log. It waits for the census fragment of
+      <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code>, so that the proof and that
+      rescan never scan the same JT-60SA paths at once.
     </p>
 
     <section class="section-landed">
