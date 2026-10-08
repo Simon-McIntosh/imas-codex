@@ -5,6 +5,27 @@ import pytest
 from imas_codex.discovery.wiki.pipeline import html_to_text
 
 
+@pytest.mark.parametrize(
+    ("function_name", "alias"),
+    [("get_pending_wiki_pages", "wp"), ("get_pending_wiki_documents", "wa")],
+)
+def test_direct_ingest_reads_jev_cutoff(function_name: str, alias: str):
+    from unittest.mock import MagicMock, patch
+
+    from imas_codex.discovery.wiki import pipeline
+    from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
+
+    client = MagicMock()
+    client.__enter__.return_value = client
+    client.query.return_value = []
+    with patch.object(pipeline, "GraphClient", return_value=client):
+        getattr(pipeline, function_name)("tcv")
+    query = client.query.call_args.args[0]
+    assert f"{alias}.ingest_relevance >= $min_score" in query
+    assert f"{alias}.score_composite >= $min_score" not in query
+    assert client.query.call_args.kwargs["min_score"] == CONTENT_INGEST_THRESHOLD
+
+
 class TestHTMLToText:
     """Tests for HTML to text conversion.
 
@@ -199,6 +220,21 @@ class TestTwikiMarkupToHtml:
         assert "運転日誌" in html
         # Should have at least 3 <p><b> blocks
         assert html.count("<b>") >= 3
+
+    def test_form_values_survive_scoring_preview(self):
+        """A filled report form must reach the text presented to the judge."""
+        from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
+        from imas_codex.discovery.wiki.prefetch import extract_text_from_html
+
+        raw = (
+            '%META:FORM{name="SystemDailyReportForm"}%\n'
+            '%META:FIELD{name="Date" title="Date" value="2024-01-15"}%\n'
+            '%META:FIELD{name="Comment" title="Comment" value="coil current check"}%\n'
+        )
+        preview = extract_text_from_html(twiki_markup_to_html(raw), max_chars=1500)
+        assert "2024-01-15" in preview
+        assert "coil current check" in preview
+        assert "SystemDailyReportForm" not in preview
 
     def test_headings(self):
         """TWiki headings should convert to HTML headings."""

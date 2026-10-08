@@ -2,7 +2,7 @@
 
 Workers:
 - image_fetch_worker: Fetch image Documents, downsample, create Image nodes
-- image_score_worker: VLM captioning + scoring of Image nodes
+- image_score_worker: vision captioning followed by Jev judgment of Image nodes
 """
 
 from __future__ import annotations
@@ -281,10 +281,10 @@ async def image_score_worker(
     on_progress: Callable | None = None,
     batch_size: int = 10,
 ) -> None:
-    """VLM captioning + scoring of Image nodes.
+    """Caption images with vision and judge the resulting text with Jev.
 
     Claims Image nodes with status='ingested', fetches bytes on-demand,
-    sends to VLM for caption + scoring.
+    sends to vision for captions and then to the shared judgment gate.
 
     Transitions Image: ingested → captioned
     """
@@ -388,7 +388,7 @@ async def image_score_worker(
 
         if on_progress:
             on_progress(
-                f"scoring {len(images_ready)} images",
+                f"captioning and judging {len(images_ready)} images",
                 state.image_score_stats,
                 None,
             )
@@ -416,12 +416,12 @@ async def image_score_worker(
 
             if on_progress:
                 on_progress(
-                    f"scored {len(results)} images (${cost:.3f})",
+                    f"captioned and judged {len(results)} images (${cost:.3f})",
                     state.image_score_stats,
                     [
                         {
                             "path": r.get("url", r["id"]),
-                            "score": f"{r.get('score_composite', 0):.2f}",
+                            "score": f"{r.get('ingest_relevance', 0):.2f}",
                         }
                         for r in results[:5]
                     ],

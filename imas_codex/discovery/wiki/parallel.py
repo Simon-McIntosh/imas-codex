@@ -28,6 +28,7 @@ from imas_codex.graph import GraphClient
 from imas_codex.graph.models import DocumentStatus, WikiPageStatus
 
 from .graph_ops import (
+    CONTENT_INGEST_THRESHOLD,
     INGESTABLE_DOCUMENT_TYPES,
     SCORABLE_DOCUMENT_TYPES,
     _bulk_create_wiki_documents,
@@ -467,7 +468,7 @@ async def run_parallel_wiki_discovery(
     service_monitor: Any = None,
     max_wiki_connections: int = 10,
     skip_facility_workers: bool = False,
-    min_score: float = 0.5,
+    min_score: float = CONTENT_INGEST_THRESHOLD,
 ) -> dict[str, Any]:
     """Run parallel wiki discovery with async workers.
 

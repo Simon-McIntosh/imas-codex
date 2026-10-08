@@ -3559,6 +3559,60 @@ classes:
       score:
         description: Legacy relevance score (0.0-1.0)
         range: float
+      judgment_model:
+        description: Decision model that supplied the stored Jev judgment
+      ingest_relevance:
+        description: Jev Noul probability that the resource is worth ingesting
+        range: float
+      purpose_probs:
+        description: Jev purpose probabilities in ContentPurpose enum order
+        multivalued: true
+        range: float
+      purpose_confidence:
+        description: Confidence of the Jev purpose choice
+        range: float
+      score_data_documentation_probs:
+        description: Jev score_data_documentation score probabilities in level order
+        multivalued: true
+        range: float
+      score_data_documentation_confidence:
+        description: Confidence of the Jev score_data_documentation score
+        range: float
+      score_physics_content_probs:
+        description: Jev score_physics_content score probabilities in level order
+        multivalued: true
+        range: float
+      score_physics_content_confidence:
+        description: Confidence of the Jev score_physics_content score
+        range: float
+      score_code_documentation_probs:
+        description: Jev score_code_documentation score probabilities in level order
+        multivalued: true
+        range: float
+      score_code_documentation_confidence:
+        description: Confidence of the Jev score_code_documentation score
+        range: float
+      score_data_access_probs:
+        description: Jev score_data_access score probabilities in level order
+        multivalued: true
+        range: float
+      score_data_access_confidence:
+        description: Confidence of the Jev score_data_access score
+        range: float
+      score_calibration_probs:
+        description: Jev score_calibration score probabilities in level order
+        multivalued: true
+        range: float
+      score_calibration_confidence:
+        description: Confidence of the Jev score_calibration score
+        range: float
+      score_imas_relevance_probs:
+        description: Jev score_imas_relevance score probabilities in level order
+        multivalued: true
+        range: float
+      score_imas_relevance_confidence:
+        description: Confidence of the Jev score_imas_relevance score
+        range: float
 
   CodeChunk:
     description: >-
@@ -4078,6 +4132,60 @@ classes:
       fetch_retries:
         description: Number of times content fetch was attempted and failed
         range: integer
+      judgment_model:
+        description: Decision model that supplied the stored Jev judgment
+      ingest_relevance:
+        description: Jev Noul probability that the resource is worth ingesting
+        range: float
+      purpose_probs:
+        description: Jev purpose probabilities in ContentPurpose enum order
+        multivalued: true
+        range: float
+      purpose_confidence:
+        description: Confidence of the Jev purpose choice
+        range: float
+      score_data_documentation_probs:
+        description: Jev score_data_documentation score probabilities in level order
+        multivalued: true
+        range: float
+      score_data_documentation_confidence:
+        description: Confidence of the Jev score_data_documentation score
+        range: float
+      score_physics_content_probs:
+        description: Jev score_physics_content score probabilities in level order
+        multivalued: true
+        range: float
+      score_physics_content_confidence:
+        description: Confidence of the Jev score_physics_content score
+        range: float
+      score_code_documentation_probs:
+        description: Jev score_code_documentation score probabilities in level order
+        multivalued: true
+        range: float
+      score_code_documentation_confidence:
+        description: Confidence of the Jev score_code_documentation score
+        range: float
+      score_data_access_probs:
+        description: Jev score_data_access score probabilities in level order
+        multivalued: true
+        range: float
+      score_data_access_confidence:
+        description: Confidence of the Jev score_data_access score
+        range: float
+      score_calibration_probs:
+        description: Jev score_calibration score probabilities in level order
+        multivalued: true
+        range: float
+      score_calibration_confidence:
+        description: Confidence of the Jev score_calibration score
+        range: float
+      score_imas_relevance_probs:
+        description: Jev score_imas_relevance score probabilities in level order
+        multivalued: true
+        range: float
+      score_imas_relevance_confidence:
+        description: Confidence of the Jev score_imas_relevance score
+        range: float
 
   WikiChunk:
     description: >-
@@ -4372,3 +4480,57 @@ classes:
       # Error tracking
       error:
         description: Error message if status=failed
+      judgment_model:
+        description: Decision model that supplied the stored Jev judgment
+      ingest_relevance:
+        description: Jev Noul probability that the resource is worth ingesting
+        range: float
+      purpose_probs:
+        description: Jev purpose probabilities in ContentPurpose enum order
+        multivalued: true
+        range: float
+      purpose_confidence:
+        description: Confidence of the Jev purpose choice
+        range: float
+      score_data_documentation_probs:
+        description: Jev score_data_documentation score probabilities in level order
+        multivalued: true
+        range: float
+      score_data_documentation_confidence:
+        description: Confidence of the Jev score_data_documentation score
+        range: float
+      score_physics_content_probs:
+        description: Jev score_physics_content score probabilities in level order
+        multivalued: true
+        range: float
+      score_physics_content_confidence:
+        description: Confidence of the Jev score_physics_content score
+        range: float
+      score_code_documentation_probs:
+        description: Jev score_code_documentation score probabilities in level order
+        multivalued: true
+        range: float
+      score_code_documentation_confidence:
+        description: Confidence of the Jev score_code_documentation score
+        range: float
+      score_data_access_probs:
+        description: Jev score_data_access score probabilities in level order
+        multivalued: true
+        range: float
+      score_data_access_confidence:
+        description: Confidence of the Jev score_data_access score
+        range: float
+      score_calibration_probs:
+        description: Jev score_calibration score probabilities in level order
+        multivalued: true
+        range: float
+      score_calibration_confidence:
+        description: Confidence of the Jev score_calibration score
+        range: float
+      score_imas_relevance_probs:
+        description: Jev score_imas_relevance score probabilities in level order
+        multivalued: true
+        range: float
+      score_imas_relevance_confidence:
+        description: Confidence of the Jev score_imas_relevance score
+        range: float
