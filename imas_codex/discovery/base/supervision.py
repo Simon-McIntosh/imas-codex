@@ -54,7 +54,7 @@ from typing import TYPE_CHECKING, Any
 
 from neo4j.exceptions import ServiceUnavailable, SessionExpired, TransientError
 
-from imas_codex.cli.logging import WorkerLogAdapter, log_worker_error
+from imas_codex.logs import WorkerLogAdapter, log_worker_error
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
