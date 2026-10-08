@@ -140,7 +140,7 @@ def _equilibrium_signals(
                             f"{code} {example['format']} {group}/{field}; inventory "
                             f"example {example['path']} at shot {example['shot']} "
                             f"and {example['time']} s, grid {example['grid'][0]} "
-                            f"by {example['grid'][1]}."
+                            f"by {example['grid'][1]}, SHA-256 {example['sha256']}."
                         ),
                         cocos=example.get("cocos"),
                         discovery_source="edas",
@@ -541,6 +541,8 @@ class EDASScanner:
                         raise ValueError("equilibrium grid differs from inventory")
                     if record["path"] != example["path"]:
                         raise ValueError("equilibrium path differs from inventory")
+                    if record["sha256"] != example["sha256"]:
+                        raise ValueError("equilibrium file hash differs from example")
                     if (
                         example.get("cocos") is not None
                         and record.get("cocos") != example["cocos"]

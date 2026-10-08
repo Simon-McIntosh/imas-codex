@@ -65,6 +65,7 @@ data_systems:
         shot: 101163
         time: 5.0
         grid: [129, 129]
+        sha256: c1b975f893e91c49283115655edf7254dbfcadab8e8347b1cdc144edb4f32089
       - code: TOPICS
         format: eq11
         root: /home/a048717/LOCALDB/EQDSK
@@ -72,6 +73,7 @@ data_systems:
         shot: 80296
         time: 5.0
         grid: [129, 129]
+        sha256: d3b04dbe821272bab294b27580f297b214cfb35f630bd0d725702bdc13ffd168
       - code: SA
         format: g_eqdsk
         root: /home/d200024/LOCALDB
@@ -81,6 +83,7 @@ data_systems:
         time: 6.8
         grid: [129, 129]
         cocos: 2
+        sha256: f71d3cb1009e657e841b6d7be22f694921dc9b937278f7a2d4f65ead9c52e1e7
       - code: LIUQE
         inventory_code: LIUQE/MEQ
         format: g_eqdsk
@@ -91,6 +94,7 @@ data_systems:
         time: 6.8
         grid: [60, 129]
         cocos: 7
+        sha256: f385641ad9740ed00698cbc03c8329a99577b36c948227bb6543e5888c86cd10
       - code: CHEASE
         format: g_eqdsk
         root: /home/d240036/equil_runs
@@ -100,6 +104,7 @@ data_systems:
         time: 5.9
         grid: [129, 128]
         cocos: 17
+        sha256: 962ec0d7b3c5ac22323f16aec8087ac6c01d13bc08bcb463787afb34573c1272
 
   # IMAS data available via modules
   imas:

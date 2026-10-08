@@ -92,6 +92,7 @@ async def test_equilibrium_access_methods_and_inventory_field_signals():
         assert recorded["shot"] == example["shot"]
         assert recorded["time_s"] == example["time"]
         assert recorded["grid"] == example["grid"]
+        assert len(example["sha256"]) == 64
 
     remote = AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE))
     with patch("imas_codex.remote.executor.async_run_python_script", remote):
@@ -137,6 +138,7 @@ async def test_equilibrium_access_methods_and_inventory_field_signals():
             if item["code"] == signal.data_source_path.split("/")[0]
         )
         assert example["path"] in signal.description
+        assert example["sha256"] in signal.description
         assert signal.example_shot == example["shot"]
 
 
@@ -247,6 +249,7 @@ async def test_equilibrium_check_reads_each_code_example_once():
                 "grid": example["grid"],
                 "path": example["path"],
                 "cocos": example.get("cocos"),
+                "sha256": example["sha256"],
             }
         )
 
@@ -257,6 +260,41 @@ async def test_equilibrium_check_reads_each_code_example_once():
     assert sorted(reads) == sorted(
         example["code"] for example in config["equilibrium_examples"]
     )
+
+
+async def test_equilibrium_check_refuses_changed_example_bytes():
+    _, config = _equilibrium_config()
+    scanner = EDASScanner()
+    with patch(
+        "imas_codex.remote.executor.async_run_python_script",
+        AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE)),
+    ):
+        scanned = await scanner.scan("jt-60sa", "nakasvr26", config)
+    signal = next(
+        signal
+        for signal in scanned.signals
+        if signal.data_source_path == "SELENE/selene_eq31/#EQU/PSI"
+    )
+    example = config["equilibrium_examples"][0]
+    changed = {
+        "format": example["format"],
+        "grid": example["grid"],
+        "path": example["path"],
+        "sha256": "0" * 64,
+    }
+    with patch(
+        "imas_codex.remote.executor.async_run_python_script",
+        AsyncMock(return_value=json.dumps(changed)),
+    ):
+        checked = await scanner.check("jt-60sa", "nakasvr26", [signal], config)
+    assert checked == [
+        {
+            "signal_id": signal.id,
+            "valid": False,
+            "dtype": None,
+            "error": "equilibrium file hash differs from example",
+        }
+    ]
 
 
 async def test_scanner_access_methods_share_the_existing_persistence_writer():

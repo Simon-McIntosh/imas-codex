@@ -4,6 +4,7 @@ This stdlib-only script is sent to the facility host by run_python_script.
 The record decoders are shared with the equilibrium inventory checker.
 """
 
+import hashlib
 import json
 import math
 import os
@@ -200,6 +201,7 @@ def read_grid(path, include_grid=False):
         result = _geqdsk(data, path, include_grid)
     result["path"] = str(path)
     result["bytes"] = len(data)
+    result["sha256"] = hashlib.sha256(data).hexdigest()
     return result
 
 
