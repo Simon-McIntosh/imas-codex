@@ -30,6 +30,7 @@ from .extractors.ids import extract_ids_references, extract_imas_path_references
 from .extractors.mdsplus import extract_mdsplus_paths
 from .graph import (
     link_chunks_to_data_nodes,
+    link_chunks_to_edas_signals,
     link_chunks_to_ids_roots,
     link_chunks_to_imas_paths,
     link_examples_to_facility,
@@ -275,6 +276,8 @@ def _write_file_example(
             now=now,
         )
 
+    if facility == "jt-60sa":
+        link_chunks_to_edas_signals(graph_client, example_ids=[example_id])
     if mdsplus_ref_count > 0:
         return link_chunks_to_data_nodes(graph_client, example_ids=[example_id])
     return 0

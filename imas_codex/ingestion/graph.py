@@ -48,6 +48,83 @@ def _generate_ref_id(facility: str, ref_type: str, raw_string: str) -> str:
     return f"{facility}:{ref_type}:{hash_suffix}"
 
 
+def link_chunks_to_edas_signals(
+    graph_client: GraphClient | None = None,
+    example_ids: list[str] | None = None,
+) -> dict[str, int]:
+    """Backfill stored JT-60SA code reads and resolve literal signal keys.
+
+    Reads only stored CodeChunk text. It never contacts a facility or reruns
+    discovery, so ingestion and backfill share the same extraction path.
+    """
+    from imas_codex.ingestion.extractors.edas import extract_edas_references
+
+    selection = (
+        "AND c.code_example_id IN $example_ids" if example_ids is not None else ""
+    )
+    with _get_client(graph_client) as client:
+        chunks = client.query(
+            "MATCH (c:CodeChunk {facility_id: $facility}) "
+            f"WHERE c.text IS NOT NULL {selection} "
+            "RETURN c.id AS id, c.text AS text",
+            facility="jt-60sa",
+            example_ids=example_ids,
+        )
+        rows = []
+        for chunk in chunks:
+            for ref in extract_edas_references(chunk["text"]):
+                rows.append(
+                    {
+                        "chunk_id": chunk["id"],
+                        "id": _generate_ref_id("jt-60sa", ref.ref_type, ref.raw_string),
+                        "raw_string": ref.raw_string,
+                        "ref_type": ref.ref_type,
+                        "category": ref.category,
+                        "data_name": ref.data_name,
+                        "signal_path": (
+                            ref.raw_string
+                            if ref.category
+                            else f"{ref.ref_type.removeprefix('edas_').upper()}/{ref.data_name}"
+                        ),
+                    }
+                )
+        if not rows:
+            return {"chunks": len(chunks), "references": 0, "resolved": 0}
+        resolved = 0
+        for offset in range(0, len(rows), 200):
+            result = client.query(
+                """
+                UNWIND $rows AS item
+                MATCH (c:CodeChunk {id: item.chunk_id})
+                MERGE (d:DataReference {id: item.id})
+                SET d.facility_id = $facility,
+                    d.ref_type = item.ref_type,
+                    d.raw_string = item.raw_string,
+                    d.edas_category = item.category,
+                    d.edas_data_name = item.data_name
+                MERGE (c)-[:CONTAINS_REF]->(d)
+                WITH d, item
+                MATCH (f:Facility {id: $facility})
+                MERGE (d)-[:AT_FACILITY]->(f)
+                WITH d, item
+                OPTIONAL MATCH (s:FacilitySignal {
+                    facility_id: $facility, data_source_path: item.signal_path
+                })
+                FOREACH (_ IN CASE WHEN s IS NULL THEN [] ELSE [1] END |
+                    MERGE (d)-[:RESOLVES_TO_FACILITY_SIGNAL]->(s))
+                RETURN count(s) AS resolved
+                """,
+                rows=rows[offset : offset + 200],
+                facility="jt-60sa",
+            )
+            resolved += result[0]["resolved"] if result else 0
+        return {
+            "chunks": len(chunks),
+            "references": len(rows),
+            "resolved": resolved,
+        }
+
+
 @contextlib.contextmanager
 def _get_client(graph_client: GraphClient | None = None) -> Iterator[GraphClient]:
     """Context manager that uses provided client or creates a new one."""
