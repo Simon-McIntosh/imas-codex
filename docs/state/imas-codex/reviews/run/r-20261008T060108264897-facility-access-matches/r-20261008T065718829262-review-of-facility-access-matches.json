@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest names no baseline_suite or after_suite field, so those exact keys are absent; its own head gate log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T060108264897-facility-access-matches/head-focused-gate-certified.log (revision 5dfbd315) carries zero failing test ids (106 passed), so added_failure_ids = [] and added_failure_count = 0. I reproduced the same arm independently (106 passed, EXIT=0 at 5dfbd315); there is no base arm to subtract, and a clean head arm cannot add a failure.",
+  "backend": "local",
+  "base_log_revision": "bbaab3d7d45606b511bb32f40c645c36cd8bf31e",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/paths/enrichment.py:enrich_paths",
+    "imas_codex/discovery/paths/enrichment.py:async_enrich_paths",
+    "imas_codex/discovery/code/scanner.py:_scan_remote_paths_batch",
+    "imas_codex/discovery/code/enrichment.py:enrich_files",
+    "imas_codex/discovery/paths/scorer.py:build_path_judgment_state",
+    "imas_codex/discovery/code/scorer.py:build_triage_state"
+  ],
+  "completed_at": "2026-10-08T07:12:01.431Z",
+  "dispatched_at": "2026-10-08T06:57:31Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_facility_access_matches.py",
+      "line": "68",
+      "severity": "follow-on",
+      "text": "the assertion compares content_state['file']['pattern_evidence']['categories'] against counts, the dict the test itself placed in file_row['pattern_categories'], and build_triage_state copies that field verbatim (imas_codex/discovery/code/scorer.py:294), so the assertion holds whatever the content arm does and cannot catch a regression in its evidence; the load-bearing checks are lines 66-67."
+    },
+    {
+      "file": "docs/figures/discovery-judgments-through-jev/",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "the manifest's orientation_write_paths declares this figure directory but no figure is present at the reviewed head, and \u00a715's done-when requires no figure, so it is an unused declared path rather than a missing deliverable."
+    },
+    {
+      "file": "imas_codex/discovery/code/enrichment.py",
+      "line": "79",
+      "severity": "follow-on",
+      "text": "the _build_flat_patterns docstring still describes flattening PATTERN_REGISTRY, but its body now delegates to _build_enrich_patterns(facility), which merges YAML config, the registry and the facility literals, so the comment misstates where the categories come from."
+    },
+    {
+      "file": "imas_codex/discovery/paths/enrichment.py",
+      "line": "364",
+      "severity": "follow-on",
+      "text": "facility_access_matches drops every non-facility category, but no test exercises a row carrying a generic match beside a facility one, so the exclusion side of the filter is asserted only by inspection."
+    }
+  ],
+  "head_log_revision": "5dfbd3150420f3955dc69584ce926849f9cd513e",
+  "item_verdicts": {
+    "call_sites": "paths/enrichment.enrich_paths, paths/enrichment.async_enrich_paths, code/scanner._scan_remote_paths_batch, code/enrichment.enrich_files, paths/scorer.build_path_judgment_state, code/scorer.build_triage_state",
+    "diff": "read commit by commit; the facility block and facility_access_matches are added, both scorers carry the matches, and three remote scripts switch to one batched rg --json scan.",
+    "done_when": "tests/discovery/test_facility_access_matches.py is parametrised over list_facilities() = [iter, jet, jt-60sa, tcv] and asserts category inclusion, path and content-arm state carry, the empty-row negative control and absence of other facilities' keys; the recorded 106-test gate reproduced at 5dfbd315.",
+    "goal": "one builder (_build_enrich_patterns, imas_codex/discovery/paths/enrichment.py:306) folds each facility's key_tools and code_import_patterns in as escaped literals, and path enrichment, the code scanner and file enrichment all take categories from it; no facility id literal is added.",
+    "manifest": "read; status complete, 9 commits, negative control 4 failed EXIT=1, baseline_suite and after_suite absent.",
+    "write_paths": "the manifest declares 12 changed paths plus a figures dir; the diff bbaab3d7..5dfbd315 touches exactly those 12 files, and the declared figures dir was not produced."
+  },
+  "justifications": {
+    "durability": "the parametrised test reddens under the declared mutation (4 facility cases, EXIT=1) and other-facility keys are asserted absent, but tests/discovery/test_facility_access_matches.py:68 asserts against the value the test itself passed in and the filter's generic-category exclusion is not pinned.",
+    "evidence": "I reproduced the recorded gate independently (106 passed, EXIT=0) at 5dfbd315 and read the negative control's four failures at EXIT=1, but docs/evidence/fragments/discovery-judgments-through-jev/facility-access-matches.html reports a 0.0011 AUC delta the node itself calls below judge variation, so the evidence establishes the wiring and not a quality gain.",
+    "fit": "the added names describe the mechanism with no plan or stage label, though imas_codex/discovery/code/enrichment.py:79 keeps a docstring describing a flatten the body no longer performs.",
+    "goal_fidelity": "imas_codex/discovery/paths/enrichment.py:306 adds each facility's key_tools and code_import_patterns as escaped literal categories and paths/scorer.py:304 and code/scorer.py:274 surface them as facility_data_access_matches, which is the \u00a715 deliverable.",
+    "reuse": "the change extends the existing _build_enrich_patterns owner and adds facility_access_matches beside it rather than forking a matcher, and the batch-count helper is duplicated across standalone remote scripts that cannot import one another, so no shared owner exists.",
+    "scope_discipline": "git diff --stat bbaab3d7..5dfbd315 touches only the 12 files the manifest declares, all inside the orientation_write_paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: one builder (_build_enrich_patterns, imas_codex/discovery/paths/enrichment.py:306) now folds each facility's key_tools and code_import_patterns in as escaped literals, and path enrichment, the code scanner and file enrichment all take categories from it; no facility id appears as a literal in the added code.\nVERDICT done_when: the plan's four-facility test is tests/discovery/test_facility_access_matches.py, parametrised over list_facilities() = [iter, jet, jt-60sa, tcv], and it asserts category inclusion, path+content-arm state carry, the empty-row negative control, and absence of other facilities' keys. The recorded 106-test gate reproduced (EXIT=0 at 5dfbd315).\nVERDICT write_paths: the manifest declares 12 changed paths plus a figures dir; git diff bbaab3d7..5dfbd315 touches exactly those 12 (8 source, 1 test, 2 data, 1 fragment), the declared figures dir docs/figures/discovery-judgments-through-jev/ was not produced.\nVERDICT manifest: read; status complete, commits the 9 from 54402f969 to 5dfbd315, negative_control_log facility-pattern-negative-control-certified.log (4 failed EXIT=1), and baseline_suite/after_suite both absent so added failures are readable only from the head gate log.\nVERDICT diff: read commit by commit; enrichment.py adds the facility block and facility_access_matches, both scorers put facility_access_matches(...) into their states, and the three remote scripts replace per-pattern rg calls with one batched rg --json scan; scope is exactly the goal.\nVERDICT call_sites: the builder and the match filter are reached from paths/enrichment.enrich_paths and async_enrich_paths, code/scanner._scan_remote_paths_batch, code/enrichment.enrich_files, paths/scorer.build_path_judgment_state and code/scorer.build_triage_state.\nCALL_SITES: imas_codex/discovery/paths/enrichment.py:enrich_paths, imas_codex/discovery/paths/enrichment.py:async_enrich_paths, imas_codex/discovery/code/scanner.py:_scan_remote_paths_batch, imas_codex/discovery/code/enrichment.py:enrich_files, imas_codex/discovery/paths/scorer.py:build_path_judgment_state, imas_codex/discovery/code/scorer.py:build_triage_state\nreviewed_base_sha: bbaab3d7d45606b511bb32f40c645c36cd8bf31e\nreviewed_head_sha: 5dfbd3150420f3955dc69584ce926849f9cd513e\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/paths/enrichment.py:306 adds the facility key_tools and code_import_patterns as escaped literal categories and paths/scorer.py:304 and code/scorer.py:274 surface them as facility_data_access_matches, which is the \u00a715 deliverable.\nSCORE evidence: 18\nJUSTIFICATION evidence: I reproduced the recorded gate independently (106 passed, EXIT=0) at 5dfbd315 and read the negative control's 4 failed EXIT=1, but docs/evidence/fragments/discovery-judgments-through-jev/facility-access-matches.html reports a 0.0011 AUC delta the node itself calls below judge variation, so the evidence establishes the wiring and not a quality gain.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat bbaab3d7..5dfbd315 touches only the 12 files the manifest declares, all inside the orientation_write_paths, with no dependency or unrelated-file change.\nSCORE durability: 17\nJUSTIFICATION durability: the parametrised test reddens under the declared mutation (4 facility cases failed, EXIT=1) and other-facility keys are asserted absent, but tests/discovery/test_facility_access_matches.py:68 asserts against the value the test itself passed in and the filter's exclusion of generic categories is not pinned.\nSCORE fit: 18\nJUSTIFICATION fit: the added names (facility_access_matches, facility_tool:/facility_import: prefixes, batch_pattern_counts) describe the mechanism with no plan or stage label, though imas_codex/discovery/code/enrichment.py:79 keeps a docstring describing a flatten that the body no longer performs.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing _build_enrich_patterns owner and adds facility_access_matches beside it rather than forking a matcher, and the batch-count helper is duplicated across three standalone remote scripts (imas_codex/remote/scripts/discover_files.py, enrich_files.py, enrich_directories.py) that execute via importlib.resources and cannot import one another, so no shared owner exists to extend.\nFINDING tests/discovery/test_facility_access_matches.py:68 follow-on: the assertion compares content_state['file']['pattern_evidence']['categories'] against counts, the very dict the test placed in file_row['pattern_categories'], and build_triage_state copies that field verbatim (imas_codex/discovery/code/scorer.py:294), so the assertion holds whatever the content arm does and cannot catch a regression in its evidence; the load-bearing checks are lines 66-67.\nFINDING docs/figures/discovery-judgments-through-jev:0 follow-on: the manifest's orientation_write_paths declares this figure directory but no figure is present at the reviewed head (the directory does not exist), and \u00a715's done-when requires no figure, so it is an unused declared path rather than a missing deliverable.\nFINDING imas_codex/discovery/code/enrichment.py:79 follow-on: the _build_flat_patterns docstring still describes flattening PATTERN_REGISTRY, but its body now delegates to _build_enrich_patterns(facility), which merges YAML config, the registry and the facility literals, so the comment misstates where the categories come from.\nFINDING imas_codex/discovery/paths/enrichment.py:364 follow-on: facility_access_matches drops every non-facility category, but no test exercises a row that carries a generic match beside a facility one, so the exclusion side of the filter is asserted only by inspection.",
+  "review_run_id": "r-20261008T065718829262-review-of-facility-access-matches",
+  "reviewed_base_sha": "bbaab3d7d45606b511bb32f40c645c36cd8bf31e",
+  "reviewed_head_sha": "5dfbd3150420f3955dc69584ce926849f9cd513e",
+  "reviewed_run_id": "r-20261008T060108264897-facility-access-matches",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:10:00+00:00",
+  "total": 111,
+  "verdict": "SOUND WITH FINDINGS"
+}
