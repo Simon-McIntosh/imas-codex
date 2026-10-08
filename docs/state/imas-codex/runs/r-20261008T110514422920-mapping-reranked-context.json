@@ -1,0 +1,4303 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "8004d9dd5dae610386900f74edc36c06586eea45",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 5711744,
+      "cached_input_tokens_cumulative": 5711744,
+      "input_tokens": 5832965,
+      "input_tokens_cumulative": 5832965,
+      "output_tokens": 21849,
+      "output_tokens_cumulative": 21849,
+      "reasoning_output_tokens": 4641,
+      "reasoning_output_tokens_cumulative": 4641
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 401,
+    "files": 2,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 461,
+        "name": "test_raw_check_reads_value_and_rejects_unknown_pid",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 576,
+        "name": "test_mbdb_signal_keeps_case_and_field",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 689,
+        "name": "test_lcdb_signal_keeps_owner_category_and_shot",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 969,
+        "name": "test_scan_unknown_data_class_leaves_slot_unset",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 627,
+        "name": "test_classifies_single_path",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_gathers_sections_and_identifiers",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_enriches_ids_with_llm",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_map_status_prints_route_counts",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_format_error_fields_report",
+        "path": "tests/llm/test_dd_version_reports.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 862,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 943,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 2092,
+        "name": "test_search_docs_includes_matching_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 2708,
+        "name": "test_power_at_separatrix_passes_complete_candidate_validation",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 1703,
+        "name": "test_score_descriptions_parses_reviews",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1828,
+        "name": "test_rescore_merges_and_survives_round_trip",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_rebuilds_sources_from_yaml_block_via_binder",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_no_sources_block_binds_nothing",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_matches_by_id_and_never_creates_a_node",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 208,
+        "name": "test_dry_run_performs_no_writes",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_staging",
+        "path": "tests/standard_names/test_catalog_traceability_fields.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 617,
+        "name": "test_compose_commit_once",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_query",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_both_hybrid_and_related_render",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_unclaimed_sibling_is_removed_from_every_result_projection",
+        "path": "tests/standard_names/test_compose_source_scope.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_write_boundary_still_raises_when_response_model_repairs",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_registry_sync_returns_persisted_counts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 642,
+        "name": "test_registry_dry_run_reads_version_and_paths_only",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "test_pass_through_preserves_row",
+        "path": "tests/standard_names/test_dd_sources.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "test_run_audits_wires_the_check",
+        "path": "tests/standard_names/test_description_latex.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 224,
+        "name": "test_nearby_names_returns_accepted_sns",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 288,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 287,
+        "name": "test_claim_then_persist_race_does_not_loop",
+        "path": "tests/standard_names/test_docs_supersede_safety.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_unknown_graph_link_blocks_final",
+        "path": "tests/standard_names/test_export_gates.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_unpublished_link_is_advisory_and_pruned_from_copy",
+        "path": "tests/standard_names/test_export_gates.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "_staging",
+        "path": "tests/standard_names/test_export_sidecar_surface.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_an_older_exporters_tree_is_refused_by_its_stamp",
+        "path": "tests/standard_names/test_export_sidecar_surface.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "_claim",
+        "path": "tests/standard_names/test_focus_flag.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_operators_field_spelling_normalised_to_the_class",
+        "path": "tests/standard_names/test_gap_report_segment_constraint.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_unmappable_segment_inferred_from_the_token",
+        "path": "tests/standard_names/test_gap_report_segment_constraint.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_well_formed_gaps_pass_through_untouched",
+        "path": "tests/standard_names/test_gap_report_segment_constraint.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_similarity_gate_persists_only_the_measured_dimension",
+        "path": "tests/standard_names/test_gate_verdict_provenance.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 613,
+        "name": "test_existing_cocos_type_not_overridden",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 858,
+        "name": "test_write_dd_skipped_source",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 895,
+        "name": "test_write_signals_skipped_source",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 488,
+        "name": "test_new_single_batch_projection_is_source_probed_and_preserved",
+        "path": "tests/standard_names/test_parent_admission.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_explicit_paths_return_only_claim_winners_with_fences",
+        "path": "tests/standard_names/test_pool_adapter_claims.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_scoped_terminal_residue_reports_transient_claims",
+        "path": "tests/standard_names/test_pool_idle_exhaustion.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/standard_names/test_prompt_context_wiring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_bind_recovery_sources_merges_source_edge_and_dd_path",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_rebuild_routes_orphans_by_anchor_authority",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_rebuild_replays_all_bindings_before_consistency_reconciliation",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_renders_with_dd_paths_present",
+        "path": "tests/standard_names/test_refine_docs_prompt.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "_make_docs_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 735,
+        "name": "test_claimed_record_fails_closed_without_second_write",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_name_only_prompt_omits_documentation_and_compliance",
+        "path": "tests/standard_names/test_review_name_only.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_prior_reviews_iteration_uses_dict_index",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "_family_row",
+        "path": "tests/standard_names/test_review_neighbours.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 993,
+        "name": "_fake_fetch",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_semantic_cluster_neighbors_never_expand_source_authority",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_row",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_scoped_idle_completion_refuses_transient_claim_residue",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "test_compose_seed_is_random",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 545,
+        "name": "test_compose_two_step",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 575,
+        "name": "test_compose_seed_and_expand_increment_sequence",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "query",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 235,
+        "name": "query",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 527,
+        "name": "_query",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 18
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_row",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_absent_token",
+        "path": "tests/standard_names/test_vocab_gap_gate.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_wrong_slot_placement",
+        "path": "tests/standard_names/test_vocab_gap_gate.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "test_ambiguous_known_token",
+        "path": "tests/standard_names/test_vocab_gap_gate.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 123,
+        "name": "_resolution_batch",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 54,
+        "name": "test_actionable_gap_retires_source_no_string",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_nonactionable_gap_kept_retryable",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_gap_writer_failure_rolls_back_source_outcome",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_write_vocab_gaps_links_source_to_node",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "test_compose_batch_with_vocab_gaps",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_compose_batch_multiple_gaps",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 231,
+        "name": "test_dd_source_creates_imasnode_relationship",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_signal_source_creates_facilitysignal_relationship",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1143,
+        "name": "test_invalid_segment_skipped",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1163,
+        "name": "test_false_positive_skipped",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1189,
+        "name": "test_deletes_false_positive",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1218,
+        "name": "test_preserves_genuine_absent_gap",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1241,
+        "name": "test_reclassifies_wrong_slot",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 1392,
+        "name": "test_existing_vocab_gaps_preserved",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 1498,
+        "name": "test_sources_reset_when_gaps_resolved",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "_document",
+        "path": "tests/standard_names/test_waived_sources.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 19
+    },
+    {
+      "existing_function": {
+        "line": 440,
+        "name": "test_build_process_table_multi_node",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_text_only_match_uses_text_score",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 706,
+        "name": "test_dual_match_boosted",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 746,
+        "name": "test_enrichment_includes_lifecycle",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 15
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_shared_fetch_dd_error_fields_returns_structured_results",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_version_context_includes_diagnostics",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 16
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_build_with_cocos_change",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_render_with_type_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 642,
+        "name": "test_cocos_factors_unknown_label_returns_unity",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "_pending",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 17
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_analyze_domain_distribution",
+        "path": "tests/core/test_physics_categorization.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 394,
+        "name": "test_scope_question_set_has_five_nouls_in_both_arms",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_equilibrium_access_methods_and_inventory_field_signals",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 404,
+        "name": "test_every_database_signal_has_a_persisted_access_method",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_all_domains_registered",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 648,
+        "name": "test_cocos_label_sources_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 1132,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "test_mcp_dict_section_keys",
+        "path": "tests/graph/test_dd_search.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 485,
+        "name": "test_classify_error_signals_returns_required_keys",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 507,
+        "name": "test_all_values",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 1049,
+        "name": "test_all_values",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 101
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_get_embeddings_and_ids",
+        "path": "tests/search/test_semantic_search.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_derived_from_a_procedure_still_flags_estimator_recipe",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_tick_returns_all_labels",
+        "path": "tests/standard_names/test_orphan_sweep.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_five_sources_all_linked",
+        "path": "tests/standard_names/test_produced_name_link.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 196,
+        "name": "test_returns_themes_from_comments",
+        "path": "tests/standard_names/test_quality_levers.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "test_judgment_question_set_and_storage_slots",
+        "path": "tests/wiki/test_wiki_judgments.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_analyze_domain_distribution",
+        "path": "tests/core/test_physics_categorization.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_four_kinds_have_origins_and_shared_judgment_changes_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_get_embeddings_and_ids",
+        "path": "tests/search/test_semantic_search.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_derived_from_a_procedure_still_flags_estimator_recipe",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_five_sources_all_linked",
+        "path": "tests/standard_names/test_produced_name_link.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 196,
+        "name": "test_returns_themes_from_comments",
+        "path": "tests/standard_names/test_quality_levers.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_no_key_keeps_retrieval_order",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 140
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 531,
+        "name": "_query",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_document_image_persistence_keeps_judgment_and_drops_image_bytes",
+        "path": "tests/discovery/test_document_workers.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 404,
+        "name": "test_every_database_signal_has_a_persisted_access_method",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_create_only_creates_new_node_with_props",
+        "path": "tests/graph/test_create_nodes_create_only.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 173
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "query",
+        "path": "tests/graph/test_dd_aux_streaming.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_enriches_ids_with_llm",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 408,
+        "name": "test_single_item",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 494,
+        "name": "test_data_nodes_section",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_original_reservation_snapshot",
+        "path": "tests/standard_names/fanout/test_cost_invariant.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 389,
+        "name": "test_ok_path_returns_evidence_and_writes_node",
+        "path": "tests/standard_names/fanout/test_dispatcher.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "_fake",
+        "path": "tests/standard_names/fanout/test_runners.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 353,
+        "name": "test_compose_persist_guards_a_binding_onto_an_established_name",
+        "path": "tests/standard_names/test_attachment_write_guards.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_query",
+        "path": "tests/standard_names/test_dead_end_identity_revival.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 133,
+        "name": "test_non_composition_binding_cannot_revive_retired_identity",
+        "path": "tests/standard_names/test_dead_end_identity_revival.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 67,
+        "name": "test_generate_name_event",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "test_rename_scopes_to_run_id_and_reviews_only",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "test_hint_keeps_generate_pool",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_cascade_successors_are_reported",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_below_threshold_not_force_accepted",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_exhausted_reported_not_accepted",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_docs_axis_accepts_on_docs_stage",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 230,
+        "name": "test_existing_accepted_name_is_not_demoted",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_stale_source_fence_precedes_gap_retirement",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "_attachment",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 483,
+        "name": "_collision",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 890,
+        "name": "_terminal_collision",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 1249,
+        "name": "test_reclaimed_same_candidate_can_reserve_after_owned_orphan_cleanup",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 1314,
+        "name": "test_cleanup_reaps_multi_edge_owned_target_after_edge_deletion",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 293,
+        "name": "test_filters_by_min_size",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 341,
+        "name": "test_signature_match_excludes_family",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_missing_signature_treated_as_never_harmonized",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 416,
+        "name": "test_ranked_by_drift_desc_then_n_desc",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_scoped_review_restage_is_atomic_in_seed_expand_and_readback",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_refine_docs_validation_failure_exhausts_not_reloops",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_accepted_writes_with_exact_source_fence",
+        "path": "tests/standard_names/test_pool_compose_helpers.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 729,
+        "name": "test_rebuild_reports_exact_consistency_rows_and_refuses_completion",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_excludes_specified_ids",
+        "path": "tests/standard_names/test_quality_levers.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_returns_full_docs",
+        "path": "tests/standard_names/test_quality_levers.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "_family_row",
+        "path": "tests/standard_names/test_review_neighbours.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_review_neighborhood_enrichment",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "test_dedup_across_items",
+        "path": "tests/standard_names/test_search_filters.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 575,
+        "name": "test_compose_seed_and_expand_increment_sequence",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 649,
+        "name": "test_compose_expansion_paths_recheck_after_lock",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_overview_queries_ids_nodes",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 298,
+        "name": "test_overview_with_dd_version_includes_filter",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_calibrated_gate_admits_relevant_page_below_legacy_cutoff",
+        "path": "tests/wiki/test_wiki_judgments.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "test_lexical_hits_survive_empty_vector_indexes",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "window_line": 174
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "621527529fdd4c5fb1a0c350e93631c039ded240"
+  ],
+  "completed_at": "2026-10-08T11:16:45Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T11:05:31Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/ids",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest tests/ids -p no:cacheprovider",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/ids-gate-committed.log"
+  },
+  "impl_move": {
+    "at_complete": 0.3611111111111111,
+    "at_dispatch": 0.3611111111111111,
+    "plan": "mapping-decision-chain",
+    "reason": "section 6 closes in the landing beat that follows",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.1530204716199486,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T06:54:23Z, which is after this node's 3600s horizon ending 2026-10-08T12:05:16.300528+00:00",
+    "horizon_ends_at": "2026-10-08T12:05:16.300528+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T11:05:15Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T06:54:23Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 497383,
+    "state": "quiet",
+    "utilisation_pct": 56.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T11:05:15Z",
+    "read_at": "2026-10-08T11:05:16Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 56.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T11:16:45Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/manifest.md",
+  "member": "disposable-r-20261008T110514422920-mapping-reranked-context",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/ids/test_slot_context.py::test_four_kinds_have_origins_and_shared_judgment_changes_order"
+    ],
+    "baseline_failure_ids": [
+      "tests/ids/test_slot_context.py::collection"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/ids/test_slot_context.py::test_four_kinds_have_origins_and_shared_judgment_changes_order"
+    ],
+    "declaration": "drop the rerank call so items keep retrieval order with the key present; the rerank-order test must then fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/negative-control.log",
+    "test_paths": [
+      "tests/ids/test_slot_context.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "mapping-reranked-context",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1354,
+          "cached_input_tokens": 576082,
+          "input_tokens": 577438,
+          "output_tokens": 1239,
+          "reasoning_output_tokens": 119,
+          "total_tokens": 578677,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "uv run --no-sync pytest tests/ids -p no:cacheprovider passes with tests/ids/test_slot_context.py showing all four kinds retrieved through the existing search tools and reranked through the shared judgment core, each returned item labelled with its kind and origin, a kind with no hits omitted rather than padded, and the no-key path falling back to retrieval order",
+    "estimated_hours": null,
+    "goal": "Build each binding decision's context from the hybrid search over code, wiki pages, documents and signals, reranked by Jev through the shared core in imas_codex/discovery/base/judgment.py, in a new imas_codex/ids/slot_context.py",
+    "id": "mapping-reranked-context",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T11:05:15Z",
+      "read_at": "2026-10-08T11:05:16Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 56.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T110514422920-mapping-reranked-context/manifest.md",
+    "negative_control": "drop the rerank call so items keep retrieval order with the key present; the rerank-order test must then fail",
+    "plan": "mapping-decision-chain",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/ids/slot_context.py",
+      "tests/ids/test_slot_context.py",
+      "docs/evidence/fragments/mapping-decision-chain/mapping-reranked-context.html",
+      "docs/figures/mapping-decision-chain/mapping-reranked-context"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.152901613712962,
+      "derived": 0.19537558587962975,
+      "drain_hours": 168.0,
+      "effective_limit": 0.19537558587962975,
+      "elapsed_fraction": 0.17761416898148158,
+      "elapsed_hours": 29.839180388888906,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T11:05:20+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.43999999999999995,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.56,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.5895680000000001,
+      "decided_by": "window",
+      "margin": 0.05418199999999995,
+      "name": "mapping-reranked-context",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.56
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.0494,
+        "observed_at": "2026-10-08T11:05:20+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.56,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "mapping-reranked-context",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T11:05:20.049400+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "The lead asked for the codex lane to raise throughput; reuse the existing search tools and the judgment core rather than adding new retrieval.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.532,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "mapping-decision-chain",
+  "plan_impl_at_dispatch": 0.3611111111111111,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "621527529fdd4c5fb1a0c350e93631c039ded240",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8004d9dd5dae610386900f74edc36c06586eea45",
+    "reviewed_head_sha": "621527529fdd4c5fb1a0c350e93631c039ded240",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T110514422920-mapping-reranked-context",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "mapping-20261006",
+  "session_harness": "codex",
+  "session_id": "01a11b30-b051-7f93-a20a-3d816118d358",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 5,
+  "throughput": {
+    "cumulative_cached_input_tokens": 5711744,
+    "cumulative_input_tokens": 11544709,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 26490
+  },
+  "time_budget": "60m",
+  "tool_steps": 87.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 674,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T11:16:48Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T11:05:35Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T110514422920-mapping-reranked-context",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 225,
+    "worker_pid": 1251660
+  },
+  "worker_seconds": 674,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
