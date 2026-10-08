@@ -35,6 +35,11 @@
     <p>§3 landed across these nodes. The six folds and the stage registry gave each domain a stage function. <code>sequence-runner</code> (bdf79b3c0, review 107/120) added the bare command. <code>retire-domain-subcommands</code> (91939e950, 112/120) removed the wrappers, keeping every option except the retired aliases. <code>retire-subcommand-prose</code> (edbdd465f, 99/120) and <code>discovery-prose-matches-cli</code> (a7075f73c) moved the docs. <code>discover-hints-name-bare-command</code> (9b7448159, 107/120) makes a retired spelling name its <code>--only</code> form, with <code>map</code> pointing at candidates. <code>wiki-ingest-gate-default</code> (8f69fadb2) and <code>wiki-ingest-threshold-setting</code> (dd2fe44ad) put the wiki gate in settings, which removed an import cycle. <code>mapping-opt-in</code> (b2b432923) applies the lead's reversal of the mapping default. No node added a failure. <code>imas_codex/schemas/facility.yaml</code> descriptions remain with the session that owns that file.</p>
   </section>
 
+  <section id="s8">
+    <h2>§8 — a swallowed stage failure fails the stage</h2>
+    <p><code>stage-errors-fail-the-stage</code> (fe00c1ed2, review 107/120, no added failures): the signals seed worker in <code>imas_codex/discovery/signals/parallel.py</code> records each scanner failure in <code>state.scanner_errors</code>, <code>run_parallel_data_discovery</code> returns them under <code>errors</code>, and <code>run_sequence</code> marks a stage with a non-empty <code>errors</code> receipt as failed, naming the failures as its reason and skipping dependants. An infrastructure error still raises. 89 tests pass; ignoring receipt errors fails the failed-stage test.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -23,9 +23,9 @@
   <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -129,22 +129,12 @@
       model for a transform expression.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s6">§6 — Reranked context from every source kind</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="1.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-    <p>
-      The map stage's context today is a fixed set of wiki and code snippets gathered per IDS. The decision state instead
-      takes, per source, what the hybrid search finds across code, wiki pages, documents and signals, reranked by Jev
-      against the binding being decided through the shared core in <code>imas_codex/discovery/base/judgment.py</code>.
-      The top items by relevance go into the state, each labelled with its kind and origin, so a sign decision can read
-      the code that writes the signal and the wiki page that defines its direction.
-    </p>
-    <p>
-      <strong>Node</strong> <code>mapping-reranked-context</code>, role implement, 1.25 h, after §3. Write paths:
-      <code>imas_codex/ids/slot_context.py</code>, <code>tests/ids/test_slot_context.py</code> and its fragment.
-      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests
-      showing all four kinds retrieved and reranked through the shared core, a kind with no hits omitted rather than
-      padded, and the no-key path falling back to retrieval order.
-    </p>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Each binding decision's context comes from the hybrid search over code, wiki, documents and signals, reranked by Jev through the shared judgment core, each item labelled by kind and origin (ffc0c36a4). <a href="/imas-codex/evidence/archive/mapping-decision-chain-landed.html#s6">full record</a></p>
+</section>
 
     <h2 id="s7">§7 — JT-60SA proof</h2>
 <section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -198,7 +188,7 @@
     <div class="r-comment-body"><p>Binding context retrieves code, wiki, document, and signal evidence through hybrid search and shared judgment reranking; committed ids gate 554 passed, 5 skipped, 3 deselected.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261008T111653010623-review-of-mapping-reranked-context" data-who="reckon-build" data-when="2026-10-08T11:26:56.346Z">
-    <div class="r-comment-body"><p>Independent review of r-20261008T110514422920-mapping-reranked-context at head 621527529: parsed review stored scoring all six dimensions (total 109, verdict SOUND WITH FINDINGS), base/head recorded, added_failure_count 0 over the reviewed run&#x27;s own baseline_suite and after_suite.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261008T110514422920-mapping-reranked-context at head 621527529: parsed review stored scoring all six dimensions (total 109, verdict SOUND WITH FINDINGS), base/head recorded, added_failure_count 0 over the reviewed run's own baseline_suite and after_suite.</p></div>
 </div>
 </section>
 </main>

@@ -30,6 +30,11 @@
     <p><code>mapping-slots</code> (ab2b46ffe, review 108/120, no added failures) adds <code>BindingTransformSlots</code> to <code>imas_codex/ids/models.py</code>: five slots, sign, scale factor, unit conversion, COCOS label and index layout, each with its value, the authority that settled it (code, jev, local or escalated) and its evidence. <code>compose_transform</code> in <code>imas_codex/ids/transforms.py</code> builds the stored expression and refuses a binding with an open slot by name. A source-specific sign and constant scale multiply on top of <code>cocos_sign(label, cocos_in, cocos_out)</code> rather than replacing it, so a database sign flip composes with the COCOS conversion. tests/ids: 550 passed.</p>
   </section>
 
+  <section id="s6">
+    <h2>§6 — reranked context from every source kind</h2>
+    <p><code>mapping-reranked-context</code> (ffc0c36a4, review 109/120, no added failures) adds <code>imas_codex/ids/slot_context.py</code>: for a binding being decided it retrieves code, wiki pages, documents and signals through the existing search tools, reranks them through the shared core in <code>imas_codex/discovery/base/judgment.py</code>, labels each item with its kind and origin, omits a kind with no hits, and keeps retrieval order when the OpenRouter key is absent. tests/ids: 554 passed.</p>
+  </section>
+
 </main>
 </body>
 </html>
