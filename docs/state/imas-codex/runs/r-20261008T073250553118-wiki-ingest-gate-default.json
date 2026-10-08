@@ -1,0 +1,6546 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "e7464580a459406f969f35f19c8a056538486550",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4887680,
+      "cached_input_tokens_cumulative": 4887680,
+      "input_tokens": 4987104,
+      "input_tokens_cumulative": 4987104,
+      "output_tokens": 14125,
+      "output_tokens_cumulative": 14125,
+      "reasoning_output_tokens": 4650,
+      "reasoning_output_tokens_cumulative": 4650
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 36,
+    "files": 2,
+    "removed": 3
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_command_builds_options_and_calls_stage",
+        "path": "tests/cli/test_discover_paths_stage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_focus_run_preflights_before_graph_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 801
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 1132,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_see_also_in_report",
+        "path": "tests/search/test_cluster_output.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 801
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 335,
+        "name": "test_cli_reaches_atomic_operator",
+        "path": "tests/standard_names/test_accepted_cohort_restage.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 801
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 583,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 948,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 800
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "test_judgment_question_set_and_storage_slots",
+        "path": "tests/wiki/test_wiki_judgments.py"
+      },
+      "run_function": {
+        "line": 63,
+        "name": "run_wiki_stage",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 799
+    },
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_rejudge_asks_every_content_question",
+        "path": "tests/discovery/test_code_ingested_rejudge.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "_relevance",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1082
+    },
+    {
+      "existing_function": {
+        "line": 418,
+        "name": "test_composite_is_the_largest_of_five_nouls",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 536,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1082
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1082
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_name_mode_sets_name_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_docs_mode_sets_docs_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 923,
+        "name": "test_audit_covers_every_attachment_writer",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_all_values_non_empty",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1082
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1082
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 990,
+        "name": "_make_mock_state",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 439,
+        "name": "test_prompt_describes_structured_chain",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 547,
+        "name": "test_source_reset_writes_only_source_state_and_non_lifecycle_name_cache",
+        "path": "tests/standard_names/test_provenance_lifecycle.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "test_source_hint_cas_sets_only_steering_fields",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_source_hint_prompt_is_conditional_and_non_authoritative",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "_wipe",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_the_routed_consumers_no_longer_read_it",
+        "path": "tests/standard_names/test_vocab_consumers_see_operators.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 1083
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 949
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "async_main",
+        "path": "imas_codex/cli/discover/wiki.py"
+      },
+      "window_line": 947
+    },
+    {
+      "existing_function": {
+        "line": 54,
+        "name": "engine",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 69,
+        "name": "engine",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 82
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 246
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 245
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 245
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 246
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 246
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_command_builds_options_and_calls_stage",
+        "path": "tests/cli/test_discover_paths_stage.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 245
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_focus_run_preflights_before_graph_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 269
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 1132,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_see_also_in_report",
+        "path": "tests/search/test_cluster_output.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 269
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 335,
+        "name": "test_cli_reaches_atomic_operator",
+        "path": "tests/standard_names/test_accepted_cohort_restage.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 269
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 583,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 948,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 268
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 713,
+        "name": "test_approval_creates_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_existing_rc_tag_does_not_block_approval",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 813,
+        "name": "test_undo_removes_the_contract_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 855,
+        "name": "test_undo_restores_the_exact_rc_tag",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 1018,
+        "name": "test_approval_locates_the_labelled_artifact_and_tags_the_version",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 270
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "test_judgment_question_set_and_storage_slots",
+        "path": "tests/wiki/test_wiki_judgments.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "window_line": 247
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "de6f6529d8f7f6fbc8239c7f829ed1fa3b4e49eb",
+    "506a447506d3e73a87f51defa4e9bdcf3733bba8"
+  ],
+  "completed_at": "2026-10-08T07:42:46Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T07:33:10Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest tests/cli/test_discover_wiki_stage.py tests/test_cli.py -p no:cacheprovider",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073250553118-wiki-ingest-gate-default/gate-final.log"
+  },
+  "impl_move": {
+    "at_complete": 0.175,
+    "at_dispatch": 0.175,
+    "plan": "facility-discovery-sequence",
+    "reason": "a default correction inside the landed wiki fold, not one of the plan's counted section nodes",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.8747068889029723,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T08:50:25Z, which is after this node's 1800s horizon ending 2026-10-08T08:02:53.677776+00:00",
+    "horizon_ends_at": "2026-10-08T08:02:53.677776+00:00",
+    "horizon_seconds": 1800,
+    "metered": true,
+    "observed_at": "2026-10-08T07:32:52Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T08:50:25Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 510126,
+    "state": "quiet",
+    "utilisation_pct": 45.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T07:32:52Z",
+    "read_at": "2026-10-08T07:32:53Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 45.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T07:42:46Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073250553118-wiki-ingest-gate-default/manifest.md",
+  "member": "disposable-r-20261008T073250553118-wiki-ingest-gate-default",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/cli/test_discover_wiki_stage.py::test_cli_default_min_score_reaches_engine",
+      "tests/cli/test_discover_wiki_stage.py::test_default_min_score_uses_ingest_gate",
+      "tests/cli/test_discover_wiki_stage.py::test_min_score_help_names_ingest_gate"
+    ],
+    "baseline_failure_ids": [
+      "tests/cli/test_discover_wiki_stage.py::test_cli_default_min_score_reaches_engine",
+      "tests/cli/test_discover_wiki_stage.py::test_default_min_score_uses_ingest_gate",
+      "tests/cli/test_discover_wiki_stage.py::test_min_score_help_names_ingest_gate"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/cli/test_discover_wiki_stage.py::test_cli_default_min_score_reaches_engine",
+      "tests/cli/test_discover_wiki_stage.py::test_default_min_score_uses_ingest_gate",
+      "tests/cli/test_discover_wiki_stage.py::test_min_score_help_names_ingest_gate"
+    ],
+    "declaration": "restore the literal 0.5 default; the default-gate tests must then fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073250553118-wiki-ingest-gate-default/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073250553118-wiki-ingest-gate-default/negative-control.log",
+    "test_paths": [
+      "tests/cli/test_discover_wiki_stage.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "wiki-ingest-gate-default",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 311,
+          "cached_input_tokens": 809528,
+          "input_tokens": 809841,
+          "output_tokens": 1348,
+          "reasoning_output_tokens": 531,
+          "total_tokens": 811189,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "6ef53af6-a519-4f8c-b15e-556d607ebcfe",
+      "session_id": "mapping-20261006"
+    },
+    "done_when": "tests/cli/test_discover_wiki_stage.py shows WikiStageOptions().min_score equals CONTENT_INGEST_THRESHOLD, a plain discover wiki invocation passes CONTENT_INGEST_THRESHOLD to the engine, an explicit --min-score still overrides it, and the --min-score help names the Jev ingest gate rather than 0.5; no literal 0.5 ingest default remains in wiki.py; tests/cli/test_discover_wiki_stage.py and tests/test_cli.py pass",
+    "estimated_hours": null,
+    "goal": "Make the wiki stage's min_score default in imas_codex/cli/discover/wiki.py read CONTENT_INGEST_THRESHOLD from imas_codex/discovery/wiki/graph_ops.py instead of 0.5",
+    "id": "wiki-ingest-gate-default",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T07:32:52Z",
+      "read_at": "2026-10-08T07:32:53Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 45.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T073250553118-wiki-ingest-gate-default/manifest.md",
+    "negative_control": "restore the literal 0.5 default; the default-gate tests must then fail",
+    "plan": "facility-discovery-sequence",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/cli/discover/wiki.py",
+      "tests/cli/test_discover_wiki_stage.py",
+      "docs/evidence/fragments/facility-discovery-sequence/wiki-ingest-gate-default.html",
+      "docs/figures/facility-discovery-sequence/wiki-ingest-gate-default"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.8745167197377164,
+      "derived": 0.17220285991071432,
+      "drain_hours": 168.0,
+      "effective_limit": 0.17220285991071432,
+      "elapsed_fraction": 0.15654805446428574,
+      "elapsed_hours": 26.300073150000003,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T07:32:59+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.55,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.45,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.4252500000000001,
+      "decided_by": "window",
+      "margin": 0.1434999999999999,
+      "name": "wiki-ingest-gate-default",
+      "score": 0.56875,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.45
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.26334,
+        "observed_at": "2026-10-08T07:32:59+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.45,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "wiki-ingest-gate-default",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T07:32:59.263340+00:00",
+    "score": 0.56875,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "The lead asked to use the codex lane to raise throughput; a two-line default fix after the wiki Jev ingest gate merged.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5020.653,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "facility-discovery-sequence",
+  "plan_impl_at_dispatch": 0.175,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "506a447506d3e73a87f51defa4e9bdcf3733bba8",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e7464580a459406f969f35f19c8a056538486550",
+    "reviewed_head_sha": "506a447506d3e73a87f51defa4e9bdcf3733bba8",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 114
+  },
+  "review_tier": "light",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T073250553118-wiki-ingest-gate-default",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "mapping-20261006",
+  "session_harness": "codex",
+  "session_id": "01a11a6e-4b84-7aa2-8f66-29495aa58056",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4887680,
+    "cumulative_input_tokens": 9874784,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 18775
+  },
+  "time_budget": "30m",
+  "tool_steps": 79.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 576,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T07:42:49Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T07:33:16Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T073250553118-wiki-ingest-gate-default",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 210,
+    "worker_pid": 2993413
+  },
+  "worker_seconds": 576,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
