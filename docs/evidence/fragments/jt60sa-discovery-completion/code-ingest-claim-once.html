@@ -14,7 +14,9 @@
     Claim selection now takes a write lock on the facility before reading
     eligible files, serializing concurrent batches. A working batch renews its
     own token-checked claim at one-third of the stale-claim timeout, so a long
-    ingest remains owned until its holder finishes.
+    ingest remains owned until its holder finishes. Ingestion runs on a separate
+    thread because its synchronous graph writes can otherwise block the event
+    loop that renews the claim.
   </p>
   <p id="code-ingest-claim-once-measure">
     The new concurrent-claim and held-claim tests pass; 104 adjacent discovery
@@ -24,5 +26,7 @@
     for 1.4 seconds against a one-second timeout and the contender took zero
     files; it removed its single probe node. Restoring the original claim query
     made the concurrent-claim test fail with eight claims for four files.
+    When the test made ingestion block synchronously, the contender reclaimed
+    the held file before the thread change; after it, the contender took none.
   </p>
 </section>
