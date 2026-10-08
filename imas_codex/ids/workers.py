@@ -579,7 +579,7 @@ async def context_worker(
         if on_progress:
             on_progress(detail, state.context_stats, [{"detail": detail}])
 
-    # Phase 1: Shared context (sources, embeddings, wiki, code) — done ONCE
+    # Gather source embeddings and external context once for all IDS targets.
     shared = await asyncio.to_thread(
         gather_shared_context,
         state.facility,
@@ -591,7 +591,7 @@ async def context_worker(
 
     state.sources_total = len(shared["groups"])
 
-    # Phase 2: Per-IDS context (vector queries with pre-computed embeddings)
+    # Query each IDS using the shared embeddings.
     for i, ids_name in enumerate(state.target_ids_list):
         if state.should_stop():
             break
@@ -1006,7 +1006,7 @@ async def validate_worker(
                 gc=gc,
             )
 
-            # Derive error mappings (Stage 2) unless skipped
+            # Derive error mappings from validated bindings unless skipped.
             if not state.skip_errors:
                 from imas_codex.ids.mapping import derive_error_mappings
 
