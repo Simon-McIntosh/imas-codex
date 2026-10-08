@@ -199,7 +199,8 @@ def test_dry_run_prints_every_stage_and_runs_nothing(monkeypatch, healthy):
     assert result.exit_code == 0, result.output
     for domain in sequence.DOMAINS:
         assert domain in result.output
-    assert result.output.count(sequence.RUNNABLE) == len(sequence.DOMAINS)
+    assert result.output.count(sequence.RUNNABLE) == len(sequence.DOMAINS) - 1
+    assert "mapping    skipped: not requested" in result.output
     assert sequence._stage_function.call_count == 0
 
 
@@ -302,7 +303,9 @@ def test_stage_functions_run_in_order_with_remaining_limits(monkeypatch, healthy
     outcomes = sequence.run_sequence(
         "jt-60sa",
         config=_config(),
-        options=sequence.SequenceOptions(cost_limit=12.0, time_limit=10),
+        options=sequence.SequenceOptions(
+            only=sequence.DOMAINS, cost_limit=12.0, time_limit=10
+        ),
     )
     assert [name for name, _ in calls] == STAGE_ORDER
     assert [outcome.outcome for outcome in outcomes] == [sequence.RAN] * len(
@@ -323,7 +326,7 @@ def test_failure_skips_consumers_and_independent_domains_continue(monkeypatch, h
         assert _outcome(outcomes, name).outcome == sequence.DEPENDENCY_FAILED
         assert name not in [called for called, _ in calls]
     assert _outcome(outcomes, "wiki").outcome == sequence.RAN
-    assert _outcome(outcomes, "mapping").outcome == sequence.RAN
+    assert _outcome(outcomes, "mapping").outcome == sequence.NOT_REQUESTED
 
 
 def test_selection_and_halves(monkeypatch, healthy):
@@ -359,7 +362,27 @@ def test_selection_and_halves(monkeypatch, healthy):
             skip=("paths", "code", "documents", "wiki", "signals")
         ),
     )
-    assert [name for name, _ in calls] == ["candidates", "mapping"]
+    assert [name for name, _ in calls] == ["candidates"]
+
+
+def test_mapping_requires_only_and_bare_run_keeps_candidates(
+    monkeypatch, healthy, capsys
+):
+    calls = _recording_stages(monkeypatch)
+    outcomes = sequence.run_sequence("jt-60sa", config=_config())
+    report = capsys.readouterr().out
+
+    assert "mapping" not in [name for name, _ in calls]
+    assert "candidates" in [name for name, _ in calls]
+    assert _outcome(outcomes, "mapping").outcome == sequence.NOT_REQUESTED
+    assert "mapping    skipped: not requested" in report
+
+    calls.clear()
+    outcomes = sequence.run_sequence(
+        "jt-60sa", config=_config(), options=sequence.SequenceOptions(only=("mapping",))
+    )
+    assert [name for name, _ in calls] == ["mapping"]
+    assert _outcome(outcomes, "mapping").outcome == sequence.RAN
 
 
 def test_document_seeding_runs_before_any_document_is_pending(monkeypatch, healthy):
@@ -394,6 +417,12 @@ def test_cli_parses_repeated_and_comma_separated_domains(
     )
     assert result.exit_code == 0, result.output
     assert [name for name, _ in calls] == ["paths", "signals scan", "signals enrich"]
+
+    calls.clear()
+    skipped = CliRunner().invoke(discover, ["jt-60sa", "--skip", "mapping"])
+    assert skipped.exit_code == 0, skipped.output
+    assert "mapping" not in [name for name, _ in calls]
+    assert "excluded by --skip" in skipped.output
 
 
 @pytest.mark.parametrize(
