@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -511,6 +511,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261008T090704926794-review-of-documents-focus-validates-claimable" data-who="reckon-build" data-when="2026-10-08T09:16:02.779Z">
     <div class="r-comment-body"><p>Review stored for r-20261008T085856902168-documents-focus-validates-claimable: verdict SOUND WITH FINDINGS, six dimensions 19/15/19/17/18/19 (total 107), reviewed_base_sha e8d9cc2f2 and reviewed_head_sha f823bc569, added_failure_count 0 with no added ids; four follow-on findings, no blocker.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261008T085814094919-focus-needs-one-domain" data-who="reckon-build" data-when="2026-10-08T09:13:56Z">
+    <div class="r-comment-body"><p>Focused discover now requires exactly one --only domain before stages start, mapping reads YAML items through resolve_focus_items, and the named gate passed 84 tests; removing the one-domain check failed both refusal cases.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T075819553950-sequence-mapping-stages" data-who="reckon-build" data-when="2026-10-08T08:22:09Z">
     <div class="r-comment-body"><p>Default IDS enumeration now includes selected and escalated candidate homes; the committed gate passed 558 tests with 5 skipped and 3 deselected, and removing the union failed the cross-IDS test.</p></div>
