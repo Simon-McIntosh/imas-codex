@@ -336,7 +336,12 @@ def _build_enrich_patterns(facility: str | None = None) -> dict[str, str]:
         ):
             for value in access.get(source) or []:
                 if value:
-                    patterns[f"{prefix}{value}"] = re.escape(value)
+                    literal = re.escape(value)
+                    if value[0].isalnum():
+                        literal = r"(?:^|[^A-Za-z0-9])" + literal
+                    if value[-1].isalnum():
+                        literal += r"(?:$|[^A-Za-z0-9_])"
+                    patterns[f"{prefix}{value}"] = literal
 
     return patterns
 

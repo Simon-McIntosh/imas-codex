@@ -35,11 +35,13 @@ def test_facility_access_patterns_reach_path_and_code_states(facility: str) -> N
         if value
     }
     assert expected
-    assert all(patterns.get(key) == regex for key, regex in expected.items())
+    assert all(
+        key in patterns and regex in patterns[key] for key, regex in expected.items()
+    )
 
     # The matched row models the counted output of either remote matcher.
     key, regex = next(iter(expected.items()))
-    assert re.search(regex, key.split(":", 1)[1])
+    assert re.search(patterns[key], key.split(":", 1)[1])
     counts = {key: 2}
     path_state = build_path_judgment_state(
         {"path": "/source", "pattern_categories": counts}, facility, config
@@ -84,21 +86,43 @@ def test_remote_matchers_count_access_calls_in_one_scan(tmp_path) -> None:
     if not shutil.which("rg"):
         pytest.skip("Remote matchers require rg")
     source = tmp_path / "reader.py"
-    source.write_text("getseldata()\neddbreadTime()\ngetseldata()\n")
+    source.write_text("egis()\n_eddbreadTime()\negis()\n")
     unrelated = tmp_path / "unrelated.py"
-    unrelated.write_text("print('nothing matched')\n")
+    unrelated.write_text("register()\n")
+    facility = next(
+        name
+        for name in list_facilities()
+        if "egis"
+        in (get_facility(name).get("data_access_patterns") or {}).get("key_tools", [])
+    )
+    built = _build_enrich_patterns(facility)
     categories = {
-        "facility_tool:getseldata": re.escape("getseldata"),
-        "facility_import:eddbreadTime": re.escape("eddbreadTime"),
+        key: built[key]
+        for key in ("facility_tool:egis", "facility_import:eddbreadTime")
     }
     expected = {
-        "facility_tool:getseldata": 2,
+        "facility_tool:egis": 2,
         "facility_import:eddbreadTime": 1,
     }
     files = [str(source), str(unrelated)]
     assert count_category_matches(str(tmp_path), categories) == expected
     assert _batch_pattern_counts(files, categories) == {str(source): expected}
     assert batch_pattern_counts(files, categories) == {str(source): expected}
+
+
+def test_access_call_literal_does_not_match_inside_another_identifier() -> None:
+    facility = next(
+        name
+        for name in list_facilities()
+        if "egis"
+        in (get_facility(name).get("data_access_patterns") or {}).get("key_tools", [])
+    )
+    patterns = _build_enrich_patterns(facility)
+    tool = patterns["facility_tool:egis"]
+    assert re.search(tool, "egis")
+    assert not re.search(tool, "register")
+    loader = patterns["facility_import:eddbreadTime"]
+    assert re.search(loader, "_eddbreadTime(")
 
 
 def test_path_enrichment_uses_facility_remote_interpreter(monkeypatch) -> None:
