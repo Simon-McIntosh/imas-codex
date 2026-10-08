@@ -141,6 +141,12 @@ def _geqdsk(data, path, include_grid):
     if "LIUQE" in header.upper() or "MEQ" in header.upper():
         code = "LIUQE/MEQ"
         basis = "header"
+    elif "CHEASE" in header.upper():
+        code = "CHEASE"
+        basis = "header"
+    elif header.lstrip().upper().startswith("EFIT"):
+        code = "EFIT"
+        basis = "header"
     elif header.lstrip().startswith("SA"):
         code = "SA"
         basis = "header"
@@ -165,6 +171,22 @@ def _geqdsk(data, path, include_grid):
     return result
 
 
+def facility_basis(result):
+    path = result["path"].lower()
+    header = result.get("header", "").lower()
+    if "/localdb/" in path:
+        return "LOCALDB path"
+    if any(part.startswith("eqdb_") for part in path.split(os.sep)):
+        return "EQDB directory"
+    if "/jt60sa/" in path or "jt-60sa" in header or "jt60sa" in header:
+        return "machine named in path or header"
+    if "/work_sa/" in path and "input_sa.txt" in header:
+        return "SA simulation path and header"
+    if "/equil_runs/" in path and re.search(r"e\d{6}", os.path.basename(path)):
+        return "shot-tagged reconstruction path"
+    return None
+
+
 def read_grid(path, include_grid=False):
     with open(path, "rb") as stream:
         data = stream.read()
@@ -183,6 +205,7 @@ def read_grid(path, include_grid=False):
     result["path"] = path
     result["bytes"] = len(data)
     result["owner"] = pwd.getpwuid(os.stat(path).st_uid).pw_name
+    result["facility_basis"] = facility_basis(result)
     return result
 
 
@@ -259,9 +282,11 @@ def main():
             item = read_grid(path)
             seen.add(item["format"])
             print(
-                "PASS {} {} shot={} time={} grid={} psi_range={}".format(
+                "PASS {} {} code={} facility={} shot={} time={} grid={} psi_range={}".format(
                     item["format"],
                     path,
+                    item["code"],
+                    item["facility_basis"],
                     item["shot"],
                     item["time_s"],
                     item["grid"],
