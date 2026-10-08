@@ -20,9 +20,9 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="50">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -47,7 +47,7 @@
     </p>
 
     <h2 id="s2">§2 — Stage registry and access probes</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <figure>
       <img src="/imas-codex/figures/facility-discovery-sequence/stage-graph.svg"
            alt="Discovery stages with what each needs; signal enrichment, discover map and imas map run need only the graph">
@@ -410,6 +410,9 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261008T034022169014-review-of-sequence-stage-registry" data-who="reckon-build" data-when="2026-10-08T03:57:09.705Z">
     <div class="r-comment-body"><p>review of run r-20261008T021952758562-sequence-stage-registry stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T021952758562-sequence-stage-registry.json: parsed record scoring all six dimensions 0..20 (goal_fidelity 18, evidence 17, scope_discipline 20, durability 15, fit 16, reuse 20; total 106), reviewed_base_sha 202972657fdd2028c3c138b04aedd400420acaf4 and reviewed_head_sha 21c0e6d34f2c1b3c5b86e6d5be61f62a25955e00, added_failure_count null with added_failure_ids [] because the reviewed run's manifest declares no baseline_suite log; the §2 done-when met; 3 follow-on findings (signals-mode collapse in stage_command, invalid mapping model seat, single-site wiki probe).</p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-registry-landed-20261008" data-who="reckon-build" data-when="2026-10-08T07:58:00Z">
+    <div class="r-comment-body"><p>The stage registry with access probes and dry run (21c0e6d34) landed on main with sequence-runner, which was built on it; §2's deliverable is in the tree.</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261008T040251800434-review-of-discover-cli-surface-census" data-who="reckon-build" data-when="2026-10-08T04:22:48.332Z">
     <div class="r-comment-body"><p>review of run r-20261008T023259015541-discover-cli-surface-census stored as docs/state/imas-codex review r-20261008T040251800434 at head 1efcfaa10: scores goal_fidelity 16, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 20, total 111; 4 findings (wiki --max-pages dropped from the item-cap concept and the verdicts; section 5 verdicts not exhaustive; sn run census a stated subset; section 4 bare file prefixes); added_failure_count unmeasured (docs-only reviewed run names no suite gate)</p></div>
 </div>
@@ -457,6 +460,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T074433330634-review-of-wiki-ingest-gate-default" data-who="reckon-build" data-when="2026-10-08T07:52:52.968Z">
     <div class="r-comment-body"><p>review of r-20261008T073250553118-wiki-ingest-gate-default stored, status parsed, six dimensions scored goal_fidelity 20 / evidence 17 / scope_discipline 20 / durability 18 / fit 19 / reuse 20 (total 114), reviewed_base_sha e7464580a459406f969f35f19c8a056538486550, reviewed_head_sha 506a447506d3e73a87f51defa4e9bdcf3733bba8, added_failure_count 0, added_failure_ids []; three follow-on findings (negative-control header names the base revision but ran post-base tests; --min-score help no longer shows the numeric default; worktree gate logs record no module.__file__/cwd).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-runner-landed-20261008" data-who="reckon-build" data-when="2026-10-08T07:58:00Z">
+    <div class="r-comment-body"><p>sequence-runner landed (5fddb226d, eb32cddb1) with the stage registry it was built on (21c0e6d34): <code>imas-codex discover FACILITY</code> routes to a hidden run command, runs the seven domains in order through their stage functions, isolates failures, passes remaining cost and time, refuses <code>--scan-only</code> with <code>--flush</code> and <code>--reset-to</code> without one <code>--only</code>, and ends with one table; status and inspect read <code>get_path_scan_threshold()</code>. Gate 75 passed at eb32cddb1; review 107/120 sound with findings, 0 added failures. Its untested branches (the mapping <code>--focus</code>/<code>--ids</code> refusal, negative limits, the receipt-less remaining count, inspect's threshold) go to <code>focus-needs-one-domain</code>, which rewrites that focus handling.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T070202003889-sequence-runner" data-who="reckon-build" data-when="2026-10-08T07:40:54Z">
+    <div class="r-comment-body"><p>Bare discover FACILITY routes to ordered stages with shared limits and failure isolation; final committed gate 75 passed, 0 failed, and the routing mutation failed 1 test as declared.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261008T064515993215-review-of-focus-candidates" data-who="reckon-build" data-when="2026-10-08T07:03:54.008Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T061140828099-focus-candidates stored as a parsed record scoring goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 18, reuse 18 (total 108), verdict SOUND WITH FINDINGS, reviewed_base_sha ad49d924d10ce972975339230f51bd72ccd93e62 and reviewed_head_sha 7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e, with added_failure_count 0 derived from clean arms at both revisions; four follow-on findings, no blocker.</p></div>
