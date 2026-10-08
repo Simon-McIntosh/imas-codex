@@ -41,7 +41,7 @@ imas-codex discover tcv --only signals --topic equilibrium
 | `--scan-only` | | flag | `false` | Only scan, skip enrichment |
 | `--flush` | | flag | `false` | Drain discovered signals without scanning |
 | `--limit` | | int | none | Maximum signals to process |
-| `--cost-limit` | `-c` | float | `5.0` | Maximum LLM spend in USD |
+| `--cost-limit` | `-c` | float | `25.0` | Maximum LLM spend in USD |
 | `--time` | | int | none | Maximum runtime in minutes |
 | `--topic` | | str | none | Steer signal enrichment toward a topic |
 | `--enrich-workers` | | int | `2` | Parallel enrichment workers |
