@@ -31,6 +31,7 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.discover.wiki import WikiStageOptions, run_wiki_stage, wiki
+from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
 
 FACILITY = "jt-60sa"
 
@@ -149,6 +150,37 @@ def test_stage_options_are_frozen() -> None:
     options = WikiStageOptions()
     with pytest.raises(FrozenInstanceError):
         options.scan_only = True  # type: ignore[misc]
+
+
+def test_default_min_score_uses_ingest_gate() -> None:
+    assert WikiStageOptions().min_score == CONTENT_INGEST_THRESHOLD
+
+
+def test_cli_default_min_score_reaches_engine(engine, monkeypatch) -> None:
+    monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "local")
+    result = CliRunner().invoke(wiki, [FACILITY])
+    assert result.exit_code == 0, result.output
+    assert engine["calls"]
+    assert all(
+        call["min_score"] == CONTENT_INGEST_THRESHOLD for call in engine["calls"]
+    )
+
+
+def test_cli_explicit_min_score_overrides_ingest_gate(engine, monkeypatch) -> None:
+    monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "local")
+    result = CliRunner().invoke(wiki, [FACILITY, "--min-score", "0.3"])
+    assert result.exit_code == 0, result.output
+    assert engine["calls"]
+    assert all(call["min_score"] == 0.3 for call in engine["calls"])
+
+
+def test_min_score_help_names_ingest_gate() -> None:
+    result = CliRunner().invoke(wiki, ["--help"])
+    assert result.exit_code == 0, result.output
+    help_text = " ".join(result.output.split())
+    assert "--min-score" in help_text
+    assert "Jev ingest gate" in help_text
+    assert "default: 0.5" not in help_text
 
 
 def test_scan_only_selects_the_seeding_half(engine) -> None:
