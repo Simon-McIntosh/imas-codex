@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="700" viewBox="0 0 1400 700" role="img" aria-labelledby="title desc">
+  <title id="title">JT-60SA candidate edges by transform slot</title>
+  <desc id="desc">For 2,958 escalated candidate edges, code can conditionally settle 398 sign, factor, and COCOS sign slots, 465 unit conversions accepted by pint, and 1,882 scalar index layouts. Remaining slots require judgment.</desc>
+  <rect width="1400" height="700" fill="#fff"/>
+  <g font-family="sans-serif" fill="#202326" font-size="28">
+    <text x="320" y="130" text-anchor="end">Sign</text>
+    <text x="320" y="235" text-anchor="end">Constant factor</text>
+    <text x="320" y="340" text-anchor="end">Unit conversion</text>
+    <text x="320" y="445" text-anchor="end">COCOS sign</text>
+    <text x="320" y="550" text-anchor="end">Index</text>
+  </g>
+  <g fill="#2d7772">
+    <rect x="340" y="90" width="135" height="58"/>
+    <rect x="340" y="195" width="135" height="58"/>
+    <rect x="340" y="300" width="157" height="58"/>
+    <rect x="340" y="405" width="135" height="58"/>
+    <rect x="340" y="510" width="636" height="58"/>
+  </g>
+  <g fill="#9a9fa4">
+    <rect x="475" y="90" width="865" height="58"/>
+    <rect x="475" y="195" width="865" height="58"/>
+    <rect x="497" y="300" width="843" height="58"/>
+    <rect x="475" y="405" width="865" height="58"/>
+    <rect x="976" y="510" width="364" height="58"/>
+  </g>
+  <g font-family="sans-serif" font-size="25" text-anchor="middle" dominant-baseline="middle">
+    <g fill="#fff">
+      <text x="407" y="119">398</text>
+      <text x="407" y="224">398</text>
+      <text x="418" y="329">465</text>
+      <text x="407" y="434">398</text>
+      <text x="658" y="539">code 1,882</text>
+    </g>
+    <g fill="#202326">
+      <text x="907" y="119">judgment 2,560</text>
+      <text x="907" y="224">judgment 2,560</text>
+      <text x="918" y="329">judgment 2,493</text>
+      <text x="907" y="434">judgment 2,560</text>
+      <text x="1158" y="539">judgment 1,076</text>
+    </g>
+  </g>
+  <g fill="none" stroke="#202326" stroke-width="1.2">
+    <path d="M340 612H1340"/>
+    <path d="M340 612v8M678 612v8M1016 612v8M1340 612v8"/>
+  </g>
+  <g font-family="sans-serif" fill="#202326" font-size="24" text-anchor="middle">
+    <text x="340" y="655">0</text>
+    <text x="678" y="655">1,000</text>
+    <text x="1016" y="655">2,000</text>
+    <text x="1340" y="655">2,958</text>
+    <text x="840" y="690">candidate edges</text>
+  </g>
+</svg>
