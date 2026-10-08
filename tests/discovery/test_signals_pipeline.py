@@ -63,6 +63,26 @@ FACILITY_CONFIG = {
     },
 }
 
+
+@pytest.fixture
+def bare_discover_stage(monkeypatch, tmp_path):
+    from imas_codex.cli import logging as cli_logging
+    from imas_codex.cli.discover import sequence
+
+    monkeypatch.setattr(
+        sequence,
+        "evaluate_stage",
+        lambda stage, facility, config: sequence.StageOutcome(
+            stage.name, stage.domain, sequence.RUNNABLE, "ready"
+        ),
+    )
+    monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
+    monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
+    monkeypatch.setattr(
+        cli_logging, "get_log_file", lambda *a, **k: tmp_path / "discover.log"
+    )
+
+
 # 25 leaf nodes per tree version simulating signal paths
 LEAF_NODES_PER_VERSION = 25
 
@@ -1000,10 +1020,10 @@ class TestCategoryScope:
             assert self.PREDICATE in call.args[0]
             assert call.kwargs["categories"] == ["FAME"]
 
-    def test_cli_category_routes_to_pipeline(self):
+    def test_cli_category_routes_to_pipeline(self, bare_discover_stage):
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover.signals import signals
+        from imas_codex.cli.discover import discover
 
         captured_kwargs = {}
 
@@ -1044,8 +1064,16 @@ class TestCategoryScope:
             patch("imas_codex.cli.shutdown.install_shutdown_handlers"),
         ):
             result = CliRunner().invoke(
-                signals,
-                [FACILITY, "-s", "mdsplus", "--category", "MAG,PSRC"],
+                discover,
+                [
+                    FACILITY,
+                    "--only",
+                    "signals",
+                    "--scanners",
+                    "mdsplus",
+                    "--category",
+                    "MAG,PSRC",
+                ],
                 catch_exceptions=False,
             )
 
@@ -1652,27 +1680,27 @@ class TestCLISignals:
     """Tests for the signals CLI command with mocked pipeline."""
 
     def test_cli_help(self):
-        """CLI signals command responds to --help."""
+        """The bare command exposes signal discovery options."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover.signals import signals
+        from imas_codex.cli.discover import discover
 
         runner = CliRunner()
-        result = runner.invoke(signals, ["--help"])
+        result = runner.invoke(discover, [FACILITY, "--help"])
         assert result.exit_code == 0
-        assert "Discover signals" in result.output
         assert "--scan-only" in result.output
-        assert "--enrich-only" in result.output
+        assert "--flush" in result.output
         assert "--scanners" in result.output
         assert "--cost-limit" in result.output
 
-    def test_cli_unknown_scanner_exits(self):
+    def test_cli_unknown_scanner_exits(self, bare_discover_stage):
         """CLI rejects unknown scanner types."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover.signals import signals
+        from imas_codex.cli.discover import discover
 
         runner = CliRunner()
+        messages = []
         with (
             patch(
                 "imas_codex.cli.rich_output.should_use_rich",
@@ -1689,19 +1717,32 @@ class TestCLISignals:
                 "imas_codex.discovery.signals.scanners.base.list_scanners",
                 return_value=["mdsplus", "tdi"],
             ),
+            patch("imas_codex.cli.discover.common.ensure_remote_environment"),
+            patch(
+                "imas_codex.cli.discover.common.make_log_print",
+                return_value=messages.append,
+            ),
         ):
             result = runner.invoke(
-                signals,
-                [FACILITY, "-s", "nonexistent_scanner"],
+                discover,
+                [
+                    FACILITY,
+                    "--only",
+                    "signals",
+                    "--scan-only",
+                    "--scanners",
+                    "nonexistent_scanner",
+                ],
                 catch_exceptions=False,
             )
         assert result.exit_code != 0
+        assert any("nonexistent_scanner" in message for message in messages)
 
-    def test_cli_scan_only_invokes_pipeline(self):
+    def test_cli_scan_only_invokes_pipeline(self, bare_discover_stage):
         """CLI --scan-only routes to run_parallel_data_discovery with discover_only."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover.signals import signals
+        from imas_codex.cli.discover import discover
 
         runner = CliRunner()
 
@@ -1754,8 +1795,8 @@ class TestCLISignals:
             ),
         ):
             result = runner.invoke(
-                signals,
-                [FACILITY, "--scan-only", "-s", "mdsplus"],
+                discover,
+                [FACILITY, "--only", "signals", "--scan-only", "--scanners", "mdsplus"],
                 catch_exceptions=False,
             )
 

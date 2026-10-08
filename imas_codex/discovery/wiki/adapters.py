@@ -2389,7 +2389,7 @@ done
 def _get_document_type_from_filename(filename: str) -> str:
     """Get document type from filename extension.
 
-    Shared utility for all adapters that discover documents.
+    Shared utility for adapters that scan documents.
     Returns semantic type names matching DocumentType enum values.
     """
     filename_lower = filename.lower()

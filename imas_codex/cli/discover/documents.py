@@ -72,7 +72,7 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
     draining half without seeding. Neither flag runs both halves in order.
 
     Args:
-        facility: Facility id to discover documents for.
+        facility: Facility id whose documents are scanned.
         options: Settled stage options.
 
     Raises:

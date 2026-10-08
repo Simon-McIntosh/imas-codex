@@ -68,7 +68,7 @@ class DataSourceScanner(Protocol):
     data_systems section.
 
     Lifecycle:
-        1. scan() — discover signals from data source
+        1. scan() — find signals in a data source
         2. (shared) enrichment via LLM classification, with wiki context injection
         3. check() — validate signals return data
 
