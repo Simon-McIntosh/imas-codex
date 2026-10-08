@@ -1,0 +1,57 @@
+<section>
+  <h2 id="sequence-stage-registry">A discovery run is one ordered stage registry with access probes</h2>
+  <p id="sequence-stage-registry-scope">
+    <code>imas_codex/cli/discover/sequence.py</code> holds one ordered tuple of
+    nine <code>Stage</code> records in dependency order: paths, code, documents,
+    wiki, signals scan, signals enrich, signals check, candidates, mapping. Each
+    record carries the access it needs, the facility-config keys it requires, the
+    stages it reads, the pending-work predicates that decide whether it has work,
+    and the model seat the stage's own monitor guards. Predicates are
+    <code>module:function</code> specs resolved lazily through
+    <code>importlib</code>, so a test patches the source module and no predicate
+    is reimplemented here.
+  </p>
+  <p id="sequence-stage-registry-run">
+    <code>imas-codex discover run FACILITY --dry-run</code> evaluates every stage in
+    registry order and prints each one with its outcome and reason, invoking
+    nothing. Access is probed through the three checks every discover command
+    already uses, imported unchanged from
+    <code>imas_codex/discovery/base/services.py</code>:
+    <code>neo4j_health_check</code>, <code>ssh_health_check</code> and
+    <code>wiki_auth_check</code>. No probe is written anew. A stage reads one of
+    <code>runnable</code>; <code>skipped: not configured</code> when a required
+    config block is absent; <code>skipped: unreachable</code> when a probe fails
+    or a pending-work query raises; <code>skipped: nothing to do</code> when its
+    predicate is false.
+  </p>
+  <p id="sequence-stage-registry-pending">
+    <code>imas_codex/discovery/documents/pipeline.py</code> gains the public
+    <code>has_pending_work(facility)</code> the documents stage calls: true when
+    either private check (images to fetch, images to score) is true. The private
+    checks raise on a failed query, so a graph fault reaches the caller as an
+    exception and the stage reads <code>skipped: unreachable</code>, never
+    <code>skipped: nothing to do</code>.
+  </p>
+  <figure>
+    <img src="/imas-codex/figures/facility-discovery-sequence/stage-graph.svg" alt="The nine discovery stages in dependency order with their access needs"/>
+  </figure>
+  <table id="sequence-stage-registry-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/discovery/test_documents_pending_work.py tests/test_cli.py -p no:cacheprovider</code></td><td>69 passed, exit 0</td></tr>
+      <tr><td>negative control — make <code>has_pending_work</code> swallow a query error and return <code>False</code></td><td>2 failed, 22 passed, exit 1</td></tr>
+    </tbody>
+  </table>
+  <p id="sequence-stage-registry-tests">
+    The suite shows the nine stages in table order, every discovery domain owned
+    by a stage, and a dry run that prints each stage with its outcome and reason
+    while invoking no stage command. With the SSH check patched down the SSH
+    stages read <code>skipped: unreachable</code> and the graph-only stages read
+    <code>runnable</code>; without <code>wiki_sites</code> the wiki stage reads
+    <code>skipped: not configured</code> before any probe runs; each stage's
+    outcome follows a patched check and its named pending-work predicate. With the documents predicate made to swallow a query
+    failure the raising-query test fails, the stage reading
+    <code>skipped: nothing to do</code> instead of
+    <code>skipped: unreachable</code>.
+  </p>
+</section>

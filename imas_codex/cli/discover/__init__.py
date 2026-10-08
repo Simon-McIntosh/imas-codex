@@ -515,6 +515,7 @@ from imas_codex.cli.discover.code import code  # noqa: E402
 from imas_codex.cli.discover.documents import documents  # noqa: E402
 from imas_codex.cli.discover.map import map_candidates  # noqa: E402
 from imas_codex.cli.discover.paths import paths  # noqa: E402
+from imas_codex.cli.discover.sequence import run as sequence_run  # noqa: E402
 from imas_codex.cli.discover.signals import signals  # noqa: E402
 from imas_codex.cli.discover.wiki import wiki  # noqa: E402
 
@@ -524,3 +525,4 @@ discover.add_command(signals)
 discover.add_command(code)
 discover.add_command(documents)
 discover.add_command(map_candidates)
+discover.add_command(sequence_run)
