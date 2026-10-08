@@ -171,17 +171,17 @@ def test_each_stage_follows_its_named_pending_predicate(monkeypatch, name):
 
 
 def test_raising_pending_query_reads_unreachable(monkeypatch):
-    """A graph fault in the documents predicate reads unreachable, not empty."""
+    """A graph fault in a pending predicate reads unreachable, not empty."""
     _probes(monkeypatch, graph=True, ssh=True, wiki=True)
 
-    from imas_codex.discovery.documents import pipeline
+    from imas_codex.discovery.code import graph_ops
 
     def boom(facility: str) -> bool:
         raise RuntimeError("graph unavailable")
 
-    monkeypatch.setattr(pipeline, "_has_pending_image_documents", boom)
+    monkeypatch.setattr(graph_ops, "has_pending_scan_work", boom)
 
-    o = sequence.evaluate_stage(_stage("documents"), "jt-60sa", _config())
+    o = sequence.evaluate_stage(_stage("code"), "jt-60sa", _config())
 
     assert o.outcome == sequence.UNREACHABLE
     assert "pending-work query failed" in o.reason
@@ -353,6 +353,18 @@ def test_selection_and_halves(monkeypatch, healthy):
     assert [name for name, _ in calls] == ["candidates", "mapping"]
 
 
+def test_document_seeding_runs_before_any_document_is_pending(monkeypatch, healthy):
+    _patch_predicates(monkeypatch, False)
+    calls = _recording_stages(monkeypatch)
+    sequence.run_sequence(
+        "jt-60sa",
+        config=_config(),
+        options=sequence.SequenceOptions(only=("documents",), scan_only=True),
+    )
+    assert [name for name, _ in calls] == ["documents"]
+    assert calls[0][1][1].scan_only is True
+
+
 def test_cli_parses_repeated_and_comma_separated_domains(
     monkeypatch, healthy, tmp_path
 ):
@@ -415,6 +427,38 @@ def test_mapping_calls_existing_pipeline_with_remaining_limits(monkeypatch):
     assert callback.call_args.kwargs["time_limit"] == 7
     assert callback.call_args.kwargs["domains"] == ("equilibrium",)
     assert callback.call_args.kwargs["ids_names"] == ("pf_active",)
+
+
+def test_mapping_focus_and_limit_restrict_ids_targets(monkeypatch, tmp_path):
+    from imas_codex.cli.map import map_run
+    from imas_codex.graph import client
+    from imas_codex.ids import tools
+
+    manifest = tmp_path / "ids.txt"
+    manifest.write_text("equilibrium\npf_active\n")
+    callback = MagicMock()
+    monkeypatch.setattr(map_run, "callback", callback)
+    monkeypatch.setattr(client, "GraphClient", MagicMock())
+    selection = MagicMock(
+        return_value={
+            "ids_targets": [
+                {"ids_name": "pf_active"},
+                {"ids_name": "equilibrium"},
+            ]
+        }
+    )
+    monkeypatch.setattr(tools, "discover_mappable_ids", selection)
+
+    result = sequence.run_mapping_stage(
+        "jt-60sa",
+        sequence.SequenceOptions(focus=(str(manifest),), limit=1),
+        3.5,
+        7,
+    )
+    assert selection.call_args.kwargs["ids_filter"] == ["equilibrium", "pf_active"]
+    assert callback.call_args.kwargs["domains"] == ()
+    assert callback.call_args.kwargs["ids_names"] == ("equilibrium",)
+    assert result["remaining"] == 1
 
 
 def test_signals_halves_resolve_to_the_signals_stage_function():

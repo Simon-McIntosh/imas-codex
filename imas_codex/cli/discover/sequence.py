@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import time
 from dataclasses import dataclass, fields
+from pathlib import Path
 
 import click
 
@@ -48,7 +49,6 @@ class Stage:
 
 
 _CODE = "imas_codex.discovery.code.graph_ops"
-_DOCUMENTS = "imas_codex.discovery.documents.pipeline"
 _SIGNALS = "imas_codex.discovery.signals.parallel"
 _IDS = "imas_codex.ids.workers"
 
@@ -103,7 +103,7 @@ STAGES: tuple[Stage, ...] = (
         "documents",
         "documents",
         access=("ssh",),
-        pending=(f"{_DOCUMENTS}:has_pending_work",),
+        pending=(),
         reads=("paths",),
         model_section="discovery-vision",
     ),
@@ -245,6 +245,8 @@ def _validate_options(options: SequenceOptions) -> None:
         options.time_limit is not None and options.time_limit < 0
     ):
         raise click.UsageError("cost and time limits must be non-negative")
+    if options.limit is not None and options.limit < 0:
+        raise click.UsageError("--limit must be non-negative")
 
 
 def _ssh_host(config: dict) -> str:
@@ -458,8 +460,49 @@ def run_mapping_stage(
     from imas_codex.cli.map import map_run
     from imas_codex.ids import workers
 
+    focus = []
+    for item in options.focus:
+        path = Path(item)
+        if path.is_file():
+            focus.extend(
+                line.strip()
+                for line in path.read_text().splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            )
+        else:
+            focus.append(item)
+    ids_names = options.ids
+    domains = options.physics_domain
+    if focus:
+        ids_names = tuple(
+            name for name in focus if not options.ids or name in options.ids
+        )
+        domains = ()
+        if not ids_names:
+            raise click.UsageError("--focus and --ids select no common IDS")
+    remaining = None
+    if options.limit is not None:
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.ids.tools import discover_mappable_ids
+
+        with GraphClient() as gc:
+            plan = discover_mappable_ids(
+                facility,
+                gc=gc,
+                domains=list(domains) if domains else None,
+                ids_filter=list(ids_names) if ids_names else None,
+            )
+        targets = sorted(t["ids_name"] for t in plan["ids_targets"])
+        ids_names = tuple(targets[: options.limit])
+        domains = ()
+        remaining = len(targets) - len(ids_names)
+        if not ids_names:
+            return {"cost": 0.0, "bindings": 0, "remaining": remaining}
+
     original = workers.run_mapping_engine
     receipt = {"cost": 0.0, "bindings": 0}
+    if remaining is not None:
+        receipt["remaining"] = remaining
 
     async def record(state, **kwargs):
         try:
@@ -472,8 +515,8 @@ def run_mapping_stage(
     try:
         map_run.callback(
             facility=facility,
-            domains=options.physics_domain,
-            ids_names=options.ids,
+            domains=domains,
+            ids_names=ids_names,
             model=None,
             dd_version=None,
             cost_limit=cost,
