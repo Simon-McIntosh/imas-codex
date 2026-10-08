@@ -30,6 +30,11 @@
     <p>Six nodes landed for §4. <code>sequence-mapping-stages</code> (29a0f37c6, review 108/120) unions every IDS holding a selected or escalated <code>MAPPING_CANDIDATE</code> edge into <code>discover_mappable_ids</code>; on the live graph JT-60SA gets 76 targets from 2,958 edges across 59 IDSs in 2.7 s. <code>candidate-homes-under-domain-filter</code> (390dd9403, 114/120) extends that to domain-filtered calls and the no-domain early return; filtered and unfiltered statements pass a live EXPLAIN. <code>assignment-work-matches-claim</code> (2c9bce091, 103/120) makes the assign phase's pending check select by target IDS like its claim, so a cross-domain home no longer ends the phase early; <code>assignment-predicate-shared</code> (8bed4a85b) gives both one builder. <code>metadata-tests-offline</code> (d52629de8) guards <code>tests/ids/test_metadata.py</code> against unpatched LLM calls. No node added a failure.</p>
   </section>
 
+  <section id="s3">
+    <h2>§3 — one discover command</h2>
+    <p>§3 landed across these nodes. The six folds and the stage registry gave each domain a stage function. <code>sequence-runner</code> (bdf79b3c0, review 107/120) added the bare command. <code>retire-domain-subcommands</code> (91939e950, 112/120) removed the wrappers, keeping every option except the retired aliases. <code>retire-subcommand-prose</code> (edbdd465f, 99/120) and <code>discovery-prose-matches-cli</code> (a7075f73c) moved the docs. <code>discover-hints-name-bare-command</code> (9b7448159, 107/120) makes a retired spelling name its <code>--only</code> form, with <code>map</code> pointing at candidates. <code>wiki-ingest-gate-default</code> (8f69fadb2) and <code>wiki-ingest-threshold-setting</code> (dd2fe44ad) put the wiki gate in settings, which removed an import cycle. <code>mapping-opt-in</code> (b2b432923) applies the lead's reversal of the mapping default. No node added a failure. <code>imas_codex/schemas/facility.yaml</code> descriptions remain with the session that owns that file.</p>
+  </section>
+
 </main>
 </body>
 </html>

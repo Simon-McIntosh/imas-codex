@@ -20,9 +20,9 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="92">
+<meta name="plan-version" content="93">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -165,207 +165,12 @@
         to do</em>.</li>
     </ul>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s3">§3 — One discover command: the settled surface, the folded domains and the runner</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      The lead settled the surface on 2026-10-08 from the §6 census
-      (<code>docs/research/discover-cli-surface.html</code>). It follows <code>sn run</code>. One command
-      runs the work, and it selects stages by name. A few subcommands remain to inspect and reset
-      state. The per-domain subcommands <code>discover paths</code>, <code>code</code>,
-      <code>documents</code>, <code>wiki</code>, <code>signals</code> and <code>map</code> are retired.
-      <code>imas-codex discover FACILITY</code> runs every stage in order, mapping included.
-      <code>status</code>, <code>clear</code>, <code>seed</code> and <code>inspect</code> stay as
-      subcommands. The group routes a first argument that names no subcommand to a hidden
-      <code>run</code>, as <code>_HostGroup</code> in <code>imas_codex/cli/host.py</code> does. So
-      <code>imas-codex discover jt-60sa</code> runs the sequence, and
-      <code>imas-codex discover status jt-60sa</code> is unchanged.
-    </p>
-    <table>
-      <thead><tr><th>option</th><th>meaning</th><th>replaces</th></tr></thead>
-      <tbody>
-        <tr><td><code>--only DOMAIN</code></td><td>Run only these domains, repeatable or comma-separated: <code>paths</code>, <code>code</code>, <code>documents</code>, <code>wiki</code>, <code>signals</code>, <code>candidates</code> and <code>mapping</code>. Same grammar as <code>sn run --only</code>.</td><td>running one per-domain subcommand</td></tr>
-        <tr><td><code>--skip DOMAIN</code></td><td>Run every domain except these.</td><td>new</td></tr>
-        <tr><td><code>--scan-only</code></td><td>Run each selected domain's seeding half only: enumerate new work, judge nothing.</td><td><code>--scan-only</code> on paths, code, documents, wiki and signals</td></tr>
-        <tr><td><code>--flush</code></td><td>Run each selected domain's draining half only, without seeding: the same concept as <code>sn run --flush</code>. A drain half is a status-plus-claim query over nodes the seed half created (census §4).</td><td><code>--triage-only</code>, <code>--score-only</code> and <code>--enrich-only</code></td></tr>
-        <tr><td><code>--focus ITEMS</code></td><td>Restrict to named items, or to a manifest file, as on <code>sn run</code>. A path item covers everything under it. The item kind is the domain's own: facility paths, code files, wiki pages, signal accessors or source ids.</td><td><code>paths --root</code>, <code>code --path-prefix</code></td></tr>
-        <tr><td><code>--topic TEXT</code></td><td>A free-text steer for stages that score or enrich.</td><td>the free-text <code>--focus</code> on every discover domain</td></tr>
-        <tr><td><code>-c</code>, <code>--cost-limit USD</code></td><td>The invocation's spend cap. Each domain receives what remains.</td><td>same meaning, kept</td></tr>
-        <tr><td><code>-t</code>, <code>--time MINUTES</code></td><td>The invocation's wall-clock cap. Each domain receives what remains. The short form now matches <code>sn run -t</code>.</td><td><code>--time</code>, kept</td></tr>
-        <tr><td><code>--limit N</code></td><td>Item cap for each selected domain, as on <code>sn run --limit</code>.</td><td><code>--path-limit</code>, <code>--max-paths</code>, <code>--signal-limit</code>, <code>wiki --max-pages</code> and <code>-n</code></td></tr>
-        <tr><td><code>--dry-run</code></td><td>Print every stage with its outcome and reason, and invoke nothing.</td><td>new; no discover domain had one</td></tr>
-        <tr><td><code>--reset-to TARGET</code></td><td>The per-domain reset target. It needs exactly one <code>--only</code> domain, because targets differ per domain.</td><td>per-domain <code>--reset-to</code></td></tr>
-        <tr><td><code>--rescan</code></td><td>Re-discover items already scanned, in the domains that scan.</td><td>per-domain <code>--rescan</code></td></tr>
-      </tbody>
-    </table>
-    <p>
-      Domain tunables move onto the one command unchanged, among them worker counts, thresholds,
-      <code>--category</code>, <code>--scanners</code>, <code>--reference-shot</code>,
-      <code>--physics-domain</code>, <code>--ids</code>, <code>--rejudge-ingested</code> and
-      <code>--rescan-documents</code>, <code>--add-roots</code>, <code>--store-bytes</code>, <code>--max-depth</code> and <code>--store-images</code>. <code>code --min-score</code> gives way to the Jev-calibrated gates described below. A tunable whose name another domain or <code>sn run</code>
-      already uses with a different meaning takes the domain as a prefix. <code>wiki --source</code>
-      becomes <code>--wiki-site</code>, because <code>sn run --source</code> is an extraction source.
-      Two deprecated aliases are deleted: <code>paths --reset-scored</code> and
-      <code>signals --reenrich</code>.
-    </p>
-    <p>
-      Each domain module turns its click command into one stage function,
-      <code>run_&lt;domain&gt;_stage(facility, options)</code>, with a frozen dataclass of the settled
-      options. The body that builds the engine and calls <code>run_discovery</code>
-      (<code>imas_codex/cli/discover/common.py:212</code>) is kept whole, so no engine changes. The click
-      subcommand is deleted with its registration. These six folds touch disjoint files, so they run in
-      parallel, with one exception. <code>discovery-judgments-through-jev</code> §4's node
-      <code>path-jev-deploy</code> is editing <code>paths.py</code> and <code>code.py</code>. It retires
-      the 0.9 composite threshold as the path gate in favour of Jev-calibrated scan, expand and enrich
-      gates, and code-scan path selection stops reading the old threshold. So
-      <code>fold-paths-stage</code> and <code>fold-code-stage</code> dispatch only after that node
-      merges, and they carry its gate options rather than the 0.9 default. Wiki keeps its own
-      <code>--min-score</code>. The other four folds run now:
-    </p>
-    <ul>
-      <li><code>fold-paths-stage</code>: <code>imas_codex/cli/discover/paths.py</code> and <code>tests/cli/test_discover_paths_stage.py</code></li>
-      <li><code>fold-code-stage</code>: <code>imas_codex/cli/discover/code.py</code> and <code>tests/cli/test_discover_code_stage.py</code></li>
-      <li><code>fold-documents-stage</code>: <code>imas_codex/cli/discover/documents.py</code> and <code>tests/cli/test_discover_documents_stage.py</code></li>
-      <li><code>fold-wiki-stage</code>: <code>imas_codex/cli/discover/wiki.py</code> and <code>tests/cli/test_discover_wiki_stage.py</code></li>
-      <li><code>fold-signals-stage</code>: <code>imas_codex/cli/discover/signals.py</code> and <code>tests/cli/test_discover_signals_stage.py</code></li>
-      <li><code>fold-candidates-stage</code>: <code>imas_codex/cli/discover/map.py</code> and <code>tests/cli/test_discover_candidates_stage.py</code></li>
-    </ul>
-    <p>
-      Each fold is role implement, 1.5 h, with its fragment under
-      <code>docs/evidence/fragments/facility-discovery-sequence/</code>. A fold leaves its click command
-      in place as a thin wrapper that builds the options and calls the stage function. That way no two
-      folds write <code>imas_codex/cli/discover/__init__.py</code>, and nothing breaks before the runner
-      lands. <code>--focus ITEMS</code> is wired where the domain's engine already filters by item:
-      <code>paths</code> through its root filter and <code>code</code> through its path prefix. A domain
-      without one refuses <code>--focus</code>, and never ignores it silently. The message states the
-      mechanism: this domain's claim query takes no item filter yet. It names no plan or section,
-      because plan references do not belong in source.
-      <strong>Done when</strong> the module exposes the stage function, and its new test file shows
-      four things. <code>--scan-only</code> and <code>--flush</code> run the seeding and draining
-      workers respectively. <code>--topic</code> reaches the scorer or enricher that the old free-text
-      <code>--focus</code> reached. <code>--limit</code> caps items. <code>--focus</code> is honoured or
-      refused as above, with no plan name or section number in the message or comments. The tests that
-      drove the old command still pass.
-    </p>
-    <p>
-      <strong>Node</strong> <code>retire-domain-subcommands</code>, role implement, 1.5 h, after
-      <code>sequence-runner</code>. It deletes the six thin wrappers and their registrations. It greps for
-      every caller of <code>discover paths</code>, <code>code</code>, <code>documents</code>,
-      <code>wiki</code>, <code>signals</code> and <code>map</code> in <code>imas_codex/</code>,
-      <code>tests/</code>, <code>scripts/</code>, <code>docs/</code> and the <code>AGENTS.md</code>
-      files, and moves each one to the bare-command spelling. The census found code callers in
-      <code>imas_codex/cli/map.py</code>, <code>compute.py</code> and <code>wiki.py</code>, and prose
-      in the facility YAML comments, the READMEs and <code>schemas/common.yaml</code>. A file another
-      session holds at dispatch is named in the fragment and left for that session, never edited
-      under it. It also rewrites the fold reviews' leftovers. It removes the stage-option docstrings phrased as changelog ("the old <code>--source</code>" in <code>wiki.py</code>) and the <code>--score-only</code> and <code>--enrich-only</code> aliases on the wrappers it deletes. It updates the prose that still names <code>--root</code>, <code>--score-only</code> or <code>--path-limit</code>: <code>imas_codex/llm/prompts/discovery/roots.md</code>, the discovery README, the worker-count hints in <code>compute.py</code>, and the progress comments. <strong>Done when</strong> no caller of a retired subcommand remains outside the files
-      the fragment lists, and the tests that drove the six commands pass through the bare command.
-    </p>
-    <p>
-      A census on 2026-10-08 found 38 files naming a retired subcommand and 10 test files invoking one directly, so the node
-      splits by kind. <strong>Node</strong> <code>retire-domain-subcommands</code> takes the code: the six registrations and
-      wrappers in <code>imas_codex/cli/discover/</code>, the callers in <code>imas_codex/cli/compute.py</code>,
-      <code>imas_codex/cli/map.py</code> and <code>imas_codex/cli/wiki.py</code>, the user-facing hints in
-      <code>imas_codex/discovery/code/__init__.py</code>, <code>imas_codex/discovery/code/graph_ops.py</code>,
-      <code>imas_codex/discovery/documents/__init__.py</code>, <code>imas_codex/discovery/signals/scanners/__init__.py</code>,
-      <code>imas_codex/discovery/signals/scanners/base.py</code>, <code>imas_codex/discovery/wiki/adapters.py</code>,
-      <code>imas_codex/ingestion/__init__.py</code>, <code>imas_codex/standard_names/pool_adapter.py</code> and
-      <code>imas_codex/standard_names/workers.py</code>, and the tests that drove the six commands. It waits for
-      <code>focus-needs-one-domain</code>, which holds <code>sequence.py</code>. The bare command's <code>--min-score</code> help
-      prints the number, as the wiki wrapper's did.
-      <strong>Node</strong> <code>mapping-opt-in</code>, role implement, 0.25 h, after <code>retire-domain-subcommands</code>,
-      which holds <code>sequence.py</code>. Under the reversed <code>mapping-stage-default</code> decision, the default domain set
-      drops <code>mapping</code>: it runs only when <code>--only</code> names it, and <code>--skip mapping</code> stays accepted.
-      <code>candidates</code> stays in the default set. The final table lists mapping as <em>skipped: not requested</em>.
-      Write paths: <code>imas_codex/cli/discover/sequence.py</code>, <code>tests/cli/test_discover_sequence.py</code> and its
-      fragment. <strong>Done when</strong> <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
-      passes with tests showing a bare run never calls the map pipeline and reports mapping as not requested,
-      <code>--only mapping</code> calls it once, and a bare run still calls the candidates stage. <strong>Node</strong> <code>retire-subcommand-prose</code> takes the prose:
-      <code>docs/architecture/discovery.md</code>, <code>docs/architecture/signals.md</code>, <code>docs/zellij-quickstart.md</code>,
-      <code>imas_codex/cli/README.md</code>, <code>imas_codex/discovery/README.md</code>,
-      <code>imas_codex/discovery/signals/README.md</code>, <code>imas_codex/llm/prompts/discovery/roots.md</code>, the
-      descriptions in <code>imas_codex/schemas/common.yaml</code> and <code>imas_codex/schemas/facility.yaml</code>, and the
-      comments in the iter, jet, jt-60sa and tcv facility YAML files. It moves each mention to the bare-command spelling and
-      retires <code>--root</code>, <code>--score-only</code> and <code>--path-limit</code> from the prose. <strong>Done when</strong>
-      no file it owns names a retired subcommand or option, <code>uv run build-models --force</code> succeeds, and
-      <code>uv run --no-sync pytest tests/graph/test_schema_context.py tests/test_cli.py -p no:cacheprovider</code> passes.
-    </p>
-    <p>
-      <code>retire-subcommand-prose</code> landed (edbdd465f; review 99/120). Its review found two pages still wrong.
-      <code>docs/architecture/discovery.md</code> documents <code>imas-codex discover static</code> and
-      <code>discover status tcv -d static</code>, but no static command or domain exists. <code>docs/architecture/signals.md</code>
-      gives a cost-limit default of 5.0 where the bare command's is 25.0. The <code>facility.yaml</code> descriptions pass to
-      the session that owns that file. <strong>Node</strong> <code>discovery-prose-matches-cli</code>, role implement, 0.25 h.
-      Write paths: <code>docs/architecture/discovery.md</code>, <code>docs/architecture/signals.md</code> and its fragment.
-      <strong>Done when</strong> every command, domain, option and default either page names exists in
-      <code>imas-codex discover jt-60sa --help</code> or the <code>discover</code> group with the value stated, checked by
-      a grep the fragment records.
-    </p>
-    <p>
-      <code>retire-domain-subcommands</code> landed (91939e950; review 112/120, no added failures). Two user-facing leftovers
-      remain. The wiki stage still prints <em>use --scan-only / --score-only</em>, and the bare command rejects
-      <code>--score-only</code>. <code>WikiStageOptions</code> still documents its fields as settled spellings of old flags. And a
-      retired spelling such as <code>discover paths jt-60sa</code> now fails with click's <em>Got unexpected extra argument</em>,
-      because the group reads <code>paths</code> as the facility.
-      <strong>Node</strong> <code>discover-hints-name-bare-command</code>, role implement, 0.25 h. The wiki hint and docstring
-      name only options the bare command accepts and state what each field does. A first word that is a discovery domain is
-      refused with the <code>discover FACILITY --only DOMAIN</code> spelling. Write paths:
-      <code>imas_codex/cli/discover/wiki.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
-      <code>tests/cli/test_discover_wiki_stage.py</code>, <code>tests/test_cli.py</code> and its fragment.
-      <strong>Done when</strong> <code>uv run --no-sync pytest tests/cli tests/test_cli.py -p no:cacheprovider</code> passes
-      with tests showing <code>discover paths jt-60sa</code> refused with a message naming <code>discover jt-60sa --only paths</code>,
-      and no wiki stage output naming <code>--score-only</code>.
-    </p>
-    <p>
-      <strong>Node</strong> <code>wiki-ingest-threshold-setting</code>, role implement, 0.5 h. The wiki stage read its
-      <code>--min-score</code> default from <code>imas_codex.discovery.wiki.graph_ops</code> at module level, which loads the
-      whole wiki engine when the CLI imports. Under <code>pytest -n 8 tests/wiki tests/cli/test_discover_wiki_stage.py</code>
-      that import order reaches a partially initialised <code>imas_codex.discovery.base.supervision</code> and errors 13 tests,
-      while each file passes serially. The threshold moves to a getter in the leaf settings module,
-      <code>get_wiki_ingest_threshold()</code> in <code>imas_codex/settings.py</code>, read from
-      <code>IMAS_CODEX_WIKI_INGEST_THRESHOLD</code>, then <code>[discovery].wiki-ingest-threshold</code>, then 0.16, as
-      <code>get_code_ingest_threshold()</code> does for code. <code>cli/discover/wiki.py</code> reads the getter, and its help
-      prints the number. The wiki engine's own constant in <code>graph_ops.py</code> is repointed at the getter by the session
-      that owns that engine. Write paths: <code>imas_codex/settings.py</code>, <code>imas_codex/cli/discover/wiki.py</code>,
-      <code>tests/cli/test_discover_wiki_stage.py</code>, <code>tests/test_settings_wiki_ingest.py</code> and its fragment.
-      <strong>Done when</strong> <code>uv run --no-sync pytest -n 8 -p no:cacheprovider tests/wiki tests/cli/test_discover_wiki_stage.py tests/test_settings_wiki_ingest.py tests/test_cli.py</code>
-      reports no errors, a subprocess test shows <code>import imas_codex.cli.discover</code> leaves
-      <code>imas_codex.discovery.wiki</code> out of <code>sys.modules</code>, and the getter's default, environment override and
-      help text are pinned.
-    </p>
-    <p>
-      <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h, after the six folds, built on
-      the unmerged registry commit <code>21c0e6d34</code>. Write paths:
-      <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
-      <code>tests/cli/test_discover_sequence.py</code> and its fragment. The registry's stages become
-      the seven domains. Each has a seed half and a drain half, except <code>candidates</code> and
-      <code>mapping</code>, which only drain what earlier domains seeded. Under <code>--scan-only</code> they
-      read <em>skipped: nothing to seed</em>, rather than reporting a run that did nothing. The runner calls each runnable
-      domain's stage function in order, passing the remaining cost and time. A stage that raises is
-      recorded as failed, and a domain that reads its output is skipped with that reason, while an
-      independent domain still runs. The run ends with one table, one row per domain, giving outcome,
-      reason, counts done and remaining, cost and wall-clock time; the same table goes to the CLI log.
-      It also fixes the registry review's three findings. Each signals half resolves to the signals
-      stage function with its half selected, not to the bare command. The mapping stage's seat is
-      <code>ids-mapping</code>, a key of <code>MODEL_SECTIONS</code>. The wiki probe tests every
-      configured site, and the stage reads unreachable if any site is down. <code>discover status</code> marks high-value paths at the Jev scan gate,
-      <code>get_path_scan_threshold()</code>, rather than the old 0.90. Only the call site in
-      <code>imas_codex/cli/discover/__init__.py</code> changes; <code>discovery-judgments-through-jev</code>
-      fixes the default inside <code>get_high_value_paths</code>.
-      <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
-      passes with tests showing the following:
-    </p>
-    <ul>
-      <li><code>imas-codex discover jt-60sa --dry-run</code> routes to the sequence, and
-        <code>imas-codex discover status jt-60sa</code> still reaches status;</li>
-      <li>domains run in order through their stage functions;</li>
-      <li>failure isolation works as described above;</li>
-      <li>each domain receives the remaining cost and time;</li>
-      <li><code>--only</code>, <code>--skip</code>, <code>--scan-only</code> and <code>--flush</code>
-        select domains and halves;</li>
-      <li><code>--reset-to</code> without exactly one <code>--only</code> domain is refused, and so are <code>--scan-only</code> and <code>--flush</code> together, which would ask for seeding only and draining only at once (the signals fold showed nothing else catches it);</li>
-      <li>the final table lists every domain;</li>
-      <li>the three review findings are pinned.</li>
-    </ul>
+<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary"><code>imas-codex discover FACILITY</code> runs paths, code, documents, wiki, signals and candidates in order through their stage functions, with <code>--only/--skip</code>, <code>--scan-only/--flush</code>, <code>--focus</code> (one <code>--only</code> domain), <code>--topic</code>, cost, time and item limits, failure isolation and one summary table (bdf79b3c0). Mapping runs only as <code>--only mapping</code> (b2b432923). The six per-domain subcommands are retired, and code, tests, prose and hints name the bare command (91939e950, edbdd465f, a7075f73c, 9b7448159). <a href="/imas-codex/evidence/archive/facility-discovery-sequence-landed.html#s3">full record</a></p>
+</section>
 
     <section class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
