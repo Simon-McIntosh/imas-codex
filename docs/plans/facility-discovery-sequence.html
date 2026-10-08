@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -68,8 +68,8 @@
       stale.
       For each stage it records the command that runs it, what the stage needs, the stages whose
       output it reads, and the existing pending-work predicate that says whether it has work. Each
-      stage keeps exactly one owner. The registry points at the existing click command and adds no
-      second implementation.
+      stage keeps exactly one owner. The registry points at the domain's stage function, which §3
+      folds out of the domain's former click command, and adds no second implementation.
     </p>
     <table>
       <thead><tr><th>Stage</th><th>Runs</th><th>Needs</th><th>Reads output of</th></tr></thead>
@@ -165,87 +165,152 @@
         to do</em>.</li>
     </ul>
 
-    <h2 id="s3">§3 — The runner and its report</h2>
+    <h2 id="s3">§3 — One discover command: the settled surface, the folded domains and the runner</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      The runner invokes each runnable stage's existing click command with
-      <code>ctx.invoke</code>. Every discover domain builds its engine inside its own command
-      function and then calls <code>run_discovery</code>
-      (<code>imas_codex/cli/discover/common.py:212</code>), so invoking the command is the only path
-      that reuses each stage whole, without refactoring seven commands or starting subprocesses.
-      <code>--cost-limit</code> and <code>--time</code> mean what they mean on every per-domain
-      command: a cap on this invocation's spend and wall-clock time. The sequence's invocation is
-      longer, so before each stage it passes the remainder, the cap minus what the earlier stages
-      spent or took, as that stage's own <code>--cost-limit</code> and <code>--time</code>. No stage can
-      exceed what is left, and no option is overloaded.
+      The lead settled the surface on 2026-10-08 from the §6 census
+      (<code>docs/research/discover-cli-surface.html</code>). It follows <code>sn run</code>. One command
+      runs the work, and it selects stages by name. A few subcommands remain to inspect and reset
+      state. The per-domain subcommands <code>discover paths</code>, <code>code</code>,
+      <code>documents</code>, <code>wiki</code>, <code>signals</code> and <code>map</code> are retired.
+      <code>imas-codex discover FACILITY</code> runs every stage in order, mapping included.
+      <code>status</code>, <code>clear</code>, <code>seed</code> and <code>inspect</code> stay as
+      subcommands. The group routes a first argument that names no subcommand to a hidden
+      <code>run</code>, as <code>_HostGroup</code> in <code>imas_codex/cli/host.py</code> does. So
+      <code>imas-codex discover jt-60sa</code> runs the sequence, and
+      <code>imas-codex discover status jt-60sa</code> is unchanged.
+    </p>
+    <table>
+      <thead><tr><th>option</th><th>meaning</th><th>replaces</th></tr></thead>
+      <tbody>
+        <tr><td><code>--only DOMAIN</code></td><td>Run only these domains, repeatable or comma-separated: <code>paths</code>, <code>code</code>, <code>documents</code>, <code>wiki</code>, <code>signals</code>, <code>candidates</code> and <code>mapping</code>. Same grammar as <code>sn run --only</code>.</td><td>running one per-domain subcommand</td></tr>
+        <tr><td><code>--skip DOMAIN</code></td><td>Run every domain except these.</td><td>new</td></tr>
+        <tr><td><code>--scan-only</code></td><td>Run each selected domain's seeding half only: enumerate new work, judge nothing.</td><td><code>--scan-only</code> on paths, code, documents, wiki and signals</td></tr>
+        <tr><td><code>--flush</code></td><td>Run each selected domain's draining half only, without seeding: the same concept as <code>sn run --flush</code>. A drain half is a status-plus-claim query over nodes the seed half created (census §4).</td><td><code>--triage-only</code>, <code>--score-only</code> and <code>--enrich-only</code></td></tr>
+        <tr><td><code>--focus ITEMS</code></td><td>Restrict to named items, or to a manifest file, as on <code>sn run</code>. A path item covers everything under it. The item kind is the domain's own: facility paths, code files, wiki pages, signal accessors or source ids.</td><td><code>paths --root</code>, <code>code --path-prefix</code></td></tr>
+        <tr><td><code>--topic TEXT</code></td><td>A free-text steer for stages that score or enrich.</td><td>the free-text <code>--focus</code> on every discover domain</td></tr>
+        <tr><td><code>-c</code>, <code>--cost-limit USD</code></td><td>The invocation's spend cap. Each domain receives what remains.</td><td>same meaning, kept</td></tr>
+        <tr><td><code>-t</code>, <code>--time MINUTES</code></td><td>The invocation's wall-clock cap. Each domain receives what remains. The short form now matches <code>sn run -t</code>.</td><td><code>--time</code>, kept</td></tr>
+        <tr><td><code>--limit N</code></td><td>Item cap for each selected domain, as on <code>sn run --limit</code>.</td><td><code>--path-limit</code>, <code>--max-paths</code>, <code>--signal-limit</code> and <code>-n</code></td></tr>
+        <tr><td><code>--dry-run</code></td><td>Print every stage with its outcome and reason, and invoke nothing.</td><td>new; no discover domain had one</td></tr>
+        <tr><td><code>--reset-to TARGET</code></td><td>The per-domain reset target. It needs exactly one <code>--only</code> domain, because targets differ per domain.</td><td>per-domain <code>--reset-to</code></td></tr>
+        <tr><td><code>--rescan</code></td><td>Re-discover items already scanned, in the domains that scan.</td><td>per-domain <code>--rescan</code></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Domain tunables move onto the one command unchanged, among them worker counts, thresholds,
+      <code>--category</code>, <code>--scanners</code>, <code>--reference-shot</code>,
+      <code>--physics-domain</code>, <code>--ids</code>, <code>--rejudge-ingested</code> and
+      <code>--rescan-documents</code>. A tunable whose name another domain or <code>sn run</code>
+      already uses with a different meaning takes the domain as a prefix. <code>wiki --source</code>
+      becomes <code>--wiki-site</code>, because <code>sn run --source</code> is an extraction source.
+      Two deprecated aliases are deleted: <code>paths --reset-scored</code> and
+      <code>signals --reenrich</code>.
     </p>
     <p>
-      A stage that raises is recorded as <em>failed</em> with its error. The runner then continues with
-      the stages that do not read its output, so one broken stage does not stop an independent one.
-      <code>--only</code> and <code>--skip</code> take stage names. The run ends with one table, one row
-      per stage, giving outcome, reason, counts done and remaining, cost and wall-clock time. The same
-      table goes to the CLI log at <code>~/.local/share/imas-codex/logs/</code>.
-    </p>
-    <p>
-      The command adds one CLI entry, <code>discover run FACILITY</code>, and five options:
-      <code>--dry-run</code>, <code>--only</code> and <code>--skip</code> (stage names),
-      <code>--cost-limit</code> and <code>--time</code>. The last two are the per-domain options with
-      the same meaning over a longer invocation, so the sequence adds no new concept for them. The
-      mapping stage is opted into by naming it, under the decision below, and needs no option of its
-      own. Nothing is retired. The per-domain commands stay the way to run one stage with its
-      stage-specific options, for example <code>discover signals --category</code>, which the sequence
-      does not re-declare.
-    </p>
-    <p>
-      <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h. Write paths:
-      <code>imas_codex/cli/discover/sequence.py</code> and
-      <code>tests/cli/test_discover_sequence.py</code>. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
-      passes with tests showing:
+      Each domain module turns its click command into one stage function,
+      <code>run_&lt;domain&gt;_stage(facility, options)</code>, with a frozen dataclass of the settled
+      options. The body that builds the engine and calls <code>run_discovery</code>
+      (<code>imas_codex/cli/discover/common.py:212</code>) is kept whole, so no engine changes. The click
+      subcommand is deleted with its registration. These six folds touch disjoint files, so they run in
+      parallel, with one exception. <code>discovery-judgments-through-jev</code> §4's node
+      <code>path-jev-deploy</code> is editing <code>paths.py</code> and <code>code.py</code>. It retires
+      the 0.9 composite threshold as the path gate in favour of Jev-calibrated scan, expand and enrich
+      gates, and code-scan path selection stops reading the old threshold. So
+      <code>fold-paths-stage</code> and <code>fold-code-stage</code> dispatch only after that node
+      merges, and they carry its gate options rather than the 0.9 default. Wiki keeps its own
+      <code>--min-score</code>. The other four folds run now:
     </p>
     <ul>
-      <li>stages run in registry order through <code>ctx.invoke</code> of their commands;</li>
-      <li>a failing stage is reported as failed, a stage that reads its output is skipped with that
-        reason, and an independent stage still runs;</li>
-      <li>each stage receives the remaining cost and time as its own <code>--cost-limit</code> and
-        <code>--time</code>, and the sequence stops invoking paid stages when nothing remains;</li>
-      <li><code>--only</code> and <code>--skip</code> select stages by name;</li>
-      <li>the final table lists every stage with outcome, reason, counts, cost and time.</li>
+      <li><code>fold-paths-stage</code>: <code>imas_codex/cli/discover/paths.py</code> and <code>tests/cli/test_discover_paths_stage.py</code></li>
+      <li><code>fold-code-stage</code>: <code>imas_codex/cli/discover/code.py</code> and <code>tests/cli/test_discover_code_stage.py</code></li>
+      <li><code>fold-documents-stage</code>: <code>imas_codex/cli/discover/documents.py</code> and <code>tests/cli/test_discover_documents_stage.py</code></li>
+      <li><code>fold-wiki-stage</code>: <code>imas_codex/cli/discover/wiki.py</code> and <code>tests/cli/test_discover_wiki_stage.py</code></li>
+      <li><code>fold-signals-stage</code>: <code>imas_codex/cli/discover/signals.py</code> and <code>tests/cli/test_discover_signals_stage.py</code></li>
+      <li><code>fold-candidates-stage</code>: <code>imas_codex/cli/discover/map.py</code> and <code>tests/cli/test_discover_candidates_stage.py</code></li>
+    </ul>
+    <p>
+      Each fold is role implement, 1.5 h, with its fragment under
+      <code>docs/evidence/fragments/facility-discovery-sequence/</code>. <strong>Done when</strong> the
+      module exposes the stage function and no click command, and its new test file shows four things.
+      The halves selected by <code>--scan-only</code> and <code>--flush</code> run the right workers.
+      <code>--focus</code> items restrict every claim query of the domain. <code>--topic</code> reaches the
+      scorer or enricher that the old free-text <code>--focus</code> reached. <code>--limit</code> caps
+      items. The tests that drove the old command are moved to the stage function, not deleted. Before
+      deleting anything, each fold greps for every caller of its command, in <code>imas_codex/</code>,
+      <code>tests/</code>, <code>scripts/</code>, <code>docs/</code> and the <code>AGENTS.md</code>
+      files, and updates them to the bare-command spelling. A missed caller is a hidden break.
+    </p>
+    <p>
+      <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h, after the six folds, built on
+      the unmerged registry commit <code>21c0e6d34</code>. Write paths:
+      <code>imas_codex/cli/discover/sequence.py</code>, <code>imas_codex/cli/discover/__init__.py</code>,
+      <code>tests/cli/test_discover_sequence.py</code> and its fragment. The registry's stages become
+      the seven domains, each with a seed half and a drain half. The runner calls each runnable
+      domain's stage function in order, passing the remaining cost and time. A stage that raises is
+      recorded as failed, and a domain that reads its output is skipped with that reason, while an
+      independent domain still runs. The run ends with one table, one row per domain, giving outcome,
+      reason, counts done and remaining, cost and wall-clock time; the same table goes to the CLI log.
+      It also fixes the registry review's three findings. Each signals half resolves to the signals
+      stage function with its half selected, not to the bare command. The mapping stage's seat is
+      <code>ids-mapping</code>, a key of <code>MODEL_SECTIONS</code>. The wiki probe tests every
+      configured site, and the stage reads unreachable if any site is down.
+      <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider</code>
+      passes with tests showing the following:
+    </p>
+    <ul>
+      <li><code>imas-codex discover jt-60sa --dry-run</code> routes to the sequence, and
+        <code>imas-codex discover status jt-60sa</code> still reaches status;</li>
+      <li>domains run in order through their stage functions;</li>
+      <li>failure isolation works as described above;</li>
+      <li>each domain receives the remaining cost and time;</li>
+      <li><code>--only</code>, <code>--skip</code>, <code>--scan-only</code> and <code>--flush</code>
+        select domains and halves;</li>
+      <li><code>--reset-to</code> without exactly one <code>--only</code> domain is refused;</li>
+      <li>the final table lists every domain;</li>
+      <li>the three review findings are pinned.</li>
     </ul>
 
     <h2 id="s4">§4 — The mapping stages join the sequence</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
-      The last two stages run the mapping pipeline. <code>candidates</code> runs <code>discover
-      map</code>. <code>mapping</code> runs <code>imas map run FACILITY</code> once, and its own target
-      enumeration, <code>discover_mappable_ids</code> (<code>imas_codex/ids/tools.py:376</code>,
-      called at <code>imas_codex/cli/map.py:211</code>), decides the IDSs. The sequence keeps no
-      second list. That enumeration picks IDSs by physics-domain overlap today, so it could miss an
-      IDS that holds a source's cross-IDS sibling home. This node extends it: an IDS holding a selected
-      or escalated candidate edge for the facility is a target even when the domain overlap misses
-      it. With the per-IDS map claim from <code>mapping-candidate-selection</code> §8, the one
-      invocation then maps each source into every home it has. The mapping stage runs only when the decision below allows it, because it spends on
-      the reasoning seat.
+      The last two domains run the mapping pipeline. <code>candidates</code> runs the candidate stage
+      that <code>discover map</code> ran, now <code>run_candidates_stage</code>. <code>mapping</code>
+      calls the function behind <code>imas map run FACILITY</code> once. It runs by default under the
+      lead's decision, because its reasoning seat, <code>ids-mapping</code>, is local. Its own target
+      enumeration, <code>discover_mappable_ids</code> (<code>imas_codex/ids/tools.py:376</code>), decides
+      the IDSs, and the sequence keeps no second list. That enumeration picks IDSs by physics-domain
+      overlap today, so it could miss an IDS that holds a source's cross-IDS sibling home. This node
+      extends it: an IDS holding a selected or escalated candidate edge for the facility is a target
+      even when the domain overlap misses it. With the per-IDS map claim from
+      <code>mapping-candidate-selection</code> §8, the one invocation then maps each source into every
+      home it has. <code>imas map run</code> stays as the <code>imas</code> group's own command, because
+      that group is not a discover domain.
     </p>
     <p>
-      <strong>Node</strong> <code>sequence-mapping-stages</code>, role implement, 0.75 h, after the
-      gate below. Write paths: <code>imas_codex/cli/discover/sequence.py</code>,
-      <code>imas_codex/ids/tools.py</code>, <code>tests/cli/test_discover_sequence.py</code> and
-      <code>tests/ids/</code>. <strong>Done when</strong>
+      <strong>Node</strong> <code>sequence-mapping-stages</code>, role implement, 0.75 h, after
+      <code>sequence-runner</code>. Write paths: <code>imas_codex/cli/discover/sequence.py</code>,
+      <code>imas_codex/ids/tools.py</code>, <code>tests/cli/test_discover_sequence.py</code>,
+      <code>tests/ids/test_mappable_ids_from_candidates.py</code> and its fragment. <strong>Done
+      when</strong>
       <code>uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/ids tests/test_cli.py -p no:cacheprovider</code>
-      passes with tests showing the mapping stage invokes <code>imas map run FACILITY</code> exactly
-      once, <code>discover_mappable_ids</code> includes an IDS that holds a selected candidate edge but
-      no physics-domain overlap, and the stage skips with <em>nothing to do</em> when no source has a
-      route.
+      passes with tests showing three things. The mapping domain runs by default and calls the map
+      pipeline once. <code>discover_mappable_ids</code> includes an IDS that holds a selected candidate
+      edge but has no physics-domain overlap. The domain skips with <em>nothing to do</em> when no
+      source has a route.
     </p>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
-      From the ITER host, run <code>imas-codex discover run jt-60sa --dry-run</code>. Then run it for
-      real with <code>--only signals-enrich</code> under a small cap. The dry run must name every stage,
-      with wiki and documents skipped and their probe results as reasons. The real run must enrich
-      without touching the facility. The evidence fragment records both tables.
+      From the ITER host, run <code>imas-codex discover jt-60sa --dry-run</code>. Then run it for real
+      with <code>--only signals --flush</code> under a small cap. The dry run must name every domain,
+      with wiki and documents skipped and their probe results as reasons. The real run must drain
+      signal enrichment without touching the facility. The check half needs SSH, so it reads
+      unreachable or runs, by its probe. The evidence fragment records both tables. When
+      <code>jt60sa-imas-maps</code> §5 is released, its enrichment, candidate and mapping pass runs
+      through this command.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-jt60sa-proof</code>, role test, 0.5 h. Write paths:
@@ -299,6 +364,14 @@
     <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §2</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T021952758562-sequence-stage-registry" data-who="reckon-build" data-when="2026-10-08T03:09:57.030Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/facility-discovery-sequence/sequence-stage-registry.html</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T034022169014-review-of-sequence-stage-registry" data-who="reckon-build" data-when="2026-10-08T03:57:09.705Z">
+    <div class="r-comment-body"><p>review of run r-20261008T021952758562-sequence-stage-registry stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T021952758562-sequence-stage-registry.json: parsed record scoring all six dimensions 0..20 (goal_fidelity 18, evidence 17, scope_discipline 20, durability 15, fit 16, reuse 20; total 106), reviewed_base_sha 202972657fdd2028c3c138b04aedd400420acaf4 and reviewed_head_sha 21c0e6d34f2c1b3c5b86e6d5be61f62a25955e00, added_failure_count null with added_failure_ids [] because the reviewed run's manifest declares no baseline_suite log; the §2 done-when met; 3 follow-on findings (signals-mode collapse in stage_command, invalid mapping model seat, single-site wiki probe).</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

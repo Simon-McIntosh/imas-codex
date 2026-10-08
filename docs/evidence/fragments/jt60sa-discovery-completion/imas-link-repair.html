@@ -1,0 +1,45 @@
+<section id="imas-link-repair">
+  <h2 id="imas-link-repair-title">Code references to IMAS DD paths and IDS roots</h2>
+  <p id="imas-link-repair-behaviour">
+    Code chunks now keep normalized DD path candidates in <code>imas_paths</code>
+    and bare IDS names in <code>related_ids</code>. A DD path receives
+    <code>REFERENCES_IMAS</code> only when an <code>IMASNode</code> with that
+    exact path ID exists. A bare name receives <code>REFERENCES_IDS</code>
+    to its <code>IDS</code> root. Each missing named root link raises, even
+    when another name in the same batch links. Python attribute chains,
+    Fortran derived-type chains and slash
+    strings feed the same DD path extractor.
+  </p>
+  <table id="imas-link-repair-counts">
+    <caption>JT-60SA stored chunks, before and after the facility-scoped backfill</caption>
+    <thead>
+      <tr><th>Measure</th><th>Before</th><th>After</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Code chunks</td><td>3,307</td><td>3,307</td></tr>
+      <tr><td>Chunks naming an IDS</td><td>63</td><td>63</td></tr>
+      <tr><td>IDS-name mentions linked to IDS roots</td><td>0 of 65</td><td>65 of 65</td></tr>
+      <tr><td>DD-path candidates linked to IMASNode paths</td><td>0</td><td>12 of 26</td></tr>
+    </tbody>
+  </table>
+  <p id="imas-link-repair-resolution">
+    Twelve of 26 extracted DD-path candidates resolved to existing nodes
+    (46.2%); all twelve have a link. Fourteen candidates have no matching
+    <code>IMASNode</code> and remain unlinked. The count is per chunk and
+    candidate path, so repeated paths in different chunks count separately.
+    The backfill read stored JT-60SA chunk text and wrote 71 chunks with at
+    least one IDS name or DD-path candidate; it made no facility-host request.
+  </p>
+  <p id="imas-link-repair-verification">
+    The old query reproduced a zero result on a chunk naming
+    <code>equilibrium</code> while its IDS root existed. The focused gate
+    passed eight direct tests; the focused ingestion and schema gate passed
+    58 tests. Restoring the old <code>IMASNode</code>
+    <code>id = ids</code> match made the DD-path and IDS-root link tests fail
+    (two failures, exit 1); five edited Cypher statements passed live
+    <code>EXPLAIN</code>. The backfill receipt and mutation log are stored in
+    the run directory under <code>jt60sa-backfill.log</code> and
+    <code>negative-control.log</code>. A live rerun of the per-name guard
+    found zero missing links among the 65 JT-60SA IDS mentions.
+  </p>
+</section>

@@ -3410,6 +3410,12 @@ classes:
       mdsplus_ref_count:
         description: Count of MDSplus path references in this chunk
         range: integer
+      related_ids:
+        description: IDS names found in this code chunk
+        multivalued: true
+      imas_paths:
+        description: Normalized IMAS data dictionary paths found in this code chunk
+        multivalued: true
       ref_doc_id:
         description: Reference to parent document ID for provenance
       data_references:
@@ -3426,6 +3432,13 @@ classes:
         range: IMASNode
         annotations:
           relationship_type: REFERENCES_IMAS
+      references_ids:
+        description: IDS roots named in this code chunk
+        multivalued: true
+        inlined: false
+        range: IDS
+        annotations:
+          relationship_type: REFERENCES_IDS
 
   DataReference:
     description: >-

@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run r-20261008T025419172961-flux-map-inventory declares no baseline_suite/after_suite pair (both manifest fields empty) and its run directory contains no pytest suite log, because the node's gate is a facility-side read-only inventory rather than a repo test run, so no added-failure count could be derived",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T03:43:13.687Z",
+  "dispatched_at": "2026-10-08T03:33:25Z",
+  "findings": [
+    {
+      "file": "scripts/check_jt60sa_flux_maps.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the standalone check script re-implements a G EQDSK Fortran-float reader that partly duplicates imas_codex/cocos/loaders.py:113 load_from_eqdsk, but that loader exposes only psi_axis/psi_edge/ip/b0 for COCOS and returns no psi(R,Z) grid, so it cannot serve this grid-verification need; the duplication is justified by the script's stdlib-only constraint on the analysis host and warrants no change."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate that reconciled the fragment tables against the JSON totals and per-code/per-owner counts (ROOTS=20 VALID=499 JT60SA=425 OTHER=74 in inventory-consistency.log) is an ad-hoc stdin script not committed, so a later edit that drops a file from the JSON or misstates a fragment count reddens nothing; the committed check_jt60sa_flux_maps.py verifies grids but not the inventory totals."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites: scripts/check_jt60sa_flux_maps.py is a standalone operator tool invoked as `ssh jt-60sa /usr/bin/python3.12 -`, adding no repo call site",
+    "diff": "read commit by commit against base 7e9d77c617aafb4232f54ede439e946c55782394 (the parent of the first of five commits, c5980cc04) to head 5184f643132063072495ac7ca885496f907bc21b; the range adds 4 files, docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.html (84), .../flux-map-inventory.json (10859), docs/figures/jt60sa-flux-maps/selene-e101163-5s.svg (1061) and scripts/check_jt60sa_flux_maps.py (303), 12307 insertions, all inside the declared write paths.",
+    "done_when": "\u00a745 done-when is met: the fragment gives per-code counts (CHEASE 2, LIUQE/MEQ 2, SA 282, SELENE 133, TOPICS 6) and per-owner counts (nine owners) with shot-range and time-slice columns, embeds the SELENE E101163 129x129 contour, states the unreachable central routes, and a committed check script re-reads EQ31, EQ11 and G EQDSK samples and verifies each grid at EXIT=0.",
+    "goal": "the node's goal is \u00a745: inventory every readable equilibrium in the 19 readable nakasvr26 homes plus /analysis_DB and render one; docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.html reports 499 validated grids (425 JT-60SA, 74 unrelated) as three tables plus an embedded SELENE figure, and the JSON beside it carries every path, owner, shot, time, grid and validation range.",
+    "manifest": "read; it records commits c5980cc..5184f643, changed_paths (four files), the check command and its EXIT=0 (five PASS, three formats), the consistency and two refusal controls, and declares no baseline_suite/after_suite, so no pytest added-failure count was derivable.",
+    "write_paths": "the manifest declares five write entries; the four files landed (fragment html, fragment json, selene svg, check script) all lie inside docs/evidence/fragments/jt60sa-discovery-completion/, docs/figures/jt60sa-flux-maps/ and scripts/, and the fifth declared figures directory was left unused without consequence."
+  },
+  "justifications": {
+    "durability": "scripts/check_jt60sa_flux_maps.py is committed and re-runnable, so the grid re-read is durable, but it depends on facility-side data reachable only from the analysis host and is not wired into the repo suite or CI, and the inventory-consistency reconciler that ties the JSON totals to the fragment was an uncommitted stdin script, so an edit that desyncs counts fails nothing.",
+    "evidence": "each gate log's first line names revision=5184f643132063072495ac7ca885496f907bc21b, its tree, and the literal command, and ends EXIT=0 (flux-grid-check.log five PASS across all three formats; inventory-consistency.log ROOTS=20 VALID=499 JT60SA=425 FORMAT_COUNTS) with the two refusal controls at EXIT=1 (out-of-scope root, non-grid file); I independently re-read the JSON and confirmed 499 files, 425 with a non-null facility_basis, 74 null, and codes SA 282/SELENE 133/TOPICS 6/CHEASE 2/LIUQE-MEQ 2 matching the fragment tables, but the flux-grid-check piped the script via stdin so no digest binds that stdin to the committed file.",
+    "fit": "the fragment follows the id-anchored section-and-pre idiom of sibling docs/evidence/fragments/jt60sa-discovery-completion/*.html, its ids (flux-map-inventory-*) carry no plan label or version, the JSON sits beside the fragment, and the SVG lands under docs/figures/jt60sa-flux-maps/ at 1008pt (14in) width, matching the repository data-ink size rule.",
+    "goal_fidelity": "docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.html gives the per-code and per-owner tables with shot ranges and time slices, embeds the SELENE E101163 5.000s contour (129x129, psi -0.5500..1.3938), and states the unreachable central routes (dbsvr17p unresolved; /JT60SA_EQ/EQDB, EQDB_EFIT and the /analysis_DB EQDB paths absent), matching \u00a745's done-when line for line.",
+    "reuse": "the diff adds one standalone script that cannot import imas_codex on the analysis host; its G EQDSK reader partly overlaps imas_codex/cocos/loaders.py load_from_eqdsk, which returns no psi(R,Z) grid and so cannot serve grid verification, and its SELENE EQ31/EQ11 binary readers have no existing owner in the repo, so no capability was forked.",
+    "scope_discipline": "all four files added by the five commits \u2014 the fragment html and json, the selene svg and the check script \u2014 lie inside the manifest's declared write paths, and no file outside them was touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is \u00a745: inventory every readable equilibrium in the 19 readable nakasvr26 homes plus /analysis_DB and render one; docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.html reports 499 validated grids (425 JT-60SA, 74 unrelated) as three tables plus an embedded SELENE figure, and the JSON beside it carries every path, owner, shot, time, grid and validation range.\nVERDICT done_when: \u00a745 done-when is met: the fragment gives per-code counts (CHEASE 2, LIUQE/MEQ 2, SA 282, SELENE 133, TOPICS 6) and per-owner counts (nine owners) with shot-range and time-slice columns, embeds the SELENE E101163 129x129 contour, states the unreachable central routes, and a committed check script re-reads EQ31, EQ11 and G EQDSK samples and verifies each grid at EXIT=0.\nVERDICT write_paths: the manifest declares five write entries; the four files landed (fragment html, fragment json, selene svg, check script) all lie inside docs/evidence/fragments/jt60sa-discovery-completion/, docs/figures/jt60sa-flux-maps/ and scripts/, and the fifth declared figures directory was left unused without consequence.\nVERDICT manifest: read; it records commits c5980cc..5184f643, changed_paths (four files), the check command and its EXIT=0 (five PASS, three formats), the consistency and two refusal controls, and declares no baseline_suite/after_suite, so no pytest added-failure count was derivable.\nVERDICT diff: read commit by commit against base 7e9d77c617aafb4232f54ede439e946c55782394 (the parent of the first of five commits, c5980cc04) to head 5184f643132063072495ac7ca885496f907bc21b; the range adds 4 files, docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.html (84), .../flux-map-inventory.json (10859), docs/figures/jt60sa-flux-maps/selene-e101163-5s.svg (1061) and scripts/check_jt60sa_flux_maps.py (303), 12307 insertions, all inside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.html gives the per-code and per-owner tables with shot ranges and time slices, embeds the SELENE E101163 5.000s contour (129x129, psi -0.5500..1.3938), and states the unreachable central routes (dbsvr17p unresolved; /JT60SA_EQ/EQDB, EQDB_EFIT and the /analysis_DB EQDB paths absent), matching \u00a745's done-when line for line.\nSCORE evidence: 18\nJUSTIFICATION evidence: each gate log's first line names revision=5184f643132063072495ac7ca885496f907bc21b, its tree, and the literal command, and ends EXIT=0 (flux-grid-check.log five PASS across all three formats; inventory-consistency.log ROOTS=20 VALID=499 JT60SA=425 FORMAT_COUNTS) with the two refusal controls at EXIT=1 (out-of-scope root, non-grid file); I independently re-read the JSON and confirmed 499 files, 425 with a non-null facility_basis, 74 null, and codes SA 282/SELENE 133/TOPICS 6/CHEASE 2/LIUQE-MEQ 2 matching the fragment tables, but the flux-grid-check piped the script via stdin so no digest binds that stdin to the committed file.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all four files added by the five commits \u2014 the fragment html and json, the selene svg and the check script \u2014 lie inside the manifest's declared write paths, and no file outside them was touched.\nSCORE durability: 16\nJUSTIFICATION durability: scripts/check_jt60sa_flux_maps.py is committed and re-runnable, so the grid re-read is durable, but it depends on facility-side data reachable only from the analysis host and is not wired into the repo suite or CI, and the inventory-consistency reconciler that ties the JSON totals to the fragment was an uncommitted stdin script, so an edit that desyncs counts fails nothing.\nSCORE fit: 19\nJUSTIFICATION fit: the fragment follows the id-anchored section-and-pre idiom of sibling docs/evidence/fragments/jt60sa-discovery-completion/*.html, its ids (flux-map-inventory-*) carry no plan label or version, the JSON sits beside the fragment, and the SVG lands under docs/figures/jt60sa-flux-maps/ at 1008pt (14in) width, matching the repository data-ink size rule.\nSCORE reuse: 17\nJUSTIFICATION reuse: the diff adds one standalone script that cannot import imas_codex on the analysis host; its G EQDSK reader partly overlaps imas_codex/cocos/loaders.py load_from_eqdsk, which returns no psi(R,Z) grid and so cannot serve grid verification, and its SELENE EQ31/EQ11 binary readers have no existing owner in the repo, so no capability was forked.\nFINDING scripts/check_jt60sa_flux_maps.py:1 follow-on: the standalone check script re-implements a G EQDSK Fortran-float reader that partly duplicates imas_codex/cocos/loaders.py:113 load_from_eqdsk, but that loader exposes only psi_axis/psi_edge/ip/b0 for COCOS and returns no psi(R,Z) grid, so it cannot serve this grid-verification need; the duplication is justified by the script's stdlib-only constraint on the analysis host and warrants no change.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/flux-map-inventory.json:1 follow-on: the gate that reconciled the fragment tables against the JSON totals and per-code/per-owner counts (ROOTS=20 VALID=499 JT60SA=425 OTHER=74 in inventory-consistency.log) is an ad-hoc stdin script not committed, so a later edit that drops a file from the JSON or misstates a fragment count reddens nothing; the committed check_jt60sa_flux_maps.py verifies grids but not the inventory totals.\n",
+  "review_run_id": "r-20261008T033304763818-review-of-flux-map-inventory",
+  "reviewed_base_sha": "7e9d77c617aafb4232f54ede439e946c55782394",
+  "reviewed_head_sha": "5184f643132063072495ac7ca885496f907bc21b",
+  "reviewed_run_id": "r-20261008T025419172961-flux-map-inventory",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T03:40:32.250025+00:00",
+  "total": 109
+}
