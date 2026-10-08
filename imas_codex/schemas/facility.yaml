@@ -389,6 +389,16 @@ enums:
         description: TDI function call (e.g., tcv_eq("PSI", "LIUQE"))
       imas_path:
         description: IMAS data dictionary path (future)
+      edas_eddb:
+        description: EDAS experiment database signal read
+      edas_uddb:
+        description: EDAS unprocessed database signal read
+      edas_pmdb:
+        description: EDAS plant database signal read
+      edas_lcdb:
+        description: EDAS local database signal read
+      edas_mbdb:
+        description: EDAS machine database signal read
 
   SignalNodeSource:
     description: How a SignalNode was discovered and ingested
@@ -3667,6 +3677,10 @@ classes:
         description: Type of data reference
         required: true
         range: DataReferenceType
+      edas_category:
+        description: Literal EDAS category argument, when supplied by the call
+      edas_data_name:
+        description: Literal EDAS data name or PID supplied by the call
       facility_id:
         description: Parent facility ID
         required: true
@@ -3685,6 +3699,12 @@ classes:
         description: IMAS path this reference resolves to (future)
         range: IMASNode
         multivalued: true
+      resolves_to_facility_signal:
+        description: FacilitySignal identified by the literal EDAS category and data name
+        range: FacilitySignal
+        multivalued: true
+        annotations:
+          relationship_type: RESOLVES_TO_FACILITY_SIGNAL
 
   AgentRun:
     description: >-
