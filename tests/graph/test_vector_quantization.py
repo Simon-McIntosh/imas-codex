@@ -119,7 +119,11 @@ class TestDimensionMismatchDetection:
         dropped: list[str] = []
 
         mock_sess = MagicMock()
-        stale_index = {"name": "imas_node_embedding", "dim": 256}
+        stale_index = {
+            "name": "imas_node_embedding",
+            "dim": 256,
+            "props": ["embedding"],
+        }
 
         def fake_run(query, **kwargs):
             if isinstance(query, str):
@@ -157,7 +161,11 @@ class TestDimensionMismatchDetection:
         """Indexes already at the configured dimension must NOT be dropped."""
         client, mock_sess, captured_queries, dropped = self._make_client_and_session()
 
-        correct_index = {"name": "imas_node_embedding", "dim": 1024}
+        correct_index = {
+            "name": "imas_node_embedding",
+            "dim": 1024,
+            "props": ["embedding"],
+        }
 
         def fake_run(query, **kwargs):
             if isinstance(query, str):
@@ -188,8 +196,12 @@ class TestDimensionMismatchDetection:
         client, mock_sess, captured_queries, dropped = self._make_client_and_session()
 
         stale_indexes = [
-            {"name": "imas_node_embedding", "dim": 256},
-            {"name": "wiki_chunk_embedding", "dim": 256},
+            {"name": "imas_node_embedding", "dim": 256, "props": ["embedding"]},
+            {
+                "name": "wiki_chunk_embedding",
+                "dim": 256,
+                "props": ["embedding", "facility_id"],
+            },
         ]
 
         def fake_run(query, **kwargs):
