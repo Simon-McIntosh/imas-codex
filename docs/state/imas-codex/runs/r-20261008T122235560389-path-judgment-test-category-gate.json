@@ -1,0 +1,5576 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "4f40b717526698bdd0cbee423b6c4d1193724dce",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4750848,
+      "cached_input_tokens_cumulative": 4750848,
+      "input_tokens": 4847744,
+      "input_tokens_cumulative": 4847744,
+      "output_tokens": 13595,
+      "output_tokens_cumulative": 13595,
+      "reasoning_output_tokens": 4171,
+      "reasoning_output_tokens_cumulative": 4171
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 20,
+    "files": 1,
+    "removed": 8
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "query",
+        "path": "tests/graph/test_dd_aux_streaming.py"
+      },
+      "run_function": {
+        "line": 56,
+        "name": "test_path_state_carries_scanner_evidence_and_facility_patterns",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_enriches_ids_with_llm",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 56,
+        "name": "test_path_state_carries_scanner_evidence_and_facility_patterns",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "judge",
+        "path": "tests/discovery/test_path_description.py"
+      },
+      "run_function": {
+        "line": 90,
+        "name": "test_typed_path_judgment_stores_distributions_and_computes_gates",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 97
+    },
+    {
+      "existing_function": {
+        "line": 246,
+        "name": "judge",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 90,
+        "name": "test_typed_path_judgment_stores_distributions_and_computes_gates",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 97
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_graph_start_does_not_read_embedding_compute_config",
+        "path": "tests/cli/test_graph_start_config.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_multiletter_si_units_round_trip",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_leading_named_unit_is_preserved",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "categorizer",
+        "path": "tests/core/test_physics_categorization.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 767,
+        "name": "test_python_tcvpy_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 786,
+        "name": "test_matlab_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_fortran_mds_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_idl_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 838,
+        "name": "test_python_mdsplus_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 856,
+        "name": "test_tdi_function_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 776,
+        "name": "test_uddb_table_rows_are_emitted",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 867,
+        "name": "remote_run",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 969,
+        "name": "test_scan_unknown_data_class_leaves_slot_unset",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_enriches_nodes_with_llm",
+        "path": "tests/graph/test_dd_identifier_enrichment.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_enriches_ids_with_llm",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_returns_page_context",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "test_public_name_claims_are_exactly_scope_owned",
+        "path": "tests/graph/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "_rebuild",
+        "path": "tests/graph/test_rebuild_honours_resolution.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 844,
+        "name": "test_run_error_derivation_only_derives_from_graph",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 462,
+        "name": "test_legacy_flat_format_backward_compat",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 943,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1084,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1125,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1153,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1529,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1566,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1639,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1660,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1679,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1715,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1750,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_plan",
+        "path": "tests/llm/test_sn_edit_cascade_reporting.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "_persist",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 304,
+        "name": "test_open_edit_propagation_uses_only_the_atomic_transaction",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1093,
+        "name": "_terminal_recovery_client",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 2845,
+        "name": "test_terminal_recovery_relationship_lock_plan_is_participant_anchored",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1680,
+        "name": "test_user_prompt_renders_fixture_item",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_stub_item",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 497,
+        "name": "test_adjudicator_not_called_when_nothing_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "test_description_from_dict",
+        "path": "tests/standard_names/test_candidate_description.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_no_sources_block_binds_nothing",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_matches_by_id_and_never_creates_a_node",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_missing_name_is_reported_not_recreated",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 617,
+        "name": "test_compose_commit_once",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_both_hybrid_and_related_render",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "query",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_unit_injection_reports_only_physical_scalar_edge_conflicts",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "_review_item",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_reviewer_report",
+        "path": "tests/standard_names/test_dd_gap_evidence_rule.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_transition_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1708,
+        "name": "test_reconcile_fails_closed_when_evidence_changes_after_preflight",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 1719,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 698,
+        "name": "test_from_dd_row_basic",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 721,
+        "name": "test_from_signal_row",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 288,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 223,
+        "name": "_add_peer_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_make_name",
+        "path": "tests/standard_names/test_docs_review_content_gate.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_rename_plan",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "_accepted_docs_node",
+        "path": "tests/standard_names/test_edit_parity.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_generate_name_dd_item",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_refine_name_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "_review_names_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_review_docs_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "_review_docs_parent_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 309,
+        "name": "test_steering_block_contains_hint_and_reason_text",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 456,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 938,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_header_omits_catalog_sha",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 739,
+        "name": "test_manifest_sources_reconcile_emitted_excluded_and_non_nameable",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 801,
+        "name": "test_manifest_source_projection_follows_superseded_identity",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_hint_fields_reach_the_caller",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 858,
+        "name": "test_write_dd_skipped_source",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_mock_extraction_returns_gyrokinetics",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 95,
+        "name": "test_embedding_field_not_in_write_batch",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_phase_to_stats_mapping",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_scoped_review_restage_is_atomic_in_seed_expand_and_readback",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_scoped_terminal_residue_reports_transient_claims",
+        "path": "tests/standard_names/test_pool_idle_exhaustion.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "test_claim_review_docs_returns_scalar_physics_domain",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_sn_side_pools_use_sn_ids",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "test_rename_successor_uses_unanimous_dd_source_unit",
+        "path": "tests/standard_names/test_rename_unit_derivation.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_item",
+        "path": "tests/standard_names/test_review_feedback_render.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_review_single_batch_no_explicit_temperature",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 470,
+        "name": "_docs_item",
+        "path": "tests/standard_names/test_review_quorum_pool.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_semantic_cluster_neighbors_never_expand_source_authority",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 545,
+        "name": "test_compose_two_step",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_kind_reclassification_defaults_to_an_exact_zero_write_preview",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_pooled_compose_delivers_source_and_name_steering_to_prompt",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 217,
+        "name": "test_signals_source_without_dd_path_not_filtered",
+        "path": "tests/standard_names/test_source_invariants.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_public_refresh_restamps_raw_convergence_without_steering",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_accepts_signals_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_group",
+        "path": "tests/standard_names/test_stranded_identity_census.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 634,
+        "name": "_label",
+        "path": "tests/standard_names/test_tombstone_supersede.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "test_validate_via_isn_description_quality",
+        "path": "tests/standard_names/test_validate_isn.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_invalid_editorial_rows_are_rejected",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_duplicate_gap_identity_is_rejected",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 639,
+        "name": "test_observation_write_preserves_editorial_and_dedup_state",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_shared_fetch_dd_error_fields_returns_structured_results",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_multiletter_si_units_round_trip",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_leading_named_unit_is_preserved",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 767,
+        "name": "test_python_tcvpy_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 786,
+        "name": "test_matlab_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_fortran_mds_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_idl_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 838,
+        "name": "test_python_mdsplus_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 856,
+        "name": "test_tdi_function_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 776,
+        "name": "test_uddb_table_rows_are_emitted",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 867,
+        "name": "remote_run",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_enriches_nodes_with_llm",
+        "path": "tests/graph/test_dd_identifier_enrichment.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "test_public_name_claims_are_exactly_scope_owned",
+        "path": "tests/graph/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 844,
+        "name": "test_run_error_derivation_only_derives_from_graph",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 943,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1084,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1125,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1153,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1529,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1566,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1639,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1660,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1679,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1715,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1750,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_plan",
+        "path": "tests/llm/test_sn_edit_cascade_reporting.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "_persist",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 304,
+        "name": "test_open_edit_propagation_uses_only_the_atomic_transaction",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1680,
+        "name": "test_user_prompt_renders_fixture_item",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_stub_item",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "_review_item",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_reviewer_report",
+        "path": "tests/standard_names/test_dd_gap_evidence_rule.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_transition_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1708,
+        "name": "test_reconcile_fails_closed_when_evidence_changes_after_preflight",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 1719,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 721,
+        "name": "test_from_signal_row",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 288,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_make_name",
+        "path": "tests/standard_names/test_docs_review_content_gate.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_rename_plan",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "_accepted_docs_node",
+        "path": "tests/standard_names/test_edit_parity.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_generate_name_dd_item",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_refine_name_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "_review_names_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_review_docs_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "_review_docs_parent_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 456,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 938,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_header_omits_catalog_sha",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_mock_extraction_returns_gyrokinetics",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_scoped_review_restage_is_atomic_in_seed_expand_and_readback",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "test_claim_review_docs_returns_scalar_physics_domain",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "test_rename_successor_uses_unanimous_dd_source_unit",
+        "path": "tests/standard_names/test_rename_unit_derivation.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_item",
+        "path": "tests/standard_names/test_review_feedback_render.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_review_single_batch_no_explicit_temperature",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 470,
+        "name": "_docs_item",
+        "path": "tests/standard_names/test_review_quorum_pool.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_kind_reclassification_defaults_to_an_exact_zero_write_preview",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_public_refresh_restamps_raw_convergence_without_steering",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_group",
+        "path": "tests/standard_names/test_stranded_identity_census.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 634,
+        "name": "_label",
+        "path": "tests/standard_names/test_tombstone_supersede.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 188
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "_answers",
+        "path": "tests/discovery/test_path_category_gate.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "judge",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "judge",
+        "path": "tests/discovery/test_path_description.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "judge",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_typed_path_judgment_stores_distributions_and_computes_gates",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "judge",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "window_line": 254
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "8936a38ae2f63018f3034aa94fbbfd1f1d1b5b1b"
+  ],
+  "completed_at": "2026-10-08T12:30:47Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T12:22:52Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122235560389-path-judgment-test-category-gate/head-discovery.log"
+  },
+  "impl_move": {
+    "at_complete": 0.75,
+    "at_dispatch": 0.75,
+    "plan": "discovery-judgments-through-jev",
+    "reason": "repairs the test the category gate node could not reach; §17 node 2a's landing records the section progress",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.13037891092113,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T08:06:02Z, which is after this node's 1800s horizon ending 2026-10-08T12:52:37.349356+00:00",
+    "horizon_ends_at": "2026-10-08T12:52:37.349356+00:00",
+    "horizon_seconds": 1800,
+    "metered": true,
+    "observed_at": "2026-10-08T12:22:36Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T08:06:02Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 492742,
+    "state": "quiet",
+    "utilisation_pct": 58.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T12:22:36Z",
+    "read_at": "2026-10-08T12:22:37Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 58.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T12:30:47Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122235560389-path-judgment-test-category-gate/manifest.md",
+  "member": "disposable-r-20261008T122235560389-path-judgment-test-category-gate",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_path_judgments.py::test_typed_path_judgment_stores_distributions_and_computes_gates"
+    ],
+    "baseline_failure_ids": [
+      "tests/discovery/test_path_judgments.py::collection"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_path_judgments.py::test_typed_path_judgment_stores_distributions_and_computes_gates"
+    ],
+    "declaration": "restore the maximum-of-facets expectation (1.1/3) for scan_relevance; the test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122235560389-path-judgment-test-category-gate/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122235560389-path-judgment-test-category-gate/negative-control.log",
+    "test_paths": [
+      "tests/discovery/test_path_judgments.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "path-judgment-test-category-gate",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1338,
+          "cached_input_tokens": 726244,
+          "input_tokens": 727584,
+          "output_tokens": 1136,
+          "reasoning_output_tokens": 288,
+          "total_tokens": 728720,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "tests/discovery/test_path_judgments.py passes at the worktree head, its scan_relevance assertion expects the code-bearing category probability rather than the maximum facet, a below-threshold case built from a non-code category distribution asserts should_enrich is False, and tests/discovery passes with no added failure against the base 4f40b717",
+    "estimated_hours": null,
+    "goal": "align test_path_judgments.py with the category-derived scan gate",
+    "id": "path-judgment-test-category-gate",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T12:22:36Z",
+      "read_at": "2026-10-08T12:22:37Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 58.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122235560389-path-judgment-test-category-gate/manifest.md",
+    "negative_control": "restore the maximum-of-facets expectation (1.1/3) for scan_relevance; the test must fail",
+    "plan": "discovery-judgments-through-jev",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§17",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/discovery/test_path_judgments.py",
+      "docs/evidence/fragments/discovery-judgments-through-jev/path-judgment-test-category-gate.html",
+      "docs/figures/discovery-judgments-through-jev/path-judgment-test-category-gate"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.1302445588234624,
+      "derived": 0.20381794074255957,
+      "drain_hours": 168.0,
+      "effective_limit": 0.20381794074255957,
+      "elapsed_fraction": 0.1852890370386905,
+      "elapsed_hours": 31.128558222500004,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T12:22:41+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.42000000000000004,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.58,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.618976,
+      "decided_by": "window",
+      "margin": -0.05022599999999999,
+      "name": "path-judgment-test-category-gate",
+      "score": 0.56875,
+      "state": "observed",
+      "verdict": "split",
+      "window_fill": 0.58
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.809601,
+        "observed_at": "2026-10-08T12:22:41+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.58,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "path-judgment-test-category-gate",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T12:22:41.809601+00:00",
+    "score": 0.56875,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.62,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 511.181,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 930.221,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1433868.706787,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53194,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1433868.706787,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53194,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1433868.706787,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53194,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 53194,
+          "headroom_pct": 76.9,
+          "peak_utilisation_p50_pct": 60.1,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 416,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 102,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 9
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 2752.739787,
+        "budget_reason": null,
+        "burn_multiple": 3.1297682563171327,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53194,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.702777155243055,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 3,
+          "passed": 46,
+          "unknown": 0
+        },
+        "pace_allowance": 0.20384895869279107,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 2752.739787,
+        "budget_reason": null,
+        "burn_multiple": 3.1297682563171327,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53194,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.702777155243055,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.20384895869279107,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 2752.739787,
+        "budget_reason": null,
+        "burn_multiple": 3.1297682563171327,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53194,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.702777155243055,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.20384895869279107,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.02,
+      "claude:claude-sonnet-5-5": 0.01,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.29,
+      "hold": 0.01,
+      "local:deepseek-v4.1-flash": 0.67
+    },
+    "rendered_token_estimate": 1845,
+    "usage": {
+      "cost": 0.000224616,
+      "input_tokens": 5348,
+      "output_tokens": 150
+    }
+  },
+  "plan": "discovery-judgments-through-jev",
+  "plan_impl_at_dispatch": 0.75,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "8936a38ae2f63018f3034aa94fbbfd1f1d1b5b1b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "4f40b717526698bdd0cbee423b6c4d1193724dce",
+    "reviewed_head_sha": "8936a38ae2f63018f3034aa94fbbfd1f1d1b5b1b",
+    "scores": {
+      "durability": 15,
+      "evidence": 20,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 114
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T122235560389-path-judgment-test-category-gate",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§17",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a11b77-874a-7440-82de-cc612c538094",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4750848,
+    "cumulative_input_tokens": 9598592,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 17766
+  },
+  "time_budget": "30m",
+  "tool_steps": 64.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 2586,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: SSH banner timeout skipped the final scoring-only code pass; 17 /home CodeFiles remain triaged. /home expansion remains assigned to path-category-gate and outside this pass.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 6186,
+        "exit_record": {
+          "attempt": 7,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T11:37:07Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T10:39:39Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T054432526078-jt60sa-jev-rescan",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 1666,
+          "worker_pid": 924821
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "SSH banner timeout skipped the final scoring-only code pass; 17 /home CodeFiles remain triaged. /home expansion remains assigned to path-category-gate and outside this pass.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T11:37:07Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2732,
+        "log_fresh": false,
+        "manifest_commits": [
+          "1dbe6daed12767e1b7a30a91079dc29afc79cad4",
+          "258a9bdbad90ba48764cabefb079ed17466713e9",
+          "984f05308289c28f7ec8a6e277e93c2e7baa29fa",
+          "6c0332bbea316434a455a49bbd04fe47e6047f35",
+          "7cba46750f70478b5eb168a7291e96da480095b9"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "084317b74fff3fed529c205f856cb83dcfeb902daa76ceed4b6db893b91fad86",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T054432526078-jt60sa-jev-rescan/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T054432526078-jt60sa-jev-rescan/manifest.md; resolve the blocker before resuming the run",
+        "node": "jt60sa-jev-rescan",
+        "phase": "blocked",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T054432526078-jt60sa-jev-rescan",
+        "session": "jt60sa-20261005",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261008T054432526078-jt60sa-jev-rescan",
+          "session_id": "01a11a0b-2ea6-7d30-8bc2-825796d31041",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 2772,
+        "terminal_at": "2026-10-08T11:36:26Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/jt60sa-jev-rescan"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 2672,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Two scoped EDAS scan attempts failed after different fixes (JSON date serialization; then remote enumerator exit 255); satisfying the node's mandatory stop rule. The scanner failures prevented UDDB and LCDB route persistence; so the drain was not started.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 6272,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T10:49:27Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T10:38:12Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 374,
+          "worker_pid": 896860
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Two scoped EDAS scan attempts failed after different fixes (JSON date serialization; then remote enumerator exit 255); satisfying the node's mandatory stop rule. The scanner failures prevented UDDB and LCDB route persistence; so the drain was not started.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T10:49:27Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 5593,
+        "log_fresh": false,
+        "manifest_commits": [
+          "c928f987d158ae4e1753a0cb76c51bf6f00b618d",
+          "2a9eb46f6ae6d567b6fca14b278b6ff618e159a7"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "34f7d43b222d1fe9775e4ade58cee9d1677cb241c900a1ae3b58522eaaf4a733",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md; resolve the blocker before resuming the run",
+        "node": "jt60sa-signals-stage",
+        "phase": "blocked",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+        "session": "jt60sa-20261005",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+          "session_id": "01a11ae0-77a0-78c3-bbee-f6de1ebd463c",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 5616,
+        "terminal_at": "2026-10-08T10:49:02Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/jt60sa-signals-stage"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3343,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T11:30:44Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T11:27:01Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T103855443292-path-category-gate",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 734,
+          "worker_pid": 1464940
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T11:30:44Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 3118,
+        "log_fresh": false,
+        "manifest_commits": [
+          "45b5ae08714283e7c9f2f7c54b6c953751e87331",
+          "4115e23b5781f81d943713bab4c663dabb2bf85a",
+          "d977830d6a94d48f1c04e88aa63bf0311cefe547",
+          "2e901e8d2e41bbfd6609e2671f034f7583c2d879",
+          "9907c67c8fd6ec7ddcfaab7924abcd8f28fa8699",
+          "4d6919fdf45727941f33b60febf80243caafbc34",
+          "4f40b717526698bdd0cbee423b6c4d1193724dce"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "3cdf1607a1ea58483e228dfc9eaa30e70f9b638e6aa12ea4c0cf1873a1bbcfcb",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T103855443292-path-category-gate/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261008T103855443292-path-category-gate --gate <verdict> --commit 45b5ae08714283e7c9f2f7c54b6c953751e87331 --commit 4115e23b5781f81d943713bab4c663dabb2bf85a --commit d977830d6a94d48f1c04e88aa63bf0311cefe547 --commit 2e901e8d2e41bbfd6609e2671f034f7583c2d879 --commit 9907c67c8fd6ec7ddcfaab7924abcd8f28fa8699 --commit 4d6919fdf45727941f33b60febf80243caafbc34 --commit 4f40b717526698bdd0cbee423b6c4d1193724dce",
+        "node": "path-category-gate",
+        "phase": "complete",
+        "plan": "discovery-judgments-through-jev",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261008T103855443292-path-category-gate",
+        "session": "jt60sa-20261005",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 3153,
+        "terminal_at": "2026-10-08T11:30:05Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/path-category-gate"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1648,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 5248,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T11:12:01Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T10:55:15Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T105454879301-edas-scan-repair",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 399,
+          "worker_pid": 1123570
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T11:12:01Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 4244,
+        "log_fresh": false,
+        "manifest_commits": [
+          "a4848492cac2d1a53c47acc4523c41ca553ac366",
+          "835784127d1f7c45745ae5918f03180503f07446"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "434f9c1b68fed5b64d0daedca5eef9e651e5012fdd10bebe3a4c9aa004d9e9f1",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --plan jt60sa-discovery-completion --section '§55' --role review --spec-level exact --node review-of-edas-scan-repair --goal 'attach an independent review to run r-20261008T105454879301-edas-scan-repair' --done-when 'the review for r-20261008T105454879301-edas-scan-repair stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T105454879301-edas-scan-repair.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T105454879301-edas-scan-repair.at-835784127d1f7c45745ae5918f03180503f07446.json --time-budget 60m --session jt60sa-20261005 --allow-unreconciled-runs --local",
+        "node": "edas-scan-repair",
+        "phase": "complete",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T105454879301-edas-scan-repair",
+        "session": "jt60sa-20261005",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 4284,
+        "terminal_at": "2026-10-08T11:11:14Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/edas-scan-repair"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 700,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 4300,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T11:28:25Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-08T11:11:06Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T111052980769-review-of-path-category-gate",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 6936,
+          "worker_pid": 1323310
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T11:28:25Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 3257,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "9b99873b54d322bc7bb62606a6ba90f5eb5f61f45ad43e1b1a8e6e03a73d118c",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T111052980769-review-of-path-category-gate/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-path-category-gate",
+        "phase": "complete",
+        "plan": "discovery-judgments-through-jev",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T111052980769-review-of-path-category-gate",
+        "session": "jt60sa-20261005",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 3322,
+        "terminal_at": "2026-10-08T11:27:16Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/review-of-path-category-gate"
+      }
+    ]
+  },
+  "wall_seconds": 475,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T12:30:50Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T12:22:58Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T122235560389-path-judgment-test-category-gate",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 185,
+    "worker_pid": 1600433
+  },
+  "worker_seconds": 475,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
