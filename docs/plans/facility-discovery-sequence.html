@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -353,7 +353,7 @@
 
     <h2 id="s7">§7 — --focus names items in every domain</h2>
 <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-<p><code>--focus ITEMS</code> restricts a run to named items, or to a manifest file, as on <code>sn run</code>. Paths and code honour it from §3 through filters their engines already have. Signals, wiki, documents and candidates refuse it until their claim queries take an item filter. Signals filters by accessor or SignalSource id, in <code>imas_codex/discovery/signals/parallel.py</code>. Wiki filters by page, in the wiki claim module. Documents filters by document path. Candidates filters by SignalSource id, in <code>claim_sources_for_candidates</code> in <code>imas_codex/ids/workers.py</code>. Each is one node, writing its engine's claim module and a named test file. They dispatch once <code>jt60sa-discovery-completion</code>'s widening releases the signals engine and the facility config. <strong>Done when</strong> each domain's test shows a focused run claiming only the named items, a manifest naming the same items producing the same run, and an unknown item refused with its name.</p>
+<p><code>--focus ITEMS</code> restricts a run to named items, or to a manifest file, as on <code>sn run</code>. Paths and code honour it from §3 through filters their engines already have. Signals, wiki, documents and candidates refuse it until their claim queries take an item filter. Signals filters by accessor or SignalSource id, in <code>imas_codex/discovery/signals/parallel.py</code>. Wiki filters by page, in the wiki claim module. Documents filters by document path. Candidates filters by SignalSource id, in <code>claim_sources_for_candidates</code> in <code>imas_codex/ids/workers.py</code>. Each is one node, writing its engine's claim module and a named test file. Each dispatches once its domain's fold is on main. Signals also waits until <code>jt60sa-discovery-completion</code>'s widening releases the signals engine. Documents waits for <code>sequence-runner</code>, because the held registry commit also changes <code>imas_codex/discovery/documents/pipeline.py</code>. Candidates goes first, as node <code>focus-candidates</code>, writing <code>imas_codex/ids/workers.py</code>, <code>imas_codex/cli/discover/map.py</code> and <code>tests/cli/test_discover_candidates_focus.py</code>. <strong>Done when</strong> each domain's test shows a focused run claiming only the named items, a manifest naming the same items producing the same run, and an unknown item refused with its name.</p>
 
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
@@ -396,6 +396,11 @@
     <div class="r-fu-body">The registry and its dry run come first; the runner and the mapping stages build on them.</div>
     <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §2</pre>
     </article>
+<article class="r-fu" data-id="f-fds-002" data-status="open" data-written-by="reckon-build" data-written-at="2026-10-08T06:12:44Z" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stop helper workers on a seed-only run</h4>
+    <div class="r-fu-body"><p>The paths and code folds select the seeding workers correctly under <code>--scan-only</code>. But the engines in <code>imas_codex/discovery/paths/parallel.py</code> and <code>imas_codex/discovery/code/parallel.py</code> still append their embed, dedup and user helper pools unconditionally. So a seed-only run still starts work that belongs to the draining half. The fix gates those pools on the selected half, and the stage tests then assert that the pools are absent. It waits until <code>jt60sa-discovery-completion</code>'s <code>jt60sa-jev-rescan</code> stops running through those engines.</p></div>
+    <pre class="r-fu-prompt">/reckon-build facility-discovery-sequence §3</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261008T021952758562-sequence-stage-registry" data-who="reckon-build" data-when="2026-10-08T03:09:57.030Z">
@@ -421,6 +426,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T043424229971-fold-candidates-stage" data-who="reckon-build" data-when="2026-10-08T05:31:33.458Z">
     <div class="r-comment-body"><p>fold-candidates-stage - run_candidates_stage(facility, options) with a frozen CandidatesStageOptions dataclass extracted from the discover map click command, now a thin wrapper. tests/cli/test_discover_candidates_stage.py plus the old tests/cli/test_discover_map.py pass 18 of 18 (gate EXIT=0), and the negative control fails 1 (test_flush_runs_the_draining_worker) when the stage is mutated to treat --flush as the seeding half (EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T050059413025-fold-documents-stage" data-who="reckon-build" data-when="2026-10-08T05:30:12.775Z">
+    <div class="r-comment-body"><p>Extracted run_documents_stage(facility, options) and frozen DocumentsOptions from the documents click command, leaving a thin wrapper; --scan-only runs the seeding half, --flush the draining half, --limit caps items, --topic reaches the VLM scorer, --focus ITEMS is refused with a mechanism message (the claim query takes no item filter, no plan reference); gate 56 passed, declared mutation red on 2 flush tests.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T053654104027-review-of-fold-documents-stage" data-who="reckon-build" data-when="2026-10-08T05:56:04.167Z">
+    <div class="r-comment-body"><p>review of run r-20261008T050059413025-fold-documents-stage stored to reviews/imas-codex/r-20261008T050059413025-fold-documents-stage.json (+ .at-1824768c3 copy, byte-identical): status parsed, six dimensions scored goal_fidelity 19 / evidence 17 / scope_discipline 20 / durability 19 / fit 19 / reuse 20, total 114; reviewed_base_sha 425dd5620, reviewed_head_sha 1824768c3; added_failure_count 0, added_failure_ids []; two follow-on findings (the fragment/manifest cite the 56-passed gate figure at the base 425dd5620 while gate.log's header reads rev 1824768c3; the reviewed manifest names its two suite arms only via test_logs and omits baseline_suite/after_suite, so the harness reads the added-failure count unmeasured from the manifest).</p></div>
 </div>
 </section>
 </main>
