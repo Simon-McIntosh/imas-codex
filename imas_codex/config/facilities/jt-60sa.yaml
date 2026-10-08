@@ -245,7 +245,7 @@ discovery_roots:
 # JT-60SA documentation is served on nakasvr26 through the workstation VPN.
 # Site 0: Static Code wiki - analysis code documentation
 # Site 1: Server landing page - hardware, software, login, batch jobs, compilers
-# Access is through the jt-60sa SSH hop; port_forwards supplies browser ports.
+# Direct viewing requires the IFERC VPN; port_forwards supplies local browser ports.
 wiki_sites:
   - name: twiki_code
     url: https://nakasvr26.iferc.org/wiki
@@ -318,19 +318,17 @@ port_forwards:
 # =============================================================================
 # Browser URLs - Localhost access with active port forwards
 # =============================================================================
-# These URLs work when the jt-60sa-twiki-forward.service is running.
-# Workstation-only: there is no path from ITER workers to these services.
+# Direct over the IFERC VPN: https://nakasvr26.iferc.org/wiki/WebHome.html
+# Local Code wiki tunnel: ssh -N -L 8800:nakasvr26.iferc.org:443 jt-60sa
+# Forward port 8801 to the same host for server_docs. These localhost URLs
+# are for workstation browsers with their corresponding SSH forwards running.
 
 browser:
   services:
-    - name: twiki_main
-      url: http://localhost:8800/twiki
-      description: Main TWiki web - EDAS manuals, API docs, shot reports
-
     - name: twiki_code
-      url: https://localhost:8801/twiki_html
-      description: Code web static - TOPICS, equilibrium codes, hardware specs
+      url: https://localhost:8800/wiki/WebHome.html
+      description: Code wiki - analysis code documentation and linked attachments
 
     - name: server_docs
-      url: https://localhost:8802/
+      url: https://localhost:8801/
       description: Server documentation - login, batch jobs, compilers
