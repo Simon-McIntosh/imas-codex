@@ -1,0 +1,46 @@
+{
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run is investigation-only and its manifest names no baseline_suite or after_suite gate log, so no added-failure count was taken and none is stored as a measured zero",
+  "backend": "clive",
+  "completed_at": "2026-10-08T07:12:39.391Z",
+  "dispatched_at": "2026-10-08T07:05:37Z",
+  "findings": [],
+  "item_verdicts": {
+    "call_sites": "the change is a documentation fragment; it introduces no runtime symbol and has no production call site, and no existing code references it.",
+    "diff": "read both commits: 2259196f3 adds the seven-row fragment, ff9f39a4 clarifies the PMDB eGIS selection route as an EDDB class-P lookup whose PID group is empty; a one-file evidence change with no code.",
+    "done_when": "the fragment has one row per database with call, return code, shot and shape or reason, and names the PMDB inventory sources and the none-found result; both are present at database-data-reads.html:4-11.",
+    "goal": "read section 50 of imas-codex:jt60sa-discovery-completion; the one-sentence deliverable is one real data read per named database through the EDAS wrapper, recorded as call, return code, shot and shape or reason none, plus a PMDB inventory source or an explicit none-found.",
+    "manifest": "read; its status is complete, it records the same 2-of-7 payload outcome as database-read-gate.log, and its empty baseline_suite/after_suite fields are honest for an investigation-only node, so the added-failure count is unmeasured rather than zero.",
+    "write_paths": "the two commits touch only docs/evidence/fragments/jt60sa-discovery-completion/database-data-reads.html, inside the manifest's declared write paths; the declared docs/figures/... path was not used and the goal does not require it."
+  },
+  "justifications": {
+    "durability": "an evidence fragment is a recorded document rather than code, so no test fails if a claim in database-data-reads.html regresses; the only added guard is the row/credential validation in fragment-check.log (rows=7, credential_markers=0), which bounds the fragment's shape and secrecy but does not detect a drifted read result.",
+    "evidence": "the fragment's core claims reconcile with the recorded receipt database-read-gate.log: line EDDB irc=0 2001 points, UDDB header_codes=[(1013, 6), (1301, 182)] and irc=1061, the two MBDB opens irtn=1012, LCDB rc=0 shape 14x1x1, FSMD ret_cc=10 and EASY loader OSError/exit 255, and the SUMMARY line databases=7 data_read_successes=2 no_data=5, with the 188-PID header breakdown and the 216-entry MBDB survey attested by the worker's own executed fd/ls commands in stream.jsonl; docked because that secondary narrative (the .ldb survey count and the adas/eGIS inventory reads) is not itself in the gate log a reader can open.",
+    "fit": "the fragment matches the sibling evidence family's idiom -- a <section id=\"<slug>-landing\"> wrapper, an <h2 id=\"<slug>-heading\">, <p id=\"<slug>-...\"> prose paragraphs and an id-keyed <table> with <thead>/<tbody>, as in all-edas-databases.html in the same directory -- and the naming scan over the committed file returns only physical identifiers (E101173, EDDB, LCDB, MMSYS, Cryo) with no plan label, ticket reference, version suffix or author attribution.",
+    "goal_fidelity": "docs/evidence/fragments/jt60sa-discovery-completion/database-data-reads.html:4-10 carries one row per database for all seven the node names (EDDB, UDDB, PMDB, FSMD, EASY, LCDB, MBDB), each stating the wrapper call, the return code, the shot or case, and the payload shape or the reason none returned, and :11 names the PMDB inventory sources searched and the candidates tried, meeting both halves of the source node section 50 done-when.",
+    "reuse": "the node adds no function, class or module, so there is no capability to fork; the fragment is a distinct deliverable from the pre-existing all-edas-databases.html, which records catalogue coverage for its scanner while this one records payload reads for the seven named databases, and the reuse search over docs/evidence/fragments/jt60sa-discovery-completion found no fragment that already records these reads.",
+    "scope_discipline": "the diff from 08082bf72ac3b634d48f52c32e806f9a49d28cc5 to ff9f39a4ddefb90afd558035a71508f610730893 newly adds docs/evidence/fragments/jt60sa-discovery-completion/database-data-reads.html alone (+15 lines, 2259196f3 then a one-line clarification at ff9f39a4), both inside the manifest's declared write path and with no unrelated payload."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of run r-20261008T052310039707-database-data-reads (plan imas-codex:jt60sa-discovery-completion section 50), read at its head ff9f39a4ddefb90afd558035a71508f610730893 on base 08082bf72ac3b634d48f52c32e806f9a49d28cc5.\n\nVERDICT goal: section 50 asks for one real data read per database across EDDB, UDDB, PMDB, FSMD, EASY, LCDB and MBDB through the EDAS wrapper, and for the PMDB channel-inventory source or an explicit none-found. The landed fragment carries all seven rows and the inventory paragraph.\nVERDICT done_when: the fragment body has one row per database naming the call, the return code, the shot or case and the shape or the reason none returned, and the inventory paragraph names dbdata_id_dict, the eGIS plantmonitor_data_pid_grp, edas_pmdb.ini and the EDDB plant categories before reporting none usable; the measure is met.\nVERDICT write_paths: both commits stay inside the declared write path; 2259196f3 and ff9f39a4 each touch docs/evidence/fragments/jt60sa-discovery-completion/database-data-reads.html alone.\nVERDICT manifest: read; it reports the same outcome the gate log records and its empty suite fields are truthful for an investigation node.\nVERDICT diff: read commit by commit; the second commit narrows the PMDB candidate-source sentence to the EDDB class-P route and its empty PID group.\n\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: database-data-reads.html:4-10 gives one row for each of the seven named databases with call, return code, shot/case and shape-or-reason, and :11 names the PMDB inventory sources searched and the five irc=301 candidates, satisfying both halves of the done-when.\nSCORE evidence: 18\nJUSTIFICATION evidence: the fragment's headlines reconcile with database-read-gate.log's own lines (EDDB irc=0 2001 points; header_codes=[(1013, 6), (1301, 182)] with irc=1061; MBDB irtn=1012; LCDB rc=0 14x1x1; FSMD ret_cc=10; EASY OSError and exit 255; SUMMARY databases=7 data_read_successes=2 no_data=5), and the 188-PID probes and 216-entry MBDB survey are backed by executed fd/ls commands in stream.jsonl, docked one band because the secondary narrative is not itself in the gate log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the base-to-head diff adds one file, database-data-reads.html (+15), both inside the manifest's declared write path and carrying nothing the goal does not imply.\nSCORE durability: 12\nJUSTIFICATION durability: as a recorded document the fragment has no code whose regression a test could catch; fragment-check.log (rows=7, credential_markers=0) bounds only the fragment's shape and secrecy.\nSCORE fit: 19\nJUSTIFICATION fit: the section/h2/p-id/table idiom matches all-edas-databases.html in the same directory and the naming scan over the committed file finds only physical identifiers, no plan label or attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: no definition is added to fork a capability; the fragment is a payload-read record distinct from the catalogue-coverage fragment of the same name family, and no existing fragment already records these reads.\n\nNOTES: the reviewed run counted one unattributed retry failure (easy-legacy-core, the legacy EASY core dump); at one counted failure the stop rule is not reached and the EASY row reports it as a reason none returned, which the done-when allows. The five no-data rows correctly distinguish access failure from an empty-database claim.",
+  "review_run_id": "r-20261008T070523207596-review-of-database-data-reads",
+  "reviewed_base": "08082bf72ac3b634d48f52c32e806f9a49d28cc5",
+  "reviewed_base_sha": "08082bf72ac3b634d48f52c32e806f9a49d28cc5",
+  "reviewed_commit": "ff9f39a4ddefb90afd558035a71508f610730893",
+  "reviewed_head_sha": "ff9f39a4ddefb90afd558035a71508f610730893",
+  "reviewed_run_id": "r-20261008T052310039707-database-data-reads",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:10:21+00:00",
+  "total": 109
+}
