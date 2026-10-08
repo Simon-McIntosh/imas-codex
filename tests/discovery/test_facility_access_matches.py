@@ -125,6 +125,10 @@ def test_access_call_literal_does_not_match_inside_another_identifier() -> None:
     assert re.search(loader, "_eddbreadTime(")
 
 
+def test_unknown_facility_keeps_generic_match_categories() -> None:
+    assert _build_enrich_patterns("unconfigured") == _build_enrich_patterns()
+
+
 def test_path_enrichment_uses_facility_remote_interpreter(monkeypatch) -> None:
     facility = next(
         name

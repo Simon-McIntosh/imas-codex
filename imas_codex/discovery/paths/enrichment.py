@@ -329,7 +329,10 @@ def _build_enrich_patterns(facility: str | None = None) -> dict[str, str]:
                 patterns[key] = pattern
 
     if facility:
-        access = get_facility(facility).get("data_access_patterns") or {}
+        try:
+            access = get_facility(facility).get("data_access_patterns") or {}
+        except ValueError:
+            access = {}
         for source, prefix in (
             ("key_tools", "facility_tool:"),
             ("code_import_patterns", "facility_import:"),
