@@ -393,7 +393,7 @@ def get_code_discovery_stats(
     with GraphClient() as gc:
         result = gc.query(
             """
-            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
+            MATCH (cf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
             WITH cf.status AS status, cf.language AS language,
                  cf.score_composite AS score
             RETURN status, language,
