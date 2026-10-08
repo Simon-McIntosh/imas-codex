@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/signals/scanners/base.py:258",
+    "imas_codex/discovery/signals/parallel.py:2836",
+    "imas_codex/discovery/signals/parallel.py:4927"
+  ],
+  "completed_at": "2026-10-08T03:36:33.248Z",
+  "dispatched_at": "2026-10-08T03:24:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/all-edas-databases.html",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the plan names the db_pdcattable store for the EDDB category comparison while the fragment documents the substitution with the eddbreadCatTable public API, so the raw table was not read as the deliverable asked."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit 71b25ea..4b6dad10 against base 223593c2; the scanner, both remote scripts, the config and the test file carry the change with the EDDB id construction unchanged.",
+    "done_when": "the done-when requires each of UDDB/PMDB/LCDB/MBDB/EQDB to carry FacilitySignals or a recorded attempt with call and return code; the fragment's attempt table records UDDB 188 landed, LCDB 8,469 landed, PMDB plantdread/planthread 301, MBDB mbdbROpen 1012, EQDB scandir 2, and the head gate run records 18 passed.",
+    "goal": "\u00a739 asks the EDAS scanner to land FacilitySignals from every JT-60SA EDAS database; imas_codex/discovery/signals/scanners/edas.py:191-268 adds UDDB, LCDB and MBDB branches to the existing EDASScanner and jt-60sa.yaml:44 extends data_systems.edas with the database list and wrapper paths, so no parallel scanner is added and the EDDB branch (edas.py:270-300) is untouched.",
+    "manifest": "read; it records the gate command with absolute paths and EXIT=0 with 18 passed, a baseline_suite/after_suite pair (baseline.log exit 1, head-absolute.log exit 0), a negative control, and the live-landing/live-check logs.",
+    "write_paths": "the reviewed manifest declares the scanner, enumerate_edas.py, check_edas.py, tests/discovery/test_edas_scanner.py, the evidence fragment, a figures directory and jt-60sa.yaml; git diff --stat against the base touches exactly six files, all inside that set."
+  },
+  "justifications": {
+    "durability": "the recorded negative control (negative-control.log) mutates enumerate_uddb to return no rows and fails tests/discovery/test_edas_scanner.py::TestConfiguredDatabases::test_uddb_table_rows_are_emitted with EXIT=1, but the MBDB name-extraction path at enumerate_edas.py:473 runs live only through the stubbed test.",
+    "evidence": "the head gate tests/discovery/test_edas_scanner.py exits 0 with 18 passed and the live logs (live-enumeration-final.log, live-check-lcdb.log, live-check-uddb.log) record the counts, but the plan's db_pdcattable comparison was substituted with the eddbreadCatTable public API, as all-edas-databases.html:18 states.",
+    "fit": "imas_codex/remote/scripts/enumerate_edas.py:254 follows the module's existing per-database helper idiom and the added symbols (_lcdb_categories, _mbdb_data_names, attempt_database) carry no plan label.",
+    "goal_fidelity": "imas_codex/discovery/signals/scanners/edas.py:196 emits UDDB/LCDB/MBDB signals via the existing EDASScanner and the plan's \"do not add a parallel scanner\" holds, since the EDDB identity path at edas.py:270 is unchanged.",
+    "reuse": "the change extends the existing EDASScanner and its remote scripts, and a search over imas_codex and tests for lcdb/mbdb/uddb/pmdb owners found only the scanner's own scripts and jt-60sa.yaml, so no capability was forked.",
+    "scope_discipline": "git diff --stat 223593c2..4b6dad10 touches only the scanner, the two remote scripts, jt-60sa.yaml, tests/discovery/test_edas_scanner.py and the evidence fragment, every one inside the manifest's declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a739 asks the EDAS scanner to land FacilitySignals from every JT-60SA EDAS database; imas_codex/discovery/signals/scanners/edas.py:191-268 adds UDDB, LCDB and MBDB branches to the existing EDASScanner and jt-60sa.yaml:44 extends data_systems.edas with the database list and wrapper paths, so no parallel scanner is added and the EDDB branch (edas.py:270-300) is untouched.\nVERDICT done_when: the done-when requires each of UDDB/PMDB/LCDB/MBDB/EQDB to carry FacilitySignals or a recorded attempt with call and return code; the fragment's attempt table records UDDB 188 landed, LCDB 8,469 landed, PMDB plantdread/planthread 301, MBDB mbdbROpen 1012, EQDB scandir 2, and the head gate run records 18 passed.\nVERDICT write_paths: the reviewed manifest declares the scanner, enumerate_edas.py, check_edas.py, tests/discovery/test_edas_scanner.py, the evidence fragment, a figures directory and jt-60sa.yaml; git diff --stat against the base touches exactly six files, all inside that set.\nVERDICT manifest: read; it records the gate command with absolute paths and EXIT=0 with 18 passed, a baseline_suite/after_suite pair (baseline.log exit 1, head-absolute.log exit 0), a negative control, and the live-landing/live-check logs.\nVERDICT diff: read commit by commit 71b25ea..4b6dad10 against base 223593c2; the scanner, both remote scripts, the config and the test file carry the change with the EDDB id construction unchanged.\nCALL_SITES: imas_codex/discovery/signals/scanners/base.py:258, imas_codex/discovery/signals/parallel.py:2836, imas_codex/discovery/signals/parallel.py:4927\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/scanners/edas.py:196 emits UDDB/LCDB/MBDB signals via the existing EDASScanner and the plan's \"do not add a parallel scanner\" holds, since the EDDB identity path at edas.py:270 is unchanged.\nSCORE evidence: 18\nJUSTIFICATION evidence: the head gate tests/discovery/test_edas_scanner.py exits 0 with 18 passed and the live logs (live-enumeration-final.log, live-check-lcdb.log, live-check-uddb.log) record the counts, but the plan's db_pdcattable comparison was substituted with the eddbreadCatTable public API, as all-edas-databases.html:18 states.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 223593c2..4b6dad10 touches only the scanner, the two remote scripts, jt-60sa.yaml, tests/discovery/test_edas_scanner.py and the evidence fragment, every one inside the manifest's declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: the recorded negative control (negative-control.log) mutates enumerate_uddb to return no rows and fails tests/discovery/test_edas_scanner.py::TestConfiguredDatabases::test_uddb_table_rows_are_emitted with EXIT=1, but the MBDB name-extraction path at enumerate_edas.py:473 runs live only through the stubbed test.\nSCORE fit: 20\nJUSTIFICATION fit: imas_codex/remote/scripts/enumerate_edas.py:254 follows the module's existing per-database helper idiom and the added symbols (_lcdb_categories, _mbdb_data_names, attempt_database) carry no plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing EDASScanner and its remote scripts, and a search over imas_codex and tests for lcdb/mbdb/uddb/pmdb owners found only the scanner's own scripts and jt-60sa.yaml, so no capability was forked.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/all-edas-databases.html:18 follow-on: the plan names the db_pdcattable store for the EDDB category comparison while the fragment documents the substitution with the eddbreadCatTable public API, so the raw table was not read as the deliverable asked.\n",
+  "review_run_id": "r-20261008T032421915615-review-of-all-edas-databases",
+  "reviewed_base_sha": "223593c25f6494a51ab4573e1414a4724bd96314",
+  "reviewed_head_sha": "4b6dad10acbab2708295a11bcc976d795734393a",
+  "reviewed_run_id": "r-20261008T015512824344-all-edas-databases",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T03:40:00+00:00",
+  "total": 117
+}
