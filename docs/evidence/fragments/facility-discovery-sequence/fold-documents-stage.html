@@ -1,0 +1,20 @@
+<section id="fold-documents-stage">
+  <h2 id="fold-documents-stage-heading">Fold the documents stage out of its click command</h2>
+  <p id="fold-documents-stage-anchor">
+    <code>imas_codex/cli/discover/documents.py</code> now exposes
+    <code>run_documents_stage(facility, options)</code> with a frozen
+    <code>DocumentsOptions</code> dataclass holding the settled option spellings; the
+    click command is a thin wrapper that builds the options and calls the stage. The
+    seeding half (<code>scan_facility_documents</code>) is selected by
+    <code>--scan-only</code> and the draining half (image fetch and VLM captioning) by
+    <code>--flush</code>; <code>--limit</code> caps scanned items and <code>--topic</code>
+    reaches the VLM scorer that the retired free-text <code>--focus</code> reached.
+    <code>--focus</code> ITEMS is refused with a mechanism message, because this
+    domain's claim query takes no item filter. Gate: <code>uv run --no-sync pytest
+    tests/cli/test_discover_documents_stage.py tests/test_cli.py -p no:cacheprovider</code>
+    at 425dd5620 — 56 passed. Declared mutation (stage ignores <code>--flush</code> and
+    runs the seeding half too) turns the gate red (EXIT=1) on
+    <code>test_stage_flush_skips_the_seeding_half</code> and
+    <code>test_flush_runs_only_the_draining_half_via_the_command</code>.
+  </p>
+</section>
