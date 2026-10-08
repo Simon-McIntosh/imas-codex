@@ -8,6 +8,7 @@ to a loopback address behind a tunnel it cannot open.
 
 from __future__ import annotations
 
+import builtins
 from unittest.mock import patch
 
 import pytest
@@ -170,3 +171,64 @@ def test_graph_and_embedding_jobs_may_sit_on_different_nodes():
 
     assert graph_url == f"bolt://98dci4-gpu-0001:{BOLT_PORT}"
     assert embed_url == f"http://{GPU_NODE}:{PORT}"
+
+
+@pytest.mark.parametrize("resolver", [loc._find_compute_location, loc.resolve_location])
+def test_facility_import_error_propagates(resolver):
+    """A broken facility import must be visible to the caller."""
+    original_import = builtins.__import__
+
+    def fail_facility_import(name, *args, **kwargs):
+        if name == "imas_codex.discovery.base.facility":
+            raise ImportError("injected facility import failure")
+        return original_import(name, *args, **kwargs)
+
+    loc.resolve_location.cache_clear()
+    with (
+        patch("builtins.__import__", side_effect=fail_facility_import),
+        pytest.raises(ImportError, match="injected facility import failure") as error,
+    ):
+        resolver("titan")
+    assert "while resolving location 'titan'" in error.value.__notes__
+
+
+def test_unknown_facility_keeps_direct_location_fallback():
+    """A location without a facility config remains a direct SSH location."""
+    loc.resolve_location.cache_clear()
+    info = loc.resolve_location("missing-facility-for-location-test")
+
+    assert info.name == "missing-facility-for-location-test"
+    assert info.facility == info.ssh_host == info.name
+    assert info.scheduler == "none"
+    assert not info.is_compute
+
+
+def test_compute_location_propagates_facility_read_error():
+    """A present facility with a broken config read is not an unknown one."""
+    with (
+        patch(
+            "imas_codex.discovery.base.facility.list_facilities", return_value=["iter"]
+        ),
+        patch(
+            "imas_codex.discovery.base.facility.get_facility",
+            side_effect=RuntimeError("facility read failed"),
+        ),
+        pytest.raises(RuntimeError, match="facility read failed") as error,
+    ):
+        loc._find_compute_location("titan")
+    assert "while resolving location 'titan'" in error.value.__notes__
+
+
+def test_direct_location_propagates_facility_read_error():
+    """A broken direct facility config must reach the caller."""
+    loc.resolve_location.cache_clear()
+    with (
+        patch.object(loc, "_find_compute_location", return_value=None),
+        patch(
+            "imas_codex.discovery.base.facility.get_facility",
+            side_effect=RuntimeError("facility read failed"),
+        ),
+        pytest.raises(RuntimeError, match="facility read failed") as error,
+    ):
+        loc.resolve_location("iter")
+    assert "while resolving location 'iter'" in error.value.__notes__
