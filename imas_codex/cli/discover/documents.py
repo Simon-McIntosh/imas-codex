@@ -8,9 +8,32 @@ from dataclasses import dataclass
 
 import click
 
-from imas_codex.cli.discover.common import reset_to_option
+from imas_codex.cli.discover.common import reset_to_option, resolve_focus_items
 
 logger = logging.getLogger(__name__)
+
+
+def _validate_focus(facility: str, prefixes: list[str]) -> None:
+    """Refuse path prefixes that match no Document at this facility."""
+    from imas_codex.graph import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $prefixes AS prefix
+            OPTIONAL MATCH (d:Document {facility_id: $facility})
+            WHERE d.path STARTS WITH prefix
+            RETURN prefix, count(d) AS matches
+            """,
+            facility=facility,
+            prefixes=prefixes,
+        )
+    found = {row["prefix"] for row in rows if row["matches"]}
+    missing = [prefix for prefix in prefixes if prefix not in found]
+    if missing:
+        raise click.UsageError(
+            "--focus item filter names unknown Document path(s): " + ", ".join(missing)
+        )
 
 
 @dataclass(frozen=True)
@@ -53,16 +76,14 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
         options: Settled stage options.
 
     Raises:
-        click.UsageError: When ``--focus`` is given (this domain has no item
-            filter) or when ``--scan-only`` and ``--flush`` are combined.
+        click.UsageError: When a focused path matches no Document or when
+            ``--scan-only`` and ``--flush`` are combined.
     """
-    if options.focus:
-        raise click.UsageError(
-            "--focus is not supported for documents yet: the documents claim "
-            "query takes no item filter"
-        )
     if options.scan_only and options.flush:
         raise click.UsageError("--scan-only and --flush are mutually exclusive")
+    path_prefixes = resolve_focus_items(options.focus)
+    if path_prefixes:
+        _validate_focus(facility, path_prefixes)
 
     from imas_codex.cli.discover.common import (
         DiscoveryConfig,
@@ -159,6 +180,7 @@ def run_documents_stage(facility: str, options: DocumentsOptions) -> None:
             store_images=options.store_bytes,
             scan_only=False,
             focus=options.topic,
+            path_prefixes=tuple(path_prefixes) if path_prefixes else None,
         )
 
         # Build display for rich mode

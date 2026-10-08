@@ -35,6 +35,7 @@ class DocumentDiscoveryState(DiscoveryStateBase):
     store_images: bool = False
     scan_only: bool = False
     focus: str | None = None
+    path_prefixes: tuple[str, ...] | None = None
 
     # Worker stats
     image_stats: WorkerStats = field(default_factory=WorkerStats)
@@ -55,47 +56,76 @@ class DocumentDiscoveryState(DiscoveryStateBase):
         return self.image_score_stats.cost
 
 
-def _has_pending_image_documents(facility: str) -> bool:
+def _has_pending_image_documents(
+    facility: str, path_prefixes: tuple[str, ...] | None = None
+) -> bool:
     """Check if there are Document nodes with document_type='image' pending processing."""
     from imas_codex.graph import GraphClient
 
+    path_filter = (
+        "AND any(prefix IN $path_prefixes WHERE d.path STARTS WITH prefix)"
+        if path_prefixes is not None
+        else ""
+    )
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (d:Document {facility_id: $facility, document_type: 'image'})
+            f"""
+            MATCH (d:Document {{facility_id: $facility, document_type: 'image'}})
             WHERE d.status = 'discovered'
+              {path_filter}
             RETURN count(d) > 0 AS has_work
             """,
             facility=facility,
+            path_prefixes=path_prefixes,
         )
         return result[0]["has_work"] if result else False
 
 
-def _has_pending_image_scores(facility: str) -> bool:
+def _has_pending_image_scores(
+    facility: str, path_prefixes: tuple[str, ...] | None = None
+) -> bool:
     """Check if there are Image nodes pending VLM scoring."""
 
     from imas_codex.graph import GraphClient
 
+    path_filter = (
+        """AND EXISTS {
+                MATCH (d:Document {facility_id: $facility})-[:HAS_IMAGE]->(img)
+                WHERE any(prefix IN $path_prefixes WHERE d.path STARTS WITH prefix)
+            }"""
+        if path_prefixes is not None
+        else ""
+    )
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (img:Image {facility_id: $facility})
+            f"""
+            MATCH (img:Image {{facility_id: $facility}})
             WHERE img.status = 'ingested' AND img.claimed_at IS NULL
+              {path_filter}
             RETURN count(img) > 0 AS has_work
             """,
             facility=facility,
+            path_prefixes=path_prefixes,
         )
         return result[0]["has_work"] if result else False
 
 
-def has_pending_work(facility: str) -> bool:
+def has_pending_work(
+    facility: str, path_prefixes: tuple[str, ...] | None = None
+) -> bool:
     """Whether document discovery has work: images to fetch or to score.
 
     True when either private check is true. The private checks raise on a
     failed query, so a graph fault reaches the caller as an exception rather
     than as an empty stage.
     """
-    return _has_pending_image_documents(facility) or _has_pending_image_scores(facility)
+    if path_prefixes is None:
+        return _has_pending_image_documents(facility) or _has_pending_image_scores(
+            facility
+        )
+    return _has_pending_image_documents(
+        facility, path_prefixes
+    ) or _has_pending_image_scores(facility, path_prefixes)
 
 
 async def run_document_discovery(
@@ -125,9 +155,22 @@ async def run_document_discovery(
     start_time = time.time()
     facility = state.facility
 
-    state.image_phase.set_has_work_fn(lambda: _has_pending_image_documents(facility))
+    state.image_phase.set_has_work_fn(
+        lambda: (
+            _has_pending_image_documents(facility, state.path_prefixes)
+            if state.path_prefixes is not None
+            else _has_pending_image_documents(facility)
+        )
+    )
     state.image_score_phase.set_has_work_fn(
-        lambda: _has_pending_image_scores(facility) or not state.image_phase.done
+        lambda: (
+            (
+                _has_pending_image_scores(facility, state.path_prefixes)
+                if state.path_prefixes is not None
+                else _has_pending_image_scores(facility)
+            )
+            or not state.image_phase.done
+        )
     )
 
     workers = [
