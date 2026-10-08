@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -354,6 +354,18 @@
       test showing an escalated source whose physics domain is not among the target IDS domains, but whose candidate is in a
       target IDS, is both claimed and reported as pending, and another showing a source with no candidate in any target IDS
       is neither.
+    </p>
+    <p>
+      Every §4 gate runs <code>tests/ids</code>, and two tests there,
+      <code>TestPopulateMetadata::test_populate_returns_ids_metadata_result</code> and
+      <code>test_populate_deterministic_fields_always_present</code> in <code>tests/ids/test_metadata.py</code>, call
+      <code>populate_metadata</code> without patching the LLM call, so they reach the live local endpoint and time out when it
+      is slow. Three nodes on 2026-10-08 saw that timeout and passed only on a repeat.
+      <strong>Node</strong> <code>metadata-tests-offline</code>, role implement, 0.25 h, test-only. An autouse fixture in that
+      file makes <code>call_llm_structured</code> raise if called unpatched, and each populate test that needs an LLM answer
+      patches it explicitly. Write paths: <code>tests/ids/test_metadata.py</code> and its fragment. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids/test_metadata.py -p no:cacheprovider</code> passes with the guard fixture in
+      place, so no test in the file reaches an endpoint.
     </p>
 
     <h2 id="s5">§5 — JT-60SA proof</h2>
