@@ -9,7 +9,10 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from imas_codex.ids.models import BindingTransformSlots
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +97,67 @@ def cocos_sign(label: str, *, cocos_in: int, cocos_out: int) -> int | float:
     else:
         logger.warning("Unknown COCOS label '%s', returning 1", label)
         return 1
+
+
+def compose_transform(slots: BindingTransformSlots) -> str:
+    """Compose a binding expression only after every typed slot is settled."""
+    from imas_codex.ids.models import CocosLabel, SlotResolution
+
+    names = ("sign", "scale_factor", "unit_conversion", "cocos_label", "index_layout")
+    open_slots = [
+        name
+        for name in names
+        if (slot := getattr(slots, name)).value is None
+        or slot.settled_by
+        not in (
+            SlotResolution.CODE,
+            SlotResolution.JEV,
+            SlotResolution.LOCAL,
+        )
+        or not slot.evidence
+    ]
+    if open_slots:
+        raise ValueError(f"open transform slot(s): {', '.join(open_slots)}")
+
+    layout = slots.index_layout.value
+    expression = "value"
+    if layout.kind == "index":
+        expression += f"[{layout.index}]"
+    elif layout.kind == "slice":
+        bounds = [layout.start, layout.stop, layout.step]
+        end = 3 if layout.step is not None else 2
+        expression += (
+            "[" + ":".join("" if x is None else str(x) for x in bounds[:end]) + "]"
+        )
+
+    units = slots.unit_conversion.value
+    if units.source_unit is not None and units.source_unit != units.target_unit:
+        convert_units(1.0, units.source_unit, units.target_unit)
+        expression = (
+            f"convert_units({expression}, {units.source_unit!r}, {units.target_unit!r})"
+        )
+
+    label = slots.cocos_label.value
+    sign = slots.sign.value
+    scale = slots.scale_factor.value
+    if label != CocosLabel.NONE:
+        if slots.cocos_in is None or slots.cocos_out is None:
+            raise ValueError("cocos_label requires cocos_in and cocos_out")
+        factor = cocos_sign(
+            label.value, cocos_in=slots.cocos_in, cocos_out=slots.cocos_out
+        )
+        if sign != (-1 if factor < 0 else 1) or not math.isclose(
+            scale, abs(factor), rel_tol=1e-12
+        ):
+            raise ValueError("sign or scale_factor disagrees with cocos_label")
+        expression = (
+            f"({expression} * cocos_sign({label.value!r}, "
+            f"cocos_in={slots.cocos_in}, cocos_out={slots.cocos_out}))"
+        )
+    elif sign != 1 or scale != 1:
+        multiplier = sign * scale
+        expression = f"({expression} * {multiplier!r})"
+    return expression
 
 
 def execute_transform(value: Any, transform_expression: str | None) -> Any:
