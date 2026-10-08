@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T10:35:29.405Z",
+  "dispatched_at": "2026-10-08T10:20:27Z",
+  "findings": [
+    {
+      "file": "docs/research/mapping-decision-census.html",
+      "line": "159",
+      "severity": "follow-on",
+      "text": "follow-on: the sign, constant-factor and COCOS \"Code\" counts test only whether the target carries a cocos_transformation_type, not the \"known source convention\" the same paragraph names as a precondition, so 398 is an upper bound conditional on the JT-60SA source convention holding for all 151 sources and the Cypher evaluates only the target label."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100505462070-mapping-slot-census-candidates/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are both left empty, so the harness derives added_failure_count as unmeasured for this run rather than a number."
+    },
+    {
+      "file": "docs/research/mapping-decision-census.html",
+      "line": "146",
+      "severity": "follow-on",
+      "text": "follow-on: the candidate-slots section has no committed test; the only assertion is the one-shot census_verify.py under the run directory, so a table cell or a Code count could drift with nothing turning red."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read at c415a5a29e9963050c2d6d0fe5798e4652f81926 against base e183fecbad9e18bbdd70ab3641251212139caeb4; it replaces the document summary meta and appends the candidate-slots section \u2014 a cohort paragraph, a \"Code\"-definition paragraph, the ten-row table, an SVG figure, a positive-control paragraph and three Cypher statements plus the Pint exact-pair literal; docs-only, no runtime code.",
+    "done_when": "the node's done-when is that the table and the Cypher producing it are in the document, every number reproduces on the live graph, and reckon audit-doc reports no error; I ran census_verify.py from the reviewed worktree at c415a5a29e9963050c2d6d0fe5798e4652f81926, which extracted the three queries from the document, re-ran them through GraphClient, asserted the cohort controls, the 29 pint-accepted pairs and all ten table cells, and exited 0, and I ran reckon audit-doc docs/research/mapping-decision-census.html --project imas-codex at the same revision, which printed OK.",
+    "goal": "plan \u00a72 node mapping-slot-census-candidates extends docs/research/mapping-decision-census.html with a per-facility, per-slot census of how many selected-or-escalated candidate edges code could settle, how many need a judgment, and how many unit pairs pint converts exactly; the new section at docs/research/mapping-decision-census.html:146-232 carries the cohort definition, the per-slot eligibility rule, the ten-row table and the three Cypher statements.",
+    "manifest": "read; status complete, commit [c415a5a29e9963050c2d6d0fe5798e4652f81926], test_logs names census_verify.log, audit_doc.log and census_probe.log, and baseline_suite and after_suite are both empty at manifest.md:21-22.",
+    "write_paths": "the manifest declares the census document, the mapping-decision-census figure directory and the fragment; git show --stat c415a5a29e9963050c2d6d0fe5798e4652f81926 touches exactly docs/research/mapping-decision-census.html, docs/figures/mapping-decision-census/candidate-slot-counts.svg and docs/evidence/fragments/mapping-decision-chain/mapping-slot-census-candidates.html, all inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the section has no committed test \u2014 the only assertion is the one-shot census_verify.py kept in the run directory, which is not in the repository, so a dropped table row or a changed Code count would redden nothing.",
+    "evidence": "I re-ran the run's own gate at c415a5a29e9963050c2d6d0fe5798e4652f81926 and got CHECKS=passed and EXIT=0, and audit-doc OK, so the numbers reproduce; the proof is nonetheless conditional on the JT-60SA source convention, which the counted predicate does not test.",
+    "fit": "the commit uses a conventional docs(mapping) subject with a body naming what changed and why, carries no plan or section label and no AI trailer, and matches the sibling research-document idiom.",
+    "goal_fidelity": "the document holds the required per-facility, per-slot table, the cohort and eligibility rule, and the Cypher that produced every cell, and I reproduced all of it live at c415a5a29e9963050c2d6d0fe5798e4652f81926; the sign, factor and COCOS \"Code\" counts credit only the target's cocos_transformation_type presence, not the \"known source convention\" the same paragraph names as a precondition, so those three rows are a conditional upper bound the query never evaluates.",
+    "reuse": "the change adds no code \u2014 it is a research-document section \u2014 and it reuses convert_units, GraphClient and the existing census document rather than adding a second census path.",
+    "scope_discipline": "git show --stat c415a5a29e9963050c2d6d0fe5798e4652f81926 lists only the three declared evidence paths and nothing outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: e183fecbad9e18bbdd70ab3641251212139caeb4\nreviewed_head_sha: c415a5a29e9963050c2d6d0fe5798e4652f81926\nVERDICT goal: plan \u00a72 node mapping-slot-census-candidates extends docs/research/mapping-decision-census.html with a per-facility, per-slot census of how many selected-or-escalated candidate edges code could settle, how many need a judgment, and how many unit pairs pint converts exactly; the new section at docs/research/mapping-decision-census.html:146-232 carries the cohort definition, the per-slot eligibility rule, the ten-row table and the three Cypher statements.\nVERDICT done_when: the node's done-when is that the table and the Cypher producing it are in the document, every number reproduces on the live graph, and reckon audit-doc reports no error; I ran census_verify.py from the reviewed worktree at c415a5a29e9963050c2d6d0fe5798e4652f81926, which extracted the three queries from the document, re-ran them through GraphClient, asserted the cohort controls, the 29 pint-accepted pairs and all ten table cells, and exited 0, and I ran reckon audit-doc docs/research/mapping-decision-census.html --project imas-codex at the same revision, which printed OK.\nVERDICT write_paths: the manifest declares the census document, the mapping-decision-census figure directory and the fragment; git show --stat c415a5a29e9963050c2d6d0fe5798e4652f81926 touches exactly docs/research/mapping-decision-census.html, docs/figures/mapping-decision-census/candidate-slot-counts.svg and docs/evidence/fragments/mapping-decision-chain/mapping-slot-census-candidates.html, all inside the declared scope.\nVERDICT manifest: read; status complete, commit [c415a5a29e9963050c2d6d0fe5798e4652f81926], test_logs names census_verify.log, audit_doc.log and census_probe.log, and baseline_suite and after_suite are both empty at manifest.md:21-22.\nVERDICT diff: read at c415a5a29e9963050c2d6d0fe5798e4652f81926 against base e183fecbad9e18bbdd70ab3641251212139caeb4; it replaces the document summary meta and appends the candidate-slots section \u2014 a cohort paragraph, a \"Code\"-definition paragraph, the ten-row table, an SVG figure, a positive-control paragraph and three Cypher statements plus the Pint exact-pair literal; docs-only, no runtime code.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the document holds the required per-facility, per-slot table, the cohort and eligibility rule, and the Cypher that produced every cell, and I reproduced all of it live at c415a5a29e9963050c2d6d0fe5798e4652f81926; the sign, factor and COCOS \"Code\" counts credit only the target's cocos_transformation_type presence, not the \"known source convention\" the same paragraph names as a precondition, so those three rows are a conditional upper bound the query never evaluates.\nSCORE evidence: 17\nJUSTIFICATION evidence: I re-ran the run's own gate at c415a5a29e9963050c2d6d0fe5798e4652f81926 and got CHECKS=passed and EXIT=0, and audit-doc OK, so the numbers reproduce; the proof is nonetheless conditional on the JT-60SA source convention, which the counted predicate does not test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat c415a5a29e9963050c2d6d0fe5798e4652f81926 lists only the three declared evidence paths and nothing outside the fence.\nSCORE durability: 7\nJUSTIFICATION durability: the section has no committed test \u2014 the only assertion is the one-shot census_verify.py kept in the run directory, which is not in the repository, so a dropped table row or a changed Code count would redden nothing.\nSCORE fit: 19\nJUSTIFICATION fit: the commit uses a conventional docs(mapping) subject with a body naming what changed and why, carries no plan or section label and no AI trailer, and matches the sibling research-document idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no code \u2014 it is a research-document section \u2014 and it reuses convert_units, GraphClient and the existing census document rather than adding a second census path.\nFINDING docs/research/mapping-decision-census.html:159 follow-on: the sign, constant-factor and COCOS \"Code\" counts test only whether the target carries a cocos_transformation_type, not the \"known source convention\" the same paragraph names as a precondition, so 398 is an upper bound conditional on the JT-60SA source convention holding for all 151 sources and the Cypher evaluates only the target label.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T100505462070-mapping-slot-census-candidates/manifest.md:21 follow-on: baseline_suite and after_suite are both left empty, so the harness derives added_failure_count as unmeasured for this run rather than a number.\nFINDING docs/research/mapping-decision-census.html:146 follow-on: the candidate-slots section has no committed test; the only assertion is the one-shot census_verify.py under the run directory, so a table cell or a Code count could drift with nothing turning red.\n",
+  "review_run_id": "r-20261008T102016949082-review-of-mapping-slot-census-candidates",
+  "reviewed_base_sha": "e183fecbad9e18bbdd70ab3641251212139caeb4",
+  "reviewed_head_sha": "c415a5a29e9963050c2d6d0fe5798e4652f81926",
+  "reviewed_run_id": "r-20261008T100505462070-mapping-slot-census-candidates",
+  "scores": {
+    "durability": 7,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:33:01.519483+00:00",
+  "total": 100,
+  "verdict": "SOUND WITH FINDINGS"
+}
