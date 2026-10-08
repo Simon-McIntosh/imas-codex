@@ -1,0 +1,5338 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "47df56a2710a289c6b0f3c592b4935c41dca49b4",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4091520,
+      "cached_input_tokens_cumulative": 4091520,
+      "input_tokens": 4207589,
+      "input_tokens_cumulative": 4207589,
+      "output_tokens": 15484,
+      "output_tokens_cumulative": 15484,
+      "reasoning_output_tokens": 5175,
+      "reasoning_output_tokens_cumulative": 5175
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 152,
+    "files": 2,
+    "removed": 3
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 385,
+        "name": "_stage_function",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 390
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_multiletter_si_units_round_trip",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_leading_named_unit_is_preserved",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 767,
+        "name": "test_python_tcvpy_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 786,
+        "name": "test_matlab_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_fortran_mds_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_idl_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 838,
+        "name": "test_python_mdsplus_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 856,
+        "name": "test_tdi_function_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 792,
+        "name": "test_uddb_table_rows_are_emitted",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 883,
+        "name": "remote_run",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_enriches_nodes_with_llm",
+        "path": "tests/graph/test_dd_identifier_enrichment.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "test_public_name_claims_are_exactly_scope_owned",
+        "path": "tests/graph/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 844,
+        "name": "test_run_error_derivation_only_derives_from_graph",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 943,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1084,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1125,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1153,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1529,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1566,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1589,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1639,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1660,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1679,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1715,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1750,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_plan",
+        "path": "tests/llm/test_sn_edit_cascade_reporting.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "_persist",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 304,
+        "name": "test_open_edit_propagation_uses_only_the_atomic_transaction",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1680,
+        "name": "test_user_prompt_renders_fixture_item",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_stub_item",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "_review_item",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_reviewer_report",
+        "path": "tests/standard_names/test_dd_gap_evidence_rule.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_transition_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1708,
+        "name": "test_reconcile_fails_closed_when_evidence_changes_after_preflight",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 1719,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 721,
+        "name": "test_from_signal_row",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 288,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_make_name",
+        "path": "tests/standard_names/test_docs_review_content_gate.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_rename_plan",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "_accepted_docs_node",
+        "path": "tests/standard_names/test_edit_parity.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_generate_name_dd_item",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_refine_name_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "_review_names_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_review_docs_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "_review_docs_parent_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 456,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 938,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_header_omits_catalog_sha",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_mock_extraction_returns_gyrokinetics",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_scoped_review_restage_is_atomic_in_seed_expand_and_readback",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "test_claim_review_docs_returns_scalar_physics_domain",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "test_rename_successor_uses_unanimous_dd_source_unit",
+        "path": "tests/standard_names/test_rename_unit_derivation.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_item",
+        "path": "tests/standard_names/test_review_feedback_render.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_review_single_batch_no_explicit_temperature",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 470,
+        "name": "_docs_item",
+        "path": "tests/standard_names/test_review_quorum_pool.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_kind_reclassification_defaults_to_an_exact_zero_write_preview",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_public_refresh_restamps_raw_convergence_without_steering",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_group",
+        "path": "tests/standard_names/test_stranded_identity_census.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 634,
+        "name": "_label",
+        "path": "tests/standard_names/test_tombstone_supersede.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 402,
+        "name": "_stage_options",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_candidate_selection_passes_focus_to_the_stage",
+        "path": "tests/cli/test_discover_candidates_focus.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_command_builds_options_and_calls_stage",
+        "path": "tests/cli/test_discover_paths_stage.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 282,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_rejudge_asks_every_content_question",
+        "path": "tests/discovery/test_code_ingested_rejudge.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 1606,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 536,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 385,
+        "name": "test_facility_records_every_database_route_and_loader",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_every_database_signal_has_a_persisted_access_method",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 539,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 1132,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 655
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_name_mode_sets_name_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_docs_mode_sets_docs_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 923,
+        "name": "test_audit_covers_every_attachment_writer",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_all_values_non_empty",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 583,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 655
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 948,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 990,
+        "name": "_make_mock_state",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 439,
+        "name": "test_prompt_describes_structured_chain",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 547,
+        "name": "test_source_reset_writes_only_source_state_and_non_lifecycle_name_cache",
+        "path": "tests/standard_names/test_provenance_lifecycle.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "test_source_hint_cas_sets_only_steering_fields",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_source_hint_prompt_is_conditional_and_non_authoritative",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "_wipe",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_the_routed_consumers_no_longer_read_it",
+        "path": "tests/standard_names/test_vocab_consumers_see_operators.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "test_judgment_question_set_and_storage_slots",
+        "path": "tests/wiki/test_wiki_judgments.py"
+      },
+      "run_function": {
+        "line": 654,
+        "name": "_done_count",
+        "path": "imas_codex/cli/discover/sequence.py"
+      },
+      "window_line": 656
+    },
+    {
+      "existing_function": {
+        "line": 227,
+        "name": "test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 476,
+        "name": "test_until_runs_dependency_closure_in_registry_order",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 479
+    },
+    {
+      "existing_function": {
+        "line": 428,
+        "name": "test_cli_parses_repeated_and_comma_separated_domains",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 476,
+        "name": "test_until_runs_dependency_closure_in_registry_order",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 478
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_bare_focus_requires_one_domain_before_stages",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 476,
+        "name": "test_until_runs_dependency_closure_in_registry_order",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 478
+    },
+    {
+      "existing_function": {
+        "line": 576,
+        "name": "test_bare_candidate_focus_reaches_stage",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 476,
+        "name": "test_until_runs_dependency_closure_in_registry_order",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 482
+    },
+    {
+      "existing_function": {
+        "line": 227,
+        "name": "test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 555,
+        "name": "test_bare_focus_requires_one_domain_before_stages",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 558
+    },
+    {
+      "existing_function": {
+        "line": 428,
+        "name": "test_cli_parses_repeated_and_comma_separated_domains",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 555,
+        "name": "test_bare_focus_requires_one_domain_before_stages",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 557
+    },
+    {
+      "existing_function": {
+        "line": 476,
+        "name": "test_until_runs_dependency_closure_in_registry_order",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 555,
+        "name": "test_bare_focus_requires_one_domain_before_stages",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 557
+    },
+    {
+      "existing_function": {
+        "line": 576,
+        "name": "test_bare_candidate_focus_reaches_stage",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 555,
+        "name": "test_bare_focus_requires_one_domain_before_stages",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 561
+    },
+    {
+      "existing_function": {
+        "line": 227,
+        "name": "test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 576,
+        "name": "test_bare_candidate_focus_reaches_stage",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 428,
+        "name": "test_cli_parses_repeated_and_comma_separated_domains",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 576,
+        "name": "test_bare_candidate_focus_reaches_stage",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 476,
+        "name": "test_until_runs_dependency_closure_in_registry_order",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 576,
+        "name": "test_bare_candidate_focus_reaches_stage",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_bare_focus_requires_one_domain_before_stages",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 576,
+        "name": "test_bare_candidate_focus_reaches_stage",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "window_line": 580
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "aa0e40b896cd46e57628edd979ab5c306c2d505e",
+    "00a9856539ae16880b3b81cb3bea0d7839c3cfe0"
+  ],
+  "completed_at": "2026-10-08T14:46:30Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T14:38:08Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/discover-until-option uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/discover-until-option/tests/cli/test_discover_sequence.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T143749148843-discover-until-option/final-gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.842,
+    "at_dispatch": 0.857,
+    "plan": "jt60sa-discovery-completion",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.170655393935359,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T09:05:17Z, which is after this node's 3600s horizon ending 2026-10-08T15:37:51.448741+00:00",
+    "horizon_ends_at": "2026-10-08T15:37:51.448741+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T14:37:50Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T09:05:17Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 484628,
+    "state": "quiet",
+    "utilisation_pct": 63.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T14:37:50Z",
+    "read_at": "2026-10-08T14:37:51Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 63.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T14:46:30Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T143749148843-discover-until-option/manifest.md",
+  "member": "disposable-r-20261008T143749148843-discover-until-option",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/cli/test_discover_sequence.py::test_until_runs_dependency_closure_in_registry_order[mapping-expected2]",
+      "tests/cli/test_discover_sequence.py::test_until_runs_dependency_closure_in_registry_order[signals-expected0]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/cli/test_discover_sequence.py::test_until_runs_dependency_closure_in_registry_order[mapping-expected2]",
+      "tests/cli/test_discover_sequence.py::test_until_runs_dependency_closure_in_registry_order[signals-expected0]"
+    ],
+    "declaration": "remove the context edges from the closure and show the --until signals test failing",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T143749148843-discover-until-option/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T143749148843-discover-until-option/negative-control.log",
+    "test_paths": [
+      "tests/cli/test_discover_sequence.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "discover-until-option",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 465,
+          "cached_input_tokens": 347578,
+          "input_tokens": 348045,
+          "output_tokens": 654,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 348699,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "tests in tests/cli/test_discover_sequence.py show the selected stages and run order for --until signals, --until code and --until mapping, the --skip wiki stale-context report, the --until with --only refusal and the --only signals context warning, all passing with uv run --no-sync pytest -p no:cacheprovider tests/cli/test_discover_sequence.py, plus a negative control that removes the context edges and fails the --until signals test",
+    "estimated_hours": null,
+    "goal": "add a discover --until STAGE option that runs the target stage's dependency closure in registry order",
+    "id": "discover-until-option",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T14:37:50Z",
+      "read_at": "2026-10-08T14:37:51Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 63.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T143749148843-discover-until-option/manifest.md",
+    "negative_control": "remove the context edges from the closure and show the --until signals test failing",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§57",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/cli/discover/sequence.py",
+      "tests/cli/test_discover_sequence.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/discover-until-option.html",
+      "docs/figures/jt60sa-discovery-completion/discover-until-option"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.1705034694307708,
+      "derived": 0.2185772722476852,
+      "drain_hours": 168.0,
+      "effective_limit": 0.2185772722476852,
+      "elapsed_fraction": 0.19870661113425925,
+      "elapsed_hours": 33.382710670555554,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T14:37:56+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.37,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.63,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.690606,
+      "decided_by": "window",
+      "margin": -0.04685600000000001,
+      "name": "discover-until-option",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "split",
+      "window_fill": 0.63
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.758414,
+        "observed_at": "2026-10-08T14:37:56+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.63,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "discover-until-option",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T14:37:56.758414+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "hold",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": null,
+    "comment": "",
+    "confidence": 0.73,
+    "decision_source": "jev",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": null,
+    "jev_latency_ms": 1466.456,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2387.507,
+    "model": null,
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1441984.671166,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65711,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1441984.671166,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65711,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1441984.671166,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65711,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "full",
+          "running": 12,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 65711,
+          "headroom_pct": 71.4,
+          "peak_utilisation_p50_pct": 60.1,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 425,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 102,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 32.803166,
+        "budget_reason": null,
+        "burn_multiple": 3.170026916974235,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65711,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.608842382337962,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 3,
+          "passed": 50,
+          "unknown": 0
+        },
+        "pace_allowance": 0.21861013112830693,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 63.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 32.803166,
+        "budget_reason": null,
+        "burn_multiple": 3.170026916974235,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65711,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.608842382337962,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.21861013112830693,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 63.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 32.803166,
+        "budget_reason": null,
+        "burn_multiple": 3.170026916974235,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65711,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.608842382337962,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.21861013112830693,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 63.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.01,
+      "claude:claude-sonnet-5-5": 0.01,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0.01,
+      "codex:gpt-6-sol": 0.19,
+      "hold": 0.76,
+      "local:deepseek-v4.1-flash": 0.02
+    },
+    "rendered_token_estimate": 1863,
+    "usage": {
+      "cost": 0.000223566,
+      "input_tokens": 5323,
+      "output_tokens": 141
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "00a9856539ae16880b3b81cb3bea0d7839c3cfe0",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "47df56a2710a289c6b0f3c592b4935c41dca49b4",
+    "reviewed_head_sha": "00a9856539ae16880b3b81cb3bea0d7839c3cfe0",
+    "scores": {
+      "durability": 19,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 112
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T143749148843-discover-until-option",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§57",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a11bf3-5b17-7572-b758-1249522bdc67",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 4,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4091520,
+    "cumulative_input_tokens": 8299109,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 20659
+  },
+  "time_budget": "60m",
+  "tool_steps": 80.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 10787,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Two scoped EDAS scan attempts failed after different fixes (JSON date serialization; then remote enumerator exit 255); satisfying the node's mandatory stop rule. The scanner failures prevented UDDB and LCDB route persistence; so the drain was not started.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 14387,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T10:49:27Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T10:38:12Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 374,
+          "worker_pid": 896860
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Two scoped EDAS scan attempts failed after different fixes (JSON date serialization; then remote enumerator exit 255); satisfying the node's mandatory stop rule. The scanner failures prevented UDDB and LCDB route persistence; so the drain was not started.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T10:49:27Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 13708,
+        "log_fresh": false,
+        "manifest_commits": [
+          "c928f987d158ae4e1753a0cb76c51bf6f00b618d",
+          "2a9eb46f6ae6d567b6fca14b278b6ff618e159a7"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "34f7d43b222d1fe9775e4ade58cee9d1677cb241c900a1ae3b58522eaaf4a733",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/manifest.md; resolve the blocker before resuming the run",
+        "node": "jt60sa-signals-stage",
+        "phase": "blocked",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+        "session": "jt60sa-20261005",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261008T093733679102-jt60sa-signals-stage",
+          "session_id": "01a11ae0-77a0-78c3-bbee-f6de1ebd463c",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 13731,
+        "terminal_at": "2026-10-08T10:49:02Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/jt60sa-signals-stage"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 2700,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 1850,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T14:19:16Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T14:07:06Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T134034354652-code-ingest-claim-once",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 638,
+          "worker_pid": 3055659
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T14:19:16Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1121,
+        "log_fresh": false,
+        "manifest_commits": [
+          "8d820383273ca21af189db021071e0068c98b9a5",
+          "dc2a4896a0b550b17f740acbe482cec38e9ee30b",
+          "49a91f19e6c8cf4c0b063af9e3cb095bcc5d299e",
+          "16cded4a2800e066adc90a8c890a75181cc47ec5",
+          "b1a13fdba01b969448b49f599ce9155a4f38b755",
+          "e5daecb1e53d6e301d139028608a8b6c9b090592"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "8d85ab3ab5ea54b3ddf379b2803a2be90524f7feee1300c1dfe60ad195d39816",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T134034354652-code-ingest-claim-once/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --plan jt60sa-discovery-completion --section '§41' --role review --spec-level exact --node review-of-code-ingest-claim-once --goal 'attach an independent review to run r-20261008T134034354652-code-ingest-claim-once' --done-when 'the review for r-20261008T134034354652-code-ingest-claim-once stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T134034354652-code-ingest-claim-once.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261008T134034354652-code-ingest-claim-once.at-e5daecb1e53d6e301d139028608a8b6c9b090592.json --time-budget 45m --session jt60sa-20261005 --allow-unreconciled-runs --local",
+        "node": "code-ingest-claim-once",
+        "phase": "complete",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T134034354652-code-ingest-claim-once",
+        "session": "jt60sa-20261005",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1162,
+        "terminal_at": "2026-10-08T14:18:31Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-ingest-claim-once"
+      }
+    ]
+  },
+  "wall_seconds": 502,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T14:46:32Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T14:38:13Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T143749148843-discover-until-option",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 215,
+    "worker_pid": 3573048
+  },
+  "worker_seconds": 502,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
