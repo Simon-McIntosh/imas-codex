@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -410,6 +410,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T043352243384-fold-signals-stage" data-who="reckon-build" data-when="2026-10-08T05:17:23.833Z">
     <div class="r-comment-body"><p>signals.py exposes run_signals_stage(facility, options) with a frozen SignalsStageOptions and the click command is a thin wrapper that builds the options and calls it; the --focus refusal states the mechanism (the claim query takes no item filter) with no plan reference; gate 21 passed (11 new) at 32913438b; negative control makes the stage ignore --flush and the two --flush tests then fail.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T050059274277-review-of-fold-candidates-stage" data-who="reckon-build" data-when="2026-10-08T05:23:40.176Z">
+    <div class="r-comment-body"><p>review of run r-20261008T043424229971-fold-candidates-stage stored to reviews/imas-codex/r-20261008T043424229971-fold-candidates-stage.json (+ .at-ed4fdf1d3 copy): status parsed, six dimensions scored goal_fidelity 18 / evidence 18 / scope_discipline 19 / durability 18 / fit 19 / reuse 19, total 111; reviewed_base_sha df596be2, reviewed_head_sha ed4fdf1d3; added_failure_count 1, added_failure_ids [tests/cli/test_discover_candidates_stage.py::test_flush_runs_the_draining_worker] -- that id is the run&#x27;s own declared negative control, not a regression; two follow-on findings (map.py:92 drain-only no-op for --scan-only/--topic; the run manifest suite mislabeling).</p></div>
 </div>
 </section>
 </main>
