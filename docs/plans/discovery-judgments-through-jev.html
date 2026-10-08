@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -308,6 +308,9 @@ graph write, no discover run.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T020846501902-judge-function" data-who="reckon-build" data-when="2026-10-08T02:45:15Z">
     <div class="r-comment-body"><p>Shared judge, model-aware stale claims, and scoped remote-free rejudgment committed in c47801540 and 437119048; base 1849 passed, final head 1856 passed, zero added failures; model-blind mutation failed the stale-claim test.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T024710258732-review-of-judge-function" data-who="reckon-build" data-when="2026-10-08T03:00:25.585Z">
+    <div class="r-comment-body"><p>independent review of run r-20261008T020846501902-judge-function (judge-function) scored 6/6 dimensions, total 119/120; no blocking finding, one follow-on on the RERANK_POOL guard.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-s4-design" data-who="lead" data-when="2026-10-08T02:25:00Z">
     <div class="r-comment-body"><p><strong>Lead, 2026-10-08: this is critical-path work.</strong> JT-60SA code discovery now waits on it.

@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: baseline_suite (rev 9542178aab, tests/discovery+tests/ids) records 1849 passed, 0 failures (failure_ids []) at EXIT=0; after_suite (rev 437119048, same selection) records 1856 passed, 0 failures (failure_ids []) at EXIT=0. Added failures = 0.",
+  "backend": "local",
+  "base_log_revision": "9542178aab31dd9113a4f051b780c01b6b3fa5ab",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py:337",
+    "imas_codex/discovery/code/workers.py:640",
+    "imas_codex/discovery/code/workers.py:804"
+  ],
+  "completed_at": "2026-10-08T03:00:25.585Z",
+  "dispatched_at": "2026-10-08T02:47:29Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_judgment.py",
+      "line": "297",
+      "severity": "follow-on",
+      "text": "follow-on: the RERANK_POOL guard pins RERANK_POOL > 30, a hardcoded threshold, while the invariant the section comment asked for is that the pool exceeds the k the search tools return. The search-tool entry points default k=10 and already enforce the identity in code via pool = max(k, RERANK_POOL) (imas_codex/llm/search_tools.py:891,1647), so the assertion is weaker than the stated ask (a k of 31-59 passed by a caller would satisfy max() but the guard would still hold at 60). It does prevent the stated regression to 30. Not a blocker."
+    }
+  ],
+  "head_log_revision": "43711904813bbc85340fac387e03649db4c58b8d",
+  "item_aggregate": 0,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s) of judge_rows in imas_codex/discovery/code/workers.py (triage_worker, score_worker, rejudge_ingested_files); no inline decision loop remains (no acall_decisions / Semaphore / asyncio.gather in workers.py)",
+    "diff": "two commits c47801540 and 437119048 against base 9542178aab touch 9 files inside the declared write paths: judgment.py (judge_rows + rerank sort-key fix), claims.py (judgment_selection + claim_batch order_key/node_alias/match_clause/graph_client), graph_ops.py (triage/score_judgment_selection + two claims and two pending checks moved onto claim_batch), scorer.py (apply_stale_content_rejudge), parallel.py (counts read the shared selection), workers.py (both arms routed through judge_rows), and three test files.",
+    "done_when": "all six \u00a73 done-when items are measured: an ordinary scoped score run re-judges a stale/ingested row from stored chunks with the remote executor refusing (test_scoped_stale_ingested_judgment_uses_chunks_without_remote_executor, 7 new tests pass at head); never-judged-first ordering asserted by test_stale_name_claim_checks_model_and_claims_unjudged_first; ingested status/chunks untouched (apply_ingested_rejudge + the no-DETACH/no-status assertion); no inline loop in workers.py; same fields via _relevance_item/_relevance_set_clause; spend recorded on all three workers.",
+    "goal": "the node's goal is to add one judge function (judge_rows) on decide_batch and make stale judgments claimable work; judgment.py:136 builds it on decide_batch, claims.py:254 writes the stale predicate and never-judged-first order once, and graph_ops.py:47,61 supply the two code-pipeline selections.",
+    "manifest": "read; it records two commits, nine changed paths, baseline_suite/after_suite with revision+command+exit_status+completed+failure_count+failure_ids, a negative control log and a base-arm reproduction log; reckon crew check-manifest reported no findings.",
+    "write_paths": "the two commits touch only imas_codex/discovery/{base/judgment.py,base/claims.py,code/graph_ops.py,code/parallel.py,code/scorer.py,code/workers.py} and tests/discovery/{test_judgment.py,test_code_relevance.py,test_code_claims_prefix_scope.py}, all inside the declared write paths; no path outside them and no generated file staged."
+  },
+  "justifications": {
+    "durability": "test_code_claims_prefix_scope.py:166 asserts the claimed set is {fresh, stale} and that the current-model and out-of-prefix rows carry no claim_token, driving the real generated predicate (the stub only matches on the literal 'coalesce(sf.relevance_model, \\'\\') <> $judgment_model' substring the query emits); the declared negative control (negative-stale-model-final.log) strips the model comparison and the same test fails EXIT=1 while the committed head passes it EXIT=0 in head-stale-control-final.log; the base arm reproduces the missing-stale-row defect (base-stale-reproduction-valid.log, EXIT=1).",
+    "evidence": "all six done-when items carry a test that fails without the change: the remote-executor refusal is asserted by monkeypatching run_python_script/async_run_python_script to raise; the never-judged-first order, the status/chunk preservation and the spend assertions are in the added tests; both full suites completed with zero failures (1849 -> 1856 passed, 0 added).",
+    "fit": "judge_rows mirrors decide_batch's shape in the same module and imports nothing from imas_codex.llm (enforced by test_judgment_imports_nothing_from_the_llm_package); the claim move reuses the existing claim_batch/release_claims_batch helpers; added symbols carry no plan label.",
+    "goal_fidelity": "judge_rows (judgment.py:136) is built on decide_batch, takes rows/state_for/questions_for/apply, runs decide_batch under a concurrency bound, books the reported spend and applies only answered rows; the two code arms and the ingested rejudge all call it; the stale predicate and never-judged-first order are written once in judgment_selection (claims.py:254) and read by both the claims and the pending counts.",
+    "reuse": "claim_batch is generalised once (order_key/node_alias/match_clause/graph_client) rather than duplicated across the two claims; judgment_selection is shared by triage and score; judge_rows replaces the three hand-rolled asyncio.gather decision loops; no second judge or claim owner was introduced.",
+    "scope_discipline": "git diff --stat 9542178aab..437119048 shows exactly 9 files, all inside the declared write paths; the declared-but-unneeded reset.py, test_code_ingested_rejudge.py, fragment and figures paths were left untouched; no generated models staged."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to add one judge function on decide_batch and make stale judgments claimable work; judgment.py:136 (judge_rows) is built on decide_batch, claims.py:254 (judgment_selection) writes the stale predicate and never-judged-first order once, and graph_ops.py:47,61 supply the two code-pipeline selections.\nVERDICT done_when: all six done-when items are measured: a scoped ordinary score run re-judges a stale/ingested row from stored chunks with the remote executor refusing (test_scoped_stale_ingested_judgment_uses_chunks_without_remote_executor); never-judged-first asserted by test_stale_name_claim_checks_model_and_claims_unjudged_first; ingested status/chunks untouched (apply_ingested_rejudge plus the no-status/no-DETACH assertion); no inline loop in workers.py; same fields via _relevance_item/_relevance_set_clause; spend recorded on all three workers.\nVERDICT write_paths: the two commits touch only imas_codex/discovery/{base/judgment.py,base/claims.py,code/graph_ops.py,code/parallel.py,code/scorer.py,code/workers.py} and three tests/discovery files, all inside the declared write paths; no path outside them and no generated file staged.\nVERDICT manifest: read; it records two commits, nine changed paths, baseline_suite/after_suite with revision+command+exit_status+completed+failure_count+failure_ids, a negative control log and a base-arm reproduction log.\nVERDICT diff: commits c47801540 and 437119048 against base 9542178aab touch 9 files inside scope: the judge function on the existing sorting fix in judgment.py, the shared judgment_selection predicate and generalised claim_batch in claims.py, the code-pipeline selections and moved claims/counts in graph_ops.py, apply_stale_content_rejudge in scorer.py, the shared-selection counts in parallel.py, the three workers routed through judge_rows, and three test files.\nCALL_SITES: imas_codex/discovery/code/workers.py:337, imas_codex/discovery/code/workers.py:640, imas_codex/discovery/code/workers.py:804\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: judge_rows (judgment.py:136) is built on decide_batch, takes rows/state_for/questions_for/apply, runs decide_batch under a concurrency bound, books the reported spend and applies only answered rows; the two code arms and the ingested rejudge all call it; the stale predicate and never-judged-first order are written once in judgment_selection (claims.py:254) and read by both the claims and the pending counts.\nSCORE evidence: 20\nJUSTIFICATION evidence: all six done-when items carry a test that fails without the change: the remote-executor refusal is asserted by monkeypatching run_python_script/async_run_python_script to raise; the never-judged-first order, the status/chunk preservation and the spend assertions are in the source tree; both full suites completed with zero failures (1849 -> 1856 passed, 0 added).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 9542178aab..437119048 shows exactly 9 files, all inside the declared paths; declared-but-unneeded reset.py, test_code_ingested_rejudge.py, fragment and figures paths were left untouched.\nSCORE durability: 19\nJUSTIFICATION durability: test_code_claims_prefix_scope.py:166 asserts the claimed set is {fresh, stale} and that the current-model and out-of-prefix rows carry no claim_token, driving the real generated predicate; the declared negative control (negative-stale-model-final.log) strips the model comparison and the same test fails EXIT=1 while the committed head passes EXIT=0 (head-stale-control-final.log). Reserving one point because the fake-graph stub partly re-expresses the Cypher predicate the test asserts against.\nSCORE fit: 20\nJUSTIFICATION fit: judge_rows mirrors decide_batch's shape in the same module and imports nothing from imas_codex.llm; the claim move reuses claim_batch/release_claims_batch; added symbols carry no plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: claim_batch is generalised once (order_key/node_alias/match_clause/graph_client) rather than duplicated across the two claims; judgment_selection is shared by triage and score; judge_rows replaces the three hand-rolled decision loops.\nFINDING tests/discovery/test_judgment.py:297 follow-on: the RERANK_POOL guard pins RERANK_POOL > 30, a hardcoded threshold, while the section comment asked that the pool exceed the k the search tools return; the search-tool entry points already enforce the identity via pool = max(k, RERANK_POOL) (imas_codex/llm/search_tools.py:891,1647), so the assertion is weaker than the stated ask though it does prevent the regression to 30. Not a blocker.",
+  "review_run_id": "r-20261008T024710258732-review-of-judge-function",
+  "reviewed_base_sha": "9542178aab31dd9113a4f051b780c01b6b3fa5ab",
+  "reviewed_head_sha": "43711904813bbc85340fac387e03649db4c58b8d",
+  "reviewed_run_id": "r-20261008T020846501902-judge-function",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T02:56:00.000000+00:00",
+  "total": 119
+}
