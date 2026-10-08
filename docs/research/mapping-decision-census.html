@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mapping-decision-census">
+  <meta name="plan-title" content="Mapping decision census">
+  <meta name="plan-summary" content="Live graph census of the transform decisions in written IMAS bindings">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-informs" content="mapping-decision-chain">
+  <title>Mapping decision census | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Mapping decision census</h1>
+    <p>
+      At 2026-10-08 09:57 UTC, the live graph contained <strong>zero</strong>
+      <code>MAPS_TO_IMAS</code> relationships. The endpoint-scoped query also returned zero.
+      Thus no written transform exists to classify, and the observed counts for every slot
+      are zero. These zeros describe the current graph, not the share a future code resolver
+      can settle. No settlement rate or judgment threshold can be estimated from an empty
+      binding cohort.
+    </p>
+
+    <h2 id="coverage">Coverage and positive controls</h2>
+    <p>
+      The scan used <code>SignalSource.facility_id</code> to enumerate facilities and
+      counted bindings from each facility's sources to <code>IMASNode</code>. The graph
+      has 2,335 JET and 5,086 JT-60SA signal sources. A separate relationship query
+      found 2,958 <code>MAPPING_CANDIDATE</code> edges, all with a facility-bearing
+      source and an identified target, while 42 <code>IMASMapping</code> nodes have
+      207 <code>USES_SIGNAL_SOURCE</code> links. The DD has 61,366
+      <code>IMASNode</code> nodes, 553 carrying
+      <code>cocos_transformation_type</code>. These positive controls show that the
+      graph and the queried endpoint classes contain data; the binding absence is not
+      inferred from an empty graph or a missing source or DD label property.
+    </p>
+
+    <h2 id="slots">Transform slots by facility</h2>
+    <p>
+      Each row counts bindings whose expression sets the named slot. A binding could
+      contribute to several rows. “Code” means the slot could be settled from a DD
+      <code>cocos_transformation_type</code> and recorded source COCOS, or from pint
+      with recorded source and target units. “Judgment” means the binding's evidence
+      leaves that slot open. The graph currently has no rows on which to apply either
+      classification, so both count columns are zero; the split is unmeasured rather
+      than evidence that code can handle every future slot.
+    </p>
+    <table>
+      <thead><tr><th>Facility</th><th>Slot</th><th>Bindings setting slot</th><th>Code</th><th>Judgment</th></tr></thead>
+      <tbody>
+        <tr><td>JET</td><td>Sign</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JET</td><td>Constant factor</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JET</td><td>Unit conversion</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JET</td><td>COCOS sign call</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JET</td><td>Index or slice</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JET</td><td>Other</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JT-60SA</td><td>Sign</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JT-60SA</td><td>Constant factor</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JT-60SA</td><td>Unit conversion</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JT-60SA</td><td>COCOS sign call</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JT-60SA</td><td>Index or slice</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>JT-60SA</td><td>Other</td><td>0</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/imas-codex/figures/mapping-decision-census/slot-counts.svg"
+           alt="For each of six transform slots, code-settleable and judgment counts are both zero because the live graph has no written bindings">
+      <figcaption>
+        Code-settleable circles and judgment crosses are offset horizontally so both zero
+        values remain visible. The two facilities have identical zero counts; the table
+        retains their separate rows. No nonzero slot comparison is available.
+      </figcaption>
+    </figure>
+
+    <h2 id="sign">COCOS sign comparison</h2>
+    <p>
+      Written-sign disagreements with <code>cocos_sign</code> for a source's recorded
+      COCOS: <strong>0 bindings</strong>. There are no examples to show because there
+      are no written bindings, including none with a recorded source COCOS. This is not
+      a validation of any sign. The comparison requires a binding expression, its DD
+      label, the source COCOS and the target COCOS; none can be compared until a
+      binding is written.
+    </p>
+
+    <h2 id="queries">Cypher and reproduction</h2>
+    <p>
+      The queries below ran on the live Neo4j database through <code>GraphClient</code>.
+      The global count establishes that no relationship of the requested type exists,
+      even with another endpoint label. The typed count and row extraction establish
+      the exact cohort whose expressions would be classified. Since that extraction
+      returned an empty list, every facility-slot count and the disagreement count
+      above follows directly as zero. The source-facility query defines the table's
+      facility domain. A new binding requires rerunning the extraction and doing an
+      expression-level slot and COCOS comparison; this empty-cohort result cannot be
+      extrapolated to it.
+    </p>
+    <pre><code>MATCH ()-[r:MAPS_TO_IMAS]-&gt;()
+RETURN count(r) AS bindings;
+
+MATCH (s:SignalSource)-[r:MAPS_TO_IMAS]-&gt;(t:IMASNode)
+RETURN count(r) AS bindings;
+
+MATCH (s:SignalSource) WHERE s.facility_id IS NOT NULL
+WITH DISTINCT s.facility_id AS facility
+OPTIONAL MATCH (ss:SignalSource {facility_id: facility})
+  -[r:MAPS_TO_IMAS]-&gt;(:IMASNode)
+RETURN facility, count(r) AS bindings ORDER BY facility;
+
+MATCH (s:SignalSource) WHERE s.facility_id IS NOT NULL
+RETURN s.facility_id AS facility, count(s) AS sources ORDER BY facility;
+
+MATCH (s:SignalSource)-[r:MAPPING_CANDIDATE]-&gt;(t:IMASNode)
+RETURN count(r) AS candidates, count(s.facility_id) AS with_facility,
+       count(t.id) AS with_target;
+
+MATCH (m:IMASMapping)-[r:USES_SIGNAL_SOURCE]-&gt;(s:SignalSource)
+RETURN count(DISTINCT m) AS mappings, count(r) AS links,
+       count(s) AS source_endpoints;
+
+MATCH (t:IMASNode)
+RETURN count(t) AS targets,
+       count(t.cocos_transformation_type) AS labeled_targets;
+
+MATCH (s:SignalSource)-[r:MAPS_TO_IMAS]-&gt;(t:IMASNode)
+RETURN s.facility_id AS facility, s.id AS source, t.id AS target,
+       r.transform_expression AS expression,
+       r.source_units AS source_units, r.target_units AS target_units,
+       r.cocos_label AS edge_label, r.cocos_source AS cocos_source,
+       r.cocos_target AS cocos_target,
+       t.cocos_transformation_type AS dd_label, t.units AS dd_units
+ORDER BY facility, source, target;</code></pre>
+    <p>
+      Observed results: global bindings 0; typed bindings 0; facility bindings
+      JET 0 and JT-60SA 0; sources JET 2,335 and JT-60SA 5,086; candidate
+      edges 2,958 (all 2,958 with source facility and target ID); linked
+      mappings 42 with 207 source links; DD nodes 61,366 with 553 labels;
+      extracted binding rows 0. The complete query text and result rows are
+      preserved in the run's <code>census_queries.log</code>.
+    </p>
+  </main>
+</body>
+</html>
