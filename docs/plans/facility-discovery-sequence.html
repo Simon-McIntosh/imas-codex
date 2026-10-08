@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="84">
+<meta name="plan-version" content="85">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -368,7 +368,11 @@
       signals and candidates in one invocation. Mapping is not in it: under the opt-in decision it waits for the
       per-source conventions that <code>jt60sa-discovery-completion</code> §56 establishes, and then runs as
       <code>--only mapping</code>. The dry run must name every domain, each with its probe result, and mapping as not
-      requested. The evidence fragment records both tables and the spend against the cap.
+      requested. The evidence fragment records both tables and the spend against the cap. It also waits for two
+      fixes in <code>jt60sa-discovery-completion</code>. On 2026-10-08 a signals rescan reset 6,053 of 6,295 checked JT-60SA
+      EDDB signals to discovered: the merge in <code>imas_codex/discovery/signals/parallel.py</code> copies the scanned status
+      over progressed signals. Node <code>signal-status-monotonic</code> fixes that, and §51 node 2 gives UDDB and LCDB signals
+      their DataAccess. Until both are on main, any run here passes <code>--skip signals</code>.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-jt60sa-proof</code>, role test, 0.5 h. Write paths:

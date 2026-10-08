@@ -23,6 +23,8 @@
   <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
   <main class="plan-doc">
@@ -83,6 +85,22 @@
       <code>docs/figures/mapping-decision-census</code> and its fragment. <strong>Done when</strong> the research document
       holds the per-facility, per-slot table of resolvable and judged counts, the count of COCOS sign disagreements with
       examples, and the Cypher it ran, and every number in it is reproduced by that Cypher on the live graph.
+    </p>
+    <p>
+      <code>mapping-decision-census</code> (84aa7ab5e) found nothing to measure: the live graph holds no
+      <code>MAPS_TO_IMAS</code> binding and no relationship carrying a <code>transform_expression</code>. Re-checked directly on
+      2026-10-08: 0 <code>MAPS_TO_IMAS</code> edges. The 53 <code>IMASMapping</code> nodes, all JET, link only to their sources.
+      146 JET SignalSources read <code>mapping_status = validated</code> with no binding edge, which is stale state. So the
+      census moves to the population the chain will actually decide: the selected or escalated
+      <code>MAPPING_CANDIDATE</code> edges. For JT-60SA there are 2,958 such edges over 151 sources. 398 target fields carry a
+      <code>cocos_transformation_type</code>, the representative signal's <code>unit</code> is set on 1,924 edges, and every
+      target has a DD unit. <strong>Node</strong> <code>mapping-slot-census-candidates</code>, role implement, 0.75 h. It
+      extends <code>docs/research/mapping-decision-census.html</code> with, per facility and per slot, how many candidate
+      edges code can settle given a known source convention, how many need a judgment, and for unit slots how many pint
+      converts exactly. Write paths: <code>docs/research/mapping-decision-census.html</code>,
+      <code>docs/figures/mapping-decision-census</code> and its fragment. <strong>Done when</strong> that table and the Cypher
+      producing it are in the document, every number reproduces on the live graph, and <code>reckon audit-doc</code> reports
+      no error.
     </p>
 
     <h2 id="s3">§3 — Typed slots replace the free-form transform</h2>
@@ -188,18 +206,18 @@
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
 <div class="r-gate" data-id="g-mdc-1" data-section="s4" data-gated-sections="s4,s7" data-status="open" data-verdict="">
-    <h4 class="r-gate-measure">a loader returns each JT-60SA source's persisted conventions, COCOS index, psi factor and per-quantity signs with evidence, leaving undetermined values absent</h4>
+    <h4 class="r-gate-measure">a loader returns each JT-60SA source&#x27;s persisted conventions, COCOS index, psi factor and per-quantity signs with evidence, leaving undetermined values absent</h4>
     <p class="r-gate-required-evidence">jt60sa-discovery-completion#s56</p>
-</div>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mdc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-08" data-recommends-skill="/reckon-build mapping-decision-chain §2">
-    <h4 class="r-fu-title">Measure the decisions inside today's bindings</h4>
+<article class="r-fu" data-id="f-mdc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-08" data-recommends-skill="/reckon-build mapping-decision-chain §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the decisions inside today&#x27;s bindings</h4>
     <div class="r-fu-body">The census sets the slot kinds §3 models and the acceptance threshold §5 uses.</div>
     <pre class="r-fu-prompt">/reckon-build mapping-decision-chain §2</pre>
-</article>
+    </article>
 </section>
   </main>
 </body>
