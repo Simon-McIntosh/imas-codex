@@ -25,7 +25,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
 <meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -490,6 +490,35 @@ asserts that the prompt the owner sends names the <code>results</code> shape. A 
 <code>discovery-score</code> seat over stored JT-60SA root rows returns a valid batch, with no facility hop. Node 2 runs
 after §15 releases <code>paths/scorer.py</code>. It moves <code>scorer.py</code> onto the same owner and retires the
 0.90 defaults named above.</p></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-20261008-s17-categorise" data-who="lead" data-when="2026-10-08T06:55:00Z">
+    <div class="r-comment-body"><p><strong>Lead, 2026-10-08: categorise before the content is known; score once it is.</strong> At the path stage the
+judge sees names, counts, child names, file types and a description generated from that same metadata. 20 of the 32
+misses had nothing beneath them in the graph. Scoring eleven facets on that evidence is guessing a degree without the
+thing it measures. The design changes as follows, and this supersedes the two binary labels in node 1 above.</p>
+<ul>
+<li><strong>Path stage: a category, and an action derived from it in code.</strong> The judge answers the
+<code>path_purpose</code> Choice it already asks, over the <code>PathPurpose</code> values, plus the children-worth-listing
+Noul. The scan, expand and skip decisions are code over the category distribution:
+<ul>
+<li>scan when the probability of the code-bearing categories clears a calibrated threshold (modeling, analysis and
+operations code, data access, workflow, visualization, software project, test suite);</li>
+<li>expand for containers, or when children-worth-listing clears its threshold;</li>
+<li>route experimental and modeling data to data-store handling;</li>
+<li>skip archives, build artifacts, system directories and empty directories.</li>
+</ul>
+No facet Score is asked at the path stage.</li>
+<li><strong>Content stage: scores.</strong> The eleven facet Scores are judged where content is read, by the code
+judge's content arm on each file. A path's facet values become a roll-up of its judged files, stored with the count of
+files they rest on, so a path score always names the evidence behind it.</li>
+<li><strong>Goldens are categories.</strong> Node 1 labels each path with its <code>PathPurpose</code> category from
+source inspection on the facility, marks each working copy with the canonical path it copies, and caps any one tree at
+a quarter of the set. It reports category accuracy and macro-F1 for the Choice, and scan-or-expand AUC with
+confidence intervals, for two gates: the current maximum-of-facets gate and the category-derived gate. It also locates
+the variation with three frozen-state and three fresh-description judgments per path.</li>
+<li><strong>Node 2</strong> implements the category gate and the file roll-up, and adds the graph neighbourhood to
+each judge's state, measured against node 1's labels.</li>
+</ul></div>
 </div>
 </section>
 </main>
