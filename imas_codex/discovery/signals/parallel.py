@@ -2590,22 +2590,31 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
         with GraphClient() as gc:
             for i in range(0, len(signals), batch_size):
                 batch = signals[i : i + batch_size]
+                scan_rows = [
+                    {
+                        "signal": sig,
+                        "scanned": {
+                            key: value for key, value in sig.items() if key != "status"
+                        },
+                    }
+                    for sig in batch
+                ]
 
                 # Phase 1: Create/update signal nodes + AT_FACILITY edge
                 gc.query(
                     """
-                    UNWIND $signals AS sig
+                    UNWIND $rows AS row
+                    WITH row.signal AS sig, row.scanned AS scanned
                     MERGE (s:FacilitySignal {id: sig.id})
-                    ON CREATE SET s.discovered_at = datetime()
-                    WITH s, sig, s.status AS existing_status
-                    SET s += sig,
-                        s.status = coalesce(existing_status, sig.status),
-                        s.claimed_at = null
+                    ON CREATE SET s += sig,
+                                  s.discovered_at = datetime()
+                    ON MATCH SET s += scanned,
+                                 s.claimed_at = null
                     WITH s, sig
                     MATCH (f:Facility {id: sig.facility_id})
                     MERGE (s)-[:AT_FACILITY]->(f)
                     """,
-                    signals=batch,
+                    rows=scan_rows,
                 )
 
                 # Phase 2: Create DATA_ACCESS edges for signals with data_access

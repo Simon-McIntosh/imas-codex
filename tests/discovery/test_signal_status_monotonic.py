@@ -54,6 +54,8 @@ def test_rescan_preserves_checked_signal_status():
                 parallel, "GraphClient", return_value=_TransactionClient(transaction)
             ):
                 assert parallel.ingest_discovered_signals([scanned]) == 1
+                new_signal = {**scanned, "id": f"{signal_id}:new"}
+                assert parallel.ingest_discovered_signals([new_signal]) == 1
             result = transaction.run(
                 "MATCH (s:FacilitySignal {id: $id}) "
                 "RETURN s.name AS name, s.status AS status, s.checked_at AS checked_at",
@@ -62,6 +64,13 @@ def test_rescan_preserves_checked_signal_status():
             assert result["name"] == "rescanned"
             assert result["checked_at"] is not None
             assert result["status"] == FacilitySignalStatus.checked.value
+            created = transaction.run(
+                "MATCH (s:FacilitySignal {id: $id}) "
+                "RETURN s.status AS status, s.discovered_at AS discovered_at",
+                id=new_signal["id"],
+            ).single()
+            assert created["status"] == FacilitySignalStatus.discovered.value
+            assert created["discovered_at"] is not None
         finally:
             transaction.rollback()
 
