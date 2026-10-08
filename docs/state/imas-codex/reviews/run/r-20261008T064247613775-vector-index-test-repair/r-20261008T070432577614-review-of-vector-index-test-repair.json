@@ -1,0 +1,58 @@
+{
+  "absent": {},
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/graph/dd_identifier_enrichment.py:354",
+    "imas_codex/graph/dd_ids_enrichment.py:455"
+  ],
+  "completed_at": "2026-10-08T07:13:13.485Z",
+  "dispatched_at": "2026-10-08T07:04:45Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's manifest leaves the structured baseline_suite field empty although baseline.log records the pre-fix arm (4 failed, EXIT=1). The two gate logs are on disk and were used to derive added_failure_count/ids, but a coordinator reading only manifest.md's JSON fields sees no baseline arm for an armed node. Serialising baseline.log into the baseline_suite block would make the record self-contained."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the single index-DDL owner at imas_codex/graph/client.py:407 and its production callers, imas_codex/graph/dd_identifier_enrichment.py:354 and imas_codex/graph/dd_ids_enrichment.py:455.",
+    "diff": "read abb02d6a0 in full: +6 lines in test_dd_aux_streaming.py (index_ensures counter plus two assertions) and +20/-4 in test_vector_quantization.py (props added to the stale, correct-dimension and multi-index fake rows).",
+    "done_when": "both files pass at the head (final-head.log 9 passed EXIT=0; independently reproduced in repro-head.log) and removing the dimension-mismatch drop fails the quantization tests (negative-control.log 2 failed EXIT=1; independently reproduced in scratch-nc.log).",
+    "goal": "\u00a753 delivered: the two streaming fakes implement ensure_vector_indexes and the quantization fakes supply the index shape the owner's query returns, so the existing dimension-mismatch drop is exercised against the single owner.",
+    "manifest": "read; commits names abb02d6a0, after_suite records final-head.log 9 passed EXIT=0 at abb02d6a0, negative_control_log reproduces, test_logs and artifacts reconcile with the logs I opened.",
+    "write_paths": "git show --stat abb02d6a0 lists exactly tests/graph/test_dd_aux_streaming.py and tests/graph/test_vector_quantization.py, the manifest's changed_paths."
+  },
+  "justifications": {
+    "durability": "the fix makes the fakes return the shape the owner's query actually yields, so the drop branch is exercised rather than short-circuited, and the negative control demonstrates the drop assertions fail if the drop is removed; the streaming tests now also assert the owner's index-setup call is made exactly once (client.index_ensures == 1). The guard is therefore shown to fire, not merely green.",
+    "evidence": "the reviewed run carries a reproducing baseline (baseline.log: 4 failed, 5 passed, EXIT=1) matching the plan's four named failures \u2014 two _FakeClient AttributeError from the missing ensure_vector_indexes, two TestDimensionMismatchDetection drops short-circuited by a KeyError on 'props' (client.py:485 logs \"Could not check vector index shape: 'props'\") \u2014 plus a committed-head gate (final-head.log: 9 passed, EXIT=0) and a mutation control (negative-control.log: 2 failed, EXIT=1). I independently re-ran the two files at abb02d6a0 (repro-head.log: 9 passed, EXIT=0) and re-derived the negative control in a scratch extraction by setting dimension_differs=False (scratch-nc.log: 2 failed, EXIT=1), so the drop guard fires exactly as declared.",
+    "fit": "the commit subject 'test(graph): align vector index fakes with client interface' carries a body stating what changed and why; the added symbols (index_ensures, props) describe the mechanism; no plan, sprint, ticket or phase identifier appears in the diff, message or comments.",
+    "goal_fidelity": "\u00a753 asks that the dimension-mismatch drop and the streaming tests be restored against the single owner GraphClient.ensure_vector_indexes, repairing production code where the refactor lost the drop behaviour and the test doubles where only they lag the new interface. The commit touches only the two test files: both fakes gain the interface the owner exposes (imas_codex/graph/client.py:407, called from imas_codex/graph/dd_identifier_enrichment.py:354 and imas_codex/graph/dd_ids_enrichment.py:455), and the fake index rows gain the `props` field the owner's SHOW INDEXES query returns. The drop behaviour was intact at the base \u2014 ensure_vector_indexes still drops an owned index whose dimension differs (client.py:446-483) \u2014 so no production repair was warranted and none was made. Both files pass at the head and the negative control fails the two drop tests, meeting both done-when clauses.",
+    "reuse": "the change extends the existing _FakeClient and the existing TestDimensionMismatchDetection fixtures and keeps GraphClient.ensure_vector_indexes as the single index-DDL owner; no parallel index path or duplicate DDL was introduced.",
+    "scope_discipline": "git show --stat abb02d6a0 lists exactly tests/graph/test_dd_aux_streaming.py and tests/graph/test_vector_quantization.py \u2014 the two paths the manifest declares in changed_paths. No production file is touched and no second index-DDL path is added, matching the plan's constraint. client.py was named in orientation_write_paths but correctly left unchanged once the defect was localised to the doubles."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a753 delivered \u2014 the two streaming fakes implement ensure_vector_indexes and the quantization fakes supply the props field the owner's SHOW INDEXES query returns, so the existing dimension-mismatch drop in GraphClient.ensure_vector_indexes is exercised against the single owner; no production change was needed because the drop was intact.\nVERDICT done_when: both files pass at the head (9 passed, EXIT=0) and disabling the dimension-mismatch drop fails the two TestDimensionMismatchDetection tests (2 failed, EXIT=1).\nVERDICT write_paths: exactly tests/graph/test_dd_aux_streaming.py and tests/graph/test_vector_quantization.py across abb02d6a0^..abb02d6a0.\nVERDICT manifest: commit abb02d6a0, after_suite final-head.log 9 passed EXIT=0, negative_control_log reproduces; records reconcile with the logs.\nVERDICT diff: +6 lines streaming fakes, +20/-4 quantization fake rows; tests only.\nCALL_SITES: imas_codex/graph/dd_identifier_enrichment.py:354, imas_codex/graph/dd_ids_enrichment.py:455\nSCORE goal_fidelity: 19\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 20\nSCORE reuse: 20\nFINDING manifest.md:21 follow-on: baseline_suite field left empty though baseline.log holds the 4-failure pre-fix arm; serialise it so the record is self-contained.\n",
+  "review_run_id": "r-20261008T070432577614-review-of-vector-index-test-repair",
+  "reviewed_base_sha": "44f9d67fbac21ae26991f7bd4aec0ac0144232f1",
+  "reviewed_head_sha": "abb02d6a0afc232f6e1d6d3a97a3cff2a140b1f2",
+  "reviewed_run_id": "r-20261008T064247613775-vector-index-test-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:14:00+00:00",
+  "total": 116
+}
