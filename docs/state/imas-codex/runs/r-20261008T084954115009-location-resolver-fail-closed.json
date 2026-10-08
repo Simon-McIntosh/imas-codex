@@ -1,0 +1,764 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "fd63244ced57ba37c5a2e2ed13c8bcd05938b423",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 5317632,
+      "cached_input_tokens_cumulative": 5317632,
+      "input_tokens": 5473736,
+      "input_tokens_cumulative": 5473736,
+      "output_tokens": 23551,
+      "output_tokens_cumulative": 23551,
+      "reasoning_output_tokens": 7000,
+      "reasoning_output_tokens_cumulative": 7000
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 86,
+    "files": 3,
+    "removed": 4
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_slurm_location",
+        "path": "tests/graph/test_client_address_resolution.py"
+      },
+      "run_function": {
+        "line": 25,
+        "name": "_slurm_location",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_slurm_discovery_uses_recorded_host_when_no_job_visible",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_login_node_caller_falls_back_to_loopback_when_undiscovered",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_login_node_caller_falls_back_to_loopback_when_undiscovered",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "test_slurm_discovery_uses_recorded_host_when_no_job_visible",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "window_line": 117
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "test_direct_location_propagates_facility_read_error",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "run_function": {
+        "line": 206,
+        "name": "test_compute_location_propagates_facility_read_error",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_compute_location_propagates_facility_read_error",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "run_function": {
+        "line": 222,
+        "name": "test_direct_location_propagates_facility_read_error",
+        "path": "tests/remote/test_locations_resolution.py"
+      },
+      "window_line": 227
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "66aab5da6008f6d82d7ac239dba2ac6ec5ea43e6",
+    "1c197a292ebb1b9f56fb82d1f5f13ee844b4a6c8"
+  ],
+  "completed_at": "2026-10-08T09:11:53Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T08:50:13Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "discovery/ingestion"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/remote tests/graph tests/discovery",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084954115009-location-resolver-fail-closed/head-default-markers.log"
+  },
+  "impl_move": {
+    "at_complete": 0.737,
+    "at_dispatch": 0.684,
+    "plan": "discovery-judgments-through-jev",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.923563415174525,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-10T08:51:42Z, which is after this node's 2700s horizon ending 2026-10-08T09:34:56.981242+00:00",
+    "horizon_ends_at": "2026-10-08T09:34:56.981242+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-08T08:49:56Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T08:51:42Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 505502,
+    "state": "quiet",
+    "utilisation_pct": 48.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T08:49:56Z",
+    "read_at": "2026-10-08T08:49:56Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 48.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T09:11:53Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084954115009-location-resolver-fail-closed/manifest.md",
+  "member": "disposable-r-20261008T084954115009-location-resolver-fail-closed",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/remote/test_locations_resolution.py::test_facility_import_error_propagates[_find_compute_location]"
+    ],
+    "baseline_failure_ids": [
+      "tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/remote/test_locations_resolution.py::test_facility_import_error_propagates[_find_compute_location]"
+    ],
+    "declaration": "restore except Exception around the facility import in _find_compute_location; the injected-ImportError test must fail",
+    "head_failure_ids": [
+      "tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084954115009-location-resolver-fail-closed/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084954115009-location-resolver-fail-closed/negative-control.log",
+    "test_paths": [
+      "tests/remote/test_locations_resolution.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "location-resolver-fail-closed",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2271,
+          "cached_input_tokens": 562702,
+          "input_tokens": 564975,
+          "output_tokens": 845,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 565820,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "an injected ImportError at the facility import propagates out of resolve_location and _find_compute_location, an unknown facility still yields the documented fallback, and the fragment gives default-marker counts for tests/remote, tests/graph and tests/discovery at base and head with the cause of every added failure",
+    "estimated_hours": null,
+    "goal": "narrow the location resolver's exception handlers to the missing-config case",
+    "id": "location-resolver-fail-closed",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T08:49:56Z",
+      "read_at": "2026-10-08T08:49:56Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 48.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T084954115009-location-resolver-fail-closed/manifest.md",
+    "negative_control": "restore except Exception around the facility import in _find_compute_location; the injected-ImportError test must fail",
+    "plan": "discovery-judgments-through-jev",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§20",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/remote/locations.py",
+      "tests/remote/test_locations_resolution.py",
+      "docs/evidence/fragments/discovery-judgments-through-jev/location-resolver-fail-closed.html",
+      "docs/figures/discovery-judgments-through-jev/location-resolver-fail-closed"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.923409610702247,
+      "derived": 0.18061102285052916,
+      "drain_hours": 168.0,
+      "effective_limit": 0.18061102285052916,
+      "elapsed_fraction": 0.16419183895502648,
+      "elapsed_hours": 27.584228944444448,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T08:50:02+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.52,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.48,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.470016,
+      "decided_by": "window",
+      "margin": 0.17373400000000006,
+      "name": "location-resolver-fail-closed",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.48
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.2242,
+        "observed_at": "2026-10-08T08:50:02+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.48,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "location-resolver-fail-closed",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T08:50:02.224200+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "hold",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": null,
+    "comment": "",
+    "confidence": 0.58,
+    "decision_source": "jev",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": null,
+    "jev_latency_ms": 431.991,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2099.314,
+    "model": null,
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1421109.638633,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55808,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1421109.638633,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55808,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1421109.638633,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55808,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "full",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 55808,
+          "headroom_pct": 75.8,
+          "peak_utilisation_p50_pct": 60.1,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 410,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 102,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 37.864633,
+        "budget_reason": null,
+        "burn_multiple": 2.922893969843009,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55808,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.850451555173612,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 30,
+          "unknown": 0
+        },
+        "pace_allowance": 0.18064288525264544,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 48.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 37.864633,
+        "budget_reason": null,
+        "burn_multiple": 2.922893969843009,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55808,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.850451555173612,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.18064288525264544,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 48.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 37.864633,
+        "budget_reason": null,
+        "burn_multiple": 2.922893969843009,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55808,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.850451555173612,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.18064288525264544,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 48.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0.01,
+      "claude:claude-opus-5-5": 0.02,
+      "claude:claude-sonnet-5-5": 0.02,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0.01,
+      "codex:gpt-6-sol": 0.27,
+      "hold": 0.63,
+      "local:deepseek-v4.1-flash": 0.04
+    },
+    "rendered_token_estimate": 1828,
+    "usage": {
+      "cost": 0.000221928,
+      "input_tokens": 5284,
+      "output_tokens": 141
+    }
+  },
+  "plan": "discovery-judgments-through-jev",
+  "plan_impl_at_dispatch": 0.684,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "1c197a292ebb1b9f56fb82d1f5f13ee844b4a6c8",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "fd63244ced57ba37c5a2e2ed13c8bcd05938b423",
+    "reviewed_head_sha": "1c197a292ebb1b9f56fb82d1f5f13ee844b4a6c8",
+    "scores": {
+      "durability": 18,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 17,
+      "scope_discipline": 16
+    },
+    "status": "parsed",
+    "total": 103
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T084954115009-location-resolver-fail-closed",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§20",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a11ab4-e1e2-7d60-a77b-a435d8f5e3c0",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 5317632,
+    "cumulative_input_tokens": 10791368,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 30551
+  },
+  "time_budget": "45m",
+  "tool_steps": 90.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1300,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T09:11:56Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T08:50:19Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T084954115009-location-resolver-fail-closed",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 243,
+    "worker_pid": 3636196
+  },
+  "worker_seconds": 1300,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
