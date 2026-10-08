@@ -36,7 +36,6 @@ from imas_codex.discovery.base.supervision import (
     PipelinePhase,
     is_infrastructure_error,
 )
-from imas_codex.discovery.paths.models import ScoreBatch
 from imas_codex.graph.models import PathStatus, TerminalReason
 from imas_codex.graph.query_builder import build_path_prefix_filter
 
@@ -2391,68 +2390,6 @@ def _apply_score_data_dir_overrides(
                 result["path"],
                 total_bytes,
             )
-
-
-def _build_score_results(
-    batch: ScoreBatch,
-    paths: list[dict],
-) -> list[dict]:
-    """Build results dict from LLM score batch (shared by sync/async)."""
-    path_to_result = {r.path: r for r in batch.results}
-    results = []
-
-    for p in paths:
-        if p["path"] in path_to_result:
-            r = path_to_result[p["path"]]
-            result: dict = {
-                "path": p["path"],
-                "score": max(0.0, min(1.0, r.new_score)),
-                "adjustment_reason": r.scoring_reason or "",
-                "primary_evidence": r.primary_evidence or [],
-                "evidence_summary": r.evidence_summary or "",
-                "description": r.description or p.get("description", ""),
-                "keywords": r.keywords or p.get("keywords", []),
-                "path_purpose": (r.path_purpose.value if r.path_purpose else None)
-                or p.get("path_purpose"),
-                "physics_domain": (r.physics_domain.value if r.physics_domain else None)
-                or p.get("physics_domain"),
-                "should_expand": r.should_expand,
-            }
-
-            # Add per-dimension scores (use original if LLM returned None)
-            for dim in [
-                "score_modeling_code",
-                "score_analysis_code",
-                "score_operations_code",
-                "score_modeling_data",
-                "score_experimental_data",
-                "score_data_access",
-                "score_workflow",
-                "score_visualization",
-                "score_documentation",
-                "score_imas",
-                "score_convention",
-            ]:
-                llm_value = getattr(r, dim, None)
-                if llm_value is not None:
-                    result[dim] = max(0.0, min(1.0, llm_value))
-                else:
-                    # Fall back to triage-phase value
-                    triage_dim = dim.replace("score_", "triage_")
-                    result[dim] = p.get(triage_dim, 0.0)
-
-            results.append(result)
-        else:
-            results.append(
-                {
-                    "path": p["path"],
-                    "score": p.get("triage_composite", 0.5),
-                    "adjustment_reason": "not in response",
-                    "_failed": True,
-                }
-            )
-
-    return results
 
 
 async def _async_score_with_llm(
