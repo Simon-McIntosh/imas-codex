@@ -221,7 +221,7 @@ def test_triage_keeps_judged_purpose_and_uses_text_only_model(monkeypatch, purpo
     path = "/analysis/example"
 
     async def describe(*, response_model, **_kwargs):
-        assert response_model is PathDescriptionBatch
+        assert issubclass(response_model, PathDescriptionBatch)
         assert set(PathDescription.model_fields) == {"path", "description"}
         return (
             PathDescriptionBatch(

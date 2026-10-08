@@ -15,7 +15,6 @@ from imas_codex.discovery.base.llm import suppress_litellm_noise
 from imas_codex.discovery.base.scoring import PATH_SCORE_DIMENSIONS, max_composite
 from imas_codex.discovery.paths.models import (
     DirectoryEvidence,
-    PathDescriptionBatch,
     ResourcePurpose,
     TriageBatch,
     TriagedBatch,
@@ -295,7 +294,11 @@ def build_path_judgment_state(
             "vcs_type": path_row.get("vcs_type"),
             "patterns_detected": decoded(path_row.get("patterns_detected"), []),
             "numeric_dir_ratio": path_row.get("numeric_dir_ratio") or 0,
-            "description": (path_row.get("description") or "")[:1500],
+            "description": (
+                path_row["description"][:1500]
+                if path_row.get("description") is not None
+                else None
+            ),
             "enrichment": {
                 "total_bytes": path_row.get("total_bytes"),
                 "total_lines": path_row.get("total_lines"),
@@ -366,34 +369,26 @@ class DirectoryTriager:
 
         from imas_codex.discovery.base.facility import get_facility
         from imas_codex.discovery.base.judgment import judge_rows
-        from imas_codex.discovery.base.llm import acall_llm_structured
+        from imas_codex.discovery.paths.description import describe_paths
 
         if not directories:
             return TriagedBatch([], 0.0, self.model or "", 0)
 
-        batch, description_cost, tokens = await acall_llm_structured(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Describe each directory in one factual sentence. Return only its path and description; do not score, classify, or decide whether to explore it.",
-                },
-                {
-                    "role": "user",
-                    "content": json.dumps(
-                        {"focus": focus, "directories": directories}, default=str
-                    ),
-                },
-            ],
-            response_model=PathDescriptionBatch,
-            service="facility-discovery",
-            reasoning_effort=get_reasoning_effort("discovery-triage"),
-        )
-        descriptions = {item.path: item.description for item in batch.results}
-        if set(descriptions) != {row["path"] for row in directories}:
-            raise ValueError("Path descriptions do not match the claimed directories")
+        try:
+            batch, description_cost, tokens = await describe_paths(
+                directories,
+                model=self.model,
+                focus=focus,
+                reasoning_effort=get_reasoning_effort("discovery-triage"),
+            )
+            descriptions = {item.path: item.description for item in batch.results}
+        except Exception:
+            logger.warning(
+                "Path description failed; judging metadata without it", exc_info=True
+            )
+            descriptions, description_cost, tokens = {}, 0.0, 0
         rows = [
-            {**row, "description": descriptions[row["path"]]} for row in directories
+            {**row, "description": descriptions.get(row["path"])} for row in directories
         ]
         facility_config = get_facility(self.facility) if self.facility else {}
         model = get_model("discovery-relevance")

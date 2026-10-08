@@ -86,3 +86,61 @@ async def test_description_refuses_missing_or_repeated_paths(monkeypatch):
         await describe_paths(
             [{"path": "/analysis/src"}, {"path": "/analysis/data"}], model="test-model"
         )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "description_fails", [False, True], ids=["path-keyed", "failed"]
+)
+async def test_triage_judges_when_description_is_path_keyed_or_fails(
+    monkeypatch, description_fails
+):
+    from imas_codex.discovery.base import facility, judgment, llm
+    from imas_codex.discovery.paths.scorer import DirectoryTriager
+
+    path = "/analysis/src/eddb"
+
+    async def describe(**kwargs):
+        if description_fails:
+            raise ValueError("PathDescriptionBatch results Field required")
+        batch = llm._parse_structured_content(
+            json.dumps({path: "EDDB source files"}),
+            kwargs["response_model"],
+            kwargs["model"],
+        )
+        return batch, 0.01, 12
+
+    async def judge(rows, state_for, questions_for, apply, **_kwargs):
+        description = None if description_fails else "EDDB source files"
+        assert rows[0]["description"] == description
+        assert state_for(rows[0])["directory"]["description"] == description
+        questions = questions_for()
+        purpose = "analysis_code"
+        options = questions["path_purpose"]["criteria"]
+        answers = {
+            "path_purpose": {
+                "choice": purpose,
+                "probabilities": {name: float(name == purpose) for name in options},
+                "confidence": 1,
+            },
+            "children_worth_listing": {"noul": 0.8},
+        }
+        for name in questions:
+            if name.startswith("score_"):
+                answers[name] = {
+                    "score": 3 if name == "score_data_access" else 0,
+                    "probabilities": {"0": 0, "1": 0, "2": 0, "3": 1},
+                    "confidence": 1,
+                }
+        return apply([(rows[0], answers, 0.001)], 0.001), 0.001, []
+
+    monkeypatch.setattr(llm, "acall_llm_structured", describe)
+    monkeypatch.setattr(judgment, "judge_rows", judge)
+    monkeypatch.setattr(facility, "get_facility", lambda _facility: {})
+    result = await DirectoryTriager(facility="jt-60sa").async_triage_batch(
+        [{"path": path, "total_files": 2, "total_dirs": 0}]
+    )
+    assert result.triaged_dirs[0].judgments["judgment_model"]
+    assert result.triaged_dirs[0].to_graph_dict()["description"] == (
+        None if description_fails else "EDDB source files"
+    )
