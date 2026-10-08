@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/sn.py:948",
+    "imas_codex/standard_names/loop.py:1176",
+    "imas_codex/cli/sn.py:2721",
+    "imas_codex/standard_names/graph_ops.py:8498",
+    "imas_codex/cli/embed.py:101",
+    "imas_codex/cli/embed.py:158"
+  ],
+  "completed_at": "2026-10-08T08:08:10.763Z",
+  "dispatched_at": "2026-10-08T07:52:30Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: section 54's done-when names a fragment stating each cause and whether it was a test or a production defect, the fragment was in the node's declared write scope, and no such file exists at the reviewed head, so the deliverable is unmet."
+    },
+    {
+      "file": "manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run leaves the structured baseline_suite and after_suite fields empty although base-cli-tests.log (3 failed, EXIT=1) and worktree-head.log (3 passed, EXIT=0) are on disk, so a reader of the JSON fields alone sees no baseline arm; serialising them would make the record self-contained."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against f186f51ae; tests/cli/test_sn_embed_preflight.py and tests/cli/test_sn_generate_cli.py replace mocks of the superseded imas_codex.cli.discover.common.run_discovery seam with a mock of imas_codex.standard_names.loop.preview_sn_pools and add preview.assert_awaited_once() and reset.assert_not_called(), and tests/cli/test_embed_service_footprint.py clears SLURM_JOB_ID and patches _start_foreground with side_effect=AssertionError; every edit is test-side, matching the plan's finding that no production code was at fault.",
+    "done_when": "section 54's done-when is that the three pass in a checkout and in an archive with .env linked; worktree-head.log and archive-cli-tests.log each record 3 passed EXIT=0, I independently re-ran the three tests at the head (review-head-gate.log 3 passed EXIT=0) and again with the graph unreachable (review-head-gate-nograph.log 3 passed EXIT=0), so the hermeticity clause holds, but the clause naming the fragment that states each cause is unmet.",
+    "goal": "the node's goal in section 54 was to repair the three tests/cli tests that fail on main, making a test that reaches a live service hermetic and fixing a production defect in production code; commit 50d81730f edits exactly the three named test files and all three pass at the head, but the delta holds no fragment naming each cause.",
+    "manifest": "read; it names commit 50d81730f, changed_paths of the three test files, test_logs base-cli-tests.log/worktree-head.log/archive-cli-tests.log and artifacts that reconcile with the logs I opened, but leaves its own baseline_suite and after_suite JSON fields empty.",
+    "write_paths": "the manifest's orientation_write_paths name imas_codex/cli/utils.py, imas_codex/cli/sn.py, imas_codex/cli/embed.py, the three tests/cli test files, docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html and docs/figures/jt60sa-discovery-completion/cli-test-repair; git show --stat 50d81730f lists exactly tests/cli/test_sn_embed_preflight.py, tests/cli/test_embed_service_footprint.py and tests/cli/test_sn_generate_cli.py and no production file, so the code change stays inside scope, though the declared fragment path was never written."
+  },
+  "justifications": {
+    "durability": "tests/cli/test_embed_service_footprint.py:104 patches _start_foreground with side_effect=AssertionError so a regression re-entering the foreground path fails loudly, and tests/cli/test_sn_generate_cli.py:296 asserts reset_standard_names is not called when --dry-run is set.",
+    "evidence": "worktree-head.log records 3 passed EXIT=0 and archive-cli-tests.log records 3 passed EXIT=0 with measurement_module /tmp/cli-test-repair.0LUegh/imas_codex/cli/sn.py, and I reproduced 3 passed EXIT=0 at the head, but the manifest's baseline_suite and after_suite fields are empty.",
+    "fit": "commit 50d81730f follows the surrounding patch context-manager idiom of tests/cli/test_sn_embed_preflight.py:48 and carries a body with no plan or ticket identifier in the diff or message.",
+    "goal_fidelity": "the three repaired tests at tests/cli/test_sn_embed_preflight.py:68, tests/cli/test_embed_service_footprint.py:101 and tests/cli/test_sn_generate_cli.py:261 pass and are hermetic, but the fragment section 54's done-when names is absent from docs/evidence/fragments/jt60sa-discovery-completion/ (cli-test-repair.html is the missing entry).",
+    "reuse": "the change patches the existing owners imas_codex/standard_names/loop.py:1176 preview_sn_pools and imas_codex/standard_names/graph_ops.py:8498 reset_standard_names rather than adding any parallel path.",
+    "scope_discipline": "git show --stat 50d81730f lists only tests/cli/test_sn_embed_preflight.py, tests/cli/test_embed_service_footprint.py and tests/cli/test_sn_generate_cli.py, the three paths the manifest's changed_paths declares."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal in section 54 was to repair the three tests/cli tests that fail on main, making a test that reaches a live service hermetic and fixing a production defect in production code; commit 50d81730f edits exactly the three named test files and all three pass at the head, but the delta holds no fragment naming each cause.\nVERDICT done_when: section 54's done-when is that the three pass in a checkout and in an archive with .env linked; worktree-head.log and archive-cli-tests.log each record 3 passed EXIT=0, I independently re-ran the three tests at the head (review-head-gate.log 3 passed EXIT=0) and again with the graph unreachable (review-head-gate-nograph.log 3 passed EXIT=0), so the hermeticity clause holds, but the clause naming the fragment that states each cause is unmet.\nVERDICT write_paths: the manifest's orientation_write_paths name imas_codex/cli/utils.py, imas_codex/cli/sn.py, imas_codex/cli/embed.py, the three tests/cli test files, docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html and docs/figures/jt60sa-discovery-completion/cli-test-repair; git show --stat 50d81730f lists exactly tests/cli/test_sn_embed_preflight.py, tests/cli/test_embed_service_footprint.py and tests/cli/test_sn_generate_cli.py and no production file, so the code change stays inside scope, though the declared fragment path was never written.\nVERDICT manifest: read; it names commit 50d81730f, changed_paths of the three test files, test_logs base-cli-tests.log/worktree-head.log/archive-cli-tests.log and artifacts that reconcile with the logs I opened, but leaves its own baseline_suite and after_suite JSON fields empty.\nVERDICT diff: read commit by commit against f186f51ae; tests/cli/test_sn_embed_preflight.py and tests/cli/test_sn_generate_cli.py replace mocks of the superseded imas_codex.cli.discover.common.run_discovery seam with a mock of imas_codex.standard_names.loop.preview_sn_pools and add preview.assert_awaited_once() and reset.assert_not_called(), and tests/cli/test_embed_service_footprint.py clears SLURM_JOB_ID and patches _start_foreground with side_effect=AssertionError; every edit is test-side, matching the plan's finding that no production code was at fault.\nCALL_SITES: imas_codex/cli/sn.py:948, imas_codex/standard_names/loop.py:1176, imas_codex/cli/sn.py:2721, imas_codex/standard_names/graph_ops.py:8498, imas_codex/cli/embed.py:101, imas_codex/cli/embed.py:158\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the three repaired tests at tests/cli/test_sn_embed_preflight.py:68, tests/cli/test_embed_service_footprint.py:101 and tests/cli/test_sn_generate_cli.py:261 pass and are hermetic, but the fragment section 54's done-when names is absent from docs/evidence/fragments/jt60sa-discovery-completion/ (cli-test-repair.html is the missing entry).\nSCORE evidence: 18\nJUSTIFICATION evidence: worktree-head.log records 3 passed EXIT=0 and archive-cli-tests.log records 3 passed EXIT=0 with measurement_module /tmp/cli-test-repair.0LUegh/imas_codex/cli/sn.py, and I reproduced 3 passed EXIT=0 at the head, but the manifest's baseline_suite and after_suite fields are empty.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 50d81730f lists only tests/cli/test_sn_embed_preflight.py, tests/cli/test_embed_service_footprint.py and tests/cli/test_sn_generate_cli.py, the three paths the manifest's changed_paths declares.\nSCORE durability: 17\nJUSTIFICATION durability: tests/cli/test_embed_service_footprint.py:104 patches _start_foreground with side_effect=AssertionError so a regression re-entering the foreground path fails loudly, and tests/cli/test_sn_generate_cli.py:296 asserts reset_standard_names is not called when --dry-run is set.\nSCORE fit: 20\nJUSTIFICATION fit: commit 50d81730f follows the surrounding patch context-manager idiom of tests/cli/test_sn_embed_preflight.py:48 and carries a body with no plan or ticket identifier in the diff or message.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change patches the existing owners imas_codex/standard_names/loop.py:1176 preview_sn_pools and imas_codex/standard_names/graph_ops.py:8498 reset_standard_names rather than adding any parallel path.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/cli-test-repair.html:1 blocking: section 54's done-when names a fragment stating each cause and whether it was a test or a production defect, the fragment was in the node's declared write scope, and no such file exists at the reviewed head, so the deliverable is unmet.\nFINDING manifest.md:22 follow-on: the reviewed run leaves the structured baseline_suite and after_suite fields empty although base-cli-tests.log (3 failed, EXIT=1) and worktree-head.log (3 passed, EXIT=0) are on disk, so a reader of the JSON fields alone sees no baseline arm; serialising them would make the record self-contained.\n",
+  "review_run_id": "r-20261008T075219688995-review-of-cli-test-repair",
+  "reviewed_base_sha": "f186f51aef37b9eb1dea9fbe4f228919020bdced",
+  "reviewed_head_sha": "50d81730f27d6a019ca79145088e0e2246911198",
+  "reviewed_run_id": "r-20261008T073654979240-cli-test-repair",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T08:05:20.188085+00:00",
+  "total": 110
+}
