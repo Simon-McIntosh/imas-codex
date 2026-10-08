@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any
 
 from imas_codex.config.discovery_config import get_discovery_config
 from imas_codex.discovery.base.facility import get_facility
+from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import async_run_python_script, run_python_script
 
 if TYPE_CHECKING:
@@ -257,7 +258,9 @@ def enrich_paths(
         config = get_facility(facility)
         ssh_host = config.get("ssh_host", facility)
     except ValueError:
+        config = {}
         ssh_host = facility
+    environment = resolve_remote_environment(config)
 
     # Build input data for the remote script
     # Include path_purposes so the remote script can select targeted patterns
@@ -273,6 +276,8 @@ def enrich_paths(
             input_data=input_data,
             ssh_host=ssh_host,
             timeout=timeout,
+            python_command=environment.python_command,
+            setup_commands=list(environment.setup_commands),
         )
     except subprocess.TimeoutExpired as e:
         # Recover partial results from JSONL lines that completed before timeout
@@ -356,7 +361,7 @@ def _build_enrich_input(
     facility: str,
     paths: list[str],
     path_purposes: dict[str, str | None] | None = None,
-) -> tuple[str, dict]:
+) -> tuple[str, dict, Any]:
     """Build SSH host and input data for enrichment.
 
     Returns:
@@ -366,6 +371,7 @@ def _build_enrich_input(
         config = get_facility(facility)
         ssh_host = config.get("ssh_host", facility)
     except ValueError:
+        config = {}
         ssh_host = facility
 
     input_data = {
@@ -373,7 +379,7 @@ def _build_enrich_input(
         "path_purposes": path_purposes or {},
         "pattern_categories": _build_enrich_patterns(facility),
     }
-    return ssh_host, input_data
+    return ssh_host, input_data, resolve_remote_environment(config)
 
 
 def _parse_single_enrich_result(data: dict) -> EnrichmentResult:
@@ -484,7 +490,9 @@ async def async_enrich_paths(
     if not paths:
         return []
 
-    ssh_host, input_data = _build_enrich_input(facility, paths, path_purposes)
+    ssh_host, input_data, environment = _build_enrich_input(
+        facility, paths, path_purposes
+    )
 
     try:
         if pool is not None:
@@ -496,6 +504,8 @@ async def async_enrich_paths(
                 ssh_host=ssh_host,
                 timeout=timeout,
                 pool=pool,
+                python_command=environment.python_command,
+                setup_commands=list(environment.setup_commands),
             )
         else:
             output = await async_run_python_script(
@@ -503,6 +513,8 @@ async def async_enrich_paths(
                 input_data=input_data,
                 ssh_host=ssh_host,
                 timeout=timeout,
+                python_command=environment.python_command,
+                setup_commands=list(environment.setup_commands),
             )
     except subprocess.TimeoutExpired as e:
         # Recover partial results from JSONL lines that completed before timeout

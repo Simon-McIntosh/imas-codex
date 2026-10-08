@@ -10,6 +10,7 @@ import pytest
 from imas_codex.discovery.base.facility import get_facility, list_facilities
 from imas_codex.discovery.code.scanner import _get_pattern_categories
 from imas_codex.discovery.code.scorer import build_triage_state
+from imas_codex.discovery.paths import enrichment as path_enrichment
 from imas_codex.discovery.paths.enrichment import _build_enrich_patterns
 from imas_codex.discovery.paths.scorer import build_path_judgment_state
 from imas_codex.remote.scripts.discover_files import _batch_pattern_counts
@@ -98,3 +99,25 @@ def test_remote_matchers_count_access_calls_in_one_scan(tmp_path) -> None:
     assert count_category_matches(str(tmp_path), categories) == expected
     assert _batch_pattern_counts(files, categories) == {str(source): expected}
     assert batch_pattern_counts(files, categories) == {str(source): expected}
+
+
+def test_path_enrichment_uses_facility_remote_interpreter(monkeypatch) -> None:
+    facility = next(
+        name
+        for name in list_facilities()
+        if (get_facility(name).get("remote_environment") or {}).get("python_command")
+        and (get_facility(name).get("remote_environment") or {}).get("setup_commands")
+    )
+    calls = []
+
+    def fake_run(script, **kwargs):
+        calls.append((script, kwargs))
+        return '{"path": "/source", "pattern_categories": {}}'
+
+    monkeypatch.setattr(path_enrichment, "run_python_script", fake_run)
+    result = path_enrichment.enrich_paths(facility, ["/source"])
+    assert result[0].error is None
+    _, kwargs = calls[0]
+    expected = get_facility(facility)["remote_environment"]
+    assert kwargs["python_command"] == expected["python_command"]
+    assert kwargs["setup_commands"] == expected["setup_commands"]
