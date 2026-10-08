@@ -214,9 +214,14 @@ def collect(selected_roots):
             and os.access(entry.path, os.R_OK | os.X_OK)
         ]
         roots = sorted(homes) + ["/analysis_DB"]
+    roots = [os.path.realpath(root) for root in roots]
     for root in roots:
-        if not (root == "/analysis_DB" or root.startswith("/home/")):
-            raise ValueError("collection root lies outside /home and /analysis_DB")
+        if not (root == "/analysis_DB" or os.path.dirname(root) == "/home"):
+            raise ValueError(
+                "collection root lies outside readable homes and /analysis_DB"
+            )
+        if not os.path.isdir(root) or not os.access(root, os.R_OK | os.X_OK):
+            raise ValueError("collection root is not a readable directory")
     for root in roots:
         errors = []
         rejected = Counter()
