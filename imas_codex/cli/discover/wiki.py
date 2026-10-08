@@ -1,10 +1,19 @@
-"""Wiki discovery command: Page scanning, scoring and ingestion."""
+"""Wiki discovery stage: page scanning, scoring and ingestion.
+
+The discovery logic lives in :func:`run_wiki_stage`, which takes a facility
+and a frozen :class:`WikiStageOptions`. The click command is a thin wrapper
+that builds the options and calls the stage function. ``--scan-only`` selects
+the seeding half (enumerate pages and documents, judge nothing); ``--flush``
+selects the draining half (score and ingest the nodes the seeding half
+created).
+"""
 
 from __future__ import annotations
 
 import asyncio
 import logging
 import time
+from dataclasses import dataclass
 
 import click
 from rich.markup import escape as rich_escape
@@ -13,95 +22,44 @@ from imas_codex.cli.discover.common import reset_to_option
 
 logger = logging.getLogger(__name__)
 
+_FOCUS_REFUSAL = (
+    "--focus is not supported for wiki yet: the wiki claim query takes no item filter."
+)
 
-@click.command()
-@click.argument("facility")
-@click.option("--source", "-s", help="Specific wiki site URL or index")
-@click.option(
-    "--cost-limit", "-c", type=float, default=10.0, help="Maximum LLM spend in USD"
-)
-@click.option(
-    "--max-pages", "-n", type=int, default=None, help="Maximum pages to process"
-)
-@click.option(
-    "--max-depth", type=int, default=None, help="Maximum link depth from portal"
-)
-@click.option(
-    "--focus", "-f", help="Focus discovery (e.g., 'equilibrium', 'diagnostics')"
-)
-@click.option(
-    "--scan-only", is_flag=True, help="Only scan pages, skip scoring and ingestion"
-)
-@click.option(
-    "--score-only",
-    is_flag=True,
-    help="Only score already-discovered pages, skip ingestion",
-)
-@click.option("--verbose", "-v", is_flag=True, help="Show detailed progress")
-@click.option(
-    "--rescan",
-    is_flag=True,
-    default=False,
-    help="Re-scan pages even if already in graph",
-)
-@click.option(
-    "--score-workers",
-    type=int,
-    default=2,
-    help="Number of parallel score workers (default: 2)",
-)
-@click.option(
-    "--ingest-workers",
-    type=int,
-    default=4,
-    help="Number of parallel ingest workers (default: 4)",
-)
-@click.option(
-    "--rescan-documents",
-    is_flag=True,
-    default=False,
-    help="Re-scan documents even if already in graph",
-)
-@click.option(
-    "--time",
-    "time_limit",
-    type=int,
-    default=None,
-    help="Maximum runtime in minutes (e.g., 5). Discovery halts when time expires.",
-)
-@click.option(
-    "--store-images",
-    is_flag=True,
-    default=False,
-    help="Keep image bytes in graph after VLM scoring (default: clear to save storage)",
-)
-@click.option(
-    "--min-score",
-    type=float,
-    default=0.5,
-    help="Minimum composite score for ingestion (default: 0.5)",
-)
-@reset_to_option("wiki")
-def wiki(
-    facility: str,
-    source: str | None,
-    cost_limit: float,
-    max_pages: int | None,
-    max_depth: int | None,
-    focus: str | None,
-    scan_only: bool,
-    score_only: bool,
-    verbose: bool,
-    rescan: bool,
-    score_workers: int,
-    ingest_workers: int,
-    rescan_documents: bool,
-    time_limit: int | None,
-    store_images: bool,
-    min_score: float,
-    reset_to: str | None = None,
-) -> None:
-    """Discover wiki pages and build documentation graph.
+
+@dataclass(frozen=True)
+class WikiStageOptions:
+    """Settled options for the wiki discovery stage.
+
+    ``wiki_site`` selects one configured site by index or URL substring, the
+    settled spelling of the old ``--source``. ``scan_only`` selects the seeding
+    half; ``flush`` selects the draining half, the settled spelling of the old
+    ``--score-only``. ``topic`` is the free-text steer the scorer reads, the
+    settled spelling of the old free-text ``--focus``. ``focus`` names items
+    and is refused because the wiki claim query takes no item filter.
+    ``limit`` caps pages.
+    """
+
+    wiki_site: str | None = None
+    cost_limit: float = 10.0
+    limit: int | None = None
+    max_depth: int | None = None
+    topic: str | None = None
+    focus: tuple[str, ...] = ()
+    scan_only: bool = False
+    flush: bool = False
+    rescan: bool = False
+    score_workers: int = 2
+    ingest_workers: int = 4
+    rescan_documents: bool = False
+    time_limit: int | None = None
+    store_images: bool = False
+    min_score: float = 0.5
+    reset_to: str | None = None
+
+
+def run_wiki_stage(facility: str, options: WikiStageOptions) -> dict:
+    """Discover wiki pages and build the documentation graph.
 
     Runs parallel wiki discovery workers:
 
@@ -111,16 +69,13 @@ def wiki(
     - INGEST: Chunk and embed high-score pages
     - FILE: Score and embed wiki file attachments (PDFs, CSVs, etc.)
 
-    Page scanning runs automatically on first invocation. Use --rescan
-    to re-enumerate pages (adds new pages, keeps existing).
-
-    \b
-    Examples:
-      imas-codex discover wiki jt-60sa              # Full discovery
-      imas-codex discover wiki jt-60sa --scan-only  # Scan pages only
-      imas-codex discover wiki tcv -f equilibrium  # Focus scoring
-      imas-codex discover wiki jet -c 5.0          # $5 budget
+    The seeding half enumerates pages and documents; the draining half scores
+    and ingests the nodes the seeding half created.
     """
+
+    if options.options.topic:
+        raise click.UsageError(_FOCUS_REFUSAL)
+
     from imas_codex.cli.discover.common import make_log_print, setup_logging
     from imas_codex.cli.rich_output import should_use_rich
     from imas_codex.discovery.base.facility import get_facility
@@ -135,7 +90,7 @@ def wiki(
     from imas_codex.discovery.wiki.parallel import run_parallel_wiki_discovery
 
     use_rich = should_use_rich()
-    console = setup_logging("wiki", facility, use_rich, verbose)
+    console = setup_logging("wiki", facility, use_rich, options.verbose)
     log_print = make_log_print("wiki", console)
     wiki_logger = logging.getLogger("imas_codex.discovery.wiki")
 
@@ -154,7 +109,7 @@ def wiki(
         raise SystemExit(1)
 
     # Check embedding server availability upfront for ingestion mode.
-    if not scan_only and not score_only:
+    if not options.scan_only and not options.flush:
         from imas_codex.embeddings.config import EmbeddingBackend
         from imas_codex.settings import get_embedding_location
 
@@ -225,9 +180,9 @@ def wiki(
         console.print()
 
     site_indices = list(range(len(wiki_sites)))
-    if source:
+    if options.wiki_site:
         try:
-            idx = int(source)
+            idx = int(options.wiki_site)
             if 0 <= idx < len(wiki_sites):
                 site_indices = [idx]
             else:
@@ -237,12 +192,12 @@ def wiki(
             matched = [
                 i
                 for i, s in enumerate(wiki_sites)
-                if source.lower() in s.get("url", "").lower()
+                if options.wiki_site.lower() in s.get("url", "").lower()
             ]
             if matched:
                 site_indices = matched
             else:
-                log_print(f"[red]No site matching '{source}'[/red]")
+                log_print(f"[red]No site matching '{options.wiki_site}'[/red]")
                 raise SystemExit(1) from None
 
     # ================================================================
@@ -252,7 +207,7 @@ def wiki(
     # Check wiki stats once (facility-level, not per-site)
     wiki_stats = get_wiki_stats(facility)
     existing_pages = wiki_stats.get("pages", 0) or wiki_stats.get("total", 0)
-    should_bulk_discover = rescan or existing_pages == 0
+    should_bulk_discover = options.rescan or existing_pages == 0
 
     # Check existing document count
     existing_documents = 0
@@ -339,7 +294,7 @@ def wiki(
                 for sname, cnt in _site_document_counts:
                     log_print(f"[dim]  {sname}: {cnt:,} documents[/dim]")
             log_print("[dim]Use --rescan-documents to re-enumerate documents[/dim]")
-    elif rescan and existing_pages > 0:
+    elif options.rescan and existing_pages > 0:
         log_print(
             f"[yellow]Rescan: adding new pages (keeping {existing_pages} existing)[/yellow]"
         )
@@ -351,17 +306,17 @@ def wiki(
         log_print(f"[dim]Reset {total_reset} orphaned pages from previous run[/dim]")
 
     # Handle --reset-to: reset wiki pages to a target state
-    if reset_to:
+    if options.reset_to:
         from imas_codex.discovery.base.reset import WIKI_RESET_SPECS, reset_to_status
 
-        spec = WIKI_RESET_SPECS[reset_to]
+        spec = WIKI_RESET_SPECS[options.reset_to]
         reset_count = reset_to_status(spec, facility)
         if reset_count > 0:
             log_print(
-                f"[yellow]Reset {reset_count} page(s) to '{reset_to}' for reprocessing[/yellow]"
+                f"[yellow]Reset {reset_count} page(s) to '{options.reset_to}' for reprocessing[/yellow]"
             )
         else:
-            log_print(f"[dim]No pages to reset to '{reset_to}'[/dim]")
+            log_print(f"[dim]No pages to reset to '{options.reset_to}'[/dim]")
 
     # Recover pages that were marked failed due to transient fetch failures.
     # These pages have exhausted fetch_retries but have no actual error — they
@@ -510,7 +465,7 @@ def wiki(
 
         # Bulk page discovery
         bulk_discovered = 0
-        if should_bulk_discover and not score_only:
+        if should_bulk_discover and not options.flush:
             from imas_codex.discovery.wiki.parallel import bulk_discover_pages
 
             # Skip Keycloak auth if the domain is unreachable
@@ -592,10 +547,10 @@ def wiki(
 
         # Document scanning
         should_discover_documents_site = (
-            rescan_documents
+            options.rescan_documents
             or (bulk_discovered > 0)
             or (existing_pages > 0 and existing_documents == 0)
-        ) and not score_only
+        ) and not options.flush
         if should_discover_documents_site:
             from imas_codex.discovery.wiki.parallel import bulk_discover_documents
 
@@ -744,21 +699,23 @@ def wiki(
     # ================================================================
 
     worker_parts = []
-    if not scan_only:
-        worker_parts.append(f"{score_workers} score")
-        worker_parts.append(f"{ingest_workers} ingest")
+    if not options.scan_only:
+        worker_parts.append(f"{options.score_workers} score")
+        worker_parts.append(f"{options.ingest_workers} ingest")
         worker_parts.append("2 document")
     log_print(f"\nWorkers: {', '.join(worker_parts)}")
-    if not scan_only:
-        log_print(f"Cost limit: ${cost_limit:.2f}")
-    if max_pages:
-        log_print(f"Page limit: {max_pages}")
-    if time_limit is not None:
-        log_print(f"Time limit: {time_limit} min")
-    if focus and not scan_only:
-        log_print(f"Focus: {focus}")
+    if not options.scan_only:
+        log_print(f"Cost limit: ${options.cost_limit:.2f}")
+    if options.limit:
+        log_print(f"Page limit: {options.limit}")
+    if options.time_limit is not None:
+        log_print(f"Time limit: {options.time_limit} min")
+    if options.topic and not options.scan_only:
+        log_print(f"Focus: {options.topic}")
     if len(site_configs) > 1:
         log_print(f"Sites to process: {len(site_configs)}")
+
+    result: dict = {}
 
     try:
         from imas_codex.cli.discover.common import (
@@ -767,8 +724,8 @@ def wiki(
         )
 
         deadline: float | None = None
-        if time_limit is not None:
-            deadline = time.time() + (time_limit * 60)
+        if options.time_limit is not None:
+            deadline = time.time() + (options.time_limit * 60)
 
         multi_site = len(site_configs) > 1
 
@@ -779,12 +736,12 @@ def wiki(
 
             display = WikiProgressDisplay(
                 facility=facility,
-                cost_limit=cost_limit,
-                page_limit=max_pages,
-                focus=focus or "",
+                cost_limit=options.cost_limit,
+                page_limit=options.limit,
+                focus=options.topic or "",
                 console=console,
-                scan_only=scan_only,
-                score_only=score_only,
+                scan_only=options.scan_only,
+                score_only=options.flush,
             )
 
         # Custom graph refresh for wiki — calls get_wiki_discovery_stats
@@ -832,8 +789,8 @@ def wiki(
             model_section="discovery-score",
             display=display,
             check_graph=True,
-            check_embed=not (scan_only or score_only),
-            check_model=not scan_only,
+            check_embed=not (options.scan_only or options.flush),
+            check_model=not options.scan_only,
             graph_refresh_fn=wiki_graph_refresh if display else None,
             graph_refresh_interval=2.0,
             suppress_loggers=[
@@ -993,13 +950,13 @@ def wiki(
                 "cost": 0.0,
                 "elapsed_seconds": 0.0,
             }
-            remaining_budget = cost_limit
-            remaining_pages = max_pages
+            remaining_budget = options.cost_limit
+            remaining_pages = options.limit
 
             # Start facility-scoped workers for multi-site mode
             facility_group = None
             facility_state = None
-            if multi_site and not scan_only:
+            if multi_site and not options.scan_only:
                 from imas_codex.discovery.base.supervision import (
                     SupervisedWorkerGroup,
                     run_supervised_loop,
@@ -1013,10 +970,10 @@ def wiki(
                 facility_state = create_facility_worker_state(
                     facility,
                     ssh_host=_shared_ssh,
-                    focus=focus,
-                    cost_limit=cost_limit,
+                    focus=options.topic,
+                    cost_limit=options.cost_limit,
                     deadline=deadline,
-                    store_images=store_images,
+                    store_images=options.store_images,
                     service_monitor=service_monitor,
                 )
                 facility_group = SupervisedWorkerGroup()
@@ -1085,14 +1042,14 @@ def wiki(
                         "credential_service": sc["credential_service"],
                         "cost_limit": remaining_budget,
                         "page_limit": remaining_pages,
-                        "max_depth": max_depth,
-                        "focus": focus,
+                        "max_depth": options.max_depth,
+                        "focus": options.topic,
                         "num_scan_workers": 1,
-                        "num_score_workers": score_workers,
-                        "num_ingest_workers": ingest_workers,
-                        "scan_only": scan_only,
-                        "score_only": score_only,
-                        "store_images": store_images,
+                        "num_score_workers": options.score_workers,
+                        "num_ingest_workers": options.ingest_workers,
+                        "scan_only": options.scan_only,
+                        "score_only": options.flush,
+                        "store_images": options.store_images,
                         "bulk_discover": False,
                         "skip_reset": multi_site,
                         "deadline": deadline,
@@ -1100,8 +1057,8 @@ def wiki(
                         "on_score_progress": on_score,
                         "on_ingest_progress": on_ingest,
                         "max_wiki_connections": sc.get("max_wiki_connections", 10),
-                        "skip_facility_workers": multi_site and not scan_only,
-                        "min_score": min_score,
+                        "skip_facility_workers": multi_site and not options.scan_only,
+                        "min_score": options.min_score,
                     }
 
                     # Rich-only callbacks
@@ -1216,9 +1173,154 @@ def wiki(
         )
     except Exception as e:
         log_print(f"[red]Error: {e}[/red]")
-        if verbose:
+        if options.verbose:
             import traceback
 
             traceback.print_exc()
 
     log_print("\n[green]Documentation discovery complete.[/green]")
+
+    return result
+
+
+@click.command()
+@click.argument("facility")
+@click.option("--wiki-site", "-s", help="Specific wiki site URL or index")
+@click.option(
+    "--cost-limit", "-c", type=float, default=10.0, help="Maximum LLM spend in USD"
+)
+@click.option("--limit", type=int, default=None, help="Maximum pages to process")
+@click.option(
+    "--max-depth", type=int, default=None, help="Maximum link depth from portal"
+)
+@click.option(
+    "--topic", help="Free-text steer for scoring (e.g., 'equilibrium', 'diagnostics')"
+)
+@click.option(
+    "--focus",
+    "focus_items",
+    multiple=True,
+    default=(),
+    help="Restrict to named items or a manifest file. Not supported for wiki "
+    "yet, so it is refused: the claim query takes no item filter.",
+)
+@click.option(
+    "--scan-only", is_flag=True, help="Only scan pages, skip scoring and ingestion"
+)
+@click.option(
+    "--flush",
+    is_flag=True,
+    help="Only run the draining half: score and ingest already-scanned pages, "
+    "skip scanning",
+)
+@click.option("--score-only", is_flag=True, help="Deprecated: use --flush.")
+@click.option("--verbose", "-v", is_flag=True, help="Show detailed progress")
+@click.option(
+    "--rescan",
+    is_flag=True,
+    default=False,
+    help="Re-scan pages even if already in graph",
+)
+@click.option(
+    "--score-workers",
+    type=int,
+    default=2,
+    help="Number of parallel score workers (default: 2)",
+)
+@click.option(
+    "--ingest-workers",
+    type=int,
+    default=4,
+    help="Number of parallel ingest workers (default: 4)",
+)
+@click.option(
+    "--rescan-documents",
+    is_flag=True,
+    default=False,
+    help="Re-scan documents even if already in graph",
+)
+@click.option(
+    "--time",
+    "-t",
+    "time_limit",
+    type=int,
+    default=None,
+    help="Maximum runtime in minutes (e.g., 5). Discovery halts when time expires.",
+)
+@click.option(
+    "--store-images",
+    is_flag=True,
+    default=False,
+    help="Keep image bytes in graph after VLM scoring (default: clear to save storage)",
+)
+@click.option(
+    "--min-score",
+    type=float,
+    default=0.5,
+    help="Minimum composite score for ingestion (default: 0.5)",
+)
+@reset_to_option("wiki")
+def wiki(
+    facility: str,
+    wiki_site: str | None,
+    cost_limit: float,
+    limit: int | None,
+    max_depth: int | None,
+    topic: str | None,
+    focus_items: tuple[str, ...],
+    scan_only: bool,
+    flush: bool,
+    score_only: bool,
+    verbose: bool,
+    rescan: bool,
+    score_workers: int,
+    ingest_workers: int,
+    rescan_documents: bool,
+    time_limit: int | None,
+    store_images: bool,
+    min_score: float,
+    reset_to: str | None = None,
+) -> None:
+    """Discover wiki pages and build documentation graph.
+
+    Runs parallel wiki discovery workers:
+
+    \b
+    - SCAN: Enumerate all pages per site (runs once, cached in graph)
+    - SCORE: LLM relevance evaluation with content fetch
+    - INGEST: Chunk and embed high-score pages
+    - FILE: Score and embed wiki file attachments (PDFs, CSVs, etc.)
+
+    Page scanning runs automatically on first invocation. Use --rescan
+    to re-enumerate pages (adds new pages, keeps existing).
+
+    \b
+    Examples:
+      imas-codex discover wiki jt-60sa                  # Full discovery
+      imas-codex discover wiki jt-60sa --scan-only      # Seeding half only
+      imas-codex discover wiki jt-60sa --flush          # Draining half only
+      imas-codex discover wiki tcv --topic equilibrium  # Topic steer
+      imas-codex discover wiki jet -c 5.0               # $5 budget
+    """
+    run_wiki_stage(
+        facility,
+        WikiStageOptions(
+            wiki_site=wiki_site,
+            cost_limit=cost_limit,
+            limit=limit,
+            max_depth=max_depth,
+            topic=topic,
+            focus=tuple(focus_items),
+            scan_only=scan_only,
+            flush=flush or score_only,
+            verbose=verbose,
+            rescan=rescan,
+            score_workers=score_workers,
+            ingest_workers=ingest_workers,
+            rescan_documents=rescan_documents,
+            time_limit=time_limit,
+            store_images=store_images,
+            min_score=min_score,
+            reset_to=reset_to,
+        ),
+    )
