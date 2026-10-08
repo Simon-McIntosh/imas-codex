@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
 from imas_codex.discovery.paths.scorer import (
@@ -119,6 +117,10 @@ def test_typed_path_judgment_stores_distributions_and_computes_gates():
     assert fields["triage_data_access_confidence"] == 0.6
     assert fields["scan_relevance"] == 1.1 / 3
     assert fields["should_enrich"] is True
+    assert (
+        path_judgment_fields(answers, "test-judge", scan_threshold=0.4)["should_enrich"]
+        is False
+    )
     assert fields["should_expand"] is True
     assert fields["judgment_model"] == "test-judge"
     assert (
@@ -192,9 +194,7 @@ def test_triage_keeps_judged_purpose_and_uses_text_only_model(monkeypatch, purpo
     monkeypatch.setattr(llm, "acall_llm_structured", describe)
     monkeypatch.setattr(judgment, "judge_rows", judge)
     monkeypatch.setattr(facility, "get_facility", lambda _facility: {})
-    result = asyncio.run(
-        DirectoryTriager(facility="jt-60sa").async_triage_batch(
-            [{"path": path, "total_files": 0, "total_dirs": 0}]
-        )
+    result = DirectoryTriager(facility="jt-60sa").triage_batch(
+        [{"path": path, "total_files": 0, "total_dirs": 0}]
     )
     assert result.triaged_dirs[0].to_graph_dict()["path_purpose"] == purpose

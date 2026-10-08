@@ -1,18 +1,8 @@
-"""LLM-based directory triage.
+"""Directory description and typed path judgments for graph-led discovery.
 
-This module implements the triage phase of graph-led discovery:
-1. Query graph for scanned but untriaged paths
-2. Build batched prompts with directory context (parent/sibling scores,
-   tree structure, file types, quality indicators)
-3. Call LLM with structured output schema for reliable parsing
-4. Trust the LLM's scores and expansion decisions directly
-
-The LLM sees all relevant context in the prompt and makes calibrated
-scoring and expansion decisions. The code applies only structural
-overrides (git repos, data containers) that encode facts the LLM
-cannot verify.
-
-Retry logic handles rate limiting (OpenRouter "Overloaded" errors).
+The language model writes factual descriptions. Jev classifies purpose,
+scores the schema facets, and judges whether children are worth listing.
+Code derives scan, expansion and enrichment decisions from those answers.
 """
 
 from __future__ import annotations
@@ -58,7 +48,11 @@ def path_scan_relevance(scores: dict[str, float]) -> float:
 
 
 def path_judgment_fields(
-    answers: dict[str, Any], model: str, *, prefix: str = "score"
+    answers: dict[str, Any],
+    model: str,
+    *,
+    prefix: str = "score",
+    scan_threshold: float | None = None,
 ) -> dict[str, Any]:
     """Validate and flatten a complete typed Jev answer for graph storage."""
     questions = build_path_judgment_questions()
@@ -93,7 +87,8 @@ def path_judgment_fields(
         fields[f"{stored}_confidence"] = float(answer["confidence"])
     fields["scan_relevance"] = path_scan_relevance(scores)
     fields["should_expand"] = fields["children_worth_listing"] >= PATH_EXPAND_THRESHOLD
-    fields["should_enrich"] = fields["scan_relevance"] >= get_path_scan_threshold()
+    minimum = get_path_scan_threshold() if scan_threshold is None else scan_threshold
+    fields["should_enrich"] = fields["scan_relevance"] >= minimum
     return fields
 
 
@@ -335,26 +330,7 @@ def combined_score(
 
 @dataclass
 class DirectoryTriager:
-    """Score directories using LLM with grounded evidence.
-
-    Implements:
-    1. Batch prompt construction from DirStats
-    2. LLM evidence collection via LiteLLM/OpenRouter
-    3. Deterministic combined scoring from LLM dimension scores
-    4. Frontier expansion logic
-
-    Args:
-        model: Model name (None = use "score" task model from config)
-        facility: Facility ID for sampling calibration examples
-
-    Example:
-        triager = DirectoryTriager(facility="tcv")
-        batch = triager.triage_batch(
-            directories=[...],
-            focus="equilibrium codes",
-            threshold=0.7,
-        )
-    """
+    """Describe scanned directories and judge their path facets with Jev."""
 
     model: str | None = None
     facility: str | None = None
@@ -368,74 +344,18 @@ class DirectoryTriager:
         self,
         directories: list[dict[str, Any]],
         focus: str | None = None,
-        threshold: float = 0.7,
+        threshold: float | None = None,
     ) -> TriagedBatch:
-        """Score a batch of directories using LLM with structured output.
+        """Run the same description and Jev path as asynchronous triage."""
+        import asyncio
 
-        Args:
-            directories: List of directory info dicts with:
-              - path: str
-              - total_files: int
-              - total_dirs: int
-              - has_readme: bool
-              - has_makefile: bool
-              - has_git: bool
-              - file_type_counts: dict (optional)
-              - patterns_detected: list (optional)
-            focus: Natural language focus query (e.g., "equilibrium codes")
-            threshold: Min score to expand (0.0-1.0)
-
-        Returns:
-            TriagedBatch with results and cost
-        """
-        from imas_codex.discovery.base.llm import call_llm_structured
-
-        if not directories:
-            return TriagedBatch(
-                triaged_dirs=[],
-                total_cost=0.0,
-                model=self.model,
-                tokens_used=0,
-            )
-
-        # Load prompt template
-        system_prompt = self._build_system_prompt(focus)
-        user_prompt = self._build_user_prompt(directories)
-
-        # Call LLM with shared retry+parse loop (retries on both API
-        # errors and JSON/validation errors from truncated responses).
-        # Model-aware token limits applied automatically.
-        batch, cost, total_tokens = call_llm_structured(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            response_model=TriageBatch,
-            service="facility-discovery",
-            reasoning_effort=get_reasoning_effort("discovery-triage"),
-        )
-
-        # Calculate cost per path for tracking
-        cost_per_path = cost / len(directories) if directories else 0.0
-
-        # Map parsed results to TriagedDirectory objects
-        triaged_dirs = self._map_triaged_directories(
-            batch, directories, threshold, cost_per_path
-        )
-
-        return TriagedBatch(
-            triaged_dirs=triaged_dirs,
-            total_cost=cost,
-            model=self.model,
-            tokens_used=total_tokens,
-        )
+        return asyncio.run(self.async_triage_batch(directories, focus, threshold))
 
     async def async_triage_batch(
         self,
         directories: list[dict[str, Any]],
         focus: str | None = None,
-        threshold: float = 0.7,
+        threshold: float | None = None,
     ) -> TriagedBatch:
         """Describe paths with the language model and judge them with Jev."""
         import json
@@ -477,7 +397,9 @@ class DirectoryTriager:
         def apply(answered, _cost):
             triaged = []
             for row, answers, paid in answered:
-                fields = path_judgment_fields(answers, model, prefix="triage")
+                fields = path_judgment_fields(
+                    answers, model, prefix="triage", scan_threshold=threshold
+                )
                 file_types = row.get("file_type_counts") or {}
                 if isinstance(file_types, str):
                     file_types = json.loads(file_types)
