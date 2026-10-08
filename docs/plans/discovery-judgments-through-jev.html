@@ -22,10 +22,10 @@
   <title>Discovery Judgments Through Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;deferred&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="c161f6fd7ca2b2a3e9a461a48d67823624bd595e,d1458b6aa49e8af6dfa020d6ace4b88590696dbf,8a63ba5cd761af352621577aa4e2322fc1054a53,87595806405596503ba79e30697b46ae05236197,ac2e9a179fad19c3413b4d0da81dc98c91fe2e7f,5ca9c29294056cfb3320f32a58d30b4b536da02f">
-<meta name="plan-impl" content="0.533">
-<meta name="plan-version" content="51">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="52">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -249,6 +249,52 @@ judgment fields rather than re-adjudicated. Bring the prompt-coverage expectatio
 exist.</p>
 <p><strong>Done when</strong> both tests pass at the head. Re-adding an undeclared FacilityPath property write fails the
 property check. The fragment lists each <code>triage_*</code> read with its disposition.</p>
+
+    <h2 id="s17">§17 — Correct the goldens, find the variation, and give every judge its graph neighbourhood</h2>
+<section data-reckon="section" data-id="s17" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> The lead asked on 2026-10-08 what limits the judges and whether the goldens are wrong. The
+lead also asked whether the knowledge graph is exploited: a resource's links to and from other resources, and the types
+of the resources it links to. §15's paired run gave AUC 0.850 without facility matches and 0.851 with them, at the
+0.30 scan gate on the 158 labelled JT-60SA paths. Reading its 32 misses and 6 false alarms (coordinator, 2026-10-08)
+gives four findings.</p>
+<ul>
+<li><strong>The measure scores a decision the pipeline does not make.</strong> 16 of the 32 misses are containers the
+judge already marks worth expanding, with children-worth-listing at 0.5 or more (<code>edas2/v2.1.14</code> 0.87,
+<code>esurf_plugins</code> 0.88, <code>topics/common</code> 0.83). Scored on the decision the pipeline makes, scan or
+expand, the same judgments give AUC 0.890. Scan at 0.30 or expand at 0.6 reaches 101 of 118 positives with 6 of 40
+false alarms. The children-worth-listing values come from the deploy run, not the fresh one.</li>
+<li><strong>The goldens are skewed and inconsistent.</strong> 50 of 158 labels are working copies of TOPICS under
+<code>/home/a048717/src/pjtopics_*</code>, 36 of them positive. <code>atdisp</code> is negative in three copies while
+sibling TOPICS directories are positive, and <code>client_eqdbms…/eqtrace</code>, equilibrium tracing in the EQDB
+client, is negative. The labels were made from paths and stored descriptions, which is the same text the judge reads,
+not from the source.</li>
+<li><strong>Variation exceeds the effects being measured.</strong> Repeat calls changed the score on 117 of 137 paths
+whose state did not change. The fresh describe step writes a new description on every pass, and the description is in
+the state, so the input may not be stable.</li>
+<li><strong>The graph context is unused.</strong> The path state carries the directory alone. The schema holds its parent
+and children (<code>IN_DIRECTORY</code>), aliases (<code>ALIAS_OF</code>) and repository copies (<code>INSTANCE_OF</code>),
+the CodeFiles under it with their chunks' <code>DataReference</code> and IDS links, and the Documents under it. 20 of
+the 32 misses have no children or files in the graph, because they were never scanned. The containers do have judged
+children the state does not show: <code>edas2/v2.1.14</code> has a child scoring 0.50 for analysis code, and the FLEDD
+<code>eqdbms</code> has a child scoring 0.67 for data access. None of the 32 carries <code>INSTANCE_OF</code> or
+<code>ALIAS_OF</code>, so the working copies look independent. Wiki pages naming a tool or path (eSurf, eqdbms,
+getseldata) are not linked to the FacilityPath. Code files carry no include or import links.</li>
+</ul>
+<p><strong>Node 1: goldens and noise.</strong> Relabel the set from source inspection on the facility, with two labels
+per path: worth scanning for code, and worth expanding. Mark each working copy with the canonical path it copies; a
+copy is judged once, by its canonical path. Add enough non-TOPICS paths that no single tree supplies more than a
+quarter of the set. Find the variation source by judging each path three times with a frozen state and three times with
+a fresh description. Report AUC on the scan-or-expand decision, with confidence intervals, under the old and new labels.
+Committed beside the fragment: <code>labelled-paths-v2.json</code>, which does not replace the earlier files.</p>
+<p><strong>Node 2: graph context, after node 1 and §15 land.</strong> Add the graph neighbourhood to each judge's state,
+read through the graph client. For a path: its parent's and children's judgments, its canonical copy and that copy's
+judgment, and the CodeFiles and Documents under it with their facets and data references. For a code file: its
+directory's judgment and the DataReferences and IDS its chunks link. For a wiki page: the types of its link targets and
+documents, and its inbound link count. Measure AUC with and without that context on node 1's labels.</p>
+<p><strong>Done when</strong> node 1's fragment gives the relabelled set's composition, the variation source with
+repeat-call evidence, and the scan-or-expand AUC under both labellings. Node 2's fragment gives the paired AUC with and
+without graph context, and a test parametrised over every facility config asserts each judge's state carries its
+neighbourhood fields.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
