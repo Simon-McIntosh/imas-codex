@@ -30,6 +30,11 @@
     <p>Node 1 (run r-20261008T061834979151-path-description-shape, <code>406f44509</code>) gave the describe step one owner, <code>describe_paths</code> in <code>imas_codex/discovery/paths/description.py</code>. Its prompt states the <code>results</code> shape, and a live discovery-score call returned 3 of 3 descriptions. Node 2 (run r-20261008T073136128152-path-triage-describe-owner, <code>dac0f8f4c</code>) moved <code>DirectoryTriager.async_triage_batch</code> onto it. A failed description now leaves the path judged with the description recorded as null. Every path gate under <code>imas_codex/discovery/paths</code> reads <code>get_path_scan_threshold()</code>, and a test fails on <code>get_discovery_threshold()</code> there. 82 focused tests passed, and one live EDDB path stored a Jev judgment. Restoring the triager's own describe call fails the path-keyed replay.</p>
   </section>
 
+  <section id="s19">
+    <h2>§19 — the discovery engine no longer imports the CLI, and the wiki cutoff reads settings</h2>
+    <p>Node 1 (run r-20261008T080516648619-engine-import-cycle, <code>0ab6af8e2</code>) moved <code>WorkerLogAdapter</code> and <code>log_worker_error</code> into <code>imas_codex/logs.py</code>, which <code>cli/logging.py</code> re-exports. A fresh-interpreter import of <code>imas_codex.discovery.base.engine</code> leaves <code>imas_codex.cli</code> out of <code>sys.modules</code>. The coordinator's merged-head gate, <code>pytest -n 8 tests/discovery tests/wiki tests/cli tests/ingestion</code> in an archive with <code>.env</code> linked, passed 2,444, against 31 failures and 1 error on the pre-merge head. The only 2 failures are <code>test_release</code>'s archive-only missing-<code>.git</code> cases. Node 2 (run r-20261008T082149027629-wiki-cutoff-from-settings, <code>1c1dd03e1</code>) sets <code>CONTENT_INGEST_THRESHOLD</code> from <code>get_wiki_ingest_threshold()</code>. A fresh-interpreter environment override reaches it, and a restored literal fails the test.</p>
+  </section>
+
 </main>
 </body>
 </html>
