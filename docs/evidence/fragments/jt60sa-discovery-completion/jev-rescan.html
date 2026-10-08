@@ -1,249 +1,114 @@
 <section>
   <h2 id="jt60sa-jev-rescan-outcome">Jev-gated JT-60SA discovery census</h2>
-  <p id="jt60sa-jev-rescan-state">The stored-evidence re-judge refreshed 5,614 FacilityPaths for USD 0.723152, leaving 0 stale among 5,619 scored or triaged paths. It makes no facility call. All 24 configured new roots are present; discovery seeded 26 missing config roots in total and scanned 23 of these 24. Path triage stopped after the description model twice returned a response that failed PathDescriptionBatch validation. One root gained a Jev triage judgment in the single-path retry. The /home code pass spent USD 0.481508 on file decisions and descriptions; that root judgment cost USD 0.000121. Total observed spend is about USD 1.204782 of the USD 15 ceiling.</p>
-  <p id="jt60sa-jev-rescan-home-coverage">The /home code pass reached 230 of 2,901 paths above the 0.30 gate. It is incomplete. The new roots have no listed CodeFiles because their new FacilityPaths did not clear Jev triage before the description failure. Zero file counts below measure unfinished pipeline work, not empty remote directories.</p>
+  <p id="jt60sa-jev-rescan-state">The stored-evidence re-judge refreshed 5,614 FacilityPaths for USD 0.723152 without a facility call. The focused 24-root path passes left 676 paths under those roots, 664 with Jev judgments, no paths left in scanned status or awaiting expansion, and 397 at the 0.30 code-scan gate. The focused root code pass scanned 15,357 files, scored 910 and ingested 600 for USD 2.50; its bounded flush scored 950 and ingested 836 more for USD 2.44. Across the observed passes, Jev spend is about USD 6.282 of the USD 15 authorization.</p>
+  <p id="jt60sa-jev-rescan-coverage">The graph currently has 9,123 JT-60SA FacilityPaths, 6,284 carrying a stored judgment; 5,782 are scored or triaged. Under /home, 2,901 paths pass the 0.30 code-scan gate and 230 have file scans. 505 scored /home paths still request expansion but have no expanded_at timestamp. The expansion worker claims only triaged paths, so those scored rows cannot advance. The next /home code pass stopped at remote interpreter preflight: wrapped SSH closed before discovery. Counts below are the graph state at this checkpoint, not a completed /home drain.</p>
   <table id="jt60sa-jev-rescan-roots">
-    <thead><tr><th>Root</th><th>Path status</th><th>Jev scan gate</th><th>Listed</th><th>Judged</th><th>Ingested</th><th>Chunked files</th><th>Chunks</th></tr></thead>
-    <tbody>
-      <tr><th><code>/analysis/src/eddb</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>triaged</td><td>0.170</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>scored</td><td>0.097</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>skipped</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>scanned</td><td>—</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/home</code></th><td>2,901 paths at gate; 230 file-scanned</td><td>0.30</td><td>2863</td><td>2863</td><td>148</td><td>148</td><td>525</td></tr>
-    </tbody>
-  </table>
-  <p id="jt60sa-jev-rescan-method">Facets below are exclusive: each judged CodeFile is assigned its highest stored five-scope Jev relevance (ties follow the displayed order). Files with no positive facet and files without a judgment have separate rows. Listed counts are graph CodeFiles, judged means a recorded relevance stage, and chunks follow CodeFile ← FROM_FILE — CodeExample — HAS_CHUNK → CodeChunk. Root scopes overlap only where one configured directory contains another; do not sum roots for a distinct-file total.</p>
+    <thead><tr><th>Root</th><th>Paths</th><th>Jev judged</th><th>Code gate</th><th>Paths file-scanned</th><th>Files listed</th><th>Judged</th><th>Ingested</th><th>Chunked files</th><th>Chunks</th><th>Triaged files</th></tr></thead><tbody>
+      <tr><th><code>/analysis/src/eddb</code></th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+      <tr><th><code>/analysis/src/uddb</code></th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/pmdb</code></th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+      <tr><th><code>/analysis/src/mbdb</code></th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>9</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>9</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/safledd</code></th><td>6</td><td>6</td><td>1</td><td>1</td><td>55</td><td>52</td><td>3</td><td>3</td><td>18</td><td>16</td></tr>
+      <tr><th><code>/analysis/src/edas_inf</code></th><td>2</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>27</td><td>27</td><td>18</td><td>18</td><td>124</td><td>118</td><td>18</td><td>18</td><td>52</td><td>17</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>7</td><td>7</td><td>1</td><td>1</td><td>30</td><td>26</td><td>0</td><td>0</td><td>0</td><td>8</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>1</td><td>1</td><td>1</td><td>1</td><td>9</td><td>8</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/SAsetequ</code></th><td>2</td><td>2</td><td>1</td><td>1</td><td>15</td><td>13</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/setequ</code></th><td>2</td><td>2</td><td>1</td><td>1</td><td>15</td><td>14</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/SAselene</code></th><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/CCStable</code></th><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/SAdata</code></th><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/slice</code></th><td>5</td><td>5</td><td>2</td><td>2</td><td>22</td><td>21</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+      <tr><th><code>/analysis/src/adam3</code></th><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>70</td><td>69</td><td>41</td><td>40</td><td>2,420</td><td>2,289</td><td>47</td><td>47</td><td>191</td><td>114</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>528</td><td>520</td><td>320</td><td>240</td><td>12,646</td><td>11,982</td><td>988</td><td>988</td><td>4,624</td><td>1,934</td></tr>
+      <tr><th><code>/analysis/src/toolc</code></th><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/gdlib</code></th><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>9</td><td>8</td><td>6</td><td>6</td><td>14</td><td>13</td><td>5</td><td>5</td><td>20</td><td>4</td></tr>
+      <tr><th><code>/home</code></th><td>7,744</td><td>5,052</td><td>2,901</td><td>230</td><td>2,863</td><td>2,863</td><td>148</td><td>148</td><td>525</td><td>444</td></tr>
+    </tbody></table>
+  <p id="jt60sa-jev-rescan-scope-note">Root scopes can overlap when one configured directory contains another. Rows therefore describe each prefix independently and should not be summed as distinct files. A judged file has a stored relevance stage or triage timestamp. Chunk counts follow CodeFile ← FROM_FILE — CodeExample — HAS_CHUNK → CodeChunk; the /home query returns the known positive control of 148 chunked files and 525 chunks.</p>
   <table id="jt60sa-jev-rescan-facets">
-    <thead><tr><th>Root</th><th>Primary facet</th><th>Listed</th><th>Judged</th><th>Ingested</th><th>Chunked files</th><th>Chunks</th></tr></thead>
-    <tbody>
-      <tr><th><code>/analysis/src/eddb</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/eddb</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/eddb</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/eddb</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/eddb</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/eddb</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/eddb</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/edas_inf</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/SAselene</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>diagnostic load</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>signal processing</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>machine description</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>IMAS mapping</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>reconstruction database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/home</code></th><td>diagnostic load</td><td>900</td><td>900</td><td>82</td><td>82</td><td>296</td></tr>
-      <tr><th><code>/home</code></th><td>signal processing</td><td>1434</td><td>1434</td><td>34</td><td>34</td><td>163</td></tr>
-      <tr><th><code>/home</code></th><td>machine description</td><td>50</td><td>50</td><td>2</td><td>2</td><td>5</td></tr>
-      <tr><th><code>/home</code></th><td>IMAS mapping</td><td>306</td><td>306</td><td>26</td><td>26</td><td>50</td></tr>
-      <tr><th><code>/home</code></th><td>reconstruction database</td><td>173</td><td>173</td><td>4</td><td>4</td><td>11</td></tr>
-      <tr><th><code>/home</code></th><td>no positive facet</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th><code>/home</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-    </tbody>
-  </table>
-  <h3 id="jt60sa-jev-rescan-path-categories">FacilityPath judgments by purpose and facet</h3>
-  <p id="jt60sa-jev-rescan-path-method">These counts use FacilityPaths whose judgment_model is the current Jev seat. Purpose categories are exclusive. Facet counts show Scores at or above 0.30 and may overlap; omitted facets have zero qualifying paths. Container paths can be worth expanding even when no facet clears the code-scan gate.</p>
-  <table id="jt60sa-jev-rescan-path-table">
-    <thead><tr><th>Root</th><th>Path rows</th><th>Jev judged</th><th>Judged path_purpose categories</th><th>Facet Scores ≥ 0.30</th></tr></thead>
-    <tbody>
-      <tr><th><code>/analysis/src/eddb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/uddb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/pmdb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/mbdb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/safledd</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+    <thead><tr><th>Root</th><th>Primary code facet</th><th>Listed</th><th>Judged</th><th>Ingested</th><th>Chunked files</th><th>Chunks</th></tr></thead><tbody>
+      <tr><th><code>/analysis/src/eddb</code></th><td>reconstruction database</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/uddb</code></th><td>unjudged</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/pmdb</code></th><td>reconstruction database</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/mbdb</code></th><td>diagnostic load</td><td>1</td><td>1</td><td>1</td><td>1</td><td>9</td></tr>
+      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>diagnostic load</td><td>1</td><td>1</td><td>1</td><td>1</td><td>9</td></tr>
+      <tr><th><code>/analysis/src/safledd</code></th><td>signal processing</td><td>2</td><td>2</td><td>1</td><td>1</td><td>1</td></tr>
+      <tr><th><code>/analysis/src/safledd</code></th><td>machine description</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/safledd</code></th><td>reconstruction database</td><td>48</td><td>48</td><td>2</td><td>2</td><td>17</td></tr>
+      <tr><th><code>/analysis/src/safledd</code></th><td>unjudged</td><td>3</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>diagnostic load</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>signal processing</td><td>10</td><td>10</td><td>10</td><td>10</td><td>36</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>machine description</td><td>6</td><td>6</td><td>5</td><td>5</td><td>13</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>reconstruction database</td><td>99</td><td>99</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>unjudged</td><td>6</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>signal processing</td><td>3</td><td>3</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>machine description</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>IMAS mapping</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>reconstruction database</td><td>21</td><td>21</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>unjudged</td><td>4</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>reconstruction database</td><td>8</td><td>8</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>unjudged</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/SAsetequ</code></th><td>reconstruction database</td><td>13</td><td>13</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/SAsetequ</code></th><td>unjudged</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/setequ</code></th><td>reconstruction database</td><td>14</td><td>14</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/setequ</code></th><td>unjudged</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/slice</code></th><td>reconstruction database</td><td>21</td><td>21</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/slice</code></th><td>unjudged</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>diagnostic load</td><td>3</td><td>3</td><td>3</td><td>3</td><td>15</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>signal processing</td><td>49</td><td>49</td><td>32</td><td>32</td><td>150</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>machine description</td><td>15</td><td>15</td><td>2</td><td>2</td><td>3</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>IMAS mapping</td><td>5</td><td>5</td><td>4</td><td>4</td><td>8</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>reconstruction database</td><td>2,217</td><td>2,217</td><td>6</td><td>6</td><td>15</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>unjudged</td><td>131</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>diagnostic load</td><td>97</td><td>97</td><td>71</td><td>71</td><td>133</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>signal processing</td><td>1,043</td><td>1,043</td><td>669</td><td>669</td><td>3,490</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>machine description</td><td>258</td><td>258</td><td>7</td><td>7</td><td>25</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>IMAS mapping</td><td>149</td><td>149</td><td>106</td><td>106</td><td>450</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>reconstruction database</td><td>10,435</td><td>10,435</td><td>135</td><td>135</td><td>526</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>unjudged</td><td>664</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>diagnostic load</td><td>5</td><td>5</td><td>5</td><td>5</td><td>20</td></tr>
+      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>reconstruction database</td><td>8</td><td>8</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>unjudged</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><th><code>/home</code></th><td>diagnostic load</td><td>55</td><td>55</td><td>50</td><td>50</td><td>170</td></tr>
+      <tr><th><code>/home</code></th><td>signal processing</td><td>101</td><td>101</td><td>46</td><td>46</td><td>224</td></tr>
+      <tr><th><code>/home</code></th><td>machine description</td><td>39</td><td>39</td><td>3</td><td>3</td><td>6</td></tr>
+      <tr><th><code>/home</code></th><td>IMAS mapping</td><td>81</td><td>81</td><td>45</td><td>45</td><td>114</td></tr>
+      <tr><th><code>/home</code></th><td>reconstruction database</td><td>2,587</td><td>2,587</td><td>4</td><td>4</td><td>11</td></tr>
+    </tbody></table>
+  <p id="jt60sa-jev-rescan-facet-method">Each CodeFile is assigned to its strongest stored five-scope Jev relevance; ties follow table order. A file with a judgment and no positive facet is counted separately from an unjudged file.</p>
+  <table id="jt60sa-jev-rescan-path-categories">
+    <thead><tr><th>Root</th><th>Paths</th><th>Jev judged</th><th>Judged path_purpose categories</th><th>Facet scores ≥ 0.30</th></tr></thead><tbody>
+      <tr><th><code>/analysis/src/eddb</code></th><td>1</td><td>1</td><td>data_access 1</td><td>operations_code 1; data_access 1</td></tr>
+      <tr><th><code>/analysis/src/uddb</code></th><td>1</td><td>1</td><td>data_access 1</td><td>data_access 1; workflow 1</td></tr>
+      <tr><th><code>/analysis/src/pmdb</code></th><td>1</td><td>1</td><td>data_access 1</td><td>analysis_code 1; data_access 1</td></tr>
+      <tr><th><code>/analysis/src/mbdb</code></th><td>1</td><td>1</td><td>data_access 1</td><td>analysis_code 1; data_access 1</td></tr>
+      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>1</td><td>1</td><td>data_access 1</td><td>analysis_code 1; data_access 1; imas 1</td></tr>
+      <tr><th><code>/analysis/src/safledd</code></th><td>6</td><td>6</td><td>analysis_code 4; documentation 1; configuration 1</td><td>analysis_code 1</td></tr>
       <tr><th><code>/analysis/src/edas_inf</code></th><td>2</td><td>1</td><td>configuration 1</td><td>—</td></tr>
       <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>1</td><td>1</td><td>data_access 1</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/MagLine2022</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/SAsetequ</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/setequ</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>27</td><td>27</td><td>analysis_code 15; workflow 4; test_suite 3; experimental_data 3; container 1; empty_directory 1</td><td>analysis_code 13; visualization 5; convention 14; workflow 16; data_access 1; modeling_data 2</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>7</td><td>7</td><td>analysis_code 3; container 1; build_artifact 1; software_project 1; archive 1</td><td>analysis_code 1; operations_code 1</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>1</td><td>1</td><td>analysis_code 1</td><td>analysis_code 1; operations_code 1; visualization 1</td></tr>
+      <tr><th><code>/analysis/src/SAsetequ</code></th><td>2</td><td>2</td><td>analysis_code 2</td><td>analysis_code 1; workflow 1</td></tr>
+      <tr><th><code>/analysis/src/setequ</code></th><td>2</td><td>2</td><td>analysis_code 2</td><td>analysis_code 1</td></tr>
       <tr><th><code>/analysis/src/SAselene</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/CCStable</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/SAdata</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/slice</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/adam3</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/OFMC</code></th><td>2</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/accome</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/toolc</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/gdlib</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
-      <tr><th><code>/home</code></th><td>7,667</td><td>5,051</td><td>modeling_code 1,745; analysis_code 577; data_access 516; modeling_data 478; visualization 394; empty_directory 236; container 223; software_project 199; build_artifact 198; configuration 114; experimental_data 94; operations_code 90; workflow 84; documentation 41; archive 23; other 22; test_suite 17</td><td>modeling_code 1,010; analysis_code 801; operations_code 207; modeling_data 696; experimental_data 33; data_access 462; workflow 1,449; visualization 1,033; documentation 164; imas 368; convention 482</td></tr>
-    </tbody>
-  </table>
-  <p id="jt60sa-jev-rescan-limits">The /home copy_count field cannot support a deduplication census: it is absent from every JT-60SA CodeFile, while content_hash is present on 1,733 files across the facility. The code pass completed at the eight-minute bound with 148 /home files ingested and 525 chunks; 444 /home files remain at triaged. The resumed single-root pass against main also failed: its triage worker still uses DirectoryTriager.async_triage_batch and validates the response with PathDescriptionBatch, while the new describe_paths helper is called by path scoring. The source route needs repair outside this worker’s file scope before the new roots can clear the Jev gate.</p>
+      <tr><th><code>/analysis/CCStable</code></th><td>2</td><td>2</td><td>container 1; analysis_code 1</td><td>—</td></tr>
+      <tr><th><code>/analysis/SAdata</code></th><td>2</td><td>2</td><td>experimental_data 1; archive 1</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/slice</code></th><td>5</td><td>5</td><td>analysis_code 4; container 1</td><td>analysis_code 2; visualization 1; convention 2</td></tr>
+      <tr><th><code>/analysis/src/adam3</code></th><td>2</td><td>2</td><td>software_project 1; analysis_code 1</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>1</td><td>1</td><td>software_project 1</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>70</td><td>69</td><td>analysis_code 50; configuration 4; data_access 4; container 3; archive 3; software_project 2; build_artifact 1; modeling_code 1; modeling_data 1</td><td>analysis_code 34; workflow 24; convention 7; modeling_code 8; visualization 6; operations_code 3; imas 11; data_access 4; modeling_data 2</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>528</td><td>520</td><td>analysis_code 294; archive 131; software_project 19; modeling_code 15; visualization 12; build_artifact 12; container 9; configuration 9; experimental_data 6; data_access 3; operations_code 3; other 2; empty_directory 2; modeling_data 1; workflow 1; test_suite 1</td><td>analysis_code 217; visualization 50; operations_code 23; convention 73; documentation 33; imas 30; workflow 79; modeling_code 20; modeling_data 3; data_access 4</td></tr>
+      <tr><th><code>/analysis/src/toolc</code></th><td>1</td><td>1</td><td>software_project 1</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/gdlib</code></th><td>2</td><td>2</td><td>container 1; visualization 1</td><td>visualization 1</td></tr>
+      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>9</td><td>8</td><td>data_access 7; analysis_code 1</td><td>analysis_code 6; operations_code 1; data_access 4; workflow 4</td></tr>
+      <tr><th><code>/home</code></th><td>7,744</td><td>5,052</td><td>modeling_code 1,745; analysis_code 577; data_access 516; modeling_data 478; visualization 394; empty_directory 236; container 224; software_project 199; build_artifact 198; configuration 114; experimental_data 94; operations_code 90; workflow 84; documentation 41; archive 23; other 22; test_suite 17</td><td>modeling_data 577; workflow 1,308; visualization 924; operations_code 198; documentation 122; analysis_code 737; data_access 444; convention 477; imas 361; modeling_code 935; experimental_data 18</td></tr>
+    </tbody></table>
+  <p id="jt60sa-jev-rescan-limits">The five-scope code drain is unfinished: root and /home CodeFiles remain triaged. The /home expansion mismatch and facility SSH preflight failure prevented completing the requested path and code coverage. The five database-library roots contain 18 stored chunks, confirming the chunk-text query sees the cohort, but none contains eddbreadTime. The /home copy_count property is absent from JT-60SA CodeFiles, so a content-hash deduplication census is unavailable from that field.</p>
 </section>
