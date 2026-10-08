@@ -26,10 +26,11 @@ if TYPE_CHECKING:
     from imas_codex.embeddings.encoder import Encoder
 
 from .chunkers import chunk_code, chunk_text
-from .extractors.ids import extract_ids_references
+from .extractors.ids import extract_ids_references, extract_imas_path_references
 from .extractors.mdsplus import extract_mdsplus_paths
 from .graph import (
     link_chunks_to_data_nodes,
+    link_chunks_to_ids_roots,
     link_chunks_to_imas_paths,
     link_examples_to_facility,
 )
@@ -93,6 +94,7 @@ def _split_and_extract(
         # Extract IDS references
         ids_refs = extract_ids_references(chunk.text)
         related_ids = sorted(ids_refs) if ids_refs else []
+        imas_paths = extract_imas_path_references(chunk.text, ids_refs)
 
         # Extract MDSplus paths
         mdsplus_refs = extract_mdsplus_paths(chunk.text)
@@ -107,6 +109,8 @@ def _split_and_extract(
         if related_ids:
             chunk_dict["related_ids"] = related_ids
             chunk_dict["related_ids_count"] = len(related_ids)
+        if imas_paths:
+            chunk_dict["imas_paths"] = imas_paths
         if mdsplus_paths:
             chunk_dict["mdsplus_paths"] = mdsplus_paths
             chunk_dict["mdsplus_ref_count"] = len(mdsplus_paths)
@@ -670,6 +674,7 @@ async def ingest_files(
 
     t_link_start = _time.monotonic()
     with GraphClient() as graph_client:
+        link_chunks_to_ids_roots(graph_client, example_ids=all_example_ids)
         link_chunks_to_imas_paths(graph_client, example_ids=all_example_ids)
         if stats["mdsplus_paths"] > 0:
             link_chunks_to_data_nodes(graph_client, example_ids=all_example_ids)
