@@ -364,9 +364,7 @@ async def test_scanner_access_methods_share_the_existing_persistence_writer():
 
 
 class TestConfiguredDatabases:
-    def test_raw_check_uses_global_catalogue_and_rejects_unknown_pid(
-        self, monkeypatch, capsys
-    ):
+    def test_raw_check_reads_value_and_rejects_unknown_pid(self, monkeypatch, capsys):
         class ProcessedCatalogue:
             def __init__(self, path):
                 pass
@@ -389,6 +387,18 @@ class TestConfiguredDatabases:
                     return True, {"data": [pid], "count": 1, "irc": 0}
                 return False, {"data": [], "count": 0, "irc": 1111}
 
+            def uddbreadHeader(self, shot, pid):
+                if pid == "2111UA001" and shot == "E101163":
+                    return True, {"data": "STIME=0 ETIME=1", "irc": 0}
+                return False, {"data": None, "irc": 1022}
+
+            def uddbreadConvert(self, shot, pid, t1, t2, datavol, ch):
+                assert (shot, pid, ch) == ("E101163", "2111UA001", 1)
+                if datavol == 1:
+                    return False, {"datavol": 50, "irc": 1062}
+                assert datavol == 50
+                return True, {"datavol": 50, "data": [1.23], "irc": 0}
+
             def uddbClose(self):
                 return True
 
@@ -410,8 +420,18 @@ class TestConfiguredDatabases:
                         "api_path": "/analysis/src/eddb",
                         "lib_path": "/analysis/lib/libeddb.so",
                         "signals": [
-                            {"id": "known", "database": "UDDB", "pid": "2111UA001"},
-                            {"id": "unknown", "database": "UDDB", "pid": "NO_SUCH_PID"},
+                            {
+                                "id": "known",
+                                "database": "UDDB",
+                                "pid": "2111UA001",
+                                "shot": "E101163",
+                            },
+                            {
+                                "id": "unknown",
+                                "database": "UDDB",
+                                "pid": "NO_SUCH_PID",
+                                "shot": "E101163",
+                            },
                         ],
                     }
                 )
@@ -420,8 +440,8 @@ class TestConfiguredDatabases:
         check_main()
         results = json.loads(capsys.readouterr().out)["results"]
         assert [result["success"] for result in results] == [True, False]
-        assert results[0]["dtype"] == "raw_catalogue"
-        assert "absent from catalogue" in results[1]["error"]
+        assert results[0]["dtype"] == "raw_value"
+        assert "header unavailable" in results[1]["error"]
 
     def test_mbdb_opened_case_exposes_native_field_list(self, monkeypatch):
         class CaseCatalogue:
@@ -676,6 +696,7 @@ class TestConfiguredDatabases:
                 "units": "",
                 "description": "raw channel",
                 "metadata_source": "uddbreadTable()",
+                "metadata_shot": "",
             }
         ]
 
@@ -716,6 +737,7 @@ class TestConfiguredDatabases:
         )
         assert rows[0]["description"] == "coil current"
         assert rows[0]["units"] == "A"
+        assert rows[0]["metadata_shot"] == "E101163"
 
     async def test_uddb_catalogue_produces_distinct_raw_signal(self):
         config = {**CONFIG, "databases": ["EDDB", "UDDB"]}
@@ -736,6 +758,7 @@ class TestConfiguredDatabases:
                             "shot_range": "E080000-",
                             "units": "A",
                             "description": "coil current",
+                            "metadata_shot": "E101163",
                         },
                     ],
                 }
@@ -751,9 +774,10 @@ class TestConfiguredDatabases:
             "jt-60sa:general/uddb_2111ua001",
         }
         raw = next(s for s in result.signals if s.data_source_name == "UDDB")
-        assert raw.accessor == "uddbreadConvert('E101173', '2111UA001', t1, t2)"
+        assert raw.accessor == "uddbreadConvert('E101163', '2111UA001', t1, t2)"
         assert raw.unit == "A"
         assert raw.description == "coil current"
+        assert raw.example_shot == 101163
 
     async def test_raw_signal_check_uses_uddb_pid(self):
         signal = FacilitySignal(
@@ -772,7 +796,7 @@ class TestConfiguredDatabases:
                 "jt-60sa", "nakasvr26", [signal], CONFIG
             )
         assert remote.call_args.args[1]["signals"] == [
-            {"id": signal.id, "database": "UDDB", "pid": "2111UA001"}
+            {"id": signal.id, "database": "UDDB", "pid": "2111UA001", "shot": "E101173"}
         ]
         assert results[0]["valid"] is True
 

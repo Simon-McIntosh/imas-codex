@@ -355,6 +355,7 @@ def enumerate_uddb(config):
                     if source_shot
                     else "uddbreadTable()"
                 ),
+                "metadata_shot": source_shot,
             }
         )
     return rows, attempt

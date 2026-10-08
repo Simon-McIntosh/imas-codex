@@ -297,6 +297,7 @@ class EDASScanner:
             description = raw.get("description", "")
 
             if raw.get("database") == "UDDB":
+                sample_shot = raw.get("metadata_shot") or shot_str
                 signals.append(
                     FacilitySignal(
                         id=f"{facility}:general/uddb_{dname.lower()}",
@@ -304,7 +305,7 @@ class EDASScanner:
                         status=FacilitySignalStatus.discovered,
                         physics_domain="general",
                         name=f"UDDB/{dname}",
-                        accessor=f"uddbreadConvert('{shot_str}', '{dname}', t1, t2)",
+                        accessor=f"uddbreadConvert('{sample_shot}', '{dname}', t1, t2)",
                         data_source_name="UDDB",
                         data_source_path=f"UDDB/{dname}",
                         unit=units,
@@ -314,7 +315,7 @@ class EDASScanner:
                         pid=dname,
                         aliases=[raw["alias"]] if raw.get("alias") else None,
                         discovery_source="edas",
-                        example_shot=ref_shot,
+                        example_shot=int(str(sample_shot).removeprefix("E")),
                     )
                 )
                 continue
@@ -608,7 +609,16 @@ class EDASScanner:
                 )
                 continue
             if s.data_source_name == "UDDB" and len(parts) == 2:
-                batch.append({"id": s.id, "database": "UDDB", "pid": parts[1]})
+                batch.append(
+                    {
+                        "id": s.id,
+                        "database": "UDDB",
+                        "pid": parts[1],
+                        "shot": f"E{s.example_shot:06d}"
+                        if s.example_shot
+                        else shot_str,
+                    }
+                )
                 continue
             if len(parts) == 2:
                 data_class = EDDB_LETTER_BY_DATA_CLASS.get(

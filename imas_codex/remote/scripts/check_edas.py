@@ -35,6 +35,7 @@ Output (JSON on stdout):
 """
 
 import json
+import re
 import sys
 
 
@@ -168,18 +169,23 @@ def main():
                 from lcdbWrapper import LcdbWrapper
 
                 root = config.get("lcdb_root") or "/analysis_DB/EDASDB"
-                ok, _values = LcdbWrapper().lcdb_value(
+                ok, values = LcdbWrapper().lcdb_value(
                     int(sig["shot"]),
                     sig["category"],
                     [sig["data_name"]],
                     root=f"{root}/{sig['owner']}",
                 )
+                has_value = (
+                    ok
+                    and isinstance(values, dict)
+                    and values.get(sig["data_name"]) is not None
+                )
                 results.append(
                     {
                         "id": sig["id"],
-                        "success": bool(ok),
-                        "dtype": "analysis" if ok else None,
-                        "error": None if ok else "LCDB value unavailable",
+                        "success": bool(has_value),
+                        "dtype": "analysis_value" if has_value else None,
+                        "error": None if has_value else "LCDB value unavailable",
                     }
                 )
                 continue
@@ -191,20 +197,59 @@ def main():
                     config.get("uddb_lib_path") or "/analysis/lib/libuddb.so"
                 )
                 opened = raw.uddbOpen()
-                if opened:
-                    ok, rtn = raw.uddbreadTable(pid=sig["pid"])
+                if not opened:
+                    results.append(
+                        {"id": sig["id"], "success": False, "error": "UDDB open failed"}
+                    )
+                    continue
+                try:
+                    shot = sig.get("shot") or ref_shot
+                    header_ok, header = raw.uddbreadHeader(shot=shot, pid=sig["pid"])
+                    if not header_ok:
+                        results.append(
+                            {
+                                "id": sig["id"],
+                                "success": False,
+                                "error": f"UDDB header unavailable (irc={(header or {}).get('irc')})",
+                            }
+                        )
+                        continue
+                    header_text = (header or {}).get("data") or ""
+                    match = re.search(
+                        r"\bSTIME=([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?)",
+                        header_text,
+                    )
+                    start = float(match.group(1)) if match else 0.0
+                    t1, t2 = f"{start:.6f}", f"{start + 0.0001:.6f}"
+                    ok, response = raw.uddbreadConvert(
+                        shot=shot, pid=sig["pid"], t1=t1, t2=t2, datavol=1, ch=1
+                    )
+                    needed = (response or {}).get("datavol", 0)
+                    if (
+                        not ok
+                        and (response or {}).get("irc") == 1062
+                        and 1 < needed <= 10000
+                    ):
+                        ok, response = raw.uddbreadConvert(
+                            shot=shot,
+                            pid=sig["pid"],
+                            t1=t1,
+                            t2=t2,
+                            datavol=needed,
+                            ch=1,
+                        )
+                    values = (response or {}).get("data")
+                    has_value = bool(ok and values is not None and len(values) > 0)
+                finally:
                     raw.uddbClose()
-                else:
-                    ok, rtn = False, {}
-                registered = ok and sig["pid"] in (rtn.get("data") or [])
                 results.append(
                     {
                         "id": sig["id"],
-                        "success": bool(registered),
-                        "dtype": "raw_catalogue" if registered else None,
+                        "success": has_value,
+                        "dtype": "raw_value" if has_value else None,
                         "error": None
-                        if registered
-                        else f"UDDB PID absent from catalogue (irc={rtn.get('irc')})",
+                        if has_value
+                        else f"UDDB value unavailable (irc={(response or {}).get('irc')})",
                     }
                 )
                 continue
