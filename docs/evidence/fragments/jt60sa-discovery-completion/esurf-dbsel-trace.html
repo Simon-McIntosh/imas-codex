@@ -1,0 +1,154 @@
+<section id="esurf-dbsel-trace">
+  <h2 id="esurf-dbsel-trace-heading">eSurf equilibrium database routes and DBSEL</h2>
+  <p id="esurf-dbsel-trace-result">
+    On 2026-10-08, <code>jt-60sa</code> SSH reached <code>intr26-2</code> (the
+    nakasvr26 route). The current <code>/analysis/bin/esurf</code> launches EDAS
+    <code>v2.2.1</code>. Its defaults define eleven equilibrium database IDs;
+    only FAME (0) and EQDB (1) are marked available, and only EQDB is marked
+    writable. For recent shot <code>44822</code>, a real
+    <code>Eqlist_Get_Rev</code> call returned five FAME times with return code
+    <code>0</code>. Shot 44822 is also named in a current eSurf asset,
+    <code>edas_share/libs/a6c_SES_after_44822.dat</code>, dated 2026-07-24.
+    The other ten calls returned zero times. The working FAME
+    time-list call used a direct socket route in the compiled library rather
+    than resolving the <code>dbsvr17p</code> hostname.
+  </p>
+
+  <h3 id="esurf-dbsel-trace-defaults">The complete eSurf default list</h3>
+  <p id="esurf-dbsel-trace-defaults-source">
+    Source: <code>/analysis/src/edas2/v2.2.1/edas_share/eslice_esurf/default/Eqdb.py:70-126</code>.
+    Its <code>dbserver</code> is <code>/analysis_DB</code>, set in
+    <code>default/Default.py:137-141</code>. The <code>Dir</code> column is UI
+    metadata, not proof of the path taken by the compiled list call. With a
+    shot supplied, <code>SelectEqdbDialog.py:1379-1382</code> filters this list
+    through <code>CheckEqdbFromShot</code>, which requires both
+    <code>Available</code> and a nonempty time list (<code>db/Eqdb.py:105-134</code>).
+  </p>
+  <table id="esurf-dbsel-trace-defaults-table">
+    <thead><tr><th>ID</th><th>Name</th><th>Tooltip</th><th>Writable</th><th>Available</th><th>UI Dir</th></tr></thead>
+    <tbody>
+      <tr><td>-3</td><td>LOCALDB/2M</td><td>Local data base for 2M</td><td>false</td><td>false</td><td>/analysis_DB/DUMMY</td></tr>
+      <tr><td>-2</td><td>LOCALDB/EQDSK</td><td>Local data base for positive magnetic shear</td><td>false</td><td>false</td><td>/analysis_DB/DUMMY</td></tr>
+      <tr><td>-1</td><td>reverse/EQDSK</td><td>Local data base for negative magnetic shear</td><td>false</td><td>false</td><td>/analysis_DB/DUMMY</td></tr>
+      <tr><td>0</td><td>FAME</td><td>FAME DB</td><td>false</td><td>true</td><td>/analysis_DB/FAME3</td></tr>
+      <tr><td>1</td><td>EQDB</td><td>Data base for positive magnetic shear</td><td>true</td><td>true</td><td>/analysis_DB/EQDB</td></tr>
+      <tr><td>2</td><td>EQDB_RV</td><td>Data base for negative magnetic shear</td><td>false</td><td>false</td><td>/analysis_DB/EQDB_RV</td></tr>
+      <tr><td>3</td><td>EQDB_PRE</td><td>Equilibrium data of negative magnetic shear by auto-processing tool</td><td>false</td><td>false</td><td>/analysis_DB/EQDB_PRE</td></tr>
+      <tr><td>4</td><td>EQDB_EFIT</td><td>Equilibrium data of negative magnetic shear of EFIT</td><td>false</td><td>false</td><td>/analysis_DB/EQDB_EFIT</td></tr>
+      <tr><td>5</td><td>EQDB_JFT2M</td><td>Data base for 2M</td><td>false</td><td>false</td><td>/analysis_DB/EQDB_JFT2M</td></tr>
+      <tr><td>6</td><td>EQDB_CCS</td><td>Equilibrium data processed by old CCS-SELENE</td><td>false</td><td>false</td><td>/analysis_DB/EQDB_CCS</td></tr>
+      <tr><td>7</td><td>EQDB_TSC</td><td>Data base for TOSCA</td><td>false</td><td>false</td><td>/analysis_DB/EQDB_TSC</td></tr>
+    </tbody>
+  </table>
+  <p id="esurf-dbsel-trace-enum">
+    The separate named API enum in
+    <code>edas_share/edas_common/edas_enum.py:229-284</code> contains only
+    <code>MBEQ=-5</code>, <code>LOCALDB=-2</code>, <code>FAME=0</code>, and
+    <code>EQDB=1</code>. It is not the full UI list; the FLEDD entry point
+    accepts the numeric IDs above.
+  </p>
+
+  <h3 id="esurf-dbsel-trace-routing">FLEDD routing and measured returns</h3>
+  <p id="esurf-dbsel-trace-routing-chain">
+    eSurf's active <code>esurf_default.ini:42,68,88</code> selects
+    <code>FLEDD_locallib_API</code> and <code>/analysis/lib/libFLEDDPIC.so</code>.
+    That library links to <code>/analysis/lib/JT60SAEQDB/libEQDBMSPIC.so</code>.
+    In <code>/analysis/src/safledd/eqlist_get.f:82-129</code>, the
+    <code>EQLIST_GET_REV</code> wrapper calls <code>ALLEQDBLIST_REV</code>.
+    Disassembly of <code>alleqdblist_rev_</code> in the linked library sends
+    negative IDs to <code>locallist_rev_</code>, and IDs 0–8 to
+    <code>socket_eqdblist_</code>. The latter loads the literal
+    <code>192.168.29.13</code> and port <code>0xfdf3</code> (65011) immediately
+    before <code>eqdbsockclient_connect</code>. Its per-ID table selects the
+    configuration filename shown below. The files for IDs 1–7 still name
+    <code>SERVER_NAME:dbsvr17p</code> and the stated <code>EQDB_PATH</code>;
+    these are configured storage targets, while the observed list-call client
+    hop is the literal socket endpoint. The FAME file lacks a server or data
+    path setting. Its storage path behind the socket is not exposed here.
+  </p>
+  <p id="esurf-dbsel-trace-local-route">
+    The local resolver uses <code>$HOME</code> plus the embedded suffixes
+    <code>/LOCALDB/2M</code>, <code>/LOCALDB/EQDSK</code>, and
+    <code>/reverse/EQDSK</code> for IDs -3, -2, and -1 respectively. This
+    session had <code>HOME=/home/d240044</code> and no <code>EQDB_FILE</code>
+    or <code>EQDSK_DIR</code> override. All three resolved base directories
+    were absent on <code>intr26-2</code>. The UI's <code>DUMMY</code> path is
+    therefore not a local database route.
+  </p>
+  <table id="esurf-dbsel-trace-calls-table">
+    <thead><tr><th>ID</th><th>FLEDD client route</th><th>Selected configuration and declared path</th><th>IRET</th><th>NLIST</th><th>Command exit</th></tr></thead>
+    <tbody>
+      <tr><td>-3</td><td>/home/d240044/LOCALDB/2M</td><td>local-list branch</td><td>-255</td><td>0</td><td>0</td></tr>
+      <tr><td>-2</td><td>/home/d240044/LOCALDB/EQDSK</td><td>local-list branch</td><td>-255</td><td>0</td><td>0</td></tr>
+      <tr><td>-1</td><td>/home/d240044/reverse/EQDSK</td><td>local-list branch</td><td>-255</td><td>0</td><td>0</td></tr>
+      <tr><td>0</td><td>192.168.29.13:65011</td><td>eqdbfm.eqdbms; no server/path field</td><td>0</td><td>5</td><td>0</td></tr>
+      <tr><td>1</td><td>192.168.29.13:65011</td><td>defaults.eqdbms; dbsvr17p /JT60SA_EQ/EQDB</td><td>6415</td><td>0</td><td>0</td></tr>
+      <tr><td>2</td><td>192.168.29.13:65011</td><td>reverse.eqdbms; dbsvr17p /JT60SA_EQ/EQDB_RV</td><td>6415</td><td>0</td><td>0</td></tr>
+      <tr><td>3</td><td>192.168.29.13:65011</td><td>autorv.eqdbms; dbsvr17p /JT60SA_EQ/EQDB_PRE</td><td>6415</td><td>0</td><td>0</td></tr>
+      <tr><td>4</td><td>192.168.29.13:65011</td><td>efitrv.eqdbms; dbsvr17p /JT60SA_EQ/EQDB_EFIT</td><td>6415</td><td>0</td><td>0</td></tr>
+      <tr><td>5</td><td>192.168.29.13:65011</td><td>eqdb2m.eqdbms; dbsvr17p /JT60SA_EQ/EQDB_JFT2M</td><td>6151</td><td>0</td><td>0</td></tr>
+      <tr><td>6</td><td>192.168.29.13:65011</td><td>eqdbccs.eqdbms; dbsvr17p /JT60SA_EQ/EQDB_CCS</td><td>6151</td><td>0</td><td>0</td></tr>
+      <tr><td>7</td><td>192.168.29.13:65011</td><td>eqdbtsc.eqdbms; dbsvr17p /JT60SA_EQ/EQDB_TSC</td><td>6151</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="esurf-dbsel-trace-socket-scope">
+    This is a working equilibrium <em>client route</em> without a
+    <code>dbsvr17p</code> name lookup: FAME ID 0 returned five times through
+    <code>192.168.29.13:65011</code>, while
+    <code>getent hosts dbsvr17p</code> exited 2 on the same host. A reverse
+    lookup of the socket IP also exited 2, so this evidence does not establish
+    whether that IP is physically the same server as <code>dbsvr17p</code>.
+    Changing <code>FAME_HOST</code> and <code>FAME_DIR</code> to invalid values
+    left the list result at <code>IRET=0, NLIST=5</code>; those eSurf defaults
+    do not select the path of this compiled time-list call. Code 0 and its
+    nonempty list are the positive control for the call; the nonzero codes for
+    other IDs are backend results, not Python process exits or proof that
+    those databases contain no records.
+  </p>
+  <p id="esurf-dbsel-trace-command">
+    Command on the <code>jt-60sa</code> SSH route: set
+    <code>PATH</code> to include
+    <code>/analysis/lib/JT60SAEQDB/eqdbms</code>, set
+    <code>LD_LIBRARY_PATH</code> to include the Intel runtime and
+    <code>/analysis/lib/JT60SAEQDB</code>, then run the following Python 3.5
+    call in a separate process for each ID. The exact per-ID argv is
+    <code>["timeout", "20s", "python3", "-c", code, str(ID), "44822"]</code>,
+    for each table ID in ascending order. Every subprocess exit is in the
+    final column; the outer SSH command exited 0. The full captured receipt is
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044924743905-esurf-dbsel-trace/fledd-calls-valid.log</code>.
+  </p>
+  <pre id="esurf-dbsel-trace-call-code">import ctypes, sys
+db = ctypes.c_int(int(sys.argv[1])); shot = ctypes.c_int(int(sys.argv[2])); nmax = ctypes.c_int(1000)
+nlist = ctypes.c_int(-1); iret = ctypes.c_int(-1)
+buf = ((ctypes.c_char * 15) * 1000)()
+lib = ctypes.CDLL("/analysis/lib/libFLEDDPIC.so")
+lib.eqlist_get_rev_(ctypes.byref(db), ctypes.byref(shot), ctypes.byref(nmax), ctypes.byref(nlist), ctypes.byref(buf), ctypes.byref(iret))
+print("IRET={} NLIST={}".format(iret.value, nlist.value), flush=True)</pre>
+
+  <h3 id="esurf-dbsel-trace-dbsel">What DBSEL selects</h3>
+  <p id="esurf-dbsel-trace-dbsel-script">
+    <code>/analysis/bin/dbsel</code> is a C shell script; a source-tree copy is
+    <code>/analysis/src/SAselene_v2.0_forPSRC/RUN/dbsel</code>. Its usage is
+    <code>dbsel SHOT TIME [1:Display]</code>. It passes the shot and time to
+    <code>/analysis/bin/getseldata</code>, links <code>EFIT95.DATA</code> as
+    <code>fort.95</code>, then invokes <code>/analysis/exec/SAselene.ex</code>
+    with the optional display flag and fixed mode arguments
+    <code>1 -2 'mgt'</code>, reading <code>fort.96</code>. The getseldata wrapper
+    calls <code>/analysis/exec/getseldata.ex</code> with that shot and time;
+    its source under <code>/analysis/src/getseldata_v4.2</code> accesses EDDB
+    and writes the SELENE inputs. Thus DBSEL selects a shot/time slice for a
+    SELENE run; it is not an EQDB server chooser. The script was inspected,
+    not executed, because it deletes and creates files in its current directory.
+  </p>
+  <p id="esurf-dbsel-trace-provenance">
+    Read commands and exits: <code>ssh -F ~/.ssh/config jt-60sa hostname</code>
+    → <code>intr26-2</code>, exit 0; <code>sha256sum</code> of the active FLEDD
+    and EQDBMS libraries, exit 0, yielded
+    <code>f26585f36497e6c9dc16af01a6139a6dde0d8164ac1e77748836fd51be4f4a7b</code>
+    and <code>20bdb7b7cb0870aab0e4dac76a3c1964bfda362373894bd0edcfc2ab6a3f8ac5</code>.
+    <code>objdump -d -Mintel</code> and <code>objdump -s</code> on that EQDBMS
+    library, exit 0, supplied the dispatch, endpoint, port, and local suffixes.
+    <code>rg</code> of the eight named EQDBMS configuration files, exit 0,
+    supplied their declared server/path pairs. No credential is recorded here.
+  </p>
+</section>
