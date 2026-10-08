@@ -527,6 +527,49 @@ class TestConfiguredDatabases:
         assert {row["data_name"] for row in rows} == {"DNAME", "NFIT"}
         assert all(row["shot"] == 63632 for row in rows)
 
+    def test_lcdb_file_units_follow_the_named_data_axis(self, tmp_path, monkeypatch):
+        owner = tmp_path / "owner"
+        file = owner / "06/0636/063632/lcdb/ane.s001.ldb"
+        file.parent.mkdir(parents=True)
+        file.write_text(
+            "&INFO\n"
+            "  XUNIT='m',\n"
+            "  YUNIT='W',\n"
+            "  COMMENT='heat flux profile',\n"
+            "&END\n"
+            "&DATA\n"
+            "  XEXPDATA(:)=1,\n"
+            "  YFITDATA(:)=2,\n"
+            "  XEXPINDEX(:)=0,\n"
+            "  NFIT=1,\n"
+            "&END\n"
+        )
+
+        class AnalysisCatalogue:
+            def lcdb_shot(self, **kwargs):
+                return True, [63632]
+
+            def lcdb_dname(self, shot, category, **kwargs):
+                return True, ["XEXPDATA", "YFITDATA", "XEXPINDEX", "NFIT"]
+
+        monkeypatch.setitem(
+            sys.modules,
+            "lcdbWrapper",
+            SimpleNamespace(LcdbWrapper=AnalysisCatalogue, lib=object()),
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas._lcdb_categories",
+            lambda lib, root, shot: (["ane.s001"], 0),
+        )
+        rows, _ = enumerate_lcdb({"lcdb_root": str(tmp_path)})
+        by_name = {row["data_name"]: row for row in rows}
+        assert by_name["XEXPDATA"]["units"] == "m"
+        assert by_name["YFITDATA"]["units"] == "W"
+        assert by_name["YFITDATA"]["description"] == "heat flux profile"
+        assert by_name["XEXPINDEX"]["units"] == ""
+        assert by_name["NFIT"]["units"] == ""
+        assert all(row["metadata_source"] == str(file) for row in rows)
+
     async def test_lcdb_signal_keeps_owner_category_and_shot(self):
         fixture = {
             "signals": [
@@ -537,6 +580,8 @@ class TestConfiguredDatabases:
                     "data_name": "NFIT",
                     "root": "/analysis_DB/EDASDB/owner",
                     "shot": 63632,
+                    "units": "W",
+                    "description": "heat flux profile",
                 }
             ],
             "categories": [],
@@ -551,6 +596,8 @@ class TestConfiguredDatabases:
         assert signal.data_source_path == "owner/ane.s001/NFIT"
         assert signal.example_shot == 63632
         assert "lcdb_value(63632, 'ane.s001', ['NFIT']" in signal.accessor
+        assert signal.unit == "W"
+        assert signal.description == "Dataset comment: heat flux profile"
 
     def test_eddb_only_failure_is_reported_as_error(self, monkeypatch, capsys):
         monkeypatch.setattr(

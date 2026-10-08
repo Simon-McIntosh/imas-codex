@@ -384,6 +384,40 @@ def _lcdb_categories(lib, root, shot):
     ], 0
 
 
+def _lcdb_file_metadata(path):
+    """Read declared text metadata near the start of a dataset namelist."""
+    try:
+        with path.open(encoding="utf-8", errors="replace") as source:
+            header = source.read(65536)
+    except OSError:
+        return {}
+    fields = {}
+    for match in re.finditer(
+        r"^[ \t]*([A-Za-z][A-Za-z0-9_]*)[ \t]*=[ \t]*(?:'([^']*)'|\"([^\"]*)\"|([^,\r\n]*))",
+        header,
+        re.MULTILINE,
+    ):
+        key = match.group(1).upper()
+        if key.endswith("UNIT") or key in {"COMMENT", "DESCRIPTION", "DESC"}:
+            fields[key] = next(
+                (part.strip() for part in match.groups()[1:] if part is not None), ""
+            )
+    return fields
+
+
+def _lcdb_field_unit(name, metadata):
+    """Apply an axis unit only to the data arrays on that axis."""
+    field = name.upper()
+    for key in (f"{field}_UNIT", f"{field}UNIT"):
+        if metadata.get(key):
+            return metadata[key], key
+    if re.match(r"^X(?:EXP|FIT)DATA", field) and metadata.get("XUNIT"):
+        return metadata["XUNIT"], "XUNIT"
+    if re.match(r"^Y(?:EXP|FIT)DATA", field) and metadata.get("YUNIT"):
+        return metadata["YUNIT"], "YUNIT"
+    return "", ""
+
+
 def enumerate_lcdb(config):
     """Enumerate every readable owner, shot, category and data name."""
     api_path = config.get("lcdb_api_path", "/analysis/src/lcdbWrapper")
@@ -427,8 +461,18 @@ def enumerate_lcdb(config):
                     if not ok:
                         failures += 1
                         continue
+                    source_file = (
+                        Path(root)
+                        / f"{shot // 10000:02d}"
+                        / f"{shot // 100:04d}"
+                        / f"{shot:06d}"
+                        / "lcdb"
+                        / f"{category}.ldb"
+                    )
+                    metadata = _lcdb_file_metadata(source_file)
                     for name in names:
                         key = (owner, category, name)
+                        unit, unit_key = _lcdb_field_unit(name, metadata)
                         found[key] = {
                             "database": "LCDB",
                             "category": f"LCDB/{owner}/{category}",
@@ -436,6 +480,15 @@ def enumerate_lcdb(config):
                             "data_name": name,
                             "root": root,
                             "shot": shot,
+                            "units": unit,
+                            "description": (
+                                metadata.get("DESCRIPTION")
+                                or metadata.get("DESC")
+                                or metadata.get("COMMENT")
+                                or ""
+                            ),
+                            "metadata_source": str(source_file),
+                            "unit_source_key": unit_key,
                         }
         except Exception:
             failures += 1

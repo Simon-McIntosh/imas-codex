@@ -334,7 +334,12 @@ class EDASScanner:
                         accessor=f"lcdb_value({shot}, {source_category!r}, [{dname!r}], root={root!r})",
                         data_source_name="LCDB",
                         data_source_path=f"{owner}/{source_category}/{dname}",
-                        description=f"LCDB {source_category} {dname} from {owner}",
+                        unit=units,
+                        description=(
+                            f"Dataset comment: {description}"
+                            if description
+                            else f"LCDB {source_category} {dname} from {owner}"
+                        ),
                         discovery_source="edas",
                         example_shot=shot,
                     )
