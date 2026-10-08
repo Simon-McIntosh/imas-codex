@@ -56,7 +56,6 @@ data_systems:
 
 excludes:
   path_prefixes:
-    - /home
     - /tmp
     - /var/tmp
     - /work/edas
