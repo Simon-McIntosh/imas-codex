@@ -105,8 +105,11 @@ def resolve_location(location: str) -> LocationInfo:
                 scheduler = "slurm"
                 service_job_name = loc_cfg.get("service_job_name", service_job_name)
                 break
-    except Exception:
+    except ValueError:
         pass
+    except Exception as exc:
+        exc.add_note(f"while resolving location {location!r}")
+        raise
     return LocationInfo(
         name=location,
         facility=location,
@@ -123,14 +126,18 @@ def _find_compute_location(name: str) -> LocationInfo | None:
     """
     try:
         from imas_codex.discovery.base.facility import get_facility, list_facilities
-    except Exception:
-        return None
+    except ImportError as exc:
+        exc.add_note(f"while resolving location {name!r}")
+        raise
 
     for facility_id in list_facilities():
         try:
             cfg = get_facility(facility_id)
-        except Exception:
+        except ValueError:
             continue
+        except Exception as exc:
+            exc.add_note(f"while resolving location {name!r}")
+            raise
         compute_locs = cfg.get("compute_locations", {})
         if name in compute_locs:
             loc_cfg = compute_locs[name]

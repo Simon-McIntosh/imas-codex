@@ -1,0 +1,13 @@
+<section id="location-resolver-fail-closed">
+  <h2 id="location-resolver-fail-closed-title">Location resolution surfaces facility failures</h2>
+  <table id="location-resolver-fail-closed-suite-counts">
+    <thead><tr><th>Default-marker suite</th><th>Base passed</th><th>Base failed</th><th>Head passed</th><th>Head failed</th><th>Added failure cause</th></tr></thead>
+    <tbody>
+      <tr><td><code>tests/remote</code></td><td>89</td><td>0</td><td>94</td><td>0</td><td>None</td></tr>
+      <tr><td><code>tests/graph</code></td><td>582</td><td>1</td><td>582</td><td>1</td><td>None</td></tr>
+      <tr><td><code>tests/discovery</code></td><td>1425</td><td>0</td><td>1425</td><td>0</td><td>None</td></tr>
+    </tbody>
+  </table>
+  <p id="location-resolver-fail-closed-failure">Both arms fail <code>tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties</code>: the repository scan reports undeclared LinkML properties and stale runtime adjudications in discovery and ingestion code. This failure is present at the base revision and no failure was added at the head.</p>
+  <p id="location-resolver-fail-closed-refusal">An injected facility-import <code>ImportError</code> is propagated by both <code>_find_compute_location</code> and <code>resolve_location</code>; an unknown facility retains the direct SSH fallback. The 12 focused resolver tests pass. Restoring <code>except Exception: return None</code> around the compute resolver's facility import fails <code>test_facility_import_error_propagates[_find_compute_location]</code> (one failed, one passed in the selected mutation run).</p>
+</section>
