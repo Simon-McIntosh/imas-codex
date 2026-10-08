@@ -213,5 +213,37 @@
       <tr><th><code>/home</code></th><td>unjudged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
-  <p id="jt60sa-jev-rescan-limits">The /home copy_count field cannot support a deduplication census: it is absent from every JT-60SA CodeFile, while content_hash is present on 1,733 files across the facility. The code pass completed at the eight-minute bound with 148 /home files ingested and 525 chunks; 444 /home files remain at triaged. The path description response must be repaired outside this worker’s file scope before the new roots can clear the Jev gate.</p>
+  <h3 id="jt60sa-jev-rescan-path-categories">FacilityPath judgments by purpose and facet</h3>
+  <p id="jt60sa-jev-rescan-path-method">These counts use FacilityPaths whose judgment_model is the current Jev seat. Purpose categories are exclusive. Facet counts show Scores at or above 0.30 and may overlap; omitted facets have zero qualifying paths. Container paths can be worth expanding even when no facet clears the code-scan gate.</p>
+  <table id="jt60sa-jev-rescan-path-table">
+    <thead><tr><th>Root</th><th>Path rows</th><th>Jev judged</th><th>Judged path_purpose categories</th><th>Facet Scores ≥ 0.30</th></tr></thead>
+    <tbody>
+      <tr><th><code>/analysis/src/eddb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/uddb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/pmdb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/mbdb</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/lcdbWrapper</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/safledd</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/edas_inf</code></th><td>2</td><td>1</td><td>configuration 1</td><td>—</td></tr>
+      <tr><th><code>/analysis/lib/JT60SAEQDB</code></th><td>1</td><td>1</td><td>data_access 1</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/MagLine2022</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/offlineTCCS.MAIN</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/SAsetequ</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/setequ</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/SAselene</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/CCStable</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/SAdata</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/slice</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/adam3</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/adamwin-v4</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/OFMC</code></th><td>2</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/accome</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/toolc</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/gdlib</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/analysis/src/getseldata_v4.1</code></th><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><th><code>/home</code></th><td>7,667</td><td>5,051</td><td>modeling_code 1,745; analysis_code 577; data_access 516; modeling_data 478; visualization 394; empty_directory 236; container 223; software_project 199; build_artifact 198; configuration 114; experimental_data 94; operations_code 90; workflow 84; documentation 41; archive 23; other 22; test_suite 17</td><td>modeling_code 1,010; analysis_code 801; operations_code 207; modeling_data 696; experimental_data 33; data_access 462; workflow 1,449; visualization 1,033; documentation 164; imas 368; convention 482</td></tr>
+    </tbody>
+  </table>
+  <p id="jt60sa-jev-rescan-limits">The /home copy_count field cannot support a deduplication census: it is absent from every JT-60SA CodeFile, while content_hash is present on 1,733 files across the facility. The code pass completed at the eight-minute bound with 148 /home files ingested and 525 chunks; 444 /home files remain at triaged. The resumed single-root pass against main also failed: its triage worker still uses DirectoryTriager.async_triage_batch and validates the response with PathDescriptionBatch, while the new describe_paths helper is called by path scoring. The source route needs repair outside this worker’s file scope before the new roots can clear the Jev gate.</p>
 </section>
