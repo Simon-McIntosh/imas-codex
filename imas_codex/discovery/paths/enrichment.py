@@ -564,15 +564,14 @@ def persist_enrichment(facility: str, results: list[EnrichmentResult]) -> int:
     return len(updates)
 
 
-def get_paths_pending_enrichment(facility: str, threshold: float = 0.75) -> list[str]:
+def get_paths_pending_enrichment(facility: str, threshold: float = 0.30) -> list[str]:
     """Get paths marked for enrichment that haven't been enriched yet.
 
-    Uses should_enrich flag set by LLM during scoring. The threshold is used
-    as a fallback for paths scored before should_enrich was added.
+    Uses the code-computed enrich decision from the stored path judgments.
 
     Args:
         facility: Facility ID
-        threshold: Fallback minimum score for legacy paths without should_enrich
+        threshold: Minimum Jev scan relevance when the explicit decision is absent
 
     Returns:
         List of paths ready for enrichment
@@ -587,10 +586,10 @@ def get_paths_pending_enrichment(facility: str, threshold: float = 0.75) -> list
                 AND (p.is_enriched IS NULL OR p.is_enriched = false)
                 AND (
                     p.should_enrich = true
-                    OR (p.should_enrich IS NULL AND p.score_composite >= $threshold)
+                    OR (p.should_enrich IS NULL AND p.scan_relevance >= $threshold)
                 )
             RETURN p.path AS path
-            ORDER BY p.score_composite DESC
+            ORDER BY p.scan_relevance DESC
             """,
             facility=facility,
             threshold=threshold,
@@ -601,7 +600,7 @@ def get_paths_pending_enrichment(facility: str, threshold: float = 0.75) -> list
 
 def run_enrichment_pipeline(
     facility: str,
-    threshold: float = 0.75,
+    threshold: float = 0.30,
     batch_size: int = 50,
     limit: int | None = None,
 ) -> dict[str, int]:

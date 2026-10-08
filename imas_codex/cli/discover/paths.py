@@ -76,6 +76,12 @@ logger = logging.getLogger(__name__)
     help="LLM triage/scoring only, no SSH scanning (offline, graph-only)",
 )
 @click.option(
+    "--rejudge-stale",
+    is_flag=True,
+    default=False,
+    help="Refresh stale path judgments under exactly one --root from stored evidence",
+)
+@click.option(
     "--add-roots",
     is_flag=True,
     default=False,
@@ -119,6 +125,7 @@ def paths(
     triage_workers: int,
     scan_only: bool,
     triage_only: bool,
+    rejudge_stale: bool,
     add_roots: bool,
     enrich_threshold: float | None,
     reset_scored: bool,
@@ -153,6 +160,21 @@ def paths(
 
     # Convert root tuple to list or None
     root_filter = list(root) if root else None
+
+    if rejudge_stale:
+        import asyncio
+
+        from imas_codex.discovery.paths.scorer import rejudge_stale_paths
+
+        if len(root) != 1 or reset_to or add_roots or scan_only:
+            raise click.UsageError(
+                "--rejudge-stale requires exactly one --root and no reset, add-roots or scan-only"
+            )
+        count, spent = asyncio.run(
+            rejudge_stale_paths(facility, root[0], limit=path_limit or 25)
+        )
+        click.echo(f"Re-judged {count} paths from stored evidence (${spent:.6f})")
+        return
 
     _run_iterative_discovery(
         facility=facility,
@@ -652,10 +674,10 @@ def _print_discovery_summary(
         )
         return
 
-    from imas_codex.settings import get_discovery_threshold
+    from imas_codex.settings import get_path_scan_threshold
 
     all_high_value = get_high_value_paths(
-        facility, min_score=get_discovery_threshold(), limit=200
+        facility, min_score=get_path_scan_threshold(), limit=200
     )
 
     if scored_this_run:

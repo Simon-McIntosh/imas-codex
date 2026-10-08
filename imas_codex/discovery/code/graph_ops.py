@@ -162,9 +162,9 @@ def claim_paths_for_file_scan(
         List of dicts with ``id``, ``path``, ``score``, ``purpose``, ``files_scanned``
     """
     if min_score is None:
-        from imas_codex.settings import get_discovery_threshold
+        from imas_codex.settings import get_path_scan_threshold
 
-        min_score = get_discovery_threshold()
+        min_score = get_path_scan_threshold()
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
     prefix_clause, prefix_params = build_path_prefix_filter("p", path_prefixes)
@@ -184,7 +184,7 @@ def claim_paths_for_file_scan(
             f"""
             MATCH (p:FacilityPath {{facility_id: $facility}})
             WHERE p.status IN ['scored', 'explored']
-              AND coalesce(p.score_composite, 0) >= $min_score
+              AND p.scan_relevance >= $min_score
               AND p.path IS NOT NULL
               {prefix_clause}
               {excluded_clause}
@@ -212,7 +212,7 @@ def claim_paths_for_file_scan(
         result = gc.query(
             """
             MATCH (p:FacilityPath {facility_id: $facility, files_claim_token: $token})
-            RETURN p.id AS id, p.path AS path, p.score_composite AS score,
+            RETURN p.id AS id, p.path AS path, p.scan_relevance AS score,
                    p.path_purpose AS purpose,
                    coalesce(p.files_scanned, 0) AS files_scanned
             """,
@@ -639,9 +639,9 @@ def has_pending_scan_work(
     of the prefixes count, so the predicate matches the scoped claim.
     """
     if min_score is None:
-        from imas_codex.settings import get_discovery_threshold
+        from imas_codex.settings import get_path_scan_threshold
 
-        min_score = get_discovery_threshold()
+        min_score = get_path_scan_threshold()
     prefix_clause, prefix_params = build_path_prefix_filter("p", path_prefixes)
     excluded_clause, excluded_params = build_facility_exclusion_filter(facility, "p")
     params: dict[str, Any] = {
@@ -655,7 +655,7 @@ def has_pending_scan_work(
             f"""
             MATCH (p:FacilityPath {{facility_id: $facility}})
             WHERE p.status IN ['scored', 'explored']
-              AND coalesce(p.score_composite, 0) >= $min_score
+              AND p.scan_relevance >= $min_score
               AND p.path IS NOT NULL
               {prefix_clause}
               {excluded_clause}

@@ -580,9 +580,9 @@ class ParallelProgressDisplay(BaseProgressDisplay):
                     top_dim.replace("score_", "").replace("_", " ") if top_dim else ""
                 )
 
-                from imas_codex.settings import get_discovery_threshold
+                from imas_codex.settings import get_path_scan_threshold
 
-                _threshold = get_discovery_threshold()
+                _threshold = get_path_scan_threshold()
                 style = (
                     "bold green"
                     if display_score >= _threshold
@@ -1379,9 +1379,9 @@ def print_discovery_status(
             coverage = (triaged + scored) / total * 100 if total > 0 else 0
             output(f"Coverage: {coverage:.1f}% triaged")
 
-            from imas_codex.settings import get_discovery_threshold
+            from imas_codex.settings import get_path_scan_threshold
 
-            _threshold = get_discovery_threshold()
+            _threshold = get_path_scan_threshold()
             high_value = get_high_value_paths(facility, min_score=_threshold, limit=10)
             if high_value:
                 output(f"High-value paths (score > {_threshold}): {len(high_value)}")
