@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -432,6 +432,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T053654104027-review-of-fold-documents-stage" data-who="reckon-build" data-when="2026-10-08T05:56:04.167Z">
     <div class="r-comment-body"><p>review of run r-20261008T050059413025-fold-documents-stage stored to reviews/imas-codex/r-20261008T050059413025-fold-documents-stage.json (+ .at-1824768c3 copy, byte-identical): status parsed, six dimensions scored goal_fidelity 19 / evidence 17 / scope_discipline 20 / durability 19 / fit 19 / reuse 20, total 114; reviewed_base_sha 425dd5620, reviewed_head_sha 1824768c3; added_failure_count 0, added_failure_ids []; two follow-on findings (the fragment/manifest cite the 56-passed gate figure at the base 425dd5620 while gate.log's header reads rev 1824768c3; the reviewed manifest names its two suite arms only via test_logs and omits baseline_suite/after_suite, so the harness reads the added-failure count unmeasured from the manifest).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T055729378160-fold-paths-stage" data-who="reckon-build" data-when="2026-10-08T06:08:59Z">
+    <div class="r-comment-body"><p>run_paths_stage with frozen PathsStageOptions routes the settled options and calibrated gate through the existing path engine; committed-head gate 12 passed, 1 warning in 11.72s, and the flush negative control failed as declared.</p></div>
 </div>
 </section>
 </main>
