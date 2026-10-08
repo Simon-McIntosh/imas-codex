@@ -40,7 +40,9 @@
     The scanner's check refuses a changed hash even when path and grid size
     still match. <code>scripts/check_jt60sa_flux_maps.py</code> and the
     remote access template now call the same stdlib reader in
-    <code>imas_codex/remote/scripts/read_equilibrium_file.py</code>.</p>
+    <code>imas_codex/remote/scripts/read_equilibrium_file.py</code>. On the
+    analysis host, the checker loads a copied reader module beside itself;
+    from a checkout it imports the package module.</p>
   <p id="file-equilibria-access-read-result">The rendered DataAccess
     templates read one inventory example per access method. EQ31 returned
     129 × 129 ψ values for SELENE E101163 at 5.0 s; G-EQDSK returned

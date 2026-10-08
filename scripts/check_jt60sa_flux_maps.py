@@ -1,7 +1,8 @@
 """Inventory and verify readable JT-60SA equilibrium grids on nakasvr26.
 
-Run this script on the analysis host. Collection walks only readable entries
-under /home and /analysis_DB, and never follows directory symlinks.
+Run this script on the analysis host with read_equilibrium_file.py beside it,
+or from a checkout with imas_codex importable. Collection walks only readable
+entries under /home and /analysis_DB, and never follows directory symlinks.
 """
 
 import argparse
@@ -12,9 +13,12 @@ import re
 import struct
 from collections import Counter
 
-from imas_codex.remote.scripts.read_equilibrium_file import (
-    read_grid as read_equilibrium_grid,
-)
+try:
+    from imas_codex.remote.scripts.read_equilibrium_file import (
+        read_grid as read_equilibrium_grid,
+    )
+except ModuleNotFoundError:
+    from read_equilibrium_file import read_grid as read_equilibrium_grid
 
 GEQDSK_NAME = re.compile(r"(?:eqdsk|geqdsk|^g\d{6})", re.I)
 
