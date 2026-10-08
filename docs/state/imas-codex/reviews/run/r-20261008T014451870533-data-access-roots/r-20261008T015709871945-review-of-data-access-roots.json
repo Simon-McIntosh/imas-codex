@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/paths/frontier.py:456",
+    "imas_codex/discovery/base/facility.py:235",
+    "imas_codex/cli/discover/paths.py:234"
+  ],
+  "completed_at": "2026-10-08T02:17:00.814Z",
+  "dispatched_at": "2026-10-08T01:57:28Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/data-access-roots.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment was written although the node's landing contract states its done-when names no artifact and the node writes no evidence prose; it stays inside the declared write path and only restates the manifest's landing line, so it does not block."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "commit dce00a9302b9a57bd59ad4d109595115035f6fd2 against base fab003e292fb98045e38a2334fcd433c2afe3ada touches three files inside scope: 24 discovery_roots entries in jt-60sa.yaml, a 24-element DATA_ACCESS_ROOTS tuple with two tests in tests/config/test_jt60sa_exclusions.py, and a new evidence fragment.",
+    "done_when": "the node's measure is that every listed root is a discovery root that no exclude prefix covers and the test file passes; tests/config/test_jt60sa_exclusions.py:52-61 asserts each root is in discovery_roots and uncovered, and the manifest records the gate EXIT=0 with 29 passed.",
+    "goal": "the node's goal is to seed the data-access directories \u00a738 lists as their own discovery_roots entries; imas_codex/config/facilities/jt-60sa.yaml:158-181 adds exactly the 24 paths under \u00a738 \"Roots to add\", never the parent /analysis/src, and get_facility(\"jt-60sa\") returns all 24.",
+    "manifest": "read; it records the gate command and EXIT=0 with 29 passed and names gate.log and gate-after.log, but it names no baseline_suite/after_suite pair, so the review's added-failure count is unmeasured rather than zero.",
+    "write_paths": "the manifest declares imas_codex/config/facilities/jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py, the data-access-roots evidence fragment and a figures directory; the diff touches only the first three and no path outside them."
+  },
+  "justifications": {
+    "durability": "tests/config/test_jt60sa_exclusions.py:52 compares the config's discovery_roots against an independent literal tuple, so removing a root reddens it, and the recorded negative control (negative-control.log) deletes /analysis/src/eddb and fails test_data_access_root_is_seeded_and_unexcluded[/analysis/src/eddb] with EXIT=1.",
+    "evidence": "tests/config/test_jt60sa_exclusions.py:52 asserts each root is seeded and uncovered by any path_prefixes entry, and the gate its manifest names exits 0 with 29 passed, so the done_when is measured and recorded.",
+    "fit": "imas_codex/config/facilities/jt-60sa.yaml:158 follows the file's existing commented `- /path` entry idiom and the added symbols carry no plan label.",
+    "goal_fidelity": "imas_codex/config/facilities/jt-60sa.yaml:158 seeds every directory \u00a738 lists (24 of them; the goal line's \"23\" miscounts that list) and never names /analysis/src, giving the corpus the download libraries and tool trees the section exists to reach.",
+    "reuse": "the change adds configuration data and extends the existing tests/config/test_jt60sa_exclusions.py, and a search of imas_codex/config and imas_codex/discovery found no owner of a JT-60SA root list besides jt-60sa.yaml itself.",
+    "scope_discipline": "git diff --stat fab003e292..dce00a930 shows the commit touches exactly jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py and the new fragment, all inside the declared write paths, but docs/evidence/fragments/jt60sa-discovery-completion/data-access-roots.html duplicates the manifest's landing line for a node whose landing contract said it writes no evidence prose."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to seed the data-access directories \u00a738 lists as their own discovery_roots entries; imas_codex/config/facilities/jt-60sa.yaml:158-181 adds exactly the 24 paths under \u00a738 \"Roots to add\", never the parent /analysis/src, and get_facility(\"jt-60sa\") returns all 24.\nVERDICT done_when: the node's measure is that every listed root is a discovery root that no exclude prefix covers and the test file passes; tests/config/test_jt60sa_exclusions.py:52-61 asserts each root is in discovery_roots and uncovered, and the manifest records the gate EXIT=0 with 29 passed.\nVERDICT write_paths: the manifest declares imas_codex/config/facilities/jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py, the data-access-roots evidence fragment and a figures directory; the diff touches only the first three and no path outside them.\nVERDICT manifest: read; it records the gate command and EXIT=0 with 29 passed and names gate.log and gate-after.log, but it names no baseline_suite/after_suite pair, so the review's added-failure count is unmeasured rather than zero.\nVERDICT diff: commit dce00a9302b9a57bd59ad4d109595115035f6fd2 against base fab003e292fb98045e38a2334fcd433c2afe3ada touches three files inside scope: 24 discovery_roots entries in jt-60sa.yaml, a 24-element DATA_ACCESS_ROOTS tuple with two tests in tests/config/test_jt60sa_exclusions.py, and a new evidence fragment.\nCALL_SITES: imas_codex/discovery/paths/frontier.py:456, imas_codex/discovery/base/facility.py:235, imas_codex/cli/discover/paths.py:234\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/config/facilities/jt-60sa.yaml:158 seeds every directory \u00a738 lists (24 of them; the goal line's \"23\" miscounts that list) and never names /analysis/src, giving the corpus the download libraries and tool trees the section exists to reach.\nSCORE evidence: 20\nJUSTIFICATION evidence: tests/config/test_jt60sa_exclusions.py:52 asserts each root is seeded and uncovered by any path_prefixes entry, and the gate its manifest names exits 0 with 29 passed, so the done_when is measured and recorded.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat fab003e292..dce00a930 shows the commit touches exactly jt-60sa.yaml, tests/config/test_jt60sa_exclusions.py and the new fragment, all inside the declared write paths, but docs/evidence/fragments/jt60sa-discovery-completion/data-access-roots.html duplicates the manifest's landing line for a node whose landing contract said it writes no evidence prose.\nSCORE durability: 20\nJUSTIFICATION durability: tests/config/test_jt60sa_exclusions.py:52 compares the config's discovery_roots against an independent literal tuple, so removing a root reddens it, and the recorded negative control (negative-control.log) deletes /analysis/src/eddb and fails test_data_access_root_is_seeded_and_unexcluded[/analysis/src/eddb] with EXIT=1.\nSCORE fit: 20\nJUSTIFICATION fit: imas_codex/config/facilities/jt-60sa.yaml:158 follows the file's existing commented `- /path` entry idiom and the added symbols carry no plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds configuration data and extends the existing tests/config/test_jt60sa_exclusions.py, and a search of imas_codex/config and imas_codex/discovery found no owner of a JT-60SA root list besides jt-60sa.yaml itself.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/data-access-roots.html:1 follow-on: the fragment was written although the node's landing contract states its done-when names no artifact and the node writes no evidence prose; it stays inside the declared write path and only restates the manifest's landing line, so it does not block.",
+  "review_run_id": "r-20261008T015709871945-review-of-data-access-roots",
+  "reviewed_base_sha": "fab003e292fb98045e38a2334fcd433c2afe3ada",
+  "reviewed_head_sha": "dce00a9302b9a57bd59ad4d109595115035f6fd2",
+  "reviewed_run_id": "r-20261008T014451870533-data-access-roots",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T02:14:26.001431+00:00",
+  "total": 118
+}
