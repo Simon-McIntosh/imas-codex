@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured independently with a base arm and a head arm in scratch trees. Head arm at f2dee20f3 (reviewed worktree, fixed scanner imported from .../code-scan-failure-not-empty/imas_codex/discovery/code/scanner.py). Base arm at 84e76711b (scratch tree /tmp/review-codescan-3938878/base, base scanner imported from that tree, run with the head test file). The three failure tests test_exit_255/timeout/unparseable fail at base (3 failed, 1 passed, EXIT=1) and all pass at head (8 passed, EXIT=0), so the change adds no failing test. The reviewed run's own manifest carries no baseline_suite/after_suite objects, so its own evidence cannot carry this derivation (finding 2); its baseline.log (3 failed) and gate-passing.log (0 failed) do agree with my arms.",
+  "after_suite": {
+    "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/code-scan-failure-not-empty UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_scan_failures.py tests/discovery/test_code_ingest_claim_once.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T150706612464-review-of-code-scan-failure-not-empty/head-verify.log",
+    "revision": "f2dee20f3c380493a73d90936b154d37cb037ffc"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "PYTHONPATH=/tmp/review-codescan-3938878/base UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_code_scan_failures.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 3,
+    "failure_ids": [
+      "tests/discovery/test_code_scan_failures.py::test_exit_255_releases_batch_without_scanning",
+      "tests/discovery/test_code_scan_failures.py::test_timeout_releases_batch_without_scanning",
+      "tests/discovery/test_code_scan_failures.py::test_unparseable_output_releases_batch_without_scanning"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T150706612464-review-of-code-scan-failure-not-empty/base-verify.log",
+    "revision": "84e76711b093cd6ceb0e7a2f0fc965938f5685e8"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py (scan_worker, the batch scan call and its existing except-Exception claim release)"
+  ],
+  "completed_at": "2026-10-08T15:23:02.026Z",
+  "dispatched_at": "2026-10-08T15:07:16Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/scanner.py",
+      "line": "138",
+      "severity": "follow-on",
+      "text": "follow-on: the three except clauses now 'raise' for every subprocess.CalledProcessError, not only exit 255. The reference the plan cites (imas_codex/discovery/paths/scanner.py:210-226) re-raises only returncode 255 and records any other exit code as a per-path error, because those are permanent script failures rather than transient SSH drops. Here a non-255 script failure releases the batch's claims and retries up to max_ssh_retries on every pass instead of being recorded, and no test covers a non-255 exit. The change is not wrong for the plan's stated goal (a failed call must not become an empty result) but it is broader than 'raises on exit 255'."
+    },
+    {
+      "file": "tests/discovery/test_code_scan_failures.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: manifest/evidence hygiene. (a) The reviewed manifest carries empty baseline_suite and after_suite objects, so a reader deriving added failures from the run's own evidence reads a head arm only and records the count as unmeasured rather than zero; this review supplied the comparable arms. (b) baseline.log opens with 'revision=84e76711b' (the base product revision) but the run measured the head test file against the base package: tests/discovery/test_code_scan_failures.py does not exist at 84e76711b (it is added in 40a574c84), so the header revision does not identify the measured tree."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/code-scan-failure-not-empty.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's declared write scope names docs/evidence/fragments/jt60sa-discovery-completion/code-scan-failure-not-empty.html and docs/figures/jt60sa-discovery-completion/code-scan-failure-not-empty, but neither exists at the reviewed head (the fragment file is absent and no figures directory for this node was created). A declared write path that produced nothing reads as incomplete work or as a scope that over-states the run."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "the raised exception is caught by the single except-Exception block in scan_worker (imas_codex/discovery/code/workers.py:179) which increments state.scan_stats.errors by len(paths) and calls release_path_file_scan_claim for every claimed path, then backs off and retries; no other caller of _scan_remote_paths_batch/async_scan_remote_paths_batch is affected.",
+    "diff": "four commits against 84e76711b change one product file (imas_codex/discovery/code/scanner.py: three 'return {p: [] for p in remote_paths}' swallow statements become bare 'raise' for TimeoutExpired, CalledProcessError and JSONDecodeError) and add tests/discovery/test_code_scan_failures.py (116 lines, four tests). No product file other than scanner.py changed; workers.py is unmodified because its error path already releases claims.",
+    "done_when": "all four plan clauses hold at the committed head and are shown by tests/discovery/test_code_scan_failures.py: exit 255 marks no path scanned and leaves the batch claimable (test_exit_255, scans={} claimed=set() and re-claimable), timeout and unparseable do the same (test_timeout, test_unparseable), and a reported not_a_directory path is still marked scanned with 0 files (test_reported_non_directory, scans={'first':0,'second':0}, errors==0). The declared negative control (restore-swallow) fails the 255 test with EXIT=1; I reproduced it.",
+    "goal": "the node establishes that a transient SSH failure is recorded as an empty directory and makes a failed or unparsed batch call raise instead, so the scan worker's existing except-Exception path releases every claim without marking any path scanned; a per-path not_a_directory observation is still recorded with 0 files.",
+    "manifest": "read at the run directory; status 'complete', four commits ending f2dee20f3, changed_paths scanner.py + the new test file, gate/negative-control/probe logs listed. Its baseline_suite and after_suite objects are empty (finding 2) and its declared write scope names a fragment html and a figures directory that were never produced (finding 1). Worktree is clean at f2dee20f3 (confirmed)."
+  },
+  "justifications": {
+    "durability": "the guard is a control, not an assertion of intent: restoring the swallowed exception makes the 255 test fail (reproduced, EXIT=1), and the timeout and unparseable arms fail identically at base, so all three swallow sites are load-bearing. Residual risk is finding 3 (the scanner now raises on every CalledProcessError, not only 255, so a permanent non-255 script failure is retried up to max_ssh_retries each pass rather than recorded as a path error; no test covers a non-255 exit).",
+    "evidence": "the head gate (8 passed, EXIT=0) is reproduced by an independent head arm that imported the reviewed tree's scanner, and a comparable base arm at 84e76711b (3 failed, 1 passed, EXIT=1) closes the added-failure question at zero; the negative-control mutation is reproduced (255 test: 1 failed, EXIT=1). Gaps: the reviewed manifest carries empty baseline_suite/after_suite objects, its baseline.log header names revision=84e76711b although the run measured the head test file against the base package (that revision predates the test file), and the head test file's success-case mock was corrected in two later commits, so the first two test revisions were not green.",
+    "fit": "the change adopts the exception-propagation idiom the spec cites from imas_codex/discovery/paths/scanner.py (raise for transient failures so the existing retry path runs), reuses the worker's existing claim-release block rather than adding a parallel path, tests are named by mechanism, commits carry conventional subjects with bodies, and no plan, sprint, ticket or author identifier appears in the code, tests or messages (checked).",
+    "goal_fidelity": "the cause from the plan is reproduced at base (all three failure tests fail with paths marked {first:0,second:0}) and refuted at head; the fix raises on 255, timeout and unparseable output, the worker releases claims without marking, and the not_a_directory control still records 0 files; the plan's four done-when clauses are each shown by a named test at the committed head.",
+    "reuse": "it does not re-implement recovery: the claim release, error count, backoff and retry are the pre-existing scan_worker error path, and the tests drive the real worker through monkeypatched graph_ops rather than a shadow harness. It diverges however from paths/scanner.py's finer distinction (255 transient vs other exits recorded as path errors) by raising on all CalledProcessError.",
+    "scope_discipline": "the diff stays inside the declared product write scope (scanner.py, the new test file) across all four commits and adds no unrelated edits; the reviewed scope additionally declared a docs fragment html and a figures directory, neither of which the run produced (finding 1), so the declared scope over-states what was touched rather than the work exceeding it."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Review of r-20261008T145331300482-code-scan-failure-not-empty against plan section 58. The reviewed diff removes the swallow at the three failure sites in imas_codex/discovery/code/scanner.py so a failed batch scan raises and the scan worker's existing except-Exception path releases the batch claims without marking any path scanned; a per-path not_a_directory error is still recorded with 0 files. I reproduced the head gate (8 passed, EXIT=0), the base defect (3 failed, 1 passed, EXIT=1) and the declared negative control (255 test: 1 failed, EXIT=1) in independent arms. Verdict: SOUND WITH FINDINGS.",
+  "review_run_id": "r-20261008T150706612464-review-of-code-scan-failure-not-empty",
+  "reviewed_base_sha": "84e76711b093cd6ceb0e7a2f0fc965938f5685e8",
+  "reviewed_head_sha": "f2dee20f3c380493a73d90936b154d37cb037ffc",
+  "reviewed_run_id": "r-20261008T145331300482-code-scan-failure-not-empty",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T15:20:36.652813+00:00",
+  "total": 101,
+  "verdict": "SOUND WITH FINDINGS"
+}
