@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs and confirmed with independent clean arms at the reviewed revisions. The reviewed run's own logs: baseline-gate-worktree.log at c79ce9d3e851738fc15a2bf813e89ded82e1ccc7 (64 passed, 0 failed, EXIT=0) and after-suite.log at eb32cddb1a86510ef4c9daf49f146e4c296224b4 (75 passed, 0 failed, EXIT=0). My independent clean arms (scratch trees of the reviewed revisions): base c79ce9d3e851738fc15a2bf813e89ded82e1ccc7, command 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261008T074135326773-review-of-sequence-runner/base uv run --no-sync pytest tests/cli/test_discover_sequence.py tests/test_cli.py -p no:cacheprovider', 64 passed, EXIT=0; head eb32cddb1a86510ef4c9daf49f146e4c296224b4, same command with the arms tree, 75 passed, EXIT=0; after minus base is 0 added failures.",
+  "backend": "local",
+  "base_log_revision": "c79ce9d3e851738fc15a2bf813e89ded82e1ccc7",
+  "completed_at": "2026-10-08T07:56:48.597Z",
+  "dispatched_at": "2026-10-08T07:41:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/facility-discovery-sequence/sequence-runner.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the plan names 'its fragment' among the sequence-runner node's write paths and the reviewed manifest's orientation_write_paths declares docs/evidence/fragments/facility-discovery-sequence/sequence-runner.html and a figures dir docs/figures/facility-discovery-sequence/sequence-runner, but neither was produced: changed_paths lists only the three code/test files, the fragment directory holds only the registry review's sequence-stage-registry.html plus fold fragments, and the figures dir holds only stage-graph.svg. The node's evidence lives only in its manifest, so a later reader of the node has no fragment for it."
+    },
+    {
+      "file": "manifest.md",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest declares after_suite at eb32cddb but omits baseline_suite, so its own record alone does not yield an added-failure count; the base arm exists only as the separate baseline-gate-worktree.log at c79ce9d3 (64 passed, EXIT=0). This review supplies both arms at the reviewed revisions and derives 0 added failures."
+    },
+    {
+      "file": "imas_codex/cli/discover/__init__.py",
+      "line": "391",
+      "severity": "follow-on",
+      "text": "follow-on: the plan names only the discover status call site for the Jev path-scan gate, but discover_inspect's scored-path filter also moved from get_discovery_threshold to get_path_scan_threshold in the same commit (line 483 uses _gdt at line 483). Using the calibrated path gate for path inspection is consistent with the change, but it is a second call site the plan did not name and no test pins inspect's threshold."
+    },
+    {
+      "file": "imas_codex/cli/discover/sequence.py",
+      "line": "482",
+      "severity": "follow-on",
+      "text": "follow-on: a few branches are untested. run_mapping_stage's refusal when --focus and --ids select no common IDS (sequence.py:481-482), _validate_options' negative cost/time and limit checks (sequence.py:244-249), _remaining_count's predicate fallback when a receipt carries no 'remaining' key (sequence.py:633-645), and the discover_inspect threshold path are all reachable without a test. An added test for the mapping focus/--ids refusal and for _remaining_count's zero-proof would pin them."
+    }
+  ],
+  "head_log_revision": "eb32cddb1a86510ef4c9daf49f146e4c296224b4",
+  "item_verdicts": {
+    "call_sites": "parse_args is the group's own hook; probe_access/neo4j_health_check/ssh_health_check/wiki_auth_check are the canonical discovery service checks; run_sequence is called only by the run click command (sequence.py:802); _stage_options resolves each domain's frozen options class by name; run_mapping_stage is called only by run_sequence for the mapping domain; get_path_scan_threshold now has two call sites in __init__.py (status line 145, inspect line 483).",
+    "diff": "read against c79ce9d3: __init__.py gains _CleanupGroup.parse_args injecting a hidden run before a first argument that is not a subcommand, and moves the discover status high-value threshold from get_discovery_threshold to get_path_scan_threshold (and the same in discover_inspect); sequence.py grows the STAGES registry, probe_access, evaluate_stage/evaluate_plan, _stage_options, run_mapping_stage, _run_with_receipt, _report and the run_sequence driver, and tests/cli/test_discover_sequence.py grows from 216 to 509 lines covering each done-when bullet.",
+    "done_when": "the plan's gate command passes and each bullet is pinned by tests/cli/test_discover_sequence.py: test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command shows discover jt-60sa --dry-run reaching the sequence while discover status jt-60sa keeps its command (lines 217-247); test_stage_functions_run_in_order_with_remaining_limits shows the runner calls each stage function in STAGE_ORDER and passes the remaining cost and time (lines 291-305); test_failure_skips_consumers_and_independent_domains_continue shows a failed paths stage skips its consumers while wiki and mapping still run (lines 308-317); test_selection_and_halves and test_cli_parses_repeated_and_comma_separated_domains bubble --only/--skip/--scan-only/--flush; test_conflicting_options_are_refused pins --reset-to without exactly one --only domain and --scan-only with --flush (exit 2); test_final_table_looks... (lines 403-412) pins one row per domain; test_signals_halves_resolve_to_the_signals_stage_function, test_registry_records_the_documented_dependencies (model_section ids-mapping) and test_wiki_probe checks every configured site pin the registry review's findings. The plan's write path \"its fragment\" was declared in orientation_write_paths but no sequence-runner.html was produced.",
+    "goal": "the plan's sequence-runner node (facility-discovery-sequence section 3) turns the unmerged stage registry (commit 21c0e6d34) into the seven discover domains and gives one command that runs them in dependency order: the group routes a first argument naming no subcommand to a hidden run command (imas_codex/cli/discover/__init__.py:34 parse_args), and sequence.py defines STAGES for paths, code, documents, wiki, signals scan, signals enrich, candidates and mapping with each stage's access need, config keys, upstream stages it reads and pending-work predicates (sequence.py:81-156).",
+    "manifest": "read; it declares status complete, two commits (5fddb226d4b48ea97906c90dcbf931b3543d6524 and eb32cddb1a86510ef4c9daf49f146e4c296224b4), three changed_paths, a committed-head gate '75 passed' EXIT=0 and a negative_control_log at EXIT=1. It declares after_suite at eb32cddb (75 passed, failure_count 0) but omits baseline_suite, so the added-failure count is not derivable from the manifest alone; the run's separate baseline-gate-worktree.log supplies the base arm at c79ce9d3 (64 passed, EXIT=0).",
+    "write_paths": "git diff --stat c79ce9d3e851738fc15a2bf813e89ded82e1ccc7..eb32cddb1a86510ef4c9daf49f146e4c296224b4 touches exactly imas_codex/cli/discover/__init__.py, imas_codex/cli/discover/sequence.py and tests/cli/test_discover_sequence.py, 3 files changed, 851 insertions(+), 180 deletions(-), nothing else; the plan's fourth write path (the node fragment docs/evidence/fragments/facility-discovery-sequence/sequence-runner.html) does not exist and the figures dir holds only stage-graph.svg from the registry review."
+  },
+  "justifications": {
+    "durability": "the guard fires and I reproduced it independently: with the _CleanupGroup.parse_args reroute removed, tests/cli/test_discover_sequence.py::test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command fails (my mutation-scratch.log records 1 failed, EXIT=1), which is the reviewed run's own final-negative-control.log red reproduced. The suite also pins the failure-isolation, remaining-budget and selection behaviours by test, so a regression in any of them is visible.",
+    "evidence": "I reproduced both arms independently in scratch trees of the reviewed revisions (source copied from the reviewed worktree, base source restored from the base blobs, UV_PROJECT_ENVIRONMENT pointed at the main checkout's .venv, PYTHONPATH at the scratch tree, module.__file__ confirmed under the scratch tree): base c79ce9d3 ran the plan's command to '64 passed, 1 warning' EXIT=0 and head eb32cddb ran the same to '75 passed, 1 warning' EXIT=0, matching the reviewed run's own baseline-gate-worktree.log (64 passed) and after-suite.log (75 passed). I also reproduced the negative control independently: removing the group's run injection makes test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command fail (EXIT=1). The shortfall is that the reviewed manifest omits baseline_suite, so its own record alone does not yield the added-failure count.",
+    "fit": "the added symbols (STAGES, Stage, StageOutcome, SequenceOptions, probe_access, evaluate_stage, run_sequence, _report) are named by what they do with no plan label or section number, the hidden run command mirrors the _HostGroup idiom the plan names, and the frozen option dataclasses follow the six folds. A small fit shortfall is the discover_inspect threshold change, which is not the call site the plan describes.",
+    "goal_fidelity": "every done-when behaviour is present and measured: the bare-facility route, ordered stage calls with shared cost/time, failure isolation with independent domains continuing, --only/--skip/--scan-only/--flush selection, the --reset-to and --scan-only+--flush refusals, the final one-row-per-domain table, and the registry review's findings (each signals half resolving to run_signals_stage, the mapping seat ids-mapping, the wiki probe over every configured site, the status threshold at get_path_scan_threshold). The shortfall is that the plan names a node fragment among its write paths and orientation_write_paths declared docs/evidence/fragments/facility-discovery-sequence/sequence-runner.html and a figures dir, and neither was produced, so the node's evidence lives only in the manifest.",
+    "reuse": "the runner reuses the canonical discovery health checks, each fold's stage function and options dataclass, the existing map_run pipeline, and _run_with_receipt rather than re-deriving counts. The reuse smell is run_mapping_stage's own --focus reader (it expands a manifest of IDS names inline at sequence.py:463-473, duplicating the candidates-page focus reader the fold added), and it monkeypatches workers.run_mapping_engine globally to capture the receipt, restored in a finally.",
+    "scope_discipline": "the diff touches only the three declared code/test files with no pyproject, lock or unrelated change; the declared fragment and figures dir were not produced, which is an evidence shortfall rather than scope creep. One change sits just outside the plan's named site: the plan names only the discover status call site for the path-scan gate, and discover_inspect's scored-path filter moved from get_discovery_threshold to get_path_scan_threshold in the same commit."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: __init__.py:34 _CleanupGroup.parse_args routes a first argument naming no subcommand to a hidden run; sequence.py:81 STAGES carries the seven domains with access, config, reads and pending predicates.\nVERDICT done_when: the plan gate command passes; test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command, test_stage_functions_run_in_order_with_remaining_limits, test_failure_skips_consumers_and_independent_domains_continue, test_selection_and_halves, test_conflicting_options_are_refused, test_final_table. . . each pin a bullet; the plan's node fragment was not produced.\nVERDICT write_paths: git diff c79ce9d3..eb32cddb touches __init__.py, sequence.py, tests/cli/test_discover_sequence.py only, 3 files, +851/-180; the fourth declared write path (the node fragment) is absent.\nVERDICT manifest: 75 passed EXIT=0 at eb32cddb; declares after_suite but omits baseline_suite; base arm is the separate baseline-gate-worktree.log 64 passed.\nVERDICT diff: read against c79ce9d3; the routing hook, the STAGES registry, evaluate/run driver, mapping stage and the grown test file.\nSCORE goal_fidelity: 17\nSCORE evidence: 18\nSCORE scope_discipline: 18\nSCORE durability: 19\nSCORE fit: 18\nSCORE reuse: 17\nFINDING the node fragment and figures dir were declared and not produced\nFINDING the reviewed manifest omits baseline_suite so its own record does not yield an added-failure count\nFINDING discover_inspect's scored-path threshold also moved to get_path_scan_threshold, beyond the plan's named status call site\nFINDING run_mapping_stage focus/'--ids' refusal, negative-limit validation and _remaining_count predicate fallback are untested\nNEGCTRL reproduced independently: removing the group's run injection fails test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command EXIT=1\nARMS base c79ce9d3 64 passed EXIT=0; head eb32cddb 75 passed EXIT=0; added failures 0\n",
+  "review_run_id": "r-20261008T074135326773-review-of-sequence-runner",
+  "reviewed_base_sha": "c79ce9d3e851738fc15a2bf813e89ded82e1ccc7",
+  "reviewed_head_sha": "eb32cddb1a86510ef4c9daf49f146e4c296224b4",
+  "reviewed_run_id": "r-20261008T070202003889-sequence-runner",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:55:04.004984Z",
+  "total": 107,
+  "verdict": "SOUND WITH FINDINGS"
+}

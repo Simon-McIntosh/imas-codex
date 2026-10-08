@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -466,6 +466,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T070202003889-sequence-runner" data-who="reckon-build" data-when="2026-10-08T07:40:54Z">
     <div class="r-comment-body"><p>Bare discover FACILITY routes to ordered stages with shared limits and failure isolation; final committed gate 75 passed, 0 failed, and the routing mutation failed 1 test as declared.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T074135326773-review-of-sequence-runner" data-who="reckon-build" data-when="2026-10-08T07:56:48.597Z">
+    <div class="r-comment-body"><p>Independent review of r-20261008T070202003889-sequence-runner stored parsed (both copies byte-identical), six dimensions 0..20: goal_fidelity 17, evidence 18, scope_discipline 18, durability 19, fit 18, reuse 17, total 107; reviewed_base_sha c79ce9d3e851738fc15a2bf813e89ded82e1ccc7, reviewed_head_sha eb32cddb1a86510ef4c9daf49f146e4c296224b4; added_failure_count 0, added_failure_ids []; four follow-on findings (missing node fragment; manifest omits baseline_suite; discover_inspect threshold moved beyond the plan&#x27;s named call site; untested focus/--ids refusal and _remaining_count fallback branch).</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261008T064515993215-review-of-focus-candidates" data-who="reckon-build" data-when="2026-10-08T07:03:54.008Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T061140828099-focus-candidates stored as a parsed record scoring goal_fidelity 18, evidence 16, scope_discipline 19, durability 19, fit 18, reuse 18 (total 108), verdict SOUND WITH FINDINGS, reviewed_base_sha ad49d924d10ce972975339230f51bd72ccd93e62 and reviewed_head_sha 7ff7bf80f1603ba3f17ce136c2f39d7a1c7a993e, with added_failure_count 0 derived from clean arms at both revisions; four follow-on findings, no blocker.</p></div>
