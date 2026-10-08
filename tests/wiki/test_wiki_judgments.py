@@ -9,7 +9,10 @@ import yaml
 
 from imas_codex.discovery.base.facility import get_facility
 from imas_codex.discovery.wiki.entity_extraction import extract_facility_tool_mentions
-from imas_codex.discovery.wiki.scoring import build_content_judgment_state
+from imas_codex.discovery.wiki.scoring import (
+    build_content_judgment_questions,
+    build_content_judgment_state,
+)
 
 _CONFIG_DIR = Path(__file__).resolve().parents[2] / "imas_codex/config/facilities"
 _FACILITIES = [
@@ -17,6 +20,40 @@ _FACILITIES = [
     for path in sorted(_CONFIG_DIR.glob("*.yaml"))
     if (yaml.safe_load(path.read_text()) or {}).get("data_access_patterns")
 ]
+
+
+def test_judgment_question_set_and_storage_slots():
+    from imas_codex.graph.schema import get_schema
+
+    questions = build_content_judgment_questions()
+    assert set(questions) == {
+        "ingest_relevance",
+        "purpose",
+        "score_data_documentation",
+        "score_physics_content",
+        "score_code_documentation",
+        "score_data_access",
+        "score_calibration",
+        "score_imas_relevance",
+    }
+    assert questions["ingest_relevance"]["type"] == "noul"
+    assert questions["purpose"]["type"] == "choice"
+    assert all(
+        questions[key]["type"] == "score"
+        for key in questions
+        if key.startswith("score_")
+    )
+    for class_name in ("WikiPage", "Document", "Image"):
+        slots = get_schema().get_all_slots(class_name)
+        assert {
+            "judgment_model",
+            "ingest_relevance",
+            "purpose_probs",
+            "purpose_confidence",
+        } <= set(slots)
+        for key in questions:
+            if key.startswith("score_"):
+                assert {f"{key}_probs", f"{key}_confidence"} <= set(slots)
 
 
 @pytest.mark.parametrize("facility", _FACILITIES)
