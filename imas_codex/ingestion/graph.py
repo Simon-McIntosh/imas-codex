@@ -65,10 +65,7 @@ def link_chunks_to_imas_paths(
     graph_client: GraphClient | None = None,
     example_ids: list[str] | None = None,
 ) -> int:
-    """Create REFERENCES_IMAS relationships for chunks with IDS references.
-
-    Matches CodeChunk nodes that have related_ids metadata to
-    existing IMASNode IDS root nodes (where ids field matches the IDS name).
+    """Link extracted DD paths to existing IMASNode paths only.
 
     Args:
         graph_client: Optional GraphClient instance. If None, creates one.
@@ -76,37 +73,60 @@ def link_chunks_to_imas_paths(
             CodeExample IDs. Otherwise processes all chunks (legacy mode).
 
     Returns:
-        Number of relationships created
+        Number of path references resolved
     """
-    if example_ids is not None:
-        cypher = """
-            MATCH (c:CodeChunk)
-            WHERE c.code_example_id IN $example_ids
-              AND c.related_ids IS NOT NULL
-            UNWIND c.related_ids AS ids_name
-            MATCH (p:IMASNode)
-            WHERE p.ids = ids_name AND p.id = ids_name
-            MERGE (c)-[:REFERENCES_IMAS]->(p)
-            RETURN count(*) AS created
-        """
-        params = {"example_ids": example_ids}
-    else:
-        cypher = """
-            MATCH (c:CodeChunk)
-            WHERE c.related_ids IS NOT NULL
-            UNWIND c.related_ids AS ids_name
-            MATCH (p:IMASNode)
-            WHERE p.ids = ids_name AND p.id = ids_name
-            MERGE (c)-[:REFERENCES_IMAS]->(p)
-            RETURN count(*) AS created
-        """
-        params = {}
-
     with _get_client(graph_client) as client:
-        result = client.query(cypher, **params)
-        count = result[0]["created"] if result else 0
-        logger.info("Created %d REFERENCES_IMAS relationships", count)
+        count = _link_chunk_references(
+            client, "imas_paths", "IMASNode", "REFERENCES_IMAS", example_ids
+        )[1]
+        logger.info("Resolved %d IMAS DD path references", count)
         return count
+
+
+def link_chunks_to_ids_roots(
+    graph_client: GraphClient | None = None,
+    example_ids: list[str] | None = None,
+) -> int:
+    """Link bare IDS names to IDS roots and refuse a silent zero result."""
+    with _get_client(graph_client) as client:
+        mentions, linked = _link_chunk_references(
+            client, "related_ids", "IDS", "REFERENCES_IDS", example_ids
+        )
+        if mentions and not linked:
+            raise ValueError(f"No IDS roots linked for {mentions} named references")
+        logger.info("Resolved %d IDS root references", linked)
+        return linked
+
+
+def _link_chunk_references(
+    client: GraphClient,
+    property_name: str,
+    target_label: str,
+    relationship: str,
+    example_ids: list[str] | None,
+) -> tuple[int, int]:
+    """Count references, then merge links only to existing target nodes."""
+    selection = (
+        "WHERE c.code_example_id IN $example_ids" if example_ids is not None else ""
+    )
+    params = {"example_ids": example_ids} if example_ids is not None else {}
+    counts = client.query(
+        f"MATCH (c:CodeChunk) {selection} "
+        f"RETURN sum(size(coalesce(c.{property_name}, []))) AS mentions",
+        **params,
+    )
+    mentions = counts[0]["mentions"] or 0
+    if not mentions:
+        return 0, 0
+    links = client.query(
+        f"MATCH (c:CodeChunk) {selection} "
+        f"UNWIND c.{property_name} AS reference "
+        f"MATCH (target:{target_label} {{id: reference}}) "
+        f"MERGE (c)-[:{relationship}]->(target) "
+        "RETURN count(*) AS linked",
+        **params,
+    )
+    return mentions, links[0]["linked"] if links else 0
 
 
 def link_examples_to_facility(
@@ -537,6 +557,7 @@ def link_example_mdsplus_paths(
 
 __all__ = [
     "link_chunks_to_imas_paths",
+    "link_chunks_to_ids_roots",
     "link_chunks_to_data_nodes",
     "link_example_mdsplus_paths",
     "link_examples_to_facility",
