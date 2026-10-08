@@ -26,19 +26,22 @@
     "excluded_probe": {
       "shot": "E101163",
       "time_s": 5.5,
-      "reason": "FLEDD returned IRET=0 but EQTIM=0 and repeated the 5.1 s grid; excluded from inference"
+      "reason": "FLEDD returned IRET=0 but EQTIM=0 and repeated the 5.1 s grid; excluded from inference",
+      "psi_sha256_equal_to_5_1_s": "1eceef66decfa08fb6f889608ee6b4a5e8ca1efc650d086708509c2dbea2fa11"
     },
     "sources": [
       "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-cocos-study.html",
       "docs/evidence/receipts/jt60sa-selene-sensor-order.json",
       "magnetic-comparison-data.log",
       "second-shot-comparison.log",
-      "other-channels.log"
+      "other-channels.log",
+      "reference-values.log",
+      "stale-grid.log"
     ]
   },
   "method": {
     "flux": "Bilinear SELENE psi(R,Z) at each geo.in loop position. Compare raw EDDB Wb divided by 2pi after removing the median offset across the 27 mapped loops per shot/time. Residuals test individual channels.",
-    "pickup": "Bilinear derivatives of SELENE psi at each geo.in probe position, Br=(dpsi/dZ)/R and Bz=-(dpsi/dR)/R; project on listed R-Z angle. The available model does not isolate vacuum and coil contributions.",
+    "pickup": "Bilinear derivatives of SELENE psi at each geo.in probe position, Br=(dpsi/dZ)/R and Bz=-(dpsi/dR)/R. With the listed angle, N=(-sin angle, cos angle); all 17 mapped readings follow -B·N. Compare against along-angle and +N controls.",
     "rogowski": "Compare each raw current with SELENE TTCU or SA G-EQDSK current at the named shot. Sign inference requires at least 10% of reference current in both shots.",
     "toroidal": "PSC/oTFCur is PID 1625 O293; outeddb.c uses positive factor 2.25*2.96/25.7 to produce BTV in T m.",
     "profile": "Read per-record coordinate selector rather than assign one coordinate system to all profiles."
@@ -1634,7 +1637,7 @@
     "pickup_coils": {
       "catalogued_channels": 23,
       "mapped_sensor_positions": 17,
-      "family_sign": "undetermined",
+      "family_sign": "negative relative to listed geometric normal for 17 mapped channels",
       "channels": [
         {
           "id": "PSRC/magPbTC1",
@@ -1651,43 +1654,50 @@
               "time_s": 4.8,
               "measured": 0.10563648492097855,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.01113877541542787,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.01113877541542787,
+              "selene_positive_normal_t": -0.080514917,
+              "selene_expected_t": 0.080514917
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.10806397348642349,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.011943910685302771,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.011943910685302771,
+              "selene_positive_normal_t": -0.096823398,
+              "selene_expected_t": 0.096823398
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.1081649661064148,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.012395280897617314,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.012395280897617314,
+              "selene_positive_normal_t": -0.080704988,
+              "selene_expected_t": 0.080704988
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.07744250446557999,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.014671426503666934,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.014671426503666934,
+              "selene_positive_normal_t": -0.065252028,
+              "selene_expected_t": 0.065252028
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": -0.002728,
-          "two_shot_measured_change_t": 0.030621,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "medium",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.02746,
+          "median_opposite_sign_error_t": 0.187511
         },
         {
           "id": "PSRC/magPbTC2",
@@ -1704,43 +1714,50 @@
               "time_s": 4.8,
               "measured": 0.130469411611557,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.005621439853932972,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.005621439853932972,
+              "selene_positive_normal_t": -0.115854563,
+              "selene_expected_t": 0.115854563
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.1328572928905487,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.005299965374175458,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.005299965374175458,
+              "selene_positive_normal_t": -0.125352669,
+              "selene_expected_t": 0.125352669
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.13324932754039764,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.002825339176096439,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.002825339176096439,
+              "selene_positive_normal_t": -0.117681995,
+              "selene_expected_t": 0.117681995
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.09063102304935455,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.016249180487964407,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.016249180487964407,
+              "selene_positive_normal_t": -0.086643561,
+              "selene_expected_t": 0.086643561
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": 1,
-          "two_shot_model_change_t": 0.021549,
-          "two_shot_measured_change_t": 0.042226,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.015567,
+          "median_opposite_sign_error_t": 0.248628
         },
         {
           "id": "PSRC/magPbTC3",
@@ -1757,43 +1774,50 @@
               "time_s": 4.8,
               "measured": 0.12001875787973404,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.00023070887989178057,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.00023070887989178057,
+              "selene_positive_normal_t": -0.11902495,
+              "selene_expected_t": 0.11902495
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.11873787641525269,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.0017451725496230933,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.0017451725496230933,
+              "selene_positive_normal_t": -0.117165908,
+              "selene_expected_t": 0.117165908
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.11811521649360657,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.0028969648730175143,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.0028969648730175143,
+              "selene_positive_normal_t": -0.117549281,
+              "selene_expected_t": 0.117549281
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.04877082258462906,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.020703819837662788,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.020703819837662788,
+              "selene_positive_normal_t": -0.049635914,
+              "selene_expected_t": 0.049635914
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": 1,
-          "two_shot_model_change_t": 0.018959,
-          "two_shot_measured_change_t": 0.069967,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.001572,
+          "median_opposite_sign_error_t": 0.235784
         },
         {
           "id": "PSRC/magPbTC4",
@@ -1810,43 +1834,50 @@
               "time_s": 4.8,
               "measured": 0.08952063322067261,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.0552643429853755,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.0552643429853755,
+              "selene_positive_normal_t": -0.101548739,
+              "selene_expected_t": 0.101548739
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.08687176555395126,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.055482449002492835,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.055482449002492835,
+              "selene_positive_normal_t": -0.090170195,
+              "selene_expected_t": 0.090170195
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.0858398824930191,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.0527103317407836,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.0527103317407836,
+              "selene_positive_normal_t": -0.099795935,
+              "selene_expected_t": 0.099795935
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.018670111894607544,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.016665846656476732,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.016665846656476732,
+              "selene_positive_normal_t": -0.022782341,
+              "selene_expected_t": 0.022782341
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": -1,
-          "two_shot_model_change_t": -0.038817,
-          "two_shot_measured_change_t": 0.068202,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.013956,
+          "median_opposite_sign_error_t": 0.181339
         },
         {
           "id": "PSRC/magPbTC5",
@@ -1863,43 +1894,50 @@
               "time_s": 4.8,
               "measured": -0.054845161736011505,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.058837039046270204,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.058837039046270204,
+              "selene_positive_normal_t": 0.033880994,
+              "selene_expected_t": -0.033880994
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": -0.05172288045287132,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.058998924268679406,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.058998924268679406,
+              "selene_positive_normal_t": 0.043937148,
+              "selene_expected_t": -0.043937148
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": -0.050799716264009476,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.055414302016433756,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.055414302016433756,
+              "selene_positive_normal_t": 0.02716935,
+              "selene_expected_t": -0.02716935
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.0045704832300543785,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.00952706669800811,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.00952706669800811,
+              "selene_positive_normal_t": -0.000833297,
+              "selene_expected_t": 0.000833297
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": 1,
-          "two_shot_model_change_t": -0.049472,
-          "two_shot_measured_change_t": -0.047152,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "medium",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.02363,
+          "median_opposite_sign_error_t": 0.083348
         },
         {
           "id": "PSRC/magPbTC6",
@@ -1916,43 +1954,50 @@
               "time_s": 4.8,
               "measured": -0.06939850747585297,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.062052023917385485,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.062052023917385485,
+              "selene_positive_normal_t": 0.051305589,
+              "selene_expected_t": -0.051305589
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": -0.0677499920129776,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.05977185789454764,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.05977185789454764,
+              "selene_positive_normal_t": 0.063585818,
+              "selene_expected_t": -0.063585818
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": -0.06754481047391891,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.055992482119852555,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.055992482119852555,
+              "selene_positive_normal_t": 0.04631486,
+              "selene_expected_t": -0.04631486
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.027840638533234596,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.001180404196128252,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.001180404196128252,
+              "selene_positive_normal_t": 0.022808764,
+              "selene_expected_t": -0.022808764
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": -1,
-          "two_shot_model_change_t": 0.058591,
-          "two_shot_measured_change_t": -0.039909,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "medium",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.02123,
+          "median_opposite_sign_error_t": 0.117282
         },
         {
           "id": "PSRC/magPbTC7",
@@ -1969,43 +2014,50 @@
               "time_s": 4.8,
               "measured": 0.06738835573196411,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.03345679196712333,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.03345679196712333,
+              "selene_positive_normal_t": -0.089782326,
+              "selene_expected_t": 0.089782326
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.06580941379070282,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.04301880031898769,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.04301880031898769,
+              "selene_positive_normal_t": -0.071839351,
+              "selene_expected_t": 0.071839351
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.0649200975894928,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.03156792327774678,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.03156792327774678,
+              "selene_positive_normal_t": -0.09025325,
+              "selene_expected_t": 0.09025325
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.032256364822387695,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.02005917430665767,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.02005917430665767,
+              "selene_positive_normal_t": -0.037802242,
+              "selene_expected_t": 0.037802242
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": 1,
-          "two_shot_model_change_t": 0.02296,
-          "two_shot_measured_change_t": 0.033553,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "medium",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.025333,
+          "median_opposite_sign_error_t": 0.146411
         },
         {
           "id": "PSRC/magPbTC8",
@@ -2022,43 +2074,50 @@
               "time_s": 4.8,
               "measured": 0.16561828553676605,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.0032468169549363436,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.0032468169549363436,
+              "selene_positive_normal_t": -0.187784322,
+              "selene_expected_t": 0.187784322
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.1638559252023697,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.00869036634068543,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.00869036634068543,
+              "selene_positive_normal_t": -0.172873972,
+              "selene_expected_t": 0.172873972
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.16387248039245605,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.0016074205190911204,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.0016074205190911204,
+              "selene_positive_normal_t": -0.188217031,
+              "selene_expected_t": 0.188217031
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.05489552393555641,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.011904834287042908,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.011904834287042908,
+              "selene_positive_normal_t": -0.067080249,
+              "selene_expected_t": 0.067080249
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": 0.003214,
-          "two_shot_measured_change_t": 0.10896,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "medium",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.024345,
+          "median_opposite_sign_error_t": 0.34441
         },
         {
           "id": "PSRC/magPbTC9",
@@ -2075,43 +2134,50 @@
               "time_s": 4.8,
               "measured": 0.19426077604293823,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.002695197188345517,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.002695197188345517,
+              "selene_positive_normal_t": -0.193338853,
+              "selene_expected_t": 0.193338853
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.1935948133468628,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.0028602380187238235,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.0028602380187238235,
+              "selene_positive_normal_t": -0.197911116,
+              "selene_expected_t": 0.197911116
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.1949208676815033,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.0058537728840100545,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.0058537728840100545,
+              "selene_positive_normal_t": -0.192651977,
+              "selene_expected_t": 0.192651977
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.08311271667480469,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.025125912667874145,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.025125912667874145,
+              "selene_positive_normal_t": -0.092094342,
+              "selene_expected_t": 0.092094342
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": -1,
-          "two_shot_model_change_t": -0.022266,
-          "two_shot_measured_change_t": 0.110482,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.008982,
+          "median_opposite_sign_error_t": 0.387586
         },
         {
           "id": "PSRC/magPbTC10",
@@ -2128,43 +2194,50 @@
               "time_s": 4.8,
               "measured": 0.0924539789557457,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.003277793603780389,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.003277793603780389,
+              "selene_positive_normal_t": -0.087326302,
+              "selene_expected_t": 0.087326302
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.09381389617919922,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.004744999637750287,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.004744999637750287,
+              "selene_positive_normal_t": -0.095041232,
+              "selene_expected_t": 0.095041232
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.09477030485868454,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.00011363234269472927,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.00011363234269472927,
+              "selene_positive_normal_t": -0.087798873,
+              "selene_expected_t": 0.087798873
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.05735064670443535,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.017647465060143867,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.017647465060143867,
+              "selene_positive_normal_t": -0.05416204,
+              "selene_expected_t": 0.05416204
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": 1,
-          "two_shot_model_change_t": 0.022392,
-          "two_shot_measured_change_t": 0.036463,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.006971,
+          "median_opposite_sign_error_t": 0.181175
         },
         {
           "id": "PSRC/magPbTC11",
@@ -2181,43 +2254,50 @@
               "time_s": 4.8,
               "measured": -0.04179137572646141,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.01828350674478056,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.01828350674478056,
+              "selene_positive_normal_t": 0.046328006,
+              "selene_expected_t": -0.046328006
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": -0.04255417361855507,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.017267179264351135,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.017267179264351135,
+              "selene_positive_normal_t": 0.042307051,
+              "selene_expected_t": -0.042307051
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": -0.04295918345451355,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.023019525774563284,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.023019525774563284,
+              "selene_positive_normal_t": 0.048570602,
+              "selene_expected_t": -0.048570602
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.04587725177407265,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.0475853473798335,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.0475853473798335,
+              "selene_positive_normal_t": 0.04823132,
+              "selene_expected_t": -0.04823132
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": 0.030318,
-          "two_shot_measured_change_t": 0.003323,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.005611,
+          "median_opposite_sign_error_t": 0.089825
         },
         {
           "id": "PSRC/magPbTC12",
@@ -2234,43 +2314,50 @@
               "time_s": 4.8,
               "measured": -0.0657830536365509,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.05774649888603919,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.05774649888603919,
+              "selene_positive_normal_t": 0.070438013,
+              "selene_expected_t": -0.070438013
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": -0.06755213439464569,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.0566922250199649,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.0566922250199649,
+              "selene_positive_normal_t": 0.067624579,
+              "selene_expected_t": -0.067624579
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": -0.06832251697778702,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.05997073653800342,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.05997073653800342,
+              "selene_positive_normal_t": 0.0738588,
+              "selene_expected_t": -0.0738588
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.08054091036319733,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.05393052704488685,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.05393052704488685,
+              "selene_positive_normal_t": 0.082927788,
+              "selene_expected_t": -0.082927788
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": 0.002762,
-          "two_shot_measured_change_t": 0.012989,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.005536,
+          "median_opposite_sign_error_t": 0.139201
         },
         {
           "id": "PSRC/magPbTC13",
@@ -2287,43 +2374,50 @@
               "time_s": 4.8,
               "measured": 0.017967768013477325,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.13327648428845446,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.13327648428845446,
+              "selene_positive_normal_t": -0.018390054,
+              "selene_expected_t": 0.018390054
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.018133755773305893,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.13009198922990806,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.13009198922990806,
+              "selene_positive_normal_t": -0.019485897,
+              "selene_expected_t": 0.019485897
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.01831386797130108,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.13462365878946073,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.13462365878946073,
+              "selene_positive_normal_t": -0.018403524,
+              "selene_expected_t": 0.018403524
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.010160091333091259,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.11586912719279988,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.11586912719279988,
+              "selene_positive_normal_t": -0.00921704,
+              "selene_expected_t": 0.00921704
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": 0.014223,
-          "two_shot_measured_change_t": 0.007974,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.001352,
+          "median_opposite_sign_error_t": 0.036538
         },
         {
           "id": "PSRC/magPbTC14",
@@ -2340,43 +2434,50 @@
               "time_s": 4.8,
               "measured": 0.13908496499061584,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.006007800950905848,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.006007800950905848,
+              "selene_positive_normal_t": -0.137663493,
+              "selene_expected_t": 0.137663493
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.13871772587299347,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.006438803276283628,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.006438803276283628,
+              "selene_positive_normal_t": -0.138410954,
+              "selene_expected_t": 0.138410954
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.13852240145206451,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.006012101890816232,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.006012101890816232,
+              "selene_positive_normal_t": -0.136929357,
+              "selene_expected_t": 0.136929357
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.10040955245494843,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.01441448931159802,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.01441448931159802,
+              "selene_positive_normal_t": -0.099502086,
+              "selene_expected_t": 0.099502086
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": 0.007976,
-          "two_shot_measured_change_t": 0.038308,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.001593,
+          "median_opposite_sign_error_t": 0.2761
         },
         {
           "id": "PSRC/magPbTC15",
@@ -2393,43 +2494,50 @@
               "time_s": 4.8,
               "measured": 0.09350099414587021,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.042342464219723736,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.042342464219723736,
+              "selene_positive_normal_t": -0.084806995,
+              "selene_expected_t": 0.084806995
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.09314844012260437,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.041624036297883985,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.041624036297883985,
+              "selene_positive_normal_t": -0.089172499,
+              "selene_expected_t": 0.089172499
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.09275474399328232,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.04211773263447817,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.04211773263447817,
+              "selene_positive_normal_t": -0.083244267,
+              "selene_expected_t": 0.083244267
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.043363407254219055,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.032029032770767005,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.032029032770767005,
+              "selene_positive_normal_t": -0.039234334,
+              "selene_expected_t": 0.039234334
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": -0.009595,
-          "two_shot_measured_change_t": 0.049785,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.00951,
+          "median_opposite_sign_error_t": 0.177153
         },
         {
           "id": "PSRC/magPbTC16",
@@ -2446,43 +2554,50 @@
               "time_s": 4.8,
               "measured": 0.07656367868185043,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.03310268410889932,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.03310268410889932,
+              "selene_positive_normal_t": -0.060489378,
+              "selene_expected_t": 0.060489378
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.07688724249601364,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.03269411405384291,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.03269411405384291,
+              "selene_positive_normal_t": -0.070054877,
+              "selene_expected_t": 0.070054877
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.07661568373441696,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.03220859557613223,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.03220859557613223,
+              "selene_positive_normal_t": -0.059035738,
+              "selene_expected_t": 0.059035738
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.03792903944849968,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.013072420419370841,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.013072420419370841,
+              "selene_positive_normal_t": -0.030327483,
+              "selene_expected_t": 0.030327483
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": -1,
-          "two_shot_model_change_t": -0.019622,
-          "two_shot_measured_change_t": 0.038958,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "high",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.01758,
+          "median_opposite_sign_error_t": 0.136352
         },
         {
           "id": "PSRC/magPbTC17",
@@ -2499,43 +2614,50 @@
               "time_s": 4.8,
               "measured": 0.08549191802740097,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.010833148688121743,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.010833148688121743,
+              "selene_positive_normal_t": -0.063097418,
+              "selene_expected_t": 0.063097418
             },
             {
               "shot": "E101163",
               "time_s": 5.0,
               "measured": 0.08679135143756866,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.01070164173120197,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.01070164173120197,
+              "selene_positive_normal_t": -0.07710082,
+              "selene_expected_t": 0.07710082
             },
             {
               "shot": "E101163",
               "time_s": 5.1,
               "measured": 0.08663696050643921,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": -0.009525664334517873,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": -0.009525664334517873,
+              "selene_positive_normal_t": -0.062125448,
+              "selene_expected_t": 0.062125448
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": 0.05408334732055664,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": 0.0022431406612231424,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": 0.0022431406612231424,
+              "selene_positive_normal_t": -0.042891576,
+              "selene_expected_t": 0.042891576
             }
           ],
-          "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": -1,
-          "two_shot_model_change_t": -0.012945,
-          "two_shot_measured_change_t": 0.032708,
-          "orientation": "geometric R-Z axis at listed angle; winding polarity unresolved",
+          "inferred_sign": -1,
+          "orientation": "measured positive axis is the negative R-Z normal N=(−sin(angle), cos(angle)) to the listed geometry angle",
           "two_pi_factor": 1,
-          "confidence": "undetermined",
+          "confidence": "medium",
           "family_disagreement": null,
-          "evidence": "Two-shot directional difference is only a candidate; model excludes unresolved vacuum-field and coil calibration contributions"
+          "evidence": "Four paired EDDB/SELENE samples at two named shots; negative normal projection matches channel polarity and outperforms both along-angle and positive-normal models",
+          "max_abs_residual_t": 0.024512,
+          "median_opposite_sign_error_t": 0.148676
         },
         {
           "id": "PSRC/magPbTC18",
@@ -2549,27 +2671,24 @@
               "time_s": 5.1,
               "measured": -0.0021793285850435495,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.0038326436188071966,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             }
           ],
           "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": null,
-          "two_shot_measured_change_t": null,
           "orientation": null,
-          "two_pi_factor": null,
+          "two_pi_factor": 1,
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
-          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions; the raw field unit is tesla, so no flux normalization applies"
         },
         {
           "id": "PSRC/magPbTC19",
@@ -2583,27 +2702,24 @@
               "time_s": 5.1,
               "measured": -0.003278400981798768,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.003278400981798768,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             }
           ],
           "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": null,
-          "two_shot_measured_change_t": null,
           "orientation": null,
-          "two_pi_factor": null,
+          "two_pi_factor": 1,
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
-          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions; the raw field unit is tesla, so no flux normalization applies"
         },
         {
           "id": "PSRC/magPbTC20",
@@ -2617,27 +2733,24 @@
               "time_s": 5.1,
               "measured": -0.0028358895797282457,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.004340429324656725,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             }
           ],
           "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": null,
-          "two_shot_measured_change_t": null,
           "orientation": null,
-          "two_pi_factor": null,
+          "two_pi_factor": 1,
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
-          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions; the raw field unit is tesla, so no flux normalization applies"
         },
         {
           "id": "PSRC/magPbTC21",
@@ -2651,27 +2764,24 @@
               "time_s": 5.1,
               "measured": -0.0007550590089522302,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.002145156031474471,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             }
           ],
           "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": null,
-          "two_shot_measured_change_t": null,
           "orientation": null,
-          "two_pi_factor": null,
+          "two_pi_factor": 1,
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
-          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions; the raw field unit is tesla, so no flux normalization applies"
         },
         {
           "id": "PSRC/magPbTC22",
@@ -2685,27 +2795,24 @@
               "time_s": 5.1,
               "measured": -0.0022697828244417906,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.0024147434160113335,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             }
           ],
           "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": null,
-          "two_shot_measured_change_t": null,
           "orientation": null,
-          "two_pi_factor": null,
+          "two_pi_factor": 1,
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
-          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions; the raw field unit is tesla, so no flux normalization applies"
         },
         {
           "id": "PSRC/magPbTC23",
@@ -2719,29 +2826,35 @@
               "time_s": 5.1,
               "measured": -0.0022687797900289297,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             },
             {
               "shot": "E101011",
               "time_s": 6.8,
               "measured": -0.00031257333466783166,
               "selene_psi_wb_per_rad": null,
-              "selene_projected_t": null,
-              "irc": 0
+              "irc": 0,
+              "selene_tangent_t": null
             }
           ],
           "inferred_sign": null,
-          "candidate_sign_from_two_shot_difference": null,
-          "two_shot_model_change_t": null,
-          "two_shot_measured_change_t": null,
           "orientation": null,
-          "two_pi_factor": null,
+          "two_pi_factor": 1,
           "confidence": "undetermined",
           "family_disagreement": "sensor_position_missing",
-          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions"
+          "evidence": "PSRC catalogue and two EDDB reads; SELENE geometry has only 17 tangential probe positions; the raw field unit is tesla, so no flux normalization applies"
         }
-      ]
+      ],
+      "negative_normal_median_absolute_deviation_t": {
+        "E101163@4.8": 0.013193,
+        "E101163@5.0": 0.004069,
+        "E101163@5.1": 0.013298,
+        "E101011@6.8": 0.005055
+      },
+      "excluded_along_angle_median_absolute_deviation_t": {
+        "E101163@5.0": 0.0477
+      }
     },
     "ip_rogowski_coils": {
       "channels": [
@@ -3226,7 +3339,7 @@
           "evidence": "MDAC current agrees in sign and within 0.08% of PSC current at both shots"
         }
       ],
-      "sa_geqdsk_btv_tm": 6.0109148904,
+      "sa_geqdsk_btv_tm": 6.010914971628579,
       "psc_current_converted_btv_tm": 6.010914960631137
     }
   },
@@ -3259,7 +3372,7 @@
   },
   "unresolved": [
     "Seven catalogued flux loops lack a sensor position in the SELENE geometry input.",
-    "Six catalogued pickup coils lack a sensor position; the mapped pickup channels lack a validated vacuum/coil reference for winding polarity.",
+    "Six catalogued pickup coils lack a sensor position in the SELENE geometry input.",
     "The diamagnetic loop has no established sensor geometry or predicted flux at the loop.",
     "The observed profile record does not use a named SELENE reference equilibrium and TOPICS_RHOTYPE=6 is not decoded by the FIT selector map."
   ]
