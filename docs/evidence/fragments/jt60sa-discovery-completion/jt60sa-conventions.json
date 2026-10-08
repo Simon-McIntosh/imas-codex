@@ -36,10 +36,10 @@
     "selene_eq31": {
       "cocos": 2,
       "confidence": "medium",
-      "signs": "native SELENE ψ is in Wb/rad, rises from magnetic axis to edge for positive clockwise Ip and Bt, and q is positive; its model uses BR=(1/R)dψ/dZ and BZ=-(1/R)dψ/dR",
+      "signs": "native SELENE ψ is in Wb/rad, rises from magnetic axis to edge for positive clockwise Ip and Bt, and q is positive; mgfild computes internal BR=(1/R)dψ/dZ and BZ=-(1/R)dψ/dR, then negates both into the measured-field projections",
       "example": "FLEDD EQDB ID 1 E101163 at 4.700 s: BTV +6.66 T m, TTCU +0.994504 MA, SAXIS -0.445550 Wb/rad, SIV edge 0, QQV axis +1.00667; each item getter iret=0",
       "evidence": [
-        "/analysis/src/SAselene_v2.0_forPSRC/mgfild.f:4-7; efitout.f:19-30,262-269; eqdbput.f:219-231",
+        "/analysis/src/SAselene_v2.0_forPSRC/mgfild.f:4-7,17-41; efitout.f:19-30,262-269; eqdbput.f:219-231",
         "/analysis/src/safledd/eqitem_get.f:188-208 defines BTV, TTCU, SAXIS, SIV and QQV",
         "COCOS paper Table I and equations 12-13: clockwise phi, increasing Wb/rad ψ and positive q match index 2",
         "docs/evidence/fragments/jt60sa-discovery-completion/fledd-equilibrium-read.html"
@@ -49,7 +49,7 @@
       "cocos": null,
       "candidate_cocos": 2,
       "confidence": "low",
-      "signs": "sample FAME record stores positive BTV and TTCU, increasing Wb/rad-like SIV and positive QQV; no FAME-specific BR/BZ equation or explicit COCOS label was established",
+      "signs": "legacy-shot FAME sample stores positive BTV and TTCU, increasing Wb/rad-like SIV and positive QQV; no FAME-specific BR/BZ equation or explicit COCOS label was established, and this sample does not establish a JT-60SA E-shot polarity",
       "example": "FLEDD FAME ID 0 shot 45218 at 3.200 s: BTV +5.207183 T m, TTCU +0.436174 MA, SAXIS -0.303198, SIV edge 0, QQV axis +0.999963; each item getter iret=0",
       "evidence": [
         "/analysis/src/safledd/eqdata_get.f uses the FLEDD EQDB common layout; eqitem_get.f:188-208 names the queried fields",
