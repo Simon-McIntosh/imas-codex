@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: baseline_suite (4f40b717, exit 2, completed) recorded one collection error (tests/discovery/test_path_judgments.py::collection) and after_suite (8936a38ae, exit 0, completed) recorded zero; no failure present at head absent from base.",
+  "base_log_revision": "4f40b717526698bdd0cbee423b6c4d1193724dce",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T12:38:22.175Z",
+  "dispatched_at": "2026-10-08T12:31:17Z",
+  "findings": [],
+  "head_log_revision": "8936a38ae2f63018f3034aa94fbbfd1f1d1b5b1b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites; the change is test-only",
+    "diff": "read commit 8936a38ae against base 4f40b717 - one file modified (tests/discovery/test_path_judgments.py), 20 insertions, 8 deletions; the dropped import names a helper absent from the base scorer and the added assertions encode the category probability and a below-threshold refusal",
+    "done_when": "focused file passes at head (7 passed, reproduced by this review); scan_relevance asserts the code-bearing category probability (1.0); a non-code distribution (analysis_code 0.2) asserts should_enrich False at threshold 0.4; tests/discovery passes 1435 with zero added failures against base 4f40b717",
+    "goal": "align tests/discovery/test_path_judgments.py with the category-derived scan gate; commit 8936a38ae removes the stale path_scan_relevance import and updates both scan_relevance assertions",
+    "manifest": "read; status complete; commits [8936a38ae]; changed_paths match the diff; five gate logs named; negative_control_log is the bare path",
+    "write_paths": "git diff --name-status 4f40b717..8936a38ae lists exactly tests/discovery/test_path_judgments.py; no fragment or figure written, none required"
+  },
+  "justifications": {
+    "durability": "the change is itself a regression guard encoding the category-derived scan_relevance and a below-threshold refusal; as a test-only node it lands no production guard",
+    "evidence": "base defect quoted as ImportError for path_scan_relevance; head focused 7 passed and discovery 1435 passed at named revisions; negative control fails EXIT=1; head focused run independently reproduced",
+    "fit": "follows the file's existing style, reuses existing helpers, conventional test(discovery) commit with a body and no plan identifiers",
+    "goal_fidelity": "the change is exactly the stated goal - the stale test is aligned to the category gate and the obsolete helper dropped",
+    "reuse": "deletes a dead import and assertion, adds no helper or fixture, exercises the existing gate through its public entry",
+    "scope_discipline": "exactly one modified file, the sole declared write path; production code untouched"
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 4f40b717526698bdd0cbee423b6c4d1193724dce\nreviewed_head_sha: 8936a38ae2f63018f3034aa94fbbfd1f1d1b5b1b\nVERDICT goal: the node goal is to align tests/discovery/test_path_judgments.py with the category-derived scan gate; commit 8936a38ae drops the import of the retired path_scan_relevance helper and rewrites the two scan_relevance expectations to the code-bearing category probability the base scorer now computes, so collection succeeds and the file's assertions match the gate the production code implements.\nVERDICT done_when: all four clauses hold. The focused file passes at head (7 passed, independently reproduced by this review from the target worktree). scan_relevance now asserts the code-bearing category probability (1.0 for an analysis_code distribution of 1.0) rather than the maximum facet. A below-threshold case built from a non-code distribution (analysis_code 0.2, other 0.8) asserts should_enrich is False at scan_threshold 0.4. tests/discovery passes with zero added failures: base 4f40b717 exited 2 with one collection error, head 8936a38ae exited 0 with 1435 passed.\nVERDICT write_paths: the node declares tests/discovery/test_path_judgments.py plus a fragment and a figures directory; git diff --name-status 4f40b717..8936a38ae lists exactly one path, tests/discovery/test_path_judgments.py (modified), and no other file. The done-when names no artifact, so no fragment or figure is required and none was written.\nVERDICT manifest: read; status complete; commits [8936a38ae]; changed_paths match the diff; test_logs name the five gate logs and artifacts quote their summary lines; evidence_inputs state the base ImportError and the head pass; negative_control_log is the bare path to negative-control.log.\nVERDICT diff: read commit 8936a38ae against base 4f40b717 - one file modified, 20 insertions, 8 deletions. The removed import path_scan_relevance no longer exists in the base scorer, which is what broke collection; the added block builds a low-code distribution and asserts both scan_relevance 0.2 and should_enrich False.\nCALL_SITES: none (the change is test-only; the retired helper's production call site was removed in the base commit under review's ancestor).\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the single change is exactly the stated goal - the stale test is aligned to the category-derived scan gate, and the obsolete helper it referenced is dropped.\nSCORE evidence: 20\nJUSTIFICATION evidence: the base defect is quoted (ImportError: cannot import name 'path_scan_relevance'), the head gate result is recorded with its revision and command, a negative control restores the old 1.1/3 expectation and fails with EXIT=1, and this review reproduced the head focused run (7 passed) from the target worktree.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 4f40b717..8936a38ae lists exactly the one declared write path; no fragment, figure, or production file was touched.\nSCORE durability: 15\nJUSTIFICATION durability: the change is itself a regression guard - it encodes the category-derived scan_relevance and a below-threshold refusal so the retired maximum-of-facets semantics cannot silently return - but a test-only node lands no production guard and its assertion is only as strong as the scorer contract it mirrors.\nSCORE fit: 19\nJUSTIFICATION fit: the edit follows the file's existing style, reuses build_path_judgment_questions and path_judgment_fields, and commit 8936a38ae is a conventional test(discovery) commit with a body and no plan or ticket identifiers.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change deletes a dead import and a dead assertion and adds no helper, fixture, or duplicate definition; it exercises the existing gate code through its public entry point.",
+  "review_run_id": "r-20261008T123108607142-review-of-path-judgment-test-category-gate",
+  "reviewed_base_sha": "4f40b717526698bdd0cbee423b6c4d1193724dce",
+  "reviewed_head_sha": "8936a38ae2f63018f3034aa94fbbfd1f1d1b5b1b",
+  "reviewed_run_id": "r-20261008T122235560389-path-judgment-test-category-gate",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T12:37:38.174677+00:00",
+  "total": 114
+}
