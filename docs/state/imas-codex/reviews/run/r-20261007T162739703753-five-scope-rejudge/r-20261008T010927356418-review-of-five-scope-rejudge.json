@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run is operational and its manifest names no baseline_suite or after_suite gate log, so the added-failure set difference over pytest node ids was not taken. The reviewed node's gate is a census and a search, recorded under test_logs, not a test suite.",
+  "completed_at": "2026-10-08T01:24:40.594Z",
+  "dispatched_at": "2026-10-08T01:09:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html",
+      "line": "9",
+      "severity": "follow-on",
+      "text": "follow-on: the overview paragraph states 'the nine .bf field-list includes and #INTERFACE.inc' while the detail paragraph beneath (the admitted-includes block) states 'the facility holds 10 CodeFiles ending .bf' and enumerates ten (#CNT, #EQ2M, #EQTTL, #EQU, #EQV, #GEO, #MSEDB, #OUT, #PAR, #VAC). The node's own census confirms ten (incF_final.json bf_count = 10). The overview undercounts by one and contradicts the detail in the same fragment; it is a text defect in the deliverable, not a data defect.",
+      "type": "consistency"
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html",
+      "line": "84",
+      "severity": "follow-on",
+      "text": "follow-on: plan \u00a735 step (4) says to re-open the inc/F path 'through the existing reset owner, scoped by prefix', but the fragment records that the reset owner alone is insufficient -- the path had also scored 0.4, below the 0.9 discovery threshold, so '--min-score' had to be lowered. The fragment flags this as 'an addition beyond the literal step-(4) form'. The literal plan text therefore cannot list the includes; the plan wording, not the node, is the thing to correct.",
+      "type": "plan-wording"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "None. This is an operational run: it changes no runtime code, so there is no production call site that can reach it. The commands it ran (discover code jt-60sa --reset-to content, --rejudge-ingested, --rescan --min-score --path-prefix) are the CLI entry points, unchanged by this node.",
+    "diff": "Read commit by commit against base a289919b: c07774e records the blocked state, c7333675 the name-stage outcome, 9b99fed the ingested-stage outcome, d30dee700 the completed content and inc/F stages. One file, +142/-0 from the base; all four commits are fragment edits.",
+    "done_when": "The \u00a735 done-when is a set of fragment content clauses, and each is present. The numbers reconcile with the node's own recorded outputs on disk: census_final2.json (total 3219; by_status_stage ingested/content 668, scored/content 723, skipped/content 98, skipped/name 1730; chunks 3307; eqdb_total 59; eqdb_chunks 70; admitted_rec_db_ge_0p5 265; ingested_below_before 334; incF_codefiles 11; bf_count 10) and search_eqdbms_final2.json ('## Code Examples (10 matches)', top hit eqitem_get.f score 6.12). The fragment's table and prose match those files.",
+    "goal": "The node goal is \u00a735: re-judge JT-60SA code under the widened five-scope noul and report the outcome in an evidence fragment. The fragment (docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html) reports all six done-when items: before/after counts by status and stage, the newly admitted set with the EQDBMS names, the inc/F includes, the simulation-looking admits, the client_eqdbms chunk counts, the \u00a714 search result and the spend. Judgment correct; the overview paragraph undercounts the .bf set at 'nine'.",
+    "manifest": "Read; status complete. It names the four commits (c07774e, c7333675, 9b99fed, d30dee700), changed_paths is exactly the fragment, and it records the four discover-code gate commands with their logs and the spend. It carries no baseline_suite/after_suite arm pair, which is correct for an operational node whose gate is a census, not a test suite.",
+    "write_paths": "The node's declared write paths were the report directory reports/imas-codex/five-scope-rejudge, docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html and the figures directory. The landed diff against the base is one file, docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html, inside that set; no figures were produced and no path outside the set; the reports live under ~/.config/reckon/crew/reports, outside the repository index."
+  },
+  "justifications": {
+    "durability": "An operational docs node has no test that fails on regression; reproducibility rests on the recorded scripts (census.py, post.py, unjudged.py) and step logs rather than an assertion, so the fragment is a record and not a guard.",
+    "evidence": "The fragment's numbers reconcile with the node's recorded census and search outputs (census_final2.json total 3219, admitted 265, below-gates 334; search 10 matches, top hit 6.12); the \u00a714 criterion is honestly reported as only partially met; marked down because the gate is a scripted census with no arm-pair and the inc/F per-file scores live only in the manifest, not the fragment.",
+    "fit": "The fragment follows the evidence-fragment idiom used by its siblings (section/h2/paragraph ids, a census table) and introduces no forbidden name; 'noul' is the plan's own term.",
+    "goal_fidelity": "All six done-when clauses are reported in docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html (overview, census table, admitted list, inc/F includes, simulation list, \u00a714 search, spend); marked down only because the overview undercounts the .bf set as 'nine' and the includes are not each given a score in the fragment.",
+    "reuse": "The node reused the existing discover-code CLI and the graph census/search path rather than adding a parallel mechanism; no capability is forked.",
+    "scope_discipline": "The entire diff is one file inside the declared write paths (docs/evidence/fragments.../five-scope-rejudge.html), +142 lines, no path outside the set and no repository code touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a735 re-judge JT-60SA code under the widened five-scope noul; the fragment reports all six done-when items (before/after counts, admitted set with EQDBMS names, inc/F includes, simulation-looking admits, client_eqdbms chunks, \u00a714 result, spend). VERDICT done_when: fragment numbers reconcile with census_final2.json (total 3219, admitted 265, below-gates 334, chunks 3307, eqdb chunks 70) and search_eqdbms_final2.json (10 matches, top hit 6.12). VERDICT write_paths: one file inside scope. VERDICT manifest: status complete; four commits; the fragment alone changed. VERDICT diff: c07774e..d30dee700, one file, +142. CALL_SITES: none. SCORE goal_fidelity: 18. SCORE evidence: 17. SCORE scope_discipline: 20. SCORE durability: 14. SCORE fit: 19. SCORE reuse: 20. FINDING docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html:9 follow-on: overview says nine .bf includes while the detail and the census say ten. FINDING docs/evidence/fragments/jt60sa-discovery-completion/five-scope-rejudge.html:84 follow-on: \u00a735 step (4)'s literal form omits the --min-score the pass required; the plan wording needs correcting.",
+  "review_run_id": "r-20261008T010927356418-review-of-five-scope-rejudge",
+  "reviewed_base_sha": "a289919b0660147c9dd875026c1cab5abeff1985",
+  "reviewed_head_sha": "d30dee70024dafad36b2dbb0105bbccf83edcbd2",
+  "reviewed_run_id": "r-20261007T162739703753-five-scope-rejudge",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:24:00Z",
+  "total": 108
+}
