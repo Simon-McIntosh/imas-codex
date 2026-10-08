@@ -61,3 +61,26 @@ def test_mapping_engine_passes_target_ids_to_pending_check():
         asyncio.run(run_mapping_engine(state))
         state.assign_phase._has_work_fn()
     pending.assert_called_once_with("jet", ["magnetics"])
+
+
+def test_claim_and_pending_pass_shared_predicate_unchanged():
+    params = {"marker": "magnetics"}
+    predicate = "n.assignment_marker = $marker"
+    with (
+        patch(
+            "imas_codex.ids.workers._escalated_source_predicate",
+            return_value=(predicate, params),
+        ) as builder,
+        patch("imas_codex.ids.workers.claim_batch", return_value=[]) as claim,
+        patch("imas_codex.ids.workers.has_pending", return_value=False) as pending,
+    ):
+        claim_sources_for_escalated("jet", ["magnetics"], domains=["equilibrium"])
+        has_pending_assignment_work("jet", ["magnetics"])
+
+    assert builder.call_args_list == [
+        ((["magnetics"], ["equilibrium"]), {}),
+        ((["magnetics"],), {}),
+    ]
+    for graph_call in (claim.call_args, pending.call_args):
+        assert graph_call.kwargs["status_predicate"] is predicate
+        assert graph_call.kwargs["status_params"] is params
