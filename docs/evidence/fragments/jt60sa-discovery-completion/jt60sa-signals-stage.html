@@ -1,0 +1,62 @@
+<section id="jt60sa-signals-stage-landing">
+  <h2 id="jt60sa-signals-stage-heading">JT-60SA signals stage: bounded first pass</h2>
+  <p id="jt60sa-signals-stage-receipt">At revision <code>9770785c1b3f96c3793d2aa9d79e0858c8569c30</code>, <code>imas-codex discover jt-60sa --only signals -t 8 -c 10</code> scanned the configured EDAS and IMAS sources, then drained for 471.9 seconds. The runner reported 29,973 scanned (both stages' seed accounting), 682 enriched, 585 checked and USD 0.06 spent against the USD 10 ceiling. The EDAS scanner enumerated 15,018 records across 73 categories. An EDDB positive control found 6,298 records before and 6,338 after; the latter count includes 40 newly scanned records. The graph snapshots and full CLI log are in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T093733679102-jt60sa-signals-stage/</code>.</p>
+  <table id="jt60sa-signals-stage-coverage">
+    <caption>FacilitySignal rows by database before and after the pass. Unit, description and embedded counts are rows with a nonempty value; status counts sum to the total. All counts are signals.</caption>
+    <thead><tr><th>Database</th><th>When</th><th>Discovered</th><th>Enriched</th><th>Checked</th><th>Underspecified</th><th>Total</th><th>With units</th><th>With descriptions</th><th>Embedded</th></tr></thead>
+    <tbody>
+      <tr><td>EDDB</td><td>Before</td><td>0</td><td>3</td><td>6,295</td><td>0</td><td>6,298</td><td>4,588</td><td>6,298</td><td>6,298</td></tr>
+      <tr><td>EDDB</td><td>After</td><td>6,053</td><td>0</td><td>281</td><td>4</td><td>6,338</td><td>4,628</td><td>6,338</td><td>6,338</td></tr>
+      <tr><td>UDDB</td><td>Before</td><td>188</td><td>0</td><td>0</td><td>0</td><td>188</td><td>1</td><td>6</td><td>0</td></tr>
+      <tr><td>UDDB</td><td>After</td><td>189</td><td>0</td><td>0</td><td>0</td><td>189</td><td>1</td><td>6</td><td>6</td></tr>
+      <tr><td>LCDB</td><td>Before</td><td>8,469</td><td>0</td><td>0</td><td>0</td><td>8,469</td><td>6</td><td>8,469</td><td>0</td></tr>
+      <tr><td>LCDB</td><td>After</td><td>8,253</td><td>0</td><td>214</td><td>2</td><td>8,469</td><td>6</td><td>8,469</td><td>8,469</td></tr>
+      <tr><td>EQDB</td><td>Before</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>EQDB</td><td>After</td><td>8</td><td>0</td><td>2</td><td>0</td><td>10</td><td>0</td><td>10</td><td>10</td></tr>
+      <tr><td>G-EQDSK</td><td>Before</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>G-EQDSK</td><td>After</td><td>12</td><td>0</td><td>0</td><td>0</td><td>12</td><td>0</td><td>12</td><td>12</td></tr>
+      <tr><td>PMDB, MBDB, IMAS</td><td>Before and after</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <table id="jt60sa-signals-stage-routes">
+    <caption>DataAccess routes present in Neo4j.</caption>
+    <thead><tr><th>When</th><th>Route ID</th><th>Method</th></tr></thead>
+    <tbody>
+      <tr><td>Before and after</td><td><code>jt-60sa:edas:eddb</code></td><td>EDAS EDDB</td></tr>
+      <tr><td>After</td><td><code>jt-60sa:eqdb:local_record</code></td><td>EQDB local record fields</td></tr>
+      <tr><td>After</td><td><code>jt-60sa:equilibrium:g_eqdsk_file</code></td><td>G-EQDSK file fields</td></tr>
+    </tbody>
+  </table>
+  <table id="jt60sa-signals-stage-remaining">
+    <caption>Unfinished states and measured reasons.</caption>
+    <thead><tr><th>Rows</th><th>Reason and next action</th></tr></thead>
+    <tbody>
+      <tr><td>UDDB: 189 discovered; LCDB: 8,253 discovered</td><td>The eight minute drain ended before enrichment completed. The EDAS scanner constructs these signals without <code>data_access</code> and returns only EDDB and equilibrium routes, so neither database has a DataAccess node or DATA_ACCESS edge. Add their routes in the scanner before resuming with <code>--flush</code>.</td></tr>
+      <tr><td>EDDB: 6,053 discovered after 6,295 checked before</td><td>The unscoped scan rewrote existing checked signals to discovered. Repair rescan persistence so a repeat scan preserves progressed statuses, then use flush-only passes for this graph.</td></tr>
+    </tbody>
+  </table>
+  <h3 id="jt60sa-signals-stage-resume-heading">Resumed scan and exact status control</h3>
+  <p id="jt60sa-signals-stage-resume-receipt">The resumed attempt used the repaired scanner from main revision <code>a800c04c12ab30741a9642a5af1956d864ba46e7</code>. A scoped EDAS scan first failed before enumeration because nine <code>database_routes.observed_on</code> YAML values loaded as Python dates, which the scanner's JSON payload could not encode. A process-only conversion of those values to ISO strings passed a JSON encoding control; the next scan reached the remote enumerator, which returned exit 255. Both CLI invocations exited 0 and labelled the stage complete despite their scanner errors. Neither wrote a new route, so the drain was not started. The resumed attempts added USD 0.00 of LLM spend; cumulative spend remains USD 0.06 against the USD 10 ceiling.</p>
+  <table id="jt60sa-signals-stage-resume-coverage">
+    <caption>Resumed baseline and final state are identical. Each row gives both snapshots; status counts and metadata counts are signals.</caption>
+    <thead><tr><th>Database</th><th>Discovered</th><th>Enriched</th><th>Checked</th><th>Underspecified</th><th>Total</th><th>With units</th><th>With descriptions</th><th>Embedded</th></tr></thead>
+    <tbody>
+      <tr><td>EDDB</td><td>39</td><td>3</td><td>6,296</td><td>0</td><td>6,338</td><td>4,628</td><td>6,338</td><td>6,338</td></tr>
+      <tr><td>UDDB</td><td>189</td><td>0</td><td>0</td><td>0</td><td>189</td><td>1</td><td>6</td><td>6</td></tr>
+      <tr><td>LCDB</td><td>8,253</td><td>0</td><td>214</td><td>2</td><td>8,469</td><td>6</td><td>8,469</td><td>8,469</td></tr>
+      <tr><td>EQDB</td><td>8</td><td>0</td><td>2</td><td>0</td><td>10</td><td>0</td><td>10</td><td>10</td></tr>
+      <tr><td>G-EQDSK</td><td>12</td><td>0</td><td>0</td><td>0</td><td>12</td><td>0</td><td>12</td><td>12</td></tr>
+      <tr><td>PMDB, MBDB, IMAS</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <table id="jt60sa-signals-stage-resume-routes">
+    <caption>DataAccess routes and bound FacilitySignal counts in both resumed snapshots.</caption>
+    <thead><tr><th>Route ID</th><th>Bound signals</th></tr></thead>
+    <tbody>
+      <tr><td><code>jt-60sa:edas:eddb</code></td><td>6,338</td></tr>
+      <tr><td><code>jt-60sa:eqdb:local_record</code></td><td>10</td></tr>
+      <tr><td><code>jt-60sa:equilibrium:g_eqdsk_file</code></td><td>12</td></tr>
+    </tbody>
+  </table>
+  <p id="jt60sa-signals-stage-resume-control">The exact pre-scan set of 6,296 checked EDDB IDs was compared with the post-scan set: zero moved out of <code>checked</code>. The resumed before and after snapshots, checked-ID control, and both scanner logs are stored in the run directory named above.</p>
+</section>
