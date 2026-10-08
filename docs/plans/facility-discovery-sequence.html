@@ -20,7 +20,7 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -258,6 +258,23 @@
       session holds at dispatch is named in the fragment and left for that session, never edited
       under it. It also rewrites the fold reviews' leftovers. It removes the stage-option docstrings phrased as changelog ("the old <code>--source</code>" in <code>wiki.py</code>) and the <code>--score-only</code> and <code>--enrich-only</code> aliases on the wrappers it deletes. It updates the prose that still names <code>--root</code>, <code>--score-only</code> or <code>--path-limit</code>: <code>imas_codex/llm/prompts/discovery/roots.md</code>, the discovery README, the worker-count hints in <code>compute.py</code>, and the progress comments. <strong>Done when</strong> no caller of a retired subcommand remains outside the files
       the fragment lists, and the tests that drove the six commands pass through the bare command.
+    </p>
+    <p>
+      <strong>Node</strong> <code>wiki-ingest-threshold-setting</code>, role implement, 0.5 h. The wiki stage read its
+      <code>--min-score</code> default from <code>imas_codex.discovery.wiki.graph_ops</code> at module level, which loads the
+      whole wiki engine when the CLI imports. Under <code>pytest -n 8 tests/wiki tests/cli/test_discover_wiki_stage.py</code>
+      that import order reaches a partially initialised <code>imas_codex.discovery.base.supervision</code> and errors 13 tests,
+      while each file passes serially. The threshold moves to a getter in the leaf settings module,
+      <code>get_wiki_ingest_threshold()</code> in <code>imas_codex/settings.py</code>, read from
+      <code>IMAS_CODEX_WIKI_INGEST_THRESHOLD</code>, then <code>[discovery].wiki-ingest-threshold</code>, then 0.16, as
+      <code>get_code_ingest_threshold()</code> does for code. <code>cli/discover/wiki.py</code> reads the getter, and its help
+      prints the number. The wiki engine's own constant in <code>graph_ops.py</code> is repointed at the getter by the session
+      that owns that engine. Write paths: <code>imas_codex/settings.py</code>, <code>imas_codex/cli/discover/wiki.py</code>,
+      <code>tests/cli/test_discover_wiki_stage.py</code>, <code>tests/test_settings_wiki_ingest.py</code> and its fragment.
+      <strong>Done when</strong> <code>uv run --no-sync pytest -n 8 -p no:cacheprovider tests/wiki tests/cli/test_discover_wiki_stage.py tests/test_settings_wiki_ingest.py tests/test_cli.py</code>
+      reports no errors, a subprocess test shows <code>import imas_codex.cli.discover</code> leaves
+      <code>imas_codex.discovery.wiki</code> out of <code>sys.modules</code>, and the getter's default, environment override and
+      help text are pinned.
     </p>
     <p>
       <strong>Node</strong> <code>sequence-runner</code>, role implement, 2 h, after the six folds, built on
