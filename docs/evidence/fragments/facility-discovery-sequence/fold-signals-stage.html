@@ -1,0 +1,47 @@
+<section>
+  <h2 id="fold-signals-stage">Fold the signals domain behind a stage function</h2>
+  <p id="fold-signals-stage-scope">
+    Extracts <code>run_signals_stage(facility, options)</code> and refactors it to a frozen
+    <code>SignalsStageOptions</code>, leaving the click command as a thin wrapper
+    that builds options and calls the stage. Write paths:
+    <code>imas_codex/cli/discover/signals.py</code>,
+    <code>tests/cli/test_discover_signals_stage.py</code>.
+  </p>
+
+  <h3 id="fold-signals-stage-surface">Settled option surface</h3>
+  <ul id="fold-signals-stage-mapping">
+    <li><code>--scan-only</code> → <code>scan_only</code> (engine
+      <code>discover_only=True</code>): the seeding half only.</li>
+    <li><code>--flush</code> → <code>flush</code> (engine
+      <code>enrich_only=True</code>): the draining half only. Replaces
+      <code>--enrich-only</code>, retained as a deprecated visible alias so the
+      old command tests keep passing before the runner lands.</li>
+    <li><code>--topic TEXT</code> → <code>topic</code>, passed to the engine's
+      free-text <code>focus=</code> argument: the steer the old free-text
+      <code>--focus</code> reached.</li>
+    <li><code>--limit N</code> → <code>limit</code> (engine
+      <code>signal_limit</code>): caps items. Replaces <code>--signal-limit</code>
+      and <code>-n</code>.</li>
+    <li><code>--focus ITEMS</code> → <code>focus</code>: refused with a message
+      naming <code>facility-discovery-sequence</code> section 7, because the
+      signals claim query takes no item filter yet.</li>
+    <li><code>--reenrich</code> deleted (deprecated alias).</li>
+  </ul>
+
+  <h3 id="fold-signals-stage-evidence">Evidence</h3>
+  <ul id="fold-signals-stage-gate">
+    <li><code>uv run --no-sync pytest tests/cli/test_discover_signals_stage.py
+      tests/cli/test_tools_status_environment.py
+      tests/discovery/test_signals_pipeline.py::TestCLISignals -p
+      no:cacheprovider</code>: 21 passed, exit 0. The new file contributes 11
+      tests showing scan-only and flush each select their half of the engine,
+      <code>--topic</code> reaches the engine's free-text steer,
+      <code>--limit</code> caps items, <code>--focus</code> is refused naming
+      section 7, and the wrapper builds the frozen options and calls the stage;
+      the old command tests (help, unknown scanner, scan-only routing,
+      environment refusal) still pass.</li>
+    <li>Negative control: the stage is mutated to ignore <code>--flush</code>
+      (engine <code>enrich_only=False</code>); the two <code>--flush</code>
+      tests fail, exit 1. Log <code>negative_control_flush.log</code>.</li>
+  </ul>
+</section>
