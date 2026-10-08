@@ -49,6 +49,7 @@ import os
 import re
 import sys
 from collections import Counter
+from pathlib import Path
 
 # One record of the PID-keyed block that eddbreadOne returns for an empty
 # PID: PID="1651 A001" NAME="Data acquisition start time" UNIT="ms" DATA="-15000"
@@ -95,6 +96,9 @@ def main():
             signals.extend(rows)
         elif database == "LCDB":
             rows, attempt = enumerate_lcdb(config)
+            signals.extend(rows)
+        elif database == "MBDB":
+            rows, attempt = enumerate_mbdb(config)
             signals.extend(rows)
         else:
             attempt = attempt_database(database, ref_shot, config)
@@ -401,6 +405,99 @@ def enumerate_lcdb(config):
     }
 
 
+def _mbdb_data_names(lib):
+    """Read the opened case's names through the MBDB library catalogue API."""
+    import ctypes
+
+    count = ctypes.c_int()
+    width = ctypes.c_int()
+    code = lib.mbdbDatanmCount(ctypes.byref(count), ctypes.byref(width))
+    if code != 0:
+        return [], code
+    if count.value < 0 or count.value > 10000 or width.value < 0 or width.value > 1024:
+        return [], 1
+    names = ((ctypes.c_char * (width.value + 1)) * count.value)()
+    kinds = (ctypes.c_char * count.value)()
+    code = lib.mbdbDatanmList(
+        ctypes.byref(count), width, ctypes.byref(names), ctypes.byref(kinds)
+    )
+    if code != 0:
+        return [], code
+    return [
+        (ctypes.cast(name, ctypes.c_char_p).value.decode("utf-8"), kinds[i].decode())
+        for i, name in enumerate(names)
+    ], 0
+
+
+def enumerate_mbdb(config):
+    """Open every readable case file and enumerate its field names."""
+    api_path = config.get("mbdb_api_path", "/analysis/src/mbdb")
+    root_base = config.get("mbdb_root", "/analysis_DB/MBDB")
+    route = "mbdbSetDirectory('mbdb'); mbdbROpen(owner, case, file category)"
+    try:
+        sys.path.insert(0, api_path)
+        from mbdbWrapper import mbdbWrapper
+
+        db = mbdbWrapper(config.get("mbdb_lib_path", "/analysis/lib/libmbdb.so"))
+        candidates = sorted(Path(root_base).glob("*/??/????/??????/mbdb/*.ldb"))
+        set_ok, set_result = db.mbdbSetDirectory("mbdb")
+        if not set_ok:
+            return [], {
+                "database": "MBDB",
+                "call": route,
+                "return_code": set_result.get("irtn", 1),
+            }
+    except Exception as exc:
+        return [], {
+            "database": "MBDB",
+            "call": route,
+            "return_code": 1,
+            "error": str(exc)[:200],
+        }
+
+    found = {}
+    calls = []
+    for path in candidates:
+        root = str(path.parents[4])
+        owner = path.parents[4].name
+        case = int(path.parents[1].name)
+        category = path.name.removesuffix(".ldb")
+        ok, response = db.mbdbROpen(mbdbroot=root, caseno=case, category=category)
+        code = response.get("irtn", 0 if ok else 1)
+        calls.append(
+            {"root": root, "case": case, "category": category, "return_code": code}
+        )
+        if not ok:
+            continue
+        try:
+            names, code = _mbdb_data_names(db.mbdb)
+            if code != 0:
+                calls[-1]["name_return_code"] = code
+                continue
+            for name, kind in names:
+                found[(owner, case, category, name)] = {
+                    "database": "MBDB",
+                    "category": f"MBDB/{owner}/{case}/{category}",
+                    "file_category": category,
+                    "data_name": name,
+                    "data_kind": kind,
+                    "root": root,
+                    "case": case,
+                }
+        finally:
+            db.mbdbRClose()
+    rows = list(found.values())
+    return rows, {
+        "database": "MBDB",
+        "call": route,
+        "return_code": 0 if rows else (calls[0]["return_code"] if calls else 2),
+        "count": len(rows),
+        "candidate_files": len(candidates),
+        "calls": calls,
+        "field_list_call": "mbdbDatanmCount(); mbdbDatanmList() after a successful open",
+    }
+
+
 def attempt_database(database, ref_shot, config):
     """Record a bounded catalogue probe when no usable channel list is exposed."""
     call = "wrapper import"
@@ -410,22 +507,19 @@ def attempt_database(database, ref_shot, config):
             from pmdb_wrapper import pmdbWrapper
 
             db = pmdbWrapper(config.get("pmdb_lib_path", "/analysis/lib/libpmdb.so"))
-            ok, response = db.plantdread(cat="", dname="", t1="", t2="")
-            call = "plantdread(cat='', dname='', t1='', t2='')"
-            code = (response or {}).get("irc", 0 if ok else 1)
-        elif database == "MBDB":
-            sys.path.insert(0, config.get("mbdb_api_path", "/analysis/src/mbdb"))
-            from mbdbWrapper import mbdbWrapper
-
-            root = config.get("mbdb_root", "/analysis_DB/MBDB/public")
-            db = mbdbWrapper(config.get("mbdb_lib_path", "/analysis/lib/libmbdb.so"))
-            ok, response = db.mbdbROpen(
-                mbdbroot=root, caseno=int(ref_shot[1:]), category="MBEQ"
+            ok, response = db.plantdread(cat="*", dname="*", t1="", t2="")
+            header_ok, header = db.planthread(
+                cat="*", dname="*", t1="", descriptor="", count=1
             )
-            if ok:
-                db.mbdbRClose()
-            call = f"mbdbROpen(mbdbroot='{root}', caseno={int(ref_shot[1:])}, category='MBEQ')"
-            code = (response or {}).get("irtn", 0 if ok else 1)
+            call = "plantdread(cat='*', dname='*', t1='', t2=''); planthread(cat='*', dname='*', t1='', descriptor='', count=1)"
+            code = (response or {}).get("irc", 0 if ok else 1)
+            return {
+                "database": database,
+                "call": call,
+                "return_code": code,
+                "header_return_code": (header or {}).get("irc", 0 if header_ok else 1),
+                "reason": "the native wrapper exposes keyed reads but no catalogue method",
+            }
         elif database == "EQDB":
             path = config.get("eqdb_root", "/analysis_DB/EQDB")
             with os.scandir(path) as entries:

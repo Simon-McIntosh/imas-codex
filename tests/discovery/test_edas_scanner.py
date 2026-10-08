@@ -12,6 +12,7 @@ import json
 import re
 import sys
 from io import StringIO
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
@@ -20,6 +21,7 @@ from imas_codex.graph.models import FacilitySignal, SignalDataClass
 from imas_codex.remote.scripts.enumerate_edas import (
     attempt_database,
     enumerate_lcdb,
+    enumerate_mbdb,
     enumerate_uddb,
     main as enumerate_main,
 )
@@ -61,6 +63,81 @@ CONFIG = {
 
 
 class TestConfiguredDatabases:
+    def test_mbdb_opened_case_exposes_native_field_list(self, monkeypatch):
+        class CaseCatalogue:
+            def __init__(self, path):
+                self.mbdb = object()
+
+            def mbdbSetDirectory(self, name):
+                assert name == "mbdb"
+                return True, {"irtn": 0}
+
+            def mbdbROpen(self, **kwargs):
+                assert kwargs["caseno"] == 12345
+                assert kwargs["category"] == "data.t001"
+                return True, {"irtn": 0}
+
+            def mbdbRClose(self):
+                return True, {"irtn": 0}
+
+        monkeypatch.setitem(
+            sys.modules, "mbdbWrapper", SimpleNamespace(mbdbWrapper=CaseCatalogue)
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas.Path.glob",
+            lambda self, pattern: [
+                Path("/analysis_DB/MBDB/owner/01/0123/012345/mbdb/data.t001.ldb")
+            ],
+        )
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas._mbdb_data_names",
+            lambda lib: ([("PSI", "T")], 0),
+        )
+        rows, attempt = enumerate_mbdb({})
+        assert attempt["return_code"] == 0
+        assert attempt["count"] == 1
+        assert rows[0]["category"] == "MBDB/owner/12345/data.t001"
+        assert rows[0]["data_name"] == "PSI"
+
+    async def test_mbdb_signal_keeps_case_and_field(self):
+        fixture = {
+            "signals": [
+                {
+                    "database": "MBDB",
+                    "category": "MBDB/owner/12345/data.t001",
+                    "file_category": "data.t001",
+                    "data_name": "PSI",
+                    "data_kind": "T",
+                    "case": 12345,
+                    "root": "/analysis_DB/MBDB/owner",
+                }
+            ],
+            "categories": [],
+            "ncats": 0,
+        }
+        remote = AsyncMock(return_value=json.dumps(fixture))
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await EDASScanner().scan("jt-60sa", "nakasvr26", CONFIG)
+        signal = result.signals[0]
+        assert signal.id == "jt-60sa:general/mbdb_owner_12345_data.t001_psi"
+        assert signal.data_source_name == "MBDB"
+        assert signal.data_source_path == "owner/12345/data.t001/PSI"
+        assert signal.data_class == SignalDataClass.time_series
+        check_remote = AsyncMock(
+            return_value=json.dumps({"results": [{"id": signal.id, "success": True}]})
+        )
+        with patch("imas_codex.remote.executor.async_run_python_script", check_remote):
+            checked = await EDASScanner().check(
+                "jt-60sa", "nakasvr26", [signal], CONFIG
+            )
+        sent = check_remote.call_args.args[1]["signals"][0]
+        assert (sent["database"], sent["case"], sent["category"]) == (
+            "MBDB",
+            12345,
+            "data.t001",
+        )
+        assert checked[0]["valid"] is True
+
     def test_lcdb_wrapper_catalogue_is_enumerated(self, monkeypatch):
         class AnalysisCatalogue:
             def lcdb_shot(self, **kwargs):
@@ -138,27 +215,19 @@ class TestConfiguredDatabases:
                 assert path.endswith("libpmdb.so")
 
             def plantdread(self, **kwargs):
-                assert kwargs["cat"] == ""
+                assert kwargs["cat"] == "*"
                 return False, {"irc": 301}
 
-        class LargeAnalysisCatalogue:
-            def __init__(self, path):
-                assert path.endswith("libmbdb.so")
-
-            def mbdbROpen(self, **kwargs):
-                assert kwargs["category"] == "MBEQ"
-                return False, {"irtn": 1012}
+            def planthread(self, **kwargs):
+                assert kwargs["dname"] == "*"
+                return False, {"irc": 301}
 
         monkeypatch.setitem(
             sys.modules, "pmdb_wrapper", SimpleNamespace(pmdbWrapper=PlantCatalogue)
         )
-        monkeypatch.setitem(
-            sys.modules,
-            "mbdbWrapper",
-            SimpleNamespace(mbdbWrapper=LargeAnalysisCatalogue),
-        )
-        assert attempt_database("PMDB", "E101173", {})["return_code"] == 301
-        assert attempt_database("MBDB", "E101173", {})["return_code"] == 1012
+        plant_attempt = attempt_database("PMDB", "E101173", {})
+        assert plant_attempt["return_code"] == 301
+        assert plant_attempt["header_return_code"] == 301
         with patch(
             "imas_codex.remote.scripts.enumerate_edas.os.scandir",
             side_effect=FileNotFoundError(2, "No such file or directory"),

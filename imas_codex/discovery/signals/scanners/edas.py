@@ -235,6 +235,36 @@ class EDASScanner:
                 )
                 continue
 
+            if raw.get("database") == "MBDB":
+                _, owner, case, source_category = raw["category"].split("/", 3)
+                kind = raw.get("data_kind")
+                signals.append(
+                    FacilitySignal(
+                        id=f"{facility}:general/mbdb_{owner}_{case}_{source_category}_{dname}".lower(),
+                        facility_id=facility,
+                        status=FacilitySignalStatus.discovered,
+                        physics_domain="general",
+                        name=f"MBDB/{owner}/{case}/{source_category}/{dname}",
+                        accessor=(
+                            f"mbdbRPoint({dname!r})"
+                            if kind == "P"
+                            else f"mbdbRTimes({dname!r}, t1, t2)"
+                        ),
+                        data_source_name="MBDB",
+                        data_source_path=f"{owner}/{case}/{source_category}/{dname}",
+                        description=f"MBDB {source_category} {dname} from {owner} case {case}",
+                        data_class=(
+                            SignalDataClass.one_point
+                            if kind == "P"
+                            else SignalDataClass.time_series
+                            if kind == "T"
+                            else None
+                        ),
+                        discovery_source="edas",
+                    )
+                )
+                continue
+
             # A PID-keyed one-point row is its own signal group: EDDB addresses
             # it by the nine-character PID No. rather than by the catalogue
             # data name, so the PID is the signal's name within the scheme.
@@ -366,6 +396,19 @@ class EDASScanner:
         for s in signals:
             source = s.data_source_path or s.name or ""
             parts = source.split("/")
+            if s.data_source_name == "MBDB" and len(parts) == 4:
+                batch.append(
+                    {
+                        "id": s.id,
+                        "database": "MBDB",
+                        "owner": parts[0],
+                        "case": int(parts[1]),
+                        "category": parts[2],
+                        "data_name": parts[3],
+                        "data_class": getattr(s.data_class, "value", s.data_class),
+                    }
+                )
+                continue
             if s.data_source_name == "LCDB" and len(parts) == 3:
                 batch.append(
                     {
@@ -406,6 +449,9 @@ class EDASScanner:
                     "lib_path": lib_path,
                     "lcdb_api_path": config.get("lcdb_api_path"),
                     "lcdb_root": config.get("lcdb_root"),
+                    "mbdb_api_path": config.get("mbdb_api_path"),
+                    "mbdb_lib_path": config.get("mbdb_lib_path"),
+                    "mbdb_root": config.get("mbdb_root"),
                 },
                 ssh_host=ssh_host,
                 timeout=180,

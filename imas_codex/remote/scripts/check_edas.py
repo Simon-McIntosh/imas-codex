@@ -122,6 +122,45 @@ def main():
     results = []
     for sig in signals:
         try:
+            if sig.get("database") == "MBDB":
+                sys.path.insert(0, config.get("mbdb_api_path") or "/analysis/src/mbdb")
+                from mbdbWrapper import mbdbWrapper
+
+                db = mbdbWrapper(
+                    config.get("mbdb_lib_path") or "/analysis/lib/libmbdb.so"
+                )
+                base = config.get("mbdb_root") or "/analysis_DB/MBDB"
+                db.mbdbSetDirectory("mbdb")
+                opened, response = db.mbdbROpen(
+                    mbdbroot=f"{base}/{sig['owner']}",
+                    caseno=int(sig["case"]),
+                    category=sig["category"],
+                )
+                if not opened:
+                    results.append(
+                        {
+                            "id": sig["id"],
+                            "success": False,
+                            "error": f"MBDB open failed (irtn={response.get('irtn')})",
+                        }
+                    )
+                    continue
+                try:
+                    if sig.get("data_class") == "one_point":
+                        ok, _value = db.mbdbRPoint(sig["data_name"])
+                    else:
+                        ok, _value = db.mbdbRTimes(sig["data_name"], "0", "0.01")
+                finally:
+                    db.mbdbRClose()
+                results.append(
+                    {
+                        "id": sig["id"],
+                        "success": bool(ok),
+                        "dtype": "analysis" if ok else None,
+                        "error": None if ok else "MBDB value unavailable",
+                    }
+                )
+                continue
             if sig.get("database") == "LCDB":
                 sys.path.insert(
                     0, config.get("lcdb_api_path") or "/analysis/src/lcdbWrapper"
