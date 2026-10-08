@@ -97,6 +97,10 @@ def main():
             attempt = attempt_database(database, ref_shot, config)
         attempts.append(attempt)
 
+    if databases == ["EDDB"] and attempts[0]["return_code"] != 0:
+        print(json.dumps({"error": "EDDB catalogue unavailable", "attempts": attempts}))
+        return
+
     counts = Counter(row["category"] for row in signals)
     print(
         json.dumps(

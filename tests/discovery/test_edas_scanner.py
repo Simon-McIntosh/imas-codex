@@ -11,12 +11,17 @@ from __future__ import annotations
 import json
 import re
 import sys
+from io import StringIO
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph.models import FacilitySignal, SignalDataClass
-from imas_codex.remote.scripts.enumerate_edas import enumerate_uddb
+from imas_codex.remote.scripts.enumerate_edas import (
+    attempt_database,
+    enumerate_uddb,
+    main as enumerate_main,
+)
 
 # Two catalogue rows covering the two classes the scanner branches on:
 # a time series with a shot range and no PID, and a one-point row with a PID.
@@ -55,6 +60,64 @@ CONFIG = {
 
 
 class TestConfiguredDatabases:
+    def test_eddb_only_failure_is_reported_as_error(self, monkeypatch, capsys):
+        monkeypatch.setattr(
+            "imas_codex.remote.scripts.enumerate_edas.enumerate_eddb",
+            lambda *args: (
+                [],
+                [],
+                [{"database": "EDDB", "call": "eddbOpen()", "return_code": 1}],
+            ),
+        )
+        monkeypatch.setattr(
+            sys,
+            "stdin",
+            StringIO(json.dumps({"ref_shot": "E101173", **CONFIG})),
+        )
+        enumerate_main()
+        assert "error" in json.loads(capsys.readouterr().out)
+
+    def test_other_database_attempts_keep_wrapper_return_codes(self, monkeypatch):
+        class PlantCatalogue:
+            def __init__(self, path):
+                assert path.endswith("libpmdb.so")
+
+            def plantdread(self, **kwargs):
+                assert kwargs["cat"] == ""
+                return False, {"irc": 301}
+
+        class AnalysisCatalogue:
+            def lcdb_shot(self, **kwargs):
+                return False, []
+
+        class LargeAnalysisCatalogue:
+            def __init__(self, path):
+                assert path.endswith("libmbdb.so")
+
+            def mbdbROpen(self, **kwargs):
+                assert kwargs["category"] == "MBEQ"
+                return False, {"irtn": 1012}
+
+        monkeypatch.setitem(
+            sys.modules, "pmdb_wrapper", SimpleNamespace(pmdbWrapper=PlantCatalogue)
+        )
+        monkeypatch.setitem(
+            sys.modules, "lcdbWrapper", SimpleNamespace(LcdbWrapper=AnalysisCatalogue)
+        )
+        monkeypatch.setitem(
+            sys.modules,
+            "mbdbWrapper",
+            SimpleNamespace(mbdbWrapper=LargeAnalysisCatalogue),
+        )
+        assert attempt_database("PMDB", "E101173", {})["return_code"] == 301
+        assert attempt_database("LCDB", "E101173", {})["return_code"] == 1
+        assert attempt_database("MBDB", "E101173", {})["return_code"] == 1012
+        with patch(
+            "imas_codex.remote.scripts.enumerate_edas.os.scandir",
+            side_effect=FileNotFoundError(2, "No such file or directory"),
+        ):
+            assert attempt_database("EQDB", "E101173", {})["return_code"] == 2
+
     def test_uddb_table_rows_are_emitted(self, monkeypatch):
         class RawCatalogue:
             def __init__(self, path):

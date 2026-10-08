@@ -1,0 +1,91 @@
+<section id="all-edas-databases-landing">
+  <h2 id="all-edas-databases-heading">EDAS database catalogue coverage</h2>
+  <p id="all-edas-databases-summary">The native EDDB category-table call returned 73 categories; all 73 produced rows at E101173. The scanner emitted 6,298 EDDB signals and 188 UDDB raw channel signals. The graph contains 6,298 existing <code>edas</code> signals and 188 new <code>UDDB</code> signals after the landing; only UDDB rows were written, preserving the existing EDDB rows and ids. Signal enrichment spend was USD 0.00.</p>
+  <p id="all-edas-databases-control">Before the change, a scanner test requesting EDDB and UDDB failed with <code>KeyError: 'databases'</code>, because the scanner did not pass that list to the remote script. A separate failure probe found that <code>eddbOpen()</code> returning false produced an empty success record; the scanner now receives an error for that case. The repaired test file passed 13 tests. A mutation returning zero UDDB rows produced one failing test, <code>TestConfiguredDatabases::test_uddb_table_rows_are_emitted</code> (exit 1).</p>
+  <p id="all-edas-databases-attempt-context">The calls below are bounded catalogue probes on the analysis server, with their wrapper return codes. A zero landed count for PMDB, LCDB, MBDB or EQDB means this probe did not yield a channel catalogue; it does not assert that the database contains no data. EQDB field signals await a working client read route.</p>
+  <table id="all-edas-databases-attempts"><thead><tr><th>Database</th><th>Signals landed</th><th>Call</th><th>Return code</th></tr></thead><tbody>
+    <tr><td>EDDB</td><td>6,298</td><td><code>eddbreadCatTable(); eddbreadTable(&#x27;E101173&#x27;, category)</code></td><td>0</td></tr>
+    <tr><td>UDDB</td><td>188</td><td><code>uddbreadTable()</code></td><td>0</td></tr>
+    <tr><td>PMDB</td><td>0</td><td><code>plantdread(cat=&#x27;&#x27;, dname=&#x27;&#x27;, t1=&#x27;&#x27;, t2=&#x27;&#x27;)</code></td><td>301</td></tr>
+    <tr><td>LCDB</td><td>0</td><td><code>lcdb_shot(root=&#x27;/analysis_DB/EDASDB/public&#x27;)</code></td><td>1</td></tr>
+    <tr><td>MBDB</td><td>0</td><td><code>mbdbROpen(mbdbroot=&#x27;/analysis_DB/MBDB/public&#x27;, caseno=101173, category=&#x27;MBEQ&#x27;)</code></td><td>1012</td></tr>
+    <tr><td>EQDB</td><td>0</td><td><code>scandir(&#x27;/analysis_DB/EQDB&#x27;)</code></td><td>2</td></tr>
+  </tbody></table>
+  <p id="all-edas-databases-coverage">Categories in the server category table but absent at the reference shot: none. The category-table result has 73 names and all 73 are present in the EDDB row counts below. FAME is an EDDB category with 100 rows, rather than a separate source in this scan.</p>
+  <table id="all-edas-databases-categories"><thead><tr><th>EDDB category</th><th>Signals</th></tr></thead><tbody>
+    <tr><td>CAM</td><td>37</td></tr>
+    <tr><td>CO2</td><td>6</td></tr>
+    <tr><td>CS1</td><td>11</td></tr>
+    <tr><td>CS2</td><td>11</td></tr>
+    <tr><td>CS3</td><td>11</td></tr>
+    <tr><td>CS4</td><td>11</td></tr>
+    <tr><td>Cryo</td><td>2</td></tr>
+    <tr><td>CryoCP</td><td>9</td></tr>
+    <tr><td>CryoCT</td><td>57</td></tr>
+    <tr><td>CryoCTB</td><td>379</td></tr>
+    <tr><td>CryoDist</td><td>59</td></tr>
+    <tr><td>CryoHRS</td><td>704</td></tr>
+    <tr><td>CryoIL</td><td>286</td></tr>
+    <tr><td>CryoMC</td><td>17</td></tr>
+    <tr><td>CryoMCIL</td><td>105</td></tr>
+    <tr><td>CryoMag</td><td>413</td></tr>
+    <tr><td>CryoTS</td><td>121</td></tr>
+    <tr><td>DB</td><td>6</td></tr>
+    <tr><td>DCSV</td><td>753</td></tr>
+    <tr><td>DHC</td><td>272</td></tr>
+    <tr><td>DSMS</td><td>8</td></tr>
+    <tr><td>ECH</td><td>119</td></tr>
+    <tr><td>EF1</td><td>2</td></tr>
+    <tr><td>EF2</td><td>2</td></tr>
+    <tr><td>EF3</td><td>9</td></tr>
+    <tr><td>EF4</td><td>9</td></tr>
+    <tr><td>EF5</td><td>2</td></tr>
+    <tr><td>EF6</td><td>2</td></tr>
+    <tr><td>FAME</td><td>100</td></tr>
+    <tr><td>GAS</td><td>10</td></tr>
+    <tr><td>GAU</td><td>11</td></tr>
+    <tr><td>GLW</td><td>12</td></tr>
+    <tr><td>LFPPCC</td><td>1</td></tr>
+    <tr><td>MAG</td><td>18</td></tr>
+    <tr><td>MDAC</td><td>274</td></tr>
+    <tr><td>MMSYS</td><td>47</td></tr>
+    <tr><td>N2GAS</td><td>22</td></tr>
+    <tr><td>OIS</td><td>54</td></tr>
+    <tr><td>PRB</td><td>20</td></tr>
+    <tr><td>PSC</td><td>494</td></tr>
+    <tr><td>PSRC</td><td>325</td></tr>
+    <tr><td>PSSCfst</td><td>50</td></tr>
+    <tr><td>QMS</td><td>650</td></tr>
+    <tr><td>SPC</td><td>72</td></tr>
+    <tr><td>SXR</td><td>7</td></tr>
+    <tr><td>TC</td><td>31</td></tr>
+    <tr><td>TCIFW</td><td>16</td></tr>
+    <tr><td>TCTIU</td><td>1</td></tr>
+    <tr><td>TCUD</td><td>28</td></tr>
+    <tr><td>TF</td><td>63</td></tr>
+    <tr><td>TF01</td><td>24</td></tr>
+    <tr><td>TF02</td><td>24</td></tr>
+    <tr><td>TF03</td><td>24</td></tr>
+    <tr><td>TF04</td><td>24</td></tr>
+    <tr><td>TF05</td><td>24</td></tr>
+    <tr><td>TF06</td><td>24</td></tr>
+    <tr><td>TF07</td><td>24</td></tr>
+    <tr><td>TF08</td><td>24</td></tr>
+    <tr><td>TF09</td><td>24</td></tr>
+    <tr><td>TF10</td><td>24</td></tr>
+    <tr><td>TF11</td><td>24</td></tr>
+    <tr><td>TF12</td><td>24</td></tr>
+    <tr><td>TF13</td><td>24</td></tr>
+    <tr><td>TF14</td><td>24</td></tr>
+    <tr><td>TF15</td><td>24</td></tr>
+    <tr><td>TF16</td><td>24</td></tr>
+    <tr><td>TF17</td><td>24</td></tr>
+    <tr><td>TF18</td><td>24</td></tr>
+    <tr><td>TFC</td><td>4</td></tr>
+    <tr><td>TFTIME</td><td>8</td></tr>
+    <tr><td>UFPPCC</td><td>1</td></tr>
+    <tr><td>VV</td><td>92</td></tr>
+    <tr><td>VVGS</td><td>32</td></tr>
+  </tbody></table>
+  <p id="all-edas-databases-limits">The direct category-table API was compared with shot-qualified EDDB enumeration; the underlying <code>db_pdcattable</code> store was not read separately. PMDB returned 301 from an empty-name read, LCDB returned false from the public-root shot list, MBDB returned 1012 opening the candidate MBEQ case, and the candidate EQDB directory returned operating-system code 2. Those routes need database-specific catalogue or client access evidence before signals can be formed.</p>
+</section>
