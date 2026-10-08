@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log (baseline_suite empty at manifest.md:21), so the added-failure count was not taken; after_suite records failure_count 0 over the focused scanner file (32 passed), and the independent re-run of that gate at 835784127 also returned 32 passed, EXIT=0",
+  "backend": "local",
+  "base_log_revision": "7655ed9299035a88f31a7b52486b42833abbee23",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/signals/scanners/edas.py:297 (EDASScanner.scan applies _normalise_dates to the facility config before the remote JSON payload is built)"
+  ],
+  "completed_at": "2026-10-08T14:18:00.524Z",
+  "dispatched_at": "2026-10-08T14:08:56Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/route-status-after.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the plan section's done-when (every UDDB and LCDB signal has left discovered or carries a recorded reason) is not met by this node \u2014 after the scoped scan LCDB has 8,253 discovered and 2 underspecified and UDDB has 189 discovered, because the enrich/check/embed drain is deferred to the signals-stage owner; the scan wrote the route bindings but no signal left discovered."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/final.txt",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: the original exit-255 failure retained no stderr, so its cause is inferred from a separately reproduced 255 (the ssh config sandbox fault, ssh-failure-full-stderr.log) rather than proven for that specific failure; the node records this limitation itself."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite is left empty, so the harness derives added_failure_count as unmeasured rather than a number for this run."
+    }
+  ],
+  "head_log_revision": "835784127d1f7c45745ae5918f03180503f07446",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "one production call site reaches the changed code: EDASScanner.scan at edas.py:297 normalises the facility config before building the remote payload; the config change is data (nine observed_on strings in jt-60sa.yaml) consumed at that same scan path.",
+    "diff": "read commit by commit against 7655ed9299035a88f31a7b52486b42833abbee23; a4848492c quotes the nine observed_on values in jt-60sa.yaml, adds _normalise_dates at edas.py:44 and applies it at edas.py:297, and adds test_real_facility_payload_serializes_observation_dates at tests/discovery/test_edas_scanner.py:82; 835784127 adds the route-counts fragment.",
+    "done_when": "the node's charge (plan \u00a755 node 3) is to make the dates durable as strings, diagnose the exit 255 from full remote stderr and fix the cause with a test that serialises the real jt-60sa.yaml payload, and have a scoped scan persist the UDDB and LCDB route bindings; all four hold \u2014 jt-60sa.yaml:73 quotes the dates, edas.py:297 normalises before transport, tests/discovery/test_edas_scanner.py:82 loads the real config, and routes-after.json records UDDB 189 and LCDB 8,469 bindings where routes-before.json had none. The section-level done-when (signals leaving discovered) is the drain, deferred to the stage owner \u2014 see the first finding.",
+    "goal": "the node's goal is to unblock the EDAS scan blocked by two faults on the merged latter config: unquoted YAML dates that load as datetime.date and fail JSON serialisation in the remote payload, and a remote exit 255; the fix quotes the config dates and adds _normalise_dates (edas.py:44) applied at edas.py:297, and the exit 255 is diagnosed as the ssh-config sandbox fault worked around with the wrapper.",
+    "manifest": "read; status complete, commits [a4848492c, 835784127], the tests line names both the focused scanner gate and the scoped scan, after_suite records failure_count 0 for the focused file, and baseline_suite is left empty at manifest.md:21.",
+    "write_paths": "the manifest declares imas_codex/config/facilities/jt-60sa.yaml, imas_codex/discovery/signals/scanners/edas.py, tests/discovery/test_edas_scanner.py and docs/evidence/fragments/jt60sa-discovery-completion/edas-scan-repair.html; git diff --stat 7655ed9..835784127 touches exactly those four files."
+  },
+  "justifications": {
+    "durability": "test_real_facility_payload_serializes_observation_dates loads the real jt-60sa.yaml (nine routes, all str) and drives EDASScanner().scan through a patched remote that json.dumps the payload, so restoring an unquoted date fails it (confirmed independently, EXIT=1); _normalise_dates recurses through dicts and lists, so a date anywhere in the nested config is covered, not only observed_on.",
+    "evidence": "I re-ran the focused scanner gate at 835784127 and got 32 passed with EXIT=0, matching after_suite; the reproduction pair is date-test-baseline.log (base 7655ed9, the real-config payload test fails, EXIT=1) and date-test-after.log (working tree) \u2014 and I independently confirmed the guard's sensitivity by unquoting one observed_on in a scratch copy, which flips the type from str to date and fails tests/discovery/test_edas_scanner.py:85. baseline_suite is empty so no suite-regression arm was measured, and the original exit-255 cause is inferred rather than proven.",
+    "fit": "the commits a4848492c and 835784127 use conventional fix(signals)/docs(discovery) subjects with bodies and carry no plan or section label.",
+    "goal_fidelity": "edas.py:297 normalises the config before the remote payload and jt-60sa.yaml quotes the nine observed_on values, matching the node's stated fix; the scoped scan then wrote UDDB and LCDB bindings (routes-after.json) where the graph had only EDDB before. The section-level drain was not performed, but the node declares that as the stage owner's.",
+    "reuse": "a search over imas_codex for a date-normalisation helper found no existing general utility (only scattered .isoformat() call sites), so _normalise_dates is the first owner of that capability in the scanner; it is a private module helper, not a duplicated framework.",
+    "scope_discipline": "git diff --stat 7655ed9299035a88f31a7b52486b42833abbee23..835784127d1f7c45745ae5918f03180503f07446 lists only jt-60sa.yaml, edas.py, tests/discovery/test_edas_scanner.py and the fragment, all inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to unblock the EDAS scan blocked by two faults on the merged latter config: unquoted YAML dates that load as datetime.date and fail JSON serialisation in the remote payload, and a remote exit 255; the fix quotes the config dates and adds _normalise_dates (edas.py:44) and applies it at edas.py:297, and the exit 255 is diagnosed as the ssh-config sandbox fault worked around with the wrapper.\nVERDICT done_when: the node's charge (plan \u00a755 node 3) is to make the dates durable as strings, diagnose the exit 255 from full remote stderr and fix the cause with a test that serialises the real jt-60sa.yaml payload, and have a scoped scan persist the UDDB and LCDB route bindings; all four hold \u2014 jt-60sa.yaml:73 quotes the dates, edas.py:297 normalises before transport, tests/discovery/test_edas_scanner.py:82 loads the real config, and routes-after.json records UDDB 189 and LCDB 8,469 bindings where routes-before.json had none. The section-level done-when (signals leaving discovered) is the drain, deferred to the stage owner.\nVERDICT write_paths: the manifest declares imas_codex/config/facilities/jt-60sa.yaml, imas_codex/discovery/signals/scanners/edas.py, tests/discovery/test_edas_scanner.py and docs/evidence/fragments/jt60sa-discovery-completion/edas-scan-repair.html; git diff --stat 7655ed9..835784127 touches exactly those four files.\nVERDICT manifest: read; status complete, commits [a4848492c, 835784127], the tests line names both the focused scanner gate and the scoped scan, after_suite records failure_count 0, and baseline_suite is left empty at manifest.md:21.\nVERDICT diff: read commit by commit against 7655ed9299035a88f31a7b52486b42833abbee23; a4848492c quotes the nine observed_on values in jt-60sa.yaml, adds _normalise_dates at edas.py:44 and applies it at edas.py:297, and adds test_real_facility_payload_serializes_observation_dates at tests/discovery/test_edas_scanner.py:82; 835784127 adds the route-counts fragment.\nCALL_SITES: imas_codex/discovery/signals/scanners/edas.py:297 (EDASScanner.scan applies _normalise_dates to the facility config before the remote JSON payload is built).\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: edas.py:297 normalises the config before the remote payload and jt-60sa.yaml quotes the nine observed_on values, matching the node's stated fix; the scoped scan then wrote UDDB and LCDB bindings (routes-after.json) where the graph had only EDDB before. The section-level drain was not performed, but the node declares that as the stage owner's.\nSCORE evidence: 16\nJUSTIFICATION evidence: I re-ran the focused scanner gate at 835784127 and got 32 passed with EXIT=0, matching after_suite; the reproduction pair is date-test-baseline.log (base 7655ed9, the real-config payload test fails, EXIT=1) and date-test-after.log (working tree) \u2014 and I independently confirmed the guard's sensitivity by unquoting one observed_on in a scratch copy, which flips the type from str to date and fails tests/discovery/test_edas_scanner.py:85. baseline_suite is empty so no suite-regression arm was measured, and the original exit-255 cause is inferred rather than proven.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 7655ed9299035a88f31a7b52486b42833abbee23..835784127d1f7c45745ae5918f03180503f07446 lists only jt-60sa.yaml, edas.py, tests/discovery/test_edas_scanner.py and the fragment, all inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: test_real_facility_payload_serializes_observation_dates loads the real jt-60sa.yaml (nine routes, all str) and drives EDASScanner().scan through a patched remote that json.dumps the payload, so restoring an unquoted date fails it (confirmed independently, EXIT=1); _normalise_dates recurses through dicts and lists, so a date anywhere in the nested config is covered, not only observed_on.\nSCORE fit: 20\nJUSTIFICATION fit: the commits a4848492c and 835784127 use conventional fix(signals)/docs(discovery) subjects with bodies and carry no plan or section label.\nSCORE reuse: 18\nJUSTIFICATION reuse: a search over imas_codex for a date-normalisation helper found no existing general utility (only scattered .isoformat() call sites), so _normalise_dates is the first owner of that capability in the scanner; it is a private module helper, not a duplicated framework.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/route-status-after.json:1 follow-on: the plan section's done-when (every UDDB and LCDB signal has left discovered or carries a recorded reason) is not met by this node \u2014 after the scoped scan LCDB has 8,253 discovered and 2 underspecified and UDDB has 189 discovered, because the enrich/check/embed drain is deferred to the signals-stage owner; the scan wrote the reroute bindings but no signal left discovered.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/final.txt:5 follow-on: the original exit-255 failure retained no stderr, so its cause is inferred from a separately reproduced 255 (the ssh config sandbox fault, ssh-failure-full-stderr.log) rather than proven for that specific failure; the node records this limitation itself.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T105454879301-edas-scan-repair/manifest.md:21 follow-on: baseline_suite is left empty, so the harness derives added_failure_count as unmeasured rather than a number for this run.",
+  "review_run_id": "r-20261008T140847099841-review-of-edas-scan-repair",
+  "reviewed_base_sha": "7655ed9299035a88f31a7b52486b42833abbee23",
+  "reviewed_head_sha": "835784127d1f7c45745ae5918f03180503f07446",
+  "reviewed_run_id": "r-20261008T105454879301-edas-scan-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 20,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T14:16:00.000000+00:00",
+  "total": 109,
+  "verdict": "SOUND WITH FINDINGS"
+}
