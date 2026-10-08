@@ -1,17 +1,17 @@
 <section id="edas-data-references">
   <h2 id="edas-data-references-title">EDAS references in stored JT-60SA code</h2>
   <table id="edas-data-references-counts">
-    <caption>Backfill of 3,307 stored CodeChunk texts; distinct chunks by reference type</caption>
+    <caption>Backfill of 3,667 stored CodeChunk texts; distinct chunks by type, de-duplicated in total</caption>
     <thead>
       <tr><th>Reference type</th><th>Chunks</th><th>Mentions</th><th>Resolved mentions</th></tr>
     </thead>
     <tbody>
-      <tr><td>EDDB</td><td>8</td><td>10</td><td>0</td></tr>
-      <tr><td>UDDB</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>EDDB</td><td>12</td><td>14</td><td>0</td></tr>
+      <tr><td>UDDB</td><td>5</td><td>5</td><td>5</td></tr>
       <tr><td>PMDB</td><td>0</td><td>0</td><td>0</td></tr>
       <tr><td>LCDB</td><td>0</td><td>0</td><td>0</td></tr>
       <tr><td>MBDB</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th>Total</th><th>8 (0.24% of chunks)</th><th>10</th><th>0 (0%)</th></tr>
+      <tr><th>Total</th><th>15 (0.41% of chunks)</th><th>19</th><th>5 (26.3%)</th></tr>
     </tbody>
   </table>
   <table id="edas-data-references-routing">
@@ -31,6 +31,7 @@
     <tbody>
       <tr><th>Catalog lookup positive control</th><td>CAM/DivIRmP15R0: 1 FacilitySignal</td></tr>
       <tr><th>Extracted TMS/neyag exact lookup</th><td>0 FacilitySignal</td></tr>
+      <tr><th>Resolved UDDB control</th><td>5 chunks reading 2842UA001 link to UDDB/2842UA001</td></tr>
       <tr><th>Code search for TMS neyag</th><td>Matched EDAS reading chunks and rendered <code>edas_eddb: TMS/neyag</code></td></tr>
       <tr><th>Graph verification</th><td>Live rollback transaction: 1 passed; missing IDS root refused</td></tr>
       <tr><th>Config routing gate</th><td>All 4 public facility configs selected their declared reference handlers</td></tr>
