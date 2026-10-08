@@ -184,6 +184,7 @@ def test_command_is_a_thin_wrapper_that_builds_the_options(monkeypatch) -> None:
     assert options.limit == 7
     assert options.cost_limit == 1.5
     assert options.topic == "equilibrium"
+    assert options.min_score == DocumentsOptions().min_score
     assert options.scan_only is True
     assert options.flush is False
 

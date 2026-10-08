@@ -783,9 +783,7 @@ def run_sequence(
 @click.option(
     "--min-score",
     type=float,
-    default=get_wiki_ingest_threshold(),
-    show_default=True,
-    help="Minimum wiki ingest relevance score",
+    help=f"Minimum wiki ingest relevance score (wiki default: {get_wiki_ingest_threshold():g})",
 )
 @click.option("--triage-batch-size", type=int)
 @click.option("--rejudge-stale", is_flag=True)
