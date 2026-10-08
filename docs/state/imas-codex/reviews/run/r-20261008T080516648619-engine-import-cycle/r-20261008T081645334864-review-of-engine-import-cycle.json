@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from after_suite alone: the head suite at 0ab6af8e has zero failures (review-head-wiki-suite.log), so zero failures were added; the reviewed manifest names no base suite arm, and the reviewer's own base suite at 6864721220 gave 13 errors, all cleared at the head",
+  "backend": "local",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/discovery/base/supervision.py:57",
+    "imas_codex/discovery/signals/parallel.py:61",
+    "imas_codex/cli/logging.py:41",
+    "imas_codex/standard_names/review/pipeline.py:257"
+  ],
+  "completed_at": "2026-10-08T08:38:19.409Z",
+  "dispatched_at": "2026-10-08T08:16:58Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest leaves its baseline_suite field empty although a base import arm exists as baseline-import.log, so the added-failure derivation reads unmeasured from its own record and a reader of the JSON fields alone sees no base arm."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against 6864721220; imas_codex/logs.py:8 adds the leaf, imas_codex/cli/logging.py:41 re-exports both names, and imas_codex/discovery/base/supervision.py:57 and imas_codex/discovery/signals/parallel.py:61 import from the leaf, every edited path inside the declared scope.",
+    "done_when": "the done-when names two fresh-interpreter subprocess tests and a mutation; tests/discovery/test_engine_import_order.py:23 asserts imas_codex.cli is absent from sys.modules after importing the engine and tests/discovery/test_engine_import_order.py:34 imports cli.discover then the wiki, paths and code engines, and both pass while restoring the CLI import in supervision.py fails the first.",
+    "goal": "section 19 Node 1's goal is to break the discovery engine's import cycle through the CLI package by moving the worker logging helpers into a leaf module that imports no CLI or discovery code; imas_codex/logs.py:1 defines that leaf and imas_codex/discovery/base/supervision.py:57 now imports from it.",
+    "manifest": "read; it names commit 0ab6af8e, the five changed_paths, four gate logs and a complete after_suite, but its baseline_suite at manifest.md:21 is empty so the added-failure count is unmeasured from its own evidence.",
+    "write_paths": "the manifest declares imas_codex/logs.py, imas_codex/cli/logging.py, imas_codex/discovery/base/supervision.py, imas_codex/discovery/signals/parallel.py, tests/discovery/test_engine_import_order.py and two docs paths; git show --stat 0ab6af8e names exactly those five code paths and no doc, and section 19's done-when requires no fragment or figure, so the unwritten docs paths are unused scope rather than a missing deliverable."
+  },
+  "justifications": {
+    "durability": "restoring the CLI import at imas_codex/discovery/base/supervision.py:57 made tests/discovery/test_engine_import_order.py:31 fail with EXIT=1 in my own mutation, so the added guard reddens on the exact regression it exists to catch.",
+    "evidence": "the reviewed run's head gates reconcile with the logs on disk (tests/discovery/test_engine_import_order.py 34 passed, the wiki suite 0 failures, the mutation 1 failed) and I reproduced all three, but its manifest.md:21 leaves baseline_suite empty so the added-failure count is unmeasured from its own evidence.",
+    "fit": "commit 0ab6af8e carries a conventional subject and a body naming no plan or ticket, imas_codex/cli/logging.py:41 uses the explicit re-export idiom, and imas_codex/logs.py:1 names the module by what it holds.",
+    "goal_fidelity": "I reproduced the ImportError at the base revision 6864721220 in a fresh interpreter and saw imas_codex.logs imported cleanly at the head with imas_codex.cli absent from sys.modules, so imas_codex/logs.py:1 breaks the cycle at its root.",
+    "reuse": "the change moves the sole owner of the worker logging helpers into imas_codex/logs.py and re-exports rather than forking a parallel copy, and my search of imas_codex/ found no second WorkerLogAdapter or log_worker_error definition.",
+    "scope_discipline": "git show --stat 0ab6af8e lists exactly the five paths in the manifest's changed_paths, imas_codex/logs.py, imas_codex/cli/logging.py, imas_codex/discovery/base/supervision.py, imas_codex/discovery/signals/parallel.py and tests/discovery/test_engine_import_order.py, and introduces nothing the goal does not imply."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: section 19 Node 1's goal is to break the discovery engine's import cycle through the CLI package by moving the worker logging helpers into a leaf module that imports no CLI or discovery code; imas_codex/logs.py:1 defines that leaf and imas_codex/discovery/base/supervision.py:57 now imports from it.\nVERDICT done_when: the done-when names two fresh-interpreter subprocess tests and a mutation; tests/discovery/test_engine_import_order.py:23 asserts imas_codex.cli is absent from sys.modules after importing the engine and tests/discovery/test_engine_import_order.py:34 imports cli.discover then the wiki, paths and code engines, and both pass while restoring the CLI import in supervision.py fails the first.\nVERDICT write_paths: the manifest declares imas_codex/logs.py, imas_codex/cli/logging.py, imas_codex/discovery/base/supervision.py, imas_codex/discovery/signals/parallel.py, tests/discovery/test_engine_import_order.py and two docs paths; git show --stat 0ab6af8e names exactly those five code paths and no doc, and section 19's done-when requires no fragment or figure, so the unwritten docs paths are unused scope rather than a missing deliverable.\nVERDICT manifest: read; it names commit 0ab6af8e, the five changed_paths, four gate logs and a complete after_suite, but its baseline_suite at manifest.md:21 is empty so the added-failure count is unmeasured from its own evidence.\nVERDICT diff: read commit by commit against 6864721220; imas_codex/logs.py:8 adds the leaf, imas_codex/cli/logging.py:41 re-exports both names, and imas_codex/discovery/base/supervision.py:57 and imas_codex/discovery/signals/parallel.py:61 import from the leaf, every edited path inside the declared scope.\nCALL_SITES: imas_codex/discovery/base/supervision.py:57, imas_codex/discovery/signals/parallel.py:61, imas_codex/cli/logging.py:41, imas_codex/standard_names/review/pipeline.py:257\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: I reproduced the ImportError at the base revision 6864721220 in a fresh interpreter and saw imas_codex.logs imported cleanly at the head with imas_codex.cli absent from sys.modules, so imas_codex/logs.py:1 breaks the cycle at its root.\nSCORE evidence: 17\nJUSTIFICATION evidence: the reviewed run's head gates reconcile with the logs on disk (tests/discovery/test_engine_import_order.py 34 passed, the wiki suite 0 failures, the mutation 1 failed) and I reproduced all three, but its manifest.md:21 leaves baseline_suite empty so the added-failure count is unmeasured from its own evidence.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 0ab6af8e lists exactly the five paths in the manifest's changed_paths, imas_codex/logs.py, imas_codex/cli/logging.py, imas_codex/discovery/base/supervision.py, imas_codex/discovery/signals/parallel.py and tests/discovery/test_engine_import_order.py, and introduces nothing the goal does not imply.\nSCORE durability: 20\nJUSTIFICATION durability: restoring the CLI import at imas_codex/discovery/base/supervision.py:57 made tests/discovery/test_engine_import_order.py:31 fail with EXIT=1 in my own mutation, so the added guard reddens on the exact regression it exists to catch.\nSCORE fit: 20\nJUSTIFICATION fit: commit 0ab6af8e carries a conventional subject and a body naming no plan or ticket, imas_codex/cli/logging.py:41 uses the explicit re-export idiom, and imas_codex/logs.py:1 names the module by what it holds.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change moves the sole owner of the worker logging helpers into imas_codex/logs.py and re-exports rather than forking a parallel copy, and my search of imas_codex/ found no second WorkerLogAdapter or log_worker_error definition.\nFINDING manifest.md:21 follow-on: the reviewed manifest leaves its baseline_suite field empty although a base import arm exists as baseline-import.log, so the added-failure derivation reads unmeasured from its own record and a reader of the JSON fields alone sees no base arm.\n",
+  "review_run_id": "r-20261008T081645334864-review-of-engine-import-cycle",
+  "reviewed_base_sha": "6864721220d07b0687348600a51ad4f85eaf4508",
+  "reviewed_head_sha": "0ab6af8e24ef67fc2b09b520a9b86e4b15d25519",
+  "reviewed_run_id": "r-20261008T080516648619-engine-import-cycle",
+  "scores": {
+    "durability": 20,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T08:37:28.265127+00:00",
+  "total": 117
+}
