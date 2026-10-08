@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (document-baseline.log) records 0 failures and after_suite (document-after-merged.log) records 0 failures, both completed at EXIT=0, so no failure id is added by the change.",
+  "backend": "local",
+  "base_log_revision": "d415d36342a73ae161d91c6ea6322036e2d83586",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/wiki/scoring.py:611",
+    "imas_codex/discovery/base/image.py:741",
+    "imas_codex/discovery/wiki/scoring.py:173"
+  ],
+  "completed_at": "2026-10-08T07:09:12.328Z",
+  "dispatched_at": "2026-10-08T06:57:10Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/wiki/parallel.py",
+      "line": "1028",
+      "severity": "follow-on",
+      "text": "follow-on: the wiki runner's own progress status still counts pending ingest as `wp.status = $scored AND wp.score_composite >= 0.5`, so it reports pages above the retired 0.5 language-model threshold rather than the 0.16 Jev cutoff the fragment says the runner uses; because score_composite is now mirrored to ingest_relevance (graph_ops.py:990) the count under-reports the pages the ingest claim will actually take, and no test guards it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T054628859296-wiki-jev-judgments/wiki-ablation.jsonl",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the with/without-matches ablation is not a paired comparison -- 60 of the 80 rows carry different with_matches and without_matches values while only 22 rows carry a configured tool match, so about 38 rows differ on identical match input, and the reported 'match evidence lowered AUC by 0.003334' is confounded with run-to-run language-model variance rather than isolating the match effect; a single deterministic pass that toggles only the data_access_tool_matches block would settle it."
+    },
+    {
+      "file": "imas_codex/discovery/wiki/progress.py",
+      "line": "741",
+      "severity": "follow-on",
+      "text": "follow-on (adjacent, outside this node's declared write paths): the document progress display labels a document '(skipped)' when `document.score_composite < 0.5`, the same retired threshold, so the label disagrees with the 0.16 ingest gate the change installs."
+    }
+  ],
+  "head_log_revision": "d5e1708a22a52e41f53a165cf8555bee4749bed3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Reviewed fde2c055..9b586fac2; the change replaces the language-model ingest score with the shared Jev judgment across wiki pages, documents and images, retires the score fields from the three response models, adds the ContentPurpose enum and judgement fields to the WikiPage/Document/Image classes in imas_codex/schemas/facility.yaml, admits direct page/document ingestion through the 0.16 cutoff, and rebuilds the vision path to request caption/OCR/diagram text only.",
+    "done_when": "Wiki and document ingest gated on a Jev Noul -- met (test_ingest_claim_reads_jev_judgment). Prototype AUC on a labelled page sample recorded -- met and independently reproduced (0.929333/0.992667/0.989333 over 80 labelled pages from wiki-ablation.jsonl). Daily-report question answered from a raw page -- the run records that no raw page can be read from nakasvr26, which the s5 lead comment permits, and adds a converter test that nonempty %META:FIELD values survive into the judged text.",
+    "goal": "Section 5 asks that wiki pages and documents be judged through Jev with the open daily-report question carried in. Done: imas_codex/discovery/wiki/scoring.py:85-150 builds one admission Noul (ingest_relevance), an exclusive ContentPurpose Choice and six graded facet Scores, and content_judgment_fields flattens each Score keeping its distribution and confidence; graph_ops.py:874 claim_pages_for_ingesting and its document twin gate on ingest_relevance >= CONTENT_INGEST_THRESHOLD (0.16).",
+    "manifest": "Read; baseline_suite (revision d415d3634, document-baseline.log, completed true, 0 failures) and after_suite (revision d5e1708a2, document-after-merged.log, completed true, 0 failures) both ran to their summary lines at EXIT=0, so the derived added_failure_count is 0.",
+    "write_paths": "The reviewed manifest declares 15 paths; git show --stat for each of the run's own commits touches only those paths, and the two merge commits carry origin/main peer work (docs, cli/discover/documents.py, review records) that the lead directed."
+  },
+  "justifications": {
+    "durability": "The negative control demonstrates the guard fires: negative-control.log mutates claim_pages_for_ingesting to read score_composite instead of ingest_relevance and test_wiki_judgments.py::test_ingest_claim_reads_jev_judgment fails at line 58 (EXIT=1) where the green gate passes it, and the test asserts both the presence of wp.ingest_relevance >= $min_score and the absence of wp.score_composite >= $min_score. Four red cases first reproduce the remaining defects (remaining-defect-reproduction.log: the parallel runner default at 0.5, both direct-ingest cutoff queries on score_composite, and the vision response carrying score fields) before c204fddf8 turns them green. Deduction: the runner's 0.5 status query and the progress display's 0.5 skip label are unguarded by any test, which is how they survived the change.",
+    "evidence": "I re-derived the headline metric from the run's own rows: pairing wiki-labels.jsonl and wiki-ablation.jsonl (80 rows, 50 positive) reproduces AUC 0.929333 (old_score), 0.992667 (without_matches) and 0.989333 (with_matches) exactly, and the 0.16 operating point gives TP 49, FP 1, FN 1, TN 29, so the fragment's table and the ablation log reconcile with the row data rather than merely restating each other. wiki-ablation.log carries a known-present control (22/80 matched configured tools, no-match arm 0/80). Both gate logs (document-baseline.log, document-after-merged.log) run to their summary line with EXIT=0 and no failures. Deduction: the with/without-matches ablation is not cleanly paired -- 60 of 80 rows differ between the two arms while only 22 carry a configured tool match, so about 38 rows changed on identical match input (see finding).",
+    "fit": "The added symbols are named by what they do: build_content_judgment_state, build_content_judgment_questions, content_judgment_fields and judge_content_items in imas_codex/discovery/wiki/scoring.py, and CONTENT_INGEST_THRESHOLD in graph_ops.py, with no plan label, phase number or ticket id in any symbol, filename or comment. The three judgement fields follow the code scorer's naming (ingest_relevance, purpose, score_*), so a WikiPage, Document and Image read the same way as a path.",
+    "goal_fidelity": "The plan's three done-when items are met or recorded: wiki and document ingest claims now gate on the Jev Noul (imas_codex/discovery/wiki/graph_ops.py:914 claim_pages_for_ingesting and the document twin read wp.ingest_relevance >= $min_score with CONTENT_INGEST_THRESHOLD = 0.16 at graph_ops.py:29), the labelled-sample AUC is recorded in the evidence fragment (0.929333 stored language-model score versus 0.992667 Jev without matches and 0.989333 with), and the daily-report question is answered as unreachable (daily-raw-check.log: the stored raw path for jt-60sa:SystemDailyReport00246 is absent and Main-web is refused, which the lead's s5 comment permits in place of a raw read). The interface account is realised: models.py:18-75 leaves WikiScoreResult/DocumentScoreResult/ImageCaptionResult carrying id plus text only, so the score and decision fields of WikiScoreBatch, DocumentScoreBatch and ImageScoreBatch are retired. Small deduction: the fragment's claim that the parallel runner now uses the cutoff is only half true of the runner itself -- its status query still counts pending ingest at 0.5 (see finding).",
+    "reuse": "The change routes wiki, document and image content through the shared judge_rows loop in imas_codex/discovery/base/judgment.py (scoring.py:160-176 and base/image.py:662-741), reuses facility_relevance_block from discovery/code/scorer.py and extract_facility_tool_mentions from discovery/wiki/entity_extraction.py, and retires the forked language-model scoring rather than adding a parallel path. 3 production call sites of judge_content_items: imas_codex/discovery/wiki/scoring.py:611, imas_codex/discovery/base/image.py:741, plus the build_content_judgment_state callback at scoring.py:173.",
+    "scope_discipline": "The run's own commits touch only declared write paths: 22d6b4c00 (wiki graph_ops/models/scoring/workers, facility.yaml, test_wiki_judgments), a49bd3aab (evidence fragment, test_pipeline), da9985527 (graph_ops, scoring, workers, test_wiki_judgments), a366a9a5b (test_wiki_judgments), c204fddf8 (base/image.py, documents/workers.py, wiki graph_ops/models/parallel/pipeline/scoring/workers, test_document_workers, test_wiki_parallel, test_pipeline), and the docs commits; fb02f3182 and d5e1708a2 are the merges of origin/main the lead directed, carrying peer nodes' work rather than new wiki changes."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Section 5 asks that wiki pages and documents be judged through Jev with the open daily-report question carried in. Done: imas_codex/discovery/wiki/scoring.py:85-150 builds one admission Noul (ingest_relevance), an exclusive ContentPurpose Choice and six graded facet Scores, and content_judgment_fields flattens each Score keeping its distribution and confidence; graph_ops.py:874 claim_pages_for_ingesting and its document twin gate on ingest_relevance >= CONTENT_INGEST_THRESHOLD (0.16).\nVERDICT done_when: Wiki and document ingest gated on a Jev Noul -- met (test_ingest_claim_reads_jev_judgment). Prototype AUC on a labelled page sample recorded -- met and independently reproduced (0.929333/0.992667/0.989333 over 80 labelled pages from wiki-ablation.jsonl). Daily-report question answered from a raw page -- the run records that no raw page can be read from nakasvr26, which the s5 lead comment permits, and adds a converter test that nonempty %META:FIELD values survive into the judged text.\nVERDICT write_paths: The reviewed manifest declares 15 paths; git show --stat for each of the run's own commits touches only those paths, and the two merge commits carry origin/main peer work that the lead directed.\nVERDICT manifest: Read; baseline_suite (revision d415d3634, document-baseline.log, completed true, 0 failures) and after_suite (revision d5e1708a2, document-after-merged.log, completed true, 0 failures) both ran to their summary lines at EXIT=0, so the derived added_failure_count is 0.\nVERDICT diff: Reviewed fde2c055..9b586fac2; the change replaces the language-model ingest score with the shared Jev judgment across wiki pages, documents and images, retires the score fields from the three response models, adds the ContentPurpose enum and judgement fields to the WikiPage/Document/Image classes, admits direct page/document ingestion through the 0.16 cutoff, and rebuilds the vision path to request caption/OCR/diagram text only.\nCALL_SITES: imas_codex/discovery/wiki/scoring.py:611\nCALL_SITES: imas_codex/discovery/base/image.py:741\nCALL_SITES: imas_codex/discovery/wiki/scoring.py:173\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The plan's three done-when items are met or recorded: wiki and document ingest claims now gate on the Jev Noul, the labelled-sample AUC is recorded in the evidence fragment, and the daily-report question is answered as unreachable, which the lead's s5 comment permits. The interface account is realised: models.py leaves the three response models carrying id plus text only. Small deduction: the fragment's claim that the parallel runner now uses the cutoff is only half true of the runner itself -- its status query still counts pending ingest at 0.5.\nSCORE evidence: 18\nJUSTIFICATION evidence: I re-derived the headline metric from the run's own rows: the 80-row ablation reproduces AUC 0.929333/0.992667/0.989333 exactly and the 0.16 operating point gives TP 49, FP 1, FN 1, TN 29, so the fragment and log reconcile with the row data. Deduction: the with/without-matches ablation is not cleanly paired -- 60 of 80 rows differ between the two arms while only 22 carry a configured tool match.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: The run's own commits touch only declared write paths; the two merge commits carry origin/main peer work the lead directed.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control.log mutates claim_pages_for_ingesting to read score_composite instead of ingest_relevance and test_ingest_claim_reads_jev_judgment fails at line 58 (EXIT=1) where the green gate passes it. Four red cases first reproduce the remaining defects before c204fddf8 turns them green. Deduction: the runner's 0.5 status query and the progress 0.5 skip label are unguarded.\nSCORE fit: 19\nJUSTIFICATION fit: The added symbols are named by what they do with no plan label, phase number or ticket id.\nSCORE reuse: 19\nJUSTIFICATION reuse: The change routes wiki, document and image content through the shared judge_rows loop and reuses facility_relevance_block and extract_facility_tool_mentions, retiring the forked language-model scoring.\nFINDING imas_codex/discovery/wiki/parallel.py:1028 follow-on: the wiki runner's own progress status still counts pending ingest as wp.score_composite >= 0.5 rather than the 0.16 Jev cutoff, so it under-reports the pages the ingest claim will take, and no test guards it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T054628859296-wiki-jev-judgments/wiki-ablation.jsonl:1 follow-on: the with/without-matches ablation is not a paired comparison -- 60 of 80 rows differ while only 22 carry a tool match, so the reported 0.003334 AUC delta is confounded with language-model variance.\nFINDING imas_codex/discovery/wiki/progress.py:741 follow-on (adjacent, outside the node's write paths): the document progress display labels a document '(skipped)' below 0.5, disagreeing with the 0.16 ingest gate.\n",
+  "review_run_id": "r-20261008T065657780513-review-of-wiki-jev-judgments",
+  "reviewed_base": "fde2c0555d642914d022b63f0cbcb66a034eabd6",
+  "reviewed_base_sha": "fde2c0555d642914d022b63f0cbcb66a034eabd6",
+  "reviewed_commit": "9b586fac2552586bb59138d73444f64be0d5f03e",
+  "reviewed_head": "9b586fac2552586bb59138d73444f64be0d5f03e",
+  "reviewed_head_sha": "9b586fac2552586bb59138d73444f64be0d5f03e",
+  "reviewed_run_id": "r-20261008T054628859296-wiki-jev-judgments",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:07:30.000000+00:00",
+  "total": 111
+}
