@@ -488,7 +488,7 @@ def discover_mappable_ids(
                     "domains": set(r["domains"]),
                 }
 
-    # Branch C: no filters — discover all IDS from available domains
+    # Branch C: no filters — discover IDS from source domains and candidate homes
     if not domains and not ids_filter:
         all_rows = gc.query(
             f"""
@@ -510,6 +510,21 @@ def discover_mappable_ids(
                 "ids_name": r["ids_name"],
                 "domains": set(r["domains"]),
             }
+
+        for r in gc.query(
+            f"""
+            MATCH (sg:SignalSource {{facility_id: $facility}})-[r:MAPPING_CANDIDATE]->(p:IMASNode)
+            WHERE (r.route = true OR sg.candidate_route = 'escalated')
+              AND p.ids IS NOT NULL AND p.ids <> ''
+              {dd_clause}
+            RETURN p.ids AS ids_name, collect(DISTINCT p.physics_domain) AS domains
+            """,
+            facility=facility,
+            **dd_params,
+        ):
+            name = r["ids_name"]
+            entry = ids_by_name.setdefault(name, {"ids_name": name, "domains": set()})
+            entry["domains"].update(r["domains"])
 
     # Step 3: Compute source counts and build targets list
     ids_targets = []
