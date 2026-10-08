@@ -20,9 +20,9 @@
   <title>Facility Discovery Sequence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -319,9 +319,12 @@
       count rose with zero SSH calls in its log.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
     <h2 id="s6">§6 — One option surface across discover and sn run</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>The lead asked for a consistent surface on 2026-10-08. The tasks differ, but the CLI should not. Today the same concept is spelled several ways. <code>sn run</code> scopes a run with <code>--focus</code>, a list of DD paths or a manifest, while <code>discover paths</code>, <code>wiki</code> and <code>signals</code> take <code>--focus</code> as a free-text topic. <code>sn run</code> selects a phase with <code>--only</code>, while each discover domain has its own flags: <code>--scan-only</code>, <code>--triage-only</code>, <code>--score-only</code> and <code>--enrich-only</code>. <code>sn run --flush</code> drains in-flight work without seeding new work, and discover has no drain mode. The sequence command adds <code>--only</code> and <code>--skip</code> over stage names, so it should settle these spellings rather than add a fourth.</p><p><strong>Node</strong> <code>discover-cli-surface-census</code>, role investigate, 1.5 h. Write path: <code>docs/research/discover-cli-surface.html</code>, a research doc informing this plan. <strong>Done when</strong> the doc holds five things. First, a census table of every option on <code>imas-codex discover</code>'s domain subcommands (<code>paths</code>, <code>code</code>, <code>wiki</code>, <code>documents</code>, <code>signals</code>, <code>map</code>, <code>status</code>, <code>clear</code>), on <code>imas map run</code> and on <code>sn run</code>, with each option's meaning read from its code. Second, for each shared concept, every current spelling and meaning, marking where one spelling carries two meanings and where one meaning has several spellings. The concepts are scoping by path or topic, stage selection, draining, cost and time caps, resetting and rescanning, dry runs, limits and worker counts. Third, a proposed surface for <code>imas-codex discover FACILITY</code> and its subcommands: stage names, <code>--only</code> and <code>--skip</code>, a <code>--flush</code> drain mode, and path or topic scoping. Fourth, the evidence for or against <code>--flush</code> in discover: which stages split into seeding new work and draining pending work in the code, with the predicate or query that separates them. Fifth, for every existing per-domain flag, keep, rename or retire, with the reason. Retiring is preferred, since the project carries no backwards compatibility.</p>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The census of every discover, map and sn run option is merged; the lead settled one surface from it, recorded in §3. <a href="/imas-codex/evidence/archive/facility-discovery-sequence-landed.html#s6">full record</a></p>
+</section>
 
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
@@ -330,10 +333,11 @@
     <p class="r-gate-required-evidence">mapping-candidate-selection#s8</p>
     <a class="r-gate-evidence" href="mapping-candidate-selection section 8 landed (merge 3c1c0ce8f on main): the assign stage picks every listed home for an escalated source and the map stage maps each source into every IDS of its picks, claiming per IDS.">Evidence</a>
 </div>
-<div class="r-gate" data-id="g-fds-2" data-section="s3" data-gated-sections="s3,s4" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-fds-2" data-section="s3" data-gated-sections="s3,s4" data-status="closed" data-verdict="passed">
     <h4 class="r-gate-measure">the option surface for imas-codex discover FACILITY is settled from the §6 census and recorded in this plan</h4>
     <p class="r-gate-required-evidence">facility-discovery-sequence#s6</p>
-    </div>
+    <a class="r-gate-evidence" href="The census merged as bdb42163a (docs/research/discover-cli-surface.html, review 111/120), and the lead settled the surface on 2026-10-08: the per-domain subcommands fold into imas-codex discover FACILITY with --only/--skip, --scan-only, --flush, --focus items and --topic text. Section 3 records the settled option table, plan version 20.">Evidence</a>
+</div>
 </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
