@@ -423,10 +423,20 @@ def test_mapping_calls_existing_pipeline_with_remaining_limits(monkeypatch):
         3.5,
         7,
     )
+    callback.assert_called_once()
     assert callback.call_args.kwargs["cost_limit"] == 3.5
     assert callback.call_args.kwargs["time_limit"] == 7
     assert callback.call_args.kwargs["domains"] == ("equilibrium",)
     assert callback.call_args.kwargs["ids_names"] == ("pf_active",)
+
+
+def test_no_candidate_route_skips_mapping_as_nothing_to_do(monkeypatch, healthy):
+    from imas_codex.ids import workers
+
+    monkeypatch.setattr(workers, "has_pending_mapping_work", lambda facility: False)
+    monkeypatch.setattr(workers, "has_pending_validation_work", lambda facility: False)
+    outcome = sequence.evaluate_stage(_stage("mapping"), "jt-60sa", _config())
+    assert outcome.outcome == sequence.NOTHING_TO_DO
 
 
 def test_mapping_focus_and_limit_restrict_ids_targets(monkeypatch, tmp_path):
