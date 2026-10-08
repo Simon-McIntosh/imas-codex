@@ -1,0 +1,1541 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "a8bd35459898de502a4c923159c4e48256f069cf",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 27292544,
+      "cached_input_tokens_cumulative": 27292544,
+      "input_tokens": 27700430,
+      "input_tokens_cumulative": 27700430,
+      "output_tokens": 75058,
+      "output_tokens_cumulative": 75058,
+      "reasoning_output_tokens": 30590,
+      "reasoning_output_tokens_cumulative": 30590
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3,
+    "files": 1,
+    "removed": 3
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 418,
+        "name": "test_composite_is_the_largest_of_five_nouls",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "ingest_files",
+        "path": "imas_codex/ingestion/pipeline.py"
+      },
+      "window_line": 376
+    }
+  ],
+  "commit_list_shortfall": {
+    "declared": 8,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261008T035903560782-edas-data-references' has a passing gate presenting 1 commit(s) of the 8 its manifest declares; missing: 1dfbe3cee280ec7eb9da9851b4a394c462a632d9, 22b1d1726b0697056adf6d597dc4d5fe7f75798d, 2a22cb00a888d4bdef5e9355fb057c9de365dae1, 2a835906d7ec3e02e251541cd208965cc99d1d25, 502a9622d8395d846b70f75b7919ba49115c29be, 9575c60b5e95a2757eee4e51442364b310e432d4, d02ec911ca3d74138cacfd02cf64e8460cf51393. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "1dfbe3cee280ec7eb9da9851b4a394c462a632d9",
+      "22b1d1726b0697056adf6d597dc4d5fe7f75798d",
+      "2a22cb00a888d4bdef5e9355fb057c9de365dae1",
+      "2a835906d7ec3e02e251541cd208965cc99d1d25",
+      "502a9622d8395d846b70f75b7919ba49115c29be",
+      "9575c60b5e95a2757eee4e51442364b310e432d4",
+      "d02ec911ca3d74138cacfd02cf64e8460cf51393"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "1c2862d93161bead3f6ca53f196779006964ae12"
+  ],
+  "completed_at": "2026-10-08T06:10:29Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T03:59:34Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "origin/main"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/ingestion",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T035903560782-edas-data-references/ingestion-config-gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.87,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.6995198475240991,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-11T17:27:32Z, which is after this node's 3600s horizon ending 2026-10-08T04:59:08.403877+00:00",
+    "horizon_ends_at": "2026-10-08T04:59:08.403877+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T03:59:07Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-11T17:27:32Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 522951,
+    "state": "quiet",
+    "utilisation_pct": 23.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T03:59:07Z",
+    "read_at": "2026-10-08T03:59:08Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 23.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T06:10:29Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T035903560782-edas-data-references/manifest.md",
+  "member": "disposable-r-20261008T035903560782-edas-data-references",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/graph/test_code_reference_links.py::test_real_code_reference_links_and_missing_count_guard",
+      "tests/ingestion/test_edas_extractor.py::test_configured_data_systems_select_reference_extractors[jt-60sa]",
+      "tests/ingestion/test_edas_extractor.py::test_literal_calls[db.eddbreadTime('E101173',",
+      "tests/ingestion/test_edas_extractor.py::test_repeated_call_yields_one_identifier"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/graph/test_code_reference_links.py::test_real_code_reference_links_and_missing_count_guard",
+      "tests/ingestion/test_edas_extractor.py::test_configured_data_systems_select_reference_extractors[jt-60sa]",
+      "tests/ingestion/test_edas_extractor.py::test_literal_calls[db.eddbreadTime('E101173',",
+      "tests/ingestion/test_edas_extractor.py::test_repeated_call_yields_one_identifier"
+    ],
+    "declaration": "drop the eddbreadTime pattern; the eddbreadTime extraction test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T035903560782-edas-data-references/negative-control-config.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T035903560782-edas-data-references/negative-control-config.log",
+    "test_paths": [
+      "tests/graph/test_code_reference_links.py",
+      "tests/ingestion/test_edas_extractor.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "edas-data-references",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2232,
+          "cached_input_tokens": 594686,
+          "input_tokens": 596920,
+          "output_tokens": 1259,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 598179,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "a new imas_codex/ingestion/extractors/edas.py recognises the JT-60SA access calls named in §44 (eddbread* and their _f wrappers, the locallib get_time_* methods, getseldata, and the UDDB, PMDB, LCDB and MBDB wrapper calls), keeping literal category and data name; the ingest path stores them as DataReference nodes of new DataReferenceType values, resolved to the FacilitySignal with that category and data name; a backfill over stored JT-60SA chunks through the same functions makes no facility call; search_code in imas_codex/llm/search_tools.py returns and matches on the resolved references; docs/evidence/fragments/jt60sa-discovery-completion/edas-data-references.html gives the chunk counts by reference type and the share resolved; tests/ingestion/test_edas_extractor.py pins each call form with a negative control; tests/graph/test_code_reference_links.py (-m graph) runs the real REFERENCES_IMAS, REFERENCES_IDS and missing-count guard statements and the new reference statements against the live database with positive and negative controls. SHARED FILE: imas_codex/schemas/facility.yaml is shared with the concurrent path-jev-deploy node, which edits FacilityPath; edit only the DataReferenceType enum and the DataReference class there, merge origin/main before your last commit, and the coordinator accepts that path at promotion and resolves the merge",
+    "estimated_hours": null,
+    "goal": "link JT-60SA EDAS data references in ingested code to facility signals",
+    "id": "edas-data-references",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T03:59:07Z",
+      "read_at": "2026-10-08T03:59:08Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 23.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T035903560782-edas-data-references/manifest.md",
+    "negative_control": "drop the eddbreadTime pattern; the eddbreadTime extraction test must fail",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§44",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/ingestion/extractors/edas.py",
+      "imas_codex/ingestion/extractors/__init__.py",
+      "imas_codex/ingestion/graph.py",
+      "imas_codex/ingestion/pipeline.py",
+      "imas_codex/llm/search_tools.py",
+      "tests/ingestion/test_edas_extractor.py",
+      "tests/graph/test_code_reference_links.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/edas-data-references.html",
+      "docs/figures/jt60sa-discovery-completion/edas-data-references"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.6993338708382404,
+      "derived": 0.14888186738442472,
+      "drain_hours": 168.0,
+      "effective_limit": 0.14888186738442472,
+      "elapsed_fraction": 0.13534715216765883,
+      "elapsed_hours": 22.738321564166682,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T03:59:16+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.77,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.23,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.134366,
+      "decided_by": "window",
+      "margin": 0.5093840000000001,
+      "name": "edas-data-references",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.23
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.957631,
+        "observed_at": "2026-10-08T03:59:16+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.23,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "edas-data-references",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T03:59:16.957631+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "lead named the codex lane; lead directed on 2026-10-08 that facility.yaml is shared with path-jev-deploy and resolved by merge",
+    "confidence": 0.73,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 555.505,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 718.035,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1403675.156927,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 84419,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1403675.156927,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 84419,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1403675.156927,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 84419,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 14,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 84419,
+          "headroom_pct": 63.3,
+          "peak_utilisation_p50_pct": 60.0,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 381,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 97,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 3
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 35.178927,
+        "budget_reason": null,
+        "burn_multiple": 1.6987475386637696,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 84419,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.0522395378819445,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 7,
+          "unknown": 0
+        },
+        "pace_allowance": 0.14893325479017863,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 35.178927,
+        "budget_reason": null,
+        "burn_multiple": 1.6987475386637696,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 84419,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.0522395378819445,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.14893325479017863,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 35.178927,
+        "budget_reason": null,
+        "burn_multiple": 1.6987475386637696,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 84419,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.0522395378819445,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.14893325479017863,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.01,
+      "claude:claude-sonnet-5-5": 0.01,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.21,
+      "hold": 0.01,
+      "local:deepseek-v4.1-flash": 0.76
+    },
+    "rendered_token_estimate": 2084,
+    "usage": {
+      "cost": 0.000231714,
+      "input_tokens": 5517,
+      "output_tokens": 150
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.87,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "1c2862d93161bead3f6ca53f196779006964ae12",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "502a9622d8395d846b70f75b7919ba49115c29be",
+    "reviewed_head_sha": "1c2862d93161bead3f6ca53f196779006964ae12",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 20,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 115
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T035903560782-edas-data-references",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§44",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a119aa-d17c-7433-8ff7-a88d0f1dbd2e",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 27292544,
+    "cumulative_input_tokens": 54992974,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 105648
+  },
+  "time_budget": "60m",
+  "tool_steps": 146.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 7855,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T06:10:39Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T05:54:10Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T035903560782-edas-data-references",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 666,
+    "worker_pid": 1891921
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}
