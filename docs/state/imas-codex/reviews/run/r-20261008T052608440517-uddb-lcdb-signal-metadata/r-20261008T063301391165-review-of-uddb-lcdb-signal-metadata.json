@@ -1,0 +1,70 @@
+{
+  "absent": {},
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/scanners/edas.py:220",
+    "imas_codex/discovery/signals/scanners/edas.py:640"
+  ],
+  "completed_at": "2026-10-08T06:55:03.615Z",
+  "dispatched_at": "2026-10-08T06:33:36Z",
+  "findings": [
+    {
+      "file": "imas_codex/remote/scripts/enumerate_edas.py",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: _uddb_header_value's bare-value alternative ([^\\s]*) does not strip a terminator, so an unquoted unit returns with its separator: reproduced UNIT=A, -> 'A,' and UNIT=m, -> 'm,'. The observed UDDB headers quote the unit in one shot and leave it blank in another, so the measured case is unaffected, but any header whose unit is unquoted would land punctuation in the unit string. Trimming a trailing comma or treating the bare branch as a whole-token match would remove the latent case."
+    },
+    {
+      "file": "imas_codex/discovery/signals/scanners/edas.py",
+      "line": "301",
+      "severity": "follow-on",
+      "text": "follow-on: the UDDB accessor and example_shot are derived from metadata_shot (the shot whose header carried the NAME) rather than the reference shot, so a channel whose header is readable at one shot but whose data only exists at another would be addressed and value-checked at the metadata shot. In the measured case PID 2842UA001 both names and value are read at E101163, so nothing is broken now; using the reference shot for the value read and citing the metadata shot only as provenance would decouple the two."
+    },
+    {
+      "file": "imas_codex/remote/scripts/check_edas.py",
+      "line": "219",
+      "severity": "follow-on",
+      "text": "follow-on: the UDDB value read requests exactly the window [STIME, STIME+0.0001] and reports 'value unavailable' when it returns nothing, so a channel whose samples do not fall inside that 0.1 ms window reads as a failed check although the signal is valid. The measured channels start at STIME, so the control passed; widening the window or distinguishing 'no sample in window' from 'channel unreadable' would avoid a false negative in the check."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s), edas.py:220 and edas.py:640, and the scanner check path at parallel.py:4838",
+    "diff": "read commit by commit 64564b0e4..14eda62: 64564b0e4 reads UDDB headers, c99c21331 reads LCDB namelists, 0d389b877 makes check_edas read values, 248e49685 adds file-presence evidence, ca1c4fc42 rejects the blank/DEBUG placeholders, 775a7a7ae keeps per-source-shot provenance, 14eda620c writes the fragment.",
+    "done_when": "for this node's share: both databases enumerated with metadata and landed in the graph (8,657 rows), the signal check reads a live value per database (EXIT=0), and the fragment gives before/after coverage counts. tests/config is not this node's to run.",
+    "goal": "\u00a751 Node 1 is delivered: UDDB and LCDB signals now carry the units and descriptions their sources provide, and check_edas.py reads one value per database (raw_value and analysis_value). Coverage is low in absolute terms but the source probe shows the databases supply no more; the fuller done-when (config persistence, tests/config) belongs to Node 2.",
+    "manifest": "read; baseline_suite 2bf9167 24 passed EXIT=0, after_suite 775a7a7a 28 passed EXIT=0, negative_control records the LCDB unit drop, and the commits, test_logs and artifacts reconcile with the logs I opened.",
+    "write_paths": "git diff --name-only 2bf9167..14eda62 lists exactly the five paths the manifest declares; no out-of-scope file."
+  },
+  "justifications": {
+    "durability": "two parser defects the first census exposed have failing-before tests and their fixes: test_blank_raw_unit_does_not_consume_the_next_header_key and test_analysis_debug_placeholder_is_not_a_physical_unit (blank-unit-reproduction.log, debug-unit-reproduction.log, both EXIT=1 before the fix). I independently re-derived the negative control: neutering the XUNIT branch of _lcdb_field_unit makes test_lcdb_file_units_follow_the_named_data_axis fail with '' == 'm' and EXIT=1 (repro-negative-control.log). The focus file grew 24\u219228 tests.",
+    "evidence": "the run carries a before/after graph census (before-discovery.log 6295 checked + 3 enriched EDDB unchanged after; UDDB 0\u21921 units, 0\u21926 descriptions; LCDB 0\u21926 units), a live source probe (field-probe.log: UDDB header NAME/UNIT and two LCDB namelists), a live value-read control (live-value-check.log raw_value/analysis_value, EXIT=0), and a per-field 8,657-row JSONL. I reconciled metadata-rows-final.jsonl independently: 188 UDDB / 8,469 LCDB rows, UDDB 1 unit and 6 descriptions, LCDB 6 units and 1,253 file-sourced descriptions, 90 rows whose source_unit_value is DEBUG and all 6 LCDB units sourced from XUNIT \u2014 matching the fragment's numbers exactly. I also reproduced the reviewed head's focused gate (28 passed, EXIT=0, repro-head-focused.log) in a scratch extraction.",
+    "fit": "names describe the mechanism (_uddb_header_value, _lcdb_file_metadata, _lcdb_field_unit, uddb_header_shots, metadata_shot); no plan, sprint or ticket label appears in any symbol, filename, comment or commit subject; all seven commits carry a conventional subject and a body stating what changed and why.",
+    "goal_fidelity": "\u00a751 Node 1 asks that UDDB and LCDB signals carry units and descriptions, that the signal check read one value per database, and that a scoped landing put them in the graph. The gained commits read UDDB NAME/UNIT from uddbreadHeader (imas_codex/remote/scripts/enumerate_edas.py:307-320, imas_codex/discovery/signals/scanners/edas.py:298-320) and LCDB axis units plus dataset comments from the category .ldb namelists (enumerate_edas.py:401-436,481-511), and check_edas.py now reads a converted value for UDDB and a named analysis value for LCDB (check_edas.py:169-249). The scoped scan landed 8,657 of 8,657 rows and left the 6,298 EDDB rows at prior status. Coverage is thin but source-limited: UDDB 1 unit / 6 names of 188, LCDB 6 units / 1,253 comments of 8,469, with the run's own live probe showing the remaining UDDB units are blank and the remaining LCDB XUNIT/YUNIT are empty or DEBUG. The overall \u00a751 done-when also names facility-config persistence and tests/config, which the plan assigns to Node 2, so this run cannot meet them and correctly does not claim to.",
+    "reuse": "the change extends the existing EDASScanner and remote-script pair rather than adding a parallel path; the scoped landing reuses the existing persistence writer (scan reports signals_discovered 8,679 less 22 non-target equals the 8,657 written), and no second .ldb parser existed in the repo to reuse (rg for ldb parses finds only enumerate_edas.py).",
+    "scope_discipline": "git diff --name-only 2bf9167..14eda62 lists exactly the five declared paths (the new evidence fragment plus edas.py, check_edas.py, enumerate_edas.py and the test file); the EDDB signal rows keep their checked/enriched status and no facility config is touched, which is correct because that persistence belongs to \u00a751 Node 2."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a751 Node 1 delivered \u2014 UDDB and LCDB signals carry the units and descriptions their sources provide and check_edas reads one value per database; coverage is source-limited but the full done-when (config persistence, tests/config) is Node 2's.\nVERDICT done_when: 8,657 UDDB+LCDB rows landed, live value read EXIT=0, before/after counts in the fragment; tests/config is out of this node's scope.\nVERDICT write_paths: exactly the five declared paths across 2bf9167..14eda62.\nVERDICT manifest: baseline 24 passed and after 28 passed, both EXIT=0; negative control reproduces.\nVERDICT diff: read 64564b0e4..14eda62; six functional commits plus the evidence fragment.\nCALL_SITES: imas_codex/discovery/signals/scanners/edas.py:220, imas_codex/discovery/signals/scanners/edas.py:640\nSCORE goal_fidelity: 17\nSCORE evidence: 19\nSCORE scope_discipline: 19\nSCORE durability: 18\nSCORE fit: 20\nSCORE reuse: 19\nFINDING imas_codex/remote/scripts/enumerate_edas.py:61 follow-on: bare-value branch keeps a trailing separator (UNIT=A, -> 'A,'); latent for unquoted headers.\nFINDING imas_codex/discovery/signals/scanners/edas.py:301 follow-on: accessor/example_shot use the metadata shot rather than the reference shot, coupling provenance to the value read.\nFINDING imas_codex/remote/scripts/check_edas.py:219 follow-on: the UDDB read spans only [STIME, STIME+0.0001], so a channel sampled elsewhere reads as unavailable.\n",
+  "review_run_id": "r-20261008T063301391165-review-of-uddb-lcdb-signal-metadata",
+  "reviewed_base_sha": "2bf9167364e4bf36c1ca25e0abab04b939c586a0",
+  "reviewed_head_sha": "14eda620cb7b515fd25cca6857b7bcf28f11930f",
+  "reviewed_run_id": "r-20261008T052608440517-uddb-lcdb-signal-metadata",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:52:00+00:00",
+  "total": 112
+}
