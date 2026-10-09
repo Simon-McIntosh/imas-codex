@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72">
 <meta name="plan-impl" content="0.4706">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -459,6 +459,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261009T055832361259-focused-reset-scope" data-who="reckon-build" data-when="2026-10-09T06:13:25.144Z">
     <div class="r-comment-body"><p>Scoped the signals --reset-to branch to --focus: it now renders build_focus_predicate into the reset extra_filter and passes focus_items into reset_to_status, so a focused reset touches only the named sources. Unit gate tests/discovery/test_signals_focus_reset.py + test_signals_focus.py = 16 passed EXIT=0; read-only live count: the focus filter for the MDAC magPbTCNNN source id selects 14 FacilitySignals = that source's 14 members (an unfocused reset of the same cohort would select 4679). evidence docs/evidence/fragments/jt60sa-mapping-study-expansion/focused-reset-scope.html</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261009T061329880575-review-of-focused-reset-scope" data-who="reckon-build" data-when="2026-10-09T06:25:14.210Z">
+    <div class="r-comment-body"><p>review of r-20261009T055832361259-focused-reset-scope (focused-reset-scope) is SOUND, total 107/120: the --reset-to branch now composes build_focus_predicate(&#x27;n&#x27;, focus_items) into the reset extra_filter and passes focus_items as a query parameter, so a focused reset admits exactly the named sources&#x27; members (live receipt focus_filter_selected 14 == member_count 14 against whole_facility_eligible 4679); reviewer base arm 1838c759 test_signals_focus.py 13 passed EXIT=0, head arm e3ac8d01 both files 16 passed EXIT=0, 0 added failures, declared mutation reproduces (2 failed EXIT=1); two follow-ons, neither blocking (the live receipt exercises the filter but not an executed reset, and the new Cypher is mock-covered only).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-09T06:25:00Z">
     <div class="r-comment-body"><p>§3 landed: re-propagation re-arms individualization (merge <code>170a48d35</code>; 1,478 discovery tests pass). magPbTC10 to magPbTC23 now carry 14 distinct descriptions. 19 more sources (1,310 members) await the facility-wide regeneration. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s3">evidence</a></p></div>
