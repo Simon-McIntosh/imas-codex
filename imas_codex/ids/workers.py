@@ -55,7 +55,7 @@ from imas_codex.ids.candidates import (
 )
 from imas_codex.ids.graph_ops import (
     CandidateWriteError,
-    clear_mapping_bindings,
+    delete_mapping,
     write_candidates,
 )
 from imas_codex.ids.mapping import PipelineCost
@@ -540,27 +540,30 @@ def has_pending_candidate_work(
     )
 
 
-def clear_mapping_bindings_for_ids(facility: str, ids_names: list[str]) -> int:
-    """Delete the MAPS_TO_IMAS bindings of each IDS's mapping.
+def clear_mappings_for_ids(facility: str, ids_names: list[str]) -> dict[str, int]:
+    """Delete each IDS's whole mapping through the single delete owner.
 
-    Routes the engine's clear path through the single binding-delete owner
-    ``clear_mapping_bindings``, so ``map run --clear`` removes the same
-    bindings ``map clear`` removes instead of resetting source status alone
-    and leaving the previous bindings in place.
+    Routes the engine's clear path through ``delete_mapping``, so
+    ``map run --clear`` removes the bindings, the ``MappingEvidence`` nodes and
+    the ``IMASMapping`` node ``map clear`` removes instead of resetting source
+    status alone and leaving a stale mapping behind.
 
     Args:
         facility: Facility ID.
-        ids_names: IDS names whose mapping bindings are removed.
+        ids_names: IDS names whose mappings are deleted.
 
     Returns:
-        Total MAPS_TO_IMAS relationships deleted.
+        ``{"mappings": n, "bindings": n, "evidence": n}`` summed over the IDSs.
     """
+    counts = {"mappings": 0, "bindings": 0, "evidence": 0}
     if not ids_names:
-        return 0
+        return counts
     with GraphClient() as gc:
-        return sum(
-            clear_mapping_bindings(facility, ids_name, gc) for ids_name in ids_names
-        )
+        for ids_name in ids_names:
+            deleted = delete_mapping(facility, ids_name, gc)
+            for key in counts:
+                counts[key] += deleted[key]
+    return counts
 
 
 def reset_mapping_state(
@@ -1441,16 +1444,21 @@ async def run_mapping_engine(
         lambda: has_pending_validation_work(state.facility) or not state.map_phase.done
     )
 
-    # Clear previous mappings if requested: drop the MAPS_TO_IMAS bindings
-    # through their delete owner, then reset source status for re-mapping.
+    # Clear previous mappings if requested: drop the whole mapping through its
+    # delete owner, then reset source status for re-mapping.
     if state.clear:
-        removed = await asyncio.to_thread(
-            clear_mapping_bindings_for_ids,
+        cleared_counts = await asyncio.to_thread(
+            clear_mappings_for_ids,
             state.facility,
             state.target_ids_list,
         )
-        if removed:
-            logger.info("Cleared %d previous mapping bindings", removed)
+        logger.info(
+            "Cleared %d mappings, %d bindings, %d evidence for %s",
+            cleared_counts["mappings"],
+            cleared_counts["bindings"],
+            cleared_counts["evidence"],
+            state.facility,
+        )
         cleared = await asyncio.to_thread(
             reset_mapping_state,
             state.facility,

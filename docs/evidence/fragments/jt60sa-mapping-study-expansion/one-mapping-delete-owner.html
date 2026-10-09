@@ -1,0 +1,54 @@
+<section>
+  <h2 id="one-mapping-delete-owner-one-owner-deletes-a-mapping">One owner deletes a mapping, whichever command asks</h2>
+  <p id="one-mapping-delete-owner-change">
+    <strong>What changed.</strong> The whole-mapping delete moved into one
+    function, <code>delete_mapping(facility, ids_name, gc)</code> in
+    <code>imas_codex/ids/graph_ops.py</code>, beside
+    <code>clear_mapping_bindings</code>. It removes the mapping's
+    <code>MAPS_TO_IMAS</code> bindings (through the existing binding owner), its
+    sources' <code>MappingEvidence</code> nodes and the <code>IMASMapping</code>
+    node, and returns <code>{"mappings": n, "bindings": n, "evidence": n}</code>.
+    Both <code>imas map clear</code> (<code>_clear_mapping</code> in
+    <code>imas_codex/cli/map.py</code>) and the engine's <code>--clear</code>
+    branch (<code>clear_mappings_for_ids</code> in
+    <code>imas_codex/ids/workers.py</code>, formerly binding-only) now call it.
+    The engine logs its three counts unconditionally, so a clear that deletes
+    nothing logs the zeros instead of staying silent.
+  </p>
+  <p id="one-mapping-delete-owner-unit">
+    <strong>Unit measure — both callers reach the one owner.</strong>
+    <code>tests/ids/test_map_run_clear.py</code> installs a single shared spy on the
+    graph_ops owner and drives both entry points:
+    <code>workers.run_mapping_engine(MappingDiscoveryState(clear=True))</code>
+    and <code>map_cli._clear_mapping</code> both reach it for
+    <code>("jt-60sa", "magnetics")</code>. A separate test pins that the engine
+    logs <code>Cleared 0 mappings, 0 bindings, 0 evidence for jt-60sa</code>
+    when the owner returns zeros. Gate:
+    <code>tests/ids/test_map_run_clear.py tests/ids/test_mapping_edge_ownership.py</code>
+    → <code>17 passed</code>, <code>EXIT=0</code>.
+  </p>
+  <p id="one-mapping-delete-owner-graph">
+    <strong>Live-graph measure.</strong>
+    <code>tests/ids/test_mapping_delete_graph.py</code> (marked <code>graph</code>)
+    seeds a throwaway facility <code>zz-delete-owner-test</code> with one
+    <code>IMASMapping</code>, one <code>SignalSource</code>, one
+    <code>MAPS_TO_IMAS</code> binding and one <code>MappingEvidence</code>
+    node; a positive control asserts all three are visible before the clear.
+    It then calls the engine path
+    <code>clear_mappings_for_ids(FACILITY, [IDS_NAME])</code>, which returns
+    <code>{"mappings": 1, "bindings": 1, "evidence": 1}</code> and leaves the
+    graph with <code>{"mappings": 0, "bindings": 0, "evidence": 0}</code>. Run
+    with <code>-m graph</code> on the fleet node: <code>1 passed</code>,
+    <code>EXIT=0</code>.
+  </p>
+  <p id="one-mapping-delete-owner-negative-control">
+    <strong>Negative control, and it held.</strong> Making the engine path skip
+    the evidence delete (the <code>MappingEvidence</code>
+    <code>DETACH DELETE</code> removed from <code>delete_mapping</code>, the
+    owner the engine path calls) made the graph test fail:
+    <code>1 failed</code>, <code>EXIT=1</code>, with
+    <code>{'evidence': 1} != {'evidence': 0}</code> — the binding and the
+    mapping node were gone but the evidence node remained, exactly the defect the
+    section records. The mutation was reverted and the gate re-run green.
+  </p>
+</section>

@@ -672,44 +672,21 @@ def _print_summary(results: list[dict], log_print) -> None:
 def _clear_mapping(facility: str, ids_name: str, log_print=None) -> int:
     """Remove a mapping and its relationships from the graph.
 
+    Routes the whole delete — bindings, evidence and the IMASMapping node —
+    through ``graph_ops.delete_mapping``, the same owner the engine's
+    ``--clear`` path uses.
+
     Returns the number of mapping nodes deleted.
     """
     from imas_codex.graph.client import GraphClient
-    from imas_codex.ids.graph_ops import clear_mapping_bindings
+    from imas_codex.ids.graph_ops import delete_mapping
 
     gc = GraphClient()
+    counts = delete_mapping(facility, ids_name, gc)
 
-    # Delete MAPS_TO_IMAS from signal sources used by this mapping
-    clear_mapping_bindings(facility, ids_name, gc)
-
-    # Delete evidence nodes
-    gc.query(
-        """
-        MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
-              -[:USES_SIGNAL_SOURCE]->(sg:SignalSource)
-        MATCH (sg)-[:HAS_EVIDENCE]->(ev:MappingEvidence)
-        DETACH DELETE ev
-        """,
-        facility=facility,
-        ids=ids_name,
-    )
-
-    # Delete mapping node and its relationships
-    result = gc.query(
-        """
-        MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
-        WITH m, m.id AS mid
-        DETACH DELETE m
-        RETURN count(*) AS deleted
-        """,
-        facility=facility,
-        ids=ids_name,
-    )
-
-    deleted = result[0]["deleted"] if result else 0
-    if log_print and deleted:
+    if log_print and counts["mappings"]:
         log_print(f"Cleared previous mapping {facility}:{ids_name}")
-    return deleted
+    return counts["mappings"]
 
 
 # ---------------------------------------------------------------------------
