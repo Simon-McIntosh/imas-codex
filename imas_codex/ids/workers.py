@@ -53,7 +53,11 @@ from imas_codex.ids.candidates import (
     route,
     route_ids,
 )
-from imas_codex.ids.graph_ops import CandidateWriteError, write_candidates
+from imas_codex.ids.graph_ops import (
+    CandidateWriteError,
+    clear_mapping_bindings,
+    write_candidates,
+)
 from imas_codex.ids.mapping import PipelineCost
 from imas_codex.settings import get_mapping_route_thresholds
 
@@ -534,6 +538,29 @@ def has_pending_candidate_work(
             **({"focus_ids": focus_ids} if focus_ids else {}),
         },
     )
+
+
+def clear_mapping_bindings_for_ids(facility: str, ids_names: list[str]) -> int:
+    """Delete the MAPS_TO_IMAS bindings of each IDS's mapping.
+
+    Routes the engine's clear path through the single binding-delete owner
+    ``clear_mapping_bindings``, so ``map run --clear`` removes the same
+    bindings ``map clear`` removes instead of resetting source status alone
+    and leaving the previous bindings in place.
+
+    Args:
+        facility: Facility ID.
+        ids_names: IDS names whose mapping bindings are removed.
+
+    Returns:
+        Total MAPS_TO_IMAS relationships deleted.
+    """
+    if not ids_names:
+        return 0
+    with GraphClient() as gc:
+        return sum(
+            clear_mapping_bindings(facility, ids_name, gc) for ids_name in ids_names
+        )
 
 
 def reset_mapping_state(
@@ -1414,8 +1441,16 @@ async def run_mapping_engine(
         lambda: has_pending_validation_work(state.facility) or not state.map_phase.done
     )
 
-    # Clear previous mapping state if requested
+    # Clear previous mappings if requested: drop the MAPS_TO_IMAS bindings
+    # through their delete owner, then reset source status for re-mapping.
     if state.clear:
+        removed = await asyncio.to_thread(
+            clear_mapping_bindings_for_ids,
+            state.facility,
+            state.target_ids_list,
+        )
+        if removed:
+            logger.info("Cleared %d previous mapping bindings", removed)
         cleared = await asyncio.to_thread(
             reset_mapping_state,
             state.facility,
