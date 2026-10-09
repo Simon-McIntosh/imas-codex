@@ -30,11 +30,16 @@ SIGNAL_KEYS = frozenset(
         "source_units",
         "target_units",
         "cocos_label",
+        "cocos_label_source",
         "confidence",
         "evidence",
     }
 )
 UNEXPANDED_KEYS = frozenset({"source_id", "target_path", "reason"})
+
+# The DD convention writes an explicit token for a field that carries no
+# COCOS transformation class, rather than leaving the value unknown.
+COCOS_ABSENT = "none"
 
 
 def _check_keys(value: Any, expected: frozenset[str], location: str) -> None:
@@ -116,6 +121,43 @@ def _source_parts(path: str | None) -> tuple[str, str] | None:
     return group, array
 
 
+def _nearest_cocos_labels(
+    gc: GraphClient, target_ids: Sequence[str]
+) -> dict[str, tuple[str, str]]:
+    """Map each target path to the label of its nearest labelled ancestor.
+
+    A DD transformation class is stored on the structure that carries it, so a
+    data target reads the class from the closest ancestor along ``HAS_PARENT``.
+    A target with no labelled ancestor maps to the explicit absence token for
+    both the label and its source.
+    """
+    unique = list(dict.fromkeys(target_ids))
+    if not unique:
+        return {}
+    rows = gc.query(
+        """
+        MATCH (t:IMASNode)
+        WHERE t.id IN $target_ids
+        MATCH path = (t)-[:HAS_PARENT*1..]->(a:IMASNode)
+        WHERE a.cocos_transformation_type IS NOT NULL
+        WITH t.id AS target_id, a.cocos_transformation_type AS label,
+             a.cocos_label_source AS label_source, length(path) AS hops
+        ORDER BY target_id, hops ASC
+        WITH target_id, collect(label)[0] AS cocos_label,
+             collect(label_source)[0] AS cocos_label_source
+        RETURN target_id, cocos_label, cocos_label_source
+        """,
+        target_ids=unique,
+    )
+    return {
+        row["target_id"]: (
+            row["cocos_label"] or COCOS_ABSENT,
+            row["cocos_label_source"] or COCOS_ABSENT,
+        )
+        for row in rows
+    }
+
+
 def build_mapping_handoff(
     facility: str,
     ids_names: Sequence[str],
@@ -165,7 +207,6 @@ def build_mapping_handoff(
                    binding.source_property AS source_property,
                    binding.mapping_type AS mapping_type,
                    binding.derived_from AS derived_from,
-                   binding.cocos_label AS cocos_label,
                    binding.confidence AS confidence,
                    binding.evidence AS evidence
             ORDER BY source.id, target.id, signal.id
@@ -186,6 +227,9 @@ def build_mapping_handoff(
         bound_targets = defaultdict(set)
         for binding in existing["bindings"]:
             bound_targets[binding["source_id"]].add(binding["target_id"])
+        cocos_labels = _nearest_cocos_labels(
+            gc, [binding["target_id"] for binding in existing["bindings"]]
+        )
         for binding in existing["bindings"]:
             source_id = binding["source_id"]
             target_path = binding["target_id"]
@@ -236,6 +280,9 @@ def build_mapping_handoff(
                     continue
                 source_group, source_array = parts
                 identifier = _member_identifier(source_array, arrays)
+                cocos_label, cocos_label_source = cocos_labels.get(
+                    target_path, (COCOS_ABSENT, COCOS_ABSENT)
+                )
                 entry["signals"].append(
                     {
                         "signal_id": row["signal_id"],
@@ -249,7 +296,8 @@ def build_mapping_handoff(
                         "transform_expression": binding.get("transform_expression"),
                         "source_units": binding.get("source_units"),
                         "target_units": binding.get("target_units"),
-                        "cocos_label": row.get("cocos_label"),
+                        "cocos_label": cocos_label,
+                        "cocos_label_source": cocos_label_source,
                         "confidence": row.get("confidence"),
                         "evidence": row.get("evidence"),
                     }

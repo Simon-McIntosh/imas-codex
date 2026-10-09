@@ -22,7 +22,8 @@
           "transform_expression": null,
           "source_units": "T",
           "target_units": "T",
-          "cocos_label": null,
+          "cocos_label": "one_like",
+          "cocos_label_source": "xml",
           "confidence": 0.87,
           "evidence": "EDAS MDAC pickup probe channel"
         },
@@ -38,7 +39,8 @@
           "transform_expression": null,
           "source_units": "T",
           "target_units": "T",
-          "cocos_label": null,
+          "cocos_label": "one_like",
+          "cocos_label_source": "xml",
           "confidence": 0.87,
           "evidence": "EDAS MDAC pickup probe channel"
         }
@@ -68,7 +70,8 @@
           "transform_expression": null,
           "source_units": "A",
           "target_units": "A",
-          "cocos_label": null,
+          "cocos_label": "ip_like",
+          "cocos_label_source": "xml",
           "confidence": 0.83,
           "evidence": "MMSYS PF coil current channel"
         },
@@ -84,7 +87,8 @@
           "transform_expression": null,
           "source_units": "A",
           "target_units": "A",
-          "cocos_label": null,
+          "cocos_label": "ip_like",
+          "cocos_label_source": "xml",
           "confidence": 0.83,
           "evidence": "MMSYS PF coil current channel"
         }
