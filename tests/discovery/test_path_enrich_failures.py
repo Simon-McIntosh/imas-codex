@@ -165,6 +165,12 @@ class PathGraph:
                     "pending_score": 0,
                 }
             ]
+        if "AS terminal_count" in cypher:
+            set_aside = (
+                "coalesce(p.enrich_failures, 0) >= $failure_limit" in cypher
+                and self.failures >= params["failure_limit"]
+            )
+            return [{"terminal_count": int(set_aside)}]
         if (
             "SET p.claimed_at = datetime()" in cypher
             or "SET p.claimed_at = $now" in cypher
@@ -238,3 +244,17 @@ def test_set_aside_path_is_neither_pending_nor_claimable(monkeypatch):
     assert parallel.claim_paths_for_enriching("sample") == []
     assert frontier.get_discovery_stats("sample")["enrichment_ready"] == 0
     assert enrichment.get_paths_pending_enrichment("sample") == []
+
+
+def test_set_aside_path_counts_as_terminal_at_failure_limit(monkeypatch):
+    graph = PathGraph()
+    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    state = parallel.DiscoveryState(facility="sample")
+
+    graph.failures = parallel.ENRICH_FAILURE_LIMIT - 1
+    assert parallel.has_pending_work("sample") is True
+    assert state.terminal_count == 0
+
+    graph.failures = parallel.ENRICH_FAILURE_LIMIT
+    assert parallel.has_pending_work("sample") is False
+    assert state.terminal_count == 1
