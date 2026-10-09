@@ -1,0 +1,102 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T01:53:19.598Z",
+  "dispatched_at": "2026-10-09T01:45:44Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-evidence-followups.html:77",
+      "id": "anchors_resolve-1",
+      "reason": "the `signal-followup-record` implementer is told to merge an existing writer by a name that does not resolve, so the plan must name `persist_mapping_result` (or state a rename) before the node is dispatched.",
+      "text": "\u00a72 says \"`write_mapping_result`'s escalation writer becomes a caller of it\", but no function named `write_mapping_result` exists anywhere in `imas_codex/` or `tests/`; the escalation writer that persists `MappingEvidence \u2026 evidence_type = 'escalation'` is `persist_mapping_result` (imas_codex/ids/models.py:584), and the same wrong name recurs in \u00a71 (line 38) where it is presented as the existing writer",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-evidence-followups.html:91",
+      "id": "reasoning-1",
+      "reason": "the mechanism (a `facility.yaml` enum value) only reaches the generated enum through a step the gate command deliberately skips, so the node must add `uv run build-models` (or drop `--no-sync`) or the gate cannot observe the value it asserts.",
+      "text": "the \u00a72 done-when asserts \"an escalation followup round-trips through the generated models\" and \"the `declared` evidence type accepted\", but `imas_codex/graph/models.py` (which carries `class EvidenceType`, line 2468) is gitignored and rebuilt only by the `build-models` hatch sync hook, and the named command is `uv run --no-sync pytest`, which skips that hook",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-evidence-followups.html:149",
+      "id": "wiring-1",
+      "reason": "with no declared order between \u00a72 and \u00a74 and a shared write path, a dispatcher can run them concurrently on `ids/models.py` and reach a module before `raise_followup` exists.",
+      "text": "\u00a74's node `followup-evidence-in-state` writes `imas_codex/ids/models.py` (the same path \u00a72's node writes) and its prose has the conventions stage and the map \"raise followups through `raise_followup`\", a \u00a72 symbol, yet the node declares only \"after `signal-cocos-conventions` \u00a77 and `mapping-decision-chain` \u00a75\" \u2014 unlike both \u00a73 nodes, which declare \"after \u00a72\" \u2014 and no gate (g-sef-1, g-sef-2) orders it after \u00a72",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "23372a598dc2c26a36762c5ad23d064eb68003bc7ddb8fed1516772ae9817440",
+  "plan_slug": "signal-evidence-followups",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-09T01:54:54.808053+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-09T01:54:58.665848+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-09T01:55:02.339132+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:54:54.808053+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:54:58.665848+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:55:02.339132+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-signal-evidence-followups.v3.json",
+  "review_run_id": "r-20261009T014530654432-plan-review-of-signal-evidence-followups",
+  "reviewed_blob_sha": "adcf80a4e9464df88033ab1c07d5b338e8d39a10",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a72 (and \u00a71) cite `write_mapping_result` in `imas_codex/ids/models.py`, which resolves to no symbol in the repository; the escalation writer is `persist_mapping_result`.",
+    "done_when": "pass \u2014 each in-scope node's done-when is a runnable pytest target with a falsifiable assertion, and \u00a73's two nodes carry explicit negative controls (a refused attach with no write; the tool absent in read-only mode).",
+    "evidence_paths": "pass \u2014 every in-scope gate is a pytest target under `tests/` in the repository, not a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 `raise_followup`, `signal_followups`, `EvidenceType.declared` and the node ids are named by what they do, with no plan labels, ticket numbers or version tags reaching code.",
+    "reasoning": "a finding \u2014 \u00a72's mechanism adds `declared` to the `EvidenceType` schema, but the done-when pins `--no-sync`, so the schema-derived generated enum the test must observe is never rebuilt.",
+    "single_goal": "pass \u2014 each of `signal-followup-record`, `followup-triage-cli` and `followup-triage-mcp` names one deliverable and one closing verdict.",
+    "wiring": "a finding \u2014 \u00a74's `followup-evidence-in-state` calls \u00a72's `raise_followup` and shares the write path `imas_codex/ids/models.py` with \u00a72, but declares only external predecessors, so the plan orders no work between them."
+  },
+  "section_digests": {
+    "_document": "428d327874b287138a49b7dcab0e2a722cb0cf28a3f5f2d0dcfe72aa7188da8b",
+    "s1": "81671787c948a88ec1563a65a150e5c5e55fcdbed8915b5897804a38979d6ca8",
+    "s2": "8d323d17f66c855592795f2ab545ce451688ce89209223e9965d3d4e41010072",
+    "s3": "91ff2161a53e3a8f429a315da087a1b7da1c30f106a1c68554aa90bfa26f5344",
+    "s4": "caa3fd0b9317ea509fe59b493d6d7ac91ab976e3e0180e46e2caca70e2d733a0",
+    "s5": "d83d004ebb65970c857e5ce09175e53975079e8b14c98cac3cddff89a9230ec3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:54:16.521858+00:00"
+}
