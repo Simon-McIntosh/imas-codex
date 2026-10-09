@@ -1,0 +1,155 @@
+<section id="convention-probe-prototype" data-reckon="fragment">
+  <h2 id="convention-probe-prototype-title">JT-60SA live convention sign probe</h2>
+  <p id="convention-probe-prototype-scope">
+    On 2026-10-09, the graph identified the mapped plasma-current source
+    <code>jt-60sa:eddbreadTime('E101173', 'PSRC', 'Ip', t1, t2)</code>, the raw
+    absolute-loop source <code>jt-60sa:eddbreadTime('E101173', 'MDAC', 'magFlxLp7', t1, t2)</code>,
+    and the TF-coil source <code>jt-60sa:eddbreadTime('E101173', 'MMSYS', 'cur1TFLKAT', t1, t2)</code>.
+    Their members are <code>jt-60sa:general/psrc_ip</code>,
+    <code>jt-60sa:general/mdac_magflxlp7</code>, and
+    <code>jt-60sa:general/mmsys_cur1tflkat</code>. The same graph binds
+    <code>PSRC/calIp</code>, <code>FAME/BTV</code>, and <code>FAME/Q95</code> to
+    <code>jt-60sa:general/psrc_calip</code>, <code>jt-60sa:general/fame_btv</code>,
+    and <code>jt-60sa:general/fame_q95</code>. Each has a
+    <code>DATA_ACCESS</code> edge to <code>jt-60sa:edas:eddb</code>. The six
+    template selectors are <code>PSRC/Ip</code>, <code>PSRC/calIp</code>,
+    <code>MDAC/magFlxLp7</code>, <code>MMSYS/cur1TFLKAT</code>,
+    <code>FAME/BTV</code>, and <code>FAME/Q95</code>.
+  </p>
+  <p id="convention-probe-prototype-access">
+    The graph's DataAccess connection template imports
+    <code>eddbWrapper</code> from <code>/analysis/src/eddb</code>, opens
+    <code>/analysis/lib/libeddb.so</code> with <code>db.eddbOpen()</code>, and
+    closes it with <code>db.eddbClose()</code>. Its data template is
+    <code>ok, rtn = db.eddbreadTime('{shot}', '{category}', '{data_name}', '0', '99');
+    data = rtn['data'] if ok else None</code>. The graph's accessor uses
+    <code>E101173</code> as its discovery shot; each live read substituted the
+    shot in the tables below. The wrapper returned its own <code>time</code>
+    and <code>unit</code> arrays. The remote session used the DataAccess setup
+    commands <code>module unload python/3.5.6</code> and
+    <code>module load python/3.12</code> via the user SSH configuration; no
+    facility file was written.
+  </p>
+
+  <h3 id="convention-probe-prototype-census-title">Polarity census and controls</h3>
+  <p id="convention-probe-prototype-census-method">
+    <code>eddbreadShot('E100001','E101173')</code> returned 1,167 shots,
+    including 289 E-kind shots. The live screen read both graph sources
+    <code>PSRC/calIp</code> and <code>PSRC/Ip</code> on every E-kind shot; each
+    succeeded on 287 and returned <code>irc=1013</code> on the same two shots.
+    A sign interval is consecutive samples with magnitude at least 50 kA;
+    0.1 s is a screening duration, not a proof of plasma polarity. The
+    positive control is E101154: <code>calIp</code> is positive above 50 kA
+    for 11.10125 s. The union of E-shots whose <code>calIp</code> reaches
+    either sign at 50 kA is 228, reproducing the
+    <a href="/imas-ambix/evidence/fragments/jt60sa-machine-map/jtmm-op1-shot-survey.html">independent OP1 survey's</a>
+    228-shot plasma-candidate count.
+  </p>
+  <table id="convention-probe-prototype-census-table">
+    <thead><tr><th>Source</th><th>Positive peak ≥50 kA</th><th>Negative peak ≤−50 kA</th><th>Positive interval ≥0.1 s</th><th>Negative interval ≥0.1 s</th></tr></thead>
+    <tbody>
+      <tr><td>PSRC/calIp</td><td>226</td><td>24</td><td>223</td><td>2</td></tr>
+      <tr><td>PSRC/Ip</td><td>227</td><td>7</td><td>not used as the plasma-membership test</td><td>5</td></tr>
+    </tbody>
+  </table>
+  <p id="convention-probe-prototype-polarity-verdict">
+    Positive plasma-current polarity is directly represented by the long
+    E101154 and E100999 plateaus. Negative values exist in both EDDB source
+    arrays, but this probe found <strong>no corroborated reverse-current plasma
+    reference</strong> in the catalogued OP1 range. The only two negative-only
+    <code>calIp</code> peak candidates, E100599 and E100628, last 0.00925 s
+    and 0.00025 s respectively above 50 kA and have positive mapped
+    <code>Ip</code> at the negative peak. The only two negative
+    <code>calIp</code> intervals lasting 0.1 s, E100803 and E100832, begin
+    immediately after a longer positive interval; mapped <code>Ip</code> at
+    their negative midpoint is only −2.6 and −31.0 kA. The five sustained
+    negative <code>PSRC/Ip</code> intervals are E100601, E100606, E100607,
+    E100614, and E100629; <code>calIp</code> is zero at each negative
+    midpoint. None of these candidate shots has a readable FAME field or q
+    series. A sign change in one reconstructed channel is therefore not a
+    validated change of machine plasma-current polarity.
+  </p>
+
+  <h3 id="convention-probe-prototype-observations-title">Shot observations</h3>
+  <p id="convention-probe-prototype-observations-method">
+    Values are time aligned to the listed instant (nearest EDDB sample within
+    0.00025 s). A dash means that this probe did not sample that quantity at
+    that instant; <code>missing</code> means the read failed and is itemised
+    below. The loop column is the raw absolute loop 7 in Wb; it has not had
+    vacuum/PF-coil response removed. BTV and q95 are FAME reconstruction
+    outputs, while TF is the measured coil current. These writers cannot be
+    silently combined into a machine-convention declaration.
+  </p>
+  <table id="convention-probe-prototype-observations-table">
+    <thead><tr><th>Shot</th><th>Source polarity and instant [s]</th><th>PSRC/Ip [kA]</th><th>PSRC/calIp [kA]</th><th>MDAC loop 7 [Wb]</th><th>TF coil [kA]</th><th>FAME BTV [T·m]</th><th>FAME q95</th><th>Plasma reference</th></tr></thead>
+    <tbody>
+      <tr><td>E101154</td><td>positive Ip peak, 4.68750</td><td>+998.6</td><td>+996.3</td><td>+1.0830</td><td>+23.202</td><td>+6.0088</td><td>+10.158</td><td>yes, positive</td></tr>
+      <tr><td>E100999</td><td>positive Ip peak, 5.66875</td><td>+1202.6</td><td>+1198.5</td><td>+2.1526</td><td>+23.208</td><td>+6.0126</td><td>+9.156</td><td>yes, positive</td></tr>
+      <tr><td>E100599</td><td>negative calIp peak, 0.01050</td><td>+15.1</td><td>−76.1</td><td>—</td><td>—</td><td>missing</td><td>missing</td><td>unconfirmed, 0.00925 s</td></tr>
+      <tr><td>E100628</td><td>negative calIp peak, 0.04775</td><td>+19.5</td><td>−284.1</td><td>—</td><td>—</td><td>missing</td><td>missing</td><td>unconfirmed, 0.00025 s</td></tr>
+      <tr><td>E100803</td><td>positive calIp interval, 0.63000</td><td>+138.1</td><td>+157.0</td><td>−1.8579</td><td>+20.444</td><td>missing</td><td>missing</td><td>positive segment</td></tr>
+      <tr><td>E100803</td><td>negative calIp interval, 1.08250</td><td>−2.6</td><td>−157.4</td><td>−1.6140</td><td>+20.439</td><td>missing</td><td>missing</td><td>unconfirmed, after positive</td></tr>
+      <tr><td>E100832</td><td>positive calIp interval, 0.66975</td><td>+110.0</td><td>+162.6</td><td>−1.8883</td><td>+23.228</td><td>missing</td><td>missing</td><td>positive segment</td></tr>
+      <tr><td>E100832</td><td>negative calIp interval, 1.09250</td><td>−31.0</td><td>−176.3</td><td>−1.6792</td><td>+23.250</td><td>missing</td><td>missing</td><td>unconfirmed, after positive</td></tr>
+      <tr><td>E100601</td><td>negative Ip interval, 0.35562</td><td>−52.6</td><td>0</td><td>−2.1051</td><td>+23.237</td><td>missing</td><td>missing</td><td>no calIp plasma</td></tr>
+      <tr><td>E100606</td><td>negative Ip interval, 0.83262</td><td>−56.5</td><td>0</td><td>−0.9555</td><td>+23.226</td><td>missing</td><td>missing</td><td>no calIp plasma</td></tr>
+      <tr><td>E100607</td><td>negative Ip interval, 0.93350</td><td>−50.9</td><td>0</td><td>−0.7168</td><td>+23.235</td><td>missing</td><td>missing</td><td>no calIp plasma</td></tr>
+      <tr><td>E100614</td><td>negative Ip interval, 0.13137</td><td>−74.3</td><td>0</td><td>−2.5075</td><td>+23.253</td><td>missing</td><td>missing</td><td>calIp rises positive later</td></tr>
+      <tr><td>E100629</td><td>negative Ip interval, 0.14500</td><td>−64.5</td><td>0</td><td>−2.4801</td><td>+25.656</td><td>missing</td><td>missing</td><td>no calIp plasma</td></tr>
+    </tbody>
+  </table>
+  <p id="convention-probe-prototype-loop-crosscheck">
+    At the positive Ip peaks, raw loop 7 exceeds its preceding median by
+    +3.0471 Wb on E101154 and +3.5288 Wb on E100999. That is a measured
+    sign of the raw response, not a vacuum-subtracted σ<sub>Bp</sub> estimate.
+    The independent imas-ambix loop-reference fit identifies loop 7 as the
+    only absolute loop, and its three vacuum shots give a median slope of
+    −0.992 with median |r| 0.999 against the target prediction; its
+    <code>channel_factor = −1</code> is the total sensor-to-COCOS-17 sign,
+    not the source's COCOS coefficient. The imas-ambix sign cohort separately
+    reports σ<sub>Bp</sub> = +1 for its oriented source, but its corrected
+    report leaves e<sub>Bp</sub> unmeasured without a ψ grid. These are
+    cross-checks, not substitute live negative-polarity observations. The
+    <a href="/imas-ambix/evidence/fragments/jt60sa-machine-map/jtmm-loop-reference-rca.html">loop-reference fits</a>,
+    <a href="/imas-ambix/evidence/fragments/jt60sa-machine-map/jtmm-sign-cohort-repair.html">corrected sign-cohort account</a>,
+    and <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json</code>
+    bind those cross-check claims to their source records.
+  </p>
+
+  <h3 id="convention-probe-prototype-coefficients-title">Coefficient classification</h3>
+  <table id="convention-probe-prototype-coefficients-table">
+    <thead><tr><th>Quantity</th><th>Class in this probe</th><th>What the data establish</th></tr></thead>
+    <tbody>
+      <tr><td>σ<sub>Bp</sub></td><td>measured for the oriented loop-7 source, provisionally +1</td><td>The live positive shots measure raw loop-response/Ip sign +; raw traces alone carry its product with channel orientation and PF/vacuum response. The imas-ambix oriented, vacuum-corrected loop-7 cohort assigns +1 to its source. Without a validated reverse-current shot this prototype does not accept a facility-wide value.</td></tr>
+      <tr><td>σ<sub>ρθφ</sub></td><td>product-only for the machine</td><td>On two positive shots, sign(q95) = sign(Ip) = sign(FAME BTV) = +, so the FAME writer's q/Ip/B0 sign product is +1. BTV and q95 are reconstruction outputs, and a TF-coil current sign alone does not declare positive B<sub>t</sub> direction.</td></tr>
+      <tr><td>e<sub>Bp</sub></td><td>declaration-required</td><td>No raw magnitude distinguishes ψ from ψ/2π. FAME has no ψ grid in these reads; a G-EQDSK file would declare its own writer's units rather than this EDDB source's units.</td></tr>
+      <tr><td>σ<sub>RφZ</sub></td><td>declaration-required</td><td>Time traces do not define positive toroidal angle or cylindrical handedness.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="convention-probe-prototype-failures-title">Every failed live read</h3>
+  <p id="convention-probe-prototype-failures-method">
+    No SSH, library-open, or selected positive-reference read failed. The
+    following are the complete failed EDDB reads across this probe's seven
+    logged batches. <code>irc=1013</code> means that the template returned
+    <code>ok=False</code> and <code>ntime=0</code>; it does not say that a
+    listed quantity is physically zero. A repeated count denotes separate
+    read attempts by the stated batches.
+  </p>
+  <table id="convention-probe-prototype-failures-table">
+    <thead><tr><th>Shot(s)</th><th>DataAccess arguments</th><th>Attempts per shot</th><th>Error returned</th></tr></thead>
+    <tbody>
+      <tr><td>E101019, E101020</td><td>PSRC/calIp</td><td>2</td><td>ok=False, irc=1013, ntime=0</td></tr>
+      <tr><td>E101019, E101020</td><td>PSRC/Ip</td><td>1</td><td>ok=False, irc=1013, ntime=0</td></tr>
+      <tr><td>E100599, E100628, E100601, E100606, E100607, E100614, E100629, E100803, E100832, E101165</td><td>FAME/BTV</td><td>1</td><td>ok=False, irc=1013, ntime=0</td></tr>
+      <tr><td>E100599, E100628, E100601, E100606, E100607, E100614, E100629, E100803, E100832, E101165</td><td>FAME/Q95</td><td>1</td><td>ok=False, irc=1013, ntime=0</td></tr>
+    </tbody>
+  </table>
+  <p id="convention-probe-prototype-receipts">
+    Run receipts: <code>polarity_census.log</code>, <code>ip_census.log</code>,
+    <code>plasma_polarity.log</code>, <code>shot_signs.log</code>,
+    <code>negative_reference.log</code>, <code>reversal_candidates.log</code>,
+    and <code>negative_only.log</code> in the node run directory. Each names
+    its source revision and command and ends with <code>EXIT=0</code>.
+  </p>
+</section>
