@@ -3,20 +3,20 @@
   <p id="handoff-cocos-label-landing">
     <code>build_mapping_handoff</code> in <code>imas_codex/ids/handoff.py</code>
     resolves each signal row's <code>cocos_label</code> and <code>cocos_label_source</code>
-    from the nearest ancestor of its target along <code>HAS_PARENT</code> that carries
-    <code>cocos_transformation_type</code>. Both keys are additive, so
-    <code>format_version</code> stays <code>1</code>. A target with no labelled
-    ancestor carries the DD absence token <code>none</code> for both. The export
+    from the target itself or its nearest ancestor along <code>HAS_PARENT</code> that
+    carries <code>cocos_transformation_type</code>. Both keys are additive, so
+    <code>format_version</code> stays <code>1</code>. A target with no labelled node
+    on that chain carries the DD absence token <code>none</code> for both. The export
     no longer reads the binding's own <code>cocos_label</code>; it reads only the
     repaired graph label.
   </p>
   <p id="handoff-cocos-label-rows">
-    Gate: <code>uv run pytest tests/ids/test_mapping_handoff.py</code> — 4 passed
-    (EXIT=0). The mocked-graph test shows a target under a labelled parent
+    Gate: <code>uv run pytest tests/ids/test_mapping_handoff.py</code> — 5 passed
+    (EXIT=0). The mocked-graph tests show a target labelled on its own node keeping
+    its own label over its parent's, a target under a labelled parent
     (<code>magnetics/b_field_pol_probe/field/data</code>) carrying
-    <code>one_like</code> from <code>xml</code>, and a target with no labelled
-    ancestor (<code>magnetics/saddle_coil/current/data</code>) carrying
-    <code>none</code> for both.
+    <code>one_like</code> from <code>xml</code>, and a target with no labelled node
+    on its chain (<code>none</code>) carrying <code>none</code> for both.
   </p>
   <p id="handoff-cocos-label-live">
     Live export of <code>jt-60sa</code> <code>magnetics</code> gives the pickup-probe

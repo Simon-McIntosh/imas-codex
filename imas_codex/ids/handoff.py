@@ -124,12 +124,12 @@ def _source_parts(path: str | None) -> tuple[str, str] | None:
 def _nearest_cocos_labels(
     gc: GraphClient, target_ids: Sequence[str]
 ) -> dict[str, tuple[str, str]]:
-    """Map each target path to the label of its nearest labelled ancestor.
+    """Map each target path to the nearest labelled node on its ancestor chain.
 
     A DD transformation class is stored on the structure that carries it, so a
-    data target reads the class from the closest ancestor along ``HAS_PARENT``.
-    A target with no labelled ancestor maps to the explicit absence token for
-    both the label and its source.
+    data target reads the class from the target itself (hop 0) or the closest
+    ancestor along ``HAS_PARENT``. A target with no labelled node on that chain
+    maps to the explicit absence token for both the label and its source.
     """
     unique = list(dict.fromkeys(target_ids))
     if not unique:
@@ -138,7 +138,7 @@ def _nearest_cocos_labels(
         """
         MATCH (t:IMASNode)
         WHERE t.id IN $target_ids
-        MATCH path = (t)-[:HAS_PARENT*1..]->(a:IMASNode)
+        MATCH path = (t)-[:HAS_PARENT*0..]->(a:IMASNode)
         WHERE a.cocos_transformation_type IS NOT NULL
         WITH t.id AS target_id, a.cocos_transformation_type AS label,
              a.cocos_label_source AS label_source, length(path) AS hops

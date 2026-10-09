@@ -267,6 +267,85 @@ def test_builder_expands_members_and_carries_cocos_labels():
         assert marker in expansion_query
 
 
+def test_cocos_label_prefers_the_target_itself_over_its_parent():
+    """A target labelled on its own node keeps its own label, not its parent's."""
+    graph = MagicMock()
+    target = "magnetics/self_probe/current/data"
+    chain = {
+        target: ("ip_like", "xml"),
+        "magnetics/self_probe/current": ("one_like", "xml"),
+    }
+    chain_nodes = [
+        target,
+        "magnetics/self_probe/current",
+        "magnetics/self_probe",
+        "magnetics",
+    ]
+
+    def query(statement: str, **params):
+        if "m.facility_id AS facility_id" in statement:
+            return [
+                {
+                    "id": "jt-60sa:magnetics",
+                    "facility_id": "jt-60sa",
+                    "ids_name": "magnetics",
+                    "dd_version": "4.1.1",
+                    "status": "generated",
+                    "provider": "imas-codex",
+                }
+            ]
+        if "r.config AS config" in statement:
+            return []
+        if "r.source_property AS source_property" in statement:
+            return [
+                {
+                    "source_id": "jt-60sa:magnetics:pickup_probe",
+                    "target_id": target,
+                    "transform_expression": None,
+                    "source_units": "A",
+                    "target_units": "A",
+                    "source_property": "value",
+                }
+            ]
+        if "OPTIONAL MATCH (signal:FacilitySignal)-[:MEMBER_OF]->(source)" in statement:
+            return [
+                {
+                    "source_id": "jt-60sa:magnetics:pickup_probe",
+                    "target_id": target,
+                    "signal_id": "jt-60sa:general/mdac_selfpbtc1",
+                    "data_source": "edas",
+                    "data_source_path": "MDAC/selfPbTC1",
+                    "source_property": "value",
+                    "mapping_type": "direct",
+                    "derived_from": None,
+                    "cocos_label": None,
+                    "confidence": None,
+                    "evidence": None,
+                }
+            ]
+        if "HAS_PARENT" in statement:
+            start = 0 if "*0.." in statement else 1
+            for node in chain_nodes[start:]:
+                if node in chain:
+                    label, source = chain[node]
+                    return [
+                        {
+                            "target_id": target,
+                            "cocos_label": label,
+                            "cocos_label_source": source,
+                        }
+                    ]
+            return []
+        raise AssertionError(f"unexpected graph query: {statement}")
+
+    graph.query.side_effect = query
+    document = build_mapping_handoff("jt-60sa", ["magnetics"], gc=graph)
+    row = document["ids"][0]["signals"][0]
+    assert row["target_path"] == target
+    assert row["cocos_label"] == "ip_like"
+    assert row["cocos_label_source"] == "xml"
+
+
 def test_fixture_has_the_exact_contract_and_realistic_rows():
     document = json.loads(FIXTURE.read_text(encoding="utf-8"))
     check_handoff_document(document)
