@@ -2689,6 +2689,8 @@ classes:
           relationship_type: CHECKED_WITH
       description:
         description: What this signal measures (physics description)
+      source_description:
+        description: Catalogue wording supplied by the source data system, independent of enrichment
       embedding:
         description: Vector embedding of description for semantic search
         multivalued: true

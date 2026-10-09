@@ -403,6 +403,7 @@ class EDASScanner:
                         data_source_path=f"UDDB/{dname}",
                         unit=units,
                         description=description,
+                        source_description=description,
                         data_class=SignalDataClass.time_series,
                         shot_range=raw.get("shot_range") or None,
                         pid=dname,
@@ -435,6 +436,7 @@ class EDASScanner:
                             if description
                             else f"LCDB {source_category} {dname} from {owner}"
                         ),
+                        source_description=description,
                         discovery_source="edas",
                         example_shot=shot,
                     )
@@ -460,6 +462,7 @@ class EDASScanner:
                         data_source_name="MBDB",
                         data_source_path=f"{owner}/{case}/{source_category}/{dname}",
                         description=f"MBDB {source_category} {dname} from {owner} case {case}",
+                        source_description=description,
                         data_class=(
                             SignalDataClass.one_point
                             if kind == "P"
@@ -517,6 +520,7 @@ class EDASScanner:
                     data_source_path=f"{cat}/{source_dname}",
                     unit=units,
                     description=description,  # May be Japanese
+                    source_description=description,
                     data_class=data_class,
                     shot_range=raw.get("shot_range") or None,
                     pid=raw.get("udp_id") or None,

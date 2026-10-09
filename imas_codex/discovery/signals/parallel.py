@@ -1161,6 +1161,7 @@ def claim_signals_for_enrichment(
                        s.tdi_quantity AS tdi_quantity,
                        s.discovery_source AS discovery_source,
                        s.description AS description,
+                       s.source_description AS source_description,
                        s.data_source_node AS data_source_node,
                        s.facility_id AS facility_id,
                        s.is_static AS is_static,
@@ -2692,6 +2693,10 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
     Optionally creates INTRODUCED_IN relationships to SignalEpoch
     epoch (if epoch_id is present).
 
+    EDAS batches come from one scanner. A catalogue re-enumeration updates
+    only source_description on rows already present so prior enrichment and
+    claims survive the scan.
+
     Large signal lists (e.g., 5000+ from PPF) are batched to avoid
     transaction timeouts from a single massive UNWIND MERGE.
     """
@@ -2713,6 +2718,15 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
                     for sig in batch
                 ]
 
+                source_description_only = all(
+                    sig.get("discovery_source") == "edas" for sig in batch
+                )
+                on_match = (
+                    "s.source_description = sig.source_description"
+                    if source_description_only
+                    else "s += scanned, s.claimed_at = null"
+                )
+
                 # Phase 1: Create/update signal nodes + AT_FACILITY edge
                 gc.query(
                     """
@@ -2721,12 +2735,11 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
                     MERGE (s:FacilitySignal {id: sig.id})
                     ON CREATE SET s += sig,
                                   s.discovered_at = datetime()
-                    ON MATCH SET s += scanned,
-                                 s.claimed_at = null
+                    ON MATCH SET __ON_MATCH__
                     WITH s, sig
                     MATCH (f:Facility {id: sig.facility_id})
                     MERGE (s)-[:AT_FACILITY]->(f)
-                    """,
+                    """.replace("__ON_MATCH__", on_match),
                     rows=scan_rows,
                 )
 
@@ -4268,8 +4281,12 @@ async def enrich_worker(
                 if signal.get("is_static"):
                     user_lines.append("is_static: true")
 
-                # Inject existing description from scanner (e.g., EDAS Japanese desc)
-                if signal.get("description"):
+                # Keep the catalogue's wording distinct from model prose.
+                if signal.get("source_description"):
+                    user_lines.append(
+                        f"source_description: {signal['source_description']}"
+                    )
+                elif signal.get("description"):
                     user_lines.append(f"existing_description: {signal['description']}")
 
                 # Inject tree context if available (HAS_DATA_SOURCE_NODE traversal)
