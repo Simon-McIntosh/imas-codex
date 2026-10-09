@@ -21,9 +21,9 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-modified" content="2026-10-09">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -263,6 +263,35 @@
       target and total sign from the fixture; states how many targets agree; states the pickup-coil sign agreement with
       every disagreement listed; reports the PF-current signs unscored; gives the spend and wall time; shows the
       written IMASMapping nodes at status generated with none active; and names the command that clears them.
+    </p>
+
+    <h2 id="s13">§13 — The map worker maps the homes the assign stage selects</h2>
+<section data-reckon="section" data-id="s13" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>
+      The §12 example (<a href="/imas-codex/evidence/fragments/jt60sa-imas-maps/example-map-run.html">fragment</a>)
+      found a defect in <code>imas-codex imas map run</code>. In <code>~/.local/share/imas-codex/logs/map_jt-60sa.log</code>,
+      <code>assign_worker</code> marked two <code>MAPPING_CANDIDATE</code> edges selected for
+      <code>magPbTC5</code> at 04:11:19 and for the grouped <code>magPbTCNNN</code> at 04:14:21, exited at 04:14:53, and
+      <code>map_worker_0</code> exited normally at 04:14:54 having processed no source; validation then logged
+      <code>No mappings for magnetics</code>. After the run the selected sources still carried
+      <code>mapping_claimed_at</code> and <code>has_pending_mapping_work</code> returned true. So the map worker stopped
+      while work it should have claimed was pending. The worker code is <code>map_worker</code>
+      (<code>imas_codex/ids/workers.py</code>, near line 768), its claim <code>claim_sources_for_mapping</code> (near
+      line 263), and <code>refresh_mapping_status</code> (near line 353), which sets <code>mapping_status</code> from
+      selected homes and clears the claim. The repair finds why the map worker's claim saw nothing, from the claim
+      predicate, the status the assign stage leaves, and the worker's exit condition, fixes that cause, and proves it
+      on the same three sources.
+    </p>
+    <p>
+      <strong>Node</strong> <code>map-worker-selected-homes</code>, role implement, 1.5 h. Write paths:
+      <code>imas_codex/ids/workers.py</code>, <code>tests/ids/test_map_worker_selected_homes.py</code> and
+      <code>docs/evidence/fragments/jt60sa-imas-maps/map-worker-selected-homes.html</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with a test that fails on the current
+      code, in which a source with selected edges and a stale assign claim is claimed and mapped by the map worker
+      rather than skipped; and a live <code>imas-codex imas map run jt-60sa -i magnetics --no-activate -c 3 --time 30</code>
+      on the §12 sources writes bindings for the selected homes, at status generated with none active. The fragment
+      gives the cause, the fix, and the §12 audit table filled in: each written binding's target and transform beside
+      the imas-ambix target and total sign, with pickup-coil sign agreement scored and every disagreement listed.
     </p>
 
     <section data-reckon="gates" id="gates" class="r-gates">
