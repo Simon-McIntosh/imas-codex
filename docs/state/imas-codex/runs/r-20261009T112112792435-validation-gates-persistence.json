@@ -1,0 +1,734 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "e1e6ae6cd25e14c173ff7193c3dc1903755e1daa",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5093591,
+      "input_tokens_cumulative": 5093591,
+      "output_tokens": 29547,
+      "output_tokens_cumulative": 29547,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 218,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "_entry",
+        "path": "tests/ids/test_deprecated_dd_targets.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "_entry",
+        "path": "tests/ids/test_validation_gates_persistence.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_batch",
+        "path": "tests/ids/test_map_each_home.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "_entry",
+        "path": "tests/ids/test_validation_gates_persistence.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_sections",
+        "path": "tests/ids/test_binding_data_target.py"
+      },
+      "run_function": {
+        "line": 58,
+        "name": "_sections",
+        "path": "tests/ids/test_validation_gates_persistence.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "_sections",
+        "path": "tests/ids/test_binding_source_identity.py"
+      },
+      "run_function": {
+        "line": 58,
+        "name": "_sections",
+        "path": "tests/ids/test_validation_gates_persistence.py"
+      },
+      "window_line": 64
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "_sections",
+        "path": "tests/ids/test_deprecated_dd_targets.py"
+      },
+      "run_function": {
+        "line": 58,
+        "name": "_sections",
+        "path": "tests/ids/test_validation_gates_persistence.py"
+      },
+      "window_line": 58
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b0801885612f9d66ec3b494135656f289c01150d"
+  ],
+  "completed_at": "2026-10-09T11:32:12.613Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-09T11:21:22Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/ids/",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T112112792435-validation-gates-persistence/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.7407,
+    "at_dispatch": 0.76,
+    "plan": "jt60sa-mapping-study-expansion",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-09T11:56:12.917033+00:00",
+    "horizon_seconds": 2100,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-09T11:21:12Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 10,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 9,
+    "mean_context": 93333,
+    "observed_at": "2026-10-09T11:21:02Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 10,
+      "aggregate_tokens_per_second": 258.847,
+      "detail": "",
+      "mean_tokens_per_second": 71.902,
+      "observed_at": "2026-10-09T11:21:02Z",
+      "runs": 3.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-09T11:32:12.613Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T112112792435-validation-gates-persistence/manifest.md",
+  "member": "disposable-r-20261009T112112792435-validation-gates-persistence",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/ids/test_validation_gates_persistence.py::test_a_binding_with_a_missing_target_is_removed_and_escalated",
+      "tests/ids/test_validation_gates_persistence.py::test_a_binding_with_incompatible_units_is_removed_and_escalated",
+      "tests/ids/test_validation_gates_persistence.py::test_the_passing_sibling_is_kept"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/ids/test_validation_gates_persistence.py::test_a_binding_with_a_missing_target_is_removed_and_escalated",
+      "tests/ids/test_validation_gates_persistence.py::test_a_binding_with_incompatible_units_is_removed_and_escalated",
+      "tests/ids/test_validation_gates_persistence.py::test_the_passing_sibling_is_kept"
+    ],
+    "declaration": "return every binding unchanged again; the removal test must then fail",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T112112792435-validation-gates-persistence/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T112112792435-validation-gates-persistence/negative-control.log",
+    "test_paths": [
+      "tests/ids/test_validation_gates_persistence.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "validation-gates-persistence",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1466,
+          "cached_input_tokens": 668482,
+          "input_tokens": 669950,
+          "output_tokens": 802,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 670752,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "e8e8b071-0bd3-4f32-a90b-3476d18716fe",
+      "session_id": "e8e8b071-0bd3-4f32-a90b-3476d18716fe"
+    },
+    "done_when": "tests/ids/test_validation_gates_persistence.py shows a binding with a missing target and one with incompatible units removed from the returned bindings and present as escalations naming the failed check while a passing sibling is kept, and tests/ids passes",
+    "estimated_hours": null,
+    "goal": "remove bindings that fail validation checks from the persisted set and record each as an escalation naming its failed checks",
+    "id": "validation-gates-persistence",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-09T11:21:12Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 10,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 9,
+      "mean_context": 93333,
+      "observed_at": "2026-10-09T11:21:02Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 10,
+        "aggregate_tokens_per_second": 258.847,
+        "detail": "",
+        "mean_tokens_per_second": 71.902,
+        "observed_at": "2026-10-09T11:21:02Z",
+        "runs": 3.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T112112792435-validation-gates-persistence/manifest.md",
+    "negative_control": "return every binding unchanged again; the removal test must then fail",
+    "plan": "jt60sa-mapping-study-expansion",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§26",
+    "spec_level": "exact",
+    "time_budget": "35m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/ids/mapping.py",
+      "tests/ids/test_validation_gates_persistence.py",
+      "docs/evidence/fragments/jt60sa-mapping-study-expansion/validation-gates-persistence.html",
+      "docs/figures/jt60sa-mapping-study-expansion/validation-gates-persistence"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1323070.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "validation-gates-persistence",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-09T11:21:16.798178+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.93,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 505.656,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1099.806,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1516561.290583,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 73434,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1516561.290583,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 73434,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1516561.290583,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 73434,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 73434,
+          "headroom_pct": 68.1,
+          "peak_utilisation_p50_pct": 60.7,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 466,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 108,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 27
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 125.462583,
+        "budget_reason": null,
+        "burn_multiple": 2.204665032733596,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 73434,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.745687065011574,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 3,
+          "passed": 55,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3542488261954365,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 71.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 125.462583,
+        "budget_reason": null,
+        "burn_multiple": 2.204665032733596,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 73434,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.745687065011574,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3542488261954365,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 71.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 125.462583,
+        "budget_reason": null,
+        "burn_multiple": 2.204665032733596,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 73434,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.745687065011574,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3542488261954365,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 71.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0,
+      "claude:claude-sonnet-5-5": 0,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.05,
+      "hold": 0.01,
+      "local:deepseek-v4.1-flash": 0.94
+    },
+    "rendered_token_estimate": 1826,
+    "usage": {
+      "cost": 0.00022176,
+      "input_tokens": 5280,
+      "output_tokens": 150
+    }
+  },
+  "plan": "jt60sa-mapping-study-expansion",
+  "plan_impl_at_dispatch": 0.76,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b0801885612f9d66ec3b494135656f289c01150d",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "review_waiver": {
+    "reason": "lead asked to skip work reviews for speed; coordinator read the diff, verified one check per binding in order, and re-ran tests/ids on the merged head"
+  },
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261009T112112792435-validation-gates-persistence",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§26",
+  "session": "e8e8b071-0bd3-4f32-a90b-3476d18716fe",
+  "session_harness": "claude",
+  "session_id": "2a439c5f-75f3-458b-bdb4-24c266501f6f",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 5093591,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 640.405,
+    "generated_tokens": 29547,
+    "generation_seconds": 443.709,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 58.8,
+    "machine_seconds": 196.696,
+    "peak_input_tokens": 135284,
+    "tokens_per_second": 66.59,
+    "wall_tokens_per_second": 46.14
+  },
+  "time_budget": "35m",
+  "tool_steps": 45.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 650,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-09T11:32:15Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-09T11:21:27Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261009T112112792435-validation-gates-persistence",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6947,
+    "worker_pid": 3789218
+  },
+  "worker_seconds": 628,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
