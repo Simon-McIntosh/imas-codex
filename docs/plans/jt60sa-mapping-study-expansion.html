@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72">
 <meta name="plan-impl" content="0.4706">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -465,6 +465,9 @@
 </div>
 <div class="r-comment" data-section="s15" data-id="c-close-s15" data-who="reckon-build" data-when="2026-10-09T06:30:00Z">
     <div class="r-comment-body"><p>§15 landed: error signals are matched against the run's own data mappings, and the gating flag is gone (merge <code>ab402cc72</code>; 565 tests pass on <code>tests/ids/</code>). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s15">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s15" data-id="c-run-r-20261009T060714613522-error-matching-reads-run-mappings" data-who="reckon-build" data-when="2026-10-09T06:22:07.237Z">
+    <div class="r-comment-body"><p>§15 landed — match_error_signals_to_imas cross-references the in-memory data_mappings the caller passes (group key derived from source_id) instead of persisted MAPS_TO_IMAS edges, and include_direct_error_signals is removed; tests/ids 565 passed / 5 skipped / 4 deselected, negative control makes the in-memory test fail.</p></div>
 </div>
 </section>
 </main>
