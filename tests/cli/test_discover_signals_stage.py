@@ -8,8 +8,9 @@ options and calls the stage. These tests measure the command surface:
 - ``--flush`` selects the draining half: the engine gets ``enrich_only``.
 - ``--topic`` is the free-text steer for enrichment.
 - ``--limit`` caps items.
-- ``--focus ITEMS`` is refused with a message stating the mechanism: the
-  signals claim query takes no item filter.
+- ``--focus ITEMS`` is validated against the graph: an item naming nothing at
+  the facility is refused with the item named, and a known item reaches the
+  engine as ``focus_items``.
 
 The engine is replaced at its single entry point
 (``run_parallel_data_discovery``) so the kwargs it receives are the subject of
@@ -30,6 +31,7 @@ from click.testing import CliRunner
 from imas_codex.cli.discover import discover
 from imas_codex.cli.discover.signals import (
     SignalsStageOptions,
+    _validate_focus,
     run_signals_stage,
 )
 
@@ -48,6 +50,62 @@ _ENGINE_RESULT = {
     "cost": 0.0,
     "elapsed_seconds": 0.5,
 }
+
+
+class _FocusCatalogue:
+    """Resolve focus items against a toy catalogue as ``_validate_focus`` does.
+
+    The validator runs an id/accessor query and a ``data_source_path`` segment
+    query. The segment query joins ``MEMBER_OF``, so a segment reaches the
+    catalogue only through a source member; a source-less signal carrying the
+    segment is not matched — mirroring the claim predicate. The fake models
+    both shapes: a segment query that joins ``MEMBER_OF`` resolves through
+    members only, while a segment query without the join resolves a segment on
+    any node's own path.
+    """
+
+    def __init__(
+        self,
+        signals: list[dict] | None = None,
+        sources: list[dict] | None = None,
+    ) -> None:
+        self.signals = signals or []
+        self.sources = sources or []
+
+    def __enter__(self) -> _FocusCatalogue:
+        return self
+
+    def __exit__(self, *_: object) -> bool:
+        return False
+
+    def query(self, cypher: str, **params: object) -> list[dict]:
+        ids = set(params["ids"])
+        if "data_source_path" in cypher:
+            member_only = "MEMBER_OF" in cypher
+            return [
+                {
+                    "id": signal["id"],
+                    "accessor": signal.get("accessor"),
+                    "data_source_path": signal["data_source_path"],
+                }
+                for signal in self.signals
+                if signal.get("data_source_path")
+                and (signal.get("source_id") or not member_only)
+                and any(
+                    segment in ids for segment in signal["data_source_path"].split("/")
+                )
+            ]
+        return [
+            {"id": node["id"], "accessor": node.get("accessor")}
+            for node in [*self.signals, *self.sources]
+            if node["id"] in ids or node.get("accessor") in ids
+        ]
+
+
+def _install_catalogue(monkeypatch, catalogue: _FocusCatalogue) -> None:
+    monkeypatch.setattr(
+        "imas_codex.graph.GraphClient", lambda *a, **k: catalogue, raising=True
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -192,23 +250,93 @@ def test_limit_caps_items(engine) -> None:
     assert engine["signal_limit"] == 7
 
 
-def test_focus_items_are_refused_stating_the_mechanism(engine) -> None:
+def test_unknown_focus_item_is_refused_naming_it(engine, monkeypatch) -> None:
+    _install_catalogue(monkeypatch, _FocusCatalogue())
     with pytest.raises(click.UsageError) as excinfo:
         run_signals_stage(FACILITY, SignalsStageOptions(focus=("MAG/coil",)))
     message = str(excinfo.value)
-    assert "claim query takes no item filter" in message
-    assert "facility-discovery-sequence" not in message
-    assert "section 7" not in message
+    assert "MAG/coil" in message
+    assert "unknown signal or source id" in message
 
 
-def test_cli_focus_is_refused(engine) -> None:
+def test_known_focus_item_reaches_the_engine_as_focus_items(
+    engine, monkeypatch
+) -> None:
+    _install_catalogue(
+        monkeypatch,
+        _FocusCatalogue(
+            signals=[
+                {
+                    "id": "jet:sig",
+                    "accessor": "A1",
+                    "source_id": "jet:src",
+                    "data_source_path": "MDAC/magPbTC10",
+                },
+            ]
+        ),
+    )
+    run_signals_stage(FACILITY, SignalsStageOptions(focus=("magPbTC10",)))
+    assert engine["focus_items"] == ["magPbTC10"]
+
+
+def test_validate_focus_accepts_a_segment_through_a_source_member(monkeypatch) -> None:
+    _install_catalogue(
+        monkeypatch,
+        _FocusCatalogue(
+            signals=[
+                {
+                    "id": "jet:sig",
+                    "accessor": "A1",
+                    "source_id": "jet:src",
+                    "data_source_path": "MDAC/magPbTC10",
+                },
+            ]
+        ),
+    )
+    _validate_focus(FACILITY, ["magPbTC10"])
+
+
+def test_validate_focus_refuses_a_sourceless_signal_carrying_the_segment(
+    monkeypatch,
+) -> None:
+    """A segment is reached only through a MEMBER_OF source, as the claim does.
+
+    A source-less signal carrying the segment would pass this validation and
+    then be selected by nothing, so it must be refused.
+    """
+    _install_catalogue(
+        monkeypatch,
+        _FocusCatalogue(
+            signals=[
+                {
+                    "id": "jet:sig",
+                    "accessor": "A1",
+                    "source_id": None,
+                    "data_source_path": "MDAC/magPbTC10",
+                },
+            ]
+        ),
+    )
+    with pytest.raises(click.UsageError) as excinfo:
+        _validate_focus(FACILITY, ["magPbTC10"])
+    assert "magPbTC10" in str(excinfo.value)
+
+
+def test_validate_focus_accepts_a_signal_accessor(monkeypatch) -> None:
+    _install_catalogue(
+        monkeypatch,
+        _FocusCatalogue(signals=[{"id": "jet:sig", "accessor": "A1"}]),
+    )
+    _validate_focus(FACILITY, ["A1"])
+
+
+def test_cli_unknown_focus_is_refused(engine, monkeypatch) -> None:
+    _install_catalogue(monkeypatch, _FocusCatalogue())
     result = CliRunner().invoke(
         discover, [FACILITY, "--only", "signals", "--focus", "MAG/coil"]
     )
     assert result.exit_code != 0
-    assert "claim query takes no item filter" in result.output
-    assert "facility-discovery-sequence" not in result.output
-    assert "section 7" not in result.output
+    assert "MAG/coil" in result.output
 
 
 def test_click_command_is_a_thin_wrapper() -> None:
