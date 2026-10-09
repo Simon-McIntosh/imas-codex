@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1">
 <meta name="plan-impl" content="0.6316">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -498,6 +498,9 @@
 </div>
 <div class="r-comment" data-section="s18" data-id="c-close-s18" data-who="reckon-build" data-when="2026-10-09T06:57:00Z">
     <div class="r-comment-body"><p>§18 landed: <code>tests/</code> is now a regular package, and pytest's pythonpath names the root and <code>tests/</code>. With the lead's reckon <code>PYTHONPATH</code>, suite collection goes from 17 errors to none (merge <code>26f7197b1</code>). Follow-on: rewrite four top-level test imports, then drop the <code>tests</code> path entry. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s18">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s18" data-id="c-run-r-20261009T062335261707-pytest-pythonpath" data-who="reckon-build" data-when="2026-10-09T06:51:54.790Z">
+    <div class="r-comment-body"><p>§18 — made imas-codex&#x27;s `tests` a regular package by adding an empty `tests/__init__.py` and set `pythonpath = [&quot;.&quot;, &quot;tests&quot;]` in pyproject.toml, so a plain `uv run pytest` resolves `tests.discovery` even when a PYTHONPATH supplies another checkout&#x27;s regular `tests` package; with PYTHONPATH=/home/ITER/mcintos/Code/reckon the facet-admission and edit-parity runs pass and `--collect-only tests/` reports no collection errors (14590/15391, 0 errors), against a base of 17 collection errors.</p></div>
 </div>
 </section>
 </main>
