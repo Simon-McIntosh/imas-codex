@@ -92,13 +92,46 @@ def check_handoff_document(document: Any) -> None:
 _TRAILING_NUMBER = re.compile(r"(\d+)$")
 
 
-def _member_identifier(source_array: str, arrays: list[str]) -> str | None:
+def _member_patterns(facility: str) -> dict[str, re.Pattern[str]]:
+    """Compile the facility's per-source-group member patterns.
+
+    Which part of an array name is the member is facility knowledge, so each
+    source group may declare a regular expression whose ``member`` named group
+    captures it. A group with no declared pattern is absent from the result and
+    keeps the default rule in :func:`_member_identifier`.
+    """
+    from imas_codex.discovery.base.facility import get_facility
+
+    config = get_facility(facility)
+    declared = config.get("signal_member_patterns") or {}
+    patterns: dict[str, re.Pattern[str]] = {}
+    for group, entry in declared.items():
+        expression = entry.get("pattern") if isinstance(entry, dict) else entry
+        if expression:
+            patterns[group] = re.compile(expression)
+    return patterns
+
+
+def _member_identifier(
+    source_array: str,
+    arrays: list[str],
+    member_pattern: re.Pattern[str] | None = None,
+) -> str | None:
     """The segment that tells this member apart within its source.
 
-    A grouped source keeps the numeric runs that vary across its members. A
-    singleton source has no peers to compare, so its instance number is the
-    array name's trailing number, and an array without one has no identifier.
+    A source group that declares a member pattern (facility configuration) has
+    its pattern matched against the array name; the ``member`` named group wins,
+    and an array the pattern does not match keeps a null identifier. Otherwise a
+    grouped source keeps the numeric runs that vary across its members, and a
+    singleton source's instance number is the array name's trailing number, so
+    an array without one has no identifier.
     """
+    if member_pattern is not None:
+        match = member_pattern.search(source_array)
+        if not match:
+            return None
+        return match.group("member") or None
+
     from imas_codex.discovery.signals.parallel import extract_member_identifier
 
     if len(set(arrays)) > 1:
@@ -175,6 +208,8 @@ def build_mapping_handoff(
         raise ValueError("at least one IDS name is required")
     if gc is None:
         gc = GraphClient()
+
+    member_patterns = _member_patterns(facility)
 
     document: dict[str, Any] = {
         "format": FORMAT,
@@ -285,7 +320,9 @@ def build_mapping_handoff(
                     )
                     continue
                 source_group, source_array = parts
-                identifier = _member_identifier(source_array, arrays)
+                identifier = _member_identifier(
+                    source_array, arrays, member_patterns.get(source_group)
+                )
                 cocos_label, cocos_label_source = cocos_labels.get(
                     target_path, (CocosLabel.NONE, CocosLabel.NONE)
                 )

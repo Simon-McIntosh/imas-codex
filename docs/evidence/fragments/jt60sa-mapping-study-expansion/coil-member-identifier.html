@@ -1,0 +1,65 @@
+<!-- A singleton array's member identifier is read from a per-source-group
+     pattern declared in facility configuration, falling back to the array
+     name's trailing number for groups without one. The JT-60SA MMSYS coil
+     currents carry the member before the acquisition chain, so the export left
+     member_identifier null on every MMSYS row. Schema:
+     imas_codex/schemas/facility_config.yaml. Declaration:
+     imas_codex/config/facilities/jt-60sa.yaml. Reader: _member_identifier and
+     _member_patterns in imas_codex/ids/handoff.py.
+     Gate and negative-control logs:
+     ~/.config/reckon/crew/runs/r-20261009T094715891590-coil-member-identifier/logs/ -->
+<section id="coil-member-identifier-record" data-reckon="evidence">
+  <h2 id="coil-member-identifier-heading">A coil array reads its member identifier from the facility pattern</h2>
+
+  <p id="coil-member-identifier-intro">
+    <code>_member_identifier</code> in <code>imas_codex/ids/handoff.py</code>
+    took a singleton array's identifier from the array name's trailing number.
+    The JT-60SA MMSYS coil currents carry the member in the middle of the name,
+    before the acquisition chain (<code>curEF5LKAT</code>,
+    <code>curCS1HiTe</code>, <code>curUFPLKAT</code>,
+    <code>cur1TFLKAT</code>), so no trailing number exists and all 40 MMSYS rows
+    exported a null identifier. Which part of a name is the member is facility
+    knowledge, so it now lives in facility configuration: a per-source-group
+    regular expression with a named group <code>member</code>, declared by the
+    new <code>signal_member_patterns</code> slot in
+    <code>imas_codex/schemas/facility_config.yaml</code> and set for MMSYS in
+    <code>imas_codex/config/facilities/jt-60sa.yaml</code> as
+    <code>^cur(?P&lt;member&gt;.+?)(?:TFLKAT|LKAT|HiTe)$</code>.
+    <code>_member_patterns</code> compiles the facility block, and
+    <code>_member_identifier</code> reads the row's group pattern first; a group
+    with no pattern keeps the trailing-number rule, and an array the pattern
+    does not match keeps a null identifier.
+  </p>
+
+  <h3 id="coil-member-identifier-measure-heading">Measure — the four named identifiers, the fallback, and the control</h3>
+  <table id="coil-member-identifier-pattern-table">
+    <caption>Gate: <code>uv run --no-project python -m pytest -p no:cacheprovider tests/ids/test_member_identifier_patterns.py tests/ids</code> (580 passed, 5 skipped, 7 deselected)</caption>
+    <thead><tr><th>array</th><th>source group</th><th>member_identifier</th></tr></thead>
+    <tbody>
+      <tr id="coil-member-identifier-ef5"><td>curEF5LKAT</td><td>MMSYS</td><td>EF5</td></tr>
+      <tr id="coil-member-identifier-cs1"><td>curCS1HiTe</td><td>MMSYS</td><td>CS1</td></tr>
+      <tr id="coil-member-identifier-ufp"><td>curUFPLKAT</td><td>MMSYS</td><td>UFP</td></tr>
+      <tr id="coil-member-identifier-tf1"><td>cur1TFLKAT</td><td>MMSYS</td><td>1</td></tr>
+      <tr id="coil-member-identifier-psc"><td>curEFCC4</td><td>PSC (no pattern)</td><td>4 (trailing number)</td></tr>
+      <tr id="coil-member-identifier-unmatched"><td>nominalValue</td><td>MMSYS (no match)</td><td>null</td></tr>
+    </tbody>
+  </table>
+
+  <p id="coil-member-identifier-export">
+    Re-export of <code>pf_active</code> and <code>tf</code> via
+    <code>imas-codex imas map export jt-60sa -i pf_active -i tf</code> to
+    <code>/work/projects/imas_gpu/jt60sa/handoff/jt-60sa-coils-handoff.json</code>
+    at commit <code>0ea3c2c5c</code> carries a non-null
+    <code>member_identifier</code> on <strong>40 of 40</strong> MMSYS rows (was
+    0 of 40). Every MMSYS row resolves: <code>cur1TFLKAT&rarr;1</code>,
+    <code>cur2TFLKAT&rarr;2</code>, <code>curCS1HiTe&rarr;CS1</code>,
+    <code>curCS4LKAT&rarr;CS4</code>, <code>curEF5LKAT&rarr;EF5</code>,
+    <code>curLFPHiTe&rarr;LFP</code>, <code>curUFPLKAT&rarr;UFP</code>.
+  </p>
+
+  <p id="coil-member-identifier-control">
+    Negative control: <code>_member_patterns</code> mutated to return
+    <code>{}</code>. The MMSYS identifier tests then fail — 3 failed, 1 passed,
+    exit 1 (<code>logs/negative_control.log</code>).
+  </p>
+</section>
