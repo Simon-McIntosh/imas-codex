@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc,0e1f1d382">
 <meta name="plan-impl" content="0.76">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -610,6 +610,9 @@
 </div>
 <div class="r-comment" data-section="s25" data-id="c-run-r-20261009T105828078444-deprecated-dd-targets-refused" data-who="reckon-build" data-when="2026-10-09T11:17:02.454Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/jt60sa-mapping-study-expansion/deprecated-dd-targets-refused.html</p></div>
+</div>
+<div class="r-comment" data-section="s25" data-id="c-run-r-20261009T111737199951-review-of-deprecated-dd-targets-refused" data-who="reckon-build" data-when="2026-10-09T11:31:15.290Z">
+    <div class="r-comment-body"><p>no repo commit; the deliverable is the parsed review record stored at both granted paths above</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-s11-scope" data-who="reckon-build" data-when="2026-10-09T11:28:00Z">
     <div class="r-comment-body"><p>ECH and gas can be scored only for what was exported and refused, not for agreement. imas-ambix reports that its JT-60SA machine-description stores (OP1, OP2) hold only <code>magnetics</code>, <code>pf_active</code>, <code>pf_passive</code>, <code>tf</code> and <code>wall</code>, and its catalogue names neither <code>ec_launchers</code> nor <code>gas_injection</code>. Every ECH and gas row therefore scores "no machine-description store". That is recorded as its own cause, separate from rows with a null member identifier (11 of 18 ECH rows and all 5 gas rows). Member patterns for ECH (<code>powU5Xmode</code> gives <code>U5</code>) and N2GAS (<code>flwInletA</code> gives <code>A</code>) wait until the machine description gains those IDSs, because nothing would consume them before then. When it does, imas-codex emits the facility's own spelling and imas-ambix aliases it, as for the coils. The first ECH and gas exports are jt-60sa-ech-handoff.json (11:21:53Z; 18 rows and 3 unexpanded) and jt-60sa-gas-handoff.json (11:22:02Z; 5 rows).</p></div>

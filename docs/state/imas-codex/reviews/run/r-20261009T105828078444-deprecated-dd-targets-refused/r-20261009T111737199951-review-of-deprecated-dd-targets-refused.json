@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest names no baseline_suite/after_suite arm, so the base arm was measured independently at the reviewed base revision (631aeecdf, identical to 6b12d8ff across tests/ids) and the head arm is the reviewed run's own gate_tests_ids.log at f92e37f70; both EXIT=0 with zero failing ids, so the run added no failing test",
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/ids",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T105828078444-deprecated-dd-targets-refused/gate_tests_ids.log",
+    "revision": "f92e37f7027f9e76858b39d24da5f1bf6664c897"
+  },
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/ids",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T111737199951-review-of-deprecated-dd-targets-refused/base-arm-tests-ids.log",
+    "revision": "631aeecdf8023add83fb657b00af0103047811f1"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ids/workers.py:1387",
+    "imas_codex/ids/workers.py:1140",
+    "imas_codex/cli/map.py:128"
+  ],
+  "completed_at": "2026-10-09T11:31:15.290Z",
+  "dispatched_at": "2026-10-09T11:17:45Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/graph_ops.py",
+      "line": "932",
+      "severity": "follow-on",
+      "text": "follow-on: dd_version_at_or_before duplicates the live-at-version comparison owned by imas_codex/tools/graph_search.py:254, and the two disagree on a path with no INTRODUCED_IN edge \u2014 the owner's int mode requires the edge (EXISTS { MATCH (n)-[:INTRODUCED_IN]->... }) while dd_path_live_at treats a missing introduction as present, so one rule now has two spellings that drift."
+    },
+    {
+      "file": "imas_codex/ids/graph_ops.py",
+      "line": "925",
+      "severity": "follow-on",
+      "text": "follow-on: _version_tuple raises ValueError on an empty string (reproduced against the committed source: dd_path_live_at(\"3.22.0\",\"3.42.0\",\"\") -> ValueError: invalid literal for int() with base 10: ''), while the predicate's own docstring contracts only None as the disabling value; imas_codex/ids/workers.py:1138 passes dd_version_str = state.dd_version or \"\" to validate_mappings, so the one value the guard does not cover is the one that call site would supply if state.dd_version were ever unset. It does not block because imas_codex/cli/map.py:241 guarantees a non-empty dd_version before state is built."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read all three commits against the base: 01144e63b adds dd_version_at_or_before, dd_path_live_at, DDPathLifecycle, dd_path_stale_reason and dd_path_lifecycles in graph_ops.py plus the _stale_paths filter in candidates.py and the validation and hand-off guards; f92e37f70 folds the INTRODUCED_IN/DEPRECATED_IN columns into the structure read (mapping.py:1676) and member read (handoff.py:245) so no guard issues its own lifecycle query; 137979cd2 adds only the evidence fragment.",
+    "done_when": "The done_when is that unit tests exclude tf/coil/conductor/current/data for DD 4.1.1 from candidates, refuse it in validation naming its deprecation version and write it unexpanded, with tf/coil/current/data as positive control, a live-graph confirmation, and a negative control that drops the deprecation clause; tests/ids/test_deprecated_dd_targets.py carries all of these \u2014 test_retired_path_is_excluded_from_candidates and test_live_path_passes_the_candidate_filter, test_retired_path_is_refused_in_validation_naming_its_deprecation_version and test_live_path_passes_validation, test_retired_path_is_written_unexpanded_in_the_export and test_live_path_is_expanded_in_the_export, and the graph-marked test_lifecycle_predicate_on_the_live_graph \u2014 and the gate the worker ran asserts that measure.",
+    "goal": "The node goal is the fix of plan section 25 \u2014 one DD lifecycle predicate applied at candidate retrieval, binding validation and the hand-off export so a path retired at or before the mapping's DD version is excluded, refused and written unexpanded; imas_codex/ids/graph_ops.py:944 adds dd_path_live_at and candidates.py:187 (candidate retrieval) and candidates.py:634 (cluster siblings), mapping.py:1815 (validate_mappings) and handoff.py:283 (build_mapping_handoff) each call it through dd_path_lifecycles or dd_path_stale_reason, so the goal is met.",
+    "manifest": "Read the manifest at the run directory; it states base 6b12d8ff and head 137979cd2, the three commits, the tests/ids gate result (594 passed, 5 skipped, 8 deselected, exit 0), the live-graph result and the negative control, and it honestly leaves baseline_suite and after_suite empty rather than inventing a base arm \u2014 which is what lets the added-failure count be derived only by an independent base measurement.",
+    "write_paths": "The reviewed node was fenced to imas_codex/ids/{graph_ops,candidates,mapping,handoff}.py, tests/ids/test_deprecated_dd_targets.py and the evidence fragment; git diff --stat 6b12d8ff..137979cd2 reports exactly those six files, 604 insertions and 10 deletions, with nothing outside them."
+  },
+  "justifications": {
+    "durability": "The negative control at tests/ids/test_deprecated_dd_targets.py reddens four tests including test_retired_path_is_refused_in_validation_naming_its_deprecation_version when the deprecation clause is dropped, and each added assertion compares the code's output against an independent constant or a mocked lifecycle the test supplies rather than against a value it also feeds the code, so the assertions are real guards.",
+    "evidence": "The gate measures the done_when and its result is recorded \u2014 tests/ids/test_deprecated_dd_targets.py passes 10 tests in the worker's gate_unit.log, the run's gate_tests_ids.log shows the tests/ids suite at revision f92e37f70 with 594 passed and exit 0, gate_live_graph.log records the live-graph test passing with 1 passed and EXIT=0, and negative_control.log records the 4 failing ids with EXIT=1 \u2014 though the run's manifest names no baseline arm, so the suite delta rests on the base arm I measured independently.",
+    "fit": "The additions follow the module's docstring and dataclass idiom in imas_codex/ids/graph_ops.py:925-1050, carry no plan or ticket identifier in any symbol, filename or comment, and the three commits use conventional subjects with mechanism bodies and no attribution line.",
+    "goal_fidelity": "imas_codex/ids/graph_ops.py:944 implements the predicate the plan names and the three call sites it names each route through it (candidates.py:187, mapping.py:1815, handoff.py:283), with both a live path and a retired path asserted at every stage, so the landed change does what the goal states.",
+    "reuse": "imas_codex/ids/graph_ops.py:932 re-implements the \"path live at DD version\" rule that imas_codex/tools/graph_search.py:254 (_dd_version_clause) already owns in both int-major and semver modes, and graph_ops.py:925 hand-rolls version parsing where the repository standard_names and dd_accessor modules use packaging.version.Version, without extending either owner.",
+    "scope_discipline": "git diff --stat 6b12d8ff..137979cd2 shows the three commits touch exactly the six declared write paths with one purpose each, and no generated or gitignored file is staged."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is the fix of plan section 25 \u2014 one DD lifecycle predicate applied at candidate retrieval, binding validation and the hand-off export so a path retired at or before the mapping's DD version is excluded, refused and written unexpanded; imas_codex/ids/graph_ops.py:944 adds dd_path_live_at and candidates.py:187 (candidate retrieval) and candidates.py:634 (cluster siblings), mapping.py:1815 (validate_mappings) and handoff.py:283 (build_mapping_handoff) each call it through dd_path_lifecycles or dd_path_stale_reason, so the goal is met.\nVERDICT done_when: The done_when is that unit tests exclude tf/coil/conductor/current/data for DD 4.1.1 from candidates, refuse it in validation naming its deprecation version and write it unexpanded, with tf/coil/current/data as positive control, a live-graph confirmation, and a negative control that drops the deprecation clause; tests/ids/test_deprecated_dd_targets.py carries all of these \u2014 test_retired_path_is_excluded_from_candidates and test_live_path_passes_the_candidate_filter, test_retired_path_is_refused_in_validation_naming_its_deprecation_version and test_live_path_passes_validation, test_retired_path_is_written_unexpanded_in_the_export and test_live_path_is_expanded_in_the_export, and the graph-marked test_lifecycle_predicate_on_the_live_graph \u2014 and the gate the worker ran asserts that measure.\nVERDICT write_paths: The reviewed node was fenced to imas_codex/ids/{graph_ops,candidates,mapping,handoff}.py, tests/ids/test_deprecated_dd_targets.py and the evidence fragment; git diff --stat 6b12d8ff..137979cd2 reports exactly those six files, 604 insertions and 10 deletions, with nothing outside them.\nVERDICT manifest: Read the manifest at the run directory; it states base 6b12d8ff and head 137979cd2, the three commits, the tests/ids gate result (594 passed, 5 skipped, 8 deselected, exit 0), the live-graph result and the negative control, and it honestly leaves baseline_suite and after_suite empty rather than inventing a base arm \u2014 which is what lets the added-failure count be derived only by an independent base measurement.\nVERDICT diff: Read all three commits against the base: 01144e63b adds dd_version_at_or_before, dd_path_live_at, DDPathLifecycle, dd_path_stale_reason and dd_path_lifecycles in graph_ops.py plus the _stale_paths filter in candidates.py and the validation and hand-off guards; f92e37f70 folds the INTRODUCED_IN/DEPRECATED_IN columns into the structure read (mapping.py:1676) and member read (handoff.py:245) so no guard issues its own lifecycle query; 137979cd2 adds only the evidence fragment.\nCALL_SITES: imas_codex/ids/workers.py:1387, imas_codex/ids/workers.py:1140, imas_codex/cli/map.py:128\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/ids/graph_ops.py:944 implements the predicate the plan names and the three call sites it names each route through it (candidates.py:187, mapping.py:1815, handoff.py:283), with both a live path and a retired path asserted at every stage, so the landed change does what the goal states.\nSCORE evidence: 18\nJUSTIFICATION evidence: The gate measures the done_when and its result is recorded \u2014 tests/ids/test_deprecated_dd_targets.py passes 10 tests in the worker's gate_unit.log, the run's gate_tests_ids.log shows the tests/ids suite at revision f92e37f70 with 594 passed and exit 0, gate_live_graph.log records the live-graph test passing with 1 passed and EXIT=0, and negative_control.log records the 4 failing ids with EXIT=1 \u2014 though the run's manifest names no baseline arm, so the suite delta rests on the base arm I measured independently.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 6b12d8ff..137979cd2 shows the three commits touch exactly the six declared write paths with one purpose each, and no generated or gitignored file is staged.\nSCORE durability: 18\nJUSTIFICATION durability: The negative control at tests/ids/test_deprecated_dd_targets.py reddens four tests including test_retired_path_is_refused_in_validation_naming_its_deprecation_version when the deprecation clause is dropped, and each added assertion compares the code's output against an independent constant or a mocked lifecycle the test supplies rather than against a value it also feeds the code, so the assertions are real guards.\nSCORE fit: 18\nJUSTIFICATION fit: The additions follow the module's docstring and dataclass idiom in imas_codex/ids/graph_ops.py:925-1050, carry no plan or ticket identifier in any symbol, filename or comment, and the three commits use conventional subjects with mechanism bodies and no attribution line.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/ids/graph_ops.py:932 re-implements the \"path live at DD version\" rule that imas_codex/tools/graph_search.py:254 (_dd_version_clause) already owns in both int-major and semver modes, and graph_ops.py:925 hand-rolls version parsing where the repository standard_names and dd_accessor modules use packaging.version.Version, without extending either owner.\nFINDING imas_codex/ids/graph_ops.py:932 follow-on: dd_version_at_or_before duplicates the live-at-version comparison owned by imas_codex/tools/graph_search.py:254, and the two disagree on a path with no INTRODUCED_IN edge \u2014 the owner's int mode requires the edge (EXISTS { MATCH (n)-[:INTRODUCED_IN]->... }) while dd_path_live_at treats a missing introduction as present, so one rule now has two spellings that drift.\nFINDING imas_codex/ids/graph_ops.py:925 follow-on: _version_tuple raises ValueError on an empty string (reproduced against the committed source: dd_path_live_at(\"3.22.0\",\"3.42.0\",\"\") -> ValueError: invalid literal for int() with base 10: ''), while the predicate's own docstring contracts only None as the disabling value; imas_codex/ids/workers.py:1138 passes dd_version_str = state.dd_version or \"\" to validate_mappings, so the one value the guard does not cover is the one that call site would supply if state.dd_version were ever unset. It does not block because imas_codex/cli/map.py:241 guarantees a non-empty dd_version before state is built.\n",
+  "review_run_id": "r-20261009T111737199951-review-of-deprecated-dd-targets-refused",
+  "reviewed_base_sha": "6b12d8ffadbb69154a92c68d9c6cca95424f844f",
+  "reviewed_head_sha": "137979cd2e797540e8dd2a09ef3fa589e223cb67",
+  "reviewed_run_id": "r-20261009T105828078444-deprecated-dd-targets-refused",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T11:28:36.388303+00:00",
+  "total": 98
+}
