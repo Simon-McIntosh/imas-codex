@@ -1094,7 +1094,8 @@ def claim_signals_for_enrichment(
                 """
                 MATCH (s:FacilitySignal {facility_id: $facility, claim_token: $token})
                 RETURN s.id AS id, s.accessor AS accessor, s.data_source_name AS data_source_name,
-                       s.data_source_path AS data_source_path, s.unit AS unit, s.name AS name,
+                       s.data_source_path AS data_source_path, s.unit AS unit,
+                       coalesce(s.name, s.data_source_path) AS name,
                        s.tdi_function AS tdi_function,
                        s.tdi_quantity AS tdi_quantity,
                        s.discovery_source AS discovery_source,
@@ -3744,9 +3745,10 @@ async def enrich_worker(
         if tdi_func:
             return f"tdi:{tdi_func}"
 
-        # PPF signals: group by DDA (first part of name like "EFIT/IP")
+        # PPF signals: group by DDA (first part of name like "EFIT/IP"). A reset
+        # clears the enriched name, so the catalogue path stands in for it.
         source = signal.get("discovery_source", "")
-        name = signal.get("name", "")
+        name = signal.get("name") or signal.get("data_source_path") or ""
 
         if source == "ppf" and "/" in name:
             dda = name.split("/")[0]

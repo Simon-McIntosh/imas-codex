@@ -155,3 +155,50 @@ async def test_repeated_prompt_number_writes_one_row():
 
     assert [row["description"] for row in enriched_rows] == ["first answer"]
     release.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_reset_signal_without_a_name_is_enriched():
+    """A reset clears the enriched name; the worker groups by the source path."""
+    signals = [_signal(category, name) for category, name in BATCH]
+    for signal in signals:
+        signal["name"] = None
+    state = parallel.DataDiscoveryState(facility=FACILITY, scanner_types=["edas"])
+    claims = iter([signals])
+    enriched_rows: list[dict] = []
+
+    def claim(*args, **kwargs):
+        batch = next(claims, None)
+        if batch is None:
+            state.stop_requested = True
+            return []
+        return batch
+
+    async def llm(*, messages, **kwargs):
+        return _answer_by_prompt_number(messages[1]["content"]), 0.0, 0
+
+    def mark_enriched(entries, *args, **kwargs):
+        enriched_rows.extend(entries)
+
+    with (
+        patch.object(parallel, "claim_signals_for_enrichment", side_effect=claim),
+        patch.object(parallel, "detect_signal_sources", return_value=(0, 0)),
+        patch.object(parallel, "propagate_units_from_signal_nodes", return_value=0),
+        patch.object(parallel, "fetch_tree_context", return_value={}),
+        patch.object(parallel, "fetch_epoch_context", return_value={}),
+        patch.object(parallel, "fetch_signal_code_refs", return_value={}),
+        patch.object(parallel, "_fetch_code_chunks", return_value=[]),
+        patch.object(parallel, "mark_signals_enriched", side_effect=mark_enriched),
+        patch.object(parallel, "mark_signals_underspecified"),
+        patch.object(parallel, "propagate_source_enrichment", return_value=0),
+        patch.object(parallel, "release_signal_claim"),
+        patch(
+            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            return_value=[],
+        ),
+        patch("imas_codex.discovery.base.llm.acall_llm_structured", side_effect=llm),
+    ):
+        await parallel.enrich_worker(state)
+
+    by_id = {row["id"]: row["description"] for row in enriched_rows}
+    assert by_id == {s["id"]: f"describes {s['accessor']}" for s in signals}
