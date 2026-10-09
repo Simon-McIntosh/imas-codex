@@ -977,6 +977,32 @@ class DDPathLifecycle:
     reason: str | None = None
 
 
+def dd_path_stale_reason(
+    path: str,
+    introduced_version: str | None,
+    deprecated_version: str | None,
+    dd_version: int | str,
+) -> str | None:
+    """Why ``path`` is not part of ``dd_version``, or ``None`` when it is.
+
+    The reason names the deprecation version that retired the path, or, for a
+    path introduced after the version, its introduction version.
+    """
+    if dd_path_live_at(introduced_version, deprecated_version, dd_version):
+        return None
+    if deprecated_version is not None and dd_version_at_or_before(
+        deprecated_version, dd_version
+    ):
+        return (
+            f"{path} was deprecated in DD {deprecated_version} and is not part "
+            f"of DD {dd_version}"
+        )
+    return (
+        f"{path} was introduced in DD {introduced_version} and is not part "
+        f"of DD {dd_version}"
+    )
+
+
 def dd_path_lifecycles(
     gc: GraphClient,
     paths: Iterable[str],
@@ -1009,25 +1035,13 @@ def dd_path_lifecycles(
         introduced = row.get("introduced")
         deprecated = row.get("deprecated")
         live = dd_path_live_at(introduced, deprecated, dd_version)
-        reason = None
-        if not live:
-            if deprecated is not None and dd_version_at_or_before(
-                deprecated, dd_version
-            ):
-                reason = (
-                    f"{path} was deprecated in DD {deprecated} and is not part "
-                    f"of DD {dd_version}"
-                )
-            else:
-                reason = (
-                    f"{path} was introduced in DD {introduced} and is not part "
-                    f"of DD {dd_version}"
-                )
         lifecycles[path] = DDPathLifecycle(
             path=path,
             introduced_version=introduced,
             deprecated_version=deprecated,
             live=live,
-            reason=reason,
+            reason=None
+            if live
+            else dd_path_stale_reason(path, introduced, deprecated, dd_version),
         )
     return lifecycles

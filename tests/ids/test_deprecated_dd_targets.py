@@ -43,9 +43,12 @@ _LIFECYCLE = {
 
 
 def _lifecycle_rows(paths):
+    # ``id`` keys the standalone lifecycle read; ``path`` keys the structure
+    # read that carries the same columns alongside the target's data type.
     return [
         {
             "id": path,
+            "path": path,
             "introduced": _LIFECYCLE[path]["introduced"],
             "deprecated": _LIFECYCLE[path]["deprecated"],
         }
@@ -245,12 +248,24 @@ def _build_handoff():
     gc = MagicMock()
 
     def _query(statement: str, **params):
-        if statement.strip().startswith("UNWIND $paths AS pid") and (
-            "INTRODUCED_IN" in statement
-        ):
-            return _lifecycle_rows(params.get("paths") or [])
         if "MEMBER_OF" in statement:
+            # The member read carries each binding's target lifecycle, so the
+            # retired target's row is present even with no FacilitySignal.
             return [
+                {
+                    "source_id": "jt-60sa:tf:conductor",
+                    "target_id": CONDUCTOR,
+                    "signal_id": None,
+                    "data_source": None,
+                    "data_source_path": None,
+                    "source_property": "value",
+                    "mapping_type": "direct",
+                    "derived_from": None,
+                    "confidence": None,
+                    "evidence": None,
+                    "introduced": _LIFECYCLE[CONDUCTOR]["introduced"],
+                    "deprecated": _LIFECYCLE[CONDUCTOR]["deprecated"],
+                },
                 {
                     "source_id": "jt-60sa:tf:coil",
                     "target_id": COIL,
@@ -262,7 +277,9 @@ def _build_handoff():
                     "derived_from": None,
                     "confidence": 0.9,
                     "evidence": "",
-                }
+                    "introduced": _LIFECYCLE[COIL]["introduced"],
+                    "deprecated": _LIFECYCLE[COIL]["deprecated"],
+                },
             ]
         return []
 
