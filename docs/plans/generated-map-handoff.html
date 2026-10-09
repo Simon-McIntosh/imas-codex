@@ -25,7 +25,7 @@
   <title>Generated Map Hand-off | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 </head>
@@ -93,7 +93,8 @@
       <li><code>data_source</code>, for example <code>edas</code></li>
       <li><code>source_group</code>, for example <code>MDAC</code></li>
       <li><code>source_array</code>, for example <code>magPbTC10</code></li>
-      <li><code>member_identifier</code>, the segment that varies between members of the source</li>
+      <li><code>member_identifier</code>, the segment that varies between members of the source, or for a singleton source the array name's trailing number</li>
+      <li><code>source_property</code>, the property of the source the binding reads, for example <code>value</code> or <code>time</code></li>
       <li><code>target_path</code>, the DD path with no array index, for example <code>magnetics/b_field_pol_probe/field/data</code></li>
       <li><code>transform_expression</code></li>
       <li><code>source_units</code></li>
@@ -104,8 +105,9 @@
     </ul>
     <p>
       Each <code>unexpanded</code> row carries <code>source_id</code>, <code>target_path</code> and
-      <code>reason</code>. It records a binding whose source could not be expanded to member signals, or whose
-      member lacks a field above.
+      <code>reason</code>. It records a binding whose source could not be expanded to member signals, whose
+      member lacks a field above, or an error binding derived from the same signal that feeds its data field,
+      which has no error signal behind it.
     </p>
     <p>
       A key whose value the graph does not hold is written as <code>null</code>, never guessed. The document
