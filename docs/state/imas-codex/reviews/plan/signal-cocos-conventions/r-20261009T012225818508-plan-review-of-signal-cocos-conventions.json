@@ -1,0 +1,188 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T01:32:07.536Z",
+  "dispatched_at": "2026-10-09T01:22:36Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/cocos/calculator.py:158",
+      "id": "reuse_search-1",
+      "reason": "\u00a75's node should extend `imas_codex/cocos/calculator.py` (survivor-set determination as a generalisation of `determine_cocos`, reusing `cocos_sign` for the class factor) instead of adding a parallel module; the plan as written rebuilds machinery the codebase already has.",
+      "text": "\u00a75 builds \"cocos-determination-core\" without citing the existing determiner. `imas_codex/cocos/calculator.py:158 determine_cocos(psi_axis, psi_edge, ip, b0, q, dp_dpsi)` already infers a COCOS value and a confidence from physics observables using the same Sauter Eq. 23 the plan restates in \u00a75, and `:345 validate_cocos_from_data(declared_cocos, ...)` already returns a consistency verdict (`ValidationResult`), `:248 validate_cocos_consistency` returns the per-observable inconsistency list, and `:102 cocos_to_parameters` \u2014 which \u00a75 does cite \u2014 is in the same module. The plan's survivor-set logic is a generalisation of this single-value determiner, not new physics; proposing `imas_codex/cocos/determination.py` as a sibling hides that the scalar case is a special case of the survivor case and forks the Eq. 23 implementation across two files that must then stay in step. A census of the missed prior art in this family: `imas_codex/cocos/calculator.py:158`, `:248`, `:345`; `imas_codex/ids/transforms.py:43 cocos_sign` (per-class sign between two conventions); `imas_codex/ids/transforms.py:102 compose_transform` (the \"map applies one transform, once\" mechanism \u00a71 alludes to).",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cocos/calculator.py:158",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner lets the author extend it; a forked determiner drifts, and \u00a75's \"coefficient classification\" would otherwise be written twice.",
+      "text": "the plan puts COCOS determination in a new file (`cocos/determination.py`, \u00a75 `cocos-determination-core`) rather than extending the module that already owns COCOS identification and validation. `imas_codex/cocos/` is the owner: `calculator.py` holds `cocos_to_parameters`, `determine_cocos`, `validate_cocos_consistency`, `validate_cocos_from_data`, and `__init__.py` re-exports the public surface. A sibling `determination.py` splits the owner across two modules with two confidence conventions and two copies of Eq. 23.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cocos/calculator.py:345",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is an extension of the existing module (add a survivor-set return) rather than a parallel one; the plan should say so or explain the constraint that prevents it.",
+      "text": "\u00a75's proposed `cocos-determination-core` is a thin layer over existing machinery: a survivor loop that calls the existing scalar determiner per candidate convention. The plan must state why `calculate.py`'s `determine_cocos`/`validate_cocos_from_data` cannot be extended to return the survivor set (they already compute a COCOS and a confidence from the same observables). No such justification appears.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/parallel.py:1747",
+      "id": "duplicate_owner-2",
+      "reason": "the author should extend `detect_signal_sources`/its keyer (or justify placing a source regroup in the shared layer); as written the correction is placed in a file that does not own the group key, which is how a second grouping key comes to exist.",
+      "text": "\u00a79 proposes to \"regroup\" sources by measurement kind in `imas_codex/discovery/base/grouping.py`, but the digit-run keying it means to correct is not owned there. `detect_signal_sources` lives at `imas_codex/discovery/signals/parallel.py:1747` and keys groups through `_accessor_to_source_key(accessor)` (the digit-run rule the plan describes exactly); `imas_codex/discovery/base/grouping.py` is the shared claim/propagate layer whose own module docstring states \"Detection algorithms stay in their respective discovery modules\". The split/merge-by-kind belongs beside `detect_signal_sources` (make its key kind-aware), or `grouping.py` must be extended as a source-membership owner \u2014 the plan names `grouping.py` while describing a defect in `parallel.py`, so the owner it should extend is unstated.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/grouping.py:26",
+      "id": "duplicate_owner-3",
+      "reason": "the plan's phrase \"claims enriched sources\" may already intend `claim_signal_sources`; naming it (as \u00a74 names `judge_rows`) removes the ambiguity, but does not change the design if the intent is reuse.",
+      "text": "\u00a77's stage \"claims enriched sources without a convention status\", and \u00a73 adds \"claim fields for the stage's claim loop\", but neither names the existing claim mechanism: `imas_codex/discovery/base/grouping.py:26 claim_signal_sources` (atomic claim_token two-step claim) and `:92 propagate_source_enrichment` are the shared source claim/propagate primitives. A new claim loop in `imas_codex/cli/discover/conventions.py` would be a second owner of source claiming beside the one that already exists.",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/signal-cocos-conventions.html#s3",
+      "id": "interface_budget-1",
+      "reason": "without naming the relationship the graph gains two owners of a \"cocos\" fact at two levels, and the map must later decide which to trust; the section must name what it retires/merges or why both must coexist.",
+      "text": "\u00a73 adds two new enums (`cocos_class` with nine values, `convention_status` with four), a new node label `ConventionObservation`, and a `cocos`/`cocos_class`/`cocos_survivors`/`cocos_confidence` property family on `SignalSource` \u2014 beside `FacilitySignal.cocos` (`imas_codex/schemas/facility.yaml:2595 sign_convention`, `:2599 cocos`), which already exists and is populated on 12 JT-60SA signals per \u00a71. The section does not say whether `FacilitySignal.cocos`/`sign_convention` are retired, migrated to the source, or kept as per-signal overrides.",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-cocos-conventions.html#s7",
+      "id": "interface_budget-2",
+      "reason": "the section must account for the added interface surface in its own text (or state why no existing stage/command can carry it) before the first implementation node is released.",
+      "text": "\u00a77 adds `imas-codex discover conventions FACILITY`, a new entry in the stage registry (`imas_codex/cli/discover/sequence.py`), without stating what it retires or merges, or why nothing can be. Against this week's supplied counts (public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0) the section is a pure addition to the CLI-option family.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0954ebbd2b213e6ce209aad48c9f4334217b921ff0faa3181857bd43c333c6fd",
+  "plan_slug": "signal-cocos-conventions",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-09T01:36:36.111622+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-09T01:36:38.856523+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-09T01:36:40.093037+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-09T01:36:41.483402+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-3",
+      "reason": "",
+      "when": "2026-10-09T01:36:45.018983+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-09T01:36:49.003335+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "interface_budget-2",
+      "reason": "",
+      "when": "2026-10-09T01:36:51.698834+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:38.856523+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:41.483402+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:45.018983+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:49.003335+00:00"
+    },
+    "interface_budget-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:51.698834+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:36.111622+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:40.093037+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-signal-cocos-conventions.v3.json",
+  "review_run_id": "r-20261009T012225818508-plan-review-of-signal-cocos-conventions",
+  "reviewed_blob_sha": "d3f6e2ace2df33ad789d1361676802926fa826f3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the \u00a74 judgment (`conventions.py`) and the \u00a75 determination core each hide a substantial decision sequence (four parallel questions per source; sixteen-convention scoring) behind a single module, so the design concentrates behaviour behind interfaces smaller than what they hide.",
+    "duplicate_owner": "a finding \u2014 the plan re-implements two owned mechanisms rather than extending their owners: COCOS determination (owner `imas_codex/cocos/calculator.py`) and source grouping by measurement kind; the latter's keying logic is owned by `imas_codex/discovery/signals/parallel.py:1747 detect_signal_sources`, not by the file \u00a79 names.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 (two new enums, a new node type, one new `cocos`/`cocos_class` property family beside the existing `FacilitySignal.cocos`) and \u00a77 (a new `discover conventions` subcommand) each add surface without naming what they retire or merge, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites only `cocos_to_parameters` as prior art, but COCOS identification from physics observables (`imas_codex/cocos/calculator.py:158 determine_cocos`, `:345 validate_cocos_from_data`, `:248 validate_cocos_consistency`) and the per-class sign factor between two conventions (`imas_codex/ids/transforms.py:43 cocos_sign`) already exist and are exactly what \u00a75 proposes to build; the plan searches none of them.",
+    "thin_wrapper": "a finding \u2014 \u00a75's `cocos-determination-core` adds `imas_codex/cocos/determination.py` whose job is a survivor-set variant of the existing scalar `determine_cocos` in `imas_codex/cocos/calculator.py`, and the plan never says why that module cannot be extended instead."
+  },
+  "section_digests": {
+    "_document": "d540327de5ad596d1dbac406f410c9dbe64dce9a91dda0b21e358d6575c7d6bf",
+    "s1": "b474f50e663d4eeb459a19ec861f44c6afd0861521b2e1ae043ae12881d43192",
+    "s2": "f3bf9d3f711147548dac78d62796f77c8ff7cb581d5836a5380c85ae16697fd1",
+    "s3": "875509a510c27b84e1a82b9d30c3a636c9a5ba0aad987a483eca670f0074c4ba",
+    "s4": "f0a2c2928d4bc9a0668a027bd6b0805a53e562bc2e31f76da819e8d9f464fd79",
+    "s5": "a4d7364005f77773b1e013a39f63c76b056e05954e37d30adfbc210edd8e662c",
+    "s6": "78c8d0a58f39cde2c6b361e55e3af7e7d72e7ce7705eb1b8dd9387000ab59314",
+    "s7": "1e220329bd61bb17841196c72a5cf6cfe849ea750394dca5297d79b622730e07",
+    "s8": "7a17b5dd927373efb5082039905f3646e11365670d3a801411fd5e730a501eb6",
+    "s9": "937f706f689a41cdff44d4d37af1a0d02a42161868dfdaa447501f9922942490"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:32:49.581758+00:00"
+}
