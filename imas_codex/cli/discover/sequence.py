@@ -549,7 +549,6 @@ def run_mapping_stage(
             dd_version=None,
             cost_limit=cost,
             dry_run=False,
-            no_activate=False,
             time_limit=minutes,
             verbose=False,
             clear=False,

@@ -80,7 +80,7 @@ def map_cmd() -> None:
       --model/-m         Override LLM model identifier
       --clear            Clear existing mappings before generating
       --dry-run          Skip graph persistence (dry run)
-      --no-activate      Persist as 'generated' without promoting to 'active'
+      Mappings remain 'generated' until validate and activate are run.
 
     \b
     Stage Control:
@@ -173,11 +173,6 @@ def map_export(facility: str, ids_names: tuple[str, ...], output_path: Path) -> 
     help="Skip graph persistence (dry run).",
 )
 @click.option(
-    "--no-activate",
-    is_flag=True,
-    help="Persist as 'generated' without promoting to 'active'.",
-)
-@click.option(
     "--time",
     "time_limit",
     type=int,
@@ -206,7 +201,6 @@ def map_run(
     dd_version: str | None,
     cost_limit: float,
     dry_run: bool,
-    no_activate: bool,
     time_limit: int | None,
     verbose: bool,
     clear: bool,
@@ -344,7 +338,6 @@ def map_run(
             dd_version=dd_version,
             cost_limit=cost_limit,
             dry_run=dry_run,
-            no_activate=no_activate,
             clear=clear,
             deadline=deadline,
             log_print=log_print,
@@ -359,7 +352,6 @@ def map_run(
             dd_version=dd_version,
             cost_limit=cost_limit,
             dry_run=dry_run,
-            no_activate=no_activate,
             clear=clear,
             deadline=deadline,
             verbose=verbose,
@@ -382,7 +374,6 @@ def _run_plain_mode(
     dd_version: str | None,
     cost_limit: float,
     dry_run: bool,
-    no_activate: bool,
     clear: bool,
     deadline: float | None,
     log_print,
@@ -403,7 +394,7 @@ def _run_plain_mode(
         model=model,
         cost_limit=cost_limit,
         persist=not dry_run,
-        activate=not no_activate,
+        activate=False,
         clear=clear,
         skip_errors=skip_errors,
     )
@@ -447,7 +438,6 @@ def _run_rich_mode(
     dd_version: str | None,
     cost_limit: float,
     dry_run: bool,
-    no_activate: bool,
     clear: bool,
     deadline: float | None,
     verbose: bool,
@@ -507,7 +497,7 @@ def _run_rich_mode(
             model=model,
             cost_limit=cost_limit,
             persist=not dry_run,
-            activate=not no_activate,
+            activate=False,
             clear=clear,
             skip_errors=skip_errors,
         )
@@ -858,15 +848,21 @@ def map_validate(facility: str, ids_name: str) -> None:
         click.echo(f"No mapping found for {facility}/{ids_name}.")
         return
 
-    from imas_codex.ids.models import ValidatedSignalMapping
+    from types import SimpleNamespace
 
     bindings = []
     for b in result["bindings"]:
-        b.setdefault("mapping_type", "direct")
-        bindings.append(ValidatedSignalMapping(**b))
+        bindings.append(
+            SimpleNamespace(
+                **{
+                    **b,
+                    "transform_expression": b.get("transform_expression") or "value",
+                }
+            )
+        )
     if not bindings:
         click.echo("No bindings to validate.")
-        return
+        raise SystemExit(1)
 
     report = validate_mapping(bindings, gc=gc)
 
@@ -967,7 +963,9 @@ def map_validate(facility: str, ids_name: str) -> None:
         )
 
     # Confidence distribution
-    conf_dist = compute_confidence_distribution(bindings)
+    conf_dist = compute_confidence_distribution(
+        [b for b in bindings if getattr(b, "confidence", None) is not None]
+    )
     if conf_dist.total_bindings > 0:
         click.echo(
             f"\nConfidence distribution ({conf_dist.total_bindings} bindings, "
@@ -984,6 +982,27 @@ def map_validate(facility: str, ids_name: str) -> None:
                 click.echo(f"    {entry}")
             if len(conf_dist.low_bindings) > 10:
                 click.echo(f"    ... and {len(conf_dist.low_bindings) - 10} more")
+
+    if not report.all_passed or any(check.error for check in report.binding_checks):
+        click.echo("Validation failed; mapping was not promoted.", err=True)
+        raise SystemExit(1)
+
+    if result["mapping"]["status"] == "generated":
+        promoted = gc.query(
+            """
+            MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
+            WHERE m.status = 'generated'
+            SET m.status = 'validated'
+            RETURN m.status AS status
+            """,
+            facility=facility,
+            ids=ids_name,
+        )
+        if not promoted:
+            raise click.ClickException(
+                "Mapping changed during validation; run validate again."
+            )
+    click.echo(f"Mapping {facility}:{ids_name} passed validation.")
 
 
 # ---------------------------------------------------------------------------
@@ -1026,7 +1045,7 @@ def map_activate(facility: str, ids_name: str) -> None:
     """Promote a mapping to active status for use by the assembler.
 
     \b
-    Only mappings in 'generated' or 'validated' status can be activated.
+    Only mappings in 'validated' status can be activated.
     The assembler only loads mappings with status 'active'.
 
     \b
@@ -1055,20 +1074,26 @@ def map_activate(facility: str, ids_name: str) -> None:
     if current == "active":
         click.echo(f"Mapping {facility}:{ids_name} is already active.")
         return
-    if current == "deprecated":
+    if current != "validated":
         click.echo(
-            f"Cannot activate deprecated mapping {facility}:{ids_name}. "
-            "Generate a new mapping first.",
+            f"Cannot activate mapping {facility}:{ids_name} with status "
+            f"'{current}'. Run map validate first.",
             err=True,
         )
         raise SystemExit(1)
 
-    gc.query(
+    promoted = gc.query(
         """
         MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
+        WHERE m.status = 'validated'
         SET m.status = 'active'
+        RETURN m.status AS status
         """,
         facility=facility,
         ids=ids_name,
     )
+    if not promoted:
+        raise click.ClickException(
+            "Mapping changed before activation; run activate again."
+        )
     click.echo(f"Activated mapping {facility}:{ids_name} (was '{current}').")
