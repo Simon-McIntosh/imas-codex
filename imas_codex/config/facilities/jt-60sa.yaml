@@ -222,9 +222,21 @@ signal_glossary:
   - term: LFP
     meaning: lower fast plasma position control coil (FPPCC)
   - term: HiTe
-    meaning: HiTe/HiTec acquisition chain measuring the same coil current as LKAT/LKAT2
+    meaning: >-
+      HiTe/HiTec acquisition chain measuring the same coil current as LKAT/LKAT2;
+      the chain JT-60SA's equilibrium reconstruction reads, and the chain mapped
+      to pf_active coil currents
   - term: LKAT
-    meaning: LKAT/LKAT2 acquisition chain measuring the same coil current as HiTe/HiTec
+    meaning: >-
+      LKAT/LKAT2 acquisition chain measuring the same coil current as HiTe/HiTec;
+      a second reading of that current, not the chain mapped to pf_active
+  - term: magFlxLp
+    meaning: >-
+      MDAC flux loop channel; every loop except loop 7 is measured as loop N minus
+      reference loop 7, a differential flux, and magFlxLp7 is the absolute reference
+      loop
+  - term: magPbTC
+    meaning: MDAC SELENE tangential (poloidal-field) magnetic probe
 
 # Data access patterns discovered during facility exploration.
 data_access_patterns:
