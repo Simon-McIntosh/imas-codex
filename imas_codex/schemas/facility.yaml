@@ -3114,6 +3114,16 @@ classes:
         description: Lifecycle status
         range: IMASMappingStatus
         required: true
+      partial:
+        description: True when a map run stopped with selected sources still unmapped
+        range: boolean
+      unmapped_sources:
+        description: Selected SignalSource IDs left for a later map run
+        range: string
+        multivalued: true
+      stop_reason:
+        description: Deadline or cost_limit that stopped a partial run; absent when complete
+        range: string
       provider:
         description: Who created this mapping (e.g., "imas-codex")
       static_config:
