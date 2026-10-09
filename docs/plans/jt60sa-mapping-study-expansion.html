@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788">
 <meta name="plan-impl" content="0.65">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -508,6 +508,9 @@
 </div>
 <div class="r-comment" data-section="s20" data-id="c-close-s20" data-who="reckon-build" data-when="2026-10-09T07:47:00Z">
     <div class="r-comment-body"><p>§20 landed: a map run stopped by its deadline or cost limit persists what it mapped, marks the mapping partial with the unmapped sources, and resumes only the rest (merge <code>3ec338788</code>; schema slots declared; 570 tests pass). Follow-on: per-section resume for a source in several sections. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s20">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s20" data-id="c-run-r-20261009T071123224920-bounded-map-run-persists" data-who="reckon-build" data-when="2026-10-09T07:44:47Z">
+    <div class="r-comment-body"><p>Bounded map shutdown persists the completed source and records one remaining source plus stop reason; IMASMapping declares all three persisted metadata slots; committed-head gate 627 passed, 5 skipped, 7 deselected.</p></div>
 </div>
 </section>
 </main>
