@@ -42,6 +42,9 @@ data_systems:
   # remote_environment block above.
   edas:
     databases: [EDDB, UDDB, PMDB, FSMD, EASY, LCDB, MBDB, EQDB, FLEDD]
+    category_descriptions:
+      - code: MMSYS
+        description: Magnet system coil currents, including plasma control and field coils
     api_path: /analysis/src/eddb
     lib_path: /analysis/lib/libeddb.so
     uddb_api_path: /analysis/src/uddb
@@ -211,6 +214,16 @@ excludes:
 # curUFPLKAT -> UFP, cur1TFLKAT -> 1.
 signal_member_patterns:
   MMSYS: '^cur(?P<member>.+?)(?:TFLKAT|LKAT|HiTe)$'
+
+signal_glossary:
+  - term: UFP
+    meaning: upper fast plasma position control coil (FPPCC)
+  - term: LFP
+    meaning: lower fast plasma position control coil (FPPCC)
+  - term: HiTe
+    meaning: HiTe/HiTec acquisition chain measuring the same coil current as LKAT/LKAT2
+  - term: LKAT
+    meaning: LKAT/LKAT2 acquisition chain measuring the same coil current as HiTe/HiTec
 
 # Data access patterns discovered during facility exploration.
 data_access_patterns:
