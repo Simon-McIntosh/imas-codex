@@ -22,13 +22,13 @@
   <meta name="plan-after" content="generated-map-handoff">
   <meta name="plan-informs" content="imas-ambix:jt60sa-tokamap-from-generated-maps">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-mapping-study-expansion#s1&quot;], &quot;s3&quot;: [&quot;jt60sa-mapping-study-expansion#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-mapping-study-expansion#s5&quot;], &quot;s8&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s9&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s10&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s11&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s12&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s13&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s14&quot;: [&quot;jt60sa-mapping-study-expansion#s8&quot;, &quot;jt60sa-mapping-study-expansion#s9&quot;, &quot;jt60sa-mapping-study-expansion#s10&quot;, &quot;jt60sa-mapping-study-expansion#s11&quot;, &quot;jt60sa-mapping-study-expansion#s12&quot;, &quot;jt60sa-mapping-study-expansion#s13&quot;], &quot;s15&quot;: [&quot;jt60sa-mapping-study-expansion#s6&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;}">
   <title>JT-60SA Mapping Study Expansion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-commits" content="8b42e71ca">
+<meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc">
 <meta name="plan-impl" content="0.0714">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -359,6 +359,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261009T052927840877-review-of-error-mappings-from-error-signals" data-who="reckon-build" data-when="2026-10-09T05:43:27.780Z">
     <div class="r-comment-body"><p>Reviewed run r-20261009T051638952042-error-mappings-from-error-signals (commit ade2222b, base 02a98eb0e) is SOUND WITH FINDINGS: derive_error_mappings no longer writes a value-derived error binding, and error fields bind only from error signals; record stored with all six dimensions (total 108), reviewed_base_sha 02a98eb0e, reviewed_head_sha ade2222b, added_failure_count 0 over three follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-09T05:50:00Z">
+    <div class="r-comment-body"><p>§7 landed: hand-off rows carry <code>cocos_label</code> and <code>cocos_label_source</code> from the target or its nearest labelled ancestor. Time coordinates and unlabelled targets carry <code>none</code>. Merged at <code>e48572d1b</code> and <code>d8a9227fc</code>; 35 tests pass on the merged head. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s7">evidence</a></p></div>
 </div>
 </section>
 </main>
