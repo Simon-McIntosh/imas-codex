@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T01:54:27.730Z",
+  "dispatched_at": "2026-10-09T01:46:24Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/mapping-decision-chain.html:21",
+      "id": "wiring-1",
+      "reason": "a \u00a74 dispatch would build against a geometry edge that does not exist yet, so its angle-class and channel-sign slots would have nothing to read; the prior resolution added `#s5` (for `dd_cocos_class`) but left the `#s6` dependency missing.",
+      "text": "\u00a74 reads \"its `HAS_GEOMETRY` sensor geometry when present\" and its done-when needs geometry (an angle-class slot stays open while the source has no geometry; a channel sign multiplies into the sign slot), but `HAS_GEOMETRY` is introduced by `signal-cocos-conventions` \u00a76 `sensor-geometry-graph`, not by anything \u00a74's `plan-section-depends-on` lists (`signal-cocos-conventions#s3`, `#s5`)",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/mapping-decision-chain.html:159",
+      "id": "wiring-2",
+      "reason": "with no declared dependency on \u00a74\u2013\u00a76 and \u00a78, a build ordered by section number would run the proof at \u00a77 before the chain it measures and before the \u00a78 filter it reports removed candidates for, so the fragment would be produced from unbuilt machinery; the plan already records an intra-plan dependency for the same reason at \u00a78 (`mapping-decision-chain#s5`).",
+      "text": "\u00a77's node text requires the run to happen \"once \u00a74 to \u00a76 and \u00a78 have landed\", yet \u00a77's `plan-section-depends-on` lists only `signal-cocos-conventions#s8` and names none of this plan's \u00a74, \u00a75, \u00a76 or \u00a78, even though \u00a78 is a later section than \u00a77",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "afd05c4ed2f1c5799d2288e68319eb2fcc7f635a62b4af44ae1f925a43cac72a",
+  "plan_slug": "mapping-decision-chain",
+  "plan_version": 18,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "geometry is optional input to the resolver: without HAS_GEOMETRY an angle-class slot stays open, so section 4 builds and tests without section 6; the section 7 proof waits on signal-cocos-conventions section 8, which needs section 6",
+      "when": "2026-10-09T01:56:25.140107+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-2",
+      "reason": "",
+      "when": "2026-10-09T01:56:26.125085+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "geometry is optional input to the resolver: without HAS_GEOMETRY an angle-class slot stays open, so section 4 builds and tests without section 6; the section 7 proof waits on signal-cocos-conventions section 8, which needs section 6",
+      "when": "2026-10-09T01:56:25.140107+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:56:26.125085+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-decision-chain.v18.json",
+  "review_run_id": "r-20261009T014610837768-plan-review-of-mapping-decision-chain",
+  "reviewed_blob_sha": "530d37eb44ba91ab508fc239e5c6c9e807d5f509",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/ids/transforms.py` (`cocos_sign`, `convert_units`), `imas_codex/ids/mapping.py` (`map_signals`, `rep_cocos`), `imas_codex/ids/workers.py`/`tools.py` (`rep_cocos`), `imas_codex/ids/candidates.py`, `imas_codex/schemas/facility.yaml` (`cocos`), `tests/fixtures/conventions/reference_labels.json`, the landed-archive anchors `#s2`/`#s3`/`#s6`, `signal-cocos-conventions` \u00a72/\u00a73/\u00a75/\u00a78 and `jt60sa-discovery-completion` \u00a756 all resolve; `dd_cocos_class` is the forward deliverable of `signal-cocos-conventions` \u00a75 (declared), and the `discover --only mapping --limit` path is a real `DOMAINS` member.",
+    "done_when": "pass \u2014 \u00a74 and \u00a78 each embed their own negatives (an ip_like field with survivors {3,4} stays open, an absent convention leaves the slot open; a none source drops a psi_like candidate and keeps a one_like one) and a removal check (`no code or schema names FacilitySignal.cocos`), and \u00a77 declares an explicit mutation control over a scratch copy of the bindings.",
+    "evidence_paths": "pass \u2014 \u00a77 names `docs/evidence/fragments/mapping-decision-chain/mapping-chain-jt60sa-proof.html`; \u00a74/\u00a75 gate on `tests/ids` and their fragments land under `docs/evidence/fragments/`, none on a node-local scratchpad.",
+    "naming": "pass \u2014 node ids and `slot_resolution.py`/`slot_judgment.py`/`test_candidate_class_filter.py` are named by what they do, with no plan label, ticket number or changelog prose in the new symbols.",
+    "reasoning": "pass \u2014 the stated root cause (the map settles every part of a binding in one open-ended call with no binding of the written sign to the recorded convention) matches the \u00a72 census, `cocos_sign(label, cocos_in=, cocos_out=)` does return a sign and a psi_like 2\u03c0 scale as \u00a74 claims, and the \u00a77 CLI and the \u00a78 filter name real callers (`map_signals`; `judge_candidates`/`achoose_targets`).",
+    "single_goal": "pass \u2014 `mapping-slot-resolution`, `mapping-chain-jt60sa-proof` and `mapping-class-filter` each carry one deliverable and one gate.",
+    "wiring": "a finding \u2014 \u00a74's `plan-section-depends-on` omits `signal-cocos-conventions#s6`, the section that introduces the `HAS_GEOMETRY` edge \u00a74 reads, and \u00a77's omits this plan's \u00a74\u2013\u00a76 and \u00a78, which its own node text requires."
+  },
+  "section_digests": {
+    "_document": "3a8a593e1d1df37d4983d690a34f2747730d21b99249d365ef91b97fdbc9a198",
+    "s1": "8809dcb9d92e599772281e9943fe29db4afb1a87e24c7abbcea5f62c9d6debc2",
+    "s2": "92073db978fb855b2a9b1d5022774259db9507e750ed83a25748e899d113e7b8",
+    "s3": "aca7b0a23f4e45249b477beb5bfcf109a6666a158ee487d7a45d4e84fc6583d3",
+    "s4": "533e234cca899ae85c2a0c39cbde5e3ae96acf14f0530485253fde946ded9b7c",
+    "s5": "3cc465fc0649b31e458a41f087fc69e5984f939f7696828b0905013ae2eb244a",
+    "s6": "156b1d8c80aeb149f5cf9b867d2e9acc467abd2f5ac9b3978ad28e8ce1c9087a",
+    "s7": "9586ff37ebfbda6d1ca9e5ad357ecb9a6f7d35902d60548e713845a5aca15a2a",
+    "s8": "68eb7d5654d2ca06557ce44eea4d31fe430a2e6be47f70b4e063f4a9463ce79b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:55:40.206534+00:00"
+}
