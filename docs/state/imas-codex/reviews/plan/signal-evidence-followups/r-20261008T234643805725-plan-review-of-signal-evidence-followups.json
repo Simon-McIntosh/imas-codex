@@ -1,0 +1,102 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T23:59:28.214Z",
+  "dispatched_at": "2026-10-08T23:46:52Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-evidence-followups.html:136",
+      "id": "wiring-1",
+      "reason": "\u00a75 could be started before the \u00a73 triage verbs and the \u00a74 stage exist, and its done-when demands a triage round through tools that would not yet be built.",
+      "text": "\u00a75 says the lead triages \"through the \u00a73 tools, then re-runs the conventions stage\", but the plan records no relation or gate making \u00a75 wait on \u00a73 or \u00a74; the only gate on \u00a75 (`g-sef-3`) requires `signal-cocos-conventions#s8`, and the plan's `relations` are empty and it carries no `plan-section-depends-on` meta, so a scheduler reading the plan sees \u00a75 as independent of the triage surface it invokes",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-evidence-followups.html:74",
+      "id": "done_when-1",
+      "reason": "the node's evidence that `SignalFollowup` round-trips through the generated models and that `declared` is an accepted `EvidenceType` value would read green while no schema assertion executed, so the fix is to run that file under `-m graph` against the live graph or drop it from this node's gate.",
+      "text": "the `signal-followup-record` done-when runs `uv run --no-sync pytest tests/discovery/test_signal_followups.py tests/graph/test_schema_compliance.py -p no:cacheprovider`, but `tests/graph/test_schema_compliance.py` carries `pytestmark = pytest.mark.graph` (line 17) and `[tool.pytest.ini_options] addopts` in `pyproject.toml` defaults to `-m \"not slow and not graph\"` (lines 1017-1020), so every test in that file is deselected and the command exits 0 having run none of the schema-compliance tests",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-evidence-followups.html:124",
+      "id": "reasoning-1",
+      "reason": "a node scoped away from the module that builds the state it claims to affect cannot produce the evidence its \"attached evidence leading the next state\" clause asserts, so either the write scope widens to include `slot_context.py` and `mapping.py` or the map-side clause is dropped.",
+      "text": "\u00a74's node `followup-evidence-in-state` writes `imas_codex/discovery/signals/conventions.py`, `imas_codex/ids/slot_judgment.py` and `imas_codex/ids/models.py`, yet it asserts \"their state builders put a source's attached evidence first\" for the map's slot judgment as well as the conventions stage, while the map's judgment state is assembled by `build_slot_context` in `imas_codex/ids/slot_context.py` and its caller `map_signals` is in `imas_codex/ids/mapping.py` (per `mapping-decision-chain` \u00a75)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a2283593fc9e74d8c5ebf23784fde2b1bc143332f9fbcd4225bc9e3ff7546935",
+  "plan_slug": "signal-evidence-followups",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-09T00:53:01.353116+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-09T00:53:02.272669+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-09T00:53:03.312318+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:53:02.272669+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:53:03.312318+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:53:01.353116+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-signal-evidence-followups.v0.json",
+  "review_run_id": "r-20261008T234643805725-plan-review-of-signal-evidence-followups",
+  "reviewed_blob_sha": "0b87691dce04cac100a74cbb419bc20f281d92b8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the figure `docs/figures/signal-evidence-followups/triage-loop.svg` exists; gates `g-sef-1`/`g-sef-2`/`g-sef-3` name `signal-cocos-conventions#s7`, `#s8` and `mapping-decision-chain#s5`, each of which resolves; cited existing modules (`imas_codex/schemas/facility.yaml`, `imas_codex/llm/server.py`, `imas_codex/cli/discover/__init__.py`, `imas_codex/ids/models.py`) are present, and the modules that are absent (`followups.py`, `slot_judgment.py`, `followup_tools.py`) are this plan's and its siblings' create targets.",
+    "done_when": "a finding \u2014 the `signal-followup-record` node's done-when cites the whole-graph `test_schema_compliance.py`, whose tests the repo's default marker filter deselects, so its schema half measures nothing.",
+    "evidence_paths": "pass \u2014 the \u00a75 fragment is written to `docs/evidence/fragments/signal-evidence-followups/jt60sa-first-triage.html` and every gate writes under the repository's evidence paths, not a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 node ids and the added `declared` value carry no plan label, stage name, ticket number or version tag; the `g-sef-*` identifiers appear only as gate artifact ids.",
+    "reasoning": "a finding \u2014 \u00a74 asserts the map's judgment state puts attached evidence first, but its write scope omits the module that builds that state, so the mechanism it names cannot run where it claims.",
+    "single_goal": "pass \u2014 each node (`signal-followup-record`, `followup-triage-cli`, `followup-triage-mcp`, `followup-evidence-in-state`) carries one deliverable; \u00a73's terminal and MCP verbs are separate nodes with separate done-whens.",
+    "wiring": "a finding \u2014 \u00a75 depends on the \u00a73 triage verbs and the \u00a74 stage in prose but no relation or gate records it, while \u00a74's dependencies are recorded as gates."
+  },
+  "section_digests": {
+    "_document": "935138c0d6a600e02e8c81ceb16ea5866efc53c2614c833f475ced1d5df5df7c",
+    "s1": "2e5a9fec1b27a2209562c710539599cc72d150ab64cacfd71f02e9408fa288fe",
+    "s2": "5b1a631f47534454d80d01ed6009a155f0cf9b9ce760153e4f2d31cf328135ef",
+    "s3": "c9c3eaaf2146796457d3110dcab2bf609ea58d4fc2288a03c186b60b3b2952fc",
+    "s4": "3f2e3224127a4126be1b009c82bbe1e81a9962da227d6db811a954fd91ee3678",
+    "s5": "d83d004ebb65970c857e5ce09175e53975079e8b14c98cac3cddff89a9230ec3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T00:52:34.021980+00:00"
+}
