@@ -1650,6 +1650,81 @@ def _claimed_source_id(model_source_id: str, claimed_source_id: str) -> str | No
     return None
 
 
+# DD node types that carry no value of their own; a value placed on one is
+# refused downstream, so the binding must name the structure's leaf instead.
+_STRUCTURE_DATA_TYPES = frozenset({"STRUCTURE", "STRUCT_ARRAY"})
+
+
+def _structure_children(
+    target_ids: list[str], gc: GraphClient
+) -> dict[str, dict[str, Any]]:
+    """Per target path: its DD ``data_type`` and whether it has data/time children."""
+    if not target_ids:
+        return {}
+    rows = gc.query(
+        """
+        UNWIND $paths AS p
+        OPTIONAL MATCH (n:IMASNode {id: p})
+        OPTIONAL MATCH (d:IMASNode {id: p + '/data'})
+        OPTIONAL MATCH (t:IMASNode {id: p + '/time'})
+        RETURN p AS path,
+               n.data_type AS data_type,
+               d IS NOT NULL AS has_data,
+               t IS NOT NULL AS has_time
+        """,
+        paths=target_ids,
+    )
+    return {row["path"]: row for row in rows if row.get("path")}
+
+
+def _retarget_structure_bindings(
+    bindings: list[ValidatedSignalMapping], gc: GraphClient
+) -> tuple[list[ValidatedSignalMapping], list[EscalationFlag]]:
+    """Retarget a binding aimed at a structure to its data or time child.
+
+    imas-ambix places values only on data fields, so a binding whose target is
+    a ``STRUCTURE`` or ``STRUCT_ARRAY`` node names a container, not a value. When
+    the structure carries a ``data`` leaf the binding is rewritten to it and the
+    rewrite is recorded in the binding's evidence; a ``source_property`` of
+    ``time`` rewrites to the structure's ``time`` child instead. A structure
+    with no such child is refused as an escalation, because nothing can place
+    the value. A binding already naming a leaf is returned unchanged.
+    """
+    target_ids = sorted({b.target_id for b in bindings})
+    children = _structure_children(target_ids, gc)
+    kept: list[ValidatedSignalMapping] = []
+    escalations: list[EscalationFlag] = []
+    for binding in bindings:
+        row = children.get(binding.target_id, {})
+        data_type = str(row.get("data_type") or "").upper()
+        if data_type not in _STRUCTURE_DATA_TYPES:
+            kept.append(binding)
+            continue
+        wants_time = binding.source_property == "time"
+        child = "time" if wants_time else "data"
+        if row.get("has_time") if wants_time else row.get("has_data"):
+            original = binding.target_id
+            binding.target_id = f"{original}/{child}"
+            note = f"retargeted from structure {original} to its {child} child"
+            binding.evidence = (
+                f"{binding.evidence}; {note}" if binding.evidence else note
+            )
+            kept.append(binding)
+        else:
+            escalations.append(
+                EscalationFlag(
+                    source_id=binding.source_id,
+                    target_id=binding.target_id,
+                    severity=EscalationSeverity.ERROR,
+                    reason=(
+                        f"target_id {binding.target_id} is a structure with no "
+                        f"{child} child to hold the value"
+                    ),
+                )
+            )
+    return kept, escalations
+
+
 def validate_mappings(
     facility: str,
     ids_name: str,
@@ -1708,6 +1783,12 @@ def validate_mappings(
             )
         all_unmapped.extend(batch.unmapped)
         all_escalations.extend(batch.escalations)
+
+    # A binding names a value, so a target that is a structure is retargeted to
+    # its data (or, for a time binding, time) child before the section guard and
+    # validation run against the final path.
+    all_bindings, structure_escalations = _retarget_structure_bindings(all_bindings, gc)
+    all_escalations.extend(structure_escalations)
 
     # Section guard: every target_id must lie inside the section of one of the
     # source's selected candidates in this IDS. The guard is at section level,
