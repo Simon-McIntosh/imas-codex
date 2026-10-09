@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908">
 <meta name="plan-impl" content="0.2">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -368,6 +368,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-09T05:55:00Z">
     <div class="r-comment-body"><p>§5 landed: the selected-sources map worker fix is on main (merge <code>97bff9908</code>, same patch as <code>19dd9128c</code>). <code>tests/ids/</code> passes on the merged head, and a live magnetics run bound both pre-selected sources and left the others unbound. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s5">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261009T051958133490-map-worker-takes-selected" data-who="reckon-build" data-when="2026-10-09T05:49:29.692Z">
+    <div class="r-comment-body"><p>Applied commit 19dd9128c onto main as e94cedbd8 (workers.py + tests/ids/test_map_worker_selected_homes.py); tests/ids 562 passed/5 skipped/4 deselected; live `imas-codex imas map run jt-60sa -i magnetics` re-wrote bindings for both pre-selected sources (4 and 4) while three no-selected-target sources stayed at 0.</p></div>
 </div>
 </section>
 </main>
