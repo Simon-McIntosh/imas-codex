@@ -184,6 +184,12 @@ classes:
         description: Geographic location
       ssh_host:
         description: SSH host alias for connection (configured in ~/.ssh/config)
+      ssh_max_sessions:
+        description: >-
+          Maximum concurrent SSH sessions to this host within one process.
+          Persistent worker pools and per-call execution share this bound.
+        range: integer
+        minimum_value: 1
       ssh_gateway:
         description: >-
           SSH gateway/bastion host for ProxyJump connections to facility

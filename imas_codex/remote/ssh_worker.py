@@ -48,6 +48,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import subprocess
+import threading
 import time
 import weakref
 from contextlib import asynccontextmanager
@@ -57,7 +59,70 @@ logger = logging.getLogger(__name__)
 
 # Track all active pools for cleanup on process exit
 _active_pools: weakref.WeakSet[SSHWorkerPool] = weakref.WeakSet()
+_active_pools_lock = threading.Lock()
 _atexit_registered = False
+
+# One process owns admission for both short SSH calls and persistent workers.
+# Separate CLI processes do not share these permits.
+_host_sessions: dict[str, tuple[int, threading.BoundedSemaphore]] = {}
+_host_sessions_lock = threading.Lock()
+_checked_host_configs: set[str] = set()
+
+
+def configure_host_session_limit(ssh_host: str, limit: int) -> None:
+    """Register the maximum simultaneous SSH sessions for one host."""
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+        raise ValueError("ssh_max_sessions must be a positive integer")
+    key = ssh_host.lower()
+    with _host_sessions_lock:
+        current = _host_sessions.get(key)
+        if current is not None and current[0] != limit:
+            raise ValueError(f"SSH session limit for {ssh_host} already registered")
+        if current is None:
+            _host_sessions[key] = (limit, threading.BoundedSemaphore(limit))
+
+
+def host_session_limit(ssh_host: str) -> int | None:
+    """Return the registered limit, if any."""
+    entry = _host_sessions.get(ssh_host.lower())
+    return entry[0] if entry else None
+
+
+def _session_permit(ssh_host: str) -> threading.BoundedSemaphore | None:
+    key = ssh_host.lower()
+    entry = _host_sessions.get(key)
+    if entry is None and key not in _checked_host_configs:
+        from imas_codex.remote.tools import _resolve_ssh_host
+
+        _resolve_ssh_host(ssh_host)
+        _checked_host_configs.add(key)
+        entry = _host_sessions.get(key)
+    return entry[1] if entry else None
+
+
+async def acquire_host_session(ssh_host: str) -> threading.BoundedSemaphore | None:
+    """Wait for a session without blocking the event loop or leaking on cancellation."""
+    permit = _session_permit(ssh_host)
+    if permit is not None:
+        while not permit.acquire(blocking=False):
+            await asyncio.sleep(0.01)
+    return permit
+
+
+def open_worker_pool(ssh_host: str) -> SSHWorkerPool | None:
+    """Find an open pool so short calls can use a held connection."""
+    with _active_pools_lock:
+        pools = list(_active_pools)
+    return next(
+        (
+            pool
+            for pool in pools
+            if pool.ssh_host.lower() == ssh_host.lower()
+            and pool._started
+            and not pool._closed
+        ),
+        None,
+    )
 
 
 # ============================================================================
@@ -171,6 +236,10 @@ class SSHWorker:
     def __init__(
         self, ssh_host: str, worker_id: int, setup_commands: list[str] | None = None
     ):
+        # Facility-aware resolution registers a configured limit before sizing.
+        from imas_codex.remote.tools import _resolve_ssh_host
+
+        _resolve_ssh_host(ssh_host)
         self.ssh_host = ssh_host
         self.worker_id = worker_id
         self.setup_commands = setup_commands
@@ -179,6 +248,7 @@ class SSHWorker:
         self._lock = asyncio.Lock()
         self.stats = WorkerStats()
         self._reader_buffer = ""
+        self._session_permit: threading.BoundedSemaphore | None = None
 
     async def start(self, timeout: float = 30.0) -> None:
         """Start the SSH worker process and wait for ready signal."""
@@ -216,13 +286,18 @@ class SSHWorker:
             self.ssh_host,
         )
 
-        self._proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            limit=16 * 1024 * 1024,  # 16MB — scan output can exceed 64KB default
-        )
+        self._session_permit = await acquire_host_session(self.ssh_host)
+        try:
+            self._proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                limit=16 * 1024 * 1024,  # 16MB — scan output can exceed 64KB default
+            )
+        except BaseException:
+            self._release_session()
+            raise
 
         # Wait for ready signal
         assert self._proc.stdout is not None
@@ -249,7 +324,7 @@ class SSHWorker:
                 f"SSH worker {self.worker_id} for {self.ssh_host} "
                 f"did not become ready within {timeout}s"
             ) from exc
-        except Exception:
+        except BaseException:
             await self._kill()
             raise
 
@@ -318,6 +393,9 @@ class SSHWorker:
                 raise TimeoutError(
                     f"SSH worker {self.worker_id} timed out after {timeout}s"
                 ) from None
+            except asyncio.CancelledError:
+                await self._kill()
+                raise
             except (BrokenPipeError, ConnectionResetError, OSError) as e:
                 logger.warning(
                     "SSH worker %d for %s pipe broken: %s",
@@ -390,6 +468,12 @@ class SSHWorker:
             except Exception:
                 pass
             self._proc = None
+        self._release_session()
+
+    def _release_session(self) -> None:
+        if self._session_permit is not None:
+            self._session_permit.release()
+            self._session_permit = None
 
     async def close(self) -> None:
         """Gracefully shut down the worker."""
@@ -412,6 +496,7 @@ class SSHWorker:
                     pass
             finally:
                 self._proc = None
+        self._release_session()
 
     def force_kill(self) -> None:
         """Synchronous force-kill for use in atexit/signal handlers."""
@@ -422,6 +507,7 @@ class SSHWorker:
             except Exception:
                 pass
             self._proc = None
+        self._release_session()
 
 
 class SSHWorkerPool:
@@ -439,7 +525,8 @@ class SSHWorkerPool:
         start_timeout: float = 60.0,
     ):
         self.ssh_host = ssh_host
-        self.max_workers = max_workers
+        limit = host_session_limit(ssh_host)
+        self.max_workers = min(max_workers, limit) if limit is not None else max_workers
         self.setup_commands = setup_commands
         self.start_timeout = start_timeout
         self._workers: list[SSHWorker] = []
@@ -448,9 +535,11 @@ class SSHWorkerPool:
         self._started = False
         self._closed = False
         self._next_id = 0
+        self._owner_loop: asyncio.AbstractEventLoop | None = None
 
         # Register for cleanup
-        _active_pools.add(self)
+        with _active_pools_lock:
+            _active_pools.add(self)
         _ensure_atexit()
 
     async def start(self, initial_workers: int | None = None) -> None:
@@ -465,6 +554,13 @@ class SSHWorkerPool:
         async with self._lock:
             if self._started:
                 return
+            if host_session_limit(self.ssh_host) is not None:
+                existing = open_worker_pool(self.ssh_host)
+                if existing is not None and existing is not self:
+                    raise RuntimeError(
+                        f"SSH worker pool already open for {self.ssh_host}"
+                    )
+            self._owner_loop = asyncio.get_running_loop()
 
             n = initial_workers if initial_workers is not None else self.max_workers
             n = min(n, self.max_workers)
@@ -477,7 +573,11 @@ class SSHWorkerPool:
             tasks: list[asyncio.Task] = []
 
             # Tool caching task (copies rg/fd/tokei to /tmp)
-            cache_task = asyncio.create_task(self._cache_remote_tools())
+            cache_task = (
+                asyncio.create_task(self._cache_remote_tools())
+                if host_session_limit(self.ssh_host) is None
+                else None
+            )
 
             # Create and start all workers concurrently
             workers_starting: list[SSHWorker] = []
@@ -491,18 +591,18 @@ class SSHWorkerPool:
 
             # Wait for everything in parallel
             all_results = await asyncio.gather(
-                cache_task,
-                *tasks,
+                *(([cache_task] if cache_task is not None else []) + tasks),
                 return_exceptions=True,
             )
 
             # First result is cache task
-            cache_result = all_results[0]
-            if isinstance(cache_result, BaseException):
-                logger.debug("Tool caching failed (non-fatal): %s", cache_result)
+            if cache_task is not None:
+                cache_result = all_results.pop(0)
+                if isinstance(cache_result, BaseException):
+                    logger.debug("Tool caching failed (non-fatal): %s", cache_result)
 
             # Remaining results are worker starts
-            for worker, result in zip(workers_starting, all_results[1:], strict=True):
+            for worker, result in zip(workers_starting, all_results, strict=True):
                 if isinstance(result, BaseException):
                     logger.warning(
                         "Failed to start SSH worker %d for %s: %s",
@@ -526,6 +626,42 @@ class SSHWorkerPool:
                 len(self._workers),
                 n,
             )
+
+    async def run_subprocess(
+        self, command: str, stdin_data: str | None, timeout: int
+    ) -> subprocess.CompletedProcess[str]:
+        """Run a shell command through a worker's existing SSH session."""
+        payload = json.dumps(
+            {
+                "command": command,
+                "has_stdin": stdin_data is not None,
+                "timeout": timeout,
+            }
+        )
+        script = (
+            "import json, subprocess, sys\n"
+            f"request = json.loads({payload!r})\n"
+            "stream = ({'input': sys.stdin.read()} if request['has_stdin'] "
+            "else {'stdin': subprocess.DEVNULL})\n"
+            "try:\n"
+            "    result = subprocess.run(['bash', '-c', request['command']], "
+            "capture_output=True, text=True, timeout=request['timeout'], "
+            "**stream)\n"
+            "    print(json.dumps({'returncode': result.returncode, "
+            "'stdout': result.stdout, 'stderr': result.stderr}))\n"
+            "except subprocess.TimeoutExpired:\n"
+            "    print(json.dumps({'timeout': True}))\n"
+        )
+        async with self.acquire() as worker:
+            response = await worker.execute(
+                script, stdin_data=stdin_data or "", timeout=float(timeout + 2)
+            )
+        data = json.loads(response)
+        if data.get("timeout"):
+            raise subprocess.TimeoutExpired(command, timeout)
+        return subprocess.CompletedProcess(
+            command, data["returncode"], data["stdout"], data["stderr"]
+        )
 
     async def _start_worker(self, worker: SSHWorker) -> SSHWorker:
         """Start a single worker and return it."""
@@ -708,6 +844,9 @@ async def get_worker_pool(
     """
     lock = _get_registry_lock()
     async with lock:
+        existing = open_worker_pool(ssh_host)
+        if existing is not None:
+            return existing
         if ssh_host in _pools and not _pools[ssh_host]._closed:
             return _pools[ssh_host]
 
@@ -741,7 +880,9 @@ def force_kill_all_pools() -> None:
     _pools.clear()
 
     # Also kill any pools tracked via WeakSet
-    for pool in list(_active_pools):
+    with _active_pools_lock:
+        active = list(_active_pools)
+    for pool in active:
         pool.force_kill_all()
 
 
@@ -888,6 +1029,11 @@ async def ssh_worker_session(
 
     On exit (normal, exception, or signal), all worker processes are killed.
     """
+    existing = open_worker_pool(ssh_host)
+    if existing is not None:
+        yield existing
+        return
+
     pool = SSHWorkerPool(
         ssh_host=ssh_host,
         max_workers=max_workers,

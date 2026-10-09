@@ -16,12 +16,14 @@ Functions:
 - cleanup_stale_sockets(): Remove stale SSH control master sockets
 """
 
+import asyncio
 import logging
 import os
 import re
 import shlex
 import socket
 import subprocess
+import time
 from functools import lru_cache
 from pathlib import Path
 
@@ -71,6 +73,110 @@ def _get_host_nice_level(ssh_host: str | None) -> int | None:
     if ssh_host is None:
         return None
     return _host_nice_levels.get(ssh_host.lower())
+
+
+def _run_remote_process(
+    ssh_host: str, remote_cmd: str, *, input_data: str | None = None, timeout: int
+) -> subprocess.CompletedProcess[str]:
+    """Run one SSH call under the process-local host limit or its open pool."""
+    from imas_codex.remote.ssh_worker import _session_permit, open_worker_pool
+
+    args = ["ssh", "-T", ssh_host, remote_cmd]
+    permit = _session_permit(ssh_host)
+    while True:
+        pool = open_worker_pool(ssh_host)
+        if pool is not None:
+            loop = pool._owner_loop
+            if loop is None or not loop.is_running():
+                raise RuntimeError("SSH worker pool has no running event loop")
+            try:
+                current_loop = asyncio.get_running_loop()
+            except RuntimeError:
+                current_loop = None
+            if current_loop is loop:
+                raise RuntimeError(
+                    "Synchronous SSH call cannot use a pool on its event loop"
+                )
+            future = asyncio.run_coroutine_threadsafe(
+                pool.run_subprocess(remote_cmd, input_data, timeout), loop
+            )
+            return future.result(timeout + 3)
+        if permit is None or permit.acquire(blocking=False):
+            break
+        time.sleep(0.01)
+    try:
+        return subprocess.run(
+            args, input=input_data, capture_output=True, text=True, timeout=timeout
+        )
+    finally:
+        if permit is not None:
+            permit.release()
+
+
+async def _run_remote_process_async(
+    ssh_host: str, remote_cmd: str, input_data: str, timeout: int
+) -> subprocess.CompletedProcess[str]:
+    """Async counterpart sharing the same pool and host permit."""
+    from imas_codex.remote.ssh_worker import _session_permit, open_worker_pool
+
+    permit = _session_permit(ssh_host)
+    while True:
+        pool = open_worker_pool(ssh_host)
+        if pool is not None:
+            if pool._owner_loop is asyncio.get_running_loop():
+                return await pool.run_subprocess(remote_cmd, input_data, timeout)
+            if pool._owner_loop is None:
+                raise RuntimeError("SSH worker pool has no event loop")
+            future = asyncio.run_coroutine_threadsafe(
+                pool.run_subprocess(remote_cmd, input_data, timeout), pool._owner_loop
+            )
+            return await asyncio.wrap_future(future)
+        if permit is None or permit.acquire(blocking=False):
+            break
+        await asyncio.sleep(0.01)
+    try:
+        return await _communicate_async(
+            ["ssh", "-T", ssh_host, remote_cmd], input_data, timeout, ssh_host
+        )
+    finally:
+        if permit is not None:
+            permit.release()
+
+
+async def _communicate_async(
+    cmd: list[str], input_data: str, timeout: int, ssh_host: str | None
+) -> subprocess.CompletedProcess[str]:
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    try:
+        stdout_bytes, stderr_bytes = await asyncio.wait_for(
+            proc.communicate(input_data.encode()), timeout=timeout
+        )
+    except TimeoutError:
+        proc.kill()
+        await proc.wait()
+        if ssh_host:
+            _invalidate_ssh_host(ssh_host)
+        partial = b""
+        try:
+            if proc.stdout:
+                partial = await asyncio.wait_for(proc.stdout.read(), timeout=2)
+        except Exception:
+            pass
+        exc = subprocess.TimeoutExpired(cmd, timeout)
+        exc.output = partial.decode(errors="replace")
+        raise exc from None
+    except asyncio.CancelledError:
+        proc.kill()
+        await proc.wait()
+        raise
+    return subprocess.CompletedProcess(
+        cmd, proc.returncode, stdout_bytes.decode(), stderr_bytes.decode()
+    )
 
 
 # ============================================================================
@@ -897,12 +1003,7 @@ def run_command(
         # SSH execution with -T to disable pseudo-terminal allocation
         # This avoids triggering .bashrc on systems where it's loaded for PTY sessions
         try:
-            result = subprocess.run(
-                ["ssh", "-T", ssh_host, remote_cmd],
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-            )
+            result = _run_remote_process(ssh_host, remote_cmd, timeout=timeout)
         except subprocess.TimeoutExpired:
             # Killing the SSH process can kill the ControlMaster, leaving
             # a stale socket. Invalidate so next call re-checks health.
@@ -1045,11 +1146,10 @@ def run_script_via_stdin(
         # SSH execution via stdin - avoids bash -c overhead
         # Use 'interpreter [args]' to read script from stdin
         try:
-            result = subprocess.run(
-                ["ssh", "-T", ssh_host, " ".join(interp_cmd)],
-                input=remote_script,
-                capture_output=True,
-                text=True,
+            result = _run_remote_process(
+                ssh_host,
+                " ".join(interp_cmd),
+                input_data=remote_script,
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired:
@@ -1188,12 +1288,8 @@ def run_python_script(
 
         # SSH execution with JSON piped through
         try:
-            result = subprocess.run(
-                ["ssh", "-T", ssh_host, remote_cmd],
-                input=json_input,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
+            result = _run_remote_process(
+                ssh_host, remote_cmd, input_data=json_input, timeout=timeout
             )
         except subprocess.TimeoutExpired:
             _invalidate_ssh_host(ssh_host)
@@ -1258,7 +1354,6 @@ async def async_run_python_script(
         TimeoutError: If command exceeds timeout
         asyncio.CancelledError: If task is cancelled
     """
-    import asyncio
     import importlib.resources
     import json
 
@@ -1320,42 +1415,15 @@ async def async_run_python_script(
         remote_cmd = " && ".join(parts)
         cmd = ["ssh", "-T", ssh_host, remote_cmd]
 
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdin=asyncio.subprocess.PIPE,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-
-    try:
-        stdout_bytes, stderr_bytes = await asyncio.wait_for(
-            proc.communicate(json_input.encode()),
-            timeout=timeout,
+    if is_local:
+        result = await _communicate_async(cmd, json_input, timeout, None)
+    else:
+        result = await _run_remote_process_async(
+            ssh_host, remote_cmd, json_input, timeout
         )
-    except TimeoutError:
-        proc.kill()
-        await proc.wait()
-        # Killing SSH can leave ControlMaster socket stale
-        if not is_local and ssh_host:
-            _invalidate_ssh_host(ssh_host)
-        # Capture partial stdout from killed process.
-        # With JSONL-streaming scripts, completed lines are recoverable.
-        partial = b""
-        try:
-            if proc.stdout:
-                partial = await asyncio.wait_for(proc.stdout.read(), timeout=2)
-        except Exception:
-            pass
-        exc = subprocess.TimeoutExpired(cmd, timeout)
-        exc.output = partial.decode(errors="replace")
-        raise exc from None
-    except asyncio.CancelledError:
-        proc.kill()
-        await proc.wait()
-        raise
 
-    stdout = stdout_bytes.decode()
-    stderr = stderr_bytes.decode()
+    stdout = result.stdout
+    stderr = result.stderr
 
     if stderr:
         logger.debug(
@@ -1364,11 +1432,11 @@ async def async_run_python_script(
             stderr[:500],
         )
 
-    if proc.returncode != 0:
-        if not is_local and ssh_host and proc.returncode == 255:
+    if result.returncode != 0:
+        if not is_local and ssh_host and result.returncode == 255:
             _invalidate_ssh_host(ssh_host)
         raise subprocess.CalledProcessError(
-            proc.returncode, script_name, stdout, stderr
+            result.returncode, script_name, stdout, stderr
         )
 
     return stdout.strip()

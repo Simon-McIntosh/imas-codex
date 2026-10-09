@@ -11,6 +11,7 @@ location: Naka, Japan
 
 # SSH connection (user configures ~/.ssh/config with this alias)
 ssh_host: jt-60sa
+ssh_max_sessions: 1
 
 # Lower the priority of codex SSH workloads on shared JT-60SA hosts.
 nice_level: 19
