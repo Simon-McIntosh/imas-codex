@@ -80,8 +80,16 @@ class TestResetSpec:
         assert "underspecified" in spec.source_statuses
         assert "description" in spec.clear_fields
         assert "embedding" in spec.clear_fields
-        assert "checked" in spec.clear_fields
         assert spec.facility_via_rel is False
+
+    def test_signal_discovered_keeps_the_check_record(self, reset_mod):
+        """Re-enrichment regenerates the description, not the data read."""
+        discovered = reset_mod.SIGNAL_RESET_SPECS["discovered"]
+        for field in ("checked", "checked_at", "check_retries"):
+            assert field not in discovered.clear_fields
+        enriched = reset_mod.SIGNAL_RESET_SPECS["enriched"]
+        for field in ("checked", "checked_at", "check_retries"):
+            assert field in enriched.clear_fields
 
     def test_signal_discovered_clears_embed_failed_at(self, reset_mod):
         spec = reset_mod.SIGNAL_RESET_SPECS["discovered"]

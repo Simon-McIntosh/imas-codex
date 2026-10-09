@@ -1489,6 +1489,10 @@ class TestPipelineE2E:
                 "imas_codex.discovery.base.embed_worker.embed_description_worker",
                 new_callable=AsyncMock,
             ),
+            patch(
+                "imas_codex.discovery.signals.parallel.carry_forward_recorded_checks",
+                return_value=7,
+            ) as carry_forward,
         ):
             result = await run_parallel_data_discovery(
                 facility=FACILITY,
@@ -1497,7 +1501,7 @@ class TestPipelineE2E:
                 cost_limit=10.0,
                 enrich_only=True,
                 num_enrich_workers=1,
-                num_check_workers=0,
+                num_check_workers=4,
             )
 
         for p in patches.values():
@@ -1515,6 +1519,10 @@ class TestPipelineE2E:
             }
         ]
         load_wiki_context.assert_called_once_with(FACILITY)
+        # Enrich-only starts no check workers even when a count is offered,
+        # and still carries recorded checks forward without a remote read.
+        carry_forward.assert_called_once_with(FACILITY)
+        assert result["checks_carried"] == 7
 
     @pytest.mark.anyio
     @pytest.mark.timeout(30)

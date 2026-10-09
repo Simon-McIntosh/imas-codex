@@ -188,13 +188,14 @@ SIGNAL_RESET_SPECS: dict[str, ResetSpec] = {
             "embedding",
             "embedded_at",
             "embed_failed_at",
-            "checked",
-            "checked_at",
-            "check_retries",
             "context_quality",
             "enrichment_model",
             "enrichment_prompt_hash",
         ],
+        # The check record (checked, checked_at, check_retries) is kept: a
+        # check reads data through the accessor, so it does not depend on the
+        # description being regenerated. Re-enrichment carries it forward;
+        # --reset-to enriched clears it when a fresh read is wanted.
         post_cypher=("OPTIONAL MATCH (n)-[r:MEMBER_OF]->() DELETE r"),
     ),
     "enriched": ResetSpec(

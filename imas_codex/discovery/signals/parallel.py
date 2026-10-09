@@ -5619,6 +5619,17 @@ async def run_parallel_data_discovery(
         except Exception as e:
             logger.warning("Individualization failed: %s", e)
 
+    # A re-enriched signal keeps its recorded check. The check worker carries
+    # it forward as it starts, but a flush run starts none, so carry it here.
+    checks_carried = 0
+    if not discover_only:
+        try:
+            checks_carried = await asyncio.to_thread(
+                carry_forward_recorded_checks, facility
+            )
+        except Exception as e:
+            logger.warning("Carrying recorded checks forward failed: %s", e)
+
     elapsed = time.time() - start_time
     return {
         "scanned": state.discover_stats.processed,
@@ -5632,4 +5643,5 @@ async def run_parallel_data_discovery(
         "units_count": state.units_stats.processed,
         "promote_count": state.promote_stats.processed,
         "individualized": individualized,
+        "checks_carried": checks_carried,
     }
