@@ -960,6 +960,46 @@ def _provide_file_scoring_schema() -> dict[str, Any]:
 _SCHEMA_PROVIDERS["file_scoring_schema"] = _provide_file_scoring_schema
 
 
+@lru_cache(maxsize=1)
+def _provide_signal_mapping_schema() -> dict[str, Any]:
+    """Provide the SignalMappingBatch field lists for the signal-mapping prompt.
+
+    The local lane sends no response_format, so the field names and which of
+    them are required reach the model only through the prompt.
+    """
+    from imas_codex.ids.models import (
+        EscalationFlag,
+        SignalMappingBatch,
+        SignalMappingEntry,
+        UnmappedSignal,
+    )
+
+    return {
+        "signal_mapping_batch_fields": get_pydantic_schema_description(
+            SignalMappingBatch
+        ),
+        "signal_mapping_entry_fields": get_pydantic_schema_description(
+            SignalMappingEntry
+        ),
+        "unmapped_signal_fields": get_pydantic_schema_description(UnmappedSignal),
+        "escalation_flag_fields": get_pydantic_schema_description(EscalationFlag),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_assembly_schema() -> dict[str, Any]:
+    """Provide the AssemblyConfig field list for the assembly prompt."""
+    from imas_codex.ids.models import AssemblyConfig
+
+    return {
+        "assembly_config_fields": get_pydantic_schema_description(AssemblyConfig),
+    }
+
+
+_SCHEMA_PROVIDERS["signal_mapping_schema"] = _provide_signal_mapping_schema
+_SCHEMA_PROVIDERS["assembly_schema"] = _provide_assembly_schema
+
+
 def get_schema_for_prompt(
     prompt_name: str, schema_needs: list[str] | None = None
 ) -> dict[str, Any]:

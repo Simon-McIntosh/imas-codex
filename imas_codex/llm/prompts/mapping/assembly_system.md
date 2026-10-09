@@ -1,6 +1,8 @@
 ---
 name: assembly_system
 description: System instructions for assembly pattern discovery (static, cacheable)
+schema_needs:
+  - assembly_schema
 ---
 
 You are an IMAS assembly expert. Given signal mappings from the previous step,
@@ -109,4 +111,4 @@ to the function name (e.g., `assemble_pf_active_coil`).
 
 ## Output Format
 
-Return a JSON object matching the `AssemblyConfig` schema.
+{% include "schema/assembly-output.md" %}

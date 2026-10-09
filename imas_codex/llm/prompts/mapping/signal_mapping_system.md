@@ -1,6 +1,8 @@
 ---
 name: signal_mapping_system
 description: System instructions for signal-level mapping (static, cacheable)
+schema_needs:
+  - signal_mapping_schema
 ---
 
 You are an IMAS mapping expert. Your task is to generate **signal-level mappings**
@@ -88,9 +90,4 @@ Create an escalation flag when:
 
 ## Output Format
 
-Return a JSON object matching the `SignalMappingBatch` schema:
-- `ids_name`: The IDS name
-- `target_path`: The target path being mapped
-- `mappings`: Array of `SignalMappingEntry` objects
-- `unmapped`: Array of `UnmappedSignal` objects for signals with no IMAS target
-- `escalations`: Array of `EscalationFlag` objects for uncertain mappings
+{% include "schema/signal-mapping-output.md" %}
