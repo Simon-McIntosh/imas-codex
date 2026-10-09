@@ -1,0 +1,1116 @@
+{
+  "revision": "c8e35ade24760cda644f88438dd6ad3996d1582d",
+  "observed_started_at": "2026-10-09T02:48:19.323263+00:00",
+  "schema_sha256": {
+    "facility.yaml": "45aabd047cffc21ac9bf3269482b43491acafc1d1bc55f01ed041b0a76730507",
+    "imas_dd.yaml": "78fe27dc782ff33e9422cf23295988c8fb15a3669f9741b5b7b87438f8254a5b",
+    "common.yaml": "8ad1491a5cce17ea65fe52593ec77c432ded5023aa828753112c466c2f95de9a"
+  },
+  "renderer_sha256": "b7901522f6a35ad912df087a8681ee8c81f3f6fb10f95b0cbebfe4b66a7cd808",
+  "source": {
+    "path": "/home/ITER/mcintos/Code/imas-codex/tests/fixtures/mapping_handoff_example.json",
+    "kind": "CONTRACT FIXTURE",
+    "sha256": "07adcf794051238910d0227bd5174aec75f5df5af3194cb01448aba33ce84a94",
+    "exported_at": "2026-10-09T00:00:00Z"
+  },
+  "handoff": {
+    "format": "imas-codex-mapping-handoff",
+    "format_version": 1,
+    "facility": "jt-60sa",
+    "dd_version": "4.1.1",
+    "exported_at": "2026-10-09T00:00:00Z",
+    "ids": [
+      {
+        "ids_name": "magnetics",
+        "mapping_id": "jt-60sa:magnetics",
+        "status": "generated",
+        "signals": [
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc10",
+            "source_id": "jt-60sa:magnetics:pickup_probe",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC10",
+            "member_identifier": "10",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": null,
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": null,
+            "confidence": 0.87,
+            "evidence": "EDAS MDAC pickup probe channel"
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc11",
+            "source_id": "jt-60sa:magnetics:pickup_probe",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC11",
+            "member_identifier": "11",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": null,
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": null,
+            "confidence": 0.87,
+            "evidence": "EDAS MDAC pickup probe channel"
+          }
+        ],
+        "unexpanded": [
+          {
+            "source_id": "jt-60sa:magnetics:flux_loop",
+            "target_path": "magnetics/flux_loop/flux/data",
+            "reason": "No FacilitySignal member is linked to this source"
+          }
+        ]
+      },
+      {
+        "ids_name": "pf_active",
+        "mapping_id": "jt-60sa:pf_active",
+        "status": "generated",
+        "signals": [
+          {
+            "signal_id": "jt-60sa:general/mmsys_curcs1lkat",
+            "source_id": "jt-60sa:pf_active:coil_current",
+            "data_source": "edas",
+            "source_group": "MMSYS",
+            "source_array": "curCS1LKAT",
+            "member_identifier": "1",
+            "target_path": "pf_active/coil/current/data",
+            "transform_expression": null,
+            "source_units": "A",
+            "target_units": "A",
+            "cocos_label": null,
+            "confidence": 0.83,
+            "evidence": "MMSYS PF coil current channel"
+          },
+          {
+            "signal_id": "jt-60sa:general/mmsys_curcs2lkat",
+            "source_id": "jt-60sa:pf_active:coil_current",
+            "data_source": "edas",
+            "source_group": "MMSYS",
+            "source_array": "curCS2LKAT",
+            "member_identifier": "2",
+            "target_path": "pf_active/coil/current/data",
+            "transform_expression": null,
+            "source_units": "A",
+            "target_units": "A",
+            "cocos_label": null,
+            "confidence": 0.83,
+            "evidence": "MMSYS PF coil current channel"
+          }
+        ],
+        "unexpanded": []
+      }
+    ]
+  },
+  "counts": {
+    "FacilityPath": 9916,
+    "CodeFile": 68268,
+    "Document": 1057,
+    "WikiPage": 4484,
+    "FacilitySignal": 15111,
+    "SignalSource": 5180,
+    "IMASMapping": 0,
+    "IMASMapping_zero_control": [
+      {
+        "id": "jet:balance_of_plant",
+        "facility_id": "jet"
+      }
+    ],
+    "signal_statuses": [
+      {
+        "status": "checked",
+        "count": 4600
+      },
+      {
+        "status": "discovered",
+        "count": 10395
+      },
+      {
+        "status": "enriched",
+        "count": 16
+      },
+      {
+        "status": "underspecified",
+        "count": 100
+      }
+    ],
+    "candidate_routes": [
+      {
+        "route": "escalated",
+        "count": 151
+      },
+      {
+        "route": "selected",
+        "count": 5
+      },
+      {
+        "route": null,
+        "count": 5024
+      }
+    ],
+    "routed_sources": 156,
+    "bindings": 0,
+    "binding_control": [],
+    "mapping_statuses": []
+  },
+  "examples": [
+    {
+      "stem": "pickup-probe",
+      "title": "Pickup probe",
+      "row": {
+        "signal_id": "jt-60sa:general/mdac_magpbtc10",
+        "source_id": "jt-60sa:magnetics:pickup_probe",
+        "data_source": "edas",
+        "source_group": "MDAC",
+        "source_array": "magPbTC10",
+        "member_identifier": "10",
+        "target_path": "magnetics/b_field_pol_probe/field/data",
+        "transform_expression": null,
+        "source_units": "T",
+        "target_units": "T",
+        "cocos_label": null,
+        "confidence": 0.87,
+        "evidence": "EDAS MDAC pickup probe channel"
+      },
+      "graph": {
+        "SignalSource": null,
+        "MAPS_TO_IMAS": null,
+        "IMASNode": {
+          "data_type": "FLT_1D",
+          "cocos_transformation_type": null,
+          "unit": "T",
+          "id": "magnetics/b_field_pol_probe/field/data"
+        }
+      },
+      "mapping_id": "jt-60sa:magnetics",
+      "status": "generated",
+      "note": "No matching live SignalSource, MAPS_TO_IMAS."
+    },
+    {
+      "stem": "pf-coil-current",
+      "title": "PF coil current",
+      "row": {
+        "signal_id": "jt-60sa:general/mmsys_curcs1lkat",
+        "source_id": "jt-60sa:pf_active:coil_current",
+        "data_source": "edas",
+        "source_group": "MMSYS",
+        "source_array": "curCS1LKAT",
+        "member_identifier": "1",
+        "target_path": "pf_active/coil/current/data",
+        "transform_expression": null,
+        "source_units": "A",
+        "target_units": "A",
+        "cocos_label": null,
+        "confidence": 0.83,
+        "evidence": "MMSYS PF coil current channel"
+      },
+      "graph": {
+        "SignalSource": null,
+        "MAPS_TO_IMAS": null,
+        "IMASNode": {
+          "data_type": "FLT_1D",
+          "cocos_transformation_type": null,
+          "unit": "A",
+          "id": "pf_active/coil/current/data"
+        }
+      },
+      "mapping_id": "jt-60sa:pf_active",
+      "status": "generated",
+      "note": "No matching live SignalSource, MAPS_TO_IMAS."
+    }
+  ],
+  "queries": [
+    {
+      "name": "index_inventory",
+      "query": "SHOW INDEXES YIELD labelsOrTypes, properties, state, type WHERE any(label IN labelsOrTypes WHERE label IN $labels) AND type IN ['RANGE', 'TEXT'] RETURN labelsOrTypes, properties, state, type LIMIT 100",
+      "parameters": {
+        "labels": [
+          "FacilityPath",
+          "CodeFile",
+          "Document",
+          "WikiPage",
+          "FacilitySignal",
+          "SignalSource",
+          "IMASMapping",
+          "Facility",
+          "IMASNode"
+        ]
+      },
+      "seconds": 0.0123,
+      "rows": [
+        {
+          "labelsOrTypes": [
+            "CodeFile"
+          ],
+          "properties": [
+            "claim_token"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "CodeFile"
+          ],
+          "properties": [
+            "content_hash"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "CodeFile"
+          ],
+          "properties": [
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "CodeFile"
+          ],
+          "properties": [
+            "id",
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "CodeFile"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "CodeFile"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Document"
+          ],
+          "properties": [
+            "claim_token"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Document"
+          ],
+          "properties": [
+            "document_type"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Document"
+          ],
+          "properties": [
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Document"
+          ],
+          "properties": [
+            "id",
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Document"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Document"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Document"
+          ],
+          "properties": [
+            "url"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Facility"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "Facility"
+          ],
+          "properties": [
+            "ssh_host"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilityPath"
+          ],
+          "properties": [
+            "claim_token"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilityPath"
+          ],
+          "properties": [
+            "device_inode"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilityPath"
+          ],
+          "properties": [
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilityPath"
+          ],
+          "properties": [
+            "id",
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilityPath"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilityPath"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilitySignal"
+          ],
+          "properties": [
+            "claim_token"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilitySignal"
+          ],
+          "properties": [
+            "data_source_name"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilitySignal"
+          ],
+          "properties": [
+            "diagnostic"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilitySignal"
+          ],
+          "properties": [
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilitySignal"
+          ],
+          "properties": [
+            "id",
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilitySignal"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "FacilitySignal"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "node_category"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "node_category",
+            "ids"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "is_leaf"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "path_lower"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASMapping"
+          ],
+          "properties": [
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASMapping"
+          ],
+          "properties": [
+            "id",
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASMapping"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASMapping"
+          ],
+          "properties": [
+            "ids_name"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASMapping"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "ids"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "IMASNode"
+          ],
+          "properties": [
+            "url"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "SignalSource"
+          ],
+          "properties": [
+            "claim_token"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "SignalSource"
+          ],
+          "properties": [
+            "data_source_name"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "SignalSource"
+          ],
+          "properties": [
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "SignalSource"
+          ],
+          "properties": [
+            "id",
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "SignalSource"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "SignalSource"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "WikiPage"
+          ],
+          "properties": [
+            "claim_token"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "WikiPage"
+          ],
+          "properties": [
+            "content_hash"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "WikiPage"
+          ],
+          "properties": [
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "WikiPage"
+          ],
+          "properties": [
+            "id",
+            "facility_id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "WikiPage"
+          ],
+          "properties": [
+            "id"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "WikiPage"
+          ],
+          "properties": [
+            "status"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        },
+        {
+          "labelsOrTypes": [
+            "WikiPage"
+          ],
+          "properties": [
+            "url"
+          ],
+          "state": "ONLINE",
+          "type": "RANGE"
+        }
+      ]
+    },
+    {
+      "name": "facility_control",
+      "query": "MATCH (f:Facility {id: $facility}) USING INDEX f:Facility(id) RETURN f.id AS id LIMIT 1",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0009,
+      "rows": [
+        {
+          "id": "jt-60sa"
+        }
+      ]
+    },
+    {
+      "name": "FacilityPath",
+      "query": "MATCH (n:FacilityPath {facility_id: $facility}) USING INDEX n:FacilityPath(facility_id) RETURN count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0323,
+      "rows": [
+        {
+          "total": 9916,
+          "with_facility_id": 9916,
+          "with_status": 9916
+        }
+      ]
+    },
+    {
+      "name": "CodeFile",
+      "query": "MATCH (n:CodeFile {facility_id: $facility}) USING INDEX n:CodeFile(facility_id) RETURN count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.1217,
+      "rows": [
+        {
+          "total": 68268,
+          "with_facility_id": 68268,
+          "with_status": 68268
+        }
+      ]
+    },
+    {
+      "name": "Document",
+      "query": "MATCH (n:Document {facility_id: $facility}) USING INDEX n:Document(facility_id) RETURN count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0033,
+      "rows": [
+        {
+          "total": 1057,
+          "with_facility_id": 1057,
+          "with_status": 1057
+        }
+      ]
+    },
+    {
+      "name": "WikiPage",
+      "query": "MATCH (n:WikiPage {facility_id: $facility}) USING INDEX n:WikiPage(facility_id) RETURN count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0115,
+      "rows": [
+        {
+          "total": 4484,
+          "with_facility_id": 4484,
+          "with_status": 4484
+        }
+      ]
+    },
+    {
+      "name": "FacilitySignal",
+      "query": "MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0224,
+      "rows": [
+        {
+          "total": 15111,
+          "with_facility_id": 15111,
+          "with_status": 15111
+        }
+      ]
+    },
+    {
+      "name": "SignalSource",
+      "query": "MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0052,
+      "rows": [
+        {
+          "total": 5180,
+          "with_facility_id": 5180,
+          "with_status": 5180
+        }
+      ]
+    },
+    {
+      "name": "IMASMapping",
+      "query": "MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0007,
+      "rows": [
+        {
+          "total": 0,
+          "with_facility_id": 0,
+          "with_status": 0
+        }
+      ]
+    },
+    {
+      "name": "IMASMapping_identity_control",
+      "query": "MATCH (n:IMASMapping) USING INDEX n:IMASMapping(id) WHERE n.id IS NOT NULL RETURN n.id AS id, n.facility_id AS facility_id LIMIT 1",
+      "parameters": {},
+      "seconds": 0.0009,
+      "rows": [
+        {
+          "id": "jet:balance_of_plant",
+          "facility_id": "jet"
+        }
+      ]
+    },
+    {
+      "name": "signal_statuses",
+      "query": "MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN n.status AS status, count(n) AS count ORDER BY status LIMIT 30",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0208,
+      "rows": [
+        {
+          "status": "checked",
+          "count": 4600
+        },
+        {
+          "status": "discovered",
+          "count": 10395
+        },
+        {
+          "status": "enriched",
+          "count": 16
+        },
+        {
+          "status": "underspecified",
+          "count": 100
+        }
+      ]
+    },
+    {
+      "name": "candidate_routes",
+      "query": "MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN n.candidate_route AS route, count(n) AS count ORDER BY route LIMIT 20",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0047,
+      "rows": [
+        {
+          "route": "escalated",
+          "count": 151
+        },
+        {
+          "route": "selected",
+          "count": 5
+        },
+        {
+          "route": null,
+          "count": 5024
+        }
+      ]
+    },
+    {
+      "name": "bindings",
+      "query": "MATCH (s:SignalSource {facility_id: $facility}) USING INDEX s:SignalSource(facility_id) MATCH (s)-[r:MAPS_TO_IMAS]->(n:IMASNode) RETURN count(r) AS count",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0045,
+      "rows": [
+        {
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "binding_control",
+      "query": "MATCH (s:SignalSource {facility_id: $facility}) USING INDEX s:SignalSource(facility_id) MATCH (s)-[:MAPS_TO_IMAS]->(n:IMASNode) RETURN s.id AS source_id, n.id AS target_path LIMIT 1",
+      "parameters": {
+        "facility": "jet"
+      },
+      "seconds": 0.0035,
+      "rows": []
+    },
+    {
+      "name": "mapping_statuses",
+      "query": "MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN n.ids_name AS ids, n.status AS status, count(n) AS count ORDER BY ids, status LIMIT 30",
+      "parameters": {
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0008,
+      "rows": []
+    },
+    {
+      "name": "pickup-probe_source",
+      "query": "MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s {.id, .group_key, .status, .description} AS record LIMIT 1",
+      "parameters": {
+        "source": "jt-60sa:magnetics:pickup_probe",
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0008,
+      "rows": []
+    },
+    {
+      "name": "pickup-probe_edge",
+      "query": "MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH (s)-[r:MAPS_TO_IMAS]->(n:IMASNode {id: $target}) RETURN r {.source_property, .transform_expression, .source_units, .target_units, .cocos_label, .confidence, .evidence, .mapping_type, .error_type, .derived_from} AS record LIMIT 2",
+      "parameters": {
+        "source": "jt-60sa:magnetics:pickup_probe",
+        "target": "magnetics/b_field_pol_probe/field/data",
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.001,
+      "rows": []
+    },
+    {
+      "name": "pickup-probe_target",
+      "query": "MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit, .cocos_transformation_type} AS record LIMIT 1",
+      "parameters": {
+        "target": "magnetics/b_field_pol_probe/field/data"
+      },
+      "seconds": 0.0009,
+      "rows": [
+        {
+          "record": {
+            "data_type": "FLT_1D",
+            "cocos_transformation_type": null,
+            "unit": "T",
+            "id": "magnetics/b_field_pol_probe/field/data"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pf-coil-current_source",
+      "query": "MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s {.id, .group_key, .status, .description} AS record LIMIT 1",
+      "parameters": {
+        "source": "jt-60sa:pf_active:coil_current",
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0006,
+      "rows": []
+    },
+    {
+      "name": "pf-coil-current_edge",
+      "query": "MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH (s)-[r:MAPS_TO_IMAS]->(n:IMASNode {id: $target}) RETURN r {.source_property, .transform_expression, .source_units, .target_units, .cocos_label, .confidence, .evidence, .mapping_type, .error_type, .derived_from} AS record LIMIT 2",
+      "parameters": {
+        "source": "jt-60sa:pf_active:coil_current",
+        "target": "pf_active/coil/current/data",
+        "facility": "jt-60sa"
+      },
+      "seconds": 0.0007,
+      "rows": []
+    },
+    {
+      "name": "pf-coil-current_target",
+      "query": "MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit, .cocos_transformation_type} AS record LIMIT 1",
+      "parameters": {
+        "target": "pf_active/coil/current/data"
+      },
+      "seconds": 0.0006,
+      "rows": [
+        {
+          "record": {
+            "data_type": "FLT_1D",
+            "cocos_transformation_type": null,
+            "unit": "A",
+            "id": "pf_active/coil/current/data"
+          }
+        }
+      ]
+    }
+  ],
+  "observed_finished_at": "2026-10-09T02:48:29.319240+00:00",
+  "artifacts": [
+    {
+      "svg": "docs/figures/discovery-to-mapping/pipeline.svg",
+      "png": "/work/projects/imas_gpu/jt60sa/presentation/pipeline.png",
+      "svg_bytes": 8981,
+      "png_bytes": 257116,
+      "png_width": 2800,
+      "png_height": 2000
+    },
+    {
+      "svg": "docs/figures/discovery-to-mapping/mapping-lifecycle.svg",
+      "png": "/work/projects/imas_gpu/jt60sa/presentation/mapping-lifecycle.png",
+      "svg_bytes": 4481,
+      "png_bytes": 106233,
+      "png_width": 2800,
+      "png_height": 1060
+    },
+    {
+      "svg": "docs/figures/discovery-to-mapping/pickup-probe.svg",
+      "png": "/work/projects/imas_gpu/jt60sa/presentation/pickup-probe.png",
+      "svg_bytes": 27495,
+      "png_bytes": 255426,
+      "png_width": 2800,
+      "png_height": 1400
+    },
+    {
+      "svg": "docs/figures/discovery-to-mapping/pf-coil-current.svg",
+      "png": "/work/projects/imas_gpu/jt60sa/presentation/pf-coil-current.png",
+      "svg_bytes": 27257,
+      "png_bytes": 247190,
+      "png_width": 2800,
+      "png_height": 1400
+    }
+  ]
+}
