@@ -143,7 +143,7 @@ class SshMonitor:
         return self.checks > self.unhealthy_checks
 
 
-def run_retrying_scan(monkeypatch, outcomes, monitor=None):
+def run_retrying_scan(monkeypatch, outcomes, monitor=None, on_progress=None):
     state = FileDiscoveryState(facility="sample")
     state.service_monitor = monitor
     claims = ScanUntilScanned(state)
@@ -164,14 +164,15 @@ def run_retrying_scan(monkeypatch, outcomes, monitor=None):
     )
     monkeypatch.setattr("imas_codex.graph.GraphClient", FacilityGraph)
     monkeypatch.setattr(scanner, "_get_pattern_categories", lambda _facility: {})
-    monkeypatch.setattr(reachability, "_sleep_unless_stopped", record_wait)
+    monkeypatch.setattr(reachability, "sleep_unless_stopped", record_wait)
+    monkeypatch.setattr(workers, "sleep_unless_stopped", record_wait)
     with (
         patch("imas_codex.discovery.base.facility.get_facility", return_value={}),
         patch(
             "imas_codex.remote.executor.run_python_script", side_effect=outcomes
         ) as remote,
     ):
-        asyncio.run(workers.scan_worker(state, batch_size=2))
+        asyncio.run(workers.scan_worker(state, on_progress=on_progress, batch_size=2))
     return claims, state, waits, remote
 
 
@@ -210,3 +211,15 @@ def test_script_failure_still_stops_after_the_retry_limit(monkeypatch):
     assert claims.scanned == {}
     assert state.scan_phase.done
     assert remote.call_count == 5
+
+
+def test_reachable_failure_waits_with_or_without_progress_callback(monkeypatch):
+    broken = subprocess.CalledProcessError(1, "discover_files.py")
+    for callback in (None, lambda *_args: None):
+        claims, state, waits, remote = run_retrying_scan(
+            monkeypatch, [broken] * 5, on_progress=callback
+        )
+        assert claims.scanned == {}
+        assert state.scan_phase.done
+        assert remote.call_count == 5
+        assert waits == [2, 4, 8, 16]

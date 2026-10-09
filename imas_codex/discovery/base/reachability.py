@@ -23,7 +23,7 @@ def host_unreachable(exc: Exception) -> bool:
     )
 
 
-async def _sleep_unless_stopped(state: ReachabilityState, seconds: float) -> None:
+async def sleep_unless_stopped(state: ReachabilityState, seconds: float) -> None:
     """Sleep in short steps so a stop request or deadline ends the wait."""
     loop = asyncio.get_running_loop()
     until = loop.time() + seconds
@@ -36,9 +36,9 @@ async def _sleep_unless_stopped(state: ReachabilityState, seconds: float) -> Non
 
 async def wait_for_reachable_host(state: ReachabilityState, attempt: int) -> None:
     """Back off, then hold until the SSH monitor reports a healthy host."""
-    await _sleep_unless_stopped(state, min(2.0**attempt, UNREACHABLE_MAX_BACKOFF))
+    await sleep_unless_stopped(state, min(2.0**attempt, UNREACHABLE_MAX_BACKOFF))
     monitor = state.service_monitor
     if monitor is None:
         return
     while not state.should_stop() and not monitor.is_service_healthy("ssh"):
-        await _sleep_unless_stopped(state, 5.0)
+        await sleep_unless_stopped(state, 5.0)

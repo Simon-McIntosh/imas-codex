@@ -1238,6 +1238,9 @@ classes:
         description: Comma-separated warnings from enrichment (e.g., du timeout, tokei missing)
       enrich_error:
         description: Error message from enrichment failure
+      enrich_failures:
+        description: Number of failed enrichment attempts with the host reachable
+        range: integer
       total_bytes:
         description: Total size in bytes (from du -sb)
         range: integer

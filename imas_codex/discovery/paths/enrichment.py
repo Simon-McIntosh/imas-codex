@@ -610,6 +610,7 @@ def get_paths_pending_enrichment(facility: str, threshold: float = 0.30) -> list
     Returns:
         List of paths ready for enrichment
     """
+    from imas_codex.discovery.paths.parallel import ENRICH_FAILURE_LIMIT
     from imas_codex.graph import GraphClient
 
     with GraphClient() as gc:
@@ -618,15 +619,17 @@ def get_paths_pending_enrichment(facility: str, threshold: float = 0.30) -> list
             MATCH (p:FacilityPath {facility_id: $facility})
             WHERE p.status = 'scored'
                 AND (p.is_enriched IS NULL OR p.is_enriched = false)
+                AND coalesce(p.enrich_failures, 0) < $failure_limit
                 AND (
                     p.should_enrich = true
-                    OR (p.should_enrich IS NULL AND p.scan_relevance >= $threshold)
+                    OR p.scan_relevance >= $threshold
                 )
             RETURN p.path AS path
             ORDER BY p.scan_relevance DESC
             """,
             facility=facility,
             threshold=threshold,
+            failure_limit=ENRICH_FAILURE_LIMIT,
         )
 
     return [r["path"] for r in result]

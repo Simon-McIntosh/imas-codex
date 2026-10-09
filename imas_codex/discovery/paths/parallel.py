@@ -278,7 +278,7 @@ def has_pending_work(facility: str) -> bool:
     - Discovered paths awaiting first scan (including actively claimed)
     - Scanned paths awaiting scoring (including actively claimed)
     - Triaged paths with should_expand=true that haven't been expanded yet
-    - Triaged paths with should_enrich=true that haven't been enriched yet
+    - Triaged paths selected for enrichment that haven't been enriched yet
     - Enriched paths that haven't been scored yet
 
     Note: Unlike claim functions, this does NOT filter out claimed paths.
@@ -302,8 +302,9 @@ def has_pending_work(facility: str) -> bool:
                       THEN 'expand' ELSE null END AS exp,
                  CASE WHEN p.status = $triaged
                       AND NOT (p.path_purpose IN $excluded_purposes)
-                      AND (p.should_enrich = true OR (p.should_enrich IS NULL AND p.scan_relevance >= $minimum))
+                      AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
                       AND (p.is_enriched IS NULL OR p.is_enriched = false)
+                      AND coalesce(p.enrich_failures, 0) < $failure_limit
                       THEN 'enrich' ELSE null END AS enr,
                  CASE WHEN p.is_enriched = true
                       AND NOT (p.path_purpose IN $excluded_purposes)
@@ -324,6 +325,7 @@ def has_pending_work(facility: str) -> bool:
             scanned=PathStatus.scanned.value,
             triaged=PathStatus.triaged.value,
             minimum=get_path_scan_threshold(),
+            failure_limit=ENRICH_FAILURE_LIMIT,
             **_expansion_gate_params(),
             **excluded_params,
         )
@@ -418,15 +420,17 @@ def _has_pending_enrich_work(facility: str, threshold: float | None = None) -> b
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
-              AND (p.should_enrich = true OR (p.should_enrich IS NULL AND p.scan_relevance >= $minimum))
+              AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
               AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
+              AND coalesce(p.enrich_failures, 0) < $failure_limit
               {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
             minimum=minimum,
+            failure_limit=ENRICH_FAILURE_LIMIT,
             excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             **excluded_params,
         )
@@ -812,7 +816,7 @@ def claim_paths_for_enriching(
 
     Claims paths where:
     - status = 'triaged'
-    - should_enrich = true OR triage_composite >= auto_enrich_threshold
+    - should_enrich = true OR scan_relevance >= auto_enrich_threshold
     - is_enriched is null or false
 
     Uses claim_token pattern with ORDER BY rand() to prevent deadlocks.
@@ -844,9 +848,10 @@ def claim_paths_for_enriching(
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
-              AND (p.should_enrich = true OR (p.should_enrich IS NULL AND p.scan_relevance >= $auto_enrich_threshold))
+              AND (p.should_enrich = true OR p.scan_relevance >= $auto_enrich_threshold)
               AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
+              AND coalesce(p.enrich_failures, 0) < $failure_limit
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               AND (p.total_dirs IS NULL OR p.total_dirs <= 500)
               {scope_clause}
@@ -859,6 +864,7 @@ def claim_paths_for_enriching(
             triaged=PathStatus.triaged.value,
             cutoff=cutoff,
             auto_enrich_threshold=auto_enrich_threshold,
+            failure_limit=ENRICH_FAILURE_LIMIT,
             excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             token=claim_token,
             **scope_params,
@@ -1061,14 +1067,11 @@ def mark_enrichment_complete(
                 """
                 UNWIND $items AS item
                 MATCH (p:FacilityPath {id: item.id})
-                WITH p, item, coalesce(p.enrich_failures, 0) + 1 AS failures
+                WITH p, item
                 SET p.claimed_at = null,
                     p.enrich_error = item.error,
-                    p.enrich_failures = failures,
-                    p.should_enrich = CASE WHEN item.permanent OR failures >= $failure_limit
-                        THEN false ELSE p.should_enrich END,
-                    p.enrich_skip_reason = CASE WHEN item.permanent OR failures >= $failure_limit
-                        THEN item.error ELSE p.enrich_skip_reason END
+                    p.enrich_failures = CASE WHEN item.permanent THEN $failure_limit
+                        ELSE coalesce(p.enrich_failures, 0) + 1 END
                 """,
                 items=error_items,
                 failure_limit=ENRICH_FAILURE_LIMIT,
@@ -1090,7 +1093,6 @@ def mark_enrichment_complete(
                     p.write_matches = item.write_matches,
                     p.enrich_warnings = item.enrich_warnings,
                     p.enrich_failures = 0,
-                    p.enrich_skip_reason = null,
                     p.enrich_error = null,
                     p.claimed_at = null
                 """,

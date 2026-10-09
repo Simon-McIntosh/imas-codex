@@ -11,6 +11,7 @@ from imas_codex.discovery.paths import enrichment, frontier, parallel
 
 def test_code_scan_and_path_enrichment_share_host_reachability():
     assert workers.host_unreachable is reachability.host_unreachable
+    assert workers.sleep_unless_stopped is reachability.sleep_unless_stopped
     assert workers.wait_for_reachable_host is reachability.wait_for_reachable_host
     assert parallel.host_unreachable is reachability.host_unreachable
     assert parallel.wait_for_reachable_host is reachability.wait_for_reachable_host
@@ -104,11 +105,12 @@ def test_timeout_recovers_partial_output_and_charges_unfinished_path(monkeypatch
 class PathGraph:
     """Track the fields used by the enrichment eligibility queries."""
 
-    def __init__(self):
+    def __init__(self, *, should_enrich=True, scan_relevance=0.8):
         self.failures = 0
-        self.should_enrich = True
+        self.should_enrich = should_enrich
+        self.scan_relevance = scan_relevance
         self.reason = None
-        self.skip_reason = None
+        self.skip_reason = "triage excluded" if should_enrich is False else None
         self.claimed = False
         self.queries = []
 
@@ -121,17 +123,22 @@ class PathGraph:
     def query(self, cypher, **params):
         self.queries.append((cypher, params))
         if "UNWIND $items" in cypher:
-            if "p.enrich_failures = failures" in cypher:
-                assert "p.should_enrich = CASE WHEN" in cypher
-                assert "p.enrich_skip_reason = CASE WHEN" in cypher
+            if "p.enrich_failures =" in cypher:
+                assert "p.should_enrich =" not in cypher
+                assert "p.enrich_skip_reason =" not in cypher
                 self.failures += 1
             if "p.enrich_error = item.error" in cypher:
                 self.reason = params["items"][0]["error"]
-            if self.failures >= params["failure_limit"]:
-                self.should_enrich = False
-                self.skip_reason = params["items"][0]["error"]
             return []
-        eligible = self.should_enrich or "p.should_enrich IS NULL AND" not in cypher
+        threshold = params.get(
+            "minimum", params.get("auto_enrich_threshold", params.get("threshold", 0.3))
+        )
+        score_is_eligible = self.scan_relevance >= threshold
+        if "p.should_enrich IS NULL AND" in cypher:
+            score_is_eligible = self.should_enrich is None and score_is_eligible
+        eligible = self.should_enrich is True or score_is_eligible
+        if "coalesce(p.enrich_failures, 0) < $failure_limit" in cypher:
+            eligible = eligible and self.failures < params["failure_limit"]
         if "AS enrichment_ready" in cypher:
             fields = (
                 "total discovered scanned scored skipped excluded claimed "
@@ -158,7 +165,10 @@ class PathGraph:
                     "pending_score": 0,
                 }
             ]
-        if "SET p.claimed_at = datetime()" in cypher:
+        if (
+            "SET p.claimed_at = datetime()" in cypher
+            or "SET p.claimed_at = $now" in cypher
+        ):
             self.claimed = eligible
             return []
         if "claim_token: $token" in cypher:
@@ -174,15 +184,45 @@ def test_reachable_failure_sets_path_aside_with_reason(monkeypatch):
             "sample", [{"path": "/source", "error": "script failed"}]
         )
         assert graph.failures == attempt
-        assert graph.should_enrich is (attempt < 5)
+        assert graph.should_enrich is True
     assert graph.reason == "script failed"
-    assert graph.skip_reason == "script failed"
+    assert graph.skip_reason is None
     assert parallel.has_pending_work("sample") is False
     assert parallel._has_pending_enrich_work("sample") is False
     assert parallel.claim_paths_for_enriching("sample") == []
     assert frontier.get_discovery_stats("sample")["enrichment_ready"] == 0
     assert enrichment.get_paths_pending_enrichment("sample") == []
-    assert all("enrich_set_aside" not in cypher for cypher, _ in graph.queries)
+
+
+def test_relevance_auto_enrich_keeps_triage_decision_through_budget(monkeypatch):
+    graph = PathGraph(should_enrich=False)
+    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    assert parallel.has_pending_work("sample") is True
+    assert parallel._has_pending_enrich_work("sample") is True
+    assert parallel.claim_paths_for_enriching("sample") == [
+        {"path": "/source", "id": "sample:/source"}
+    ]
+    assert frontier.claim_paths_for_enriching("sample") == [
+        {"path": "/source", "id": "sample:/source"}
+    ]
+    assert frontier.get_discovery_stats("sample")["enrichment_ready"] == 1
+    assert enrichment.get_paths_pending_enrichment("sample") == ["/source"]
+    for attempt in range(parallel.ENRICH_FAILURE_LIMIT):
+        persist = (
+            frontier.mark_enrichment_complete
+            if attempt == 0
+            else parallel.mark_enrichment_complete
+        )
+        persist("sample", [{"path": "/source", "error": "script failed"}])
+    assert graph.should_enrich is False
+    assert graph.skip_reason == "triage excluded"
+    assert graph.reason == "script failed"
+    assert parallel.has_pending_work("sample") is False
+    assert parallel._has_pending_enrich_work("sample") is False
+    assert parallel.claim_paths_for_enriching("sample") == []
+    assert frontier.claim_paths_for_enriching("sample") == []
+    assert frontier.get_discovery_stats("sample")["enrichment_ready"] == 0
+    assert enrichment.get_paths_pending_enrichment("sample") == []
 
 
 def test_set_aside_path_is_neither_pending_nor_claimable(monkeypatch):
@@ -192,7 +232,7 @@ def test_set_aside_path_is_neither_pending_nor_claimable(monkeypatch):
     assert parallel._has_pending_enrich_work("sample") is True
     assert frontier.get_discovery_stats("sample")["enrichment_ready"] == 1
     assert enrichment.get_paths_pending_enrichment("sample") == ["/source"]
-    graph.should_enrich = False
+    graph.failures = parallel.ENRICH_FAILURE_LIMIT
     assert parallel.has_pending_work("sample") is False
     assert parallel._has_pending_enrich_work("sample") is False
     assert parallel.claim_paths_for_enriching("sample") == []

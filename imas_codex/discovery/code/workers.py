@@ -16,10 +16,10 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING, Any
 
-from imas_codex.discovery.base import reachability
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.discovery.base.reachability import (
     host_unreachable,
+    sleep_unless_stopped,
     wait_for_reachable_host,
 )
 from imas_codex.discovery.base.supervision import is_infrastructure_error
@@ -235,7 +235,7 @@ async def scan_worker(
                     state.scan_stats,
                     None,
                 )
-                await reachability._sleep_unless_stopped(state, backoff)
+            await sleep_unless_stopped(state, backoff)
             continue
 
         await asyncio.sleep(0.1)
