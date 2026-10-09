@@ -56,7 +56,24 @@
   "plan_slug": "external-map-rules",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-09T01:37:14.343125+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:37:14.343125+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/external-map-rules/r-20261009T012303855091-plan-review-of-external-map-rules.json",
   "review_run_id": "r-20261009T012303855091-plan-review-of-external-map-rules",
   "reviewed_blob_sha": "e722cd112de5eba8c2a498b7de640f14041f962b",
   "rubric": "design",
