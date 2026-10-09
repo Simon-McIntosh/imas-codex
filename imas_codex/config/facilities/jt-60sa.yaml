@@ -204,6 +204,14 @@ excludes:
     - '*.dat.old'
     - '*.backup'
 
+# Per-source-group rules for reading a singleton array's member identifier out
+# of its name. The MMSYS coil currents carry the member in the middle of the
+# name, followed by the acquisition chain (HiTe, LKAT, TFLKAT), so the member is
+# the text before that chain: curEF5LKAT -> EF5, curCS1HiTe -> CS1,
+# curUFPLKAT -> UFP, cur1TFLKAT -> 1.
+signal_member_patterns:
+  MMSYS: '^cur(?P<member>.+?)(?:TFLKAT|LKAT|HiTe)$'
+
 # Data access patterns discovered during facility exploration.
 data_access_patterns:
   primary_method: edas

@@ -237,6 +237,19 @@ classes:
           Browser-accessible URLs for facility services accessible via port forwards.
           Maps service names to localhost URLs for documentation and quick access.
         range: BrowserConfig
+      signal_member_patterns:
+        description: >-
+          Per-source-group rules for reading a singleton array's member
+          identifier out of its name, keyed by source group. A source group the
+          member belongs to regardless of the array (e.g. "MMSYS") names the
+          pattern that captures it. A group with no entry keeps the default
+          rule: the numeric runs that vary across the source's members, or the
+          array name's trailing number. An array an entry's pattern does not
+          match keeps a null identifier.
+        range: MemberIdentifierPattern
+        multivalued: true
+        inlined: true
+        inlined_as_list: false
 
       # --- Private fields (in <facility>_private.yaml) ---
       hostnames:
@@ -339,6 +352,24 @@ classes:
   # -------------------------------------------------------------------------
   # Nested Config Types
   # -------------------------------------------------------------------------
+
+  MemberIdentifierPattern:
+    description: >-
+      A rule for reading a member identifier out of a singleton array's name,
+      declared once per source group. The pattern is a regular expression matched
+      against the array name; the text its `member` named group captures is the
+      array's member identifier. Which part of a name is the member is facility
+      knowledge, so it is declared here rather than guessed by the exporter.
+    class_uri: fc:MemberIdentifierPattern
+    attributes:
+      source_group:
+        description: Source group the rule applies to (e.g. "MMSYS").
+        identifier: true
+      pattern:
+        description: >-
+          Regular expression matched against the source array name, carrying a
+          named group `member`.
+        required: true
 
   RemoteEnvironmentModule:
     description: >-
