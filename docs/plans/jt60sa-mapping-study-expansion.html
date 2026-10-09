@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc,0e1f1d382,43ee5a2e0,10d79f25b">
 <meta name="plan-impl" content="0.8889">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -653,6 +653,9 @@
 </div>
 <div class="r-comment" data-section="s27" data-id="c-close-s27" data-who="reckon-build" data-when="2026-10-09T11:55:00Z">
     <div class="r-comment-body"><p>§27 landed: DD path liveness is decided through the search layer's version clause, and a blank DD version no longer crashes validation (merge <code>10d79f25b</code>; 601 tests and the graph test pass). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s27">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s27" data-id="c-run-r-20261009T113249385486-dd-liveness-one-owner" data-who="reckon-build" data-when="2026-10-09T11:48:11.560Z">
+    <div class="r-comment-body"><p>dd_path_lifecycles now renders its filter through _dd_version_clause (spy-verified, owner fragment verbatim in the emitted statement) and an empty-string dd_version returns every requested path live without raising (597 passed, 5 skipped in tests/ids; graph test 1 passed).</p></div>
 </div>
 </section>
 </main>
