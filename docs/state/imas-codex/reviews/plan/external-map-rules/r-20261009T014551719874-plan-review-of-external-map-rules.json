@@ -1,0 +1,102 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T01:51:33.737Z",
+  "dispatched_at": "2026-10-09T01:46:03Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/external-map-rules.html:22",
+      "id": "wiring-1",
+      "reason": "without the declared s4\u2192s3 edge a dispatch can start the evidence-wiring node before the pull command it extends exists, and it will fail before doing any work.",
+      "text": "the `plan-section-depends-on` map carries `{s3:[s2], s5:[s3]}` with no `s4`, while \u00a74's node states it runs \"after \u00a73\"; the section-level dependency the plan needs is absent from the metadata a scheduler reads",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/external-map-rules.html:36",
+      "id": "reasoning-1",
+      "reason": "\u00a75's fragment must report \"the current bundle's joined and unjoined rule counts\", so a worker reading \u00a71's stated evidence base reports 45 where the graph holds 61.",
+      "text": "\u00a71 states the bundle holds \"45 rules to COCOS 17 for magnetics, PF, TF and equilibrium\", but the plan's own \u00a72 design fragment shows 45 is the magnetics file alone and PF+TF+equilibrium contribute another 16, for 61 signal rules total; the plan states a count its cited evidence contradicts",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/external-map-rules.html:142",
+      "id": "reasoning-2",
+      "reason": "a node that attaches the evidence and expects slot context to surface it will attach it and see nothing, because the caller's retrieval pool must be extended and the done-when does not cover slot context.",
+      "text": "\u00a74 claims \"the map's slot context therefore read pulled rules through the evidence they already read\", but `imas_codex/ids/slot_context.py:118` pools only code chunks, wiki chunks, documents and signals (lines 155\u2013221) and reads no `MappingEvidence`/`HAS_EVIDENCE` nodes, so the mechanism does not run on the named caller without new retrieval plumbing the plan does not state",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a93044eb490fc59e879e4ffdee47c5e0f0a7f749a9e7d944bee9c4cdb254ffd4",
+  "plan_slug": "external-map-rules",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-09T01:53:39.159557+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-09T01:53:41.917839+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-09T01:53:44.698181+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:53:41.917839+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:53:44.698181+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:53:39.159557+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-external-map-rules.v4.json",
+  "review_run_id": "r-20261009T014551719874-plan-review-of-external-map-rules",
+  "reviewed_blob_sha": "7c94d4c4c849491514a60134146f2987a0cd6038",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited module `imas_codex/cocos/transforms.py`, the four schema files, the audit JSON, both evidence HTML fragments (their `#external-map-record-design-record` and `#s2` anchors exist), the cross-plan sections signal-cocos-conventions \u00a75/\u00a77, signal-evidence-followups \u00a72 and jt60sa-discovery-completion \u00a756, and commits 09a095988, b5eeb7cf5, d80bfb497 all resolve; `imas_codex/ids/external_maps.py` and `imas_codex/discovery/signals/conventions.py` are declared write paths to be created, not dead links.",
+    "done_when": "pass \u2014 each node's done-when is a measurable fragment or pytest command, and the two code nodes carry a declared negative control (the idempotent re-pull that must write nothing / re-queue nothing); the two fragment nodes assert an absence (the unjoined-rule lists) rather than only a presence.",
+    "evidence_paths": "pass \u2014 every write path is repo-relative and durable (`docs/evidence/fragments/external-map-rules/\u2026`, `docs/evidence/archive/\u2026`, `tests/\u2026`); none is a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 node ids, section ids and gate ids (`g-emr-*`, `f-emr-*`) are plan artifacts; no plan label, ticket number or version tag reaches a code symbol, filename or comment, and the \"schema version 1.10.0\" is a bundle data fact.",
+    "reasoning": "a finding \u2014 \u00a71's rule count is contradicted by the plan's own landed \u00a72 evidence, and \u00a74 asserts a caller reads pulled rules through evidence it does not currently read.",
+    "single_goal": "pass \u2014 each of the four nodes names one deliverable (record design, the pull command, evidence wiring, the history fragment).",
+    "wiring": "a finding \u2014 \u00a74's node declares \"after \u00a73\" (plan.html:148) but the plan's `plan-section-depends-on` metadata omits any `s4` entry (plan.html:22 records only `s3:[s2]` and `s5:[s3]`), so the machine-readable dependency the section needs is missing."
+  },
+  "section_digests": {
+    "_document": "4a3d1106f8da600bb217be145f54d73bbe465e6b31e5752c26a0fa3ec281478f",
+    "s1": "ef78a5c94f22eb2b53a7bed7d304a79e5fc45402f603f934a1263773963f6fac",
+    "s2": "59b92aac2f6eb1c84d9217bd115e2c65f2a324d837ce292daef0ec65f05e22fb",
+    "s3": "3f0f80253c14a782097309465b8e11995e4f6a88c55e77506a45984b57713845",
+    "s4": "72da62c0033140ccc94f0806263bb56b06b37e054aea9c0ce8a64b27d1e15607",
+    "s5": "25ac90cb7cf213398fff630a6edef590907508c710984273c15aca36f93a20d8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:53:05.160187+00:00"
+}
