@@ -21,9 +21,9 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="79">
-<meta name="plan-modified" content="2026-10-08">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
+<meta name="plan-version" content="80">
+<meta name="plan-modified" content="2026-10-09">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
 <body>
@@ -225,6 +225,38 @@
 <section data-reckon="section" data-id="s11" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
   <p class="landed-summary">Member identifiers now drop accessor runs that are constant across a source, so the JT-60SA shot no longer enters member names. 3,772 names were regenerated through the fixed code, and none carries 101173 (3,565 did). <a href="s11">full record</a></p>
 </section>
+
+    <h2 id="s12">§12 — Example maps for a checkable cohort</h2>
+<section data-reckon="section" data-id="s12" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>
+      The lead asked on 2026-10-09 for example JT-60SA maps within two hours, ahead of the convention chain
+      (<code>signal-cocos-conventions</code>, <code>mapping-decision-chain</code> §4 and §5). This section runs the
+      existing pipeline on a cohort whose answers can be checked: the pickup-probe sources (EDAS <code>MDAC</code>
+      <code>magPbTC*</code>) and the PF coil-current sources (<code>MMSYS</code> <code>cur*LKAT</code> and
+      <code>cur*HiTe</code>), every one of which has an imas-ambix rule in
+      <code>tests/fixtures/conventions/reference_labels.json</code>. None of them has a candidate route yet, so the
+      candidate stage runs first on exactly those sources through <code>imas-codex discover map jt-60sa --focus</code>,
+      then <code>imas-codex imas map run jt-60sa -i magnetics -i pf_active --no-activate</code> runs under a USD 3 cap and
+      30 minutes. Nothing is activated. This run is opt-in by the lead's request and does not settle the
+      <code>mapping-stage-default</code> decision.
+    </p>
+    <p>
+      The map still has the local model write each transform expression, because <code>mapping-decision-chain</code>
+      §5 has not landed, so every written sign is audited rather than trusted. Pickup-coil fields are one_like, and
+      imas-codex's diagnostic convention audit agrees with imas-ambix on all 34 pickup comparisons, so a sign that
+      disagrees with imas-ambix's total sign is a defect. PF coil currents are ip_like and JT-60SA's COCOS is
+      undetermined (one plasma-current polarity, handedness undeclared), so their signs are reported beside imas-ambix
+      but not scored. Flux loops are left out: their signs are unadjudicated.
+    </p>
+    <p>
+      <strong>Node</strong> <code>example-map-run</code>, role implement, 1.5 h. Live graph through the linked
+      <code>.env</code>; the language-model calls stay within imas-codex's pool of four local slots. Write path:
+      <code>docs/evidence/fragments/jt60sa-imas-maps/example-map-run.html</code>. <strong>Done when</strong> the fragment
+      lists each mapped source with its target path or paths, transform expression and units, beside the imas-ambix
+      target and total sign from the fixture; states how many targets agree; states the pickup-coil sign agreement with
+      every disagreement listed; reports the PF-current signs unscored; gives the spend and wall time; shows the
+      written IMASMapping nodes at status generated with none active; and names the command that clears them.
+    </p>
 
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
