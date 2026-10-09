@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f">
 <meta name="plan-impl" content="0.5789">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -481,6 +481,9 @@
 <div class="r-comment" data-section="s15" data-id="c-run-r-20261009T060714613522-error-matching-reads-run-mappings" data-who="reckon-build" data-when="2026-10-09T06:22:07.237Z">
     <div class="r-comment-body"><p>§15 landed — match_error_signals_to_imas cross-references the in-memory data_mappings the caller passes (group key derived from source_id) instead of persisted MAPS_TO_IMAS edges, and include_direct_error_signals is removed; tests/ids 565 passed / 5 skipped / 4 deselected, negative control makes the in-memory test fail.</p></div>
 </div>
+<div class="r-comment" data-section="s15" data-id="c-run-r-20261009T062529390930-review-of-error-matching-reads-run-mappings" data-who="reckon-build" data-when="2026-10-09T06:46:36.929Z">
+    <div class="r-comment-body"><p>section 15 reviewed SOUND, total 109/120 (goal_fidelity 19, evidence 18, fit 18, reuse 18, durability 17, scope_discipline 19); review record stored at reviews/imas-codex/r-20261009T060714613522-error-matching-reads-run-mappings.json.</p></div>
+</div>
 <div class="r-comment" data-section="s17" data-id="c-close-s17" data-who="reckon-build" data-when="2026-10-09T06:35:00Z">
     <div class="r-comment-body"><p>§17 landed: the two stale stage tests are replaced, so main is green again. Focus validation resolves array segments through <code>MEMBER_OF</code> as the claim does, and a live graph test pins the predicate (merge <code>205b68c99</code>). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s17">evidence</a></p></div>
 </div>
@@ -491,7 +494,7 @@
     <div class="r-comment-body"><p>§19 landed: <code>map clear</code> and <code>map run --clear</code> now delete bindings, evidence and the mapping node through one owner (merge <code>08a6ae16f</code>; 575 tests and the live graph test pass). Evidence of a source shared by two IDS mappings is still removed by clearing either; that is pre-existing. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s19">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s19" data-id="c-run-r-20261009T062713623953-one-mapping-delete-owner" data-who="reckon-build" data-when="2026-10-09T06:42:50.271Z">
-    <div class="r-comment-body"><p>§19 — one graph_ops owner (delete_mapping) deletes a mapping&#x27;s MAPS_TO_IMAS bindings, its MappingEvidence nodes and the IMASMapping node, returning a count per kind; both map clear (_clear_mapping) and the engine --clear path (clear_mappings_for_ids) call it and the engine logs its three counts unconditionally (even at zero); unit gate tests/ids/test_map_run_clear.py + tests/ids/test_mapping_edge_ownership.py = 17 passed EXIT=0, graph test tests/ids/test_mapping_delete_graph.py -m graph seeds a throwaway mapping with one binding and one evidence node and after the engine clear finds 0 of each = 1 passed EXIT=0, negative control (engine path skips the evidence delete) = 1 failed EXIT=1 with evidence left.</p></div>
+    <div class="r-comment-body"><p>§19 — one graph_ops owner (delete_mapping) deletes a mapping's MAPS_TO_IMAS bindings, its MappingEvidence nodes and the IMASMapping node, returning a count per kind; both map clear (_clear_mapping) and the engine --clear path (clear_mappings_for_ids) call it and the engine logs its three counts unconditionally (even at zero); unit gate tests/ids/test_map_run_clear.py + tests/ids/test_mapping_edge_ownership.py = 17 passed EXIT=0, graph test tests/ids/test_mapping_delete_graph.py -m graph seeds a throwaway mapping with one binding and one evidence node and after the engine clear finds 0 of each = 1 passed EXIT=0, negative control (engine path skips the evidence delete) = 1 failed EXIT=1 with evidence left.</p></div>
 </div>
 </section>
 </main>
