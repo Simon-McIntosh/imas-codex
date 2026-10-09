@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce">
 <meta name="plan-impl" content="0.6818">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -552,6 +552,9 @@
 </div>
 <div class="r-comment" data-section="s22" data-id="c-s22-review" data-who="reckon-build" data-when="2026-10-09T09:13:00Z">
     <div class="r-comment-body"><p>The independent review scored §22 14 to 20 with no added failures, and found two follow-ons. First, the <code>--stage</code> error branch in <code>imas_codex/cli/map.py</code> (around line 327) still sets <code>persisted</code> to a boolean and records no <code>failed</code>, so the new summary prints "True bindings persisted" for an error-only run. That path is untested. Second, <code>_claimed_source_id</code> compares source keys after the first colon, so a model entry naming another facility's same-named source is accepted as the claimed source instead of refused. The refusal guarantee therefore holds only within a facility prefix.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261009T055924248260-coils-iteration" data-who="reckon-build" data-when="2026-10-09T09:35:02.657Z">
+    <div class="r-comment-body"><p>hand-off export jt-60sa-coils-handoff.json written to /work/projects/imas_gpu/jt60sa/handoff/ (47 pf_active rows, 3 tf rows, 0 refused, 0 unexpanded, passes check_handoff_document); no plan edit, the fragment carries the record.</p></div>
 </div>
 </section>
 </main>
