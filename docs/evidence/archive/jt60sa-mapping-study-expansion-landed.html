@@ -65,6 +65,11 @@
     <p><code>match_error_signals_to_imas</code> in <code>imas_codex/ids/mapping.py</code> now takes the <code>data_mappings</code> the caller holds and cross-references error signals against them, not against persisted <code>MAPS_TO_IMAS</code> edges. A first pass after <code>map clear</code> therefore maps error signals in the same run. Each binding's group key comes from its source id without the facility prefix. A coordinator query confirmed this equals the stored <code>group_key</code> for all 2,000 sampled JT-60SA sources and all 2,000 sampled JET sources. The <code>include_direct_error_signals</code> flag is removed. Worker commits <code>964d9608b</code> and <code>380e7914e</code> are merged at <code>ab402cc72</code>. On the merged head, <code>tests/ids/</code> gives 565 passed. The negative control makes the matcher read persisted edges only, and the in-memory test then fails.</p>
   </section>
 
+  <section id="s17">
+    <h2>§17 — The signals stage tests and focus validation agree with --focus</h2>
+    <p>The two stage tests that §1 had left asserting the removed refusal now assert the new behaviour. An unknown focus item is refused with a usage error that names it, and a known item reaches the engine as <code>focus_items</code>. <code>_validate_focus</code> in <code>imas_codex/cli/discover/signals.py</code> now resolves a source-array segment only through a <code>FacilitySignal</code> that is <code>MEMBER_OF</code> a <code>SignalSource</code>, the same path <code>build_focus_predicate</code> takes. A source-less signal carrying the segment is therefore refused rather than selecting nothing. A graph-marked test in <code>tests/discovery/test_signals_focus_graph.py</code> selects the 14 MDAC <code>magPbTCNNN</code> members through the rendered predicate against the live graph.</p><p>Worker commit <code>997941042</code> is merged at <code>205b68c99</code>. On the merged head, 33 tests pass across <code>tests/cli/test_discover_signals_stage.py</code>, <code>tests/discovery/test_signals_focus.py</code> and <code>tests/discovery/test_signals_focus_reset.py</code>, and the graph test passes with <code>-m graph</code>. That clears the two failures §1 added on main. The negative control drops the <code>MEMBER_OF</code> join, and the source-less refusal test then fails.</p>
+  </section>
+
 </main>
 </body>
 </html>
