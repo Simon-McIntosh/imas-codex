@@ -106,9 +106,14 @@ class MappingDiscoveryState(DiscoveryStateBase):
     sources_validated: int = 0
     bindings_total: int = 0
     bindings_passed: int = 0
+    bindings_persisted: int = 0
+    bindings_failed: int = 0
     escalations: int = 0
 
-    # Per-IDS results: ids_name -> {bindings, escalations}
+    # Bindings the graph refused to persist, each with the reason it gave.
+    binding_failures: list[Any] = field(default_factory=list)
+
+    # Per-IDS results: ids_name -> {bindings, persisted, failed, escalations}
     ids_results: dict[str, dict] = field(default_factory=dict)
 
     # Worker stats
@@ -1175,12 +1180,15 @@ async def validate_worker(
                     ],
                 )
 
-            # Persist
+            # Persist. A refused binding is recorded and skipped, so the
+            # IDS's other bindings, and every later IDS, still persist.
             mapping_id = None
+            ids_failed = 0
             if state.persist:
                 status = (
                     "active" if state.activate and stop_reason is None else "generated"
                 )
+                failures_before = len(state.binding_failures)
                 mapping_id = await asyncio.to_thread(
                     persist_mapping_result,
                     validated,
@@ -1190,12 +1198,15 @@ async def validate_worker(
                     partial=bool(remaining_sources),
                     unmapped_sources=remaining_sources,
                     stop_reason=stop_reason if remaining_sources else None,
+                    binding_failures=state.binding_failures,
                 )
+                ids_failed = len(state.binding_failures) - failures_before
                 wlog.info(
-                    "Persisted %s mapping %s (%s)",
+                    "Persisted %s mapping %s (%s), %d refused",
                     ids_name,
                     mapping_id,
                     status,
+                    ids_failed,
                 )
 
             # Refresh each source's status through the single owner. It writes
@@ -1209,18 +1220,23 @@ async def validate_worker(
                 )
 
             state.bindings_passed += ids_passed
+            state.bindings_persisted += ids_passed - ids_failed
+            state.bindings_failed += ids_failed
             state.escalations += ids_escalations
             state.sources_validated += len(batches_for_ids)
             state.validate_stats.processed += 1
             state.ids_results[ids_name] = {
                 "bindings": ids_passed,
+                "persisted": ids_passed - ids_failed,
+                "failed": ids_failed,
                 "escalations": ids_escalations,
             }
 
             wlog.info(
-                "Validated %s: %d passed, %d escalations, cost $%.4f",
+                "Validated %s: %d passed, %d refused, %d escalations, cost $%.4f",
                 ids_name,
                 ids_passed,
+                ids_failed,
                 ids_escalations,
                 state.cost.total_usd,
             )
