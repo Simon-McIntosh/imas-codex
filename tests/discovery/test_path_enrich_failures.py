@@ -9,14 +9,8 @@ import pytest
 from imas_codex.discovery.paths import enrichment, parallel
 
 
-@pytest.mark.parametrize(
-    "failure",
-    [
-        subprocess.CalledProcessError(255, "enrich_directories.py"),
-        subprocess.TimeoutExpired("enrich_directories.py", 300),
-    ],
-)
-def test_unreachable_host_pauses_without_charging(monkeypatch, failure):
+def test_unreachable_host_pauses_without_charging(monkeypatch):
+    failure = subprocess.CalledProcessError(255, "enrich_directories.py")
     state = parallel.DiscoveryState(facility="sample")
     claimed = [{"path": "/source", "path_purpose": "code"}]
     waits = []
@@ -52,6 +46,51 @@ def test_unreachable_host_pauses_without_charging(monkeypatch, failure):
     assert waits == [1]
     assert persisted == []
     assert state.enrich_phase.done is False
+
+
+def test_timeout_recovers_partial_output_and_charges_unfinished_path(monkeypatch):
+    state = parallel.DiscoveryState(facility="sample")
+    claimed = [
+        {"path": "/finished", "path_purpose": "code"},
+        {"path": "/unfinished", "path_purpose": "code"},
+    ]
+    persisted = []
+    waits = []
+    timeout = subprocess.TimeoutExpired("enrich_directories.py", 300)
+    timeout.output = '{"path": "/finished", "total_bytes": 42}\n{"path": '
+
+    async def remote(*_args, **_kwargs):
+        raise timeout
+
+    async def wait(_state, attempt):
+        waits.append(attempt)
+        state.stop_requested = True
+
+    def persist(_facility, results):
+        persisted.extend(results)
+        state.stop_requested = True
+        return 1
+
+    environment = SimpleNamespace(python_command="python", setup_commands=[])
+    monkeypatch.setattr(
+        enrichment, "_build_enrich_input", lambda *_: ("host", {}, environment)
+    )
+    monkeypatch.setattr(enrichment, "async_run_python_script", remote)
+    monkeypatch.setattr(
+        parallel, "claim_paths_for_enriching", lambda *_a, **_k: claimed
+    )
+    monkeypatch.setattr(parallel, "mark_enrichment_complete", persist)
+    monkeypatch.setattr(parallel, "_wait_for_reachable_host", wait, raising=False)
+
+    asyncio.run(parallel.enrich_worker(state))
+
+    assert waits == []
+    assert [(item["path"], item["error"]) for item in persisted] == [
+        ("/finished", None),
+        ("/unfinished", "timeout after 300s"),
+    ]
+    assert persisted[0]["total_bytes"] == 42
+    assert state.enrich_stats.errors == 1
 
 
 class PathGraph:
