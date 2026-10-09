@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run r-20261009T121818860188-study-report-corrections declares no suite arms: its committed manifest carries no baseline_suite or after_suite key, and its single gate is `reckon audit-doc docs/research/jt60sa-mapping-study.html`. With no baseline/after pair there is nothing to difference, so added_failure_count is 0 and added_failure_ids is empty. I reproduced the gate independently at f70c3e1c7 from a scratch extraction of the three committed files under TMPDIR (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T122538134003-review-of-study-report-corrections/review-gate-audit-doc.log: OK, EXIT=0) and reproduced agreement.svg from the committed script (review-figure-render.log: EXIT=0; only the dc:date stamp and matplotlib internal marker ids differ).",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-09T12:30:10.862Z",
+  "dispatched_at": "2026-10-09T12:25:46Z",
+  "findings": [
+    {
+      "file": "scripts/figures_jt60sa_mapping_study.py",
+      "line": "129",
+      "severity": "follow-on",
+      "text": "follow-on: the \u00a78 bar's dispositioned total is 26 (7 agree + 6 chain-differ + 12 unplaced + 1 refused) while the agreement table reports 46 exported and 33 imported for the same system, and the figure caption asserts every bar total is absolute. The imbalance predates this commit (the base figure's \u00a78 bar also summed to 26) and is not introduced by this change, but the corrected \u00a78 bar carries it forward; the sign-unscored rows the prose reports are not drawn."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites; the change is a documentation correction and its figure.",
+    "diff": "338 insertions, 203 deletions across the report, the figure script and agreement.svg; nothing else changes.",
+    "done_when": "reckon audit-doc reports OK (EXIT=0 at f70c3e1c7, reproduced independently); every brief number appears as stated in the report; no coil conflicting count other than 0 remains.",
+    "goal": "the brief asked for five corrections to the JT-60SA mapping study (coils rescore wording plus figure, a \u00a78 deprecated-path refusal row, a \u00a710 stage check, split \u00a713 refusal counts, and score-JSON no-store counts).",
+    "manifest": "the reviewed run records commit f70c3e1c7, the audit-doc gate (OK, EXIT=0) and the three changed paths, and carries negative_control none and no suite arms rather than inventing them.",
+    "write_paths": "git show --stat f70c3e1c7 names exactly the three declared paths, no generated or gitignored file."
+  },
+  "justifications": {
+    "durability": "the figure reproduces byte-for-byte from the committed script modulo matplotlib internal ids; the corrected numbers are hand-transcribed with no automated tie to the plan comments or score JSONs.",
+    "evidence": "every number reproduces from the plan section comments (c-s8-rescore-chains, c-s13-score, c-close-s13) and the pipeline evidence archive (18 refusals = 8/8/2); the gate and the figure both reproduce; the 8/8/2 breakdown has no pointer in the report's own Score sources list.",
+    "fit": "research-doc conventions kept, data-ink figure kept with a project-absolute src, conventional commit subject with a mechanism body and no attribution line.",
+    "goal_fidelity": "all five brief items are applied as stated; item 3 needed no change because \u00a710 already carried stage enrichment at the base (a48a6044), which the run verified and reported rather than reimplementing.",
+    "reuse": "reuses the existing data-ink style module and figure renderer, adding one series rather than a new renderer.",
+    "scope_discipline": "three changed paths, all declared, single purpose, no generated or gitignored file staged."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the brief asked for five corrections to docs/research/jt60sa-mapping-study.html (coils rescore wording and figure, a \u00a78 refusal row, a \u00a710 stage check, split \u00a713 refusal counts, and score-JSON no-store counts); all five are applied and the audit-doc done-when is met.\nVERDICT done_when: reckon audit-doc on the report reports OK (reproduced at rev f70c3e1c7, EXIT=0), every brief number appears as stated (coils 46/33/7/0/6/31/12/1 and pf_active/coil 19/16/6/0/6/16/3/0; 308 of 326 cryo with 18 member-less; 7 of 18 ECH no-store and 11 no-pattern; \u00a713 18 pipeline vs 0 scorer refusals), and no coil conflicting count other than 0 remains (only \u00a79's 0 and the corrective uses of the word conflict remain).\nVERDICT write_paths: git show --stat f70c3e1c7 touches exactly the three declared paths (report, figure script, agreement.svg), no generated or gitignored file.\nVERDICT manifest: the reviewed run records commit f70c3e1c7, the audit-doc gate (OK, EXIT=0), the three changed paths, and honestly carries negative_control none and no invented suite arms.\nVERDICT diff: the commit edits 64 lines of the report, 58 of the script and regenerates agreement.svg (338 insertions, 203 deletions across three files); no other path changes.\nVERDICT call_sites: no production call sites; the change is a documentation correction plus its figure.\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: all five brief items are applied as stated; item 3 needed no change because \u00a710 already carried stage enrichment at the base (a48a6044), which the run verified and reported rather than reimplementing.\nSCORE evidence: 19\nJUSTIFICATION evidence: every number reproduces from the plan's own section comments (c-s8-rescore-chains, c-s13-score, c-close-s13) and the pipeline evidence archive (18 refusals = 8 no_imas_equivalent / 8 insufficient_context / 2 facility_specific); the gate and the figure both reproduce independently; the 8/8/2 breakdown has no source pointer in the report's own Score sources list, which cites only the score JSONs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: three changed paths, all declared, single purpose, no generated or gitignored file staged.\nSCORE durability: 18\nJUSTIFICATION durability: the figure reproduces byte-for-byte from the committed script modulo matplotlib internal ids; the corrected numbers are hand-transcribed into the report and the script with no automated tie to the plan comments or score JSONs, so a later JSON or plan change would drift both silently.\nSCORE fit: 19\nJUSTIFICATION fit: the document keeps the research-doc conventions, the figure keeps the data-ink style with a project-absolute src, and the commit carries a conventional subject with a mechanism body and no attribution line.\nSCORE reuse: 18\nJUSTIFICATION reuse: the change reuses the existing data-ink style module and the figure renderer, adding one series rather than a new renderer.\nFINDING scripts/figures_jt60sa_mapping_study.py:129 follow-on: the \u00a78 bar's dispositioned total is 26 (7 agree + 6 chain-differ + 12 unplaced + 1 refused) while the agreement table reports 46 exported and 33 imported for the same system, and the caption asserts every bar total is absolute; the imbalance predates this commit (the base bar also summed to 26) but the corrected \u00a78 bar carries it forward.\n",
+  "review_run_id": "r-20261009T122538134003-review-of-study-report-corrections",
+  "reviewed_base_sha": "a48a604473df7d2982ab9facb7b979242ecec6b3",
+  "reviewed_head_sha": "f70c3e1c793c9f0cd076b076364d5115a424c4e3",
+  "reviewed_run_id": "r-20261009T121818860188-study-report-corrections",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T12:29:27+00:00",
+  "total": 114
+}
