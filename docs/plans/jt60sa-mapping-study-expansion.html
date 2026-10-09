@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72">
 <meta name="plan-impl" content="0.4706">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -444,6 +444,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261009T055159810682-map-run-clear-uses-owner" data-who="reckon-build" data-when="2026-10-09T06:04:06.283Z">
     <div class="r-comment-body"><p>Routed the engine clear path through clear_mapping_bindings so map run --clear deletes the MAPS_TO_IMAS bindings map clear deletes; a live jt-60sa magnetics run emitted "Cleared 8 previous mapping bindings" and left 0 of 8 pre-existing edges. Gate: 5 passed (tests/ids/test_map_run_clear.py), 14 passed with the ownership census.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261009T060528835263-review-of-map-run-clear-uses-owner" data-who="reckon-build" data-when="2026-10-09T06:23:32.363Z">
+    <div class="r-comment-body"><p>Independent review of r-20261009T055159810682-map-run-clear-uses-owner stored as a parsed record scoring all six dimensions (goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 20; total 114) at reviewed_base_sha 642f4eca and reviewed_head_sha 99701d306, added_failure_count 0 with no ids, verdict SOUND with three follow-ons.</p></div>
 </div>
 <div class="r-comment" data-section="s16" data-id="c-close-s16" data-who="reckon-build" data-when="2026-10-09T06:15:00Z">
     <div class="r-comment-body"><p>§16 landed: the hand-off reads <code>CocosLabel.NONE</code>, and a live graph test pins the nearest-label query. Hop order is moot today because no ancestor chain carries two labels, and a second test guards that (merge <code>04e46d27c</code>; 6 unit and 2 graph tests pass). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s16">evidence</a></p></div>
