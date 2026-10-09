@@ -63,9 +63,22 @@
       "finding": "reuse_search-1",
       "reason": "",
       "when": "2026-10-09T01:37:14.343125+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-09T01:37:18.958019+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:37:18.958019+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",
