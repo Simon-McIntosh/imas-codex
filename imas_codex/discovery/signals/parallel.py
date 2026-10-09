@@ -2126,6 +2126,40 @@ def propagate_source_enrichment(
         return updated
 
 
+def sweep_source_enrichment(facility: str) -> int:
+    """Enrich discovered members whose source representative is already enriched."""
+    with GraphClient() as gc:
+        representatives = gc.query(
+            """
+            MATCH (sg:SignalSource {facility_id: $facility})
+            MATCH (rep:FacilitySignal {id: sg.representative_id})-[:MEMBER_OF]->(sg)
+            WHERE rep.status IN $enriched_statuses
+              AND EXISTS {
+                  MATCH (member:FacilitySignal)-[:MEMBER_OF]->(sg)
+                  WHERE member.id <> rep.id AND member.status = $discovered
+              }
+            RETURN DISTINCT rep.id AS representative_id, properties(rep) AS enrichment
+            """,
+            facility=facility,
+            enriched_statuses=[
+                FacilitySignalStatus.enriched.value,
+                FacilitySignalStatus.checked.value,
+            ],
+            discovered=FacilitySignalStatus.discovered.value,
+        )
+
+    return sum(
+        propagate_source_enrichment(row["representative_id"], row["enrichment"])
+        for row in representatives
+    )
+
+
+def prepare_signal_sources(facility: str) -> tuple[int, int, int]:
+    """Link discovered signals to sources and settle members added after enrichment."""
+    groups, members = detect_signal_sources(facility)
+    return groups, members, sweep_source_enrichment(facility)
+
+
 def extract_member_identifier(accessor: str, member_accessors: Sequence[str]) -> str:
     """Extract the varying part of an accessor within its signal source.
 
@@ -4042,13 +4076,14 @@ async def enrich_worker(
         # followers so they skip individual LLM enrichment. Once a
         # representative is enriched, its metadata is propagated.
         try:
-            patterns_detected, followers_marked = await asyncio.to_thread(
-                detect_signal_sources,
+            patterns_detected, followers_marked, propagated = await asyncio.to_thread(
+                prepare_signal_sources,
                 state.facility,
             )
         except Exception as e:
-            logger.warning("Pattern detection failed (non-fatal): %s", e)
-            patterns_detected, followers_marked = 0, 0
+            logger.warning("Source preparation failed (non-fatal): %s", e)
+            patterns_detected, followers_marked, propagated = 0, 0, 0
+        state.enrich_stats.processed += propagated
         if patterns_detected > 0 and on_progress:
             on_progress(
                 f"detected {patterns_detected} patterns ({followers_marked} followers)",
@@ -5526,7 +5561,6 @@ async def run_parallel_data_discovery(
                 followers_marked,
                 _facility,
             )
-
         if not _scanner_types:
             scanner_instances = get_scanners_for_facility(_facility)
             _scanner_types = [s.scanner_type for s in scanner_instances]
@@ -5703,6 +5737,14 @@ async def run_parallel_data_discovery(
         orphan_specs=orphan_specs,
         on_worker_status=on_worker_status,
     )
+
+    # Scanning may have formed or extended a source after its enrich workers
+    # stopped. Settle those members before individualizing descriptions.
+    try:
+        _, _, propagated = await asyncio.to_thread(prepare_signal_sources, facility)
+        state.enrich_stats.processed += propagated
+    except Exception as e:
+        logger.warning("Final source preparation failed (non-fatal): %s", e)
 
     # --- Post-enrichment individualization ---
     # After all enrichment and propagation is complete, generate individualized
