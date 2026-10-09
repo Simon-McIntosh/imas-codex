@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f">
 <meta name="plan-impl" content="0.5789">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -489,6 +489,9 @@
 </div>
 <div class="r-comment" data-section="s19" data-id="c-close-s19" data-who="reckon-build" data-when="2026-10-09T06:47:00Z">
     <div class="r-comment-body"><p>§19 landed: <code>map clear</code> and <code>map run --clear</code> now delete bindings, evidence and the mapping node through one owner (merge <code>08a6ae16f</code>; 575 tests and the live graph test pass). Evidence of a source shared by two IDS mappings is still removed by clearing either; that is pre-existing. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s19">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s19" data-id="c-run-r-20261009T062713623953-one-mapping-delete-owner" data-who="reckon-build" data-when="2026-10-09T06:42:50.271Z">
+    <div class="r-comment-body"><p>§19 — one graph_ops owner (delete_mapping) deletes a mapping&#x27;s MAPS_TO_IMAS bindings, its MappingEvidence nodes and the IMASMapping node, returning a count per kind; both map clear (_clear_mapping) and the engine --clear path (clear_mappings_for_ids) call it and the engine logs its three counts unconditionally (even at zero); unit gate tests/ids/test_map_run_clear.py + tests/ids/test_mapping_edge_ownership.py = 17 passed EXIT=0, graph test tests/ids/test_mapping_delete_graph.py -m graph seeds a throwaway mapping with one binding and one evidence node and after the engine clear finds 0 of each = 1 passed EXIT=0, negative control (engine path skips the evidence delete) = 1 failed EXIT=1 with evidence left.</p></div>
 </div>
 </section>
 </main>
