@@ -24,6 +24,8 @@
   <title>External Machine-Map Rules Pulled Into the Graph | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
   <main class="plan-doc">
@@ -150,7 +152,7 @@
     <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
 <div class="r-gate" data-id="g-emr-1" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
-    <h4 class="r-gate-measure">discover conventions judges and persists each source's convention through the conventions module this section extends</h4>
+    <h4 class="r-gate-measure">discover conventions judges and persists each source&#x27;s convention through the conventions module this section extends</h4>
     <p class="r-gate-required-evidence">signal-cocos-conventions#s7</p>
     </div>
 <div class="r-gate" data-id="g-emr-2" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
@@ -160,25 +162,30 @@
 </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="pull-source" data-choice="" data-by="" data-when="" data-recommended="released-or-hashed" data-recommended-by="coordinator">
-        <p class="r-dec-q">What may a pull read: only released bundle tags, or a local checkout too?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="released-or-hashed">A released tag, or a local checkout whose file hashes are recorded</button>
-          <button class="r-opt" data-value="released-only">Released tags only</button>
-        </p>
-        <p class="r-dec-rat">Recommended: either, provided every file read is hashed. Release candidates change within a day and are read from the local checkout before they are released; hashing every file makes a local pull as reproducible as a tag.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="pull-source" data-choice="" data-by="" data-when="" data-recommended="released-or-hashed" data-recommended-by="coordinator">
+    <p class="r-dec-q">What may a pull read: only released bundle tags, or a local checkout too?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="released-or-hashed">A released tag, or a local checkout whose file hashes are recorded</button>
+      <button class="r-opt" data-value="released-only">Released tags only</button>
+      </p>
+    <p class="r-dec-rat">Recommended: either, provided every file read is hashed. Release candidates change within a day and are read from the local checkout before they are released; hashing every file makes a local pull as reproducible as a tag.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-emr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build external-map-rules §2" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Design the external rule record</h4>
-        <div class="r-fu-body">The rule identity and change types are settled before any schema is written, because the record has to survive renames and re-groupings.</div>
-        <pre class="r-fu-prompt">/reckon-build external-map-rules §2</pre>
-      </article>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-emr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build external-map-rules §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Design the external rule record</h4>
+    <div class="r-fu-body">The rule identity and change types are settled before any schema is written, because the record has to survive renames and re-groupings.</div>
+    <pre class="r-fu-prompt">/reckon-build external-map-rules §2</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261009T005719546184-external-map-record-design" data-who="reckon-build" data-when="2026-10-09T01:09:03Z">
+    <div class="r-comment-body"><p>&lt;a href=&quot;/imas-codex/evidence/fragments/external-map-rules/external-map-record-design.html#external-map-record-design-record&quot;&gt;External rule record design&lt;/a&gt; defines bundle, rule, revision, and change classes with a stable differential-loop identity; the current 61 signal rules join 60 SignalSources and all 61 IMASNodes, and all 432 machine bindings join IMASNodes.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
