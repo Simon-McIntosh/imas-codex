@@ -479,16 +479,29 @@ def has_pending_assignment_work(
     )
 
 
-def has_pending_mapping_work(facility: str) -> bool:
-    """Check if a selected home of any source in the facility is unbound."""
+def has_pending_mapping_work(
+    facility: str,
+    ids_name: str | None = None,
+    handled_source_ids: list[str] | None = None,
+) -> bool:
+    """Check for selected, unbound homes outside the already handled sources."""
+    ids_filter = "AND c.ids = $ids_name " if ids_name else ""
+    handled_filter = "AND NOT n.id IN $handled_source_ids" if handled_source_ids else ""
     return has_pending(
         "SignalSource",
         facility=facility,
         status_predicate=(
             "EXISTS { (n)-[c:MAPPING_CANDIDATE]->(ip:IMASNode) "
-            "WHERE c.route = true "
-            "AND NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode {ids: ip.ids}) } }"
+            f"WHERE c.route = true {ids_filter}"
+            "AND NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode {ids: ip.ids}) } } "
+            f"{handled_filter}"
         ),
+        status_params={
+            **({"ids_name": ids_name} if ids_name else {}),
+            **(
+                {"handled_source_ids": handled_source_ids} if handled_source_ids else {}
+            ),
+        },
     )
 
 
@@ -739,6 +752,9 @@ async def assign_worker(
                 marked = await asyncio.to_thread(
                     select_candidates, source_id, choice.paths, gc
                 )
+                # Assignment and mapping share the claim fields. Once the
+                # selected edges are durable, release the source for mapping.
+                await asyncio.to_thread(release_mapping_claim, source_id)
                 state.sources_assigned += 1
                 state.assign_stats.processed += 1
 
@@ -925,10 +941,23 @@ async def map_worker(
 
         if not found_any:
             state.map_phase.record_idle()
-            # Nothing left to claim: every selected source has been handled and
-            # the assign stage can add no more. Complete deterministically
-            # rather than waiting on a binding that only validation writes.
-            if state.assign_phase.done or state.map_phase.done:
+            # A selected source can still carry an assign claim from an
+            # earlier run. Keep polling until it is claimable or recovered.
+            # Ignore sources already handled here: validation writes their
+            # bindings only after this phase completes.
+            pending = False
+            for ids_name in state.target_ids_list:
+                handled_ids = [
+                    source_id
+                    for handled_ids_name, source_id in handled
+                    if handled_ids_name == ids_name
+                ]
+                if await asyncio.to_thread(
+                    has_pending_mapping_work, state.facility, ids_name, handled_ids
+                ):
+                    pending = True
+                    break
+            if state.assign_phase.done and not pending:
                 state.map_phase.mark_done()
                 break
             await asyncio.sleep(2.0)
@@ -1373,7 +1402,13 @@ async def run_mapping_engine(
         )
     )
     state.map_phase.set_has_work_fn(
-        lambda: has_pending_mapping_work(state.facility) or not state.assign_phase.done
+        lambda: (
+            any(
+                has_pending_mapping_work(state.facility, ids_name)
+                for ids_name in state.target_ids_list
+            )
+            or not state.assign_phase.done
+        )
     )
     state.validate_phase.set_has_work_fn(
         lambda: has_pending_validation_work(state.facility) or not state.map_phase.done
