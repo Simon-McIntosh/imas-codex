@@ -64,7 +64,7 @@
     <h3>The per-system loop and its scorecard</h3>
     <p>Every system section runs the same six steps against the live graph, in this order:</p>
     <ol>
-      <li><code>discover jt-60sa --only signals --focus &lt;sources&gt;</code> enriches exactly the system's own sources;</li>
+      <li><code>discover jt-60sa --only signals --focus &lt;sources&gt; --reset-to discovered</code> re-enriches exactly the system's own sources, replacing descriptions written before the matcher fix;</li>
       <li><code>discover jt-60sa --only map --focus &lt;sources&gt;</code> runs the candidate stage on the same sources;</li>
       <li><code>imas map clear jt-60sa &lt;ids&gt;</code> followed by <code>imas map run jt-60sa -i &lt;ids&gt;</code> generates the mapping, on the local <code>ids-mapping</code> seat;</li>
       <li><code>imas map export jt-60sa -i &lt;ids&gt; --out /work/projects/imas_gpu/jt60sa/handoff/jt-60sa-&lt;system&gt;-handoff.json</code> writes the hand-off document;</li>
@@ -105,29 +105,30 @@
       The focused signals tests pass, run with <code>-n 8</code>.
     </p>
 
-    <h2 id="s2">§2 — Enrichment refuses a result that names a different signal</h2>
+    <h2 id="s2">§2 — A focused reset touches only the focused sources</h2>
     <p>
-      <code>imas_codex/discovery/signals/parallel.py</code> pairs each model result with a batch signal
-      through <code>SignalEnrichmentResult.signal_index</code>, the prompt's 1-based numbering. That pairing
-      trusts the index completely. When the model returns a description written for signal 7 under index 8,
-      the graph records it against signal 8. That happened to magPbTC8 and magPbTC9, and to curEF1LKAT and
-      curEF4LKAT, each of which now carries another signal's description.
+      The swapped descriptions on curEF1LKAT, curEF4LKAT, magPbTC8 and magPbTC9 came from a matcher that paired
+      results by prompt number against a batch in claim order. Commit <code>5406bc598</code>, "match enrichment
+      results to the signal they describe", fixed that on main with a test that reproduces the production
+      symptom. The rows it wrote are still in the graph: a census on 2026-10-09 found all 4,632 enriched
+      JT-60SA signals have <code>enriched_at</code> before the fix, 1,268 of them direct model results. The
+      re-enrichment of the whole facility belongs to the discovery coordinator, who has been told. This study
+      only re-enriches its own cohorts, which needs a reset scoped to them.
     </p>
     <p>
-      The fix is to make the result name the signal it describes and to check that name. Add a required field
-      to <code>SignalEnrichmentResult</code> in <code>imas_codex/discovery/signals/models.py</code> that echoes
-      the signal's accessor exactly as the prompt printed it. Before writing, the pairing loop compares that
-      echo with the paired signal's accessor. On a mismatch it writes nothing for that result and releases the
-      claim, so the signal is retried. The prompt's own schema rendering must show the new field; the
-      local-lane rule in <code>imas_codex/llm/AGENTS.md</code> applies, because the local lane sends no
-      <code>response_format</code>.
+      The <code>--reset-to</code> branch in <code>imas_codex/cli/discover/signals.py</code> scopes its reset by
+      scanner and category, so that a scoped run never resets rows it will not then process. It ignores
+      <code>--focus</code>. As written, <code>discover jt-60sa --only signals --focus X --reset-to discovered</code>
+      would reset every JT-60SA signal and then enrich only X. The reset must take the same focus filter as the
+      claims §1 adds.
     </p>
     <p>
-      <strong>Done when:</strong> a unit test with a model response whose index and echo disagree writes no
-      enrichment and releases that claim, while a matched response in the same batch is written (the positive
-      control). The four signals named above are reset to discovered and re-enriched through
-      <code>--focus</code>. Each one's stored description then names its own channel, and the receipt records
-      the before and after descriptions.
+      <strong>Done when:</strong> a unit test shows that a focused reset passes the focused SignalSource
+      identities into <code>reset_to_status</code>, and that a signal of an unnamed source keeps its status
+      (the negative control). A live run of
+      <code>discover jt-60sa --only signals --focus magPbTC10 --reset-to discovered</code> reports a reset count
+      equal to that source's member count. Afterwards magPbTC8 and magPbTC9 are re-enriched through the same
+      path, each describing its own probe, and the receipt records their before and after descriptions.
     </p>
 
     <h2 id="s3">§3 — Every member of a grouped source keeps its own identity</h2>
