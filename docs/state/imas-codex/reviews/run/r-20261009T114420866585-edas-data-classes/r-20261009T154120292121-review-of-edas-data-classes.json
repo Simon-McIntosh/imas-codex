@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "both arms are the reviewed run's own gate logs. baseline-edas-classes.log (revision=5ec8b0ee, 11 failed, EXIT=1) ran the reviewed test file against the base source; final-edas-data-classes.log (revision=0fd78701, 29 passed, EXIT=0) is the head arm. The after arm carries zero failing ids, so no failing test id is present at the head that was absent at the base: added_failure_count is 0 and added_failure_ids is empty. Independently I reproduced the head arm at 0fd78701 (28 passed non-graph, plus the graph rescan test) and the J-mutation negative control, in a scratch copy under the run scratchpad.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/edas-data-classes uv run --no-sync pytest -p no:cacheprovider -m \"not slow\" tests/discovery/test_edas_data_classes.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114420866585-edas-data-classes/final-edas-data-classes.log",
+    "revision": "0fd78701e30bcafb29b6b39d5d7e055df714174a"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/edas-data-classes uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_edas_data_classes.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 11,
+    "failure_ids": [
+      "tests/discovery/test_edas_data_classes.py::test_catalogue_class_selects_reader[G-binary-eddbreadBinary]",
+      "tests/discovery/test_edas_data_classes.py::test_catalogue_class_selects_reader[J-parameter-eddbreadPara]",
+      "tests/discovery/test_edas_data_classes.py::test_catalogue_class_selects_reader[M-image-eddbreadImage]",
+      "tests/discovery/test_edas_data_classes.py::test_catalogue_class_selects_reader[N-comment-eddbreadComment]",
+      "tests/discovery/test_edas_data_classes.py::test_catalogue_class_selects_reader[O-one_point-eddbreadOne]",
+      "tests/discovery/test_edas_data_classes.py::test_catalogue_class_selects_reader[P-parameter-eddbreadPara]",
+      "tests/discovery/test_edas_data_classes.py::test_catalogue_class_selects_reader[T-time_series-eddbreadTime]",
+      "tests/discovery/test_edas_data_classes.py::test_unclassified_signal_keeps_catalogue_letter[A]",
+      "tests/discovery/test_edas_data_classes.py::test_unclassified_signal_keeps_catalogue_letter[C]",
+      "tests/discovery/test_edas_data_classes.py::test_unclassified_signal_keeps_catalogue_letter[K]",
+      "tests/discovery/test_edas_data_classes.py::test_unclassified_signal_keeps_catalogue_letter[V]"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114420866585-edas-data-classes/baseline-edas-classes.log",
+    "revision": "5ec8b0eed5637fffa6990f3194150bf52b01cad7"
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/discovery/signals/scanners/edas.py EDASScanner.scan and EDASScanner.check",
+    "imas_codex/discovery/signals/parallel.py ingest_discovered_signals on_match clause and enrich_worker/check_worker",
+    "imas_codex/remote/scripts/check_edas.py main",
+    "imas_codex/schemas/facility.yaml SignalDataClass and FacilitySignal.data_class_letter"
+  ],
+  "completed_at": "2026-10-09T15:54:35.594Z",
+  "dispatched_at": "2026-10-09T15:41:29Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_edas_data_classes.py",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "follow-on: test_unclassified_signal_keeps_catalogue_letter asserts only that data_class is None and the raw letter is kept, not that accessor is empty, so the unset-class accessor ('') that _eddb_accessor returns at edas.py:84 is exercised only indirectly and could regress to a valid-looking call unnoticed."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "2755",
+      "severity": "follow-on",
+      "text": "follow-on: the EDAS rescan on_match now writes accessor/data_class/data_class_letter/unit from the scanned signal for every row in an EDAS-flagged batch, including MBDB/LCDB rows that set no data_class_letter; it is safe today because Cypher yields null for an absent map key, but the batch-wide flag assumes the scanner owns every EDAS row's fields."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against 5ec8b0ee; f904e54b maps the classes and refreshes scanner fields on rescan, 723410cb states the quick-reference limit, 0fd78701 routes the remote check through native readers; no generated or out-of-scope file is staged.",
+    "done_when": "the done-when names tests mapping J/M/G/N to class and read call, a raw-letter-kept test, and a rescan-refresh test; tests/discovery/test_edas_data_classes.py carries test_catalogue_class_selects_reader over T/O/P/J/M/G/N, test_unclassified_signal_keeps_catalogue_letter over A/C/K/V, and test_rescan_refreshes_scanner_fields_without_replacing_enrichment, and the fragment states the catalogue letters and how P was resolved.",
+    "goal": "the node goal is that every EDDB data class is read with its own call; imas_codex/discovery/signals/scanners/edas.py:57-84 adds J/M/G/N to the letter map and _eddb_accessor builds each class's accessor, and imas_codex/remote/scripts/check_edas.py:260-307 dispatches each recognised letter to its native reader while refusing unknown ones.",
+    "manifest": "read; it records the three commits, the 29/29 focused gate, the J-mutation negative control and honestly leaves baseline_suite/after_suite null.",
+    "write_paths": "the manifest declares edas.py, schemas/facility.yaml, discovery/signals/parallel.py, the test file, the fragment and the figures dir, and the resume advice extended scope to imas_codex/remote/scripts/check_edas.py; git diff 5ec8b0ee..0fd78701 touches exactly those six files and nothing else."
+  },
+  "justifications": {
+    "durability": "reverting the change reddens test_catalogue_class_selects_reader[J-parameter-eddbreadPara] (independently reproduced, EXIT=1) and the base arm fails test_rescan_refreshes_scanner_fields_without_replacing_enrichment (baseline-rescan.log, EXIT=1).",
+    "evidence": "I reproduced the head arm at 0fd78701 (28 passed non-graph plus the graph rescan test passed) and the J-mutation negative control (1 failed, EXIT=1) in a scratch copy, matching final-edas-data-classes.log (29 passed, EXIT=0).",
+    "fit": "edas.py:70 keeps the module's accessor-string idiom and the {accessor} data-template placeholder, and each commit carries a mechanism body with no attribution.",
+    "goal_fidelity": "edas.py:57-84 adds J/M/G/N and _eddb_accessor builds each class's call, and check_edas.py:260-307 dispatches every recognised letter to its native reader.",
+    "reuse": "edas.py:57 extends the existing DATA_CLASS_BY_EDDB_LETTER owner and the single EDDB_LETTER_BY_DATA_CLASS reverse map (overridden at :67) rather than adding a second map.",
+    "scope_discipline": "git diff 5ec8b0ee..0fd78701 touches only the declared paths plus the resume-granted check_edas.py, one purpose, with no generated file staged."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that every EDDB data class is read with its own call; imas_codex/discovery/signals/scanners/edas.py:57-84 adds J/M/G/N to the letter map and _eddb_accessor builds each class's accessor, and imas_codex/remote/scripts/check_edas.py:260-307 dispatches each recognised letter to its native reader while refusing unknown ones.\nVERDICT done_when: the done-when names tests mapping J/M/G/N to class and read call, a raw-letter-kept test, and a rescan-refresh test; tests/discovery/test_edas_data_classes.py carries test_catalogue_class_selects_reader over T/O/P/J/M/G/N, test_unclassified_signal_keeps_catalogue_letter over A/C/K/V, and test_rescan_refreshes_scanner_fields_without_replacing_enrichment, and the fragment states the catalogue letters and how P was resolved.\nVERDICT write_paths: the manifest declares edas.py, schemas/facility.yaml, discovery/signals/parallel.py, the test file, the fragment and the figures dir, and the resume advice extended scope to imas_codex/remote/scripts/check_edas.py; git diff 5ec8b0ee..0fd78701 touches exactly those six files and nothing else.\nVERDICT manifest: read; it records the three commits, the 29/29 focused gate, the J-mutation negative control and honestly leaves baseline_suite/after_suite null.\nVERDICT diff: read commit by commit against 5ec8b0ee; f904e54b maps the classes and refreshes scanner fields on rescan, 723410cb states the quick-reference limit, 0fd78701 routes the remote check through native readers; no generated or out-of-scope file is staged.\nCALL_SITES: imas_codex/discovery/signals/scanners/edas.py EDASScanner.scan and EDASScanner.check, imas_codex/discovery/signals/parallel.py ingest_discovered_signals on_match clause and enrich_worker/check_worker, imas_codex/remote/scripts/check_edas.py main, imas_codex/schemas/facility.yaml SignalDataClass and FacilitySignal.data_class_letter\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: edas.py:57-84 adds J/M/G/N and _eddb_accessor builds each class's call, and check_edas.py:260-307 dispatches every recognised letter to its native reader.\nSCORE evidence: 18\nJUSTIFICATION evidence: I reproduced the head arm at 0fd78701 (28 passed non-graph plus the graph rescan test passed) and the J-mutation negative control (1 failed, EXIT=1) in a scratch copy, matching final-edas-data-classes.log (29 passed, EXIT=0).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 5ec8b0ee..0fd78701 touches only the declared paths plus the resume-granted check_edas.py, one purpose, with no generated file staged.\nSCORE durability: 18\nJUSTIFICATION durability: reverting the change reddens test_catalogue_class_selects_reader[J-parameter-eddbreadPara] (independently reproduced, EXIT=1) and the base arm fails test_rescan_refreshes_scanner_fields_without_replacing_enrichment (baseline-rescan.log, EXIT=1).\nSCORE fit: 18\nJUSTIFICATION fit: edas.py:70 keeps the module's accessor-string idiom and the {accessor} data-template placeholder, and each commit carries a mechanism body with no attribution.\nSCORE reuse: 19\nJUSTIFICATION reuse: edas.py:57 extends the existing DATA_CLASS_BY_EDDB_LETTER owner and the single EDDB_LETTER_BY_DATA_CLASS reverse map (overridden at :67) rather than adding a second map.\nFINDING tests/discovery/test_edas_data_classes.py:59 follow-on: test_unclassified_signal_keeps_catalogue_letter asserts only that data_class is None and the raw letter is kept, not that accessor is empty, so the unset-class accessor ('') that _eddb_accessor returns at edas.py:84 is exercised only indirectly and could regress to a valid-looking call unnoticed.\nFINDING imas_codex/discovery/signals/parallel.py:2755 follow-on: the EDAS rescan on_match now writes accessor/data_class/data_class_letter/unit from the scanned signal for every row in an EDAS-flagged batch, including MBDB/LCDB rows that set no data_class_letter; it is safe today because Cypher yields null for an absent map key, but the batch-wide flag assumes the scanner owns every EDAS row's fields.\n",
+  "review_run_id": "r-20261009T154120292121-review-of-edas-data-classes",
+  "reviewed_base_sha": "5ec8b0eed5637fffa6990f3194150bf52b01cad7",
+  "reviewed_head_sha": "0fd78701e30bcafb29b6b39d5d7e055df714174a",
+  "reviewed_run_id": "r-20261009T114420866585-edas-data-classes",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T15:54:28.582763+00:00",
+  "total": 111
+}
