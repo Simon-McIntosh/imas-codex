@@ -4,9 +4,11 @@ import pytest
 
 from imas_codex.cocos import (
     SignObservation,
+    ValidationResult,
     dd_cocos_class,
     determine_cocos,
     score_cocos_survivors,
+    validate_cocos_from_data,
 )
 
 
@@ -68,6 +70,38 @@ def test_determine_uses_unique_survivor_and_names_assumptions() -> None:
         result.confidence
         < score_cocos_survivors(mast_observations(), e_bp=0, sigma_r_phi_z=1).confidence
     )
+
+
+def test_validator_reports_contradictory_signs() -> None:
+    result = validate_cocos_from_data(
+        declared_cocos=17,
+        psi_axis=0.0,
+        psi_edge=1.0,
+        ip=1e6,
+        b0=5.0,
+        dp_dpsi=1e3,
+    )
+    assert isinstance(result, ValidationResult)
+    assert result.is_consistent is False
+    assert result.calculated_cocos is None
+    assert result.confidence == 0.0
+    assert any("not-cocos-expressible" in error for error in result.inconsistencies)
+    assert any("ψ gradient" in error for error in result.inconsistencies)
+
+
+def test_validator_reports_zero_psi_gradient() -> None:
+    result = validate_cocos_from_data(
+        declared_cocos=11,
+        psi_axis=0.0,
+        psi_edge=0.0,
+        ip=1e6,
+        b0=5.0,
+    )
+    assert isinstance(result, ValidationResult)
+    assert result.is_consistent is False
+    assert result.calculated_cocos is None
+    assert result.confidence == 0.0
+    assert any("zero psi gradient" in error for error in result.inconsistencies)
 
 
 def mock_dd_graph(

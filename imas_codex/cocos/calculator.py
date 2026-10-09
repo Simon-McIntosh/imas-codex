@@ -442,14 +442,15 @@ class ValidationResult:
     Attributes:
         is_consistent: Whether declared COCOS matches physics data
         declared_cocos: The COCOS value being validated
-        calculated_cocos: COCOS inferred from physics quantities
+        calculated_cocos: COCOS inferred from physics quantities, or None when
+            the observations cannot identify a convention
         confidence: Confidence in calculated COCOS (0.0-1.0)
         inconsistencies: List of specific physics inconsistencies
     """
 
     is_consistent: bool
     declared_cocos: int
-    calculated_cocos: int
+    calculated_cocos: int | None
     confidence: float
     inconsistencies: list[str]
 
@@ -499,16 +500,6 @@ def validate_cocos_from_data(
         ...     for error in result.inconsistencies:
         ...         print(f"  - {error}")
     """
-    # Calculate COCOS from physics
-    calculated, confidence = determine_cocos(
-        psi_axis=psi_axis,
-        psi_edge=psi_edge,
-        ip=ip,
-        b0=b0,
-        q=q,
-        dp_dpsi=dp_dpsi,
-    )
-
     # Validate declared COCOS against physics
     inconsistencies = validate_cocos_consistency(
         cocos=declared_cocos,
@@ -519,6 +510,18 @@ def validate_cocos_from_data(
         q=q,
         dp_dpsi=dp_dpsi,
     )
+    try:
+        calculated, confidence = determine_cocos(
+            psi_axis=psi_axis,
+            psi_edge=psi_edge,
+            ip=ip,
+            b0=b0,
+            q=q,
+            dp_dpsi=dp_dpsi,
+        )
+    except ValueError as exc:
+        calculated, confidence = None, 0.0
+        inconsistencies.append(str(exc))
 
     return ValidationResult(
         is_consistent=len(inconsistencies) == 0,
