@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T01:29:52.168Z",
+  "dispatched_at": "2026-10-09T01:22:55Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/ids/models.py:731, imas_codex/schemas/facility.yaml:263",
+      "id": "reuse_search-1",
+      "reason": "the plan must either record the open question as an extension of the escalation evidence it already writes, or state why the existing escalation path and `insufficient_context` disposition are insufficient.",
+      "text": "the plan introduces `SignalFollowup` as the record of an unresolved judgment without citing the two mechanisms that already do this. `write_mapping_result` persists every escalation as a `MappingEvidence` node (`ev.evidence_type = 'escalation'`, `confidence = 0.0`) linked `(sg)-[:HAS_EVIDENCE]->(ev)` from the `SignalSource` (`imas_codex/ids/models.py:731-751`), and `MappingDispositionEnum.insufficient_context` (\"Could map but evidence is too weak to commit\") is the map's existing below-threshold bucket on the source (`imas_codex/schemas/facility.yaml:263`, applied in `ids/models.py` step 6). \u00a71's \"today an open result is a status on the source and nothing more\" describes `insufficient_context`; \u00a72's new node does not say why that bucket cannot carry the question.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:3046",
+      "id": "duplicate_owner-1",
+      "reason": "forking the open-result record from `MappingEvidence` means the triage surface (\u00a73) and the escalation writer (`ids/models.py:731`) read the same fact from two places, and a reader must query both.",
+      "text": "the plan's `SignalFollowup` is a second node type owning \"an open result attached to a source\". The owner is `MappingEvidence` (`facility.yaml:3046`), whose `EvidenceType.escalation` (`facility.yaml:202`) already denotes an open/flagged item and which already hangs off `SignalSource` by `HAS_EVIDENCE`. \u00a71 explicitly reuses `MappingEvidence` for *attached* evidence but forks a parallel node for the *open* half, so an unresolved source now has two records in two shapes. The owner to extend is `MappingEvidence`/`EvidenceType` in `imas_codex/schemas/facility.yaml`; the honest alternative is a followup *status* on that node.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/followups.py",
+      "id": "deep_module-1",
+      "reason": "putting the triage core in the CLI module makes the MCP node depend on a CLI surface; the plan should name `discovery/signals/followups.py` as the home of list/show/attach and make both front ends thin.",
+      "text": "\u00a73 places the list/show/attach logic in the CLI module and then has the second \u00a73 node register MCP tools that \"call the \u00a72 and \u00a73 functions\", i.e. `imas_codex/llm/followup_tools.py` importing from `imas_codex/cli/discover/followups.py`. That inverts the layering: the MCP server would depend on a `cli/` module for behaviour, and a third caller would have to import the CLI too. The behaviour belongs behind the \u00a72 module (`imas_codex/discovery/signals/followups.py`), with the CLI and MCP files as thin adapters over it.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/discover/followups.py",
+      "id": "interface_budget-1",
+      "reason": "the plan must account for the added interface surface in its own text rather than raise every count off a zero base.",
+      "text": "\u00a73 adds `imas-codex discover followups` and `imas-codex discover attach` with five options (`--show`, `--note`, `--ref`, `--declare`, `--probe-shot`) and two MCP views (`list_signal_followups`, `attach_signal_evidence`); \u00a72 adds the `SignalFollowup` node type and \u00a71 adds the `declared` `EvidenceType` value. With the week's counts at 0 for every family, each section must name what it retires or merges, or why nothing can be \u2014 none of \u00a71, \u00a72 or \u00a73 does.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "94c27f1ccfd6095ceb66410e31ca8549aa7b70916ce70a70d0d84f3bb6050792",
+  "plan_slug": "signal-evidence-followups",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261009T012243883632-plan-review-of-signal-evidence-followups",
+  "reviewed_blob_sha": "3e642cc2f09f77a636c453280a3a3df08523817b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the triage operations (list/show/attach) are specified to live in the CLI module `imas_codex/cli/discover/followups.py`, which the \u00a73 MCP node then delegates to, so the behaviour is spread under a CLI surface instead of behind one deep module.",
+    "duplicate_owner": "a finding \u2014 `SignalFollowup` is a second owner of \"an open result on a source\", a record `MappingEvidence` already carries (schema `facility.yaml:3046`, written for escalations at `imas_codex/ids/models.py:731`).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a node type and \u00a73 adds five CLI options and an MCP tool pair, and no section names what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites the evidence *schema* it reuses (`MappingEvidence`, `HAS_EVIDENCE`, `EvidenceType` in \u00a71) but not the two places that already record an open result on a source: `write_mapping_result`'s escalation writer and the map's `insufficient_context` disposition.",
+    "thin_wrapper": "pass \u2014 the proposed `imas_codex/llm/followup_tools.py` mirrors the established `imas_codex/llm/sn_tools.py` delegation idiom and registers through `server.py`, which the plan extends rather than forks."
+  },
+  "section_digests": {
+    "_document": "428d327874b287138a49b7dcab0e2a722cb0cf28a3f5f2d0dcfe72aa7188da8b",
+    "s1": "2e5a9fec1b27a2209562c710539599cc72d150ab64cacfd71f02e9408fa288fe",
+    "s2": "412aa67f61180cc88a3d69be611f85a9c2ee609d202428ca4aa00eace51f3c12",
+    "s3": "c9c3eaaf2146796457d3110dcab2bf609ea58d4fc2288a03c186b60b3b2952fc",
+    "s4": "caa3fd0b9317ea509fe59b493d6d7ac91ab976e3e0180e46e2caca70e2d733a0",
+    "s5": "d83d004ebb65970c857e5ce09175e53975079e8b14c98cac3cddff89a9230ec3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:30:45.869784+00:00"
+}
