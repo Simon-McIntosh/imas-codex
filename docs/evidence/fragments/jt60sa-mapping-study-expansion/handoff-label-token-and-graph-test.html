@@ -1,0 +1,50 @@
+<section id="handoff-label-token-and-graph-test-record">
+  <h3>One absence token, and a live-graph test for the nearest-label query</h3>
+  <p id="handoff-label-token-and-graph-test-token">
+    <code>imas_codex/ids/handoff.py</code> now reads the absence token from
+    <code>CocosLabel.NONE</code> in <code>imas_codex/ids/models.py</code> and
+    defines no token of its own: the module-level <code>COCOS_ABSENT = "none"</code>
+    and its comment are gone, and the three absent-value sites in
+    <code>_nearest_cocos_labels</code> and its caller read
+    <code>CocosLabel.NONE</code>. The absence token therefore has one source,
+    shared with <code>imas_codex/ids/transforms.py</code>. The document contract
+    is unchanged: <code>CocosLabel.NONE</code> is a <code>StrEnum</code> whose
+    value is <code>none</code>, so serialised rows and <code>format_version</code>
+    are identical.
+  </p>
+  <p id="handoff-label-token-and-graph-test-graph">
+    <code>tests/ids/test_mapping_handoff_graph.py</code> drives the real Cypher,
+    which the mocked tests cannot: they reimplement hop selection in Python, so a
+    green mock does not prove the query's <code>ORDER BY hops</code> /
+    <code>collect(label)[0]</code> idiom. Against the live graph,
+    <code>_nearest_cocos_labels</code> resolves
+    <code>magnetics/b_field_pol_probe/field/data</code> to <code>one_like</code>
+    from <code>xml</code>, <code>magnetics/flux_loop/flux/data</code> to
+    <code>psi_like</code> from <code>inferred_forward</code>, and a
+    <code>.../time</code> target to <code>none</code> for both. A set-equality
+    assertion first requires every requested target to come back, so a silent
+    zero-row query cannot read as a pass on the absence token.
+  </p>
+  <p id="handoff-label-token-and-graph-test-negative">
+    Declared negative control: drop <code>ORDER BY hops</code> from the
+    nearest-label query. The graph test stays <strong>green</strong>
+    (<code>2 passed</code>, EXIT=0), so this node records why the result is
+    order-insensitive rather than a failing arm. On the live graph a
+    <code>cocos_transformation_type</code> label is unique to its structure:
+    553 <code>IMASNode</code> nodes carry one, and <strong>no</strong> node's
+    <code>HAS_PARENT</code> chain reaches a second labelled node
+    (<code>0</code> matching chains at 1–10 hops). A target therefore reaches at
+    most one labelled ancestor, so <code>collect(label)[0]</code> holds a single
+    entry and hop order cannot change any row. The second graph test,
+    <code>test_an_ancestor_chain_carries_at_most_one_cocos_label</code>, pins that
+    invariant: a chain that ever stacks two labels turns it red, which is the
+    signal that the ordering must then be proven.
+  </p>
+  <pre id="handoff-label-token-and-graph-test-gate">rev 240a8f622ad98ad1c8531ed48e6ddf160174a4d3
+uv run --no-sync pytest -p no:cacheprovider tests/ids/test_mapping_handoff.py
+  -> 6 passed, 1 warning in 5.78s            EXIT=0
+uv run --no-sync pytest -p no:cacheprovider -m graph tests/ids/test_mapping_handoff_graph.py
+  -> 2 passed, 1 warning in 5.86s            EXIT=0
+negative control (ORDER BY hops dropped)
+  -> 2 passed, 1 warning in 5.74s            EXIT=0   (order-insensitive; see above)</pre>
+</section>
