@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T01:54:47.965Z",
+  "dispatched_at": "2026-10-09T01:45:23Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-cocos-conventions.html:402",
+      "id": "reasoning-1",
+      "reason": "an implementer taking \"10 to 27\" at face value would look for an 18-member source that does not exist and mistarget the split, whereas \"10 to 34\" is what the node's own live check (\"flux loop 7 alone, the 26 differential loops in one source\") and the cited inventory fragment require.",
+      "text": "\u00a79 states \"loops 1 to 9 are one-member sources and loops 10 to 27 share one 25-member source\", but loops 10 to 27 are eighteen loops, not twenty-five, and the plan's own \u00a76 (line 318) says the EDAS holds 34 loop channels. The `sensor-geometry-inventory` fragment (docs/evidence/fragments/signal-cocos-conventions/sensor-geometry-inventory.html:26) settles it: \"27 / 7 of 34 graph channels \u2026 Ten source groups: nine fully covered, one partially covered (18 joined, 7 unjoined members)\", so the single multi-member group is loops 10 through 34 (25 members), of which only 18 have deck rows and 7 (28\u201334) do not. The `measurement-kind-sources` regroup must therefore split a 25-member source of loops 10\u201334, leaving the 7 deck-row-less loops unmoved \u2014 not the 18-member group the sentence as written describes.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-cocos-conventions.html:331",
+      "id": "evidence_paths-1",
+      "reason": "\"the same module\" most plainly means `imas_codex/discovery/static/geometry.py` from `sensor-geometry-graph`, so the intent is discoverable; naming it explicitly would remove the ambiguity but not alter the design.",
+      "text": "the `jt60sa-sensor-geometry` node ingests the SELENE decks \"through the same module\" and cross-checks against imas-ambix over 2 h, but its only declared write path is the evidence fragment `docs/evidence/fragments/signal-cocos-conventions/jt60sa-sensor-geometry.html`; the code it must add (the deck reader it defers to by the phrase \"beside the module's deck reader\") has no declared write path, so the implementer is left to place code in an undeclared file.",
+      "type": "evidence_paths",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e0855e2028b9e557f1fee2371bb85b2f02744a7daba14b6b21fc7faed0627f49",
+  "plan_slug": "signal-cocos-conventions",
+  "plan_version": 11,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-09T01:56:20.809052+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "evidence_paths-1",
+      "reason": "",
+      "when": "2026-10-09T01:56:23.830830+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:56:23.830830+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:56:20.809052+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-signal-cocos-conventions.v11.json",
+  "review_run_id": "r-20261009T014510292989-plan-review-of-signal-cocos-conventions",
+  "reviewed_blob_sha": "2e58d5ff42ce854649237a132e30998a64da3b7c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited modules and symbols all resolve: `determine_cocos`/`validate_cocos_consistency`/`validate_cocos_from_data`/`cocos_to_parameters` in `imas_codex/cocos/calculator.py`, `path_needs_cocos_transform` in `imas_codex/cocos/transforms.py`, `cocos_sign` in `imas_codex/ids/transforms.py`, `_accessor_to_source_key`/`detect_signal_sources` in `imas_codex/discovery/signals/parallel.py`, `claim_signal_sources` in `imas_codex/discovery/base/grouping.py`, `judge_rows` in `imas_codex/discovery/base/judgment.py`, `MappingEvidence` types `data_validation` and `sign_convention` in `facility.yaml`, `tests/graph/test_schema_compliance.py`, `external-map-rules` \u00a73/\u00a75 and `jt60sa-discovery-completion` \u00a756; `dd_cocos_class` and the new modules are declared as new rather than cited as existing.",
+    "done_when": "pass \u2014 every changed node's done-when is measurable and carries a negative control (enum refuses an out-of-range value; contradictory observations leave no survivor; `dd_cocos_class` returns nothing for an unlabelled path; a failed read is recorded as an error not a sign; a sensor whose key does not join stays unlinked; a second run claims nothing; a source of one kind is left untouched).",
+    "evidence_paths": "pass \u2014 every fragment is written under `docs/evidence/fragments/signal-cocos-conventions/` in the repository, and every code write path is a tracked module or test file, not a temporary directory.",
+    "naming": "pass \u2014 the new symbols and files are named by capability (`cocos_class`, `convention_status`, `ConventionObservation`, `dd_cocos_class`, `measurement-kind-sources`, `convention_probe.py`); no plan label, sprint id or ticket number reaches code, and the raw commit hashes that appear (`09a095988`) are in \u00a72, which is out of scope and unchanged.",
+    "reasoning": "a finding \u2014 \u00a79's description of the current grouping (loops 10 to 27 sharing a 25-member source) is internally impossible and contradicts the plan's own \u00a76 and the `sensor-geometry-inventory` fragment it cites elsewhere.",
+    "single_goal": "pass \u2014 \u00a73 has one node, \u00a77 one, \u00a79 one, and \u00a75/\u00a76 split their work into nodes each carrying a single deliverable.",
+    "wiring": "pass \u2014 the three evidence gates resolve to real targets (`external-map-rules#s3`, `external-map-rules#s5`, `signal-cocos-conventions#s9`), and each node that is ordered \"after\" another names a node that exists."
+  },
+  "section_digests": {
+    "_document": "841f7d0b2d99154895a9e960e572e25502951a869738bb77498e7ae62fb08f34",
+    "s1": "b474f50e663d4eeb459a19ec861f44c6afd0861521b2e1ae043ae12881d43192",
+    "s2": "f3bf9d3f711147548dac78d62796f77c8ff7cb581d5836a5380c85ae16697fd1",
+    "s3": "60d12734ae36ce5fedcd3b9af30a4dabcc90d9a235fc965b559a79d6c0f6eb45",
+    "s4": "f0a2c2928d4bc9a0668a027bd6b0805a53e562bc2e31f76da819e8d9f464fd79",
+    "s5": "41d5052e3c98cbacbdeac5d198c352f683d9951a6f42a5e7c614bbbf6a33cef9",
+    "s6": "97348c0ed5d3ba456b6619432585505f0600eb03bca1176489a97dac0d5859a5",
+    "s7": "b478b26c1a2560685846a5ec9701d8151aafbddeb18c7fceb34613467a89f092",
+    "s8": "7a17b5dd927373efb5082039905f3646e11365670d3a801411fd5e730a501eb6",
+    "s9": "7e05245b74735fb1548e7404453fad12039c1cd611f7a52ff97a75d1ec9db674"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:55:40.132178+00:00"
+}
