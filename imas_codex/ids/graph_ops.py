@@ -910,3 +910,138 @@ def clear_candidates(facility: str, gc: GraphClient) -> dict[str, int]:
         "edges_removed": row.get("edges_removed") or 0,
         "routes_reset": row.get("routes_reset") or 0,
     }
+
+
+# ---------------------------------------------------------------------------
+# DD path lifecycle against a mapping's DD version
+# ---------------------------------------------------------------------------
+# A retired DD node survives in the graph for its historical edges, so its
+# existence is not evidence it belongs to the version a mapping targets. The
+# predicate below decides membership from the node's INTRODUCED_IN and
+# DEPRECATED_IN versions so the candidate stage, the binding validation and the
+# hand-off export all share one rule.
+
+
+def _version_tuple(version: str) -> tuple[int, int, int]:
+    """Parse a DD version id (``"4.1.1"``) into ``(major, minor, patch)``."""
+    numbers = [int(part) for part in str(version).split(".")[:3]]
+    numbers += [0] * (3 - len(numbers))
+    return numbers[0], numbers[1], numbers[2]
+
+
+def dd_version_at_or_before(version: str, dd_version: int | str) -> bool:
+    """Whether DD version ``version`` is at or before ``dd_version``.
+
+    A ``dd_version`` given as an ``int`` compares only the major component,
+    matching the search layer's major-version mode; a version given as a string
+    compares major, minor and patch.
+    """
+    if isinstance(dd_version, int):
+        return _version_tuple(version)[0] <= dd_version
+    return _version_tuple(version) <= _version_tuple(str(dd_version))
+
+
+def dd_path_live_at(
+    introduced_version: str | None,
+    deprecated_version: str | None,
+    dd_version: int | str | None,
+) -> bool:
+    """Whether a DD path is part of the Data Dictionary at ``dd_version``.
+
+    The path belongs to the version when it was introduced at or before it and
+    was not deprecated at or before it. A path with no recorded introduction is
+    treated as present, because absence of the edge is not evidence it is not.
+    ``dd_version`` of ``None`` disables the test and returns ``True``.
+    """
+    if dd_version is None:
+        return True
+    if introduced_version is not None and not dd_version_at_or_before(
+        introduced_version, dd_version
+    ):
+        return False
+    if deprecated_version is not None and dd_version_at_or_before(
+        deprecated_version, dd_version
+    ):
+        return False
+    return True
+
+
+@dataclass(frozen=True, slots=True)
+class DDPathLifecycle:
+    """A DD path's lifecycle position relative to a mapping's DD version."""
+
+    path: str
+    introduced_version: str | None
+    deprecated_version: str | None
+    live: bool
+    reason: str | None = None
+
+
+def dd_path_stale_reason(
+    path: str,
+    introduced_version: str | None,
+    deprecated_version: str | None,
+    dd_version: int | str,
+) -> str | None:
+    """Why ``path`` is not part of ``dd_version``, or ``None`` when it is.
+
+    The reason names the deprecation version that retired the path, or, for a
+    path introduced after the version, its introduction version.
+    """
+    if dd_path_live_at(introduced_version, deprecated_version, dd_version):
+        return None
+    if deprecated_version is not None and dd_version_at_or_before(
+        deprecated_version, dd_version
+    ):
+        return (
+            f"{path} was deprecated in DD {deprecated_version} and is not part "
+            f"of DD {dd_version}"
+        )
+    return (
+        f"{path} was introduced in DD {introduced_version} and is not part "
+        f"of DD {dd_version}"
+    )
+
+
+def dd_path_lifecycles(
+    gc: GraphClient,
+    paths: Iterable[str],
+    dd_version: int | str,
+) -> dict[str, DDPathLifecycle]:
+    """Resolve each DD path's lifecycle at ``dd_version`` in one query.
+
+    Returns a map keyed by path for every requested path that exists as an
+    IMASNode. A path deprecated at or before ``dd_version`` carries
+    ``live=False`` and a reason naming its deprecation version; a path
+    introduced after ``dd_version`` carries ``live=False`` and a reason naming
+    its introduction version. A live path carries ``reason=None``.
+    """
+    wanted = list(dict.fromkeys(paths))
+    if not wanted or dd_version is None:
+        return {}
+    rows = gc.query(
+        """
+        UNWIND $paths AS pid
+        MATCH (p:IMASNode {id: pid})
+        OPTIONAL MATCH (p)-[:INTRODUCED_IN]->(iv:DDVersion)
+        OPTIONAL MATCH (p)-[:DEPRECATED_IN]->(dv:DDVersion)
+        RETURN p.id AS id, iv.id AS introduced, dv.id AS deprecated
+        """,
+        paths=wanted,
+    )
+    lifecycles: dict[str, DDPathLifecycle] = {}
+    for row in rows or []:
+        path = row["id"]
+        introduced = row.get("introduced")
+        deprecated = row.get("deprecated")
+        live = dd_path_live_at(introduced, deprecated, dd_version)
+        lifecycles[path] = DDPathLifecycle(
+            path=path,
+            introduced_version=introduced,
+            deprecated_version=deprecated,
+            live=live,
+            reason=None
+            if live
+            else dd_path_stale_reason(path, introduced, deprecated, dd_version),
+        )
+    return lifecycles

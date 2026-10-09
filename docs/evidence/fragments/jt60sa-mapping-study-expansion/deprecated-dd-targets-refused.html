@@ -1,0 +1,44 @@
+<!-- The graph keeps a node for every DD version it ever held, so a node's
+     existence does not mean the configured Data Dictionary contains it.
+     tf/coil/conductor/current/data was introduced in 3.22.0 and deprecated in
+     3.42.0, so it is not part of a 4.1.1 mapping, while tf/coil/current/data is.
+     One lifecycle predicate (imas_codex.ids.graph_ops.dd_path_live_at) is
+     applied at three points — candidate retrieval, binding validation and the
+     hand-off export — so a retired path is excluded, refused and written
+     unexpanded, while a live path passes all three.
+     Code: imas_codex/ids/{graph_ops,candidates,mapping,handoff}.py
+     Gate and negative-control logs:
+     ~/.config/reckon/crew/runs/r-20261009T105828078444-deprecated-dd-targets-refused/ -->
+<section id="deprecated-dd-targets-refused" data-reckon="evidence">
+  <h2 id="deprecated-dd-targets-refused-heading">A DD path retired at the mapping's version is refused</h2>
+  <table id="deprecated-dd-targets-refused-measure-table">
+    <caption>Gate: <code>uv run --no-sync pytest -p no:cacheprovider tests/ids/</code></caption>
+    <thead>
+      <tr><th>Arm</th><th>Establishes</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr id="deprecated-dd-targets-refused-head-row">
+        <td>head</td>
+        <td>For DD 4.1.1, <code>tf/coil/conductor/current/data</code> is dropped
+            from candidate retrieval, refused by <code>validate_mappings</code>
+            with an escalation naming its deprecation version (3.42.0), and
+            written as an unexpanded row by <code>build_mapping_handoff</code>;
+            <code>tf/coil/current/data</code> passes all three</td>
+        <td>pass (594 passed, 5 skipped, 8 deselected; exit 0)</td>
+      </tr>
+      <tr id="deprecated-dd-targets-refused-live-row">
+        <td>live graph (<code>-m graph</code>)</td>
+        <td>The predicate reads the same two paths from the live graph:
+            <code>conductor</code> live=false / deprecated 3.42.0,
+            <code>coil</code> live=true</td>
+        <td>pass (1 passed; exit 0)</td>
+      </tr>
+      <tr id="deprecated-dd-targets-refused-neg-row">
+        <td>negative control</td>
+        <td>Drop the deprecation clause from the predicate; the validation
+            refusal test then fails</td>
+        <td>4 failed, incl. <code>test_retired_path_is_refused_in_validation_naming_its_deprecation_version</code> (exit nonzero)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

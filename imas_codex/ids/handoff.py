@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.ids.graph_ops import dd_path_stale_reason
 from imas_codex.ids.models import CocosLabel
 from imas_codex.ids.tools import search_existing_mappings
 
@@ -241,6 +242,8 @@ def build_mapping_handoff(
             MATCH (m:IMASMapping {id: $mapping_id})-[:USES_SIGNAL_SOURCE]->
                   (source:SignalSource)-[binding:MAPS_TO_IMAS]->(target:IMASNode)
             OPTIONAL MATCH (signal:FacilitySignal)-[:MEMBER_OF]->(source)
+            OPTIONAL MATCH (target)-[:INTRODUCED_IN]->(iv:DDVersion)
+            OPTIONAL MATCH (target)-[:DEPRECATED_IN]->(dv:DDVersion)
             RETURN source.id AS source_id, target.id AS target_id,
                    signal.id AS signal_id,
                    signal.data_source_name AS data_source,
@@ -249,7 +252,9 @@ def build_mapping_handoff(
                    binding.mapping_type AS mapping_type,
                    binding.derived_from AS derived_from,
                    binding.confidence AS confidence,
-                   binding.evidence AS evidence
+                   binding.evidence AS evidence,
+                   iv.id AS introduced,
+                   dv.id AS deprecated
             ORDER BY source.id, target.id, signal.id
             """,
             mapping_id=mapping["id"],
@@ -275,6 +280,21 @@ def build_mapping_handoff(
             source_id = binding["source_id"]
             target_path = binding["target_id"]
             rows = members.get((source_id, target_path), [])
+            reason = dd_path_stale_reason(
+                target_path,
+                rows[0].get("introduced") if rows else None,
+                rows[0].get("deprecated") if rows else None,
+                version,
+            )
+            if reason is not None:
+                entry["unexpanded"].append(
+                    {
+                        "source_id": source_id,
+                        "target_path": target_path,
+                        "reason": reason,
+                    }
+                )
+                continue
             derived_from = rows[0].get("derived_from") if rows else None
             if (
                 rows

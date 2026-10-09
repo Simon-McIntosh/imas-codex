@@ -28,6 +28,7 @@ from imas_codex.graph.client import GraphClient
 from imas_codex.ids.candidates import CLUSTER_ARM
 from imas_codex.ids.graph_ops import (
     CandidateWriteError,
+    dd_path_stale_reason,
     read_candidates,
     write_mapping_binding,
 )
@@ -1658,7 +1659,12 @@ _STRUCTURE_DATA_TYPES = frozenset({"STRUCTURE", "STRUCT_ARRAY"})
 def _structure_children(
     target_ids: list[str], gc: GraphClient
 ) -> dict[str, dict[str, Any]]:
-    """Per target path: its DD ``data_type`` and whether it has data/time children."""
+    """Per target path: DD ``data_type``, data/time children and lifecycle.
+
+    The node's ``INTRODUCED_IN`` and ``DEPRECATED_IN`` versions ride the same
+    read so a caller can tell whether the path belongs to the mapping's DD
+    version without a second query.
+    """
     if not target_ids:
         return {}
     rows = gc.query(
@@ -1667,10 +1673,14 @@ def _structure_children(
         OPTIONAL MATCH (n:IMASNode {id: p})
         OPTIONAL MATCH (d:IMASNode {id: p + '/data'})
         OPTIONAL MATCH (t:IMASNode {id: p + '/time'})
+        OPTIONAL MATCH (n)-[:INTRODUCED_IN]->(iv:DDVersion)
+        OPTIONAL MATCH (n)-[:DEPRECATED_IN]->(dv:DDVersion)
         RETURN p AS path,
                n.data_type AS data_type,
                d IS NOT NULL AS has_data,
-               t IS NOT NULL AS has_time
+               t IS NOT NULL AS has_time,
+               iv.id AS introduced,
+               dv.id AS deprecated
         """,
         paths=target_ids,
     )
@@ -1678,7 +1688,9 @@ def _structure_children(
 
 
 def _retarget_structure_bindings(
-    bindings: list[ValidatedSignalMapping], gc: GraphClient
+    bindings: list[ValidatedSignalMapping],
+    gc: GraphClient,
+    children: dict[str, dict[str, Any]] | None = None,
 ) -> tuple[list[ValidatedSignalMapping], list[EscalationFlag]]:
     """Retarget a binding aimed at a structure to its data or time child.
 
@@ -1690,8 +1702,9 @@ def _retarget_structure_bindings(
     with no such child is refused as an escalation, because nothing can place
     the value. A binding already naming a leaf is returned unchanged.
     """
-    target_ids = sorted({b.target_id for b in bindings})
-    children = _structure_children(target_ids, gc)
+    if children is None:
+        target_ids = sorted({b.target_id for b in bindings})
+        children = _structure_children(target_ids, gc)
     kept: list[ValidatedSignalMapping] = []
     escalations: list[EscalationFlag] = []
     for binding in bindings:
@@ -1786,8 +1799,41 @@ def validate_mappings(
 
     # A binding names a value, so a target that is a structure is retargeted to
     # its data (or, for a time binding, time) child before the section guard and
-    # validation run against the final path.
-    all_bindings, structure_escalations = _retarget_structure_bindings(all_bindings, gc)
+    # validation run against the final path. The node read that decides which
+    # targets are structures also carries each target's lifecycle, so the DD
+    # guard below shares it rather than issuing a second query.
+    target_ids = sorted({binding.target_id for binding in all_bindings})
+    structure_info = _structure_children(target_ids, gc)
+
+    # DD lifecycle guard: a target must belong to the mapping's DD version. A
+    # retired node still exists in the graph, so the target-existence check
+    # accepts it; only its INTRODUCED_IN/DEPRECATED_IN versions say whether the
+    # configured DD actually holds it.
+    live_bindings: list[ValidatedSignalMapping] = []
+    for binding in all_bindings:
+        info = structure_info.get(binding.target_id, {})
+        reason = dd_path_stale_reason(
+            binding.target_id,
+            info.get("introduced"),
+            info.get("deprecated"),
+            dd_version,
+        )
+        if reason is not None:
+            all_escalations.append(
+                EscalationFlag(
+                    source_id=binding.source_id,
+                    target_id=binding.target_id,
+                    severity=EscalationSeverity.ERROR,
+                    reason=reason,
+                )
+            )
+            continue
+        live_bindings.append(binding)
+    all_bindings = live_bindings
+
+    all_bindings, structure_escalations = _retarget_structure_bindings(
+        all_bindings, gc, structure_info
+    )
     all_escalations.extend(structure_escalations)
 
     # Section guard: every target_id must lie inside the section of one of the
