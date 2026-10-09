@@ -5553,9 +5553,7 @@ async def run_parallel_data_discovery(
 
         # Detect signal sources BEFORE workers start so enrich workers
         # won't waste LLM calls on non-representative group members.
-        groups_detected, followers_marked, propagated = prepare_signal_sources(
-            _facility
-        )
+        groups_detected, followers_marked = detect_signal_sources(_facility)
         if groups_detected > 0:
             logger.info(
                 "Preflight: detected %d signal sources (%d followers) for %s",
@@ -5563,9 +5561,6 @@ async def run_parallel_data_discovery(
                 followers_marked,
                 _facility,
             )
-        if propagated > 0:
-            logger.info("Preflight: enriched %d late source members", propagated)
-
         if not _scanner_types:
             scanner_instances = get_scanners_for_facility(_facility)
             _scanner_types = [s.scanner_type for s in scanner_instances]
