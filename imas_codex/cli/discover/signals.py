@@ -183,11 +183,14 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
     )
 
     # Handle --reset-to: reset signals back to the target state. The reset
-    # takes the same scanner and category scope as the claims that follow it,
-    # so a scoped run never resets rows it will not then process.
+    # takes the same scanner, category and focus scope as the claims that
+    # follow it, so a scoped run never resets rows it will not then process.
     if options.reset_to:
         from imas_codex.discovery.base.reset import SIGNAL_RESET_SPECS, reset_to_status
-        from imas_codex.discovery.signals.parallel import build_category_predicate
+        from imas_codex.discovery.signals.parallel import (
+            build_category_predicate,
+            build_focus_predicate,
+        )
 
         spec = SIGNAL_RESET_SPECS[options.reset_to]
         extra_filter = ""
@@ -198,6 +201,9 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
         if category_list:
             extra_filter += f" AND {build_category_predicate('n')}"
             extra_params["categories"] = category_list
+        if focus_items:
+            extra_filter += f" {build_focus_predicate('n', focus_items)}"
+            extra_params["focus_items"] = focus_items
 
         reset_count = reset_to_status(
             spec, facility, extra_filter=extra_filter, extra_params=extra_params
@@ -207,6 +213,8 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
             scope_parts.append(f"scanner: {options.scanners}")
         if category_list:
             scope_parts.append(f"categories: {', '.join(category_list)}")
+        if focus_items:
+            scope_parts.append(f"focus: {', '.join(focus_items)}")
         scope = f" ({'; '.join(scope_parts)})" if scope_parts else ""
         log_print(
             f"[yellow]Reset {reset_count} signals to '{options.reset_to}'{scope}[/yellow]"
