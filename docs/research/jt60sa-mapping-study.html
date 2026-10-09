@@ -40,14 +40,16 @@
 
     <figure>
       <img src="/imas-codex/figures/jt60sa-mapping-study/agreement.svg"
-           alt="Normalised stacked bars for six systems showing, for each, the share of dispositioned rows that agree, disagree, are unplaced or are refused, with absolute counts labelled inside each segment and the system's row total at the bar end">
+           alt="Normalised stacked bars for six systems showing, for each, the share of dispositioned rows that agree, chain-differ, disagree, are unplaced or are refused, with absolute counts labelled inside each segment and the system's row total at the bar end">
       <figcaption>
         Agreement of the generated mapping against imas-ambix's hand-built tokamap,
         per system. Each bar is normalised to 100&nbsp;% of that system's dispositioned
         rows so the composition is legible across systems whose absolute counts differ
         by two orders of magnitude; the count in every segment and the row total at each
-        bar's end are absolute. Green is agreeing, orange disagreeing, grey unplaced and
-        violet refused. The §10 flux-loop bar is the flux-loop subset of the §9 magnetics
+        bar's end are absolute. Green is agreeing, blue chain-differ, orange disagreeing,
+        grey unplaced and violet refused; a chain-differ is the right coil on the other
+        acquisition chain, so §8's six are not conflicts. The §10 flux-loop bar is the
+        flux-loop subset of the §9 magnetics
         run; its three orange rows are cross-structure rows — the channel agrees, the
         store element differs — and the bar end notes this instead of a row total.
         Agreement is scored only where imas-ambix holds a hand-built reference; ECH, gas
@@ -84,9 +86,9 @@
         <tr>
           <td>§8 PF and TF coils</td><td>46</td><td>33</td><td>7</td>
           <td>12</td><td>1</td>
-          <td>6 conflicting — same coil, other acquisition chain (HiTe vs LKAT);
-          which chain is canonical is an open decision (see below). 12 of 16 imported
-          coil rows name the right coil.</td>
+          <td>0 conflicting, 6 chain-differs — same coil, other acquisition chain
+          (HiTe vs LKAT); the reference chain is the lead's decision (see below).
+          12 of 16 imported coil rows name the right coil.</td>
         </tr>
         <tr>
           <td>§9 Magnetics</td><td>26</td><td>17</td><td>10</td>
@@ -112,15 +114,19 @@
         <tr>
           <td>§13 Cryogenic group</td><td>326</td><td>0</td>
           <td>no reference</td><td>326</td><td>0</td>
-          <td>no plant-sensor store; 18 sources refused with a reason</td>
+          <td>no plant-sensor store. imas-codex's pipeline refused 18 CryoMag sources, each with a
+          disposition (8 <code>no_imas_equivalent</code>, 8 <code>insufficient_context</code>,
+          2 <code>facility_specific</code>); imas-ambix's scorer refused 0, because every row
+          failed at placement before reaching its per-row checks.</td>
         </tr>
       </tbody>
     </table>
 
     <p>
-      §8 is scored from the imas-ambix <code>coils-score.json</code>
-      (<code>pf_active</code> 43/32/6/6/11/0 and <code>tf</code> 3/1/1/0/1/1, totalling
-      46/33/7/6/12/1). §9 and §10 are scored from <code>magnetics-score.json</code>
+      §8 is scored from the imas-ambix <code>coils-score.json</code> rescore
+      (totals 46 exported, 33 imported, 7 agreeing, 0 conflicting, 6 chain-differs,
+      31 sign unscored, 12 unplaced, 1 refused; <code>pf_active/coil</code> scores
+      19/16/6/0/6/16/3/0 in the same order). §9 and §10 are scored from <code>magnetics-score.json</code>
       (total 26/17/10/0/7/2; <code>b_field_pol_probe</code> 17/11/10/0/6/0,
       <code>flux_loop</code> 6/6/0/0/0/0, <code>b_field_phi_probe</code> 2/0/no
       reference/0/1/1, <code>magnetics/time</code> 1/0/no reference/0/0/1). §11 and §12
@@ -131,8 +137,9 @@
     <h2 id="disagreements">Disagreements and their stages</h2>
 
     <p>
-      A <em>disagreement</em> is a generated row that imas-ambix reports as conflicting,
-      as landing on the wrong index (a cross-structure row), or as refused for a reason
+      A <em>disagreement</em> is a generated row that imas-ambix reports as conflicting
+      or chain-differing, as landing on the wrong index (a cross-structure row), or as
+      refused for a reason
       that names a defect in the generated mapping. Each is traced to the stage where its
       cause lives. Rows that are merely <em>unplaced</em> for a missing reference store
       are a coverage statement about imas-ambix, not a disagreement about the generated
@@ -156,10 +163,18 @@
           chain is canonical is an open decision for the lead: imas-ambix's hand-built
           <code>LKAT</code> choice rests on shot E101154, where the two chains correlate
           at at least 0.994, while JT-60SA's <code>chan_list_Reconstruction</code> reads
-          the <code>HiTe</code> chains. imas-ambix is adding <code>alternate_sources</code>
-          so that a declared chain pair scores as <code>chain_differs</code> rather than
-          conflicting.</td>
+          the <code>HiTe</code> chains. imas-ambix now declares each coil's partner chain
+          with evidence via <code>alternate_sources</code>, so a declared chain pair
+          scores as <code>chain_differs</code> rather than conflicting.</td>
           <td>mapping</td>
+        </tr>
+        <tr>
+          <td>§8</td>
+          <td>1 (<code>tf/coil/conductor/current/data</code>)</td>
+          <td>Refused: the target is not defined in DD 4.1.1 — the node was introduced in
+          DD 3.22.0 and deprecated in 3.42.0. A retired DD path was still offered as a
+          candidate target.</td>
+          <td>candidates</td>
         </tr>
         <tr>
           <td>§9</td>
@@ -208,10 +223,11 @@
         <tr>
           <td>§11, §12, §13</td>
           <td>7 + 11 + 5 + 326</td>
-          <td>Unplaced: 7 ECH rows and 109 cryo rows have no machine-description store;
-          11 ECH, 5 gas and 18 cryo rows lack a member pattern. imas-ambix cannot place a
-          row it has no store or pattern for. Coverage, not a generated-mapping
-          disagreement.</td>
+          <td>Unplaced: 7 ECH rows and 308 cryo rows have no machine-description store
+          (109 in <code>operational_instrumentation</code>, 199 in <code>calorimetry</code>);
+          11 ECH and 5 gas rows lack a member pattern, and 18 cryo rows lack a member
+          identifier. imas-ambix cannot place a row it has no store or pattern for.
+          Coverage, not a generated-mapping disagreement.</td>
           <td>hand-off</td>
         </tr>
       </tbody>
@@ -261,8 +277,9 @@
       (same channel, other store element) rather than wrong. The refusals are small and each names a fixable defect — a retired DD path
       (§11), a value bound onto a time path (§9), the deprecated
       <code>tf/coil/conductor/current/data</code> (§8's single refusal). The large unplaced
-      counts are imas-ambix coverage: 326 cryo rows and 21 ECH rows have no store to land
-      in. The study's earlier headline expectation — that the cryogenic group would act as
+      counts are imas-ambix coverage: of the 326 unplaced cryo rows, 308 have no
+      machine-description store and 18 lack a member identifier; of the 18 unplaced ECH
+      rows, 7 have no store and 11 lack a member pattern. The study's earlier headline expectation — that the cryogenic group would act as
       a negative control — did not hold: most cryogenic magnet signals do have an IMAS home
       in <code>operational_instrumentation</code> and <code>calorimetry</code>, so the
       pipeline mapped about half of them rather than refusing them.
@@ -271,8 +288,9 @@
     <h2 id="sources">Score sources</h2>
 
     <ul>
-      <li>§8 coils: <code>coils-score.json</code>, imas-ambix main <code>19150336</code>,
-      from run <code>r-20261009T105815488974-handoff-invalid-dd-target</code>.</li>
+      <li>§8 coils: <code>coils-score.json</code> rescore of the 10:41:50Z export, imas-ambix
+      main <code>6ccaade6</code>, from run
+      <code>r-20261009T105815488974-handoff-invalid-dd-target</code>.</li>
       <li>§9 magnetics and §10 flux loops: <code>magnetics-score.json</code>, from run
       <code>r-20261009T114027189171-score-flux-loops-cross-structure</code> (hand-off
       exported 2026-10-09T11:21:44Z).</li>
