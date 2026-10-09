@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. The after arm (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/final-absolute-gate.log) records 58 passed, EXIT=0 at a0bbbfc4606bf0e57850f3083f693589eefe9c2e with zero failing ids, so no failure id is present at the head. The reviewed baseline arm (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/baseline.log) records 1 failed, EXIT=1 (test_limited_host_serializes_calls_and_unlimited_host_overlaps); that id is absent at the head, so the change removes a failure rather than adding one. added_failure_count is 0 and added_failure_ids is empty. I reproduced the head independently at 58 passed, EXIT=0 (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T120714692993-review-of-facility-ssh-session-limit/review-head-gate.log) and the negative control independently (1 failed, EXIT=1). Reservation: the reviewed manifest carries no baseline_suite key and its baseline.log header names base revision 5ec8b0ee while the tree carried an intermediate reviewed source -- reconstructing the true base SOURCE (5ec8b0ee) plus the reviewed test file gives a collection ImportError, not the recorded 1-failed run (see findings).",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/facility-ssh-session-limit uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/facility-ssh-session-limit/tests/remote/test_ssh_session_limit.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/facility-ssh-session-limit/tests/remote/test_executor.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/facility-ssh-session-limit/tests/remote/test_remote_environment.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/final-absolute-gate.log",
+    "revision": "a0bbbfc4606bf0e57850f3083f693589eefe9c2e"
+  },
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/remote/test_ssh_session_limit.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/remote/test_ssh_session_limit.py::test_limited_host_serializes_calls_and_unlimited_host_overlaps"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/baseline.log",
+    "revision": "5ec8b0eed5637fffa6990f3194150bf52b01cad7"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/remote/executor.py run_command (sync per-call path)",
+    "imas_codex/remote/executor.py run_script_via_stdin (stdin runner)",
+    "imas_codex/remote/executor.py run_python_script (sync script path)",
+    "imas_codex/remote/executor.py async_run_python_script (async script path)",
+    "imas_codex/remote/ssh_worker.py SSHWorker.start (each persistent pool worker holds one session)"
+  ],
+  "completed_at": "2026-10-09T12:17:09.565Z",
+  "dispatched_at": "2026-10-09T12:07:25Z",
+  "findings": [
+    {
+      "file": "imas_codex/remote/ssh_worker.py",
+      "line": "596",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest omits the baseline_suite arm entirely and its baseline.log header reads 'revision=5ec8b0ee... tree=<worktree>' without recording that the tree carried an intermediate reviewed source. Reconstructed as the true base SOURCE (5ec8b0eed5637fffa6990f3194150bf52b01cad7) plus the reviewed test file, the arm is a collection ImportError (cannot import name 'acquire_host_session'), not the recorded 1-failed run -- so the recorded baseline is an intermediate commit, not the declared base revision, and the added-failure derivation rests on the all-green after arm alone."
+    },
+    {
+      "file": "imas_codex/remote/executor.py",
+      "line": "87",
+      "severity": "follow-on",
+      "text": "follow-on: the one owner of the bound lives in ssh_worker.py, but executor.py reaches into its private surface -- imports _session_permit and reads pool._owner_loop, pool._started and pool._closed -- so the cross-module contract is carried by names with a leading underscore; a rename or a change to pool internals breaks the executor bridge silently at runtime rather than at import."
+    },
+    {
+      "file": "tests/remote/test_ssh_session_limit.py",
+      "line": "51",
+      "severity": "follow-on",
+      "text": "follow-on: test_limited_host_serializes_calls_and_unlimited_host_overlaps asserts peak == 2 exactly for the unlimited host behind a 0.05s sleep; the overlap of two 0.05s sleeps is a scheduling race, so a stall that serialises the two thread starts would redden a correct change. The async counterpart deliberately uses 'peak >= 2' for the same condition, so the strict equality is applied only to the synchronous arm."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "The bound has one owner in ssh_worker.py and five call sites consume it: run_command, run_script_via_stdin, run_python_script and async_run_python_script in executor.py take a permit from _session_permit and route through an open pool when one exists, and SSHWorker.start takes one permit per pool worker for the worker's life (released on close/kill).",
+    "diff": "Three commits against 5ec8b0ee: 96bd503a adds the _host_sessions registry, the permit acquisition in SSHWorker, pool sizing, the run_subprocess bridge and executor routing (+~360/-73 across executor.py, ssh_worker.py, tools.py, the schema and jt-60sa.yaml plus a 231-line test file); 4120090e registers the limit for direct executor callers on first resolution and hardens pool discovery; a0bbbfc4 is the evidence-anchor doc commit.",
+    "done_when": "All three done-when clauses are carried: test_limited_host_serializes_calls_and_unlimited_host_overlaps shows limited peak 1 and unlimited peak 2; test_async_and_threaded_calls_share_the_host_limit shows a mixed async/threaded gather peaking at 1 on a limited host and >=2 on an unlimited one; test_facility_declares_one_session shows get_facility('jt-60sa')['ssh_max_sessions'] == 1 and validate_facility_config('jt-60sa') == [].",
+    "goal": "\u00a760 asks for an optional per-facility ssh_max_sessions, set to 1 for JT-60SA, with one owner beside the pool registry, pools sized to the limit, each worker holding one session for its life, per-call paths taking a session from the same bound and routing through an open pool, unlimited hosts unchanged, and the process-local scope stated in code. ssh_worker.py:63-70 adds ssh_max_sessions to the schema and :14 sets it to 1 in jt-60sa.yaml; the _host_sessions registry sits beside _active_pools; SSHWorkerPool.max_workers = min(max_workers, limit); SSHWorker.start awaits acquire_host_session; executor's four per-call paths take _session_permit and prefer open_worker_pool; the registry docstring states 'One process owns admission... Separate CLI processes do not share these permits.'",
+    "manifest": "The reviewed manifest records the three commits, the 58-passed focused gate, the negative control (1 failed, EXIT=1), and the after_suite arm with an absolute-path command; it omits baseline_suite entirely and its baseline.log header is under-specified (see findings).",
+    "write_paths": "git diff --stat 5ec8b0ee..a0bbbfc4 touches exactly the manifest's declared paths -- executor.py, ssh_worker.py, tools.py, facility_config.yaml, jt-60sa.yaml, test_ssh_session_limit.py and one docs/evidence fragment -- with no generated or gitignored file staged (the diff --name-only set is exactly those seven)."
+  },
+  "justifications": {
+    "durability": "Removing the per-call permit in _run_remote_process reddens test_limited_host_serializes_calls_and_unlimited_host_overlaps (1 failed, EXIT=1), reproduced independently in a scratch extraction under TMPDIR. Each assertion compares the observed peak concurrency against an independent expected value (1 for limited, 2 / >=2 for unlimited) measured through real ThreadPoolExecutor and asyncio.gather concurrency rather than a value fed back into the code, and a BoundedSemaphore makes an over-release raise rather than silently widen the bound. Reservation: the synchronous unlimited arm asserts peak == 2 exactly behind a 0.05s sleep, a scheduling race.",
+    "evidence": "The gate measures the done-when and the result is recorded: final-absolute-gate.log shows 58 passed, EXIT=0 at a0bbbfc4606bf0e57850f3083f693589eefe9c2e, and the negative control shows 1 failed, EXIT=1. I reproduced the head arm independently (58 passed, EXIT=0, review-head-gate.log), the negative control independently (1 failed, EXIT=1, review-negative-control.log), and confirmed get_facility('jt-60sa')['ssh_max_sessions'] == 1 in three fresh processes. Reservation: the reviewed manifest omits baseline_suite and its baseline.log names base revision 5ec8b0ee while the tree carried intermediate reviewed source -- the true base SOURCE plus the reviewed test is a collection ImportError, so the baseline arm is under-specified.",
+    "fit": "The change extends the existing per-host registry idiom: _host_sessions mirrors _host_nice_levels, configure_host_session_limit mirrors configure_host_nice and is registered from the same _resolve_ssh_host path in tools.py, and pool sizing reuses the existing SSHWorkerPool. The process-local scope is stated in the registry docstring, and all three commits carry a conventional subject with a mechanism body and no attribution line. Reservation: executor.py reaches into ssh_worker private names (_session_permit and pool._owner_loop/_started/_closed).",
+    "goal_fidelity": "The change implements every element \u00a760 names -- the optional key, the JT-60SA value of 1, one owner beside the pool registry, a pool sized to min(max_workers, limit), one permit per worker for its life, the four per-call paths taking a permit and routing through an open pool, unlimited hosts keeping today's direct behaviour, and the process-local scope stated in the code. No behaviour beyond the section is changed.",
+    "reuse": "The change reuses threading.BoundedSemaphore for the bound, the existing _resolve_ssh_host/configure_host_nice registration path in tools.py, the _active_pools WeakSet and its new lock for pool discovery, and SSHWorkerPool.acquire() for the run_subprocess bridge; no second concurrency primitive or duplicate registry is introduced.",
+    "scope_discipline": "The reviewed diff 5ec8b0ee..a0bbbfc4 touches exactly the manifest's seven declared paths with a single purpose and stages no generated or gitignored file. The node's fence also named a figures directory, left untouched because the node produced no figure."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a760 asks for an optional per-facility ssh_max_sessions set to 1 for JT-60SA, with one owner beside the pool registry, pools sized to the limit, one session held per worker, per-call paths sharing the bound and routing through an open pool, unlimited hosts unchanged, and process-local scope stated in code; ssh_worker.py's _host_sessions registry with configure_host_session_limit/host_session_limit/acquire_host_session implements exactly that and executor.py routes its four per-call paths through it.\nVERDICT done_when: test_limited_host_serializes_calls_and_unlimited_host_overlaps (peak 1 vs 2), test_async_and_threaded_calls_share_the_host_limit (mixed peak 1 vs >=2) and test_facility_declares_one_session (jt-60sa == 1) carry all three clauses.\nVERDICT write_paths: the diff 5ec8b0ee..a0bbbfc4 touches exactly the declared paths, no generated file staged.\nVERDICT manifest: records the three commits, the 58-passed gate, the negative control and the after_suite arm; omits baseline_suite and its baseline.log header names base revision 5ec8b0ee while the tree carried intermediate reviewed source.\nVERDICT diff: 96bd503a adds the registry, permits, pool sizing and the run_subprocess bridge; 4120090e registers limits for direct callers; a0bbbfc4 is the evidence anchor.\nCALL_SITES: executor.py run_command, run_script_via_stdin, run_python_script, async_run_python_script; ssh_worker.py SSHWorker.start\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: implements every element \u00a760 names and changes nothing beyond the section.\nSCORE evidence: 17\nJUSTIFICATION evidence: head arm 58 passed EXIT=0 and negative control 1 failed EXIT=1 reproduced independently and the JT-60SA limit confirmed; the reviewed manifest omits baseline_suite and its baseline.log header is under-specified.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: exactly the seven declared paths, one purpose, no generated file staged.\nSCORE durability: 17\nJUSTIFICATION durability: the mutation reddens the guard, reproduced independently; assertions compare against independent expected peaks through real concurrency; the unlimited sync arm's exact peak == 2 is timing-sensitive.\nSCORE fit: 18\nJUSTIFICATION fit: mirrors the nice-level registry idiom and the tools.py registration path, conventional commits with mechanism bodies and no attribution; executor couples to ssh_worker private names.\nSCORE reuse: 19\nJUSTIFICATION reuse: reuses BoundedSemaphore, the existing host resolution path, the _active_pools WeakSet and pool.acquire(); no duplicate primitive.\nFINDING imas_codex/remote/ssh_worker.py:596 follow-on: the reviewed manifest omits baseline_suite and its baseline.log header names base revision 5ec8b0ee while the tree carried intermediate reviewed source; the true base SOURCE plus the reviewed test is a collection ImportError, not the recorded 1-failed run.\nFINDING imas_codex/remote/executor.py:87 follow-on: the bound's one owner lives in ssh_worker.py but executor.py imports _session_permit and reads pool._owner_loop/_started/_closed, so the cross-module contract rests on private names.\nFINDING tests/remote/test_ssh_session_limit.py:51 follow-on: the unlimited sync arm asserts peak == 2 exactly behind a 0.05s sleep, a scheduling race that could redden a correct change; the async arm uses >= 2.\n",
+  "review_run_id": "r-20261009T120714692993-review-of-facility-ssh-session-limit",
+  "reviewed_base_sha": "5ec8b0eed5637fffa6990f3194150bf52b01cad7",
+  "reviewed_head_sha": "a0bbbfc4606bf0e57850f3083f693589eefe9c2e",
+  "reviewed_run_id": "r-20261009T114356955265-facility-ssh-session-limit",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T12:22:00.000000+00:00",
+  "total": 110
+}
