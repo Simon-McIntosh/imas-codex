@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "reviewed manifest declares no baseline_suite field; base arm read from the run's recorded baseline.log at revision e47bbba8, head arm from the after-suite log named in its after_suite",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/map.py:413",
+    "imas_codex/cli/map.py:563"
+  ],
+  "completed_at": "2026-10-09T07:53:19.456Z",
+  "dispatched_at": "2026-10-09T07:45:40Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/workers.py",
+      "line": "521",
+      "severity": "follow-on",
+      "text": "follow-on: the selected-and-unbound predicate is now written three times (claim_sources_for_mapping at :286, has_pending_mapping_work at :503, unmapped_selected_sources at :521), so a change to what unbound means must be made in three places or the resume set silently diverges."
+    },
+    {
+      "file": "imas_codex/schemas/facility.yaml",
+      "line": "3117",
+      "severity": "follow-on",
+      "text": "follow-on: the three IMASMapping schema slots are outside the node's declared write paths; the node disclosed this and the coordinator accepted the path, but the scope grant is not recorded in the dispatch."
+    },
+    {
+      "file": "tests/ids/test_map_partial_persist.py",
+      "line": "73",
+      "severity": "follow-on",
+      "text": "follow-on: the test replaces run_discovery_engine with a stub, so the map_worker claim-tracking additions at workers.py:875-996 carry no test that reddens if they regress."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read both commits against e47bbba8c; f5e92a7ef is the workers/models change with the new test, b7a688b0 the facility.yaml schema slots, both with substantive bodies and no attribution.",
+    "done_when": "the plan's done-when names a unit test that stops the engine on its deadline after one of two sources is mapped; tests/ids/test_map_partial_persist.py parametrizes deadline and cost_limit and asserts the persisted binding set, the partial flag, the named unmapped source and a second run, and the manifest records that run.",
+    "goal": "the goal persists the batches a stopped map run has mapped; workers.py:1569-1583 releases held claims, derives the stop reason, and calls validate_worker with it, which persists each existing batch at workers.py:1159-1173.",
+    "manifest": "read; its committed-head claim of 570 passed at tests/ids reproduces from after-schema-ids-absolute.log, while its baseline_suite field is empty and after-schema names the head log.",
+    "write_paths": "the declared write paths are workers.py, models.py, tests/ids/test_map_partial_persist.py, the evidence fragment and the figures dir; the diff touches the first three plus imas_codex/schemas/facility.yaml, which is outside the declaration and which the node flagged as a blocker."
+  },
+  "justifications": {
+    "durability": "tests/ids/test_map_partial_persist.py:124 and :132-135 redden under the declared mutation, but the test stubs run_discovery_engine so map_worker's new mapping_claims bookkeeping at workers.py:875-996 is set by hand rather than exercised.",
+    "evidence": "the manifest records tests/ids at 570 passed from after-schema-ids-absolute.log and the negative control at EXIT=1, but its baseline_suite field is empty so the added-failure derivation rests on the run's separately recorded baseline.log.",
+    "fit": "unmapped_selected_sources at workers.py:514-531 follows the GraphClient and asyncio.to_thread idiom of has_pending_mapping_work at workers.py:488-511 and adds no plan or ticket identifier.",
+    "goal_fidelity": "run_mapping_engine at workers.py:1569-1583 persists the batches a stopped run mapped and marks them partial with the unmapped sources, matching the goal and the plan.",
+    "reuse": "unmapped_selected_sources at workers.py:521-524 reproduces the selected-and-unbound predicate already written at workers.py:286 and workers.py:503 without extracting a shared owner.",
+    "scope_discipline": "the diff's schema slots at imas_codex/schemas/facility.yaml:3117-3126 are outside the declared write paths, accepted by the coordinator but never declared at dispatch."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal persists the batches a stopped map run has mapped; workers.py:1569-1583 releases held claims, derives the stop reason, and calls validate_worker with it, which persists each existing batch at workers.py:1159-1173.\nVERDICT done_when: the plan's done-when names a unit test that stops the engine on its deadline after one of two sources is mapped; tests/ids/test_map_partial_persist.py parametrizes deadline and cost_limit and asserts the persisted binding set, the partial flag, the named unmapped source and a second run, and the manifest records that run.\nVERDICT write_paths: the declared write paths are workers.py, models.py, tests/ids/test_map_partial_persist.py, the evidence fragment and the figures dir; the diff touches the first three plus imas_codex/schemas/facility.yaml, which is outside the declaration and which the node flagged as a blocker.\nVERDICT manifest: read; its committed-head claim of 570 passed at tests/ids reproduces from after-schema-ids-absolute.log, while its baseline_suite field is empty and after-schema names the head log.\nVERDICT diff: read both commits against e47bbba8c; f5e92a7ef is the workers/models change with the new test, b7a688b0 the facility.yaml schema slots, both with substantive bodies and no attribution.\nCALL_SITES: imas_codex/cli/map.py:413, imas_codex/cli/map.py:563\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: run_mapping_engine at workers.py:1569-1583 persists the batches a stopped run mapped and marks them partial with the unmapped sources, matching the goal and the plan.\nSCORE evidence: 17\nJUSTIFICATION evidence: the manifest records tests/ids at 570 passed from after-schema-ids-absolute.log and the negative control at EXIT=1, but its baseline_suite field is empty so the added-failure derivation rests on the run's separately recorded baseline.log.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the diff's schema slots at imas_codex/schemas/facility.yaml:3117-3126 are outside the declared write paths, accepted by the coordinator but never declared at dispatch.\nSCORE durability: 15\nJUSTIFICATION durability: tests/ids/test_map_partial_persist.py:124 and :132-135 redden under the declared mutation, but the test stubs run_discovery_engine so map_worker's new mapping_claims bookkeeping at workers.py:875-996 is set by hand rather than exercised.\nSCORE fit: 19\nJUSTIFICATION fit: unmapped_selected_sources at workers.py:514-531 follows the GraphClient and asyncio.to_thread idiom of has_pending_mapping_work at workers.py:488-511 and adds no plan or ticket identifier.\nSCORE reuse: 12\nJUSTIFICATION reuse: unmapped_selected_sources at workers.py:521-524 reproduces the selected-and-unbound predicate already written at workers.py:286 and workers.py:503 without extracting a shared owner.\nFINDING imas_codex/ids/workers.py:521 follow-on: the selected-and-unbound predicate is now written three times (claim_sources_for_mapping at :286, has_pending_mapping_work at :503, unmapped_selected_sources at :521), so a change to what unbound means must be made in three places or the resume set silently diverges.\nFINDING imas_codex/schemas/facility.yaml:3117 follow-on: the three IMASMapping schema slots are outside the node's declared write paths; the node disclosed this and the coordinator accepted the path, but the scope grant is not recorded in the dispatch.\nFINDING tests/ids/test_map_partial_persist.py:73 follow-on: the test replaces run_discovery_engine with a stub, so the map_worker claim-tracking additions at workers.py:875-996 carry no test that reddens if they regress.",
+  "review_run_id": "r-20261009T074531433954-review-of-bounded-map-run-persists",
+  "reviewed_base_sha": "e47bbba8c11c3d8cd3bee2ddccc0d0dac0e805a1",
+  "reviewed_head_sha": "b7a688b0c1614ed12b01b0f688a541bbd717cd20",
+  "reviewed_run_id": "r-20261009T071123224920-bounded-map-run-persists",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T07:51:52.516882+00:00",
+  "total": 98,
+  "verdict": "SOUND WITH FINDINGS"
+}
