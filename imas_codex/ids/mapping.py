@@ -1858,24 +1858,34 @@ def classify_error_signals(
     return error_signals
 
 
+def _source_group_key(source_id: str) -> str:
+    """The group_key a SignalSource id carries, after its facility prefix."""
+    return source_id.split(":", 1)[1] if ":" in source_id else source_id
+
+
 def match_error_signals_to_imas(
     facility: str,
     error_signals: list[dict],
+    data_mappings: list[ValidatedSignalMapping],
     *,
     gc: GraphClient | None = None,
 ) -> list[ValidatedSignalMapping]:
     """Match error-related signal sources directly to IMAS error fields.
 
-    Cross-references error signals with existing data mappings:
+    Cross-references error signals with the data mappings the caller holds:
     if signal source "X Error" exists and signal source "X" maps to
     data_path, then "X Error" maps to data_path_error_upper/lower.
 
-    Uses group_key and description similarity to find the parent data
-    signal source, then traverses HAS_ERROR to find the target error field.
+    The cross-reference reads the run's own bindings, so a first pass after
+    ``map clear`` seeds error fields from the same pass that produced the
+    data mappings. Uses group_key similarity to find the parent data signal
+    source, then traverses HAS_ERROR (a data-dictionary relationship) to
+    find the target error field.
 
     Args:
         facility: Facility identifier.
         error_signals: Output from classify_error_signals().
+        data_mappings: The run's in-memory data bindings to cross-reference.
         gc: GraphClient (created if None).
 
     Returns:
@@ -1884,36 +1894,18 @@ def match_error_signals_to_imas(
     if gc is None:
         gc = GraphClient()
 
-    if not error_signals:
+    if not error_signals or not data_mappings:
         return []
 
-    # Get all existing direct MAPS_TO_IMAS relationships for this facility
-    existing = gc.query(
-        """
-        MATCH (sg:SignalSource {facility_id: $facility})-[r:MAPS_TO_IMAS]->(ip:IMASNode)
-        WHERE coalesce(r.mapping_type, 'direct') = 'direct'
-        RETURN sg.id AS source_id, sg.group_key AS source_group_key,
-               ip.id AS target_id,
-               r.source_units AS source_units,
-               r.target_units AS target_units,
-               r.confidence AS confidence
-        """,
-        facility=facility,
-    )
-
-    if not existing:
-        logger.info("No existing data mappings to cross-reference for %s", facility)
-        return []
-
-    # Build lookup: group_key (normalized) -> list of mappings
-    key_to_mappings: dict[str, list[dict]] = defaultdict(list)
-    for e in existing:
-        src_key = (e.get("source_group_key") or "").strip().lower()
+    # Build lookup: group_key (normalized) -> list of data mappings
+    key_to_mappings: dict[str, list[ValidatedSignalMapping]] = defaultdict(list)
+    for m in data_mappings:
+        src_key = _source_group_key(m.source_id).strip().lower()
         if src_key:
-            key_to_mappings[src_key].append(e)
+            key_to_mappings[src_key].append(m)
 
     # Build lookup: target_path -> error children
-    target_paths = list({e["target_id"] for e in existing})
+    target_paths = list({m.target_id for m in data_mappings})
     error_children: dict[str, list[dict]] = {}
     batch_size = 500
     for i in range(0, len(target_paths), batch_size):
@@ -1960,7 +1952,7 @@ def match_error_signals_to_imas(
             continue
 
         for pm in parent_mappings:
-            errors = error_children.get(pm["target_id"], [])
+            errors = error_children.get(pm.target_id, [])
             if not errors:
                 continue
 
@@ -1976,16 +1968,16 @@ def match_error_signals_to_imas(
                             source_id=esig["signal_id"],
                             target_id=err["error_path"],
                             transform_expression="value",
-                            source_units=pm.get("source_units"),
-                            target_units=pm.get("target_units"),
-                            confidence=min((pm.get("confidence") or 0.5) * 0.9, 1.0),
+                            source_units=pm.source_units,
+                            target_units=pm.target_units,
+                            confidence=min(pm.confidence * 0.9, 1.0),
                             evidence=(
                                 f"Direct error signal match via parent "
-                                f"{pm['source_id']} -> {pm['target_id']}"
+                                f"{pm.source_id} -> {pm.target_id}"
                             ),
                             mapping_type="error_derived",
                             error_type=err["error_type"],
-                            derived_from=pm["target_id"],
+                            derived_from=pm.target_id,
                         )
                     )
 
@@ -2009,7 +2001,6 @@ def derive_error_mappings(
     *,
     gc: GraphClient | None = None,
     facility: str | None = None,
-    include_direct_error_signals: bool = True,
 ) -> list[ValidatedSignalMapping]:
     """Derive error field mappings from facility error signals.
 
@@ -2019,7 +2010,7 @@ def derive_error_mappings(
     really represents an uncertainty stands behind it, so this stage
     identifies facility signal sources classified as error signals
     (e.g. "HRTS Electron Density Error") and matches them to IMAS error
-    fields via cross-reference with the existing data mappings. An error
+    fields by cross-referencing the run's own data mappings. An error
     field with no error signal behind it is left unmapped.
 
     Cost: Zero LLM tokens. Graph queries only (~10ms).
@@ -2028,8 +2019,6 @@ def derive_error_mappings(
         data_mappings: Validated data mappings from Stage 1.
         gc: GraphClient (created if None).
         facility: Facility identifier (needed for error signal matching).
-        include_direct_error_signals: Whether to run the error signal
-            matching pass. Default True.
 
     Returns:
         List of error-derived ValidatedSignalMapping instances.
@@ -2037,14 +2026,16 @@ def derive_error_mappings(
     if gc is None:
         gc = GraphClient()
 
-    if not include_direct_error_signals or not facility:
+    if not facility or not data_mappings:
         return []
 
     error_signals = classify_error_signals(facility, gc=gc)
     if not error_signals:
         return []
 
-    error_mappings = match_error_signals_to_imas(facility, error_signals, gc=gc)
+    error_mappings = match_error_signals_to_imas(
+        facility, error_signals, data_mappings, gc=gc
+    )
 
     logger.info(
         "Matched %d error signal mappings from %d error signals for %s",
