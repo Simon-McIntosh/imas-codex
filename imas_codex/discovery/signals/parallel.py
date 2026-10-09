@@ -618,6 +618,21 @@ class DataDiscoveryState(DiscoveryStateBase):
         # Composite scan phase — done when all sub-phases are done
         self._scan_phase = PipelinePhase("scan")
 
+        # An enrich-only run starts no scan or check workers, so those phases
+        # are done before it begins; left open, they would hold the run until
+        # its time limit after the last batch is enriched.
+        if self.enrich_only:
+            for phase in (
+                self.seed_phase,
+                self.epoch_phase,
+                self.extract_phase,
+                self.units_phase,
+                self.promote_phase,
+                self._scan_phase,
+                self.check_phase,
+            ):
+                phase.mark_done()
+
     def _update_scan_phase(self) -> None:
         """Update composite scan phase from sub-phases."""
         if (
@@ -5514,14 +5529,6 @@ async def run_parallel_data_discovery(
                 ),
             ]
         )
-    else:
-        # In enrich_only mode, mark all scan sub-phases as done
-        state.seed_phase.mark_done()
-        state.epoch_phase.mark_done()
-        state.extract_phase.mark_done()
-        state.units_phase.mark_done()
-        state.promote_phase.mark_done()
-        state._scan_phase.mark_done()
 
     if discover_only:
         # Run engine with scan workers only — stop when scan phase completes

@@ -202,3 +202,38 @@ async def test_reset_signal_without_a_name_is_enriched():
 
     by_id = {row["id"]: row["description"] for row in enriched_rows}
     assert by_id == {s["id"]: f"describes {s['accessor']}" for s in signals}
+
+
+def test_enrich_only_run_stops_once_enrichment_is_done():
+    """A flush run has no check workers, so its check phase cannot hold it open."""
+    state = parallel.DataDiscoveryState(
+        facility=FACILITY, scanner_types=["edas"], enrich_only=True
+    )
+    state.enrich_phase.mark_done()
+
+    with patch.object(parallel, "has_pending_check_work", return_value=True):
+        assert state.check_phase.done
+        assert state.should_stop()
+
+
+def test_full_run_waits_for_its_checks():
+    """A run with check workers keeps going while checks remain."""
+    state = parallel.DataDiscoveryState(facility=FACILITY, scanner_types=["edas"])
+    state.enrich_phase.mark_done()
+
+    with (
+        patch.object(parallel, "has_pending_check_work", return_value=True),
+        patch(
+            "imas_codex.discovery.mdsplus.graph_ops.has_pending_extract_work_facility",
+            return_value=False,
+        ),
+        patch(
+            "imas_codex.discovery.mdsplus.graph_ops.has_pending_units_work_facility",
+            return_value=False,
+        ),
+        patch(
+            "imas_codex.discovery.mdsplus.graph_ops.has_pending_promote_work_facility",
+            return_value=False,
+        ),
+    ):
+        assert not state.should_stop()
