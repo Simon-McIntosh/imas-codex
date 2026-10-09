@@ -12,6 +12,7 @@ Usage:
 
 import json
 import logging
+from pathlib import Path
 
 import click
 
@@ -68,6 +69,7 @@ def map_cmd() -> None:
       validate           Validate mapping paths, transforms, units
       clear              Remove mapping and relationships
       activate           Promote mapping to active status
+      export             Write a facility signal hand-off document
 
     \b
     Options:
@@ -82,10 +84,52 @@ def map_cmd() -> None:
 
     \b
     Stage Control:
-      --stage data         Run LLM data mapping only (Stage 1)
-      --stage error        Run error derivation only (Stage 2, requires Stage 1)
+      --stage data         Run LLM data mapping only
+      --stage error        Run error derivation only (requires data mapping)
       --stage all          Run all stages (default)
     """
+
+
+# ---------------------------------------------------------------------------
+# Export hand-off document
+# ---------------------------------------------------------------------------
+
+
+@map_cmd.command("export")
+@click.argument("facility")
+@click.option(
+    "--ids",
+    "-i",
+    "ids_names",
+    multiple=True,
+    required=True,
+    help="IDS name to export. Repeatable.",
+)
+@click.option(
+    "--out",
+    "output_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    required=True,
+    help="JSON hand-off file to write.",
+)
+def map_export(facility: str, ids_names: tuple[str, ...], output_path: Path) -> None:
+    """Export existing mappings with their facility signal members.
+
+    Every mapping retains its graph status; generated mappings remain drafts.
+
+    \b
+    Example:
+      imas-codex imas map export jt-60sa -i magnetics -i pf_active --out handoff.json
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.ids.handoff import build_mapping_handoff
+
+    try:
+        document = build_mapping_handoff(facility, ids_names, gc=GraphClient())
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    output_path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    click.echo(f"Wrote {output_path}")
 
 
 # ---------------------------------------------------------------------------
