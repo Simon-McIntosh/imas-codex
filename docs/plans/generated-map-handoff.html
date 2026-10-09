@@ -25,9 +25,9 @@
   <title>Generated Map Hand-off | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-09">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -145,7 +145,7 @@
     </ul>
 
     <h2 id="s2">§2 — Maps stay generated until validated</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       <code>map run</code> persists at <code>generated</code> by default, and <code>--no-activate</code> is removed.
       Promotion is only <code>map activate</code>, which already admits only <code>generated</code> or
@@ -296,6 +296,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261009T022808266462-discovery-to-mapping-report" data-who="reckon-build" data-when="2026-10-09T02:55:23Z">
     <div class="r-comment-body"><p>Script-generated research report and four SVG/PNG figures delivered; audit-doc passed with 0 errors, 0 warnings and 1 informational long command; 21 bounded reads with maximum 0.1199 s. JSON source is the contract fixture, not a live export. Evidence anchor docs/evidence/fragments/generated-map-handoff/discovery-to-mapping-report.html#discovery-to-mapping-report.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-09T03:15:00Z">
+    <div class="r-comment-body"><p>§2 landed: maps stay <code>generated</code> until <code>map validate</code> passes, and <code>map activate</code> refuses an unvalidated mapping (commits <code>c46108d64</code>, <code>bccf8308c</code>). 10 focused tests pass. Open follow-up: restore <code>ValidatedSignalMapping</code> in <code>map validate</code> in place of <code>SimpleNamespace</code>. <a href="/imas-codex/evidence/archive/generated-map-handoff-landed.html#s2">evidence</a></p></div>
 </div>
 </section>
 </main>

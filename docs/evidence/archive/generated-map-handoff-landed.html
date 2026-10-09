@@ -25,6 +25,11 @@
     <p>Built <code>imas_codex/ids/handoff.py</code> (<code>build_mapping_handoff</code>, <code>check_handoff_document</code>) and <code>imas-codex imas map export FACILITY -i IDS --out FILE</code>. Each bound <code>SignalSource</code> expands through <code>MEMBER_OF</code> to its <code>FacilitySignal</code> members. source_group and source_array come from <code>data_source_path</code>, and absent values are written as null. The fixture <code>tests/fixtures/mapping_handoff_example.json</code> passes the same check. Gate: <code>tests/ids/test_mapping_handoff.py</code>, 4 passed. With the null handling mutated away, 2 of them fail. Merged at <code>2a20afb7a</code>.</p>
   </section>
 
+  <section id="s2">
+    <h2>§2 — maps stay generated until validated</h2>
+    <p><code>map run</code> always persists at <code>generated</code>, and <code>--no-activate</code> is removed. <code>map validate</code> promotes <code>generated</code> to <code>validated</code> only on a clean report, and <code>map activate</code> refuses a mapping that is not validated. The discover sequence's mapping stage no longer passes <code>no_activate=False</code>. Gate: <code>tests/cli/test_map_promotion.py</code> plus <code>tests/ids/test_mapping_handoff.py</code>, 10 passed. With the validation requirement removed from activate, the refusal test fails. Follow-up: <code>map validate</code> now wraps bindings in <code>SimpleNamespace</code> in place of <code>ValidatedSignalMapping</code>, which drops model validation of the binding rows.</p>
+  </section>
+
 </main>
 </body>
 </html>
