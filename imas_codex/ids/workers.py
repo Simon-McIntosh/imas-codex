@@ -474,9 +474,20 @@ def claim_sources_for_escalated(
 def has_pending_assignment_work(
     facility: str,
     ids_names: list[str] | None = None,
+    handled_source_ids: list[str] | None = None,
 ) -> bool:
-    """Check if escalated sources with a target IDS candidate remain unselected."""
+    """Check if escalated sources with a target IDS candidate remain unselected.
+
+    A source this run already handled stays escalated in the graph, but its
+    turn here is over — a refused choice or an empty shortlist releases it
+    without changing its route — so ``handled_source_ids`` excludes it. Without
+    the exclusion such a source counts as pending forever and an unbounded run
+    never ends.
+    """
     predicate, params = _escalated_source_predicate(ids_names)
+    if handled_source_ids:
+        predicate += " AND NOT n.id IN $handled_source_ids"
+        params["handled_source_ids"] = list(handled_source_ids)
     return has_pending(
         "SignalSource",
         facility=facility,
@@ -739,6 +750,17 @@ async def assign_worker(
         if not sources:
             state.assign_phase.record_idle()
             if state.assign_phase.done:
+                break
+            # A source this run already handled — its choice was refused or it
+            # had no shortlist — stays escalated in the graph, so it counts as
+            # pending work unless excluded. Excluding the handled sources lets
+            # this phase reach done; a later run re-claims and retries them.
+            if not await asyncio.to_thread(
+                has_pending_assignment_work,
+                state.facility,
+                state.target_ids_list,
+                list(handled),
+            ):
                 break
             await asyncio.sleep(2.0)
             continue

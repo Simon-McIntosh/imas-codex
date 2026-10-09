@@ -1,0 +1,42 @@
+<!-- The assign phase reaches done once only sources this run handled remain.
+     Handled exclusion added to has_pending_assignment_work and the assign done
+     check in imas_codex/ids/workers.py. Gate and negative-control logs:
+     ~/.config/reckon/crew/runs/r-20261009T075646473455-assign-phase-ends-on-handled/assign_phase_*.log -->
+<section id="assign-phase-ends-on-handled" data-reckon="evidence">
+  <h2 id="assign-phase-ends-on-handled-heading">The assign phase ends when only handled sources remain</h2>
+
+  <p id="assign-phase-ends-on-handled-intro">
+    A source whose target choice raises, or which has no shortlist to choose
+    from, is released with its route left as <code>escalated</code>. The assign
+    phase's pending-work check counted that released source as remaining work,
+    so the phase never reported done, the map loop waited on it forever, and
+    validation never ran. <code>has_pending_assignment_work</code> in
+    <code>imas_codex/ids/workers.py</code> now takes
+    <code>handled_source_ids</code>, and <code>assign_worker</code> excludes the
+    sources it has already handled when it checks whether the pass is complete —
+    the same exclusion the map pass already carries.
+  </p>
+
+  <h3 id="assign-phase-ends-on-handled-measure-heading">Measure — the control and the gate</h3>
+  <table id="assign-phase-ends-on-handled-measure-table">
+    <caption>Gate: <code>uv run --no-sync pytest -p no:cacheprovider tests/ids</code></caption>
+    <thead>
+      <tr><th>Arm</th><th>Establishes</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr id="assign-phase-ends-on-handled-head-row">
+        <td>head</td>
+        <td>One escalated source whose choice raises: the assign phase reaches
+            done, the map phase completes, and validation persists the other
+            source's binding — inside the test's timeout</td>
+        <td>pass</td>
+      </tr>
+      <tr id="assign-phase-ends-on-handled-neg-row">
+        <td>negative control</td>
+        <td>Drop the <code>handled_source_ids</code> exclusion from the assign
+            done check; the test then times out</td>
+        <td>times out (exit 1)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
