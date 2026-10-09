@@ -793,6 +793,64 @@ def clear_mapping_bindings(facility: str, ids_name: str, gc: GraphClient) -> int
     return deleted
 
 
+def delete_mapping(facility: str, ids_name: str, gc: GraphClient) -> dict[str, int]:
+    """Delete an IMASMapping, its bindings and its evidence as one unit.
+
+    The single owner of a whole-mapping delete. Scoped to the
+    ``facility``/``ids_name`` IMASMapping: it removes the MAPS_TO_IMAS
+    bindings its sources carry (through :func:`clear_mapping_bindings`), the
+    ``MappingEvidence`` nodes those sources point at, and the IMASMapping node
+    itself. Both ``map clear`` and the engine's ``--clear`` path call it, so a
+    cleared re-run drops the escalation evidence a stale mapping carried rather
+    than keeping evidence that may no longer hold.
+
+    Args:
+        facility: Facility ID.
+        ids_name: IDS name whose mapping is deleted.
+        gc: Graph client instance.
+
+    Returns:
+        ``{"mappings": n, "bindings": n, "evidence": n}`` counts deleted.
+    """
+    bindings = clear_mapping_bindings(facility, ids_name, gc)
+
+    evidence_rows = gc.query(
+        """
+        MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
+              -[:USES_SIGNAL_SOURCE]->(sg:SignalSource)
+        MATCH (sg)-[:HAS_EVIDENCE]->(ev:MappingEvidence)
+        WITH ev
+        DETACH DELETE ev
+        RETURN count(ev) AS deleted
+        """,
+        facility=facility,
+        ids=ids_name,
+    )
+    evidence = evidence_rows[0]["deleted"] if evidence_rows else 0
+
+    mapping_rows = gc.query(
+        """
+        MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
+        WITH m
+        DETACH DELETE m
+        RETURN count(m) AS deleted
+        """,
+        facility=facility,
+        ids=ids_name,
+    )
+    mappings = mapping_rows[0]["deleted"] if mapping_rows else 0
+
+    logger.info(
+        "Deleted mapping %s:%s: %d mappings, %d bindings, %d evidence",
+        facility,
+        ids_name,
+        mappings,
+        bindings,
+        evidence,
+    )
+    return {"mappings": mappings, "bindings": bindings, "evidence": evidence}
+
+
 def count_candidates_by_route(
     facility: str, gc: GraphClient | None = None
 ) -> dict[str, int]:
