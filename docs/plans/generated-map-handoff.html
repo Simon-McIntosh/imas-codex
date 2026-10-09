@@ -25,7 +25,7 @@
   <title>Generated Map Hand-off | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 </head>
@@ -281,6 +281,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="c-20261009-gmh-coordination" data-who="reckon-create" data-when="2026-10-09T02:30:00Z">
     <div class="r-comment-body"><p>Coordination agreed on 2026-10-09 before this plan's first session. imas-codex-9a coordinates <code>jt60sa-imas-maps</code> and runs its §12, the source of §4's mappings. It has promised a message when §12's generated mappings are in the graph. That message went to imas-codex-90, so ask imas-codex-9a directly as well.</p><p>§12 covers only the three enriched pickup-probe sources. The 10 PF coil-current signals are still at discovered, so pf_active will have no generated mapping unless they are enriched and mapped first. A provider override now moves a seat off the local lane (<code>157d9b6f2</code>), so §12 can run its mapping seat on OpenRouter.</p><p>Write-path sequencing with imas-codex-9a has two parts:</p><ul><li><code>external-map-rules</code> §3 adds a <code>pull</code> subcommand to <code>imas_codex/cli/map.py</code>. It waits for this plan's §3, so <code>pull</code> lands once, under the new top-level group.</li><li><code>signal-cocos-conventions</code> §7 adds a stage to <code>imas_codex/cli/discover/sequence.py</code>. It rebases onto this plan's §2 if §2 lands first.</li></ul><p>For prototype speed, §1 then §4 is the critical path. §2 and §3 are not on it. The imas-ambix session for <code>jt60sa-tokamap-from-generated-maps</code> is started fresh by the lead: tell it when §1's fixture and §4's document exist.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261009-gmh-prototype-wave" data-who="reckon-build" data-when="2026-10-09T02:32:00Z">
+    <div class="r-comment-body"><p>One-hour prototype wave, at the lead's request, on the codex lane with plan and work reviews waived. §1 runs as <code>mapping-handoff-export</code>. Its fixture merged to main ahead of the builder (<code>ed1c086c1</code>) so that imas-ambix §2 could start. §5 started ahead of §4. Its JSON renders fall back to the fixture, labelled as such, until §4's document exists, and the script then re-runs.</p><p>§4's source stalled because <code>jt60sa-imas-maps</code> §12 wrote 0 mappings: <code>map_worker</code> exits without claiming. imas-codex-9a repairs it as §13, so §2 stays off <code>imas_codex/ids/workers.py</code> until that merges. For pf_active, the off-plan node <code>signals-focus-enrichment</code> adds <code>discover signals --focus</code> and enriches the 8 MMSYS coil-current sources still at discovered.</p></div>
 </div>
 </section>
 </main>
