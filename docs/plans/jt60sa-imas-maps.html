@@ -21,7 +21,7 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
@@ -249,11 +249,11 @@
       but not scored. Flux loops are left out: their signs are unadjudicated.
     </p>
     <p>
-      The local lane was degraded on 2026-10-09 by another account's traffic, and the map's <code>ids-mapping</code> seat
-      runs at high reasoning, so the map run sets
-      <code>IMAS_CODEX_IDS_MAPPING_MODEL=openrouter/deepseek/deepseek-v4.1-flash</code>: the same model off the lane, its
-      price already in <code>pyproject.toml</code>, and its spend bounded by the run's USD 3 cap. The candidate stage uses
-      Jev and needs no override.
+      The map runs on its configured local <code>ids-mapping</code> seat. An attempt to move it off the lane with
+      <code>IMAS_CODEX_IDS_MAPPING_MODEL=openrouter/deepseek/deepseek-v4.1-flash</code> failed twice on 2026-10-09: the
+      override changes only the model name and keeps the seat's local route and key, so the local endpoint answered
+      unknown model, and an explicit OpenRouter base answered 401 without its key. The local lane had recovered by 04:08
+      local (four running, admission open). The candidate stage uses Jev and needs no seat.
     </p>
     <p>
       <strong>Node</strong> <code>example-map-run</code>, role implement, 1.5 h. Live graph through the linked
