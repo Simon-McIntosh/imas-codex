@@ -10,6 +10,11 @@ import click
 
 logger = logging.getLogger(__name__)
 
+# Seconds a multi-worker server's supervisor waits for a worker to answer its
+# health ping. Model loading is serialised behind a CUDA init lock, so the
+# last of eight workers on a P100 node answers after about six minutes.
+EMBED_WORKER_STARTUP_SECONDS = 900
+
 
 @click.group()
 def embed():
@@ -225,12 +230,17 @@ def _start_foreground(
         import uvicorn
 
         if workers > 1:
+            # Workers take the CUDA init lock one at a time and each spends
+            # about 40 s loading the model, so the last waits several
+            # minutes without answering the supervisor's ping. uvicorn's
+            # default 5 s health check kills it and respawns it in a loop.
             uvicorn.run(
                 "imas_codex.embeddings.server:app",
                 host=host,
                 port=port,
                 workers=workers,
                 log_level=log_level.lower(),
+                timeout_worker_healthcheck=EMBED_WORKER_STARTUP_SECONDS,
             )
         else:
             from imas_codex.embeddings.server import app

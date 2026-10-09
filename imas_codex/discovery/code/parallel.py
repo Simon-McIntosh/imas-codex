@@ -59,6 +59,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Concurrent CodeChunk embedding requests: two per GPU of the eight-card
+# titan embed server.
+CHUNK_EMBED_WORKERS = 16
+
 
 async def run_parallel_code_discovery(
     facility: str,
@@ -310,17 +314,17 @@ async def run_parallel_code_discovery(
 
     # Chunk text embeddings — picks up CodeChunk nodes written by the
     # ingestion pipeline with embedding=null and embeds them
-    # asynchronously on the GPU.  Multiple workers keep the embed
-    # server busy across GPUs; 2 per CLI instance × N concurrent
-    # facility CLIs saturates the server without excessive Neo4j
-    # contention.
+    # asynchronously on the GPU. The embed server runs one worker per GPU
+    # and a batch of code chunks takes about ten seconds on a P100, so two
+    # requests in flight per GPU keep every card busy while the previous
+    # batch's embeddings are written back.
     workers.append(
         WorkerSpec(
             "chunk_embed",
             "code_phase",
             embed_text_worker,
             group="embed",
-            count=2,
+            count=CHUNK_EMBED_WORKERS,
             on_progress=on_embed_progress,
             kwargs={
                 "labels": ["CodeChunk"],
