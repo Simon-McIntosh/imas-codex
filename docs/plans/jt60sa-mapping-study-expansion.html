@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="jt60sa-mapping-study-expansion">
+  <meta name="plan-title" content="JT-60SA Mapping Study Expansion">
+  <meta name="plan-summary" content="Fix the defects that would corrupt a wider study, then map six JT-60SA systems one at a time and score each against imas-ambix's hand-built tokamap">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="12.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="standard">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S17">
+  <meta name="plan-tags" content="jt-60sa,signals,discovery">
+  <meta name="plan-after" content="generated-map-handoff">
+  <meta name="plan-informs" content="imas-ambix:jt60sa-tokamap-from-generated-maps">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-mapping-study-expansion#s1&quot;], &quot;s3&quot;: [&quot;jt60sa-mapping-study-expansion#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-mapping-study-expansion#s5&quot;], &quot;s8&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s9&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s10&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s11&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s12&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s13&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s14&quot;: [&quot;jt60sa-mapping-study-expansion#s8&quot;, &quot;jt60sa-mapping-study-expansion#s9&quot;, &quot;jt60sa-mapping-study-expansion#s10&quot;, &quot;jt60sa-mapping-study-expansion#s11&quot;, &quot;jt60sa-mapping-study-expansion#s12&quot;, &quot;jt60sa-mapping-study-expansion#s13&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;}">
+  <title>JT-60SA Mapping Study Expansion | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">imas-codex generates, imas-ambix scores</p>
+      <h1>JT-60SA Mapping Study Expansion</h1>
+      <p class="lead">
+        The generated-map hand-off now works end to end for two JT-60SA systems, the pickup probes and the
+        PF coil currents. This plan widens the study to six systems spread across different IDSs and turns each
+        system into a measurement. It does so by scoring every generated row against imas-ambix's hand-built
+        tokamap, which serves as the answer key.
+      </p>
+    </header>
+
+    <h3>Why the study is gated on a defect wave</h3>
+    <p>
+      The JT-60SA graph holds thousands of signal sources at enriched or checked, but only about 180 have
+      reached the candidate stage, and almost none has a selected target. So candidates and target selection
+      are the bottleneck, not discovery. Two hand-off iterations exposed defects that would corrupt a wider
+      cohort silently:
+    </p>
+    <ul>
+      <li>enrichment pairs model results with the wrong signals;</li>
+      <li>a grouped source's members all read as their representative;</li>
+      <li>value signals are mapped onto their own error fields;</li>
+      <li>the map worker skips the selected sources it should take.</li>
+    </ul>
+    <p>
+      Running more systems before these are fixed would turn defects into confident wrong rows. Sections §1 to
+      §7 are that defect wave. Sections §8 to §13 each run one system through the same fixed loop, and §14
+      writes the study up.
+    </p>
+
+    <h3>The per-system loop and its scorecard</h3>
+    <p>Every system section runs the same six steps against the live graph, in this order:</p>
+    <ol>
+      <li><code>discover jt-60sa --only signals --focus &lt;sources&gt;</code> enriches exactly the system's own sources;</li>
+      <li><code>discover jt-60sa --only map --focus &lt;sources&gt;</code> runs the candidate stage on the same sources;</li>
+      <li><code>imas map clear jt-60sa &lt;ids&gt;</code> followed by <code>imas map run jt-60sa -i &lt;ids&gt;</code> generates the mapping, on the local <code>ids-mapping</code> seat;</li>
+      <li><code>imas map export jt-60sa -i &lt;ids&gt; --out /work/projects/imas_gpu/jt60sa/handoff/jt-60sa-&lt;system&gt;-handoff.json</code> writes the hand-off document;</li>
+      <li>the coordinator relays that path to the imas-ambix session, which imports it and drafts the tokamap;</li>
+      <li>the coordinator records the agreement row that imas-ambix returns.</li>
+    </ol>
+    <p>Each system reports the same five numbers:</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Meaning</th><th>Measured by</th></tr></thead>
+      <tbody>
+        <tr><td>exported</td><td>Signal rows in the hand-off document.</td><td>imas-codex worker</td></tr>
+        <tr><td>imported</td><td>Rows imas-ambix resolved to a channel.</td><td>imas-ambix</td></tr>
+        <tr><td>agreeing</td><td>Rows that match the hand-built channel, scale and sign.</td><td>imas-ambix</td></tr>
+        <tr><td>unplaced</td><td>Rows the machine description cannot locate.</td><td>imas-ambix</td></tr>
+        <tr><td>refused</td><td>Unexpanded rows, and sources judged to have no IMAS equivalent, each with its reason.</td><td>imas-codex worker</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Where imas-ambix holds no hand-built reference for a system, the row reports <em>agreeing</em> as "no
+      reference" rather than zero. The other four numbers still stand.
+    </p>
+
+    <h2 id="s1">§1 — Land <code>discover signals --focus</code></h2>
+    <p>
+      The candidate stage already takes <code>--focus</code>, a list of SignalSource identities or a manifest
+      naming them, through <code>resolve_focus_items</code> in <code>imas_codex/cli/discover/common.py</code>.
+      The signals stage does not, so a system cohort cannot enrich only its own sources. Two files are saved
+      from an earlier worktree: <code>~/.cache/imas-codex-signals-focus/signals-focus.diff</code>, a 281-line
+      diff touching <code>imas_codex/cli/discover/signals.py</code> and
+      <code>imas_codex/discovery/signals/parallel.py</code>, and
+      <code>~/.cache/imas-codex-signals-focus/test_signals_focus.py</code>. Apply them to current main, reuse
+      <code>resolve_focus_items</code> rather than a new parser, and finish whatever the diff left incomplete.
+    </p>
+    <p>
+      <strong>Done when:</strong> <code>discover jt-60sa --only signals --focus magPbTC10</code> claims only the
+      signals whose SignalSource is named. A unit test proves that an unnamed source in the same facility is
+      left unclaimed (the negative control). An unknown focus identity fails with a usage error that names it.
+      The focused signals tests pass, run with <code>-n 8</code>.
+    </p>
+
+    <h2 id="s2">§2 — Enrichment refuses a result that names a different signal</h2>
+    <p>
+      <code>imas_codex/discovery/signals/parallel.py</code> pairs each model result with a batch signal
+      through <code>SignalEnrichmentResult.signal_index</code>, the prompt's 1-based numbering. That pairing
+      trusts the index completely. When the model returns a description written for signal 7 under index 8,
+      the graph records it against signal 8. That happened to magPbTC8 and magPbTC9, and to curEF1LKAT and
+      curEF4LKAT, each of which now carries another signal's description.
+    </p>
+    <p>
+      The fix is to make the result name the signal it describes and to check that name. Add a required field
+      to <code>SignalEnrichmentResult</code> in <code>imas_codex/discovery/signals/models.py</code> that echoes
+      the signal's accessor exactly as the prompt printed it. Before writing, the pairing loop compares that
+      echo with the paired signal's accessor. On a mismatch it writes nothing for that result and releases the
+      claim, so the signal is retried. The prompt's own schema rendering must show the new field; the
+      local-lane rule in <code>imas_codex/llm/AGENTS.md</code> applies, because the local lane sends no
+      <code>response_format</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> a unit test with a model response whose index and echo disagree writes no
+      enrichment and releases that claim, while a matched response in the same batch is written (the positive
+      control). The four signals named above are reset to discovered and re-enriched through
+      <code>--focus</code>. Each one's stored description then names its own channel, and the receipt records
+      the before and after descriptions.
+    </p>
+
+    <h2 id="s3">§3 — Every member of a grouped source keeps its own identity</h2>
+    <p>
+      <code>propagate_source_enrichment</code> copies a representative's description to every member, and
+      <code>individualize_source_descriptions</code> is meant to replace that copy with one description per
+      member, built from its SignalNode description and member identifier. On JT-60SA the replacement never
+      happened for the TC probe group: magPbTC11 to magPbTC23 all read "probe TC-10". The machine description
+      therefore cannot place them, and imas-ambix reported magPbTC18 to magPbTC23 as unplaced. Find out why
+      individualization left these members as copies, and fix the cause in
+      <code>imas_codex/discovery/signals/parallel.py</code>. That may mean an ordering gap, a filter that skips
+      grouped members, or a template that falls back to the representative. Do not add a second
+      individualization path.
+    </p>
+    <p>
+      <strong>Done when:</strong> after a <code>--focus</code> re-run of the TC probe source, no two members of
+      that source share a description, and each description names its own probe number. The receipt lists all
+      fourteen. A unit test shows that a grouped source with two members whose node descriptions differ yields
+      two different member descriptions. A second test shows that a singleton source is left untouched.
+    </p>
+
+    <h2 id="s4">§4 — Error mappings come only from error signals</h2>
+    <p>
+      <code>derive_error_mappings</code> in <code>imas_codex/ids/mapping.py</code> runs two passes. The first
+      walks every direct data mapping's target to its <code>HAS_ERROR</code> children and writes an
+      <code>error_derived</code> binding from the same value source onto each error field. That claims a
+      measured value is also its own uncertainty. The hand-off export already drops these rows, but the stage
+      still writes them, and every consumer of the graph sees them. The second pass,
+      <code>match_error_signals_to_imas</code>, maps sources that really are uncertainties, and it stays.
+      Remove the first pass and its deduplication against it. An error field with no error signal is then
+      simply unmapped.
+    </p>
+    <p>
+      <strong>Done when:</strong> a unit test shows that a direct value mapping with <code>HAS_ERROR</code>
+      children produces no error binding. A second test shows that a source classified as an error signal still
+      produces one (the positive control). The exclusion branch in <code>imas_codex/ids/handoff.py</code> is
+      left in place as a guard, and its test still passes.
+    </p>
+
+    <h2 id="s5">§5 — The map worker takes the sources assignment selected</h2>
+    <p>
+      Commit <code>19dd9128c</code>, "hand selected sources from assignment to mapping", fixes a worker that
+      exits while sources with a selected target are still claimed by the assignment pass. Its run from the
+      imas-codex-9a session was blocked because the live map gate wrote no bindings. That emptiness had a
+      different cause: the mapping prompts lacked their output schema, which is now fixed on main. Build on
+      that commit with <code>--base 19dd9128c</code>, merge main into it, and prove it with a live run. The
+      peer's run itself is not promoted or discarded by this plan.
+    </p>
+    <p>
+      <strong>Done when:</strong> the merged head passes
+      <code>tests/ids/test_map_worker_selected_homes.py</code> and the mapping tests under
+      <code>tests/ids/</code>. Also, <code>imas map run jt-60sa -i magnetics</code> on the fleet node writes at
+      least one <code>MAPS_TO_IMAS</code> binding for each source that held a selected target before the run.
+      The receipt names those sources and their binding counts. A source with no selected target is left
+      unbound (the negative control).
+    </p>
+
+    <h2 id="s6">§6 — <code>map run --clear</code> removes what <code>map clear</code> removes</h2>
+    <p>
+      In the second hand-off iteration, <code>map run --clear</code> left the previous bindings in place, and
+      only a separate <code>map clear</code> followed by <code>map run</code> regenerated cleanly. The clear
+      branch of the engine is in <code>imas_codex/ids/workers.py</code> (the <code>state.clear</code> path).
+      It must route through the same owner as the <code>map clear</code> command,
+      <code>clear_mapping_bindings</code> in <code>imas_codex/ids/graph_ops.py</code>, and not keep its own
+      partial delete. This section follows §5 because both write <code>workers.py</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> a unit test shows that the engine's clear path calls the same owner as
+      <code>map clear</code>. On the live graph, <code>map run --clear</code> for an IDS with existing bindings
+      leaves no binding whose evidence predates the run.
+    </p>
+
+    <h2 id="s7">§7 — Every hand-off row carries its target's COCOS label</h2>
+    <p>
+      Every row of the current hand-off document carries <code>cocos_label: null</code>, although the graph
+      holds the label. DD 4.x dropped some <code>_like</code> labels, and the graph build already repairs that:
+      <code>_backfill_cocos_labels</code> in <code>imas_codex/graph/build_dd.py</code> carries labels forward
+      from the versions that had them. It stores the label in <code>IMASNode.cocos_transformation_type</code>
+      on the parent structure and its provenance in <code>cocos_label_source</code>. The graph shows 553
+      labelled nodes, for example <code>magnetics/b_field_pol_probe/field</code> as <code>one_like</code> from
+      <code>xml</code>, <code>magnetics/flux_loop/flux</code> as <code>psi_like</code> from
+      <code>inferred_forward</code>, and <code>pf_active/coil/current</code> as <code>ip_like</code> from
+      <code>xml</code>. The export only reads that repaired label and never infers one itself. The lead decided
+      on 2026-10-09 to follow the DD convention, with <code>none</code> where a path has no <code>_like</code>
+      label.
+    </p>
+    <p>
+      In <code>build_mapping_handoff</code> in <code>imas_codex/ids/handoff.py</code>, fill
+      <code>cocos_label</code> from the nearest ancestor of the target that carries
+      <code>cocos_transformation_type</code>. Add <code>cocos_label_source</code> beside it, copied from that
+      node's <code>cocos_label_source</code>, and write <code>none</code> for both when no ancestor carries a
+      label. Both are additive keys, so <code>format_version</code> stays 1, and
+      <code>check_handoff_document</code> and <code>tests/fixtures/mapping_handoff_example.json</code> learn
+      them. If a mapped target in §8 to §13 turns out to need a label the graph lacks, that is a defect in the
+      graph build, recorded as a followup on this plan. It is not patched in the export.
+    </p>
+    <p>
+      <strong>Done when:</strong> unit tests show two things. A target under a labelled parent carries that
+      label and its source. A target with no labelled ancestor carries <code>none</code> for both (the negative
+      control). A fresh live export of <code>magnetics</code> for jt-60sa gives its pickup-probe rows
+      <code>one_like</code> from <code>xml</code>, and the receipt quotes one such row.
+    </p>
+
+    <h2 id="s8">§8 — PF and TF coil currents</h2>
+    <p>
+      The MMSYS group carries the coil currents. Twelve of its 26 coil signals were unenriched at the second
+      iteration, and curEF1LKAT and curEF4LKAT carried other signals' descriptions until §2. Run the loop for
+      <code>pf_active</code> and <code>tf</code> over the MMSYS coil-current sources. imas-ambix holds
+      hand-built rules for these coils, so this is the first system with a full answer key. Export to
+      <code>jt-60sa-coils-handoff.json</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> the export passes <code>check_handoff_document</code>, and every MMSYS coil
+      current is either a signal row or an unexpanded row with a reason. The receipt records the exported and
+      refused counts and the seat's model, and the coordinator records imas-ambix's agreement row on the
+      landing.
+    </p>
+
+    <h2 id="s9">§9 — Plasma current</h2>
+    <p>
+      The DCSV group holds the plasma-control signals, including plasma current, three of which already have a
+      selected route. Run the loop for <code>magnetics</code> over the DCSV sources that the candidate stage
+      routes to <code>magnetics/ip</code>. Export to <code>jt-60sa-ip-handoff.json</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> the same conditions as §8 hold for the DCSV cohort.
+    </p>
+
+    <h2 id="s10">§10 — Flux loops</h2>
+    <p>
+      MDAC holds the flux loops beside the pickup probes. Run the loop for <code>magnetics</code> over the MDAC
+      flux-loop sources. Export to <code>jt-60sa-flux-loops-handoff.json</code>. JT-60SA's COCOS is not
+      declared yet, so imas-ambix scores channel and scale only. The receipt says that sign is unscored, so a
+      missing sign check is not read as agreement.
+    </p>
+    <p>
+      <strong>Done when:</strong> the same conditions as §8 hold for the flux-loop cohort, and the agreement row
+      marks sign as unscored.
+    </p>
+
+    <h2 id="s11">§11 — Electron cyclotron heating</h2>
+    <p>
+      The ECH group has 130 of 159 sources ready, and 8 are escalated. Run the loop for
+      <code>ec_launchers</code> over the ECH sources. Export to <code>jt-60sa-ech-handoff.json</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> the same conditions as §8 hold for the ECH cohort.
+    </p>
+
+    <h2 id="s12">§12 — Gas injection</h2>
+    <p>
+      N2GAS has 22 ready sources. Run the loop for <code>gas_injection</code> over the gas-valve sources. If the
+      candidate stage routes some of them elsewhere, the receipt says where. Export to
+      <code>jt-60sa-gas-handoff.json</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> the same conditions as §8 hold for the gas cohort.
+    </p>
+
+    <h2 id="s13">§13 — A cryogenic group as the negative control</h2>
+    <p>
+      Most cryogenic plant signals have no IMAS equivalent. This section tests that the pipeline refuses as well
+      as maps. Run the loop over CryoMag, which has 86 ready sources, without naming an IDS. Let the candidate
+      stage route, then run <code>map run</code> for each IDS it selected. Export the result to
+      <code>jt-60sa-cryo-handoff.json</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> the receipt records how many CryoMag sources the candidate stage judged
+      to have no IMAS target, and how many were mapped. The expected outcome is a large majority refused, each
+      with a reason. Every mapped row is listed with its target, so the coordinator can judge whether it is
+      real.
+    </p>
+
+    <h2 id="s14">§14 — Study report</h2>
+    <p>
+      Write the agreement table across the six systems into
+      <code>docs/research/jt60sa-mapping-study.html</code>. Include one figure in
+      <code>docs/figures/jt60sa-mapping-study/</code>: a horizontal stacked bar per system showing agreeing,
+      disagreeing, unplaced and refused rows, drawn in the data-ink style. Also list every disagreement
+      imas-ambix reported, with its cause traced to a stage (enrichment, candidates, mapping or hand-off).
+    </p>
+    <p>
+      <strong>Done when:</strong> the research document carries a five-number row for each of §8 to §13, taken
+      from the landing comments, and the figure renders from <code>/imas-codex/figures/jt60sa-mapping-study/</code>.
+      Every disagreement row names its stage, and <code>reckon audit-doc</code> reports no errors.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="mapping-seat" data-choice="local" data-by="Simon McIntosh" data-when="2026-10-09">
+        <p class="r-dec-q">Which lane serves the <code>ids-mapping</code> seat during the study?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="local">local</button>
+          <button class="r-opt" data-value="openrouter">openrouter</button>
+        </p>
+        <p class="r-dec-rat">The lead ruled on 2026-10-09 that map requests use the local lane, configured in <code>pyproject.toml</code>, and never OpenRouter.</p>
+      </div>
+      <div class="r-dec" data-key="system-concurrency" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How many system sections may run against the graph at once?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="three">three, one IDS each</button>
+          <button class="r-opt" data-value="one">one at a time</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-jmse-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09">
+        <h4 class="r-fu-title">Build the defect wave, then the system iterations</h4>
+        <div class="r-fu-body"><p>The defect wave, §1 to §7, starts at once in four chains: §1 then §2 then §3, §4 alone, §5 then §6, and §7 alone.</p></div>
+        <pre class="r-fu-prompt">/reckon-build jt60sa-mapping-study-expansion</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
