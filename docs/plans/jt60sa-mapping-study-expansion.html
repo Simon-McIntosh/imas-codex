@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788">
 <meta name="plan-impl" content="0.65">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -511,6 +511,9 @@
 </div>
 <div class="r-comment" data-section="s20" data-id="c-run-r-20261009T071123224920-bounded-map-run-persists" data-who="reckon-build" data-when="2026-10-09T07:44:47Z">
     <div class="r-comment-body"><p>Bounded map shutdown persists the completed source and records one remaining source plus stop reason; IMASMapping declares all three persisted metadata slots; committed-head gate 627 passed, 5 skipped, 7 deselected.</p></div>
+</div>
+<div class="r-comment" data-section="s20" data-id="c-s20-review" data-who="reckon-build" data-when="2026-10-09T07:55:00Z">
+    <div class="r-comment-body"><p>The independent review scored §20 12 to 19 with no added failures, with reuse lowest at 12. Follow-ons: the selected-and-unbound predicate is now written three times in <code>imas_codex/ids/workers.py</code>, in <code>claim_sources_for_mapping</code>, <code>has_pending_mapping_work</code> and <code>unmapped_selected_sources</code>, so it should become one shared predicate. The claim tracking added to <code>map_worker</code> has no test that fails when it regresses, because the partial-persist test replaces the engine with a stub.</p></div>
 </div>
 </section>
 </main>
