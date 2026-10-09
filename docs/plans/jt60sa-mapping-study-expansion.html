@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc">
 <meta name="plan-impl" content="0.7083">
-<meta name="plan-version" content="64">
+<meta name="plan-version" content="65">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -573,11 +573,14 @@
 <div class="r-comment" data-section="s24" data-id="c-run-r-20261009T094732527709-binding-targets-data-field" data-who="reckon-build" data-when="2026-10-09T09:57:50.455Z">
     <div class="r-comment-body"><p>retargets a structure binding to its data leaf (or its time child when source_property is time) during validate_mappings, refusing a structure with no such child as an escalation; tests/ids 580 passed, 5 skipped, negative control 3 failed (exit 1)</p></div>
 </div>
+<div class="r-comment" data-section="s24" data-id="c-run-r-20261009T095934779278-review-of-binding-targets-data-field" data-who="reckon-build" data-when="2026-10-09T10:09:42.452Z">
+    <div class="r-comment-body"><p>§24 reviewed SOUND WITH FINDINGS (total 102/120): a structure binding is retargeted to its data child, a time binding to its time child, a structure with no such child refused as an ERROR escalation, and a leaf binding left unchanged; base 0ea3c2c5c 576 passed, head 6adda303e 580 passed, negative control 3 failed EXIT=1; three follow-ons recorded (stale target_units on the time retarget, a fabricated test DD fixture, and a duplicated structure-type set).</p></div>
+</div>
 <div class="r-comment" data-section="s23" data-id="c-close-s23" data-who="reckon-build" data-when="2026-10-09T10:05:00Z">
     <div class="r-comment-body"><p>§23 landed: a facility pattern supplies coil member identifiers, and MMSYS rows go from 0 of 40 to 40 of 40 identified (merge <code>563463bbc</code>; 615 tests pass). The coils map run is re-running with §24's retargeting for the rescore. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s23">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s23" data-id="c-run-r-20261009T094715891590-coil-member-identifier" data-who="reckon-build" data-when="2026-10-09T09:59:40.081Z">
-    <div class="r-comment-body"><p>§23 — a singleton array&#x27;s member identifier is read from a per-source-group pattern declared in facility configuration; the JT-60SA MMSYS pattern gives EF5/CS1/UFP/1 for curEF5LKAT/curCS1HiTe/curUFPLKAT/cur1TFLKAT, a group without a pattern still uses the four named identifiers&#x27; fallback (trailing number), an unmatched array stays null, and a re-export carries a non-null member_identifier on 40/40 MMSYS rows (was 0/40).</p></div>
+    <div class="r-comment-body"><p>§23 — a singleton array's member identifier is read from a per-source-group pattern declared in facility configuration; the JT-60SA MMSYS pattern gives EF5/CS1/UFP/1 for curEF5LKAT/curCS1HiTe/curUFPLKAT/cur1TFLKAT, a group without a pattern still uses the four named identifiers' fallback (trailing number), an unmatched array stays null, and a re-export carries a non-null member_identifier on 40/40 MMSYS rows (was 0/40).</p></div>
 </div>
 </section>
 </main>

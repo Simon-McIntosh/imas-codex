@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest declares no baseline_suite; I ran the base arm at 0ea3c2c5c (576 passed, 5 skipped, 7 deselected, EXIT=0) and the head arm at c792d5d1a (580 passed, 5 skipped, 7 deselected, EXIT=0); the delta is the 4 new tests in test_binding_data_target.py and no failure appears in either arm, so 0 failures were added.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ids/mapping.py:1790",
+    "imas_codex/ids/mapping.py:1690",
+    "imas_codex/ids/validation.py:112"
+  ],
+  "completed_at": "2026-10-09T10:09:42.452Z",
+  "dispatched_at": "2026-10-09T09:59:43Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "1707",
+      "severity": "follow-on",
+      "text": "follow-on: the retarget rewrites target_id and evidence but not target_units (or cocos_label), which were taken from the model entry for the original structure path. For a value binding the two paths share a unit, so this is latent; for a source_property=time binding the retargeted .../current/time carries units s while a model-supplied target_units of A for .../current is now checked against it by validate_mapping (validation.py:143-155), which can raise a spurious \"Units incompatible\" or \"Identity transform but units differ\" escalation against a binding the retarget just corrected. The tests leave target_units None, so the interaction is not covered."
+    },
+    {
+      "file": "tests/ids/test_binding_data_target.py",
+      "line": "62",
+      "severity": "follow-on",
+      "text": "follow-on: the _DD fixture declares pf_active/circuit/current as a STRUCTURE with neither data nor time child, but the live DD gives that path a data child (verified via a bounded graph query), so the no-data-child branch is exercised only against a fabricated graph and no real path backs it; the fixture's comment at line 59 asserts a DD shape that is false, which could mislead a future reader."
+    },
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "1655",
+      "severity": "follow-on",
+      "text": "follow-on: _STRUCTURE_DATA_TYPES re-defines the structure-type set already canonical at imas_codex/core/node_classifier.py:44 (STRUCTURE_TYPES), adding a third copy beside the IN ['STRUCTURE','STRUCT_ARRAY'] literals in build_dd.py and tools/graph_search.py; reusing the existing constant would keep one definition of \"a structure\"."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "validate_mappings is the only caller of _retarget_structure_bindings (mapping.py:1790); _retarget_structure_bindings calls _structure_children (mapping.py:1690) and escalates through EscalationFlag; validate_mapping consumes the retargeted bindings afterwards (validation.py:112-160).",
+    "diff": "read 6adda303e against 0ea3c2c5c; the change adds _structure_children and _retarget_structure_bindings to mapping.py, wires the retarget into validate_mappings, and adds the new test module and evidence fragment.",
+    "done_when": "tests/ids/test_binding_data_target.py holds the four assertions the plan names and all pass at head (580 passed, EXIT=0); the negative control (retarget call removed) reddens three of them at exit 1.",
+    "goal": "\u00a724 implemented: a value binding on a structure is rewritten to its data child, a time binding to its time child, both recording the rewrite; a structure with no such child is refused as an ERROR escalation; a leaf binding is left unchanged.",
+    "manifest": "status complete, one commit at 6adda303e, tests/ids 580 passed, negative control EXIT=1; baseline_suite absent, so I derived the base arm (576 passed at 0ea3c2c5c) myself.",
+    "write_paths": "the three changed files are exactly the run's declared write paths; nothing outside the declaration was touched."
+  },
+  "justifications": {
+    "durability": "The declared negative control removes the retarget and reproduces 3 failures at exit 1, so the rewrite behaviour is guarded. Three gaps remain. (1) _retarget_structure_bindings rewrites only target_id and evidence (mapping.py:1707-1711); it does not refresh target_units or cocos_label, which were taken from the model entry for the original structure path (mapping.py:1778). For the value case the units coincide (both A on .../current and .../current/data), but for a time binding the retargeted .../current/time carries units s while the model's target_units for .../current was A, so validate_mapping's unit check (validation.py:143-155) can raise a spurious \"Units incompatible\"/\"Identity transform but units differ\" escalation against a binding the retarget just corrected. (2) STRUCT_ARRAY is accepted as a structure type (mapping.py:1655) but the retarget forms the literal p + '/data' child, and no test exercises an array target, so whether an array's value container is named data is unverified. (3) The no-data-child branch is not exercised against any real DD path (see the test-fixture finding).",
+    "evidence": "I ran both arms and the negative control myself in this session. Base arm at 0ea3c2c5c from a scratch extraction with PYTHONPATH shadowing the editable install: 576 passed, 5 skipped, 7 deselected, EXIT=0 (base-tests-ids.log, module.__file__ under /tmp/base-review.UpmpRU). Head arm at c792d5d1a (the reviewed change merged) with PYTHONPATH=$PWD: 580 passed, 5 skipped, 7 deselected, EXIT=0 (head-tests-ids.log). The delta is exactly the 4 new tests in test_binding_data_target.py and no failure appears in either arm. The negative control reproduces independently: removing the _retarget_structure_bindings call reddens test_value_binding_on_a_structure_retargets_to_its_data_child, test_time_binding_on_a_structure_retargets_to_its_time_child and test_structure_without_a_data_child_is_refused, 3 failed 1 passed, EXIT=1 (review-negative-control.log), matching the reviewed run's own negative_control.log. The reviewed manifest declares no baseline_suite, so I derived the base arm rather than trusting the run's single after_suite-equivalent line. I also verified the retarget Cypher against the live graph (bounded, three named paths), since the unit test mocks gc and cannot exercise it: the query returned pf_active/coil/current data_type STRUCTURE with data+time children, legitimately reaching the retarget.",
+    "fit": "The change reuses the existing escalation machinery (EscalationFlag / EscalationSeverity.ERROR) rather than inventing a second refusal channel, and it sits inside validate_mappings beside the existing section guard, before validation, so no new pipeline stage is added. The helpers are named for what they do (_structure_children, _retarget_structure_bindings) and the test module is named for the behaviour (test_binding_data_target). No plan, sprint or ticket identifier appears in any symbol, comment, docstring or the test module name.",
+    "goal_fidelity": "\u00a724's three behaviours are all present. _retarget_structure_bindings (mapping.py:1680-1726) rewrites a binding whose target data_type is STRUCTURE/STRUCT_ARRAY to the structure's data child (mapping.py:1707), or to its time child when source_property == 'time', and records the rewrite in binding.evidence (mapping.py:1708-1711); a structure lacking the required child is refused as an EscalationSeverity.ERROR (mapping.py:1713-1724); a binding already naming a leaf is returned unchanged (mapping.py:1700-1702). It is wired before the section guard and validation (mapping.py:1790), so the guard and validate_mapping run against the final path. All four named tests pass. The one goal-side gap is target_units/cocos_label, which the retarget leaves as the model supplied for the structure path (see durability).",
+    "reuse": "The retarget runs one batched Cypher over the distinct targets (mapping.py:1658-1678) rather than a query per binding, which is the right shape. Two reuse gaps: _STRUCTURE_DATA_TYPES (mapping.py:1655) re-defines a set already canonical at imas_codex/core/node_classifier.py:44 as STRUCTURE_TYPES, adding a third copy beside the IN ['STRUCTURE','STRUCT_ARRAY'] literals in build_dd.py and tools/graph_search.py:2344; and _structure_children queries data_type plus child existence, overlapping check_dd_paths (tools.py:212-236), which is called moments later by validate_mapping \u2014 the two could share one path lookup.",
+    "scope_discipline": "The commit's three changed paths (imas_codex/ids/mapping.py, tests/ids/test_binding_data_target.py, docs/evidence/fragments/jt60sa-mapping-study-expansion/binding-targets-data-field.html) are exactly the run's three declared write paths, and git show --stat lists no fourth path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a724 is implemented \u2014 _retarget_structure_bindings (mapping.py:1680-1726) rewrites a STRUCTURE/STRUCT_ARRAY binding to its data child, or its time child when source_property is time, recording the rewrite in evidence, refusing a structure lacking the required child as an ERROR escalation, and leaving a leaf binding unchanged; wired before the section guard and validation (mapping.py:1790).\nVERDICT done_when: tests/ids/test_binding_data_target.py holds 4 tests \u2014 value binding \u2192 .../data, time binding \u2192 .../time, structure-without-data refused, leaf unchanged; all 4 pass at head (580 passed, EXIT=0) and the negative control reddens 3 at EXIT=1.\nVERDICT write_paths: declared paths are imas_codex/ids/mapping.py, tests/ids/test_binding_data_target.py and the evidence fragment; the commit touches exactly those three and no path outside the declaration.\nVERDICT manifest: read; it records status complete, one change commit at 6adda303e, tests/ids at 580 passed/5 skipped, a negative control at EXIT=1, and declares no baseline_suite, so the base arm was derived (576 passed at 0ea3c2c5c).\nVERDICT diff: read commit 6adda303e against base 0ea3c2c5c; mapping.py adds _STRUCTURE_DATA_TYPES, _structure_children and _retarget_structure_bindings and wires the retarget into validate_mappings; the new test module and evidence fragment carry the gate; the message has a substantive body and no attribution.\nCALL_SITES: imas_codex/ids/mapping.py:1790, imas_codex/ids/mapping.py:1690, imas_codex/ids/validation.py:112\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: \u00a724's three behaviours are all present. _retarget_structure_bindings rewrites a binding whose target data_type is STRUCTURE/STRUCT_ARRAY to the structure's data child, or to its time child when source_property == 'time', and records the rewrite in binding.evidence; a structure lacking the required child is refused as an ERROR escalation; a binding already naming a leaf is returned unchanged. It runs before the section guard and validation, so both operate on the final path. All four named tests pass. The one goal-side gap is target_units/cocos_label, left as the model supplied for the structure path.\nSCORE evidence: 17\nJUSTIFICATION evidence: I ran both arms and the negative control myself. Base arm at 0ea3c2c5c from a scratch extraction: 576 passed, 5 skipped, 7 deselected, EXIT=0. Head arm at c792d5d1a with PYTHONPATH=$PWD: 580 passed, 5 skipped, 7 deselected, EXIT=0; the delta is exactly the 4 new tests and no failure appears in either arm. The negative control reproduces: removing the retarget call reddens three tests, 3 failed 1 passed, EXIT=1, matching the run's own negative_control.log. The reviewed manifest declares no baseline_suite, so I derived the base arm. I also ran the retarget Cypher against the live graph over three named paths to confirm the mocked query is sound.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The commit's three changed paths are exactly the run's three declared write paths, and git show --stat lists no fourth path.\nSCORE durability: 14\nJUSTIFICATION durability: The declared negative control removes the retarget and reproduces 3 failures at exit 1. Three gaps remain: the retarget does not refresh target_units/cocos_label, so a time binding retargeted to .../time can meet a stale model-supplied target_units and raise a spurious unit-mismatch escalation in validate_mapping; STRUCT_ARRAY is accepted but the literal p + '/data' child is untested for arrays; and the no-data-child branch is exercised only against a fabricated fixture, not a real DD path.\nSCORE fit: 18\nJUSTIFICATION fit: The change reuses the existing EscalationFlag/EscalationSeverity.ERROR channel rather than a second refusal path, sits inside validate_mappings beside the section guard before validation, and adds no pipeline stage. Helpers and the test module are named for their behaviour. No plan, sprint or ticket identifier appears in any symbol, comment, docstring or module name.\nSCORE reuse: 16\nJUSTIFICATION reuse: The retarget batches one Cypher over the distinct targets rather than one per binding. Two gaps: _STRUCTURE_DATA_TYPES re-defines the set already canonical at imas_codex/core/node_classifier.py:44, and _structure_children overlaps check_dd_paths, which is called moments later by validate_mapping.\n",
+  "review_run_id": "r-20261009T095934779278-review-of-binding-targets-data-field",
+  "reviewed_base_sha": "0ea3c2c5c80e46596fb9da7e4c9119d076f6b305",
+  "reviewed_head_sha": "6adda303e5df87ad8c958b07269921bf2da97bb8",
+  "reviewed_run_id": "r-20261009T094732527709-binding-targets-data-field",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T10:12:00.000000+00:00",
+  "total": 102,
+  "verdict": "SOUND WITH FINDINGS"
+}
