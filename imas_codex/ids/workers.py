@@ -93,6 +93,8 @@ class MappingDiscoveryState(DiscoveryStateBase):
     assignments: dict[str, Any] = field(default_factory=dict)
     # Mapping batches cache: ids_name -> list[(assignment, batch)]
     mapping_batches: dict[str, list] = field(default_factory=dict)
+    # Claims still held by map_worker; release them after bounded shutdown.
+    mapping_claims: set[str] = field(default_factory=set)
 
     # Pipeline cost tracking (cumulative across all IDS)
     cost: PipelineCost = field(default_factory=PipelineCost)
@@ -509,6 +511,26 @@ def has_pending_mapping_work(
     )
 
 
+def unmapped_selected_sources(facility: str, ids_name: str) -> list[str]:
+    """Return selected sources without a persisted binding in this IDS."""
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sg:SignalSource {facility_id: $facility})
+                  -[c:MAPPING_CANDIDATE]->(ip:IMASNode)
+            WHERE c.route = true AND c.ids = $ids_name
+              AND NOT EXISTS {
+                  (sg)-[:MAPS_TO_IMAS]->(:IMASNode {ids: $ids_name})
+              }
+            RETURN DISTINCT sg.id AS source_id
+            ORDER BY source_id
+            """,
+            facility=facility,
+            ids_name=ids_name,
+        )
+        return [row["source_id"] for row in rows]
+
+
 def has_pending_validation_work(facility: str) -> bool:
     """Check if mapped-but-unvalidated sources exist."""
     return has_pending(
@@ -850,6 +872,7 @@ async def map_worker(
                 ids_name,
                 batch_size=3,
             )
+            state.mapping_claims.update(source["id"] for source in claimed)
             # ``handled`` is keyed by (IDS, source): the same source claimed by
             # this IDS's pass is still eligible for every other IDS's pass,
             # and the claim this pass cannot use is released at once.
@@ -857,6 +880,7 @@ async def map_worker(
             skipped = [s["id"] for s in claimed if (ids_name, s["id"]) in handled]
             if skipped:
                 await asyncio.to_thread(release_mapping_claims_batch, skipped)
+                state.mapping_claims.difference_update(skipped)
             if not sources:
                 continue
 
@@ -882,6 +906,7 @@ async def map_worker(
             for source in sources:
                 if state.should_stop():
                     release_mapping_claims_batch([s["id"] for s in sources])
+                    state.mapping_claims.difference_update(s["id"] for s in sources)
                     return
 
                 source_id = source["id"]
@@ -897,6 +922,7 @@ async def map_worker(
                         ids_name,
                     )
                     await asyncio.to_thread(release_mapping_claim, source_id)
+                    state.mapping_claims.discard(source_id)
                     continue
 
                 for assignment in assignments:
@@ -933,6 +959,7 @@ async def map_worker(
                         await asyncio.to_thread(
                             refresh_mapping_status, source_id, ids_name
                         )
+                        state.mapping_claims.discard(source_id)
 
                         wlog.info(
                             "Mapped %s -> %s: %d bindings",
@@ -966,6 +993,7 @@ async def map_worker(
                     except Exception as e:
                         wlog.error("Mapping failed for %s: %s", source_id, e)
                         await asyncio.to_thread(release_mapping_claim, source_id)
+                        state.mapping_claims.discard(source_id)
                         state.map_stats.errors += 1
                         raise
 
@@ -996,9 +1024,10 @@ async def map_worker(
 async def validate_worker(
     state: MappingDiscoveryState,
     on_progress: Callable | None = None,
+    stop_reason: str | None = None,
     **_kwargs,
 ) -> None:
-    """Validate mappings and persist per-IDS once all sources are mapped."""
+    """Validate mapped batches per IDS, including a bounded run's shutdown."""
     wlog = WorkerLogAdapter(logger, worker_name="validate_worker")
 
     from imas_codex.ids.mapping import (
@@ -1009,8 +1038,10 @@ async def validate_worker(
     from imas_codex.ids.models import persist_mapping_result
 
     for ids_name in state.target_ids_list:
-        if state.should_stop():
+        if state.should_stop() and stop_reason is None:
             break
+        if ids_name in state.ids_results:
+            continue
 
         batches_for_ids = state.mapping_batches.get(ids_name, [])
         sections = state.assignments.get(ids_name)
@@ -1019,6 +1050,24 @@ async def validate_worker(
         if not batches_for_ids or not sections:
             wlog.info("No mappings for %s, skipping validation", ids_name)
             continue
+
+        # A claimed batch may have assigned more sources than the map phase
+        # completed. Validation must see only the batches that exist.
+        sections = sections.model_copy(
+            update={"assignments": [assignment for assignment, _ in batches_for_ids]}
+        )
+        mapped_sources = {assignment.source_id for assignment, _ in batches_for_ids}
+        remaining_sources = (
+            [
+                source_id
+                for source_id in await asyncio.to_thread(
+                    unmapped_selected_sources, state.facility, ids_name
+                )
+                if source_id not in mapped_sources
+            ]
+            if stop_reason is not None
+            else []
+        )
 
         if on_progress:
             on_progress(f"validating {ids_name}", state.validate_stats)
@@ -1090,16 +1139,6 @@ async def validate_worker(
 
             ids_passed = len(validated.bindings)
             ids_escalations = len(validated.escalations)
-            state.bindings_passed += ids_passed
-            state.escalations += ids_escalations
-            state.sources_validated += len(batches_for_ids)
-            state.validate_stats.processed += 1
-
-            # Store per-IDS results
-            state.ids_results[ids_name] = {
-                "bindings": ids_passed,
-                "escalations": ids_escalations,
-            }
 
             if on_progress:
                 on_progress(
@@ -1117,13 +1156,18 @@ async def validate_worker(
             # Persist
             mapping_id = None
             if state.persist:
-                status = "active" if state.activate else "generated"
+                status = (
+                    "active" if state.activate and stop_reason is None else "generated"
+                )
                 mapping_id = await asyncio.to_thread(
                     persist_mapping_result,
                     validated,
                     assembly=assembly,
                     gc=gc,
                     status=status,
+                    partial=bool(remaining_sources),
+                    unmapped_sources=remaining_sources,
+                    stop_reason=stop_reason if remaining_sources else None,
                 )
                 wlog.info(
                     "Persisted %s mapping %s (%s)",
@@ -1141,6 +1185,15 @@ async def validate_worker(
                     a.source_id,
                     ids_name,
                 )
+
+            state.bindings_passed += ids_passed
+            state.escalations += ids_escalations
+            state.sources_validated += len(batches_for_ids)
+            state.validate_stats.processed += 1
+            state.ids_results[ids_name] = {
+                "bindings": ids_passed,
+                "escalations": ids_escalations,
+            }
 
             wlog.info(
                 "Validated %s: %d passed, %d escalations, cost $%.4f",
@@ -1512,6 +1565,22 @@ async def run_mapping_engine(
         stop_event=stop_event,
         orphan_specs=orphan_specs,
     )
+
+    if state.mapping_claims:
+        await asyncio.to_thread(
+            release_mapping_claims_batch, sorted(state.mapping_claims)
+        )
+        state.mapping_claims.clear()
+
+    stop_reason = (
+        "deadline"
+        if state.deadline_expired
+        else "cost_limit"
+        if state.budget_exhausted
+        else None
+    )
+    if stop_reason and state.mapping_batches:
+        await validate_worker(state, on_progress=on_progress, stop_reason=stop_reason)
 
 
 async def run_candidate_engine(
