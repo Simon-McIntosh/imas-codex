@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.ids.models import CocosLabel
 from imas_codex.ids.tools import search_existing_mappings
 
 FORMAT = "imas-codex-mapping-handoff"
@@ -36,10 +37,6 @@ SIGNAL_KEYS = frozenset(
     }
 )
 UNEXPANDED_KEYS = frozenset({"source_id", "target_path", "reason"})
-
-# The DD convention writes an explicit token for a field that carries no
-# COCOS transformation class, rather than leaving the value unknown.
-COCOS_ABSENT = "none"
 
 
 def _check_keys(value: Any, expected: frozenset[str], location: str) -> None:
@@ -157,13 +154,13 @@ def _nearest_cocos_labels(
         )
         labels = {
             row["target_id"]: (
-                row["cocos_label"] or COCOS_ABSENT,
-                row["cocos_label_source"] or COCOS_ABSENT,
+                row["cocos_label"] or CocosLabel.NONE,
+                row["cocos_label_source"] or CocosLabel.NONE,
             )
             for row in rows
         }
     for name in time_targets:
-        labels[name] = (COCOS_ABSENT, COCOS_ABSENT)
+        labels[name] = (CocosLabel.NONE, CocosLabel.NONE)
     return labels
 
 
@@ -290,7 +287,7 @@ def build_mapping_handoff(
                 source_group, source_array = parts
                 identifier = _member_identifier(source_array, arrays)
                 cocos_label, cocos_label_source = cocos_labels.get(
-                    target_path, (COCOS_ABSENT, COCOS_ABSENT)
+                    target_path, (CocosLabel.NONE, CocosLabel.NONE)
                 )
                 entry["signals"].append(
                     {
