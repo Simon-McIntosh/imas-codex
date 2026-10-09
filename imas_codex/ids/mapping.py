@@ -1635,6 +1635,21 @@ async def adiscover_assembly(
         yield assignment, config
 
 
+def _claimed_source_id(model_source_id: str, claimed_source_id: str) -> str | None:
+    """The source a binding is persisted against, taken from the claim.
+
+    A batch is built for one claimed source, but the model echoes a source id
+    from its own prompt text, which can carry a mistyped facility prefix
+    (``jt-60-sa`` for ``jt-60sa``). When the model's id names the same source
+    key the binding is persisted against the claimed source, so the mistyped
+    prefix MATCHes the real ``SignalSource``. A model id naming a different
+    source returns ``None`` so the caller refuses it.
+    """
+    if _source_group_key(model_source_id) == _source_group_key(claimed_source_id):
+        return claimed_source_id
+    return None
+
+
 def validate_mappings(
     facility: str,
     ids_name: str,
@@ -1653,15 +1668,34 @@ def validate_mappings(
 
     logger.info("Running programmatic validation")
 
-    # Assemble bindings + escalations + unmapped from Step 2 batches
+    # Assemble bindings + escalations + unmapped from Step 2 batches. Each
+    # batch was built for exactly one section assignment, so its bindings name
+    # that claimed source rather than the model's own text: a facility prefix
+    # the model mistyped would otherwise MATCH no SignalSource and drop the
+    # binding. A model entry naming a different source is refused outright.
     all_bindings: list[ValidatedSignalMapping] = []
     all_escalations: list[EscalationFlag] = []
     all_unmapped: list[UnmappedSignal] = []
-    for batch in field_batches:
+    for assignment, batch in zip(sections.assignments, field_batches, strict=False):
+        claimed_source = assignment.source_id
         for m in batch.mappings:
+            source_id = _claimed_source_id(m.source_id, claimed_source)
+            if source_id is None:
+                all_escalations.append(
+                    EscalationFlag(
+                        source_id=claimed_source,
+                        target_id=m.target_id,
+                        severity=EscalationSeverity.ERROR,
+                        reason=(
+                            f"model named source {m.source_id} for a batch built "
+                            f"for {claimed_source}; binding refused"
+                        ),
+                    )
+                )
+                continue
             all_bindings.append(
                 ValidatedSignalMapping(
-                    source_id=m.source_id,
+                    source_id=source_id,
                     source_property=m.source_property,
                     target_id=m.target_id,
                     transform_expression=m.transform_expression,

@@ -1,0 +1,53 @@
+<!-- A persisted binding names the source its batch was built for, taken from the
+     claim, not from the model's echoed prompt text. A mistyped facility prefix
+     persists against the claimed source; an entry naming a different source is
+     refused as an escalation naming both ids. A binding the graph still refuses
+     is recorded with its reason while its siblings and the next IDS persist, and
+     the run summary counts persisted bindings with a non-zero exit.
+     Code: imas_codex/ids/{mapping,models,workers}.py, imas_codex/cli/map.py
+     Gate and negative-control logs:
+     ~/.config/reckon/crew/runs/r-20261009T084505677636-binding-source-from-claim/ -->
+<section id="binding-source-from-claim" data-reckon="evidence">
+  <h2 id="binding-source-from-claim-heading">A binding names the claimed source, and one refused binding fails alone</h2>
+
+  <p id="binding-source-from-claim-intro">
+    The map stage echoed a source id from its own prompt text, which carries a
+    facility prefix the model can mistype — <code>jt-60-sa</code> for
+    <code>jt-60sa</code>. The binding was persisted against that text, so
+    <code>write_mapping_binding</code> matched no <code>SignalSource</code>,
+    wrote zero <code>MAPS_TO_IMAS</code> edges, and raised — aborting the whole
+    run while the summary still counted its bindings as validated.
+    <code>validate_mappings</code> in <code>imas_codex/ids/mapping.py</code> now
+    takes each binding's <code>source_id</code> from the claim
+    (<code>assignment.source_id</code>); a model entry whose source group key
+    differs from the claim is refused as an escalation naming both ids. A
+    binding the graph still refuses is recorded with its reason
+    (<code>write_mapping_bindings</code> in <code>imas_codex/ids/models.py</code>)
+    while its siblings and the next IDS persist, and the map run summary counts
+    persisted bindings and exits non-zero when any binding failed.
+  </p>
+
+  <h3 id="binding-source-from-claim-measure-heading">Measure — the control and the gate</h3>
+  <table id="binding-source-from-claim-measure-table">
+    <caption>Gate: <code>python -m pytest tests/ids -p no:cacheprovider</code></caption>
+    <thead>
+      <tr><th>Arm</th><th>Establishes</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr id="binding-source-from-claim-head-row">
+        <td>head</td>
+        <td>A mistyped-prefix entry persists against the claimed source; a
+            different-source entry is refused naming both ids; a refused binding
+            is recorded while its sibling and the next IDS persist; the summary
+            counts persisted bindings and the command exits 1</td>
+        <td>pass (576 passed, 5 skipped)</td>
+      </tr>
+      <tr id="binding-source-from-claim-neg-row">
+        <td>negative control</td>
+        <td>Take <code>source_id</code> from the model entry again; the
+            mistyped-prefix test then fails</td>
+        <td>2 failed (exit 1)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

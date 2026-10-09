@@ -368,7 +368,8 @@ def map_run(
     # -------------------------------------------------------------------
     # Summary
     # -------------------------------------------------------------------
-    _print_summary(all_results, log_print)
+    if _print_summary(all_results, log_print):
+        raise SystemExit(1)
 
 
 def _run_plain_mode(
@@ -426,8 +427,14 @@ def _run_plain_mode(
                     "bindings": ids_result.get(
                         "bindings", sum(len(b.mappings) for _, b in batches)
                     ),
+                    "persisted": ids_result.get(
+                        "persisted",
+                        0
+                        if not engine_state.persist
+                        else sum(len(b.mappings) for _, b in batches),
+                    ),
+                    "failed": ids_result.get("failed", 0),
                     "escalations": ids_result.get("escalations", 0),
-                    "persisted": engine_state.persist,
                 }
             )
 
@@ -578,8 +585,14 @@ def _run_rich_mode(
                     "bindings": ids_result.get(
                         "bindings", sum(len(b.mappings) for _, b in batches)
                     ),
+                    "persisted": ids_result.get(
+                        "persisted",
+                        0
+                        if not engine_state.persist
+                        else sum(len(b.mappings) for _, b in batches),
+                    ),
+                    "failed": ids_result.get("failed", 0),
                     "escalations": ids_result.get("escalations", 0),
-                    "persisted": engine_state.persist,
                 }
                 all_results.append(result)
 
@@ -642,26 +655,38 @@ def _print_result(result) -> None:
             click.echo(f"  - {gid}")
 
 
-def _print_summary(results: list[dict], log_print) -> None:
-    """Print summary across all mapped IDS."""
+def _print_summary(results: list[dict], log_print) -> int:
+    """Print summary across all mapped IDS.
+
+    The binding count is the number the graph persisted, not the number the
+    model validated, so the summary cannot claim a binding the graph refused.
+    Returns the number of bindings that failed to persist.
+    """
     if not results:
         log_print("[yellow]No IDS were successfully mapped.[/yellow]")
-        return
+        return 0
 
-    total_bindings = sum(r.get("bindings", 0) for r in results)
+    total_persisted = sum(r.get("persisted", 0) for r in results)
+    total_failed = sum(r.get("failed", 0) for r in results)
     total_escalations = sum(r.get("escalations", 0) for r in results)
 
     log_print("\n[bold]Mapping Summary[/bold]")
     log_print(f"  IDS mapped: {len(results)}")
-    log_print(f"  Total bindings: {total_bindings}")
+    log_print(f"  Bindings persisted: {total_persisted}")
+    if total_failed:
+        log_print(f"  Bindings failed: {total_failed}")
     log_print(f"  Total escalations: {total_escalations}")
 
     for r in results:
-        log_print(
-            f"    {r.get('ids_name', '?')}: "
-            f"{r.get('bindings', 0)} bindings, "
-            f"{r.get('escalations', 0)} escalations"
+        line = (
+            f"    {r.get('ids_name', '?')}: {r.get('persisted', 0)} bindings persisted"
         )
+        if r.get("failed", 0):
+            line += f", {r['failed']} failed"
+        line += f", {r.get('escalations', 0)} escalations"
+        log_print(line)
+
+    return total_failed
 
 
 # ---------------------------------------------------------------------------
