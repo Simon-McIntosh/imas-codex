@@ -723,7 +723,13 @@ def has_pending_enrich_work(
     scanner_types: list[str] | None = None,
     categories: list[str] | None = None,
 ) -> bool:
-    """Check if there are signals awaiting enrichment."""
+    """Check if there are signals awaiting enrichment.
+
+    A claimed row still counts. While its claim is fresh a worker is
+    enriching it, so the phase must not end under that batch: ending it
+    cancels the call and strands the claim. Once the claim is stale, the
+    claim query takes the row again.
+    """
     scope_params = get_scanner_scope_query_params(scanner_types)
     query = f"""
         MATCH (s:FacilitySignal {{facility_id: $facility}})
@@ -732,7 +738,6 @@ def has_pending_enrich_work(
           AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
           AND {build_category_predicate("s")}
           AND {build_enrich_claimable_predicate("s")}
-          AND s.claimed_at IS NULL
         RETURN count(s) > 0 AS has_work
     """
     try:
@@ -754,7 +759,11 @@ def has_pending_check_work(
     scanner_types: list[str] | None = None,
     categories: list[str] | None = None,
 ) -> bool:
-    """Check if there are enriched signals awaiting check."""
+    """Check if there are enriched signals awaiting check.
+
+    A claimed row still counts, for the reason ``has_pending_enrich_work``
+    gives: a fresh claim is a check in flight, and a stale one is work again.
+    """
     scope_params = get_scanner_scope_query_params(scanner_types)
     query = f"""
         MATCH (s:FacilitySignal {{facility_id: $facility}})
@@ -762,7 +771,6 @@ def has_pending_check_work(
         WHERE s.status = $enriched
           AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
           AND {build_category_predicate("s")}
-          AND s.claimed_at IS NULL
         RETURN count(s) > 0 AS has_work
     """
     try:
@@ -4028,7 +4036,11 @@ async def enrich_worker(
                 user_lines.append(chunk["text"])
                 user_lines.append("")
 
+        # The prompt numbers signals group by group, so its order differs from
+        # the claimed batch whenever groups interleave. prompt_order[n] is the
+        # batch position of prompt signal n + 1; results are matched through it.
         signal_index = 0
+        prompt_order: list[int] = []
         for group_key, indexed_signals in context_groups.items():
             # Add group-level context header
             if group_key.startswith("tdi:"):
@@ -4160,8 +4172,9 @@ async def enrich_worker(
                     user_lines.append("```")
 
             # Add individual signal entries
-            for _, signal in indexed_signals:
+            for batch_position, signal in indexed_signals:
                 signal_index += 1
+                prompt_order.append(batch_position)
                 user_lines.append(f"\n### Signal {signal_index}")
                 user_lines.append(f"accessor: {signal['accessor']}")
                 user_lines.append(f"name: {signal.get('name', 'unknown')}")
@@ -4347,32 +4360,38 @@ async def enrich_worker(
             batch_cost,
         )
 
-        # Match results back to signals by index (1-based signal_index)
+        # Match results back to signals through the prompt's own numbering:
+        # signal_index is 1-based in prompt order, not batch order. A repeated
+        # index is ignored after its first result, so one prompt signal can
+        # never write two batch rows.
         enriched = []
         underspecified = []
         matched_indices = set()
 
         for result in batch_result.results:
-            # signal_index is 1-based, list is 0-based
-            idx = result.signal_index - 1
-            if 0 <= idx < len(signals):
-                signal = signals[idx]
-                matched_indices.add(idx)
-                entry = {
-                    "id": signal["id"],
-                    "physics_domain": result.physics_domain.value,
-                    "description": result.description,
-                    "name": result.name,
-                    "diagnostic": result.diagnostic.value if result.diagnostic else "",
-                    "analysis_code": result.analysis_code,
-                    "keywords": result.keywords,
-                    "sign_convention": result.sign_convention,
-                    "context_quality": result.context_quality.value,
-                }
-                if result.context_quality == ContextQuality.low:
-                    underspecified.append(entry)
-                else:
-                    enriched.append(entry)
+            prompt_position = result.signal_index - 1
+            if not 0 <= prompt_position < len(prompt_order):
+                continue
+            idx = prompt_order[prompt_position]
+            if idx in matched_indices:
+                continue
+            signal = signals[idx]
+            matched_indices.add(idx)
+            entry = {
+                "id": signal["id"],
+                "physics_domain": result.physics_domain.value,
+                "description": result.description,
+                "name": result.name,
+                "diagnostic": result.diagnostic.value if result.diagnostic else "",
+                "analysis_code": result.analysis_code,
+                "keywords": result.keywords,
+                "sign_convention": result.sign_convention,
+                "context_quality": result.context_quality.value,
+            }
+            if result.context_quality == ContextQuality.low:
+                underspecified.append(entry)
+            else:
+                enriched.append(entry)
 
         # Release claims for unmatched signals
         for idx, signal in enumerate(signals):
