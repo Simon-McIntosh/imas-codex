@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms recorded under its manifest test_logs: the base arm baseline-path-enrich-corrected.log (revision 3dfed11251ac69946cdf92c222e5b09a50be8dc7) reports 4 failed / EXIT=1 and the after arm head-path-enrich.log (revision 3fb07d05e64e3ac623914682a6b1262397ae8de2) reports 4 passed / EXIT=0. I re-ran both arms independently: at head 3fb07d05 the four tests pass (4 passed, EXIT=0) and at base 3dfed112, with the head test file present and the two source files reverted, the same four tests fail (4 failed, EXIT=1). No test that passes at head fails at base, so the run added no failures. NOTE: the reviewed manifest's structured baseline_suite and after_suite fields are both empty, so the read-time derivation falls back to the free-text arms above (see finding).",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/paths/frontier.py:296",
+    "imas_codex/discovery/paths/progress.py:1247",
+    "imas_codex/discovery/paths/enrichment.py:603"
+  ],
+  "completed_at": "2026-10-09T06:31:58.789Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-09T06:17:54Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/paths/frontier.py",
+      "line": "296",
+      "severity": "follow-on",
+      "text": "follow-on: the operator-visible pending-enrich count is not covered by the set-aside exclusion. get_discovery_stats (frontier.py:260) computes enrichment_ready from (should_enrich=true OR scan_relevance>=minimum) AND (is_enriched NULL/false) with no coalesce(enrich_set_aside,false)=false clause; that value is assigned to state.pending_enrich at progress.py:1247 and rendered in the discovery progress panel (progress.py:762). So after this change the paths stage terminates correctly (has_pending_work is fixed) but the display still reports a nonzero enrich backlog from the set-aside paths -- the exact confusing symptom the plan describes, left on the display surface. frontier.py is outside this node's write paths, so it is a follow-on rather than a defect in this node."
+    },
+    {
+      "file": "imas_codex/discovery/paths/enrichment.py",
+      "line": "603",
+      "severity": "follow-on",
+      "text": "follow-on: get_paths_pending_enrichment (enrichment.py:584, inside this node's declared write scope) still selects paths with (is_enriched NULL/false AND (should_enrich=true OR (should_enrich IS NULL AND scan_relevance>=threshold))) and no set-aside exclusion, so a set-aside path is returned again here. It is reachable only through run_enrichment_pipeline (enrichment.py:618), which currently has no callers in the package, so the gap is latent rather than live; it should carry the same coalesce(enrich_set_aside,false)=false clause as parallel.py for consistency and to avoid the bug reappearing if that pipeline is re-wired."
+    },
+    {
+      "file": "imas_codex/discovery/paths/enrichment.py",
+      "line": "282",
+      "severity": "follow-on",
+      "text": "follow-on: the former timeout branch that recovered partial enrichment output was removed, not migrated. The two call sites (sync enrich_paths ~line 282 and async async_enrich_paths ~line 509) previously caught subprocess.TimeoutExpired and, when the exception carried partial stdout, parsed the completed JSONL lines and persisted them via _parse_enrich_output; a timeout with no partial output became a per-path ssh_timeout error. That branch is gone, and an unhandled timeout now flows to the generic handler where _host_unreachable(e) is True (TimeoutExpired), so the whole batch re-raises, the claims are reverted and the worker pauses. The executor does populate partial output (executor.py:1349 sets exc.output from the killed process's stdout), so a reachable-but-slow host now loses its already-completed partial results on every retry instead of persisting them, and _wait_for_reachable_host returns immediately when SSH is healthy, so such a host loops on backoff discarding partial work. This is a behaviour change beyond the plan's wording and is not covered by the added tests (the timeout case only asserts the pause)."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest leaves both structured gate-arm fields empty -- baseline_suite (line 21) and after_suite (line 22) carry no JSON -- so a reader deriving the added-failure set from the manifest's own machine-readable arms finds nothing and must fall back to the free-text test_logs. The arms exist as files (baseline-path-enrich-corrected.log, head-path-enrich.log) and I used them, so the run added no failures, but the empty fields are the defect the derivation contract is written to prevent."
+    },
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "39",
+      "severity": "follow-on",
+      "text": "follow-on: the unreachability classifier and its backoff still live in imas_codex/discovery/code/workers.py (_host_unreachable, _wait_for_reachable_host) and the paths stage imports them privately across the subsystem boundary. Plan section 63 names this exact state: the 2026-10-09 node may import them from the code scan, and a follow-on node moves them into a module both stages import and repoints both callers. The node correctly avoided a second copy, but the shared-owner move remains outstanding and should be dispatched."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read the single commit 3fb07d05e64e3ac623914682a6b1262397ae8de2 against base 3dfed11251ac69946cdf92c222e5b09a50be8dc7; three paths, imas_codex/discovery/paths/parallel.py (+24/-3), imas_codex/discovery/paths/enrichment.py (+8/-36), tests/discovery/test_path_enrich_failures.py (+126). Substance: enrichment.py re-raises on an unreachable host instead of turning it into per-path error results; parallel.py adds enrich_failures/enrich_set_aside with ENRICH_FAILURE_LIMIT=5 to mark_enrichment_complete, threads the set-aside exclusion into has_pending_work, _has_pending_enrich_work and claim_paths_for_enriching, and pauses the enrich_worker via the borrowed _wait_for_reachable_host on an unreachable SSH. Nothing outside the three declared paths changed.",
+    "done_when": "the plan names three checks: an unreachable host pauses without spending budget, a reachable failure is set aside at the limit with its reason, and the pending count then excludes it. test_unreachable_host_pauses_without_charging asserts waits==[1], no mark_enrichment_complete call and enrich_phase.done False; test_reachable_failure_sets_path_aside_with_reason drives five reachable failures and asserts the counter, the set-aside at attempt five and the recorded reason; test_set_aside_path_is_neither_pending_nor_claimable asserts has_pending_work False and an empty claim. All three pass at head (4 passed, EXIT=0) and all fail at base (4 failed, EXIT=1), so the gate does measure the done_when.",
+    "goal": "the plan asks that path enrichment bound its failures the way the code scan already does: unreachable host pauses with no budget spent, reachable error increments a per-path counter and sets the path aside at the limit with its reason, so the pending count drops and the paths stage terminates. The diff implements exactly that shape and the enriched-path retry loop that produced the JT-60SA non-termination is closed at all three reachable query sites. The plan's shared-owner requirement is explicitly deferred to a follow-on node and is recorded as such.",
+    "manifest": "read; status complete, commit 3fb07d05e, changed paths the three declared, a landing line, the three gate logs and a negative_control_log with a matching note. Its baseline_suite and after_suite fields are empty (see finding), and the head-related-gate.log header records revision 'working-tree-after-3dfed112...' rather than the committed head, so the 102-passed related gate was measured on the working tree.",
+    "reuse": "the node imported _host_unreachable and _wait_for_reachable_host from imas_codex/discovery/code/workers.py rather than writing a second copy, which is what the plan asks for pending the deferred move; the cost is a private cross-subsystem import that the follow-on node is to retire (see finding).",
+    "write_paths": "the diff against 3dfed112 is exactly imas_codex/discovery/paths/parallel.py, imas_codex/discovery/paths/enrichment.py and tests/discovery/test_path_enrich_failures.py, each inside the node's declared write paths and nothing else."
+  },
+  "justifications": {
+    "durability": "each of the three done-when behaviours is guarded by a test I confirmed reddens at base and greens at head: the unreachable pause test fails at base with waits==[] and asserts no persistence at head; the set-aside test fails at base with failures 0==1 and passes at head; the pending-count test fails at base with has_pending_work True and passes at head. The reviewed run's negative control (removing the per-path counter in a scratch copy) reddens the set-aside test with 0==1, so the guard fires. The residual weakness is that the two reachable-failure tests mock GraphClient with a string-matching PathGraph, so a Cypher-level regression (a renamed property or a syntax error) would not be caught by them; no -m graph test exercises mark_enrichment_complete's error branch, and the base-arm reproduction I ran is the strongest available evidence that the guard is not vacuous.",
+    "evidence": "the base arm (4 failed, EXIT=1 at 3dfed112) and the head arm (4 passed, EXIT=0 at 3fb07d05) are recorded and I reproduced both independently; the related gate (102 passed) is recorded but its header names the working tree rather than the committed head, and the new tests mock the graph rather than exercising the real Cypher, so the evidence is solid for the unit behaviour and thinner for the query correctness.",
+    "fit": "the change follows the code-scan idiom the plan names and reuses its classifier/backoff instead of duplicating them, and it introduces no plan, sprint or version label (ENRICH_FAILURE_LIMIT, enrich_failures, enrich_set_aside, unreachable_count are all mechanism-named). The two deductions are that it imports private helpers across the subsystem boundary (sanctioned pending the deferred move) and that it silently dropped the timeout partial-output recovery, a behaviour change the plan did not ask for and no test covers.",
+    "goal_fidelity": "parallel.py:1064-1098 implements the increment-and-set-aside and the succeed-resets branch, parallel.py:307/425/852 thread the exclusion into the three reachable pending/claim queries, and enrichment.py re-raises on an unreachable host so the worker pauses; every plan done-when is delivered and tested. The only part of section 63 not done is the shared-owner move, which the plan itself defers to a follow-on node for the 2026-10-09 dispatch.",
+    "reuse": "the node reused the existing _host_unreachable and _wait_for_reachable_host rather than writing a second copy, which is the non-duplicating choice the plan requires; the remaining cost is the private cross-subsystem import that the deferred follow-on node is to replace with a shared module, so the reuse is correct but not yet at its intended resting point.",
+    "scope_discipline": "the diff against 3dfed112 is the three declared paths and nothing else; no shared index, sprint state or other plan files were touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of run r-20261009T060411496096-path-enrich-retry-budget (node path-enrich-retry-budget, plan imas-codex:jt60sa-discovery-completion section 63; goal: make a failing path enrichment end instead of retrying forever, following the code-scan rule).\n\nVERDICT goal: the plan asks that path enrichment bound its failures the way the code scan already does: an unreachable host pauses with no budget spent, a reachable error increments a per-path counter and sets the path aside at the limit with its reason, so the pending count drops and the paths stage terminates. Committed at 3fb07d05e64e3ac623914682a6b1262397ae8de2 against base 3dfed11251ac69946cdf92c222e5b09a50be8dc7, enrichment.py re-raises on an unreachable host instead of turning it into per-path error results, and parallel.py adds enrich_failures/enrich_set_aside (ENRICH_FAILURE_LIMIT=5) plus the set-aside exclusion in the three reachable pending/claim queries, so the retry loop that produced the JT-60SA non-termination is closed at every reachable site. The shared-owner move of the classifier and backoff is explicitly deferred by the plan to a follow-on node.\nVERDICT done_when: the three named checks pass. test_unreachable_host_pauses_without_charging asserts waits==[1] with no persistence and enrich_phase.done False; test_reachable_failure_sets_path_aside_with_reason drives five reachable failures and asserts the counter, the set-aside at attempt five and the recorded reason; test_set_aside_path_is_neither_pending_nor_claimable asserts has_pending_work False and an empty claim. I re-ran the head (4 passed, EXIT=0) and reproduced the base arm independently (4 failed, EXIT=1).\nVERDICT write_paths: the diff is exactly parallel.py, enrichment.py and tests/discovery/test_path_enrich_failures.py, all inside the node's declared write paths.\nVERDICT manifest: read; status complete, the three gate logs and a negative control present, but baseline_suite and after_suite are empty and the related gate header names the working tree rather than the committed head.\nVERDICT diff: read commit by commit against 3dfed112; one commit, three paths, all inside scope.\n\nSCORE goal_fidelity: 17\nSCORE evidence: 15\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 15\nSCORE reuse: 16\n\nFINDING imas_codex/discovery/paths/frontier.py:296 follow-on: the operator-visible enrich backlog (enrichment_ready, consumed as state.pending_enrich at progress.py:1247 and shown in the progress panel) has no set-aside clause, so the display keeps reporting set-aside paths as pending after the stage terminates.\nFINDING imas_codex/discovery/paths/enrichment.py:603 follow-on: get_paths_pending_enrichment, inside the node's scope, still lacks the set-aside exclusion; reachable only through the caller-less run_enrichment_pipeline, so latent.\nFINDING imas_codex/discovery/paths/enrichment.py:282 follow-on: the timeout branch that recovered partial JSONL output was removed rather than migrated; an unhandled timeout is now classified unreachable and re-raised, so partial results from a reachable-but-slow host are discarded on every retry.\nFINDING manifest.md:21 follow-on: baseline_suite and after_suite are empty, so the machine-readable added-failure derivation finds no arm and must fall back to the free-text logs.\nFINDING imas_codex/discovery/paths/parallel.py:39 follow-on: the classifier and backoff remain private helpers of the code scan imported across the subsystem boundary; the plan defers the shared-module move to a follow-on node.\n",
+  "review_run_id": "r-20261009T061743575967-review-of-path-enrich-retry-budget",
+  "reviewed_base_sha": "3dfed11251ac69946cdf92c222e5b09a50be8dc7",
+  "reviewed_head_sha": "3fb07d05e64e3ac623914682a6b1262397ae8de2",
+  "reviewed_run_id": "r-20261009T060411496096-path-enrich-retry-budget",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T06:24:00+00:00",
+  "total": 99
+}
