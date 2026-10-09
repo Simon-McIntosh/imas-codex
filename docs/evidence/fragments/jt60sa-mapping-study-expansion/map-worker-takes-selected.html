@@ -1,0 +1,118 @@
+<section>
+  <h2 id="map-worker-takes-selected">The map worker maps every source that held a selected unbound home</h2>
+  <p id="map-worker-takes-selected-question">
+    The commit <code>19dd9128c</code> ("hand selected sources from assignment to
+    mapping") releases the shared source claim once target selection is durable
+    and keeps the mapping worker polling while selected unhandled homes remain,
+    so an assignment claim cannot make the mapping pass exit early. Its diff is
+    applied onto current main (<code>02a98eb0e</code>) and committed as
+    <code>e94cedbd8</code>; the applied change is proven by
+    <code>2</code> unit tests and by a live
+    <code>imas-codex imas map run jt-60sa -i magnetics</code> on the fleet node.
+  </p>
+
+  <h3 id="map-worker-takes-selected-change">Change applied</h3>
+  <p id="map-worker-takes-selected-change-body">
+    <code>git show 19dd9128c | git apply</code> applied cleanly onto
+    <code>02a98eb0e</code> (the commit is not an ancestor of main). The change
+    touches exactly this node's two source paths:
+    <code>imas_codex/ids/workers.py</code> (release the claim in
+    <code>assign_worker</code>; extend <code>has_pending_mapping_work</code> with
+    an IDS filter and a handled-source exclusion; require
+    <code>assign_phase.done and not pending</code> before <code>map_worker</code>
+    exits; probe each target IDS in the has-work function) and the new test file
+    <code>tests/ids/test_map_worker_selected_homes.py</code>.
+  </p>
+
+  <h3 id="map-worker-takes-selected-tests">Unit gate</h3>
+  <table id="map-worker-takes-selected-test-counts">
+    <caption>Gate commands and results at <code>e94cedbd8</code> in the node worktree</caption>
+    <thead><tr><th>command</th><th>result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>pytest tests/ids/test_map_worker_selected_homes.py</code></td>
+        <td>2 passed</td>
+      </tr>
+      <tr>
+        <td><code>pytest tests/ids/</code> (default markers)</td>
+        <td>562 passed, 5 skipped, 4 deselected in 41.38s</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="map-worker-takes-selected-negative-control">
+    Negative control (declared mutation: revert the claim release in
+    <code>workers.py</code>). Commenting out the
+    <code>release_mapping_claim(source_id)</code> call in <code>assign_worker</code>
+    and re-running the selected-homes test makes
+    <code>test_assignment_releases_selected_source_for_mapping</code> fail
+    (<code>1 failed, 1 passed</code>, <code>EXIT=1</code>); the head arm passes
+    both. So the test fires on the guarded thing and is not vacuously green.
+  </p>
+
+  <h3 id="map-worker-takes-selected-live">Live run jt-60sa magnetics</h3>
+  <p id="map-worker-takes-selected-live-body">
+    Two sources held a selected (<code>MAPPING_CANDIDATE.route = true</code>)
+    unbound <code>magnetics</code> home before the run; their pre-existing
+    bindings were removed to create that state (the deleted edges are recorded
+    in <code>logs/preclear_bindings.json</code>). Three further sources carry a
+    <code>magnetics</code> candidate whose route is <code>false</code> and
+    hold no selected home, so they are the negative control. The run was made in
+    place on the fleet node (job <code>1281970</code>), local LLM seat
+    <code>deepseek-v4.1-flash</code>, and wrote bindings for every pre-selected
+    source while leaving the no-selected-target sources unbound.
+  </p>
+  <table id="map-worker-takes-selected-source-counts">
+    <caption>Binding counts before and after <code>imas-codex imas map run jt-60sa -i magnetics</code></caption>
+    <thead>
+      <tr><th>source</th><th>selected magnetics home before</th><th>bindings before</th><th>bindings after</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)</code></td>
+        <td>yes</td><td>0</td><td>4</td>
+      </tr>
+      <tr>
+        <td><code>jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)</code></td>
+        <td>yes</td><td>0</td><td>4</td>
+      </tr>
+      <tr>
+        <td><code>jt-60sa:eddbreadOne('E101173', 'DCSV', 'IpExStrtS', None, 0, 0)</code></td>
+        <td>no</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td><code>jt-60sa:eddbreadTime('E101173', 'DCSV', 'ppEFCC10FB', t1, t2)</code></td>
+        <td>no</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td><code>jt-60sa:eddbreadTime('E101173', 'DCSV', 'ppINPUT', t1, t2)</code></td>
+        <td>no</td><td>0</td><td>0</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="map-worker-takes-selected-summary">
+    Run summary line: <code>magnetics: 8 bindings, 2 escalations</code> (the two
+    pre-selected sources are mapped; each holds a binding into
+    <code>magnetics/b_field_pol_probe/field</code>). Every source that held a
+    selected magnetics target before the run is bound after it
+    (<code>2/2</code>); every source with no selected target is left unbound
+    (<code>0/3</code>).
+  </p>
+  <p id="map-worker-takes-selected-live-caveat">
+    What the live run does not isolate. A paired run on the pre-fix
+    <code>workers.py</code> (the main-tree file at <code>e94cedbd8^</code>) also
+    wrote bindings (<code>magnetics: 8 bindings, 1 escalations</code>), because
+    the two pre-selected sources were already claimable and the mapping pass
+    claimed them before any assignment claim existed. The defect the commit
+    fixes — a mapping pass that exits while an in-run assignment still holds the
+    claim — requires a source the assignment pass selects during the run, i.e. an
+    escalated source with <code>mapping_disposition IS NULL</code> and a
+    <code>magnetics</code> candidate. On jt-60sa all four escalated sources with a
+    <code>magnetics</code> candidate already carry a disposition
+    (<code>no_imas_equivalent</code> / <code>facility_specific</code>), so the
+    count of claimable escalated magnetics sources is <code>0</code> and the
+    in-run release path is not reproducible on this graph without manufacturing
+    state. The unit gate and its declared mutation isolate the fix; the live run
+    confirms the post-fix pipeline maps pre-selected sources and leaves
+    no-selected sources unbound.
+  </p>
+</section>
