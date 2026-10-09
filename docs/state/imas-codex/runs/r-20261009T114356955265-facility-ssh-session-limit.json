@@ -1,0 +1,1762 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "5ec8b0eed5637fffa6990f3194150bf52b01cad7",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 16590976,
+      "cached_input_tokens_cumulative": 16590976,
+      "input_tokens": 16777567,
+      "input_tokens_cumulative": 16777567,
+      "output_tokens": 51361,
+      "output_tokens_cumulative": 51361,
+      "reasoning_output_tokens": 22881,
+      "reasoning_output_tokens_cumulative": 22881
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 531,
+    "files": 7,
+    "removed": 73
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "test_engine_import_does_not_load_cli",
+        "path": "tests/discovery/test_engine_import_order.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 649
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 638,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 649
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 630,
+        "name": "run_subprocess",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 644
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "test_engine_import_does_not_load_cli",
+        "path": "tests/discovery/test_engine_import_order.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 685
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 638,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 685
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 671,
+        "name": "_cache_remote_tools",
+        "path": "imas_codex/remote/ssh_worker.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 191,
+        "name": "test_pool_bridge_executes_a_command_over_its_worker",
+        "path": "tests/remote/test_ssh_session_limit.py"
+      },
+      "run_function": {
+        "line": 122,
+        "name": "test_open_pool_owns_one_session_and_handles_per_call_scripts",
+        "path": "tests/remote/test_ssh_session_limit.py"
+      },
+      "window_line": 143
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "test_open_pool_owns_one_session_and_handles_per_call_scripts",
+        "path": "tests/remote/test_ssh_session_limit.py"
+      },
+      "run_function": {
+        "line": 191,
+        "name": "test_pool_bridge_executes_a_command_over_its_worker",
+        "path": "tests/remote/test_ssh_session_limit.py"
+      },
+      "window_line": 206
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "96bd503af73473aff875b2405983753cc2304ef5",
+    "4120090ea52625326668ff53c6c22fec174b798e",
+    "a0bbbfc4606bf0e57850f3083f693589eefe9c2e"
+  ],
+  "completed_at": "2026-10-09T12:06:20Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-09T11:44:15Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "echo base: $(grep -cE '^(FAILED|ERROR) ' /home/ITER/mcintos/.cache/imas-codex-gates/ssh-limit-and-set-aside/m6064-base.log) head: $(grep -cE '^(FAILED|ERROR) ' /home/ITER/mcintos/.cache/imas-codex-gates/ssh-limit-and-set-aside/m6064-head.log); added=$(comm -13 <(grep -E '^(FAILED|ERROR) ' /home/ITER/mcintos/.cache/imas-codex-gates/ssh-limit-and-set-aside/m6064-base.log | sed 's/ - .*//' | sort -u) <(grep -E '^(FAILED|ERROR) ' /home/ITER/mcintos/.cache/imas-codex-gates/ssh-limit-and-set-aside/m6064-head.log | sed 's/ - .*//' | sort -u)); echo added: [$added]; tail -1 /home/ITER/mcintos/.cache/imas-codex-gates/ssh-limit-and-set-aside/m6064-head.log; test -z \"$added\"",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.864,
+    "at_dispatch": 0.833,
+    "plan": "jt60sa-discovery-completion",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.189293361884368,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-11T15:35:00Z, which is after this node's 3600s horizon ending 2026-10-09T12:43:59.042967+00:00",
+    "horizon_ends_at": "2026-10-09T12:43:59.042967+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-09T11:43:58Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-11T15:35:00Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 408660,
+    "state": "quiet",
+    "utilisation_pct": 71.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-09T11:43:58Z",
+    "read_at": "2026-10-09T11:43:59Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 71.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-09T12:06:20Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/manifest.md",
+  "member": "disposable-r-20261009T114356955265-facility-ssh-session-limit",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/remote/test_ssh_session_limit.py::test_limited_host_serializes_calls_and_unlimited_host_overlaps"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/remote/test_ssh_session_limit.py::test_limited_host_serializes_calls_and_unlimited_host_overlaps"
+    ],
+    "declaration": "removing the per-host bound from the per-call path makes the no-overlap test fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/negative-control.log",
+    "test_paths": [
+      "tests/remote/test_ssh_session_limit.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "facility-ssh-session-limit",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1633,
+          "cached_input_tokens": 776882,
+          "input_tokens": 778517,
+          "output_tokens": 1814,
+          "reasoning_output_tokens": 530,
+          "total_tokens": 780331,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "tests show concurrent remote calls to a host limited to 1 never overlap while an unlimited host's calls do, the async and threaded per-call paths share the bound, an open SSHWorkerPool for a limited host sizes itself to the limit and per-call scripts run through it instead of opening another session, and the JT-60SA facility config loads with ssh_max_sessions 1",
+    "estimated_hours": null,
+    "goal": "Bound concurrent SSH sessions per facility host through one owner beside the worker pool",
+    "id": "facility-ssh-session-limit",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-09T11:43:58Z",
+      "read_at": "2026-10-09T11:43:59Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 71.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114356955265-facility-ssh-session-limit/manifest.md",
+    "negative_control": "removing the per-host bound from the per-call path makes the no-overlap test fail",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§60",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/remote/executor.py",
+      "imas_codex/remote/ssh_worker.py",
+      "imas_codex/remote/tools.py",
+      "imas_codex/schemas/facility_config.yaml",
+      "imas_codex/config/facilities/jt-60sa.yaml",
+      "tests/remote/test_ssh_session_limit.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/facility-ssh-session-limit.html",
+      "docs/figures/jt60sa-discovery-completion/facility-ssh-session-limit"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.1892404486436745,
+      "derived": 0.3567447333086971,
+      "drain_hours": 168.0,
+      "effective_limit": 0.3567447333086971,
+      "elapsed_fraction": 0.3243133939169973,
+      "elapsed_hours": 54.484650178055546,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-09T11:44:03+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.29000000000000004,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.71,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.796478,
+      "decided_by": "window",
+      "margin": -0.058977999999999975,
+      "name": "facility-ssh-session-limit",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "split",
+      "window_fill": 0.71
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.740641,
+        "observed_at": "2026-10-09T11:44:03+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.71,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "facility-ssh-session-limit",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-09T11:44:03.740641+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.9,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 364.395,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1320.526,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1517950.899181,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 109872,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1517950.899181,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 109872,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1517950.899181,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 109872,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 109872,
+          "headroom_pct": 52.3,
+          "peak_utilisation_p50_pct": 60.8,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 470,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 31,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 20
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 1515.071181,
+        "budget_reason": null,
+        "burn_multiple": 2.1890470955370023,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 109872,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.729603632164352,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 6,
+          "passed": 19,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3567762436871694,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 71.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 1515.071181,
+        "budget_reason": null,
+        "burn_multiple": 2.1890470955370023,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 109872,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.729603632164352,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3567762436871694,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 71.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 1515.071181,
+        "budget_reason": null,
+        "burn_multiple": 2.1890470955370023,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 109872,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.729603632164352,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3567762436871694,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 71.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0,
+      "claude:claude-sonnet-5-5": 0,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.08,
+      "hold": 0.01,
+      "local:deepseek-v4.1-flash": 0.91
+    },
+    "rendered_token_estimate": 1847,
+    "usage": {
+      "cost": 0.000223692,
+      "input_tokens": 5326,
+      "output_tokens": 150
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.833,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a0bbbfc4606bf0e57850f3083f693589eefe9c2e",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "5ec8b0eed5637fffa6990f3194150bf52b01cad7",
+    "reviewed_head_sha": "a0bbbfc4606bf0e57850f3083f693589eefe9c2e",
+    "scores": {
+      "durability": 17,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261009T114356955265-facility-ssh-session-limit",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§60",
+  "session": "jt60sa-20261005",
+  "session_harness": "codex",
+  "session_id": "01a1207a-87c2-75e1-8b93-b137add547da",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 16590976,
+    "cumulative_input_tokens": 33368543,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 74242
+  },
+  "time_budget": "60m",
+  "tool_steps": 205.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1325,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-09T12:06:24Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-09T11:44:21Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261009T114356955265-facility-ssh-session-limit",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 532,
+    "worker_pid": 3849968
+  },
+  "worker_seconds": 1325,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
