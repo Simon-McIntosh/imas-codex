@@ -42,6 +42,7 @@ from imas_codex.remote.executor import (
     run_python_script as _executor_run_python_script,
     run_script_via_stdin,
 )
+from imas_codex.remote.ssh_worker import configure_host_session_limit
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +113,10 @@ def _resolve_ssh_host(facility: str | None) -> str | None:
         nice_level = config.get("nice_level")
         if nice_level is not None:
             configure_host_nice(ssh_host, nice_level)
+
+        session_limit = config.get("ssh_max_sessions")
+        if session_limit is not None:
+            configure_host_session_limit(ssh_host, session_limit)
 
         return ssh_host
     except ValueError:
