@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="generated-map-handoff">
+  <meta name="plan-title" content="Generated Map Hand-off">
+  <meta name="plan-summary" content="Export generated mappings as one draft hand-off document per facility for imas-ambix, never promote a map by default, and name the map commands by what they do">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="3.75">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="standard">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S17">
+  <meta name="plan-tags" content="jt-60sa">
+  <meta name="plan-blocks" content="imas-ambix:jt60sa-tokamap-from-generated-maps">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;generated-map-handoff#s1&quot;], &quot;s3&quot;: [&quot;generated-map-handoff#s1&quot;, &quot;generated-map-handoff#s2&quot;], &quot;s4&quot;: [&quot;generated-map-handoff#s1&quot;, &quot;jt60sa-imas-maps#s12&quot;], &quot;s5&quot;: [&quot;generated-map-handoff#s4&quot;]}">
+  <meta name="plan-informs" content="jt60sa-imas-maps">
+  <title>Generated Map Hand-off | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-09">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">imas-codex generates, imas-ambix validates and writes</p>
+      <h1>Generated Map Hand-off</h1>
+      <p class="lead">
+        The lead asked on 2026-10-09 for a working prototype of the whole chain, from discovery to a tokamap
+        directory. The tokamap must carry both the machine description and the signal mappings, with the signal
+        mappings at draft. The work is split between two repositories, and each runs in its own session.
+      </p>
+      <ul>
+        <li><strong>imas-codex</strong> discovers signals, judges DD candidates, and generates mappings from facility signals to Data Dictionary paths.</li>
+        <li><strong>imas-ambix</strong> owns the machine description, which is its catalogue built from the SELENE deck. It resolves each draft signal to its probe or coil index, checks rules against data, and writes the tokamap directory and the IDS.</li>
+      </ul>
+      <p class="lead">
+        This plan builds the imas-codex half. imas-ambix's plan
+        <code>imas-ambix:jt60sa-tokamap-from-generated-maps</code> builds the other half against the same hand-off
+        format. The two sessions coordinate by message.
+      </p>
+      <p class="lead">
+        The lead also ruled that a map is never promoted by default without a validation step. Today,
+        <code>imas-codex imas map run</code> promotes to <code>active</code> unless <code>--no-activate</code> is
+        given. The discover sequence's opt-in mapping stage calls the same command with
+        <code>no_activate=False</code> (<code>imas_codex/cli/discover/sequence.py</code>). §2 reverses both.
+      </p>
+      <p class="lead">
+        The command names are confusing, and §3 fixes them.
+      </p>
+      <ul>
+        <li><code>imas-codex discover map</code> does not map anything: it is the candidates stage, which judges DD candidates. The sequence already calls it <code>candidates</code>.</li>
+        <li>Mapping generation lives under <code>imas-codex imas map</code>. The <code>imas</code> group is otherwise the Data Dictionary group, and <code>map</code> was attached to it in March (<code>9b93c7790</code>).</li>
+      </ul>
+      <p class="lead">
+        Mapping is the end of discovery, but managing a mapping record is its own lifecycle. So
+        <code>discover candidates</code> judges candidates, and a top-level <code>imas-codex map</code> group owns
+        <code>run</code>, <code>status</code>, <code>show</code>, <code>validate</code>, <code>activate</code>,
+        <code>clear</code> and the new <code>export</code>. The <code>imas</code> group keeps only the Data
+        Dictionary.
+      </p>
+    </header>
+
+    <h3>The hand-off format</h3>
+    <p>
+      There is one JSON document per facility. Both sessions build to this definition. Its top-level keys are:
+    </p>
+    <ul>
+      <li><code>format</code>, which is <code>"imas-codex-mapping-handoff"</code>;</li>
+      <li><code>format_version</code>, which is <code>1</code>;</li>
+      <li><code>facility</code>;</li>
+      <li><code>dd_version</code>;</li>
+      <li><code>exported_at</code>, in UTC ISO 8601;</li>
+      <li><code>ids</code>, a list.</li>
+    </ul>
+    <p>
+      Each <code>ids</code> entry has <code>ids_name</code>, <code>mapping_id</code>, <code>status</code> (the
+      IMASMapping status, for example <code>generated</code>), <code>signals</code> and <code>unexpanded</code>.
+      Each <code>signals</code> row is one facility signal, not one signal source, and carries these keys:
+    </p>
+    <ul>
+      <li><code>signal_id</code></li>
+      <li><code>source_id</code></li>
+      <li><code>data_source</code>, for example <code>edas</code></li>
+      <li><code>source_group</code>, for example <code>MDAC</code></li>
+      <li><code>source_array</code>, for example <code>magPbTC10</code></li>
+      <li><code>member_identifier</code>, the segment that varies between members of the source</li>
+      <li><code>target_path</code>, the DD path with no array index, for example <code>magnetics/b_field_pol_probe/field/data</code></li>
+      <li><code>transform_expression</code></li>
+      <li><code>source_units</code></li>
+      <li><code>target_units</code></li>
+      <li><code>cocos_label</code></li>
+      <li><code>confidence</code></li>
+      <li><code>evidence</code></li>
+    </ul>
+    <p>
+      Each <code>unexpanded</code> row carries <code>source_id</code>, <code>target_path</code> and
+      <code>reason</code>. It records a binding whose source could not be expanded to member signals, or whose
+      member lacks a field above.
+    </p>
+    <p>
+      A key whose value the graph does not hold is written as <code>null</code>, never guessed. The document
+      assigns no array index: imas-ambix resolves each index from its machine description.
+    </p>
+
+    <h2 id="s1">§1 — Export generated mappings as a hand-off document</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Add a builder in a new module, <code>imas_codex/ids/handoff.py</code>. It reads the graph and returns the
+      document defined above. It extends the reads that <code>search_existing_mappings</code> in
+      <code>imas_codex/ids/tools.py</code> already makes, expanding each <code>SignalSource</code> to its member
+      <code>FacilitySignal</code> rows. Expose it as an <code>export</code> command in
+      <code>imas_codex/cli/map.py</code>:
+    </p>
+    <pre>imas-codex imas map export FACILITY -i IDS ... --out FILE</pre>
+    <p>
+      §3 moves that command to <code>imas-codex map export</code>. The export includes mappings at any status and
+      writes each one's status, so a <code>generated</code> mapping is visibly a draft.
+    </p>
+    <p>
+      Commit one example document as <code>tests/fixtures/mapping_handoff_example.json</code>. imas-ambix's reader
+      test uses it as its contract fixture.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-handoff-export</code>, role implement, 1.0 h. Write paths:
+      <code>imas_codex/ids/handoff.py</code>, <code>imas_codex/cli/map.py</code>,
+      <code>tests/ids/test_mapping_handoff.py</code>, <code>tests/fixtures/mapping_handoff_example.json</code>,
+      and <code>docs/evidence/fragments/generated-map-handoff/mapping-handoff-export.html</code>.
+      <strong>Done when</strong> all of the following hold:
+    </p>
+    <ul>
+      <li>a mocked-graph test builds a document with expanded and unexpanded rows and checks every key in the format;</li>
+      <li>a test shows that a missing graph field is written as <code>null</code>;</li>
+      <li>the fixture is valid against the same check;</li>
+      <li>the fragment quotes the command's help.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Maps stay generated until validated</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>map run</code> persists at <code>generated</code> by default, and <code>--no-activate</code> is removed.
+      Promotion is only <code>map activate</code>, which already admits only <code>generated</code> or
+      <code>validated</code> mappings. It must refuse a mapping that has not passed <code>map validate</code>. The
+      discover sequence's mapping stage stops passing <code>no_activate=False</code>.
+    </p>
+    <p>
+      <strong>Node</strong> <code>maps-never-promote-by-default</code>, role implement, 0.5 h. Write paths:
+      <code>imas_codex/cli/map.py</code>, <code>imas_codex/cli/discover/sequence.py</code>, and their tests under
+      <code>tests/cli/</code>. <strong>Done when</strong> all of the following hold:
+    </p>
+    <ul>
+      <li>a test shows that <code>map run</code> leaves a mapping at <code>generated</code>;</li>
+      <li>a test shows that <code>map activate</code> refuses an unvalidated mapping and promotes a validated one;</li>
+      <li>a test shows that the sequence's mapping stage leaves its mappings at <code>generated</code>.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Name the map commands by what they do</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Mount <code>map_cmd</code> on the top-level command group in <code>imas_codex/cli/__init__.py</code>, and
+      remove it from <code>imas</code> in <code>imas_codex/cli/imas_dd.py</code>. Rename the click command
+      <code>discover map</code> to <code>discover candidates</code>, together with its domain alias in
+      <code>imas_codex/cli/discover/__init__.py</code>. This is a greenfield project, so no alias for the old names
+      is kept.
+    </p>
+    <p>
+      Update every live command reference in <code>AGENTS.md</code> files and <code>agents/</code>. Plan history
+      keeps its old spelling.
+    </p>
+    <p>
+      <strong>Node</strong> <code>map-command-names</code>, role implement, 0.5 h. Write paths:
+      <code>imas_codex/cli/__init__.py</code>, <code>imas_codex/cli/imas_dd.py</code>,
+      <code>imas_codex/cli/discover/__init__.py</code>, <code>imas_codex/cli/discover/map.py</code>, the CLI tests
+      that invoke these names, <code>imas_codex/cli/AGENTS.md</code> and <code>agents/</code>.
+      <strong>Done when</strong> all of the following hold:
+    </p>
+    <ul>
+      <li><code>imas-codex map --help</code> lists run, status, show, validate, activate, clear and export;</li>
+      <li><code>imas-codex imas --help</code> no longer lists map;</li>
+      <li><code>imas-codex discover candidates --help</code> resolves;</li>
+      <li>a search of live docs finds no <code>imas map</code> or <code>discover map</code> command.</li>
+    </ul>
+    <p>
+      §3 runs after §1 and §2 land, because those two edit <code>imas_codex/cli/map.py</code>.
+    </p>
+
+    <h2 id="s4">§4 — Hand JT-60SA's draft maps to imas-ambix</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      After <code>jt60sa-imas-maps</code> §12 has written the JT-60SA <code>magnetics</code> and
+      <code>pf_active</code> mappings at <code>generated</code>, run the §1 export for both IDSs. Write the result to
+      <code>/work/projects/imas_gpu/jt60sa/handoff/jt-60sa-mapping-handoff.json</code>. That is data and is not
+      committed.
+    </p>
+    <p>
+      <strong>Node</strong> <code>jt60sa-handoff-export</code>, role test, 0.5 h, with live graph access through
+      the linked <code>.env</code>. Write path:
+      <code>docs/evidence/fragments/generated-map-handoff/jt60sa-handoff-export.html</code>.
+      <strong>Done when</strong> the fragment gives all of the following:
+    </p>
+    <ul>
+      <li>the document's path and size;</li>
+      <li>the status of each mapping;</li>
+      <li>the expanded and unexpanded counts per IDS, with the reason for every unexpanded row;</li>
+      <li>three quoted signal rows, one pickup probe and two PF coil currents.</li>
+    </ul>
+    <p>
+      The coordinator then messages the imas-ambix session that the document exists.
+    </p>
+
+    <h2 id="s5">§5 — Research report: the discovery and mapping pipeline</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Write <code>docs/research/discovery-to-mapping-pipeline.html</code>. It is a research document with
+      <code>plan-evidence-for</code> set to this plan. It is the imas-codex chapter of the report that imas-ambix's
+      <code>jt60sa-tokamap-from-generated-maps</code> §4 writes, and that report links to it and may embed its
+      figures. It is meant for the lead to present. It covers:
+    </p>
+    <ul>
+      <li>how discovery turns a facility into signals with context: paths, code, documents, wiki, then signals scanned, enriched and checked;</li>
+      <li>how the candidates stage judges Data Dictionary targets;</li>
+      <li>how a mapping is generated, and why it stays at <code>generated</code> until validated;</li>
+      <li>what the hand-off carries and what it leaves to imas-ambix.</li>
+    </ul>
+    <p>
+      The figures go under <code>docs/figures/discovery-to-mapping/</code>, one SVG each, and follow the data-ink
+      rules.
+    </p>
+    <ul>
+      <li><strong>The pipeline.</strong> A flow chart of <code>imas-codex discover</code>'s stages in dependency order,
+      ending in the hand-off export. Label each stage with its JT-60SA count, read from the live graph with bounded,
+      indexed queries: paths, code files, documents, wiki pages, signals by status, sources with a candidate route,
+      and mappings and bindings written.</li>
+      <li><strong>The mapping lifecycle.</strong> <code>generated</code>, then <code>validated</code>, then
+      <code>active</code>, with the command that moves each step and the refusal §2 adds.</li>
+      <li><strong>Coloured JSON renders for presentation.</strong> This is the lead's explicit request, so these render
+      text as images: syntax-coloured with <code>pygments</code>, using the same colour theme as imas-ambix's
+      renders.
+        <ul>
+          <li>Show one hand-off row each for a pickup probe, a PF coil current and one other system, taken from §4's JT-60SA document.</li>
+          <li>Set each beside the graph record it came from: the <code>SignalSource</code>, its <code>MAPS_TO_IMAS</code> edge properties and the <code>IMASNode</code>.</li>
+          <li>Under each render, give the same excerpt as selectable text in a <code>&lt;pre&gt;</code>.</li>
+        </ul>
+      </li>
+    </ul>
+    <p>
+      Also write a PNG at twice the SVG's size for each render and chart, to drop into slides. Put them in
+      <code>/work/projects/imas_gpu/jt60sa/presentation/</code>, not beside the SVGs.
+    </p>
+    <p>
+      <strong>Node</strong> <code>discovery-to-mapping-report</code>, role implement, 1.25 h, with live graph access
+      through the linked <code>.env</code>, run on a compute partition. Write paths:
+      <code>docs/research/discovery-to-mapping-pipeline.html</code>, <code>docs/figures/discovery-to-mapping</code>,
+      and <code>scripts/figures_discovery_to_mapping.py</code>. <strong>Done when</strong> all of the following
+      hold:
+    </p>
+    <ul>
+      <li><code>reckon audit-doc</code> passes on the report;</li>
+      <li>every figure is generated by the script;</li>
+      <li>each count in the pipeline chart is printed with the query that produced it;</li>
+      <li>the PNG set is listed with its sizes.</li>
+    </ul>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-gmh-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build generated-map-handoff">
+    <h4 class="r-fu-title">Build the hand-off export, then hand JT-60SA's draft maps to imas-ambix</h4>
+    <div class="r-fu-body"><p>§1 is ready now. §2 follows §1. §3 follows both. §4 waits on <code>jt60sa-imas-maps</code> §12. §5, the report, follows §4.</p></div>
+    <pre class="r-fu-prompt">/reckon-build generated-map-handoff</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+</section>
+</main>
+</body>
+</html>
