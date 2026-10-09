@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc">
 <meta name="plan-impl" content="0.0714">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -362,6 +362,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-09T05:50:00Z">
     <div class="r-comment-body"><p>§7 landed: hand-off rows carry <code>cocos_label</code> and <code>cocos_label_source</code> from the target or its nearest labelled ancestor. Time coordinates and unlabelled targets carry <code>none</code>. Merged at <code>e48572d1b</code> and <code>d8a9227fc</code>; 35 tests pass on the merged head. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s7">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261009T051656606159-handoff-cocos-label" data-who="reckon-build" data-when="2026-10-09T05:47:52.987Z">
+    <div class="r-comment-body"><p>hand-off signal rows now carry cocos_label and cocos_label_source resolved from the target itself or its nearest labelled ancestor along HAS_PARENT, a time coordinate always carrying the DD absence token &quot;none&quot; for both whatever its ancestors hold, falling back to &quot;none&quot; for both when no labelled node exists; tests/ids/test_mapping_handoff.py 6 passed, and a live jt-60sa magnetics export gives pickup-probe rows one_like from xml.</p></div>
 </div>
 </section>
 </main>
