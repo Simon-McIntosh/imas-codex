@@ -25,7 +25,7 @@
   <title>Generated Map Hand-off | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 </head>
@@ -272,13 +272,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-gmh-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build generated-map-handoff">
-    <h4 class="r-fu-title">Build the hand-off export, then hand JT-60SA's draft maps to imas-ambix</h4>
+<article class="r-fu" data-id="f-gmh-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build generated-map-handoff" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the hand-off export, then hand JT-60SA&#x27;s draft maps to imas-ambix</h4>
     <div class="r-fu-body"><p>§1 is ready now. §2 follows §1. §3 follows both. §4 waits on <code>jt60sa-imas-maps</code> §12. §5, the report, follows §4.</p></div>
     <pre class="r-fu-prompt">/reckon-build generated-map-handoff</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-20261009-gmh-coordination" data-who="reckon-create" data-when="2026-10-09T02:30:00Z">
+    <div class="r-comment-body"><p>Coordination agreed on 2026-10-09 before this plan's first session. imas-codex-9a coordinates <code>jt60sa-imas-maps</code> and runs its §12, the source of §4's mappings. It has promised a message when §12's generated mappings are in the graph. That message went to imas-codex-90, so ask imas-codex-9a directly as well.</p><p>§12 covers only the three enriched pickup-probe sources. The 10 PF coil-current signals are still at discovered, so pf_active will have no generated mapping unless they are enriched and mapped first. A provider override now moves a seat off the local lane (<code>157d9b6f2</code>), so §12 can run its mapping seat on OpenRouter.</p><p>Write-path sequencing with imas-codex-9a has two parts:</p><ul><li><code>external-map-rules</code> §3 adds a <code>pull</code> subcommand to <code>imas_codex/cli/map.py</code>. It waits for this plan's §3, so <code>pull</code> lands once, under the new top-level group.</li><li><code>signal-cocos-conventions</code> §7 adds a stage to <code>imas_codex/cli/discover/sequence.py</code>. It rebases onto this plan's §2 if §2 lands first.</li></ul><p>For prototype speed, §1 then §4 is the critical path. §2 and §3 are not on it. The imas-ambix session for <code>jt60sa-tokamap-from-generated-maps</code> is started fresh by the lead: tell it when §1's fixture and §4's document exist.</p></div>
+</div>
 </section>
 </main>
 </body>
