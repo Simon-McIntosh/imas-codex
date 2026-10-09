@@ -588,6 +588,9 @@ def persist_mapping_result(
     gc: GraphClient | None = None,
     provider: str = "imas-codex",
     status: str = "generated",
+    partial: bool = False,
+    unmapped_sources: list[str] | None = None,
+    stop_reason: str | None = None,
     extraction_script: str | None = None,
     assembly_script: str | None = None,
     validated_shot: int | None = None,
@@ -609,6 +612,9 @@ def persist_mapping_result(
         gc: GraphClient instance (created if None).
         provider: Provider identifier.
         status: Initial status for the mapping node.
+        partial: Whether the map run stopped with selected sources remaining.
+        unmapped_sources: Selected source IDs left for a later run.
+        stop_reason: Deadline or cost limit that stopped a partial run.
         extraction_script: Generated extraction script code.
         assembly_script: Generated assembly script code.
         validated_shot: Shot used for E2E validation.
@@ -632,6 +638,9 @@ def persist_mapping_result(
             m.dd_version = $dd_version,
             m.provider = $provider,
             m.status = $status,
+            m.partial = $partial,
+            m.unmapped_sources = $unmapped_sources,
+            m.stop_reason = $stop_reason,
             m.extraction_script = $extraction_script,
             m.assembly_script = $assembly_script,
             m.validated_shot = $validated_shot,
@@ -647,6 +656,9 @@ def persist_mapping_result(
         dd_version=result.dd_version,
         provider=provider,
         status=status,
+        partial=partial,
+        unmapped_sources=unmapped_sources or [],
+        stop_reason=stop_reason,
         extraction_script=extraction_script,
         assembly_script=assembly_script,
         validated_shot=validated_shot,
