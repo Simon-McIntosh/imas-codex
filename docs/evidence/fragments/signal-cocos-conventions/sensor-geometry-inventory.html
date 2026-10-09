@@ -1,0 +1,58 @@
+<section id="sensor-geometry-inventory">
+  <h2 id="sensor-geometry-inventory-heading">JET and JT-60SA sensor geometry inventory</h2>
+  <p id="sensor-geometry-inventory-scope">
+    Read on 2026-10-09 from the live imas-codex graph, the JET facility configuration,
+    and the imas-ambix JT-60SA SELENE receipts and served magnetic/PF map. A join below
+    means an explicit sensor identity in both the measurement accessor and geometry;
+    a common physics name, spatial proximity, or a reconstruction output is insufficient.
+    Counts are measurement <code>FacilitySignal</code> records first. The JT-60SA
+    <code>SignalSource</code> count follows in parentheses because grouping coalesces
+    several numbered channels; JET's listed PPF measurements have no
+    <code>MEMBER_OF</code> edge yet. These are identity joins available to an ingestion
+    step, not existing <code>HAS_GEOMETRY</code> edges.
+  </p>
+
+  <table id="sensor-geometry-inventory-table">
+    <thead><tr><th>Facility and family</th><th>Geometry address and shot validity</th><th>Measurement kind in geometry</th><th>Deterministic key and joined / unjoined measurements</th></tr></thead>
+    <tbody>
+      <tr><th>JET pickup coils</th><td><code>jet:device_xml:p68613:magprobes:1</code> (and later epoch nodes) from <code>Devices/device_p68613.xml</code>; <code>jet:jec2020:probe:1..95</code> from <code>/home/chain1/jec2020/magnetics.xml</code>. Device XML epochs select the shot, starting at 68613; the JEC2020 geometry is a shot-79951 reference, not a declared open-ended interval. <code>imas_codex/discovery/signals/scanners/device_xml.py</code> reads both.</td><td>Position and angle are present; absolute/differential kind and a reference sensor are not recorded.</td><td><code>MAGN/BPME</code> array index ↔ <code>ppf_signal=BPME(n)</code> on 95 JEC2020 probe nodes: <strong>1 / 0</strong> selected PPF measurement records. Example <code>jet:magnetic_field_diagnostics/magn_bpme</code>. Its source node is absent.</td></tr>
+      <tr><th>JET flux loops</th><td><code>jet:jec2020:flux_loop:1..6</code>, same <code>magnetics.xml</code> and shot-79951 reference. The device XML and <code>magnetics_config</code> also carry epoch-specific loop positions; configuration rows have <code>first_shot</code>/<code>last_shot</code>.</td><td>Loop kind and reference are not declared on the graph nodes.</td><td><code>MAGN/FLME</code> index ↔ six <code>FLME(n)</code> nodes: <strong>1 / 0</strong>. Example <code>jet:magnetic_field_diagnostics/magn_flme</code>; no source node.</td></tr>
+      <tr><th>JET saddle loops</th><td><code>jet:jec2020:flux_loop:7..36</code> (30 <code>SLME(n)</code> saddle loops) in <code>magnetics.xml</code>, shot-79951 reference. Epoch-specific <code>SADX</code>, <code>BSAD</code>, <code>TSFL</code> and related positions also live as <code>jet:magnetics_config:&lt;configuration&gt;:&lt;type&gt;:&lt;index&gt;</code> nodes from <code>/home/chain1/input/magn/config/indexr</code> and its selected files.</td><td>No absolute/differential declaration or reference in the geometry nodes.</td><td><code>MAGN/SLME</code> index ↔ <code>SLME(n)</code>: <strong>1 / 0</strong>. Example <code>jet:magnetic_field_diagnostics/magn_slme</code>; no source node.</td></tr>
+      <tr><th>JET Rogowski coils and current readouts</th><td>No complete Rogowski path, winding, or orientation found. <code>jet:magnetics_config:limves:IPLA:1</code> and analogous <code>ITOR:1</code> nodes contain only configuration sensor coordinates, not a coil loop. Their file/shot range is on each node; the sampled <code>limves</code> IPLA node covers shots 1–27968.</td><td>Neither loop geometry nor absolute/differential kind with reference is recorded.</td><td><code>MAGN/IPLA</code>, <code>MAGN/ITOR</code>, and <code>EHTR/ROG</code> are current readouts, but none supplies a key to complete Rogowski geometry: <strong>0 / 3</strong>. A matching <code>MAGNIPLA</code> configuration label alone does not establish coil geometry. None has a source node.</td></tr>
+      <tr><th>JET PF coils</th><td><code>jet:device_xml:p68613:pfcoils:1</code> and later shot epochs (22 coils in the first XML); <code>jet:jec2020:pf_coil:1..20</code> in <code>/home/chain1/jec2020/pfSystems.xml</code> at reference shot 79951. The former uses <code>Devices/device_p68613.xml</code>; the latter includes multi-element shapes.</td><td>These are conductor descriptions, not measurement records; no measurement-kind field or reference.</td><td><code>MAGN/BVCL</code> names a vertical-field coil current but no coil id, so <strong>0 / 1</strong> selected current record. Example <code>jet:magnetic_field_diagnostics/magn_bvcl</code>; no source node.</td></tr>
+      <tr><th>JET passive structures</th><td><code>jet:device_xml:p68613:pfpassive:1..48</code> and later shot epochs from the device XML; wall contours also use the shot-ranged limiter files configured in <code>imas_codex/config/facilities/jet.yaml</code>.</td><td>Passive conductor geometry; no per-structure measurement kind.</td><td>No per-structure measurement accessor in this inventory: <strong>0 / 0</strong>. These are geometry-only records, not missing measured channels.</td></tr>
+
+      <tr><th>JT-60SA pickup coils</th><td>The 17 <code>Magnetic Probe</code> rows of <code>/analysis/src/getseldata_v4.2/UTL/getseldata/geo.in</code> on <code>jt-60sa</code>, copied at <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/source/geo.in</code>. <code>imas_ambix/data/selene_deck.py:build_magnetics</code> writes position and sensing-axis angle into both phase stores' <code>magnetics.nc</code>.</td><td>No explicit absolute/differential field or reference for probes; the angle is the directed sensing axis.</td><td>Case-fold <code>MDAC/magPbTCn</code> and use integer <code>n</code> ↔ geo.in row <code>n</code>: <strong>17 / 6</strong> of 23 graph channels. <code>magPbTC18..23</code> have no deck row. Ten source groups: nine fully covered, one partially covered (8 joined, 6 unjoined members).</td></tr>
+      <tr><th>JT-60SA flux loops</th><td>The 27 <code>Flux Loop</code> rows of the same <code>geo.in</code>; <code>build_magnetics</code> writes their positions and differential entries into each phase's <code>magnetics.nc</code>.</td><td>In the converted description, loop 7 is absolute (<code>type.index=1</code>); the other 26 measurements are differential (<code>type.index=6</code>, <code>indices_differential=[7,L]</code>, value L minus 7). This kind/reference is derived by the converter; the raw <code>geo.in</code> has positions only.</td><td><code>MDAC/magFlxLpn</code> ↔ deck row <code>n</code>: <strong>27 / 7</strong> of 34 graph channels. <code>magFlxLp28..34</code> have no deck row. Ten source groups: nine fully covered, one partially covered (18 joined, 7 unjoined members). The covered map binds loop 7 to the absolute entry and the other 26 to differential entries.</td></tr>
+      <tr><th>JT-60SA saddle loops</th><td>No separate saddle-loop block in <code>geo.in</code>, and no saddle-loop geometry in the converted <code>magnetics.nc</code>; the declared blocks are 17 probes and 27 flux loops.</td><td>Not recorded.</td><td>No source in the served magnetic map is labelled a saddle loop: <strong>0 / 0</strong> in that defined cohort. Other EDDB channels must not be classified by name alone.</td></tr>
+      <tr><th>JT-60SA Rogowski coils and plasma current</th><td><code>EQSLE.DATA</code> and <code>geo.in</code> do not provide a physical Rogowski coil loop. The SELENE-derived descriptions contain no Rogowski geometry.</td><td>Not recorded for a Rogowski sensor.</td><td><code>jt-60sa:general/psrc_ip</code> is the served plasma-current proxy, one <code>SignalSource</code>, but its EDDB accessor identifies no Rogowski coil: <strong>0 / 1</strong> record (<strong>0 / 1</strong> source group).</td></tr>
+      <tr><th>JT-60SA PF coils</th><td>The <code>12 PF COIL</code> block of <code>/analysis/src/SAselene_v2.0_forPSRC/RUN/EQSLE.DATA</code>, copied in <code>maps/jt-60sa/source/EQSLE.DATA</code>, is read by <code>parse_eqsle_deck</code> and written to OP1/OP2 <code>pf_active.nc</code>. It names CS1–4, EF1–6 and FPPC_UP/DOWN; the last two have no served current binding.</td><td>Signed coil current is a single absolute channel per served coil; the geometry store has coil/circuit names and winding data, but no explicit measurement-kind/ref field.</td><td>Strip <code>cur</code> and chain suffix (<code>LKAT</code>, except EF6 <code>HiTe</code>) from the ten <code>MMSYS</code> map arrays, then join the exact CS/EF coil name: <strong>10 / 0</strong> served records (<strong>10 / 0</strong> source groups). Example <code>jt-60sa:general/mmsys_curcs1lkat</code> ↔ CS1.</td></tr>
+      <tr><th>JT-60SA passive structures</th><td><code>EQSLE.DATA</code> vessel/cryostat filaments plus phase-specific <code>.local/share/machine_description/coil_geometry/coil_vv_OP1.dat</code> and <code>coil_vv_OP2.dat</code> on <code>jt-60sa</code>. <code>build_pf_passive</code> writes the named VV and CRYOSTAT loops in OP1/OP2 <code>pf_passive.nc</code>; the phase-specific wall contours are in <code>wall.nc</code>.</td><td>Geometry only; no per-structure measurement kind.</td><td>No per-structure measurement in the served map: <strong>0 / 0</strong>.</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sensor-geometry-inventory-validity">
+    <strong>Shot selection.</strong> JET's <code>imas_codex/config/facilities/jet.yaml</code>
+    declares 14 base device configurations from shot 68613 onward, and its
+    magnetics <code>indexr</code> selects calibration/position files by shot; a
+    JEC2020 <code>first_shot=79951</code> alone is not an end-of-validity claim.
+    JT-60SA <code>maps/jt-60sa/machine_map.json</code> selects OP1 for
+    100001–101173 and OP2 for 101174–999999. The OP1 magnetic channels were
+    observed on E100383 and later OP1 pulses; the OP2 description is inherited
+    from the phase deck, with no acquired OP2 EDDB shot in the cited record.
+    The OP1/OP2 <code>receipt.json</code> files record source hashes and deck line
+    ranges. Applying either phase's geometry to another shot range requires the
+    phase selector, not the accessor's example shot.
+  </p>
+  <p id="sensor-geometry-inventory-limits">
+    <strong>Join limits.</strong> The JET PPF accessors identify arrays, while the
+    geometry names individual array elements. The array/index join is
+    deterministic at the identity level, but no graph edge currently records it,
+    and the live graph has no <code>SignalSource</code> for any of the seven
+    selected JET measurement records above. The JT-60SA digit-pattern grouping
+    pattern merges channels beyond the available deck rows; attaching geometry
+    to that whole source without checking each <code>MEMBER_OF</code> edge would
+    mislabel 6 probes and 7 loops. The counts above count a source group as
+    fully joined only when every one of its measured members has geometry.
+  </p>
+</section>
