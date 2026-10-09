@@ -54,7 +54,6 @@ import logging
 import math
 import os
 import re
-import threading
 import time
 from collections.abc import Callable, Mapping
 from functools import lru_cache
@@ -84,15 +83,6 @@ logger = logging.getLogger(__name__)
 _LOCAL_CLIENTS: dict[str, Any] = {}
 _LOCAL_SYNC_CLIENTS: dict[str, Any] = {}
 _LOCAL_CLIENT_MAX_CONNECTIONS = 256
-
-# Most requests this process may hold on a local endpoint at once. The local
-# lane is shared with every interactive agent session behind one router gate,
-# twelve requests wide, and a batch pipeline that fills it leaves those
-# sessions queued behind its work. The cap is process-wide and thread-based
-# because pipeline workers call from several threads and event loops.
-LOCAL_MAX_IN_FLIGHT = int(os.environ.get("IMAS_CODEX_LOCAL_MAX_IN_FLIGHT", "4"))
-_LOCAL_IN_FLIGHT = threading.BoundedSemaphore(LOCAL_MAX_IN_FLIGHT)
-_LOCAL_SLOT_POLL_SECONDS = 0.25
 
 
 def _get_local_client(api_base: str, api_key: str | None) -> Any:
@@ -192,12 +182,7 @@ async def _acompletion_local(kwargs: dict[str, Any]) -> Any:
     caller already uses for litellm responses.
     """
     client = _get_local_client(kwargs["api_base"], kwargs.get("api_key"))
-    while not _LOCAL_IN_FLIGHT.acquire(blocking=False):
-        await asyncio.sleep(_LOCAL_SLOT_POLL_SECONDS)
-    try:
-        return await client.chat.completions.create(**_local_call_kwargs(kwargs))
-    finally:
-        _LOCAL_IN_FLIGHT.release()
+    return await client.chat.completions.create(**_local_call_kwargs(kwargs))
 
 
 def _completion_local(kwargs: dict[str, Any]) -> Any:
@@ -208,8 +193,7 @@ def _completion_local(kwargs: dict[str, Any]) -> Any:
     rejects the ``local/`` provider).
     """
     client = _get_local_sync_client(kwargs["api_base"], kwargs.get("api_key"))
-    with _LOCAL_IN_FLIGHT:
-        return client.chat.completions.create(**_local_call_kwargs(kwargs))
+    return client.chat.completions.create(**_local_call_kwargs(kwargs))
 
 
 T = TypeVar("T")
