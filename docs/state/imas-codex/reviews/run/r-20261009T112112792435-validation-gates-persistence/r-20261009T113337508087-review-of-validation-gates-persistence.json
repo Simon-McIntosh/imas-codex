@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest leaves baseline_suite and after_suite null, so the head arm is the reviewed run's own gate-head.log at b0801885 (598 passed, 0 failed, exit 0) and the base arm I measured independently over tests/ids at the reviewed base e1e6ae6c (594 passed, 0 failed, exit 0); both EXIT=0 with zero failing ids, so the run added no failing test. The reviewed run's gate-after-revert.log cannot serve as a base arm: its header names revision e1e6ae6c but it reports 4 passed, while I reproduced the base (base tree plus the new test file) at 3 failed, 1 passed, exit 1, so that log is a head-arm measurement mislabeled with the base revision.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/ids",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T112112792435-validation-gates-persistence/gate-head.log",
+    "revision": "b0801885612f9d66ec3b494135656f289c01150d"
+  },
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/ids",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T113337508087-review-of-validation-gates-persistence/base-arm-tests-ids.log",
+    "revision": "e1e6ae6cd25e14c173ff7193c3dc1903755e1daa"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ids/mapping.py:1879 (the gate loop that reassigns all_bindings)",
+    "imas_codex/ids/validation.py:240 (validate_mapping's all_passed, the same four-field predicate)",
+    "imas_codex/ids/mapping.py:1899 (the corrections 'failed' count, the same four-field predicate)"
+  ],
+  "completed_at": "2026-10-09T11:41:58.430Z",
+  "dispatched_at": "2026-10-09T11:33:46Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "1889",
+      "severity": "follow-on",
+      "text": "follow-on: the four-field predicate (source_exists and target_exists and transform_executes and units_compatible) is now spelled a third time \u2014 in the new gate (mapping.py:1889-1895) and in the corrections 'failed' count (mapping.py:1899-1906) \u2014 where imas_codex/ids/validation.py:240 already owns it as BindingCheck's pass condition; a BindingCheck.passed property beside the dataclass would collapse all three spellings to one and keep them from drifting."
+    },
+    {
+      "file": "tests/ids/test_validation_gates_persistence.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run ships gate-after-revert.log with the header 'revision: e1e6ae6cd25e14c173ff7193c3dc1903755e1daa (working tree)' and a result of 4 passed, but the base tree cannot pass these tests \u2014 reproduced against a pristine base tree (e1e6ae6c plus the new test file): 3 failed, 1 passed, exit 1 \u2014 so the log is a head-arm measurement mislabeled with the base revision and should not be read as a base arm."
+    },
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "1898",
+      "severity": "follow-on",
+      "text": "follow-on (pre-existing, surfaced by this change): the corrections summary appends '{failed} binding(s) failed validation checks' whenever report.all_passed is False, and all_passed is False when duplicate_targets is non-empty even though no four-check failure exists, so a mapping whose only defect is a duplicate target now writes '0 binding(s) failed validation checks' \u2014 the count no longer matches the persisted-set gate it summarises."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the gate consumes report.binding_checks in binding order (imas_codex/ids/validation.py:181 appends one check per binding in the same loop that walks bindings), so index alignment holds; the reviewed change adds no new function, so the three referenced sites are the gate and the two pre-existing spellings of the same predicate.",
+    "diff": "Read the single commit against the base: b0801885 adds the gate loop in mapping.py (20 added lines plus comment), the new four-test file, and the evidence fragment; git diff --stat e1e6ae6c..b0801885 reports exactly those three files, 218 insertions, 0 deletions, and nothing else.",
+    "done_when": "\u00a726's done-when is a unit test showing a binding with a missing target and one with incompatible units each removed from bindings and present as an escalation naming the failed check, a passing sibling kept, and a negative control that returns every binding and reddens the test; tests/ids/test_validation_gates_persistence.py carries all four assertions and the run's negative-control.log shows 3 failed, 1 passed, exit 1, which I reproduced independently against a pristine base tree.",
+    "goal": "\u00a726 asks that a binding failing any of validate_mappings' four checks be removed from the persisted set and carried as an escalation naming the failed check while a passing sibling is kept; mapping.py:1879-1897 pairs each binding with report.binding_checks[index] and keeps it only when the check is absent or all four booleans hold, so a failing binding is dropped and the escalation validate_mapping already emits (one per failing binding, reason = joined failed-check messages) remains the record, and coverage now measures the surviving set.",
+    "manifest": "The manifest records commit b0801885, the tests/ids gate (598 passed, 5 skipped, 8 deselected, exit 0), the negative control (3 failed, 1 passed, exit 1) and the escalation evidence_inputs, and honestly leaves baseline_suite/after_suite null rather than inventing an arm; it also ships gate-after-revert.log, which reads as a base-arm result but is not one (see the finding), so the suite delta rests on the base arm I measured independently.",
+    "write_paths": "The reviewed node was fenced to imas_codex/ids/mapping.py, tests/ids/test_validation_gates_persistence.py, the evidence fragment and a figures directory; git diff --stat e1e6ae6c..b0801885 reports exactly mapping.py (+22), the test file (+171) and the fragment (+25), with the figures directory untouched and no generated or gitignored file staged."
+  },
+  "justifications": {
+    "durability": "The negative control at tests/ids/test_validation_gates_persistence.py reddens three of four tests (exit 1) when the gate is mutated to keep every binding, and I reproduced that red independently against a pristine base tree (3 failed, 1 passed, exit 1), so the removal assertions are load-bearing; each assertion compares the code's output against an independent constant (MISSING_TARGET, UNITS_TARGET, GOOD_TARGET) or a report the test supplies rather than a value it also feeds the code.",
+    "evidence": "The gate measures the done-when and its result is recorded \u2014 gate-head.log shows 598 passed and exit 0 at b0801885, negative-control.log shows 3 failed and exit 1 with the mutation, and the gate-after-revert reproduction resolves to 3 failed on the true base \u2014 and I measured the base arm independently at e1e6ae6c (594 passed, exit 0) because the manifest names no baseline/after arm; the one blemish is gate-after-revert.log, a head-arm result mislabeled with the base revision, which does not undermine the measure but should not be read as the base arm.",
+    "fit": "The gate follows the module's list-comprehension idiom and carries a mechanism comment naming the four checks rather than any plan or ticket identifier; the test module docstring explains the mechanism, the symbols are named by what they assert, and the commit uses a conventional subject with a mechanism body and no attribution line.",
+    "goal_fidelity": "imas_codex/ids/mapping.py:1879-1897 implements exactly what \u00a726 names \u2014 a binding failing any of the four checks is removed and the escalation validate_mapping already records for it (imas_codex/ids/validation.py:172-179, reason = joined failed-check messages) is what remains as the record \u2014 and the passing sibling is kept, with coverage (check_coverage_threshold) now run against the surviving set so it measures what is persisted.",
+    "reuse": "The gate reaches the correct existing structures (report.binding_checks from imas_codex/ids/validation.py:181) rather than re-validating, but it spells the four-field pass predicate out a third time beside the two pre-existing spellings (imas_codex/ids/validation.py:240 and mapping.py:1899) instead of adding a BindingCheck.passed helper that would own it once, so a third copy can now drift from the other two.",
+    "scope_discipline": "git diff --stat e1e6ae6c..b0801885 shows the single commit touches exactly the three declared write paths \u2014 one source file, one test file, one evidence fragment \u2014 with one purpose, and no generated or gitignored file is staged; the declared figures directory is untouched because the node added no figure."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a726 asks that a binding failing any of validate_mappings' four checks be removed from the persisted set and carried as an escalation naming the failed check while a passing sibling is kept; mapping.py:1879-1897 pairs each binding with report.binding_checks[index] and keeps it only when the check is absent or all four booleans hold, so a failing binding is dropped and the escalation validate_mapping already emits (one per failing binding, reason = joined failed-check messages) remains the record, and coverage now measures the surviving set.\nVERDICT done_when: \u00a726's done-when is a unit test showing a binding with a missing target and one with incompatible units each removed from bindings and present as an escalation naming the failed check, a passing sibling kept, and a negative control that returns every binding and reddens the test; tests/ids/test_validation_gates_persistence.py carries all four assertions and the run's negative-control.log shows 3 failed, 1 passed, exit 1, which I reproduced independently against a pristine base tree.\nVERDICT write_paths: The reviewed node was fenced to imas_codex/ids/mapping.py, tests/ids/test_validation_gates_persistence.py, the evidence fragment and a figures directory; git diff --stat e1e6ae6c..b0801885 reports exactly mapping.py (+22), the test file (+171) and the fragment (+25), with the figures directory untouched and no generated or gitignored file staged.\nVERDICT manifest: The manifest records commit b0801885, the tests/ids gate (598 passed, 5 skipped, 8 deselected, exit 0), the negative control (3 failed, 1 passed, exit 1) and the escalation evidence_inputs, and honestly leaves baseline_suite/after_suite null rather than inventing an arm; it also ships gate-after-revert.log, which reads as a base-arm result but is not one (see the finding), so the suite delta rests on the base arm I measured independently.\nVERDICT diff: Read the single commit against the base: b0801885 adds the gate loop in mapping.py (20 added lines plus comment), the new four-test file, and the evidence fragment; git diff --stat e1e6ae6c..b0801885 reports exactly those three files, 218 insertions, 0 deletions, and nothing else.\nCALL_SITES: imas_codex/ids/mapping.py:1879 (the gate loop that reassigns all_bindings), imas_codex/ids/validation.py:240 (validate_mapping's all_passed), imas_codex/ids/mapping.py:1899 (the corrections 'failed' count)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/ids/mapping.py:1879-1897 implements exactly what \u00a726 names \u2014 a binding failing any of the four checks is removed and the escalation validate_mapping already records for it (imas_codex/ids/validation.py:172-179) is what remains as the record \u2014 and the passing sibling is kept, with coverage now run against the surviving set.\nSCORE evidence: 18\nJUSTIFICATION evidence: The gate measures the done-when and its result is recorded \u2014 gate-head.log shows 598 passed and exit 0 at b0801885, negative-control.log shows 3 failed and exit 1, and I measured the base arm independently at e1e6ae6c (594 passed, exit 0) because the manifest names no baseline/after arm; the one blemish is gate-after-revert.log, a head-arm result mislabeled with the base revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat e1e6ae6c..b0801885 shows the single commit touches exactly the three declared write paths with one purpose, and no generated or gitignored file is staged.\nSCORE durability: 18\nJUSTIFICATION durability: The negative control reddens three of four tests when the gate is mutated to keep every binding, reproduced independently against a pristine base tree (3 failed, 1 passed, exit 1), and each assertion compares the code's output against an independent constant or a report the test supplies.\nSCORE fit: 18\nJUSTIFICATION fit: The gate follows the module's list idiom and carries a mechanism comment naming the four checks rather than any plan or ticket identifier, and the commit uses a conventional subject with a mechanism body and no attribution line.\nSCORE reuse: 13\nJUSTIFICATION reuse: The gate reaches the correct existing structures (report.binding_checks) but spells the four-field pass predicate out a third time beside imas_codex/ids/validation.py:240 and mapping.py:1899 instead of adding a BindingCheck.passed helper that would own it once.\nFINDING imas_codex/ids/mapping.py:1889 follow-on: the four-field predicate (source_exists and target_exists and transform_executes and units_compatible) is now spelled a third time \u2014 in the new gate (mapping.py:1889-1895) and in the corrections 'failed' count (mapping.py:1899-1906) \u2014 where imas_codex/ids/validation.py:240 already owns it as BindingCheck's pass condition; a BindingCheck.passed property beside the dataclass would collapse all three spellings to one and keep them from drifting.\nFINDING tests/ids/test_validation_gates_persistence.py:1 follow-on: the reviewed run ships gate-after-revert.log with the header 'revision: e1e6ae6cd25e14c173ff7193c3dc1903755e1daa (working tree)' and a result of 4 passed, but the base tree cannot pass these tests \u2014 reproduced against a pristine base tree (e1e6ae6c plus the new test file): 3 failed, 1 passed, exit 1 \u2014 so the log is a head-arm measurement mislabeled with the base revision and should not be read as a base arm.\nFINDING imas_codex/ids/mapping.py:1898 follow-on (pre-existing): the corrections summary appends '{failed} binding(s) failed validation checks' whenever report.all_passed is False, and all_passed is False when duplicate_targets is non-empty even though no four-check failure exists, so a mapping whose only defect is a duplicate target now writes '0 binding(s) failed validation checks'.\n",
+  "review_run_id": "r-20261009T113337508087-review-of-validation-gates-persistence",
+  "reviewed_base_sha": "e1e6ae6cd25e14c173ff7193c3dc1903755e1daa",
+  "reviewed_head_sha": "b0801885612f9d66ec3b494135656f289c01150d",
+  "reviewed_run_id": "r-20261009T112112792435-validation-gates-persistence",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T11:38:58.332110+00:00",
+  "total": 106
+}

@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc,0e1f1d382,43ee5a2e0">
 <meta name="plan-impl" content="0.8519">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -635,6 +635,9 @@
 </div>
 <div class="r-comment" data-section="s26" data-id="c-run-r-20261009T112112792435-validation-gates-persistence" data-who="reckon-build" data-when="2026-10-09T11:32:12.613Z">
     <div class="r-comment-body"><p>A binding failing any of validate_mappings' four checks (source exists, target exists, transform executes, units compatible) is removed from the returned bindings, its failure carried as the escalation the check already records, while a passing sibling is kept; tests/ids 598 passed, 5 skipped, 8 deselected, exit 0, and the negative control that keeps every binding fails 3 tests.</p></div>
+</div>
+<div class="r-comment" data-section="s26" data-id="c-run-r-20261009T113337508087-review-of-validation-gates-persistence" data-who="reckon-build" data-when="2026-10-09T11:41:58.430Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261009T112112792435-validation-gates-persistence (node validation-gates-persistence) scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 13, total 106, added_failure_count 0; the gate in imas_codex/ids/mapping.py:1879-1897 removes any binding that fails one of validate_mappings&#x27; four checks and leaves the escalation validate_mapping already records (imas_codex/ids/validation.py:172-179) as the record, while a passing sibling is kept, which is what plan section 26 asks.</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-close-s12" data-who="reckon-build" data-when="2026-10-09T11:45:00Z">
     <div class="r-comment-body"><p>§12 landed: gas exported 5 rows, all unplaced, because the machine description has no <code>gas_injection</code> and there is no member pattern; coverage only. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s12">evidence</a></p></div>
