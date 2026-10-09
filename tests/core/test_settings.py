@@ -384,6 +384,64 @@ class TestDiscoveryFunctionSeats:
             assert endpoint["endpoint_class"] == "local-free"
             assert settings.is_explicit_free_local_endpoint(model)
 
+    def test_provider_override_leaves_the_local_route(self, monkeypatch):
+        """A seat moved to another provider drops its local route, key and class.
+
+        The seat's route serves the model it names; an ``openrouter/`` model
+        sent there is unknown to the router and refused with its key, and a
+        ``local-free`` class would book the paid call as free.
+        """
+        settings._load_pyproject_settings.cache_clear()
+        moved = "openrouter/deepseek/deepseek-v4.1-flash"
+        monkeypatch.setenv("IMAS_CODEX_IDS_MAPPING_MODEL", moved)
+        monkeypatch.delenv("IMAS_CODEX_IDS_MAPPING_API_BASE", raising=False)
+        monkeypatch.setattr(settings, "_MODEL_ENDPOINTS", {})
+
+        config = settings.get_model_config("ids-mapping")
+        assert config == {
+            "model": moved,
+            "api_base": None,
+            "api_key_env": None,
+            "endpoint_class": None,
+        }
+
+        settings.register_model_endpoints()
+        assert settings.get_model_endpoint(moved) is None
+        assert not settings.is_explicit_free_local_endpoint(moved)
+
+        source = settings.resolve_model_source("section:ids-mapping")
+        assert source.api_base is None
+        assert source.endpoint_class is None
+
+    def test_same_provider_override_keeps_the_local_route(self, monkeypatch):
+        """Another model on the same local provider stays on the seat's route."""
+        settings._load_pyproject_settings.cache_clear()
+        monkeypatch.setenv("IMAS_CODEX_IDS_MAPPING_MODEL", "local/another-model")
+        monkeypatch.delenv("IMAS_CODEX_IDS_MAPPING_API_BASE", raising=False)
+
+        route_api_base = settings._get_section("model-routes")["ambix-local"][
+            "api-base"
+        ]
+        config = settings.get_model_config("ids-mapping")
+        assert config["api_base"] == route_api_base
+        assert config["api_key_env"] == "AMBIX_API_KEY"
+        assert config["endpoint_class"] == "local-free"
+
+    def test_explicit_api_base_routes_a_moved_seat(self, monkeypatch):
+        """An explicit API-base variable still names the endpoint for a moved seat."""
+        settings._load_pyproject_settings.cache_clear()
+        monkeypatch.setenv(
+            "IMAS_CODEX_IDS_MAPPING_MODEL", "openrouter/deepseek/deepseek-v4.1-flash"
+        )
+        monkeypatch.setenv(
+            "IMAS_CODEX_IDS_MAPPING_API_BASE", "http://router.example.test/v1"
+        )
+
+        config = settings.get_model_config("ids-mapping")
+        assert config["api_base"] == "http://router.example.test/v1"
+        assert config["api_key_env"] is None
+        assert config["endpoint_class"] is None
+
     def test_ids_mapping_carries_high_reasoning_effort(self):
         """IDS mapping raises reasoning effort for the escalated choice."""
         settings._load_pyproject_settings.cache_clear()

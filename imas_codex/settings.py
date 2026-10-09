@@ -310,20 +310,43 @@ def get_model_config(section: str) -> dict[str, str | None]:
 
     Environment variable overrides (highest priority):
         - ``IMAS_CODEX_{SECTION}_API_BASE``  (e.g. ``IMAS_CODEX_SN_COMPOSE_API_BASE``)
+
+    The section's route, credential variable and endpoint class describe the
+    endpoint serving the model the section names. When the model environment
+    variable names a model from another provider, for example an
+    ``openrouter/`` model in place of a ``local/`` one, none of the three
+    applies: the model takes default proxy routing and its own pricing, unless
+    the API-base variable names an endpoint explicitly. Keeping them would send
+    the model to an endpoint that does not serve it, and would book a paid call
+    under a free endpoint class.
     """
     model = get_model(section)
     cfg = _get_section(section)
 
+    configured_model = cfg.get("model", _MODEL_DEFAULTS.get(section, model))
+    serves_model = _provider(model) == _provider(configured_model)
+
     # api-base: env override → named/direct pyproject route → None
     env_key = f"IMAS_CODEX_{section.upper().replace('-', '_')}_API_BASE"
     configured_api_base = _resolve_model_route(cfg, f"[tool.imas-codex.{section}]")
-    api_base = os.getenv(env_key) or configured_api_base
+    api_base = os.getenv(env_key) or (configured_api_base if serves_model else None)
 
     # api-key-env names the credential environment variable; the LLM layer
     # reads that secret later. This setting itself comes only from pyproject.
-    api_key_env = cfg.get("api-key-env") or None
+    api_key_env = (cfg.get("api-key-env") or None) if serves_model else None
+    endpoint_class = (cfg.get("endpoint-class") or None) if serves_model else None
 
-    return {"model": model, "api_base": api_base, "api_key_env": api_key_env}
+    return {
+        "model": model,
+        "api_base": api_base,
+        "api_key_env": api_key_env,
+        "endpoint_class": endpoint_class,
+    }
+
+
+def _provider(model: str) -> str:
+    """Return a model identifier's provider prefix, the text before its first slash."""
+    return model.split("/", 1)[0]
 
 
 # ─── Model endpoint registry ──────────────────────────────────────────────
@@ -365,7 +388,7 @@ def register_model_endpoints() -> None:
             _MODEL_ENDPOINTS[model_id] = {
                 "api_base": cfg["api_base"],
                 "api_key_env": cfg.get("api_key_env"),
-                "endpoint_class": _get_section(section).get("endpoint-class"),
+                "endpoint_class": cfg.get("endpoint_class"),
             }
 
     def _walk(node: dict) -> None:
@@ -545,7 +568,7 @@ def resolve_model_source(
         config = get_model_config(name)
         api_base = config["api_base"]
         api_key_env = config["api_key_env"]
-        endpoint_class = _get_section(name).get("endpoint-class")
+        endpoint_class = config["endpoint_class"]
     elif source_id in {"sn-review:names", "sn-fanout:proposer"} and model.startswith(
         _LOCAL_ENDPOINT_PREFIXES
     ):

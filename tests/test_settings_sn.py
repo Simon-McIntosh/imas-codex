@@ -67,6 +67,7 @@ def test_compose_seat_uses_ambix_local_route():
         "model": "local/deepseek-v4-flash",
         "api_base": route_api_base,
         "api_key_env": "AMBIX_API_KEY",
+        "endpoint_class": "local-free",
     }
 
 
@@ -121,6 +122,7 @@ def test_remote_seat_needs_no_model_route():
         "model": mod.get_model("sn-refine"),
         "api_base": None,
         "api_key_env": None,
+        "endpoint_class": None,
     }
 
 
