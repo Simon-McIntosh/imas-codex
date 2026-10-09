@@ -28,6 +28,7 @@ from imas_codex.graph.client import GraphClient
 from imas_codex.ids.candidates import CLUSTER_ARM
 from imas_codex.ids.graph_ops import (
     CandidateWriteError,
+    dd_path_lifecycles,
     read_candidates,
     write_mapping_binding,
 )
@@ -1789,6 +1790,29 @@ def validate_mappings(
     # validation run against the final path.
     all_bindings, structure_escalations = _retarget_structure_bindings(all_bindings, gc)
     all_escalations.extend(structure_escalations)
+
+    # DD lifecycle guard: a target must belong to the mapping's DD version. A
+    # retired node still exists in the graph, so the target-existence check
+    # accepts it; only its INTRODUCED_IN/DEPRECATED_IN versions say whether the
+    # configured DD actually holds it.
+    lifecycles = dd_path_lifecycles(
+        gc, [binding.target_id for binding in all_bindings], dd_version
+    )
+    live_bindings: list[ValidatedSignalMapping] = []
+    for binding in all_bindings:
+        lifecycle = lifecycles.get(binding.target_id)
+        if lifecycle is not None and not lifecycle.live:
+            all_escalations.append(
+                EscalationFlag(
+                    source_id=binding.source_id,
+                    target_id=binding.target_id,
+                    severity=EscalationSeverity.ERROR,
+                    reason=lifecycle.reason,
+                )
+            )
+            continue
+        live_bindings.append(binding)
+    all_bindings = live_bindings
 
     # Section guard: every target_id must lie inside the section of one of the
     # source's selected candidates in this IDS. The guard is at section level,

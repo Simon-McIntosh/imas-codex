@@ -27,7 +27,7 @@ returns no route, leaving the source unjudged for a retry.
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Final
@@ -38,6 +38,7 @@ from imas_codex.discovery.base.judgment import (
 )
 from imas_codex.discovery.base.llm import DecisionsValidationError, call_decisions
 from imas_codex.graph.dd_search import hybrid_dd_search, related_dd_search
+from imas_codex.ids.graph_ops import dd_path_lifecycles
 from imas_codex.models.constants import SearchMode
 from imas_codex.search.search_strategy import SearchHit
 from imas_codex.settings import (
@@ -182,6 +183,14 @@ def retrieve_candidates(
             dd_version=dd_version,
         )
 
+    all_paths = {path for hits in merged.values() for path in hits}
+    stale = _stale_paths(gc, all_paths, dd_version)
+    if stale:
+        for hits in merged.values():
+            for path in list(hits):
+                if path in stale:
+                    del hits[path]
+
     parent_docs = _fetch_parent_documentation(
         gc, sorted({path for hits in merged.values() for path in hits})
     )
@@ -248,6 +257,20 @@ def _fetch_parent_documentation(
         paths=list(paths),
     )
     return {row["id"]: row.get("parent_documentation") for row in rows or []}
+
+
+def _stale_paths(
+    gc: GraphClient, paths: Iterable[str], dd_version: int | str | None
+) -> set[str]:
+    """Of ``paths``, those not part of the Data Dictionary at ``dd_version``.
+
+    A mapping targets one DD version, and a path deprecated at or before it is
+    not a legitimate target however long the node lingers in the graph.
+    """
+    if dd_version is None or not paths:
+        return set()
+    lifecycles = dd_path_lifecycles(gc, paths, dd_version)
+    return {path for path, life in lifecycles.items() if not life.live}
 
 
 def _as_vector(embedding: object) -> list[float]:
@@ -608,7 +631,9 @@ def expand_cluster_siblings(
         if seed in by_path:
             by_path[seed].hit.see_also = list(dict.fromkeys(seed_paths_here))
 
-    new_paths = new_order[:CLUSTER_SIBLING_CAP]
+    stale = _stale_paths(gc, new_order, dd_version)
+    live_order = [path for path in new_order if path not in stale]
+    new_paths = live_order[:CLUSTER_SIBLING_CAP]
     if not new_paths:
         return [], []
 

@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.ids.graph_ops import dd_path_lifecycles
 from imas_codex.ids.models import CocosLabel
 from imas_codex.ids.tools import search_existing_mappings
 
@@ -271,9 +272,22 @@ def build_mapping_handoff(
         cocos_labels = _nearest_cocos_labels(
             gc, [binding["target_id"] for binding in existing["bindings"]]
         )
+        lifecycles = dd_path_lifecycles(
+            gc, [binding["target_id"] for binding in existing["bindings"]], version
+        )
         for binding in existing["bindings"]:
             source_id = binding["source_id"]
             target_path = binding["target_id"]
+            lifecycle = lifecycles.get(target_path)
+            if lifecycle is not None and not lifecycle.live:
+                entry["unexpanded"].append(
+                    {
+                        "source_id": source_id,
+                        "target_path": target_path,
+                        "reason": lifecycle.reason,
+                    }
+                )
+                continue
             rows = members.get((source_id, target_path), [])
             derived_from = rows[0].get("derived_from") if rows else None
             if (
