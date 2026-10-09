@@ -3841,8 +3841,9 @@ async def enrich_worker(
             dda = name.split("/")[0]
             return f"ppf:{dda}"
 
-        if source == "edas" and "/" in name:
-            cat = name.split("/")[0]
+        edas_path = signal.get("data_source_path") or name
+        if source == "edas" and "/" in edas_path:
+            cat = edas_path.split("/")[0]
             return f"edas:{cat}"
 
         # JPF signals: group by subsystem (first part of name like "DA/C1D-IPLA")
@@ -4107,6 +4108,12 @@ async def enrich_worker(
         )
 
         # Build user prompt with context from each signal source
+        edas_config = state.facility_config.get("data_systems", {}).get("edas", {})
+        edas_category_descriptions = {
+            entry["code"]: entry["description"]
+            for entry in edas_config.get("category_descriptions", [])
+        }
+        signal_glossary = state.facility_config.get("signal_glossary", [])
         user_lines = [
             f"Classify these {len(signals)} signals.\n",
             "Return results in the same order using signal_index (1-based).\n",
@@ -4164,9 +4171,13 @@ async def enrich_worker(
             elif group_key.startswith("edas:"):
                 cat = group_key[5:]
                 user_lines.append(f"\n## EDAS Category: {cat}")
-                user_lines.append(
-                    f"JT-60SA Experiment Data Access System signals from category {cat}."
-                )
+                category_description = edas_category_descriptions.get(cat)
+                if category_description:
+                    user_lines.append(f"EDAS category {cat}: {category_description}.")
+                else:
+                    user_lines.append(
+                        f"JT-60SA Experiment Data Access System signals from category {cat}."
+                    )
                 user_lines.append(
                     "Access: eddbreadTime(shot, category, data_name, t1, t2)"
                 )
@@ -4278,6 +4289,15 @@ async def enrich_worker(
                     user_lines.append(f"data_source_name: {signal['data_source_name']}")
                 if signal.get("data_source_path"):
                     user_lines.append(f"data_source_path: {signal['data_source_path']}")
+                if group_key.startswith("edas:"):
+                    catalogue_name = " ".join(
+                        str(signal.get(field) or "")
+                        for field in ("data_source_path", "name")
+                    ).casefold()
+                    for entry in signal_glossary:
+                        term = entry["term"]
+                        if term and term.casefold() in catalogue_name:
+                            user_lines.append(f"glossary: {term} — {entry['meaning']}")
                 if signal.get("is_static"):
                     user_lines.append("is_static: true")
 

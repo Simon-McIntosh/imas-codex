@@ -210,6 +210,10 @@ classes:
       data_systems:
         description: Data system configuration for signal discovery
         range: DataSystemsConfig
+      signal_glossary:
+        description: Facility terms and meanings for signal enrichment context
+        range: SignalGlossaryEntry
+        multivalued: true
       data_access_patterns:
         description: >-
           Data access patterns discovered during initial facility exploration.
@@ -864,6 +868,10 @@ classes:
         description: Observed native read, catalogue and metadata routes for each database
         range: EDASDatabaseRoute
         multivalued: true
+      category_descriptions:
+        description: Human-readable descriptions of EDAS category codes for enrichment
+        range: EDASCategoryDescription
+        multivalued: true
       api_path:
         description: Path to EDAS API source files
       uddb_api_path: {description: Path to the UDDB Python API source, range: string}
@@ -1054,6 +1062,28 @@ classes:
           the parsed file produces this many elements (probes, coils,
           contour points, etc.).
         range: integer
+
+  SignalGlossaryEntry:
+    description: A facility term and its meaning for signal enrichment
+    class_uri: fc:SignalGlossaryEntry
+    attributes:
+      term:
+        description: Term found in a catalogue path or signal name
+        required: true
+      meaning:
+        description: Facility meaning of the term
+        required: true
+
+  EDASCategoryDescription:
+    description: An EDAS category code and its signal context
+    class_uri: fc:EDASCategoryDescription
+    attributes:
+      code:
+        description: EDAS category code
+        required: true
+      description:
+        description: Human-readable description of the category
+        required: true
 
   DDADescriptionConfig:
     description: >-
