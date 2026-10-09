@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. The reviewed manifest's structured baseline_suite field is empty (manifest.md:21) and after_suite names only head-absolute-check.log, so I read the run's own arm logs: baseline.log (revision 3fb07d05e64e3ac623914682a6b1262397ae8de2, tested tree arm, command `... uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_path_enrich_failures.py tests/discovery/test_code_scan_failures.py`) reports `11 passed, 1 warning in 6.55s` / EXIT=0 with an empty failure set, and head-absolute-check.log (revision 40ed29859163ab92a6e064fc66626ac0b8d27291) reports `12 passed, 1 warning in 6.25s` / EXIT=0 with an empty failure set. No test that passes at head fails at base, so the run added no failures. I independently re-ran the head arm in the reviewed worktree at 40ed29859 and reproduced `12 passed, 1 warning` / EXIT=0 (reviewer-head-gate.log). The base arm additionally reddens the run's own new test: reproduction.log records test_timeout_recovers_partial_output_and_charges_unfinished_path as 1 failed / EXIT=1 at 3fb07d05, so the added test measures the new behavior rather than passing vacuously.",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/code/workers.py:193",
+    "imas_codex/discovery/code/workers.py:208",
+    "imas_codex/discovery/paths/enrichment.py:286",
+    "imas_codex/discovery/paths/enrichment.py:532",
+    "imas_codex/discovery/paths/parallel.py:2262",
+    "imas_codex/discovery/paths/parallel.py:2264"
+  ],
+  "completed_at": "2026-10-09T07:15:57.245Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-09T06:56:10Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/code/workers.py",
+      "line": "238",
+      "severity": "follow-on",
+      "text": "follow-on: DEFECT introduced by this run \u2014 the code-scan retry backoff moved inside the progress-callback guard. At base 3fb07d05 the line `await _sleep_unless_stopped(state, backoff)` sat at function-body indentation (workers.py:278), so it ran on every reachable-error retry. In commit 40ed29859 it became `await reachability._sleep_unless_stopped(state, backoff)` indented one level deeper, inside the `if on_progress:` block that follows the `on_progress(...)` call (workers.py:238). The intended change was to call the same helper through its new module; the incidental re-indent changed control flow. Consequence: when scan_worker is driven with on_progress=None (its default, and what the engine passes whenever on_scan_progress is None -- both production WorkerSpecs forward on_progress only when the callback is not None, engine.py:160), the host-reachable retry loop no longer sleeps at all, so a repeatedly-failing remote scan becomes a no-delay busy loop that re-issues the batched SSH call as fast as it fails, exactly the failure state section 63 exists to bound. REPRODUCED at head: a probe driving scan_worker with on_progress=None and a reachable CalledProcessError(1) (the same harness the file's own run_retrying_scan builds) records `remote_calls: 5` and `backoff_waits: []` (reviewer-backoff-probe.log); the identical drive against a scratch checkout of base 3fb07d05 records `backoff_waits: [2, 4, 8, 16]` (reviewer-backoff-probe-base.log). Uncovered by the run's own tests: tests/discovery/test_code_scan_failures.py::test_script_failure_still_stops_after_the_retry_limit asserts only claim state and remote.call_count == 5, never the backoff waits, so 12/12 still pass with the backoff entirely absent."
+    },
+    {
+      "file": "imas_codex/discovery/base/reachability.py",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: the shared module keeps `_sleep_unless_stopped` private and workers.py reaches into it as `reachability._sleep_unless_stopped` (workers.py:238) while importing `host_unreachable`/`wait_for_reachable_host` by name. A module that two subsystems now depend on is better served by a public `sleep_unless_stopped` than by a leading-underscore name read from outside the module; the private access is the only reason the call site was rewritten rather than left as a bare call. Cosmetic, not a behavior defect."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest leaves its structured baseline_suite field empty (line 21) and its after_suite field carries only the head arm, so a reader deriving the added-failure set from the manifest's own machine-readable arms finds no base and must fall back to the free-text test_logs (baseline.log, head-absolute-check.log). The arms exist as files and I used them, so the run added no failures, but the empty structured field is the same defect the previous review of this section recorded and it remains unfixed."
+    }
+  ],
+  "item_aggregate": 3,
+  "item_verdicts": {
+    "diff": "read the two commits against base 3fb07d05e64e3ac623914682a6b1262397ae8de2, one by one, on the reviewed worktree at 40ed29859163ab92a6e064fc66626ac0b8d27291. 0562a5cb0 adds tests/discovery/test_path_enrich_failures.py::test_timeout_recovers_partial_output_and_charges_unfinished_path (47 insertions) which reddens at base; 40ed29859 creates imas_codex/discovery/base/reachability.py (host_unreachable + wait_for_reachable_host + private backoff), deletes the duplicated helpers from imas_codex/discovery/code/workers.py and repoints it, points imas_codex/discovery/paths/parallel.py and imas_codex/discovery/paths/enrichment.py at the shared module, adds `_timeout_results` to recover complete JSONL on a remote timeout, migrates the enrichment set-aside from the ad-hoc `enrich_set_aside` property to the declared `enrich_skip_reason` property with `should_enrich=false`, tightens the four pending queries to `(should_enrich = true OR (should_enrich IS NULL AND scan_relevance >= threshold))`, and touches imas_codex/discovery/paths/frontier.py's enrichment_ready count and tests/discovery/test_code_scan_failures.py's monkeypatch target. Seven files, all inside the node's declared write paths. The one unintended change is the workers.py:238 backoff re-indent (see defect finding).",
+    "done_when": "the plan names an unreachable host pausing without spending budget, a reachable failure set aside at the limit with its reason, and the pending count then excluding it, plus the shared-owner move of the classifier and backoff. test_unreachable_host_pauses_without_charging asserts waits==[1] and no persistence; test_reachable_failure_sets_path_aside_with_reason drives five reachable failures and asserts the counter, should_enrich=false and the recorded skip reason; test_set_aside_path_is_neither_pending_nor_claimable asserts has_pending_work/_has_pending_enrich_work/frontier.get_discovery_stats/enrichment.get_paths_pending_enrichment all exclude it; test_code_scan_and_path_enrichment_share_host_reachability asserts both stages import the single shared owner. All pass at head (12 passed, EXIT=0) and the run's reproduction.log reddens the timeout test at base. The move is delivered: workers.py and parallel.py no longer define the helpers and import them from imas_codex.discovery.base.reachability.",
+    "goal": "section 63 asks that path enrichment bound its failures like the code scan and that the unreachability classifier and its backoff get one shared owner in a module both stages import. Commit 40ed29859 delivers the move exactly as the plan describes -- a new imas_codex/discovery/base/reachability.py holds host_unreachable and wait_for_reachable_host, workers.py and parallel.py import them, and no second copy survives -- and it also closes the three done-when behaviours and three follow-ons the prior review recorded (frontier enrichment_ready exclusion, get_paths_pending_enrichment exclusion, timeout partial-output recovery). The one thing not delivered is that the moved code's call site kept its behavior: the retry backoff now only fires when a progress callback is present.",
+    "manifest": "read; status complete, two commits 0562a5cb0 and 40ed29859, seven declared changed paths, a landing line, six named test_logs and a negative_control_log with a matching note. Its baseline_suite field is empty (line 21) and after_suite carries only head-absolute-check.log, so the machine-readable added-failure derivation finds no base arm.",
+    "reuse": "the change is the reuse the plan asked for: it moves the classifier and backoff to one shared owner and deletes the duplicate definitions rather than copying them, and the paths stage stops importing code-scan internals. The residual cost is that the shared helper's backoff is private (`_sleep_unless_stopped`) and reached from other modules.",
+    "write_paths": "the diff against 3fb07d05 is exactly imas_codex/discovery/base/reachability.py, imas_codex/discovery/code/workers.py, imas_codex/discovery/paths/enrichment.py, imas_codex/discovery/paths/frontier.py, imas_codex/discovery/paths/parallel.py, tests/discovery/test_code_scan_failures.py and tests/discovery/test_path_enrich_failures.py -- the seven the node declared, and nothing else."
+  },
+  "justifications": {
+    "durability": "the three done-when behaviours are guarded by tests I confirmed redden at base and green at head: the unreachable-path test fails at base and passes at head; the set-aside test asserts the counter, should_enrich=false and the skip reason; the pending-count test asserts four surfaces (parallel.has_pending_work, parallel._has_pending_enrich_work, frontier.get_discovery_stats, enrichment.get_paths_pending_enrichment). The run's negative control is a genuine red log (negative-control.log: classifying an enrichment timeout as unreachable makes test_timeout_recovers_partial_output_and_charges_unfinished_path fail, EXIT=1). The weakness is the code scan's retry backoff: this run changed its trigger condition and no test asserts it, so the regression survives a green suite. Additionally the enrichment tests mock GraphClient with a string-matching PathGraph, so a renamed property or a Cypher syntax error would not be caught; no -m graph test exercises these queries.",
+    "evidence": "the head arm (12 passed, EXIT=0 at 40ed29859) and the base arm (11 passed, EXIT=0 at 3fb07d05) are recorded in the reviewed run's own logs and I reproduced the head arm independently in the reviewed worktree. The run's negative control log is present and red. Against that, the run left its structured baseline_suite field empty and its tests do not exercise the code-scan backoff, so the evidence is solid for the enrichment behaviours and thinner for the code-scan change the same commit made.",
+    "fit": "the change follows the plan's idiom: one shared owner for the reachability classifier and backoff, mechanism-named symbols (host_unreachable, wait_for_reachable_host, _timeout_results, enrich_skip_reason, enrich_failures, ENRICH_FAILURE_LIMIT), and it migrates the set-aside marker onto the declared enrich_skip_reason property instead of the ad-hoc enrich_set_aside the prior attempt invented. The deductions are the accidental control-flow change at workers.py:238 and the private cross-module helper access.",
+    "goal_fidelity": "the plan's shared-owner move is delivered exactly (base/reachability.py imported by both workers.py and parallel.py, no duplicate), and the three done-when checks plus the display and pending-query follow-ons from the prior review all hold. The single shortfall traced to this run is the workers.py retry backoff now firing only under a progress callback.",
+    "reuse": "the node retired the private cross-subsystem import by moving both helpers into imas_codex/discovery/base/reachability.py and repointing workers.py, parallel.py and enrichment.py at it -- the single-owner outcome the plan asked for -- and it did not copy the helpers. The remaining cost is the private `_sleep_unless_stopped` reached from outside its module.",
+    "scope_discipline": "the diff against 3fb07d05 is the seven declared paths and nothing else; no shared index, sprint state, plan file or generated artifact was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of run r-20261009T063055508893-path-enrich-shared-reachability (node path-enrich-shared-reachability, plan imas-codex:jt60sa-discovery-completion section 63; goal: give the SSH-unreachability classifier and its backoff one shared owner in a module both the code scan and path enrichment import, and finish the retry-budget behaviours the prior attempt left outstanding).\n\nVERDICT goal: delivered. Commit 40ed29859163ab92a6e064fc66626ac0b8d27291 adds imas_codex/discovery/base/reachability.py holding host_unreachable and wait_for_reachable_host, deletes the duplicated helpers from imas_codex/discovery/code/workers.py, and repoints workers.py, imas_codex/discovery/paths/parallel.py and imas_codex/discovery/paths/enrichment.py at it. The three section-63 done-when checks hold, and three follow-ons the previous review recorded are closed: the frontier enrichment_ready display count, get_paths_pending_enrichment, and the dropped timeout partial-output recovery (restored by _timeout_results).\nVERDICT done_when: test_unreachable_host_pauses_without_charging, test_reachable_failure_sets_path_aside_with_reason and test_set_aside_path_is_neither_pending_nor_claimable pass at head (12 passed, EXIT=0) and the run's reproduction.log reddens the new timeout test at base (1 failed, EXIT=1). test_code_scan_and_path_enrichment_share_host_reachability asserts the single-owner import identity.\nVERDICT write_paths: the diff against 3fb07d05 is the seven declared paths and nothing else.\nVERDICT manifest: read; status complete, six gate logs and a negative control, but baseline_suite is empty.\nVERDICT diff: read commit by commit against 40ed29859; seven files, all in scope.\n\nSCORE goal_fidelity: 17\nSCORE evidence: 15\nSCORE scope_discipline: 20\nSCORE durability: 15\nSCORE fit: 14\nSCORE reuse: 17\n\nFINDING imas_codex/discovery/code/workers.py:238 defect: the retry backoff `await reachability._sleep_unless_stopped(state, backoff)` was indented into the `if on_progress:` block, so when scan_worker runs with on_progress=None (its default, and what the engine passes when on_scan_progress is None) the reachable-error retry loop never sleeps. Reproduced with a probe: head records remote_calls=5 with backoff_waits empty, base records [2, 4, 8, 16]; the run's own retry-limit test asserts only call_count and so stays green.\nFINDING imas_codex/discovery/base/reachability.py:26 follow-on: the shared helper `_sleep_unless_stopped` is private yet reached from other modules as reachability._sleep_unless_stopped; a shared module's sleep primitive should be public.\nFINDING manifest.md:21 follow-on: the reviewed manifest's structured baseline_suite field is empty, so the machine-readable added-failure derivation has no base arm and must fall back to the free-text logs.\n",
+  "review_run_id": "r-20261009T065559861134-review-of-path-enrich-shared-reachability",
+  "reviewed_base_sha": "3fb07d05e64e3ac623914682a6b1262397ae8de2",
+  "reviewed_head_sha": "40ed29859163ab92a6e064fc66626ac0b8d27291",
+  "reviewed_run_id": "r-20261009T063055508893-path-enrich-shared-reachability",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T07:12:00+00:00",
+  "total": 98
+}
