@@ -1162,6 +1162,7 @@ def claim_signals_for_enrichment(
                        s.discovery_source AS discovery_source,
                        s.description AS description,
                        s.source_description AS source_description,
+                       s.data_class AS data_class,
                        s.data_source_node AS data_source_node,
                        s.facility_id AS facility_id,
                        s.is_static AS is_static,
@@ -1479,7 +1480,7 @@ def claim_signals_for_check(
                        s.data_source_path AS data_source_path,
                        s.physics_domain AS physics_domain, s.tdi_function AS tdi_function,
                        s.discovery_source AS discovery_source, s.name AS name,
-                       s.data_class AS data_class,
+                       s.data_class AS data_class, s.data_class_letter AS data_class_letter,
                        s.data_source_node AS data_source_node,
                        s.node_path AS node_path,
                        COALESCE(s.data_access, derived_data_access) AS data_access
@@ -2727,9 +2728,8 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
     Optionally creates INTRODUCED_IN relationships to SignalEpoch
     epoch (if epoch_id is present).
 
-    EDAS batches come from one scanner. A catalogue re-enumeration updates
-    only source_description on rows already present so prior enrichment and
-    claims survive the scan.
+    EDAS re-enumeration refreshes scanner-owned values on existing rows while
+    prior enrichment, status, and claims survive the scan.
 
     Large signal lists (e.g., 5000+ from PPF) are batched to avoid
     transaction timeouts from a single massive UNWIND MERGE.
@@ -2752,12 +2752,12 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
                     for sig in batch
                 ]
 
-                source_description_only = all(
-                    sig.get("discovery_source") == "edas" for sig in batch
-                )
+                edas_batch = all(sig.get("discovery_source") == "edas" for sig in batch)
                 on_match = (
-                    "s.source_description = sig.source_description"
-                    if source_description_only
+                    "s.source_description = sig.source_description, "
+                    "s.accessor = sig.accessor, s.data_class = sig.data_class, "
+                    "s.data_class_letter = sig.data_class_letter, s.unit = sig.unit"
+                    if edas_batch
                     else "s += scanned, s.claimed_at = null"
                 )
 
@@ -4214,7 +4214,8 @@ async def enrich_worker(
                         f"JT-60SA Experiment Data Access System signals from category {cat}."
                     )
                 user_lines.append(
-                    "Access: eddbreadTime(shot, category, data_name, t1, t2)"
+                    "Access: use each signal's accessor; the EDDB data class "
+                    "selects its read call."
                 )
                 user_lines.append("\nSignals from this category:")
 
@@ -4313,6 +4314,13 @@ async def enrich_worker(
                 prompt_order.append(batch_position)
                 user_lines.append(f"\n### Signal {signal_index}")
                 user_lines.append(f"accessor: {signal['accessor']}")
+                if signal.get("data_class"):
+                    user_lines.append(f"data_class: {signal['data_class']}")
+                    if signal["data_class"] in {"image", "binary", "comment"}:
+                        user_lines.append(
+                            "This is a non-waveform payload; describe its content "
+                            "without treating it as a time series."
+                        )
                 user_lines.append(f"name: {signal.get('name', 'unknown')}")
                 if signal.get("tdi_quantity"):
                     user_lines.append(f"tdi_quantity: {signal['tdi_quantity']}")
@@ -5217,6 +5225,7 @@ async def check_worker(
                         data_source_node=s.get("data_source_node"),
                         data_source_path=s.get("data_source_path"),
                         data_class=s.get("data_class"),
+                        data_class_letter=s.get("data_class_letter"),
                         node_path=s.get("node_path") or s.get("data_source_path"),
                     )
                     for s in group
