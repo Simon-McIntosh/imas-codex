@@ -1,0 +1,82 @@
+<section id="convention-reference-labels">
+  <h3 id="convention-reference-labels-heading">Reference labels from the machine map and JET sources</h3>
+  <p id="convention-reference-labels-summary">
+    The frozen <code>v0.2.0-rc4</code> JT-60SA bundle has 61 map bindings:
+    60 join a graph <code>SignalSource</code> through their EDDB group and array,
+    and one does not. The fixture records the bundle version and SHA-256 of its
+    bundle descriptor and four map files. It also contains 60 hand-labelled JET
+    sources, 30 of them convention-independent controls (15 in each half).
+    JET has 30 rows in each half; JT-60SA has 33 calibration and 27 held-out
+    rows. Rows sharing a <code>SignalSource</code> remain in the same half.
+  </p>
+  <table id="convention-reference-labels-jt-counts">
+    <caption>Joined JT-60SA bindings by DD class and half</caption>
+    <thead><tr><th>DD class</th><th>Calibration</th><th>Held out</th><th>Total</th></tr></thead>
+    <tbody>
+      <tr><td><code>psi_like</code></td><td>18</td><td>9</td><td>27</td></tr>
+      <tr><td><code>one_like</code></td><td>8</td><td>9</td><td>17</td></tr>
+      <tr><td><code>ip_like</code></td><td>6</td><td>6</td><td>12</td></tr>
+      <tr><td><code>q_like</code></td><td>1</td><td>1</td><td>2</td></tr>
+      <tr><td><code>b0_like</code></td><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td><code>none</code></td><td>0</td><td>1</td><td>1</td></tr>
+      <tr><th>Total</th><th>33</th><th>27</th><th>60</th></tr>
+    </tbody>
+  </table>
+  <p id="convention-reference-labels-split">
+    The 12 <code>ip_like</code> bindings split 6/6: the ten distinct PF coil
+    currents split five per half, and PSRC <code>Ip</code> and FAME
+    <code>TTCU</code> take opposite halves. The 18-member flux-loop source
+    cannot split, so <code>psi_like</code> is 18/9 at its closest source-level
+    balance; the eight-member pickup source gives <code>one_like</code> 8/9.
+    These group constraints prevent an exact 30/30 JT-60SA row split while
+    keeping each multi-row class as balanced as its sources allow.
+  </p>
+  <table id="convention-reference-labels-jet-counts">
+    <caption>Hand-labelled JET sources by class and half</caption>
+    <thead><tr><th>Class</th><th>Calibration</th><th>Held out</th><th>Total</th></tr></thead>
+    <tbody>
+      <tr><td><code>none</code></td><td>15</td><td>15</td><td>30</td></tr>
+      <tr><td><code>one_like</code></td><td>5</td><td>6</td><td>11</td></tr>
+      <tr><td><code>psi_like</code></td><td>4</td><td>3</td><td>7</td></tr>
+      <tr><td><code>ip_like</code></td><td>2</td><td>2</td><td>4</td></tr>
+      <tr><td><code>b0_like</code></td><td>2</td><td>2</td><td>4</td></tr>
+      <tr><td><code>q_like</code></td><td>2</td><td>2</td><td>4</td></tr>
+      <tr><th>Total</th><th>30</th><th>30</th><th>60</th></tr>
+    </tbody>
+  </table>
+  <p id="convention-reference-labels-interpretation">
+    DD labels are read from the target or its nearest labelled parent: for
+    example, <code>magnetics/flux_loop/flux/data</code> inherits
+    <code>psi_like</code> from <code>magnetics/flux_loop/flux</code>. All 27
+    flux-loop rules say <code>one_like</code> in imas-ambix, but their
+    <code>channel_factor=-1</code> is already the fitted total raw-to-COCOS-17
+    sign; all 27 are marked <code>sign_adjudicated=false</code> pending the
+    diagnostic sign adjudication. The <code>BTV</code> rule's factor is
+    <code>1/3</code> for a radius conversion, so its numeric factor is preserved
+    rather than presented as a pure sign. The TF current target is explicitly
+    class <code>none</code>: neither <code>tf/coil/current/data</code> nor its
+    existing DD ancestors carries a COCOS label.
+  </p>
+  <table id="convention-reference-labels-unjoined">
+    <caption>Every map binding without a SignalSource join</caption>
+    <thead><tr><th>Source group / array</th><th>Target</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>GEQDSK / PSI</code></td>
+        <td><code>equilibrium/time_slice/profiles_2d/psi</code></td>
+        <td>This file-backed G-EQDSK source has no corresponding graph
+          <code>FacilitySignal</code> or <code>SignalSource</code>; its
+          group/array pair cannot join through the EDDB accessor route. It needs
+          a graph source before it can enter the reference fixture.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="convention-reference-labels-receipt">
+    The fixture gate read back all five file hashes, confirmed all 120 source
+    rows and all graph source ids, checked the source-level class splits,
+    and checked that the 30 independent JET controls split 15/15. The complete
+    gate receipt is <code>fixture-balance-gate.log</code> in the worker run
+    directory. It proves each multi-row JT-60SA class is as balanced as its
+    source groups allow and confirms that the JET rows are unchanged.
+  </p>
+</section>
