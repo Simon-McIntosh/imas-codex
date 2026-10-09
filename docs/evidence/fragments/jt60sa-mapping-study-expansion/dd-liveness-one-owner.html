@@ -1,0 +1,56 @@
+<!-- One owner now decides whether a DD path is live at a version. dd_path_lifecycles
+     in imas_codex/ids/graph_ops.py rendered its own Cypher filter and decided liveness
+     with a Python version comparison (dd_path_live_at), disagreeing with the search
+     layer's _dd_version_clause on a path with no INTRODUCED_IN edge and crashing on an
+     empty version string. It now selects live paths through _dd_version_clause, and an
+     empty or blank dd_version is treated as unset, the same as None.
+     Code: imas_codex/ids/graph_ops.py (import of _dd_version_clause; _unset_dd_version;
+     dd_path_lifecycles). Tests: tests/ids/test_dd_liveness_owner.py.
+     Gate and negative-control logs:
+     ~/.config/reckon/crew/runs/r-20261009T113249385486-dd-liveness-one-owner/ -->
+<section id="dd-liveness-one-owner" data-reckon="evidence">
+  <h2 id="dd-liveness-one-owner-heading">DD path liveness has one owner and an unset version is unset</h2>
+  <table id="dd-liveness-one-owner-measure-table">
+    <caption>Gates: <code>uv run --no-sync pytest -p no:cacheprovider tests/ids/</code> and <code>uv run --no-sync pytest -p no:cacheprovider -m graph tests/ids/test_deprecated_dd_targets.py</code> on the fleet node</caption>
+    <thead>
+      <tr><th>Arm</th><th>Establishes</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr id="dd-liveness-one-owner-head-row">
+        <td>head</td>
+        <td><code>dd_path_lifecycles</code> renders its filter through the spy-verified
+            <code>_dd_version_clause</code> (the emitted statement carries the owner's
+            fragment verbatim); an empty-string <code>dd_version</code> leaves every
+            requested path live without raising; a path with no recorded introduction
+            is not live, matching the owner</td>
+        <td>pass (594 passed, 5 skipped, 8 deselected; plus
+            <code>tests/ids/test_dd_liveness_owner.py</code> 3 passed; exit 0)</td>
+      </tr>
+      <tr id="dd-liveness-one-owner-graph-row">
+        <td>live graph (<code>-m graph</code>)</td>
+        <td>The §25 graph test still rejects <code>tf/coil/conductor/current/data</code>
+            (live=false, deprecated 3.42.0) and accepts
+            <code>tf/coil/current/data</code> (live=true) against the real Neo4j, so the
+            rendered clause is valid Cypher and preserves the owner's semantics</td>
+        <td>pass (1 passed; exit 0)</td>
+      </tr>
+      <tr id="dd-liveness-one-owner-neg-row">
+        <td>negative control</td>
+        <td>Restore parsing an empty <code>dd_version</code> string
+            (<code>_unset_dd_version</code> returns the blank string instead of
+            <code>None</code>); the empty-version test then raises</td>
+        <td>1 failed, incl. <code>test_empty_dd_version_leaves_every_path_live_without_raising</code>
+            — <code>ValueError: invalid literal for int() with base 10: ''</code> in
+            <code>_version_tuple</code> (exit 1)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="dd-liveness-one-owner-note">
+    The §25 crash is now unreachable: the mapping pipeline passes
+    <code>state.dd_version or ""</code> when a run carries no version, and
+    <code>_unset_dd_version</code> normalises that blank to <code>None</code> before any
+    version parser sees it. A row from a stub graph that carries no projected
+    <code>live</code> flag is decided by the same rule the clause encodes, so a missing
+    introduction is not part of the version.
+  </p>
+</section>

@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.tools.graph_search import _dd_version_clause
 
 logger = logging.getLogger(__name__)
 
@@ -922,6 +923,21 @@ def clear_candidates(facility: str, gc: GraphClient) -> dict[str, int]:
 # hand-off export all share one rule.
 
 
+def _unset_dd_version(dd_version: int | str | None) -> int | str | None:
+    """Normalise an unset DD version to ``None``.
+
+    An empty or whitespace-only string is unset, exactly as ``None`` is. The
+    mapping pipeline passes ``state.dd_version or ""`` when a run carries no DD
+    version, so a blank string must disable the version filter rather than
+    reach a version parser, which raises on it.
+    """
+    if dd_version is None:
+        return None
+    if isinstance(dd_version, str) and not dd_version.strip():
+        return None
+    return dd_version
+
+
 def _version_tuple(version: str) -> tuple[int, int, int]:
     """Parse a DD version id (``"4.1.1"``) into ``(major, minor, patch)``."""
     numbers = [int(part) for part in str(version).split(".")[:3]]
@@ -951,8 +967,10 @@ def dd_path_live_at(
     The path belongs to the version when it was introduced at or before it and
     was not deprecated at or before it. A path with no recorded introduction is
     treated as present, because absence of the edge is not evidence it is not.
-    ``dd_version`` of ``None`` disables the test and returns ``True``.
+    An unset ``dd_version`` — ``None`` or a blank string — disables the test and
+    returns ``True``.
     """
+    dd_version = _unset_dd_version(dd_version)
     if dd_version is None:
         return True
     if introduced_version is not None and not dd_version_at_or_before(
@@ -988,6 +1006,7 @@ def dd_path_stale_reason(
     The reason names the deprecation version that retired the path, or, for a
     path introduced after the version, its introduction version.
     """
+    dd_version = _unset_dd_version(dd_version)
     if dd_path_live_at(introduced_version, deprecated_version, dd_version):
         return None
     if deprecated_version is not None and dd_version_at_or_before(
@@ -1006,42 +1025,71 @@ def dd_path_stale_reason(
 def dd_path_lifecycles(
     gc: GraphClient,
     paths: Iterable[str],
-    dd_version: int | str,
+    dd_version: int | str | None,
 ) -> dict[str, DDPathLifecycle]:
     """Resolve each DD path's lifecycle at ``dd_version`` in one query.
 
     Returns a map keyed by path for every requested path that exists as an
-    IMASNode. A path deprecated at or before ``dd_version`` carries
-    ``live=False`` and a reason naming its deprecation version; a path
-    introduced after ``dd_version`` carries ``live=False`` and a reason naming
-    its introduction version. A live path carries ``reason=None``.
+    IMASNode. Liveness is decided in the graph through ``_dd_version_clause``,
+    the one owner of the "active at this DD version" rule, so a path with no
+    recorded introduction is not part of the version — matching the search
+    layer rather than the presence-tolerant Python predicate. A path deprecated
+    at or before ``dd_version`` carries ``live=False`` and a reason naming its
+    deprecation version; a path introduced after ``dd_version`` carries
+    ``live=False`` and a reason naming its introduction version. An unset
+    ``dd_version`` — ``None`` or a blank string — disables the filter and leaves
+    every requested path live. A live path carries ``reason=None``.
     """
     wanted = list(dict.fromkeys(paths))
-    if not wanted or dd_version is None:
+    if not wanted:
         return {}
+    resolved = _unset_dd_version(dd_version)
+    params: dict[str, Any] = {"paths": wanted}
+    clause = _dd_version_clause("p", resolved, params)
     rows = gc.query(
-        """
+        f"""
         UNWIND $paths AS pid
-        MATCH (p:IMASNode {id: pid})
-        OPTIONAL MATCH (p)-[:INTRODUCED_IN]->(iv:DDVersion)
-        OPTIONAL MATCH (p)-[:DEPRECATED_IN]->(dv:DDVersion)
-        RETURN p.id AS id, iv.id AS introduced, dv.id AS deprecated
+        MATCH (p:IMASNode {{id: pid}})
+        OPTIONAL MATCH (p)-[:INTRODUCED_IN]->(inode:DDVersion)
+        OPTIONAL MATCH (p)-[:DEPRECATED_IN]->(dnode:DDVersion)
+        RETURN p.id AS id,
+               inode.id AS introduced,
+               dnode.id AS deprecated,
+               CASE WHEN true {clause} THEN true ELSE false END AS live
         """,
-        paths=wanted,
+        **params,
     )
     lifecycles: dict[str, DDPathLifecycle] = {}
     for row in rows or []:
         path = row["id"]
         introduced = row.get("introduced")
         deprecated = row.get("deprecated")
-        live = dd_path_live_at(introduced, deprecated, dd_version)
+        live = row.get("live")
+        if live is None:
+            # A row without the projected flag — a stub graph, or a driver that
+            # did not evaluate the projection — is decided by the same rule the
+            # clause encodes, so a missing introduction is not part of the
+            # version.
+            live = resolved is None or (
+                introduced is not None
+                and dd_path_live_at(introduced, deprecated, resolved)
+            )
+        live = bool(live)
+        reason = None
+        if not live:
+            reason = dd_path_stale_reason(path, introduced, deprecated, resolved)
+            if reason is None:
+                reason = (
+                    f"{path} is not part of DD {resolved}: "
+                    f"no introduction at or before it"
+                    if resolved is not None
+                    else f"{path} is not part of the configured Data Dictionary"
+                )
         lifecycles[path] = DDPathLifecycle(
             path=path,
             introduced_version=introduced,
             deprecated_version=deprecated,
             live=live,
-            reason=None
-            if live
-            else dd_path_stale_reason(path, introduced, deprecated, dd_version),
+            reason=reason,
         )
     return lifecycles
