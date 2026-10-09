@@ -181,6 +181,7 @@ class DiscoveryState(DiscoveryStateBase):
         For --path-limit purposes, count paths that have completed their pipeline:
         - triaged: below threshold, terminal after 1st pass
         - scored: completed 2nd pass scoring with enrichment evidence
+        - set aside: enrichment reached its failure budget
         Both must not be awaiting expansion or enrichment.
         """
         from imas_codex.graph import GraphClient
@@ -194,13 +195,15 @@ class DiscoveryState(DiscoveryStateBase):
                   AND (NOT ({EXPANSION_GATE}))
                   AND (p.path_purpose IN $excluded_purposes
                        OR (p.should_enrich = false AND p.scan_relevance < $minimum)
-                       OR p.is_enriched = true)
+                       OR p.is_enriched = true
+                       OR coalesce(p.enrich_failures, 0) >= $failure_limit)
                 RETURN count(p) AS terminal_count
                 """,
                 facility=self.facility,
                 triaged=PathStatus.triaged.value,
                 scored=PathStatus.scored.value,
                 minimum=get_path_scan_threshold(),
+                failure_limit=ENRICH_FAILURE_LIMIT,
                 **_expansion_gate_params(),
             )
             return result[0]["terminal_count"] if result else 0
