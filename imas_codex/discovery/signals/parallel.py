@@ -1306,6 +1306,35 @@ def fetch_epoch_context(
 
 
 @retry_on_deadlock()
+def carry_forward_recorded_checks(facility: str) -> int:
+    """Move re-enriched signals that already carry a check straight to checked.
+
+    A check reads data through the signal's accessor at a reference shot, so
+    its result does not depend on the enrichment's description. A signal
+    re-enriched after ``--reset-to discovered`` keeps ``checked`` and
+    ``checked_at``, and reading the same data again would only cost a remote
+    call. ``--reset-to enriched`` clears both when a fresh check is wanted.
+    Claimed signals are left to their holder.
+    """
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            MATCH (s:FacilitySignal {facility_id: $facility})
+            WHERE s.status = $enriched
+              AND s.checked = true
+              AND s.checked_at IS NOT NULL
+              AND s.claimed_at IS NULL
+            SET s.status = $checked
+            RETURN count(s) AS carried
+            """,
+            facility=facility,
+            enriched=FacilitySignalStatus.enriched.value,
+            checked=FacilitySignalStatus.checked.value,
+        )
+    return result[0]["carried"] if result else 0
+
+
+@retry_on_deadlock()
 def claim_signals_for_check(
     facility: str,
     batch_size: int = 5,
@@ -4955,6 +4984,11 @@ async def check_worker(
     BATCH_SIZE = 20
 
     while not state.should_stop_checking():
+        carried = await asyncio.to_thread(carry_forward_recorded_checks, state.facility)
+        if carried:
+            state.check_phase.record_activity(carried)
+            wlog.info("Kept %d recorded checks for re-enriched signals", carried)
+
         # Claim batch of signals with reference_shot
         signals = await asyncio.to_thread(
             claim_signals_for_check,

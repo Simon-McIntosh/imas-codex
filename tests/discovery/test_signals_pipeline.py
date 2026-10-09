@@ -1555,6 +1555,10 @@ class TestPipelineE2E:
                 "imas_codex.discovery.signals.parallel.claim_signals_for_check",
                 side_effect=mock_claim_check,
             ),
+            patch(
+                "imas_codex.discovery.signals.parallel.carry_forward_recorded_checks",
+                return_value=0,
+            ),
             patch("asyncio.sleep", new=AsyncMock()),
         ):
             await check_worker(state)
