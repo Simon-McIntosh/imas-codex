@@ -1,0 +1,245 @@
+<section id="external-map-record-design-record">
+  <h2 id="external-map-record-design-title">A versioned record for pulled machine-map rules</h2>
+  <p id="external-map-record-design-scope">
+    This design covers the 61 signal conversion entries in the current JT-60SA
+    <code>maps/*.json</code> files and the 432 machine-description bindings in
+    <code>machine_map.json</code> (216 per phase). These are two rule families:
+    signal entries may join a <code>SignalSource</code> and an <code>IMASNode</code>;
+    machine-description bindings have an IMAS target but no corresponding
+    <code>SignalSource</code> by definition. The remaining machine-map declarations
+    stay in the hashed bundle snapshot; they are not silently cast as signal
+    rules. An earlier 45-rule count is the magnetics file alone: the
+    current PF, TF, and equilibrium files contribute another 16.
+  </p>
+
+  <h3 id="external-map-record-design-model">Nodes and properties</h3>
+  <table id="external-map-record-design-nodes">
+    <caption>Proposed graph classes; these are the complete property sets</caption>
+    <thead><tr><th>Class</th><th>Properties and meaning</th></tr></thead>
+    <tbody>
+      <tr><th><code>ExternalMapBundleVersion</code></th><td>
+        <code>id</code> (provider, facility and content digest key),
+        <code>provider</code> (<code>imas-ambix</code>), <code>facility_id</code>,
+        <code>bundle_name</code>, <code>version_label</code> (release tag or archived-state label),
+        <code>origin_kind</code> (release, local checkout, archived checkout),
+        <code>origin_ref</code> (registry reference or local source path),
+        <code>release_digest</code> (nullable OCI digest), <code>tree_sha256</code>
+        (digest of the exact files read, including relative paths),
+        <code>file_sha256_json</code> (relative path → raw SHA-256 for every file read),
+        <code>covered_rule_families_json</code> (families whose complete rule lists were read),
+        <code>is_full_bundle</code>, <code>schema_version</code>, <code>dd_version</code>,
+        <code>source_revision</code>, <code>pulled_at</code>, and <code>is_current</code>.
+        A tag is a label, not an identity: two different local trees with the
+        same candidate tag get different version nodes. Archived snapshots with
+        no <code>bundle.json</code> use their directory label and file digest.
+      </td></tr>
+      <tr><th><code>ExternalMapRule</code></th><td>
+        <code>id</code> (immutable provider/facility/kind/canonical-selector key),
+        <code>provider</code>, <code>facility_id</code>, <code>kind</code>
+        (<code>signal</code> or <code>machine_binding</code>),
+        <code>identity_key</code> (the first canonical selector),
+        <code>identity_aliases_json</code> (later verified selectors for the same rule),
+        <code>first_seen_version_id</code>, <code>last_seen_version_id</code>,
+        and <code>active</code>. Names, file placement, target, sign, validation
+        and evidence are absent from this identity node because they can change.
+      </td></tr>
+      <tr><th><code>ExternalMapRuleRevision</code></th><td>
+        <code>id</code> (rule id + version id), <code>source_file</code>,
+        <code>source_pointer</code> (JSON pointer), <code>raw_rule_sha256</code>,
+        <code>raw_json</code> (canonical complete provider entry),
+        <code>semantic_id</code>, <code>name</code>, <code>binding_set</code>,
+        <code>phase</code>, <code>source_group</code>, <code>source_array</code>,
+        <code>source_role</code>, <code>source_location</code>, <code>source_rank</code>,
+        <code>struct_array_entry</code>, <code>target_path</code> (the signal
+        <code>target_path</code> or binding <code>dd_path</code>),
+        <code>target_index</code>, <code>source_unit</code>, <code>target_unit</code>,
+        <code>source_cocos</code>, <code>target_cocos</code>,
+        <code>transformation</code>, <code>channel_factor</code>,
+        <code>unit_factor</code>, <code>sign_convention</code>,
+        <code>validation_state</code>, <code>evidence</code>,
+        <code>standard_name</code>, <code>dd_cocos_class</code>,
+        <code>source_join_state</code> (joined, unjoined, not applicable),
+        <code>target_join_state</code> (joined or unjoined), and
+        <code>join_reason</code> (nullable explicit failure reason).
+        Fields not present in one rule family are null; <code>raw_json</code>
+        retains every provider field without guessing a schema translation.
+      </td></tr>
+      <tr><th><code>ExternalMapRuleChange</code></th><td>
+        <code>id</code> (rule id + from/to version ids),
+        <code>change_types</code> (one or more types below),
+        <code>field_changes_json</code> (each changed field with exact old/new
+        JSON values, including null), <code>observed_at</code>, and
+        <code>requeue_needed</code>. One rule has one change record per comparable
+        version transition, even if name, entry and evidence all change.
+      </td></tr>
+    </tbody>
+  </table>
+  <p id="external-map-record-design-cocos">
+    A signal revision stores <code>channel_factor</code> as the provider's
+    <em>total raw-channel sign to its target COCOS</em>; it must not be applied
+    once more as a COCOS class transform. <code>dd_cocos_class</code> is resolved
+    from the target DD metadata, never from the rule's <code>transformation</code>.
+    For <code>magnetics/flux_loop/flux/data</code> the intended DD class is
+    <code>psi_like</code> while the current provider entries say
+    <code>one_like</code> and have null <code>source_cocos</code>. If the selected
+    DD version cannot supply its class, leave it unknown and fail closed for
+    class-based interpretation; the live graph's present IMASNode does not
+    currently carry <code>cocos_transformation_type</code> for this path.
+  </p>
+
+  <table id="external-map-record-design-edges">
+    <caption>Proposed directed edges and all edge properties</caption>
+    <thead><tr><th>From → edge → to</th><th>Properties and rule</th></tr></thead>
+    <tbody>
+      <tr><td>Facility → <code>HAS_EXTERNAL_MAP_VERSION</code> → ExternalMapBundleVersion</td><td>None; ownership by facility.</td></tr>
+      <tr><td>ExternalMapBundleVersion → <code>HAS_PREDECESSOR</code> → ExternalMapBundleVersion</td><td>None; links the previous pulled state in observed order, never inferred by lexical tag sort. A comparison skips back to the nearest predecessor that covers the same rule family.</td></tr>
+      <tr><td>ExternalMapBundleVersion → <code>HAS_RULE_REVISION</code> → ExternalMapRuleRevision</td><td>None; exact membership in the read snapshot.</td></tr>
+      <tr><td>ExternalMapRule → <code>HAS_REVISION</code> → ExternalMapRuleRevision</td><td>None; immutable identity to historical values.</td></tr>
+      <tr><td>ExternalMapRuleRevision → <code>JOINS_SIGNAL_SOURCE</code> → SignalSource</td><td><code>join_basis</code> (exact name or approved alias), <code>facility_signal_id</code> (the matched FacilitySignal), <code>alias_id</code> (nullable), <code>matched_at</code>. Signal rules only; historical joins stay on their revisions.</td></tr>
+      <tr><td>ExternalMapRuleRevision → <code>TARGETS_IMAS_NODE</code> → IMASNode</td><td><code>join_basis</code> (exact DD path), <code>dd_version</code>, <code>matched_at</code>. Do not replace this target with a mapping candidate.</td></tr>
+      <tr><td>ExternalMapRule → <code>HAS_EXTERNAL_CHANGE</code> → ExternalMapRuleChange</td><td>None.</td></tr>
+      <tr><td>ExternalMapRuleChange → <code>IN_VERSION</code> → ExternalMapBundleVersion</td><td>None; the version where the difference was observed.</td></tr>
+      <tr><td>ExternalMapRuleChange → <code>FROM_REVISION</code> / <code>TO_REVISION</code> → ExternalMapRuleRevision</td><td>None; either end may be absent for first observation or retirement.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="external-map-record-design-identity">Stable identity across versions</h3>
+  <p id="external-map-record-design-identity-rule">
+    A signal selector is the facility, provider, <code>signal</code> kind and
+    normalized physical channel (<code>source_group</code>,
+    <code>source_array</code>). A machine-binding selector adds the semantic
+    operating phase (from the <code>maps[].name</code> that names its binding
+    set), <code>source_role</code>, source group and array, and
+    normalized <code>struct_array_entry</code>. An <code>FLn-FLm</code> pair is
+    canonicalized to the unordered pair solely for identity; the original
+    order remains in the revision because it affects orientation. Neither
+    <code>name</code>/<code>semantic_id</code>, binding-set grouping, JSON file,
+    DD target, nor sign participates in the key. These selectors are unique
+    within the current 61 signal entries and 432 bindings. If a physical
+    locator itself changes, require a verified old-selector → new-selector
+    alias and attach it to the same rule; an ambiguous match blocks that rule's
+    pull rather than minting an unreviewed identity or merging two rules.
+  </p>
+  <p id="external-map-record-design-rename-example">
+    Worked rename: the archived <code>differential-loop-names-pre-rename</code>
+    OP1 binding named
+    <code>jt60sa-op1-magnetics-flux-loop-fl7-fl1-indices-differential</code>
+    with <code>struct_array_entry=FL7-FL1</code> becomes
+    <code>jt60sa-op1-magnetics-flux-loop-fl1-fl7-indices-differential</code>
+    with <code>struct_array_entry=FL1-FL7</code> in the current state. Both
+    have <code>source_group=magnetics</code>,
+    <code>source_array=flux_loop_indices_differential</code>,
+    <code>source_role=value</code> and
+    <code>dd_path=magnetics/flux_loop/indices_differential</code>; the
+    canonical pair <code>FL1-FL7</code> keeps one rule id. The transition is
+    one change record containing name, ordered entry and evidence differences,
+    not one deletion and one addition. Across both phases, canonical matching
+    yields 104 such name/entry/evidence changes, with zero added or removed
+    bindings between those two states.
+  </p>
+  <table id="external-map-record-design-changes">
+    <caption>Change types; examples are actual unless marked illustrative</caption>
+    <thead><tr><th>Type</th><th>Example and interpretation</th></tr></thead>
+    <tbody>
+      <tr><td><code>first_observed</code></td><td>The first readable archived machine map contains 170 bindings. With no earlier covered binding state, each is first observed, not proven newly created.</td></tr>
+      <tr><td><code>added</code></td><td>From <code>pre-differential-loops</code> to <code>differential-loop-names-pre-rename</code>, the OP1 <code>FL7-FL1</code> differential binding appears; 266 bindings are added in total.</td></tr>
+      <tr><td><code>removed</code></td><td>That same transition removes the OP1 unindexed <code>flux_loop_r</code> binding; four old unindexed position bindings disappear across both phases.</td></tr>
+      <tr><td><code>renamed</code></td><td>The worked OP1 differential name changes from <code>fl7-fl1</code> to <code>fl1-fl7</code> under the same rule id.</td></tr>
+      <tr><td><code>relocated</code></td><td>Illustrative: moving the unchanged <code>MDAC/magFlxLp1</code> entry to another <code>maps/*.json</code> file changes <code>source_file</code>, not identity.</td></tr>
+      <tr><td><code>value_changed</code></td><td>The worked binding changes ordered <code>struct_array_entry</code> from <code>FL7-FL1</code> to <code>FL1-FL7</code>; a sign, unit, target, validation or evidence edit is the same type with its own field-level old/new values.</td></tr>
+    </tbody>
+  </table>
+  <p id="external-map-record-design-comparison">
+    Only compare families covered completely by both states. An archived
+    <code>machine_map.json</code> without all four <code>maps/*.json</code> files
+    cannot prove absent signal rules were removed. The provider's release
+    command excludes <code>superseded/</code> and <code>source/</code> from its
+    OCI artifact; a local archive's label and hashed files therefore form an
+    observation, not an invented registry release. A repeat pull with the same
+    file hashes adds no revision, change or re-queue receipt.
+  </p>
+
+  <h3 id="external-map-record-design-joins">Measured current joins</h3>
+  <p id="external-map-record-design-join-method">
+    Read-only live-graph probe on 2026-10-09 against
+    <code>bolt://98dci4-gpu-0002:7687</code>, for bundle
+    <code>v0.2.0-rc4</code>. A signal rule joins only when
+    <code>lower(FacilitySignal.name)</code> exactly equals
+    <code>lower(source_group + '/' + source_array)</code> for
+    <code>facility_id=jt-60sa</code>, followed by that signal's
+    <code>MEMBER_OF</code> edge to a <code>SignalSource</code>. The DD join is
+    exact equality of <code>target_path</code> (or binding <code>dd_path</code>)
+    to <code>IMASNode.id</code>. A positive control found
+    <code>MDAC/magFlxLp1</code> →
+    <code>jt-60sa:eddbreadTime('E101173', 'MDAC', 'magFlxLp1', t1, t2)</code>
+    and <code>magnetics/flux_loop/flux/data</code> as an IMASNode. The graph
+    contains 5,087 JT-60SA SignalSources and 61,366 IMASNodes, so the join
+    probe could see known members before asserting an absence.
+  </p>
+  <table id="external-map-record-design-join-counts">
+    <caption>Rules joined in the current bundle; counts are rules, not distinct target paths</caption>
+    <thead><tr><th>Family</th><th>Rules</th><th>SignalSource joined</th><th>IMASNode joined</th><th>Both</th></tr></thead>
+    <tbody>
+      <tr><td>magnetics signal</td><td>45</td><td>45</td><td>45</td><td>45</td></tr>
+      <tr><td>PF signal</td><td>10</td><td>10</td><td>10</td><td>10</td></tr>
+      <tr><td>TF signal</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+      <tr><td>equilibrium signal</td><td>5</td><td>4</td><td>5</td><td>4</td></tr>
+      <tr><th>all signal</th><th>61</th><th>60</th><th>61</th><th>60</th></tr>
+      <tr><td>machine-description binding</td><td>432</td><td>not applicable</td><td>432</td><td>not applicable</td></tr>
+    </tbody>
+  </table>
+  <p id="external-map-record-design-unjoined">
+    Complete unjoined list for applicable joins: <code>equilibrium_psi</code>
+    (<code>maps/equilibrium.json</code>, <code>GEQDSK/PSI</code>) has no exact
+    FacilitySignal name and therefore no SignalSource join; its target
+    <code>equilibrium/time_slice/profiles_2d/psi</code> does join. The graph has
+    <code>jt-60sa:PSI</code>, represented by
+    <code>jt-60sa:equilibrium/eqdb_selene_psi</code> from EQDB, but this is a
+    candidate alias, not evidence that GEQDSK and EQDB are the same source.
+    No signal rule lacks an IMASNode target; no machine binding lacks its IMASNode
+    target. Machine bindings are not listed as failed SignalSource joins because
+    their source is a machine-description file, not a graph signal group.
+  </p>
+
+  <h3 id="external-map-record-design-requeue">Re-queue and evidence rule</h3>
+  <p id="external-map-record-design-requeue-rule">
+    On first observation or a new comparable revision, re-queue each
+    SignalSource joined by the old or new revision when any provider field,
+    source join or target join changed.
+    This includes added and removed rules, a rename, grouping/file move, sign,
+    unit or target correction, validation-state change, and evidence edit;
+    <code>pulled_at</code> and version bookkeeping alone do not qualify. A source
+    whose settled convention or binding used the prior revision gets a followup
+    when the new external evidence disagrees; never overwrite that judgment.
+    Keep an unjoined rule and its reason in the graph, and queue its newly
+    matched source if a later explicit alias resolves the join. A machine
+    binding can re-queue a source only through a recorded dependency on that
+    binding; do not fan its change out to every source sharing an IMAS target.
+    The current flux-loop sign disagreement is retained as competing evidence,
+    not adjudicated by the pull.
+  </p>
+  <p id="external-map-record-design-inputs">
+    Input anchors: <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/</code>
+    (current <code>bundle.json</code> SHA-256
+    <code>0bab8cab2d26e28d8126abed70be3838df69f0d3e5392d9f2bd7aa4e3a14d681</code>,
+    <code>machine_map.json</code> SHA-256
+    <code>6a0e4b10b1bf01805e588f22a778efbf7f8319ec9c240eb4a4b395ed8a65efec</code>);
+    archived maps <code>pre-differential-loops/machine_map.json</code>
+    (<code>6895d0b7c2b39657081b843f149c0e27f3b2d28ed84bc7aa13d5aeb40e087c2e</code>)
+    and <code>differential-loop-names-pre-rename/machine_map.json</code>
+    (<code>b9c641d6553242437b738bde72fb3dcddfd0e9137c306a8ee7c75516e4aec256</code>);
+    current signal-map file hashes are <code>maps/magnetics.json</code>
+    <code>99bdc9688e482e501d408d66e30c18b92e015d9c5816422342e1452cbe2181de</code>,
+    <code>maps/pf_active.json</code>
+    <code>d76cb1998518a436b98748fc6384751af31cca7cec5c31a8fcb2d3ec943e86a0</code>,
+    <code>maps/tf.json</code>
+    <code>d8ce84b0660ed548187d56e238c7dd37fe7bfdb333c007ce5286ff8cc2c20ae4</code>,
+    and <code>maps/equilibrium.json</code>
+    <code>a20d7e276dfaacfa8c07bd0a09f9a3c728327fc42bba790dc9a04cd9cc4323be</code>;
+    <code>imas_ambix/maps_cli.py</code> defines release contents and tree digest.
+    Graph precedents are <code>DDVersion</code>/<code>IMASNodeChange</code>,
+    <code>StandardNameChange</code>, and <code>SourceVersion</code> in the
+    imas-codex schemas. The local-checkout pull option remains an open plan
+    decision; this schema can record either released or hashed local inputs.
+  </p>
+</section>
