@@ -1,0 +1,105 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T00:13:33.750Z",
+  "dispatched_at": "2026-10-08T23:47:07Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/mapping-decision-chain.html:21",
+      "id": "wiring-1",
+      "reason": "the missing dependency lets the filter node run against an absent fixture, so its done-when fails for a scheduling reason rather than a code reason.",
+      "text": "\u00a78 `mapping-class-filter`'s `plan-section-depends-on` lists only `signal-cocos-conventions#s3`, but its node text says it runs \"after `signal-cocos-conventions` \u00a73 and \u00a72\" and its done-when checks `tests/fixtures/conventions/reference_labels.json`, the fixture that signal-cocos-conventions \u00a72 (`convention-reference-labels`) creates; a scheduler reading the declarations can dispatch \u00a78 before that fixture exists",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/mapping-decision-chain.html:21",
+      "id": "wiring-2",
+      "reason": "without the \u00a76 dependency the resolver and slot judgment run before the geometry edge exists and silently carry no sensor geometry, so the orientation context the plan relies on is absent when the \u00a77 proof runs.",
+      "text": "\u00a74 reads \"its HAS_GEOMETRY sensor geometry\" from the source and \u00a75's judgment state carries it, but HAS_GEOMETRY is introduced by `signal-cocos-conventions` \u00a76 while \u00a74's `depends-on` lists only that plan's \u00a73",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/mapping-decision-chain.html:159",
+      "id": "done_when-1",
+      "reason": "without a control that must fail, the proof cannot distinguish a working chain from one whose Jev/local-settled signs were never exercised.",
+      "text": "the \u00a77 proof node's done-when asserts \"no written binding's sign disagrees with its source's recorded convention\" and names no negative control; for the code-settled majority the written sign is produced by the same `cocos_sign` the comparison invokes, and a none-class source has no recorded convention to compare",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "991bd0d1aa832d3533362d07096cd9cce28be798a4f06341ed64c61674618c71",
+  "plan_slug": "mapping-decision-chain",
+  "plan_version": 15,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-09T00:53:04.896690+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-2",
+      "reason": "",
+      "when": "2026-10-09T00:53:06.121528+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-09T00:53:07.047996+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:53:07.047996+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:53:04.896690+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:53:06.121528+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-mapping-decision-chain.v15.json",
+  "review_run_id": "r-20261008T234659052282-plan-review-of-mapping-decision-chain",
+  "reviewed_blob_sha": "667f03caa386725e6df36365c49a676c17445ce6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/ids/{mapping,transforms,candidates,models}.py`, the figure `docs/figures/mapping-decision-chain/decision-chain.svg`, the landed-evidence archive anchors (`#s2`/`#s3`/`#s6`) and every cited commit (`6225aff61`, `ab2b46ffe`, `ffc0c36a4`, `c415a5a29e9`) resolve; the one cited path that does not exist yet \u2014 `tests/fixtures/conventions/reference_labels.json` \u2014 is produced by the dependency the wiring finding below is about, not a rename or deletion.",
+    "done_when": "a finding \u2014 \u00a77's proof node (plan.html:159) states no negative control, so nothing in the node shows its sign-disagreement check can fire rather than always agree.",
+    "evidence_paths": "pass \u2014 the proof fragment is written to `docs/evidence/fragments/mapping-decision-chain/mapping-chain-jt60sa-proof.html`, a committed repository path, and no node log lands in a scratchpad or a node-local temporary directory.",
+    "naming": "pass \u2014 new identifiers (`slot_resolution`, `slot_judgment`, `mapping-slot-resolution`, `mapping-class-filter`, `compose_transform`) carry no plan labels, stage ids, ticket numbers or version tags, and no comment carries changelog prose.",
+    "reasoning": "pass \u2014 all three checks hold. The root cause (the single map call settles sign/factor and nothing enforces the source convention) matches `map_signals` at `imas_codex/ids/mapping.py:1111`, which builds `cocos_context` and never gates on it, and matches the \u00a72 census (0 bindings, 398 COCOS-labelled targets). Each mechanism reproduces its done-when: running `cocos_sign` gives \u03c8_like the same factor (\u22122\u03c0) for COCOS 3 and 4 while ip_like gives \u22121 vs +1, so \u00a74's \"\u03c8_like settles across {3,4}, ip_like stays open\" is correct, and `compose_transform` at `imas_codex/ids/transforms.py:102` refuses an open slot and multiplies sign\u00d7scale above `cocos_sign`. The callers named exist: `map_signals`, `judge_candidates`/`route` (`candidates.py:424`, `:488`), and the assign stage `assign_worker` (`workers.py:637`). \u00a74's \"label on a structure not its data leaf\" also resolves \u2014 `magnetics/ip` is a STRUCT_ARRAY carrying the ip_like label while `magnetics/ip/data` is the leaf.",
+    "single_goal": "pass \u2014 each implementable node carries one deliverable and one gate: \u00a74 slot resolution, \u00a75 per-slot judgment, \u00a77 the JT-60SA proof, \u00a78 the candidate class filter.",
+    "wiring": "a finding \u2014 \u00a78's `plan-section-depends-on` entry (plan.html:21) lists only `signal-cocos-conventions#s3` while its node text and done-when require that plan's \u00a72 (the fixture producer), and \u00a74's entry omits the `signal-cocos-conventions#s6` that creates the HAS_GEOMETRY edge \u00a74 reads; \u00a75 and \u00a78 also both write `imas_codex/ids/mapping.py` with no declared ordering between them."
+  },
+  "section_digests": {
+    "_document": "b9dcaa427c039c75832bb3ed2b01e75096ca537056641d5dfaee9c95563612c3",
+    "s1": "8809dcb9d92e599772281e9943fe29db4afb1a87e24c7abbcea5f62c9d6debc2",
+    "s2": "92073db978fb855b2a9b1d5022774259db9507e750ed83a25748e899d113e7b8",
+    "s3": "aca7b0a23f4e45249b477beb5bfcf109a6666a158ee487d7a45d4e84fc6583d3",
+    "s4": "fbc7e979d72dfa5a9d3524cfdde5e80d24a950d3e3ed47b47884eebc68901ef8",
+    "s5": "3cc465fc0649b31e458a41f087fc69e5984f939f7696828b0905013ae2eb244a",
+    "s6": "156b1d8c80aeb149f5cf9b867d2e9acc467abd2f5ac9b3978ad28e8ce1c9087a",
+    "s7": "40b6710d78b55e6db21af47512c0ff3efb8cffc0d6986edff47f6fd8fec47a4e",
+    "s8": "9753e238b442818358167a823536085d2cdc270887767af25c50eaca66408442"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T00:52:34.068664+00:00"
+}
