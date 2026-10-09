@@ -45,6 +45,11 @@
     <p>The engine's clear branch in <code>imas_codex/ids/workers.py</code> now calls <code>clear_mapping_bindings_for_ids</code>, which deletes each IDS's <code>MAPS_TO_IMAS</code> bindings through <code>clear_mapping_bindings</code> in <code>imas_codex/ids/graph_ops.py</code>, the owner <code>map clear</code> uses. Only then does it reset source status for re-mapping. Worker commits <code>494554722</code> and <code>99701d306</code> are merged at <code>bedcba7b8</code>. On the merged head, <code>tests/ids/</code> gives 564 passed and 5 skipped. The negative control kept the engine's own partial delete, and the two owner-call tests then failed.</p><p>The live check ran <code>map run jt-60sa -i magnetics --clear</code> with a 2-minute bound. It cleared all 8 previous bindings, leaving none, and wrote no new ones. The magnetics mapping is therefore empty until the magnetics run in §9 regenerates it.</p>
   </section>
 
+  <section id="s16">
+    <h2>§16 — One absence token, and a graph test for the nearest-label query</h2>
+    <p><code>imas_codex/ids/handoff.py</code> now reads <code>CocosLabel.NONE</code>, a <code>StrEnum</code> that serialises to <code>"none"</code>, and no longer defines its own token. A new graph-marked test in <code>tests/ids/test_mapping_handoff_graph.py</code> runs <code>_nearest_cocos_labels</code> against the live graph. It reads <code>field/data</code> as <code>one_like</code> from <code>xml</code>, <code>flux_loop/flux/data</code> as <code>psi_like</code> from <code>inferred_forward</code>, and a time target as <code>none</code>. A positive control requires every requested target to come back. Worker commit <code>b70f7cca8</code> is merged at <code>04e46d27c</code>. On the merged head, 6 unit tests and 2 graph tests pass.</p><p>The negative control dropped <code>ORDER BY hops</code> and the tests stayed green. The worker showed why: among the 553 labelled nodes, no <code>HAS_PARENT</code> chain of 1 to 10 hops reaches a second labelled node, so the nearest-label collection always holds one entry. A second graph test pins that invariant and turns red if labels ever stack, which is when hop order starts to matter.</p>
+  </section>
+
 </main>
 </body>
 </html>
