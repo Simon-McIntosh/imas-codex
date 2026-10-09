@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's own two arms agree: baseline_tests_ids.log header names revision 8ba0b92c6 and after_tests_ids.log names ad9758a0d, both run the same command, both reach their summary line, and both read EXIT=0 with zero failing ids (594 passed/5 skipped baseline, 597 passed/5 skipped after; the +3 are the node's own tests). No failing test id is added.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/e8e8b071-0bd3-4f32-a90b-3476d18716fe/dd-liveness-one-owner uv run --no-sync pytest -p no:cacheprovider tests/ids",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T113249385486-dd-liveness-one-owner/after_tests_ids.log",
+    "revision": "ad9758a0d5072bddf433acd8eb89a9c77af27ed0"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/e8e8b071-0bd3-4f32-a90b-3476d18716fe/dd-liveness-one-owner uv run --no-sync pytest -p no:cacheprovider tests/ids",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T113249385486-dd-liveness-one-owner/baseline_tests_ids.log",
+    "revision": "8ba0b92c6d33280c32e2217a876af1d51f04e063"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ids/candidates.py:272",
+    "imas_codex/ids/mapping.py:1815",
+    "imas_codex/ids/handoff.py:283"
+  ],
+  "completed_at": "2026-10-09T11:55:01.770Z",
+  "dispatched_at": "2026-10-09T11:49:46Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/graph_ops.py",
+      "line": "1025",
+      "severity": "follow-on",
+      "text": "follow-on: the goal is that DD path liveness has one owner, but only the candidate-retrieval consumer was moved onto the search layer's clause. dd_path_lifecycles (candidates.py:272) now requires an INTRODUCED_IN edge, while dd_path_stale_reason \u2014 still called directly by mapping.py:1815 (validate_mappings) and handoff.py:283 (build_mapping_handoff) \u2014 remains presence-tolerant, so dd_path_live_at treats a path with no introduction as live. Reproduced against the merged source: dd_path_stale_reason(\"tf/coil/current/data\", None, None, \"4.1.1\") returns None (live) while dd_path_lifecycles over a row with introduced=None returns live=False. The \u00a725 review flagged one rule with two spellings that drift; this change relocates the disagreement rather than removing it, so a path with no recorded introduction is now excluded from candidate retrieval yet accepted at binding validation and written expanded at hand-off."
+    },
+    {
+      "file": "imas_codex/ids/graph_ops.py",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: graph_ops.py imports the owner as a private symbol (from imas_codex.tools.graph_search import _dd_version_clause) and folds its fragment into a statement with an f-string. The rule is now genuinely shared, but coupling one package to another's underscore-private function means a rename or signature change in the search layer breaks the ids package silently. Promoting _dd_version_clause to a public, documented owner symbol is the durable form of the 'one owner' decision the plan made."
+    },
+    {
+      "file": "imas_codex/ids/graph_ops.py",
+      "line": "1062",
+      "severity": "follow-on",
+      "text": "follow-on: the stub-row fallback in dd_path_lifecycles re-derives the clause's semantics in Python (resolved is None or (introduced is not None and dd_path_live_at(...))) and the reason branch carries a hand-written string for the no-introduction case, because dd_path_stale_reason returns None there. Both exist only to keep a stub graph without the projected live flag consistent with the clause; routing the non-candidate consumers through the same clause would remove the need for a second spelling inside this function."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "The three consumers the \u00a725 change named are candidates.py:272 (through dd_path_lifecycles), mapping.py:1815 and handoff.py:283 (both direct calls to dd_path_stale_reason); only the first now decides liveness through the owner clause.",
+    "diff": "Read all three files against the base: graph_ops.py adds _unset_dd_version, imports _dd_version_clause, renders the dd_path_lifecycles filter through it with a projected 'live' column, keeps the presence-tolerant Python predicate only as a stub fallback and in the reason helper, and normalises __dd_version to None before either predicate; tests/ids/test_dd_liveness_owner.py adds three tests (rendering through the owner, blank version leaves every path live, missing introduction is not live); the evidence fragment records the gate table.",
+    "done_when": "The done_when is that liveness is decided through the search layer's version clause and a blank DD version no longer crashes validation. The spy test proves the emitted statement carries _dd_version_clause's own fragment verbatim, the blank-string test proves dd_path_live_at and dd_path_lifecycles do not raise (reproduced: dd_path_live_at(\"3.22.0\",\"3.42.0\",\"\") is True), and the negative control reddens the blank-version test with ValueError in _version_tuple at graph_ops.py:943.",
+    "goal": "The node goal is plan \u00a727 \u2014 DD path liveness decided through the search layer's version clause, and a blank DD version no longer crashes validation. imas_codex/ids/graph_ops.py:1046 resolves an unset version through _unset_dd_version and renders the filter through _dd_version_clause, and the crash path (state.dd_version or \"\") is normalised before any parser sees it, so the goal is met for the candidate-retrieval consumer but only partially across the pipeline.",
+    "manifest": "Read the manifest at the run directory; it states base 8ba0b92 and head ad9758a0, the single commit, both gate results (tests/ids 597 passed, graph test 1 passed), the negative control and its ValueError, and it carries completed baseline_suite and after_suite arms with both exit_status values and failure_ids empty, which is what lets the added-failure count be derived from the run's own logs rather than an independent base arm.",
+    "write_paths": "The reviewed node was fenced to imas_codex/ids/graph_ops.py, tests/ids/test_dd_liveness_owner.py and docs/evidence/fragments/jt60sa-mapping-study-expansion/dd-liveness-one-owner.html; git diff --stat 8ba0b92..ad9758a0 reports exactly those three files, 218 insertions and 17 deletions, with nothing outside them."
+  },
+  "justifications": {
+    "durability": "The negative control is a real guard: restoring the blank string in _unset_dd_version reddens test_empty_dd_version_leaves_every_path_live_without_raising with ValueError: invalid literal for int() with base 10: '' at graph_ops.py:943, so the normalisation is what the test measures. The rendering test spies the real _dd_version_clause and asserts its fragment appears verbatim in the emitted statement, and the missing-introduction test asserts live is False against a stub row it supplies, so neither assertion can pass by agreeing with a value it also feeds the code.",
+    "evidence": "The gate measures the done_when and its receipts are present and labelled: baseline_tests_ids.log and after_tests_ids.log each carry a header line naming their revision, tree and command, both reach their summary line and read EXIT=0 with zero failing ids, head_new_test.log (3 passed) exercises the new file, after_graph.log records the live-graph \u00a725 test passing, and negative_control.log records the single failing id with EXIT=1. I re-ran tests/ids/test_dd_liveness_owner.py at the merged head in my own worktree and reproduced 3 passed.",
+    "fit": "The additions follow graph_ops.py's module idiom, use conventional commit grammar with a mechanism body and no attribution line, and carry no plan, ticket or phase identifier in any symbol, filename, docstring or comment; the new test file and docstring describe the mechanism (the search layer's clause is the owner) rather than the plan. The one fit smell is the cross-package import of a private name.",
+    "goal_fidelity": "imas_codex/ids/graph_ops.py:1046 renders the candidate-retrieval filter through _dd_version_clause and the blank version is normalised before any parser, so \u00a727's two named outcomes hold and are tested. It is not full marks because the goal is stated as liveness having one owner, and two of the three consumers (mapping.py:1815, handoff.py:283) still decide liveness with the presence-tolerant Python predicate, so the rule the plan says should have one spelling still has two.",
+    "reuse": "The change genuinely reuses the owner for the graph filter \u2014 _dd_version_clause is imported and its fragment appears verbatim in the emitted statement, replacing the Python re-derivation that previously lived in dd_path_lifecycles. It stops short of full reuse in two ways: dd_path_live_at and dd_path_stale_reason keep a second, differently-behaving spelling of the same rule that two consumers still call directly, and dd_path_lifecycles adds a third spelling as a stub fallback plus a hand-written reason for the no-introduction case, so three encodings of one rule remain after a node whose purpose was to have one.",
+    "scope_discipline": "git diff --stat 8ba0b92..ad9758a0 shows the single commit touches exactly the three declared write paths \u2014 graph_ops.py, the new test file and the evidence fragment \u2014 with one purpose each, and no generated or gitignored file is staged."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is plan \u00a727 \u2014 DD path liveness decided through the search layer's version clause, and a blank DD version no longer crashes validation. imas_codex/ids/graph_ops.py:1046 resolves an unset version through _unset_dd_version and renders the filter through _dd_version_clause, and the crash path (state.dd_version or \"\") is normalised before any parser sees it, so the goal is met for the candidate-retrieval consumer but only partially across the pipeline.\nVERDICT done_when: The done_when is that liveness is decided through the search layer's version clause and a blank DD version no longer crashes validation. The spy test proves the emitted statement carries _dd_version_clause's own fragment verbatim, the blank-string test proves dd_path_live_at and dd_path_lifecycles do not raise (reproduced: dd_path_live_at(\"3.22.0\",\"3.42.0\",\"\") is True), and the negative control reddens the blank-version test with ValueError in _version_tuple at graph_ops.py:943.\nVERDICT write_paths: The reviewed node was fenced to imas_codex/ids/graph_ops.py, tests/ids/test_dd_liveness_owner.py and docs/evidence/fragments/jt60sa-mapping-study-expansion/dd-liveness-one-owner.html; git diff --stat 8ba0b92..ad9758a0 reports exactly those three files, 218 insertions and 17 deletions, with nothing outside them.\nVERDICT manifest: Read the manifest at the run directory; it states base 8ba0b92 and head ad9758a0, the single commit, both gate results (tests/ids 597 passed, graph test 1 passed), the negative control and its ValueError, and it carries completed baseline_suite and after_suite arms with both exit_status values and failure_ids empty, which is what lets the added-failure count be derived from the run's own logs rather than an independent base arm.\nVERDICT diff: Read all three files against the base: graph_ops.py adds _unset_dd_version, imports _dd_version_clause, renders the dd_path_lifecycles filter through it with a projected 'live' column, keeps the presence-tolerant Python predicate only as a stub fallback and in the reason helper, and normalises dd_version to None before either predicate; tests/ids/test_dd_liveness_owner.py adds three tests (rendering through the owner, blank version leaves every path live, missing introduction is not live); the evidence fragment records the gate table.\nCALL_SITES: imas_codex/ids/candidates.py:272, imas_codex/ids/mapping.py:1815, imas_codex/ids/handoff.py:283\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: imas_codex/ids/graph_ops.py:1046 renders the candidate-retrieval filter through _dd_version_clause and the blank version is normalised before any parser, so \u00a727's two named outcomes hold and are tested. It is not full marks because the goal is stated as liveness having one owner, and two of the three consumers (mapping.py:1815, handoff.py:283) still decide liveness with the presence-tolerant Python predicate, so the rule the plan says should have one spelling still has two.\nSCORE evidence: 18\nJUSTIFICATION evidence: The gate measures the done_when and its receipts are present and labelled: baseline_tests_ids.log and after_tests_ids.log each carry a header line naming their revision, tree and command, both reach their summary line and read EXIT=0 with zero failing ids, head_new_test.log (3 passed) exercises the new file, after_graph.log records the live-graph \u00a725 test passing, and negative_control.log records the single failing id with EXIT=1. I re-ran tests/ids/test_dd_liveness_owner.py at the merged head in my own worktree and reproduced 3 passed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 8ba0b92..ad9758a0 shows the single commit touches exactly the three declared write paths \u2014 graph_ops.py, the new test file and the evidence fragment \u2014 with one purpose each, and no generated or gitignored file is staged.\nSCORE durability: 18\nJUSTIFICATION durability: The negative control is a real guard: restoring the blank string in _unset_dd_version reddens test_empty_dd_version_leaves_every_path_live_without_raising with ValueError: invalid literal for int() with base 10: '' at graph_ops.py:943, so the normalisation is what the test measures. The rendering test spies the real _dd_version_clause and asserts its fragment appears verbatim in the emitted statement, and the missing-introduction test asserts live is False against a stub row it supplies, so neither assertion can pass by agreeing with a value it also feeds the code.\nSCORE fit: 17\nJUSTIFICATION fit: The additions follow graph_ops.py's module idiom, use conventional commit grammar with a mechanism body and no attribution line, and carry no plan, ticket or phase identifier in any symbol, filename, docstring or comment; the new test file and docstring describe the mechanism rather than the plan. The one fit smell is the cross-package import of a private name.\nSCORE reuse: 12\nJUSTIFICATION reuse: The change genuinely reuses the owner for the graph filter \u2014 _dd_version_clause is imported and its fragment appears verbatim in the emitted statement, replacing the Python re-derivation that previously lived in dd_path_lifecycles. It stops short of full reuse in two ways: dd_path_live_at and dd_path_stale_reason keep a second, differently-behaving spelling of the same rule that two consumers still call directly, and dd_path_lifecycles adds a third spelling as a stub fallback plus a hand-written reason for the no-introduction case, so three encodings of one rule remain after a node whose purpose was to have one.\nFINDING imas_codex/ids/graph_ops.py:1025 follow-on: the goal is that DD path liveness has one owner, but only the candidate-retrieval consumer was moved onto the search layer's clause. dd_path_lifecycles (candidates.py:272) now requires an INTRODUCED_IN edge, while dd_path_stale_reason \u2014 still called directly by mapping.py:1815 and handoff.py:283 \u2014 remains presence-tolerant. Reproduced against the merged source: dd_path_stale_reason(\"tf/coil/current/data\", None, None, \"4.1.1\") returns None (live) while dd_path_lifecycles over a row with introduced=None returns live=False, so a path with no recorded introduction is excluded from candidate retrieval yet accepted at validation and expanded at hand-off.\nFINDING imas_codex/ids/graph_ops.py:21 follow-on: graph_ops.py imports the owner as a private symbol (from imas_codex.tools.graph_search import _dd_version_clause) and folds its fragment into a statement with an f-string; promoting it to a public, documented owner symbol is the durable form of the 'one owner' decision.\nFINDING imas_codex/ids/graph_ops.py:1062 follow-on: the stub-row fallback re-derives the clause's semantics in Python and the reason branch hand-writes a string for the no-introduction case because dd_path_stale_reason returns None there; routing the non-candidate consumers through the same clause would remove the need for a second spelling inside dd_path_lifecycles.\n",
+  "review_run_id": "r-20261009T114938095149-review-of-dd-liveness-one-owner",
+  "reviewed_base_sha": "8ba0b92c6d33280c32e2217a876af1d51f04e063",
+  "reviewed_head_sha": "ad9758a0d5072bddf433acd8eb89a9c77af27ed0",
+  "reviewed_run_id": "r-20261009T113249385486-dd-liveness-one-owner",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T11:58:00.000000+00:00",
+  "total": 101
+}
