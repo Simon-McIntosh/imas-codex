@@ -24,7 +24,7 @@
   <title>Signal COCOS Conventions Before the Map | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -148,9 +148,23 @@
       way round, keeps that on <code>FacilitySignal.channel_sign</code>.
     </p>
     <p>
+      <strong>What this retires.</strong> <code>FacilitySignal.cocos</code> is retired so the graph holds one owner of a
+      source's COCOS. Its 12 JT-60SA values, all from the equilibrium-file exemplars in <code>jt-60sa.yaml</code>, become
+      declared evidence on their sources (<code>MappingEvidence</code> of type <code>sign_convention</code>), which §4
+      reads. Its three readers, the representative's <code>rep_cocos</code> in <code>imas_codex/ids/workers.py</code>,
+      <code>imas_codex/ids/tools.py</code> and <code>imas_codex/ids/mapping.py</code>, are the map's convention input that
+      <code>mapping-decision-chain</code> §4 replaces with the source's persisted convention, so that node removes them and
+      the property together. <code>FacilitySignal.sign_convention</code> stays: it is enrichment's free-text description,
+      read as context, never as a verdict. The new properties cannot reuse an existing field because no existing field
+      records a probability, a survivor set or a status.
+    </p>
+    <p>
       A new <code>ConventionObservation</code> node records one sign read from facility data: facility, shot, quantity,
       observed sign, the plasma-current sign of that shot, the DataAccess used and when. It links
-      <code>OBSERVED_FOR</code> to the source, so a later reader can recompute every verdict.
+      <code>OBSERVED_FOR</code> to the source, so a later reader can recompute every verdict. It is a typed measurement
+      the survivor scorer re-reads, which free-text <code>MappingEvidence</code> cannot carry; each probe run also writes
+      one <code>MappingEvidence</code> of type <code>data_validation</code> summarising its verdict, so every reader of a
+      source's evidence finds the probe there.
     </p>
     <p>
       <strong>Node</strong> <code>convention-schema</code>, role implement, 1.5 h. Write paths:
@@ -218,8 +232,22 @@
       <code>cocos_to_parameters</code>. Each coefficient is classified as measured, measurable only as a product, or
       requiring a declaration; a declared handedness from the facility prior narrows the survivors, and an undeclared one
       leaves them split. A set of observations no convention fits is recorded as not COCOS-expressible, never rounded to
-      the nearest. The class factor is unanimous or split across the survivors, and the confidence falls when a polarity
-      is missing.
+      the nearest. The class factor is unanimous or split across the survivors, computed through the existing
+      <code>cocos_sign</code> in <code>imas_codex/ids/transforms.py</code>, and the confidence falls when a polarity is
+      missing.
+    </p>
+    <p>
+      <code>imas_codex/cocos/calculator.py</code> already owns COCOS identification: <code>determine_cocos</code> infers
+      one convention from ψ at axis and edge, Ip, B0 and q through Sauter and Medvedev Eq. 23, and
+      <code>validate_cocos_from_data</code> and <code>validate_cocos_consistency</code> check a declared one. A single
+      convention is the one-survivor case of a survivor set, so the scorer extends that module rather than forking it, and
+      <code>determine_cocos</code> is rebuilt on the scorer. Its two silent guesses, e<sub>Bp</sub> from the magnitude of
+      ψ and right-handed (R, φ, Z), become declarations it states and lowers its confidence for, because neither is
+      determinable from data. The same module family gains the one resolver every reader of a DD class uses:
+      <code>dd_cocos_class(path)</code> in <code>imas_codex/cocos/transforms.py</code>, beside
+      <code>path_needs_cocos_transform</code>, resolving a field's <code>cocos_transformation_type</code> through its
+      ancestors, because the DD labels <code>magnetics/flux_loop/flux</code> and not its <code>/data</code> leaf. The
+      §4 exemplars, the map's slot resolver and class filter, and the external rule pull all read a class through it.
     </p>
     <p>
       <strong>Node</strong> <code>convention-probe-prototype</code>, role implement, 1.5 h. A first live probe on
@@ -237,14 +265,17 @@
       that failed with its error.
     </p>
     <p>
-      <strong>Node</strong> <code>cocos-determination-core</code>, role implement, 2 h. Write paths:
-      <code>imas_codex/cocos/determination.py</code> and <code>tests/cocos/test_determination.py</code>.
-      <strong>Done when</strong> <code>uv run --no-sync pytest tests/cocos -p no:cacheprovider</code> passes with tests
-      showing MAST-like observations without a handedness declaration leave survivors {3, 4}, with the conversion factor
-      to COCOS 17 unanimous for psi_like and split for ip_like; the same observations with a declaration leave one
-      survivor; a one-polarity cohort is
-      flagged polarity-incomplete with lowered confidence; and a contradictory set leaves no survivor and reports itself
-      not COCOS-expressible.
+      <strong>Node</strong> <code>cocos-determination-core</code>, role implement, 2.5 h. Write paths:
+      <code>imas_codex/cocos/calculator.py</code>, <code>imas_codex/cocos/transforms.py</code>,
+      <code>imas_codex/cocos/__init__.py</code> and <code>tests/cocos/test_cocos_survivors.py</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/cocos -p no:cacheprovider</code> passes, the
+      existing <code>tests/cocos/test_calculator.py</code> included, with tests showing MAST-like observations without a
+      handedness declaration leave survivors {3, 4}, with the conversion factor to COCOS 17 unanimous for psi_like and
+      split for ip_like; the same observations with a declaration leave one survivor; a one-polarity cohort is flagged
+      polarity-incomplete with lowered confidence; a contradictory set leaves no survivor and reports itself not
+      COCOS-expressible; <code>determine_cocos</code> returning the scorer's unique survivor and naming the e<sub>Bp</sub>
+      and handedness declarations it assumed; and <code>dd_cocos_class</code> returning psi_like for
+      <code>magnetics/flux_loop/flux/data</code> and nothing for an unlabelled path.
     </p>
     <p>
       <strong>Node</strong> <code>convention-probe</code>, role implement, 2.5 h, after the prototype, the core and §3.
@@ -282,7 +313,13 @@
       <code>geometry-storage</code> decision, locked to the graph. A <code>SensorGeometry</code> node holds one sensor's
       position, orientation angles, area, turns, loop path, unit and frame, its measurement kind (absolute, or
       differential with its reference sensor), with its source file, content hash and valid shot range, linked
-      <code>HAS_GEOMETRY</code> from its measurement source. JET's device descriptions are ingested first. Write paths:
+      <code>HAS_GEOMETRY</code> from its measurement <code>FacilitySignal</code>, so a source whose members partly lack
+      geometry shows it member by member: JT-60SA's EDAS has 23 probe and 34 loop channels, while <code>geo.in</code> has
+      17 probe and 27 loop rows. The measurement kind is not in <code>geo.in</code>, which carries positions only; it
+      comes from the pulled imas-ambix rules (<code>external-map-rules</code>), whose differential bindings name the two
+      loops, or from facility code that forms the difference, and its source is recorded. JET's selected PPF magnetics
+      measurements belong to no <code>SignalSource</code> today, so the node also gives each joined measurement its source
+      through <code>detect_signal_sources</code>' one-member pass. JET's device descriptions are ingested first. Write paths:
       <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/static/geometry.py</code> and
       <code>tests/discovery/test_sensor_geometry.py</code>. <strong>Done when</strong> the tests pass and a live count
       shows every JET pickup coil and flux loop the inventory joined carrying one <code>HAS_GEOMETRY</code> edge, with a
@@ -301,13 +338,21 @@
     <h2 id="s7">§7 — The conventions stage in discover</h2>
 <section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      <code>imas-codex discover conventions FACILITY</code> claims enriched sources without a convention status, runs
+      <code>imas-codex discover conventions FACILITY</code> claims enriched sources without a convention status through the
+      shared <code>claim_signal_sources</code> in <code>imas_codex/discovery/base/grouping.py</code>, runs
       the §4 judgment and the §5 probe, and persists the result. It enters the stage registry in
       <code>imas_codex/cli/discover/sequence.py</code> between <code>signals enrich</code> and <code>candidates</code>,
       and <code>candidates</code> reads it, so <code>--until candidates</code> runs it. A source below the acceptance
       thresholds, or whose class factor is split across its survivors, reaches <code>needs_followup</code> with its open
       question recorded. The stage reports to <code>discover status</code> and clears through
       <code>discover clear</code>.
+    </p>
+    <p>
+      <strong>Why a stage of its own.</strong> It adds one stage and one subcommand and retires nothing. Folding it into
+      <code>signals enrich</code> would re-run description, on another seat, every time attached evidence re-queues a
+      source's convention, and would put facility data reads into a language-model stage; folding it into
+      <code>candidates</code> would make the DD-side retrieval depend on a facility probe. Re-judging a convention alone
+      is the operation the triage loop needs.
     </p>
     <p>
       <strong>Node</strong> <code>conventions-stage</code>, role implement, 2 h, after §4 and §5. Write paths:
@@ -352,15 +397,18 @@
       The graph does not group them that way. <code>detect_signal_sources</code> keys groups on digit runs in the
       accessor, so loops 1 to 9 are one-member sources and loops 10 to 27 share one 25-member source; loop 7 stands alone
       only by accident. The measurement kind comes from the sensor geometry §6 ingests: each <code>SensorGeometry</code>
-      records whether its sensor is absolute or differential and, when differential, its reference sensor. A regroup in
-      <code>imas_codex/discovery/base/grouping.py</code> then makes each source hold one kind: it moves members, links
+      records whether its sensor is absolute or differential and, when differential, its reference sensor, with the
+      evidence that says so. The 7 loops and 6 probes with no deck row keep an unknown kind and are not moved. The group
+      key is owned by <code>detect_signal_sources</code> and its <code>_accessor_to_source_key</code> in
+      <code>imas_codex/discovery/signals/parallel.py</code>, so the key becomes kind-aware there, and a regroup beside it
+      makes each existing source hold one kind: it moves members, links
       each differential source <code>REFERENCES</code> its reference sensor's source, records <code>SPLIT_FROM</code> or
       <code>MERGED_INTO</code> with the reason and time so the change is traceable like a rename, and clears the
       convention and candidate state of every source it changed so they are judged again.
     </p>
     <p>
       <strong>Node</strong> <code>measurement-kind-sources</code>, role implement, 2 h, after
-      <code>jt60sa-sensor-geometry</code>. Write paths: <code>imas_codex/discovery/base/grouping.py</code>,
+      <code>jt60sa-sensor-geometry</code>. Write paths: <code>imas_codex/discovery/signals/parallel.py</code>,
       <code>imas_codex/schemas/facility.yaml</code> and <code>tests/discovery/test_measurement_kind_sources.py</code>.
       <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/discovery/test_measurement_kind_sources.py -p no:cacheprovider</code> passes
@@ -408,6 +456,10 @@
 <div class="r-gate" data-id="g-scc-2" data-section="s8" data-gated-sections="s8" data-status="open" data-verdict="">
     <h4 class="r-gate-measure">JT-60SA flux loop 7 is alone in an absolute source and the 26 differential loops share one differential source linked to it</h4>
     <p class="r-gate-required-evidence">signal-cocos-conventions#s9</p>
+    </div>
+<div class="r-gate" data-id="g-scc-3" data-section="s9" data-gated-sections="s9" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the imas-ambix rules are pulled into the graph, so a sensor&#x27;s differential kind and reference can be read from a pulled binding with its evidence</h4>
+    <p class="r-gate-required-evidence">external-map-rules#s3</p>
     </div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

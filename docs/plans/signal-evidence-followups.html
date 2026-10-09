@@ -23,7 +23,7 @@
   <title>Signal Evidence Followups | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -33,23 +33,29 @@
     <p>
       The conventions stage (<code>signal-cocos-conventions</code>) and the map's slot decisions
       (<code>mapping-decision-chain</code> §5) both stop short of guessing: a judgment below its acceptance threshold, or
-      a COCOS class factor the surviving conventions disagree on, is left open. Today an open result is a status on the
-      source and nothing more. Nobody is asked the question, and when someone does find the missing fact, there is
-      nowhere to put it where the next run will read it.
+      a COCOS class factor the surviving conventions disagree on, is left open. Two records of an open result exist
+      today. The map's <code>insufficient_context</code> disposition marks the source, and
+      <code>write_mapping_result</code> in <code>imas_codex/ids/models.py</code> writes each escalation as a
+      <code>MappingEvidence</code> of type <code>escalation</code>, confidence 0, linked <code>HAS_EVIDENCE</code> from the
+      source. Neither names the question, the stage or the open slot, neither has a status a person can move, and the
+      conventions stage writes neither. So nobody is asked the question, and a fact someone finds has nowhere to go that
+      the next run reads.
     </p>
     <p>
-      This plan makes the open result a <code>SignalFollowup</code> in the graph: the source, the stage that raised it,
-      the open question in plain words, and Jev's distribution. A person, or an agent in an interactive session, triages
+      This plan extends that escalation evidence into the followup rather than adding a second record of an open
+      result: an escalation <code>MappingEvidence</code> gains the stage that raised it, the open slot, the question in
+      plain words, Jev's distribution and a followup status. The disposition stays the source-level summary. A person, or an agent in an interactive session, triages
       it with the evidence the pipeline already gathered in view, searches the facility's wiki, code and documents for
       more, and may read a shot. What they find is attached to the source as evidence, and the source is re-queued. The
       next judgment reads that evidence first. Mapping therefore improves in rounds: map, triage and attach, map again.
     </p>
     <figure>
       <img src="/imas-codex/figures/signal-evidence-followups/triage-loop.svg"
-           alt="A source judged below threshold by the conventions stage or the map raises a SignalFollowup; triage by a person or agent attaches evidence; the source is re-queued and its next judgment reads the evidence first">
+           alt="A source judged below threshold by the conventions stage or the map raises an escalation followup; triage by a person or agent attaches evidence; the source is re-queued and its next judgment reads the evidence first">
       <figcaption>
-        One round of the loop. Blue boxes are what this plan adds to the graph: the followup record and the attached
-        evidence. The re-queued source passes through the same stage as before, with the evidence leading its state.
+        One round of the loop. Blue boxes are the two MappingEvidence records this plan writes: the escalation that
+        carries the open question, and the evidence attached in answer. The re-queued source passes through the same
+        stage as before, with the evidence leading its state.
       </figcaption>
     </figure>
     <p>
@@ -60,23 +66,33 @@
       from the JT-60SA operations handbook".
     </p>
 
-    <h2 id="s2">§2 — A followup is a graph record</h2>
+    <h2 id="s2">§2 — A followup is an escalation record</h2>
 <section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      A <code>SignalFollowup</code> carries an id, the facility, the stage that raised it (conventions, candidates or
-      mapping), the open slot or question kind, the question text, Jev's distribution as JSON, a status (open, attached,
-      resolved, dismissed), and when and by whom it was raised and resolved. It links <code>HAS_FOLLOWUP</code> from its
-      source. <code>raise_followup</code> is idempotent on the source, stage and open slot, so a re-run that reaches the
-      same open question updates the record rather than adding a second.
+      <code>MappingEvidence</code> gains the properties an open question needs, used on escalation records: the stage
+      that raised it (conventions, candidates or mapping), the open slot or question kind, the question text, Jev's
+      distribution as JSON, a followup status (open, attached, resolved, dismissed), and when and by whom it was resolved.
+      <code>raise_followup</code> in <code>imas_codex/discovery/signals/followups.py</code> writes one escalation
+      idempotently on the source, stage and open slot, so a re-run that reaches the same open question updates the record
+      rather than adding a second. <code>write_mapping_result</code>'s escalation writer becomes a caller of it, so one
+      function owns escalation records. The same module owns listing, showing and attaching, which §3's terminal and
+      MCP front ends call.
     </p>
     <p>
-      <strong>Node</strong> <code>signal-followup-record</code>, role implement, 1.5 h. Write paths:
-      <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/signals/followups.py</code> and
-      <code>tests/discovery/test_signal_followups.py</code>. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/discovery/test_signal_followups.py -p no:cacheprovider</code> passes with tests
-      showing a followup round-trips through the generated models, a second raise of the same open slot updates the one
-      record, a raise for a different slot of the same source adds a second, resolving records who and when, and the
-      <code>declared</code> evidence type is accepted; and
+      <strong>What this adds and merges.</strong> No new node class: the open result and its answer are both
+      <code>MappingEvidence</code>, and one value joins <code>EvidenceType</code>, <code>declared</code>. The escalation
+      writer is merged into <code>raise_followup</code>.
+    </p>
+    <p>
+      <strong>Node</strong> <code>signal-followup-record</code>, role implement, 2 h. Write paths:
+      <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/signals/followups.py</code>,
+      <code>imas_codex/ids/models.py</code> and <code>tests/discovery/test_signal_followups.py</code>.
+      <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/discovery/test_signal_followups.py tests/ids -p no:cacheprovider</code> passes
+      with tests showing an escalation followup round-trips through the generated models, a second raise of the same
+      open slot updates the one record, a raise for a different slot of the same source adds a second, the map's
+      escalation path writing through <code>raise_followup</code>, list, show and attach working on the module's own
+      functions, resolving records who and when, and the <code>declared</code> evidence type accepted; and
       <code>uv run --no-sync pytest tests/graph/test_schema_compliance.py -m graph -p no:cacheprovider</code> passes
       against the live graph, since the default markers deselect that file.
     </p>
@@ -87,13 +103,17 @@
       <code>imas-codex discover followups FACILITY</code> lists open followups grouped by stage and question kind, with
       counts. <code>--show ID</code> prints everything a person needs to answer one: the source's description, members,
       unit and accessor, the question, Jev's distribution, the source's geometry, its candidate DD fields, and its top
-      reranked code, wiki and document hits. <code>imas-codex discover attach SOURCE</code> takes one of
-      <code>--note</code>, <code>--ref</code> (a WikiChunk, CodeChunk or Document id), <code>--declare</code> (a value
-      with its reference) or <code>--probe-shot</code>, writes the evidence, marks the followup attached, and re-queues
-      the source for the stage that raised it.
+      reranked code, wiki and document hits. <code>--attach ID</code> with one of <code>--note</code>,
+      <code>--ref</code> (a WikiChunk, CodeChunk or Document id), <code>--declare</code> (a value with its reference) or
+      <code>--probe-shot</code> writes the evidence, marks the followup attached, and re-queues the source for the stage
+      that raised it. The command is a thin adapter over the §2 module.
     </p>
     <p>
-      <strong>Node</strong> <code>followup-triage-cli</code>, role implement, 2 h, after §2. Write paths:
+      <strong>What this adds.</strong> One subcommand, not two: attaching is an option of the same command. Nothing
+      existing lists or answers an escalation, so nothing is retired.
+    </p>
+    <p>
+      <strong>Node</strong> <code>followup-triage-cli</code>, role implement, 1.5 h, after §2. Write paths:
       <code>imas_codex/cli/discover/followups.py</code>, <code>imas_codex/cli/discover/__init__.py</code> and
       <code>tests/cli/test_discover_followups.py</code>. <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/cli/test_discover_followups.py -p no:cacheprovider</code> passes with tests
@@ -102,16 +122,18 @@
       without a write.
     </p>
     <p>
-      The same two verbs are MCP tools, so an agent can triage inside an interactive session with the search tools beside
-      it. They are write tools and are absent from a read-only or DD-only server.
+      The same operations are one MCP tool, <code>signal_followups</code>, with an action of list, show or attach, so an
+      agent can triage inside an interactive session with the search tools beside it. It is a thin adapter over the §2
+      module, following the <code>imas_codex/llm/sn_tools.py</code> delegation idiom, and is absent from a read-only or
+      DD-only server because attach writes.
     </p>
     <p>
-      <strong>Node</strong> <code>followup-triage-mcp</code>, role implement, 1.5 h, after
-      <code>followup-triage-cli</code>. Write paths: <code>imas_codex/llm/followup_tools.py</code>,
-      <code>imas_codex/llm/server.py</code> and <code>tests/llm/test_followup_tools.py</code>. <strong>Done when</strong>
+      <strong>Node</strong> <code>followup-triage-mcp</code>, role implement, 1.5 h, after §2. Write paths:
+      <code>imas_codex/llm/followup_tools.py</code>, <code>imas_codex/llm/server.py</code> and
+      <code>tests/llm/test_followup_tools.py</code>. <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/llm/test_followup_tools.py -p no:cacheprovider</code> passes with tests showing
-      <code>list_signal_followups</code> and <code>attach_signal_evidence</code> calling the §2 and §3 functions, and both
-      tools absent when the server runs read-only.
+      each <code>signal_followups</code> action calling the §2 module's function, and the tool absent when the server runs
+      read-only.
     </p>
 
     <h2 id="s4">§4 — The next judgment reads the evidence first</h2>

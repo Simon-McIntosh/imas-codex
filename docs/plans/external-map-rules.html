@@ -24,7 +24,7 @@
   <title>External Machine-Map Rules Pulled Into the Graph | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -104,6 +104,23 @@
       hashes are already recorded writes nothing. The schema follows the §2 design as adjusted by the lead.
     </p>
     <p>
+      <strong>Owners it reuses.</strong> A revision's DD class comes from <code>dd_cocos_class</code> in
+      <code>imas_codex/cocos/transforms.py</code>, the resolver <code>signal-cocos-conventions</code> §5 adds beside
+      <code>path_needs_cocos_transform</code>; the pull stores the provider's <code>channel_factor</code> as given and
+      derives no sign of its own, so <code>imas_codex/cocos/</code> stays the one owner of COCOS semantics. The version
+      node departs from the facility's <code>SignalEpoch</code> (<code>imas_codex/schemas/facility.yaml</code>) and
+      <code>SourceVersion</code> (<code>imas_codex/schemas/facility_config.yaml</code>) precedents deliberately: those are
+      keyed by shot range, while a bundle version is keyed by the content digest of the files read, and two trees under
+      one tag are two versions. A rule's join to a source and a target records provenance of an external binding; it is
+      never written as <code>MAPS_TO_IMAS</code> or <code>MAPPING_CANDIDATE</code>, which are imas-codex's own binding
+      and proposal, and it reaches a source's evidence through <code>HAS_EVIDENCE</code> in §4.
+    </p>
+    <p>
+      <strong>What this adds.</strong> One subcommand under <code>imas map</code>, which owns source-to-IMAS bindings,
+      of which a pulled rule is one from another provider; no MCP tool; and four node classes, because no existing class
+      records a provider's rule across versions. No evidence carrier is added: §4 reuses <code>MappingEvidence</code>.
+    </p>
+    <p>
       <strong>Node</strong> <code>external-map-pull</code>, role implement, 3 h, after §2. Write paths:
       <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/ids/external_maps.py</code>,
       <code>imas_codex/cli/map.py</code> and <code>tests/ids/test_external_maps.py</code>. <strong>Done when</strong>
@@ -119,9 +136,13 @@
     <h2 id="s4">§4 — Rules reach the judgments as evidence</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      The conventions judgment and the map's slot context read a source's current pulled rules, labelled with provider,
-      version and validation state. A pull that changes a rule re-queues every source that rule joins for the
-      conventions stage, and raises a followup when the new rule disagrees with a convention already settled.
+      Each source a current rule joins carries one <code>MappingEvidence</code> of type <code>sign_convention</code>
+      through <code>HAS_EVIDENCE</code>, whose <code>source_node_id</code> names the rule revision and whose text gives
+      the provider, version, validation state, target and channel factor; a later pull replaces it. The conventions
+      judgment and the map's slot context therefore read pulled rules through the evidence they already read, beside
+      attached evidence. A pull that changes a rule re-queues every source that rule joins for the conventions stage, and
+      raises a followup through <code>raise_followup</code> when the new rule disagrees with a convention already
+      settled.
     </p>
     <p>
       <strong>Node</strong> <code>external-rules-as-evidence</code>, role implement, 1.5 h, after §3,
@@ -130,8 +151,9 @@
       <code>imas_codex/ids/slot_context.py</code> and <code>tests/ids/test_external_rule_evidence.py</code>.
       <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/ids/test_external_rule_evidence.py -p no:cacheprovider</code> passes with tests
-      showing a source's rules in both states labelled with their version, a changed rule re-queuing its sources, a
-      disagreeing rule raising one followup, and an unchanged re-pull re-queuing nothing.
+      showing a joined source carrying one evidence record per current rule naming its revision, a re-pull replacing it,
+      a changed rule re-queuing its sources, a disagreeing rule raising one followup, and an unchanged re-pull re-queuing
+      nothing.
     </p>
 
     <h2 id="s5">§5 — Pull the JT-60SA history</h2>
@@ -156,8 +178,12 @@
     <p class="r-gate-required-evidence">signal-cocos-conventions#s7</p>
     </div>
 <div class="r-gate" data-id="g-emr-2" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
-    <h4 class="r-gate-measure">raise_followup records a SignalFollowup idempotently on source, stage and open slot</h4>
+    <h4 class="r-gate-measure">raise_followup records an escalation MappingEvidence idempotently on source, stage and open slot</h4>
     <p class="r-gate-required-evidence">signal-evidence-followups#s2</p>
+    </div>
+<div class="r-gate" data-id="g-emr-3" data-section="s3" data-gated-sections="s3" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">dd_cocos_class in imas_codex/cocos/transforms.py resolves a field&#x27;s COCOS class through its ancestors</h4>
+    <p class="r-gate-required-evidence">signal-cocos-conventions#s5</p>
     </div>
 </section>
 

@@ -24,7 +24,7 @@
     <text x="105" y="56">conventions or map</text>
     <text x="105" y="76" font-size="13">judges a source</text>
     <text x="105" y="94" font-size="13">below threshold</text>
-    <text x="450" y="56" fill="#2b6cb0">SignalFollowup</text>
+    <text x="450" y="56" fill="#2b6cb0">escalation followup</text>
     <text x="450" y="76" font-size="13">open question, stage,</text>
     <text x="450" y="94" font-size="13">Jev distribution</text>
     <text x="790" y="56">triage</text>

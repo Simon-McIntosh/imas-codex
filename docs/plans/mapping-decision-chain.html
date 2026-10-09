@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-blocks" content="jt60sa-imas-maps">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;signal-cocos-conventions#s3&quot;], &quot;s7&quot;: [&quot;signal-cocos-conventions#s8&quot;], &quot;s8&quot;: [&quot;signal-cocos-conventions#s3&quot;, &quot;signal-cocos-conventions#s2&quot;, &quot;mapping-decision-chain#s5&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;signal-cocos-conventions#s3&quot;, &quot;signal-cocos-conventions#s5&quot;], &quot;s7&quot;: [&quot;signal-cocos-conventions#s8&quot;], &quot;s8&quot;: [&quot;signal-cocos-conventions#s3&quot;, &quot;signal-cocos-conventions#s2&quot;, &quot;signal-cocos-conventions#s5&quot;, &quot;mapping-decision-chain#s5&quot;]}">
   <meta name="plan-sprint" content="S17">
   <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 </head>
@@ -89,9 +89,10 @@
       <code>signal-cocos-conventions</code> persists it on the <code>SignalSource</code>: its <code>cocos_class</code>,
       its <code>cocos_survivors</code>, its <code>cocos</code> when the survivors are one convention, its confidence, and
       its <code>HAS_GEOMETRY</code> sensor geometry when present; a slot whose class is an angle class stays open while
-      the source has no geometry. It reads the DD field's <code>cocos_transformation_type</code>,
-      resolved through the field's ancestors because the DD carries a label on a structure such as
-      <code>magnetics/ip</code> rather than on its data leaf, and the DD's own COCOS. A COCOS-labelled field gets its sign
+      the source has no geometry. It reads the DD field's class through <code>dd_cocos_class</code> in
+      <code>imas_codex/cocos/transforms.py</code>, which resolves <code>cocos_transformation_type</code> through the
+      field's ancestors because the DD carries a label on a structure such as <code>magnetics/ip</code> rather than on
+      its data leaf, and the DD's own COCOS through <code>cocos_from_dd_version</code>. A COCOS-labelled field gets its sign
       and factor from <code>cocos_sign</code> in code when every surviving source convention gives the same factor for
       that label: a psi_like field settles across survivors {3, 4}, while an ip_like field does not. A source whose class
       is none, bound to a field with no label or a one_like label, has no COCOS slot; its open slots are unit and index,
@@ -102,14 +103,21 @@
       starts from what is known.
     </p>
     <p>
-      <strong>Node</strong> <code>mapping-slot-resolution</code>, role implement, 1.5 h, after §3 and
-      <code>signal-cocos-conventions</code> §3. Write paths: <code>imas_codex/ids/slot_resolution.py</code>,
-      <code>tests/ids/test_slot_resolution.py</code> and its fragment. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests showing a psi_like field
-      settles sign and factor in code when the survivors are {3, 4}, an ip_like field with the same survivors stays open,
-      a label carried on a structure applies to its data leaf, a none source opens only unit and index slots, a channel
-      sign multiplies into the sign slot, an absent convention leaves the slot open, and every settled slot carries its
-      evidence.
+      This replaces the map's current convention input, the source representative's <code>FacilitySignal.cocos</code>
+      read as <code>rep_cocos</code> in <code>imas_codex/ids/workers.py</code>, <code>imas_codex/ids/tools.py</code> and
+      <code>imas_codex/ids/mapping.py</code>. Those readers and the property are removed together here, as
+      <code>signal-cocos-conventions</code> §3 records, so the graph keeps one owner of a source's COCOS.
+    </p>
+    <p>
+      <strong>Node</strong> <code>mapping-slot-resolution</code>, role implement, 2 h, after §3 and
+      <code>signal-cocos-conventions</code> §3 and §5. Write paths: <code>imas_codex/ids/slot_resolution.py</code>,
+      <code>imas_codex/ids/workers.py</code>, <code>imas_codex/ids/tools.py</code>, <code>imas_codex/ids/mapping.py</code>,
+      <code>imas_codex/schemas/facility.yaml</code>, <code>tests/ids/test_slot_resolution.py</code> and its fragment.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests
+      showing a psi_like field settles sign and factor in code when the survivors are {3, 4}, an ip_like field with the
+      same survivors stays open, a label carried on a structure applies to its data leaf, a none source opens only unit
+      and index slots, a channel sign multiplies into the sign slot, an absent convention leaves the slot open, and every
+      settled slot carries its evidence; and no code or schema names <code>FacilitySignal.cocos</code>.
     </p>
 
     <h2 id="s5">§5 — One Jev decision per open slot</h2>
