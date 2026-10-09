@@ -56,9 +56,12 @@ def _validate_focus(facility: str, focus_items: list[str]) -> None:
 
     A focus item may name a FacilitySignal by id or accessor, a SignalSource
     by id, or a source array by a ``data_source_path`` segment (such as
-    ``magPbTC10``). Anything that resolves to none of those is a typo the
-    claim would silently honour by selecting nothing, so it is refused up
-    front with the offending identities named.
+    ``magPbTC10``). A segment reaches the catalogue only through a member of
+    a ``SignalSource`` — the same path ``build_focus_predicate`` resolves it —
+    so a source-less signal carrying the segment names nothing and is
+    refused. Anything that resolves to none of those is a typo the claim
+    would silently honour by selecting nothing, so it is refused up front
+    with the offending identities named.
     """
     from imas_codex.graph import GraphClient
 
@@ -66,17 +69,23 @@ def _validate_focus(facility: str, focus_items: list[str]) -> None:
         rows = gc.query(
             "MATCH (n) WHERE (n:FacilitySignal OR n:SignalSource) "
             "AND n.facility_id = $facility "
-            "AND (n.id IN $ids OR n.accessor IN $ids "
-            "OR ANY(segment IN split(coalesce(n.data_source_path, ''), '/') "
-            "WHERE segment IN $ids)) "
-            "RETURN n.id AS id, n.accessor AS accessor, "
-            "n.data_source_path AS data_source_path",
+            "AND (n.id IN $ids OR n.accessor IN $ids) "
+            "RETURN n.id AS id, n.accessor AS accessor",
+            facility=facility,
+            ids=focus_items,
+        )
+        segment_rows = gc.query(
+            "MATCH (member:FacilitySignal)-[:MEMBER_OF]->(:SignalSource) "
+            "WHERE member.facility_id = $facility "
+            "AND ANY(segment IN split(coalesce(member.data_source_path, ''), '/') "
+            "WHERE segment IN $ids) "
+            "RETURN member.data_source_path AS data_source_path",
             facility=facility,
             ids=focus_items,
         )
     matched = {row["id"] for row in rows}
     matched.update(row["accessor"] for row in rows if row["accessor"])
-    for row in rows:
+    for row in segment_rows:
         if row["data_source_path"]:
             matched.update(
                 segment

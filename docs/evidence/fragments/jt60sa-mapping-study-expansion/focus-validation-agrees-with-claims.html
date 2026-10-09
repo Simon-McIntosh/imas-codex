@@ -1,0 +1,38 @@
+<section>
+  <h2 id="focus-validation-agrees-with-claims-land">Focus validation and its stage tests agree with the claim predicate</h2>
+  <p id="focus-validation-agrees-with-claims-change">
+    <strong>What changed.</strong> <code>_validate_focus</code> in
+    <code>imas_codex/cli/discover/signals.py</code> resolved an array segment
+    from <em>any</em> node's own <code>data_source_path</code>, but
+    <code>build_focus_predicate</code> resolves a segment only through a member
+    inside a <code>MEMBER_OF</code> source. A source-less signal carrying the
+    segment passed validation and then selected nothing. The validator now
+    resolves a segment through a <code>FacilitySignal</code> that is
+    <code>MEMBER_OF</code> a <code>SignalSource</code>, so validation and the
+    claim agree on what a focus item names.
+    <code>tests/cli/test_discover_signals_stage.py</code> no longer asserts the
+    removed refusal; it asserts what the stage now does. A graph-marked
+    <code>tests/discovery/test_signals_focus_graph.py</code> runs the rendered
+    predicate against the live graph.
+  </p>
+
+  <p id="focus-validation-agrees-with-claims-measure">
+    <strong>Measure.</strong> <code>tests/cli/test_discover_signals_stage.py</code>
+    passes: <code>17 passed in 5.57s</code>, <code>EXIT=0</code> — an unknown
+    focus item is refused naming it, a known item reaches the engine as
+    <code>focus_items</code>, a source-less signal carrying the segment is
+    refused, and a segment reached through a <code>MEMBER_OF</code> member is
+    accepted. The graph-marked
+    <code>tests/discovery/test_signals_focus_graph.py</code> run with
+    <code>-m graph</code> on the fleet node selects exactly the 14 members of
+    the MDAC <code>magPbTCNNN</code> source through the rendered predicate:
+    <code>1 passed in 6.13s</code>, <code>EXIT=0</code>.
+  </p>
+
+  <p id="focus-validation-agrees-with-claims-negative-control">
+    <strong>Negative control, and it held.</strong> Restoring the source-less
+    segment acceptance in <code>_validate_focus</code> made
+    <code>test_validate_focus_refuses_a_sourceless_signal_carrying_the_segment</code>
+    fail: <code>1 failed, 16 passed</code>, <code>EXIT=1</code>.
+  </p>
+</section>
