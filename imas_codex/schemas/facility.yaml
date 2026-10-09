@@ -239,6 +239,27 @@ enums:
       enriched:
         description: Description and keywords populated via LLM
 
+  COCOSClass:
+    description: Transformation class of a source quantity under COCOS
+    permissible_values:
+      none: { description: Quantity does not depend on COCOS }
+      psi_like: { description: Poloidal flux and related quantities }
+      dodpsi_like: { description: Derivatives with respect to poloidal flux }
+      ip_like: { description: Plasma current and related quantities }
+      b0_like: { description: Toroidal magnetic field and related quantities }
+      q_like: { description: Safety factor and related quantities }
+      tor_angle_like: { description: Toroidal angle and related quantities }
+      pol_angle_like: { description: Poloidal angle and related quantities }
+      compound: { description: Quantity combining multiple transformation classes }
+
+  ConventionStatus:
+    description: Durable state of a source convention determination
+    permissible_values:
+      judged: { description: Convention dependence and class have been judged }
+      probed: { description: Facility data have been read for convention signs }
+      settled: { description: Convention verdict is accepted }
+      needs_followup: { description: Convention verdict needs further evidence }
+
   MappingPipelineStatus:
     description: State machine for the IMAS mapping pipeline on SignalSource nodes
     permissible_values:
@@ -2133,6 +2154,48 @@ classes:
         description: Lifecycle status
         range: SignalSourceStatus
         required: true
+      convention_dependent:
+        description: Whether the source quantity depends on COCOS sign or normalization
+        range: boolean
+      p_convention_dependent:
+        description: Probability assigned to convention dependence by the judgment
+        range: float
+      cocos_class:
+        description: COCOS transformation class of this source quantity
+        range: COCOSClass
+      cocos_class_distribution:
+        description: JSON object mapping COCOS classes to judgment probabilities
+      convention_writer:
+        description: Raw diagnostic, named reconstruction code, or unknown writer
+      cocos_survivors:
+        description: COCOS indices consistent with declared evidence and observations
+        multivalued: true
+        range: integer
+      cocos:
+        description: Unique COCOS index, populated only for one surviving convention
+        range: integer
+      cocos_confidence:
+        description: Confidence in the convention verdict
+        range: float
+      convention_status:
+        description: Durable convention determination state
+        range: ConventionStatus
+      convention_question:
+        description: Open question carried to a followup when evidence is insufficient
+      convention_judged_at:
+        description: Time of the latest convention judgment
+        range: datetime
+      convention_probed_at:
+        description: Time of the latest facility data probe
+        range: datetime
+      convention_settled_at:
+        description: Time the convention verdict was accepted
+        range: datetime
+      convention_claimed_at:
+        description: Time a worker claimed convention processing for this source
+        range: datetime
+      convention_claim_token:
+        description: Token for atomic convention processing claims
       embedding:
         description: Vector embedding of description for semantic search
         multivalued: true
@@ -2214,6 +2277,54 @@ classes:
         range: datetime
       mapping_claim_token:
         description: UUID token for atomic work claiming between parallel mapping workers
+
+  ConventionObservation:
+    description: >-
+      One sign measurement read from facility data for a source convention probe.
+      OBSERVED_FOR links each measurement to the source whose verdict it informs.
+    class_uri: facility:ConventionObservation
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Unique facility, source, shot and quantity observation key
+      facility_id:
+        required: true
+        range: Facility
+        description: Facility where the measurement was made
+        annotations:
+          relationship_type: AT_FACILITY
+      observed_for:
+        required: true
+        range: SignalSource
+        description: Source whose convention this measurement constrains
+        annotations:
+          relationship_type: OBSERVED_FOR
+      shot:
+        required: true
+        range: integer
+        description: Shot or pulse number read
+      quantity:
+        required: true
+        description: Physical quantity whose sign was read
+      observed_sign:
+        range: integer
+        description: Sign of the measured quantity, positive or negative
+      plasma_current_sign:
+        range: integer
+        description: Plasma-current sign of this shot, positive or negative
+      data_access:
+        required: true
+        range: DataAccess
+        description: Data access template used for this read
+        annotations:
+          relationship_type: DATA_ACCESS
+      observed_at:
+        required: true
+        range: datetime
+        description: Time of the facility data read
+      error:
+        description: Read failure; observed_sign is absent when set
 
 
   TDIFunction:
@@ -2596,6 +2707,9 @@ classes:
         description: >-
           Description of sign convention if relevant.
           E.g., "positive direction = co-current", "positive = outward flux"
+      channel_sign:
+        description: Installation sign of this member relative to its source group
+        range: integer
       cocos:
         description: COCOS index if applicable to this signal
         range: integer
