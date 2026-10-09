@@ -22,11 +22,13 @@
   <meta name="plan-after" content="generated-map-handoff">
   <meta name="plan-informs" content="imas-ambix:jt60sa-tokamap-from-generated-maps">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;: [&quot;jt60sa-mapping-study-expansion#s1&quot;], &quot;s3&quot;: [&quot;jt60sa-mapping-study-expansion#s2&quot;], &quot;s6&quot;: [&quot;jt60sa-mapping-study-expansion#s5&quot;], &quot;s8&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s9&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s10&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s11&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s12&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s13&quot;: [&quot;jt60sa-mapping-study-expansion#s3&quot;, &quot;jt60sa-mapping-study-expansion#s4&quot;, &quot;jt60sa-mapping-study-expansion#s6&quot;, &quot;jt60sa-mapping-study-expansion#s7&quot;], &quot;s14&quot;: [&quot;jt60sa-mapping-study-expansion#s8&quot;, &quot;jt60sa-mapping-study-expansion#s9&quot;, &quot;jt60sa-mapping-study-expansion#s10&quot;, &quot;jt60sa-mapping-study-expansion#s11&quot;, &quot;jt60sa-mapping-study-expansion#s12&quot;, &quot;jt60sa-mapping-study-expansion#s13&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;}">
   <title>JT-60SA Mapping Study Expansion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-commits" content="8b42e71ca">
+<meta name="plan-impl" content="0.0714">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -344,6 +346,11 @@
     <pre class="r-fu-prompt">/reckon-build jt60sa-mapping-study-expansion</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-09T05:35:00Z">
+    <div class="r-comment-body"><p>§4 landed: a value mapping no longer binds its own error fields; only classified error signals do (merge <code>8b42e71ca</code>). On the merged head 42 tests passed, and the negative control failed as intended. The unused <code>data_mappings</code> parameter is removed after §6. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s4">evidence</a></p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

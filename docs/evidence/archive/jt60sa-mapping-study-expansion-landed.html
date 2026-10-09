@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="jt60sa-mapping-study-expansion-landed">
+  <meta name="plan-title" content="JT-60SA Mapping Study Expansion — landed record">
+  <meta name="plan-summary" content="Closure synthesis for JT-60SA Mapping Study Expansion: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="jt60sa-mapping-study-expansion">
+  <meta name="plan-verdict" content="qualified">
+  <title>JT-60SA Mapping Study Expansion — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>JT-60SA Mapping Study Expansion — landed record</h1>
+  <p>Closure synthesis for JT-60SA Mapping Study Expansion: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s4">
+    <h2>§4 — Error mappings come only from error signals</h2>
+    <p><code>derive_error_mappings</code> in <code>imas_codex/ids/mapping.py</code> no longer walks a value mapping's target to its <code>HAS_ERROR</code> children. It returns only what <code>match_error_signals_to_imas</code> finds behind sources that <code>classify_error_signals</code> identifies as error signals, so an error field with no error signal behind it stays unmapped. Worker commit <code>ade2222b4</code>, merged at <code>8b42e71ca</code>.</p><p>Tests in <code>tests/ids/test_error_derivation.py</code> cover three cases. A value target with error children yields no binding, a classified error signal still yields one, and empty input yields nothing. The negative control restored the old pass, and the no-binding test then failed. On the merged head, <code>tests/ids/test_error_derivation.py</code>, <code>tests/ids/test_mapping_handoff.py</code> and <code>tests/ids/test_mapping_edge_ownership.py</code> gave 42 passed, logged at <code>~/.cache/imas-codex-mapping-study/s4-merged-gate.log</code>. The guard in <code>imas_codex/ids/handoff.py</code> that excludes value-derived error rows is left in place.</p><p>One item remains. <code>data_mappings</code> is now unused in the signature. Its caller is in <code>imas_codex/ids/workers.py</code>, which §5 and §6 own, so the parameter is removed after §6.</p>
+  </section>
+
+</main>
+</body>
+</html>
