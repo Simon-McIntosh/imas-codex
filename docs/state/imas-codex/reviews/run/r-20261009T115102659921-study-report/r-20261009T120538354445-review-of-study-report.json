@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run r-20261009T115102659921-study-report declares no suite arms: its committed manifest carries baseline_suite null and after_suite null, and its single gate is `reckon audit-doc docs/research/jt60sa-mapping-study.html`, which reports OK with EXIT=0. With no baseline/after pair there is nothing to difference, so added_failure_count is 0 and added_failure_ids is empty. I reproduced the gate independently at 89e995f1d from a scratch extraction of the four committed files under TMPDIR (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T120538354445-review-of-study-report/review-gate-audit-doc.log: OK, EXIT=0) and reproduced the figure byte-for-byte from the committed script (review-figure-render.log: EXIT=0; only internal matplotlib id hashes differ).",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-09T12:16:37.421Z",
+  "dispatched_at": "2026-10-09T12:05:47Z",
+  "findings": [
+    {
+      "file": "docs/research/jt60sa-mapping-study.html",
+      "line": "95",
+      "severity": "blocking",
+      "text": "blocking: the \u00a710 flux-loop five-number row is marked 'pending' in the agreeing cell (1..131 agreement table, line 95) and its figure renders 'pending' at the bar end, but \u00a710's own landing comment (c-close-s10, 2026-10-09T12:00:00Z) already resolved it \u2014 'the right channels on the wrong element, because MDAC flux loops are differential to loop 7 and were mapped as absolute' \u2014 and the coordinator's post-dispatch update fixes the row at 6 exported, 6 imported, 0 agreeing, 0 unplaced, 0 refused with 3 cross-structure rows. \u00a714's done-when requires a five-number row for each of \u00a78 to \u00a713 taken from the landing comments, so a 'pending' cell that contradicts the section's own landing comment fails the done-when at this revision."
+    },
+    {
+      "file": "docs/research/jt60sa-mapping-study.html",
+      "line": "177",
+      "severity": "follow-on",
+      "text": "follow-on: the three \u00a710 flux-loop cross-structure rows are attributed stage 'mapping' in the disagreement table (line 177), but \u00a710's landing comment places the missing fact in the enrichment glossary and the coordinator's update sets the stage to enrichment (a facility fact was missing), so the stage label is wrong even once the pending wording is removed."
+    },
+    {
+      "file": "docs/research/jt60sa-mapping-study.html",
+      "line": "243",
+      "severity": "follow-on",
+      "text": "follow-on: \u00a78's single refusal (tf/coil/conductor/current/data, a DD path the coil score JSON reports as 'not defined in Data Dictionary 4.1.1') is named only in prose (line 243, '\u00a78's single refusal') and given no disagreement row or stage, though \u00a711's identical deprecated-path refusal is listed at stage candidates and \u00a714's done-when requires 'Every disagreement row names its stage'."
+    },
+    {
+      "file": "docs/research/jt60sa-mapping-study.html",
+      "line": "112",
+      "severity": "follow-on",
+      "text": "follow-on: the \u00a713 row's note reads 'no plant-sensor store; 18 sources refused with a reason' (line 112) beside a Refused column that reads 0, conflating two different counts: imas-codex's pipeline-side 18 CryoMag refusals with a disposition (c-close-s13) and imas-ambix's scorer-side refused count of 0 (c-s13-score). The same row states both numbers without distinguishing them."
+    },
+    {
+      "file": "docs/research/jt60sa-mapping-study.html",
+      "line": "245",
+      "severity": "follow-on",
+      "text": "follow-on: '326 cryo rows and 21 ECH rows have no store to land in' (line 245) is imprecise against the score JSONs: of the 326 cryo unplaced rows, 308 lack a machine-description store and 18 lack a member pattern (cryo score total), and ECH's no-store count is 7 of its 18 unplaced rows (21 is its exported total, which also includes 3 refused)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "The commit adds 2203 lines across exactly four new files: the research document, the agreement SVG, the figure script and the evidence fragment; nothing else changes.",
+    "done_when": "The five-number rows for \u00a78, \u00a79, \u00a711, \u00a712 and \u00a713 are present and trace to the cited score JSONs, and the figure renders with audit-doc OK, but the \u00a710 row carries 'pending' where its own landing comment already gives the resolution, so the done-when is unmet at this revision.",
+    "goal": "\u00a714 asks for an agreement table across six systems in docs/research/jt60sa-mapping-study.html, one stacked-bar figure per system in the data-ink style, and every imas-ambix disagreement traced to a stage; the document carries the table, the figure and seven staged disagreement rows.",
+    "manifest": "The manifest records commit 89e995f1d, the audit-doc gate (OK, EXIT=0) and the four changed paths, and honestly carries baseline_suite null, after_suite null and negative_control none rather than inventing an arm.",
+    "write_paths": "git diff --name-status e4838db2..89e995f1d shows exactly the four declared paths (docs/research/jt60sa-mapping-study.html, docs/figures/jt60sa-mapping-study/agreement.svg, scripts/figures_jt60sa_mapping_study.py, docs/evidence/fragments/jt60sa-mapping-study-expansion/study-report.html), all additions, no generated or gitignored file."
+  },
+  "justifications": {
+    "durability": "The figure is reproducible byte-for-byte from the committed script and the gate is named, but the six agreement rows are hand-transcribed into both the document and the evidence fragment with no check tying either to the cited score JSONs, so a JSON change would drift the two copies silently.",
+    "evidence": "Every cited number reproduces from its score JSON (coils 46/33/7/12/1, magnetics 26/17/10/7/2, ech 21/0/18/3, gas 5/0/5/0, cryo 326/0/326/0), audit-doc reports OK at 89e995f1d and the SVG reproduces byte-for-byte from the committed script, but the \u00a713 'refused 18' note and two prose counts are imprecise.",
+    "fit": "The document follows the research-doc conventions, the figure uses the data-ink style with a project-absolute src (/imas-codex/figures/jt60sa-mapping-study/agreement.svg), and the commit carries a conventional subject with a mechanism body and no attribution line.",
+    "goal_fidelity": "The six-system table, the stacked-bar figure and seven staged disagreement rows are present, but \u00a710 is marked pending against its own landing comment and its stage is mapping not enrichment, and \u00a78's deprecated-path refusal carries no stage.",
+    "reuse": "The figure script and document reuse the repository's data-ink style and research template; the agreement table is duplicated into the evidence fragment by the evidence-fragment mechanism rather than by a new renderer.",
+    "scope_discipline": "git diff e4838db2..89e995f1d touches exactly the four declared paths with a single purpose, all additions, and stages no generated or gitignored file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a714 asks for an agreement table across six systems in docs/research/jt60sa-mapping-study.html, one stacked-bar figure per system in the data-ink style, and every imas-ambix disagreement traced to a stage; the document carries the table, the figure and seven staged disagreement rows.\nVERDICT done_when: the five-number rows for \u00a78, \u00a79, \u00a711, \u00a712 and \u00a713 are present and trace to the cited score JSONs, and the figure renders with audit-doc OK, but the \u00a710 row carries 'pending' where its own landing comment already gives the resolution, so the done-when is unmet at this revision.\nVERDICT write_paths: git diff --name-status e4838db2..89e995f1d shows exactly the four declared paths, all additions, no generated or gitignored file.\nVERDICT manifest: records commit 89e995f1d, the audit-doc gate (OK, EXIT=0) and the four changed paths, and honestly carries baseline_suite null, after_suite null and negative_control none rather than inventing an arm.\nVERDICT diff: the commit adds 2203 lines across exactly four new files: the research document, the agreement SVG, the figure script and the evidence fragment; nothing else changes.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: the six-system table, the stacked-bar figure and seven staged disagreement rows are present, but \u00a710 is marked pending against its own landing comment and its stage is mapping not enrichment, and \u00a78's deprecated-path refusal carries no stage.\nSCORE evidence: 16\nJUSTIFICATION evidence: every cited number reproduces from its score JSON, audit-doc reports OK at 89e995f1d and the SVG reproduces byte-for-byte from the committed script, but the \u00a713 'refused 18' note and two prose counts are imprecise.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff e4838db2..89e995f1d touches exactly the four declared paths with a single purpose, all additions, no generated or gitignored file.\nSCORE durability: 16\nJUSTIFICATION durability: the figure reproduces byte-for-byte from the committed script and the gate is named, but the six rows are hand-transcribed into the document and the fragment with no check tying them to the score JSONs.\nSCORE fit: 18\nJUSTIFICATION fit: the document follows the research-doc conventions, the figure uses the data-ink style with project-absolute src, and the commit carries a conventional subject with a mechanism body and no attribution.\nSCORE reuse: 18\nJUSTIFICATION reuse: the script and document reuse the repository's data-ink style and research template; the table is duplicated into the evidence fragment by the fragment mechanism.\nFINDING docs/research/jt60sa-mapping-study.html:95 blocking: the \u00a710 flux-loop five-number row is marked 'pending' in the agreeing cell and its figure renders 'pending', but \u00a710's own landing comment (c-close-s10, 12:00Z) already resolved it \u2014 right channels on the wrong element, differential to loop 7 \u2014 so the row is not a number and not taken from the landing comment as \u00a714's done-when requires.\nFINDING docs/research/jt60sa-mapping-study.html:177 follow-on: the three \u00a710 cross-structure rows are attributed stage 'mapping', but \u00a710's landing comment places the missing fact in the enrichment glossary and the coordinator's update sets the stage to enrichment.\nFINDING docs/research/jt60sa-mapping-study.html:243 follow-on: \u00a78's single refusal (tf/coil/conductor/current/data, a deprecated DD path) is named only in prose and given no disagreement row or stage, though \u00a711's identical deprecated-path refusal is listed at stage candidates.\nFINDING docs/research/jt60sa-mapping-study.html:112 follow-on: the \u00a713 note reads '18 sources refused with a reason' beside a Refused column of 0, conflating imas-codex's 18 pipeline-side refusals with imas-ambix's scorer-side refused count of 0.\nFINDING docs/research/jt60sa-mapping-study.html:245 follow-on: '326 cryo rows and 21 ECH rows have no store to land in' is imprecise \u2014 18 of the 326 cryo unplaced rows lack a member pattern rather than a store, and ECH's no-store count is 7 (21 is its exported total).\n",
+  "review_run_id": "r-20261009T120538354445-review-of-study-report",
+  "reviewed_base_sha": "e4838db24e3ae2fca66156db756c917b97036d9e",
+  "reviewed_head_sha": "89e995f1d26bd9d4f1f4658c36002ffa57ef3884",
+  "reviewed_run_id": "r-20261009T115102659921-study-report",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T12:21:00+00:00",
+  "total": 102
+}
