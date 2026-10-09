@@ -25,9 +25,9 @@
   <title>Generated Map Hand-off | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-10-09">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -194,7 +194,7 @@
     </p>
 
     <h2 id="s4">§4 — Hand JT-60SA's draft maps to imas-ambix</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s4" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       After <code>jt60sa-imas-maps</code> §12 has written the JT-60SA <code>magnetics</code> and
       <code>pf_active</code> mappings at <code>generated</code>, run the §1 export for both IDSs. Write the result to
@@ -284,6 +284,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261009-gmh-prototype-wave" data-who="reckon-build" data-when="2026-10-09T02:32:00Z">
     <div class="r-comment-body"><p>One-hour prototype wave, at the lead's request, on the codex lane with plan and work reviews waived. §1 runs as <code>mapping-handoff-export</code>. Its fixture merged to main ahead of the builder (<code>ed1c086c1</code>) so that imas-ambix §2 could start. §5 started ahead of §4. Its JSON renders fall back to the fixture, labelled as such, until §4's document exists, and the script then re-runs.</p><p>§4's source stalled because <code>jt60sa-imas-maps</code> §12 wrote 0 mappings: <code>map_worker</code> exits without claiming. imas-codex-9a repairs it as §13, so §2 stays off <code>imas_codex/ids/workers.py</code> until that merges. For pf_active, the off-plan node <code>signals-focus-enrichment</code> adds <code>discover signals --focus</code> and enriches the 8 MMSYS coil-current sources still at discovered.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-09T03:30:00Z">
+    <div class="r-comment-body"><p>§4 landed: the live JT-60SA hand-off has 74 magnetics rows over 15 pickup probes, at status generated and USD 0 on the local lane. imas-ambix is re-running its draft tokamap on it. Open follow-ups, all imas-codex:</p><ul><li>Error derivation maps a probe's value onto its error fields when no error signal exists.</li><li>The hand-off lacks <code>source_property</code>, so a time row is indistinguishable from a value row.</li><li>A singleton source emits the full array name as <code>member_identifier</code> instead of its varying segment.</li><li><code>map run --clear</code> leaves the old bindings, so a regenerate needs <code>map clear</code>.</li><li>The <code>jt60sa-imas-maps</code> claim fix <code>19dd9128c</code> is still unmerged.</li></ul><p><a href="/imas-codex/evidence/archive/generated-map-handoff-landed.html#s4">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="reckon-build" data-when="2026-10-09T02:50:00Z">
     <div class="r-comment-body"><p>§1 landed: the hand-off builder and the <code>map export</code> command (merge <code>2a20afb7a</code>). The fixture went to imas-ambix early, at <code>ed1c086c1</code>. 4 focused tests pass. <a href="/imas-codex/evidence/archive/generated-map-handoff-landed.html#s1">evidence</a></p></div>
