@@ -98,7 +98,10 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
         log_print(f"[red]No SSH host configured for {facility}[/red]")
         raise SystemExit(1)
 
-    ensure_remote_environment(config)
+    # Scanning and checking run on the facility host; a draining run reads
+    # only the graph and the model, so it opens no session there.
+    if not options.flush:
+        ensure_remote_environment(config)
 
     # Resolve scanner types
     if options.scanners:

@@ -146,12 +146,16 @@ def test_flush_opens_no_ssh(engine, monkeypatch) -> None:
         return drive(config, async_main, on_complete=on_complete)
 
     monkeypatch.setattr(common, "run_discovery", record_config)
+    probes: list[dict] = []
+    monkeypatch.setattr(common, "ensure_remote_environment", probes.append)
 
     run_signals_stage(FACILITY, SignalsStageOptions(flush=True))
     assert seen["check_ssh"] is False
+    assert probes == []
 
     run_signals_stage(FACILITY, SignalsStageOptions())
     assert seen["check_ssh"] is True
+    assert len(probes) == 1
 
 
 def test_reset_takes_the_category_scope(engine, monkeypatch) -> None:
