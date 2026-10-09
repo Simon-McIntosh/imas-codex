@@ -64,7 +64,7 @@
     <h3>The per-system loop and its scorecard</h3>
     <p>Every system section runs the same six steps against the live graph, in this order:</p>
     <ol>
-      <li><code>discover jt-60sa --only signals --focus &lt;sources&gt; --reset-to discovered</code> re-enriches exactly the system's own sources, replacing descriptions written before the matcher fix;</li>
+      <li>the cohort's signals read <code>enriched_at</code> after commit <code>5406bc598</code>. The discovery coordinator, imas-codex-90, is regenerating JT-60SA facility-wide once §3 merges, and has already regenerated MMSYS. A cohort that regeneration has not yet reached is re-enriched with <code>discover jt-60sa --only signals --focus &lt;sources&gt; --reset-to discovered</code>, which needs §2;</li>
       <li><code>discover jt-60sa --only map --focus &lt;sources&gt;</code> runs the candidate stage on the same sources;</li>
       <li><code>imas map clear jt-60sa &lt;ids&gt;</code> followed by <code>imas map run jt-60sa -i &lt;ids&gt;</code> generates the mapping, on the local <code>ids-mapping</code> seat;</li>
       <li><code>imas map export jt-60sa -i &lt;ids&gt; --out /work/projects/imas_gpu/jt60sa/handoff/jt-60sa-&lt;system&gt;-handoff.json</code> writes the hand-off document;</li>
