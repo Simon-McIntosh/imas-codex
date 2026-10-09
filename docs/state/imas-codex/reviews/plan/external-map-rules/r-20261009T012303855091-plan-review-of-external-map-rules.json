@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T01:31:01.571Z",
+  "dispatched_at": "2026-10-09T01:23:16Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/cocos/calculator.py:102, imas_codex/cocos/transforms.py:30",
+      "id": "reuse_search-1",
+      "reason": "the pull should read its COCOS class and sign through `imas_codex/cocos/` rather than store a second, independent notion of \"sign to target COCOS\", or it must say why that owner cannot supply it.",
+      "text": "\u00a71 and \u00a73 make the plan's central convention decision (\"record `channel_factor` as the total sign to the rule's target COCOS and take the class from the DD, never from the rule's `transformation` field\") by re-deriving COCOS sign/class semantics that `imas_codex/cocos/` already owns: `cocos_from_dd_version` (calculator.py:127), `determine_cocos` (158), `validate_cocos_from_data` (345), and `path_needs_cocos_transform` / `get_sign_flip_paths` (transforms.py:30,54), which already read the DD's psi_like labelling; the plan never cites this package",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/map.py:50",
+      "id": "duplicate_owner-1",
+      "reason": "the author must either place the pull under a distinct verb/namespace or justify overloading `map`, because `imas-codex imas map \u2026` currently means the mapping pipeline to every existing user and test.",
+      "text": "`imas map` already names the source\u2192IMAS mapping pipeline (`run/status/show/validate/clear/activate`, registered at `imas_codex/cli/imas_dd.py:58`), and \u00a73 adds `imas map pull` under the same group for machine-map rules, giving the `map` namespace a second, unrelated meaning; the plan lists `cli/map.py` as a write path but never notes the namespace is taken",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:1369",
+      "id": "duplicate_owner-2",
+      "reason": "the design must either link rules through `MappingEvidence`/`HAS_EVIDENCE` or state why a new evidence carrier is needed, so a later reader does not find two evidence stores for one convention question.",
+      "text": "\u00a71/\u00a74 treat \"a pulled rule is evidence\" and hand it to the conventions stage, but the schema already owns evidence: `Evidence` (facility.yaml:1369) and `MappingEvidence` (facility.yaml:3051) with `EvidenceType` (facility.yaml:202), whose `cocos` value is literally \"Evidence from COCOS or sign convention analysis\"; the plan names none of these",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:2093",
+      "id": "duplicate_owner-3",
+      "reason": "the join should be expressed on the existing `SignalSource` edges (with the plan naming which), or the author must justify a parallel join edge, and the census of SignalSource edges the pull touches should be listed.",
+      "text": "\u00a73 \"joins it to its source and target\" without naming the `SignalSource` edges that already own that relationship: `maps_to_imas` (MAPS_TO_IMAS, facility.yaml:2163), `mapping_candidates` (MAPPING_CANDIDATE, :2179) and `has_evidence` (HAS_EVIDENCE \u2192 MappingEvidence, :2193); a rule that \"joins a SignalSource and an IMASNode\" is exactly the join these edges carry",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/schemas/facility.yaml:1739, imas_codex/schemas/facility_config.yaml:703",
+      "id": "duplicate_owner-4",
+      "reason": "\u00a72's design should cite these facility-local version idioms and decide whether the pulled bundle reuses or deliberately departs from them, so the version/change shape is not settled four times independently.",
+      "text": "\u00a72 designs \"a bundle-version node\" plus \"a change record on the rule\" and cites only the DD/standard-name idioms, but the facility schema owns two versioned-change precedents it never cites: `SignalEpoch` (facility.yaml:1739) already records a structural version with per-version deltas (`nodes_added_from_previous`, `subtrees_added_removed` at :1772-1782) and `SourceVersion` (facility_config.yaml:703) is a version node for a data source",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "external-map-rules#s3",
+      "id": "interface_budget-1",
+      "reason": "at zero headroom every added interface must be accounted for in the section's own text, so the section must state what surface it retires or merges (e.g. reusing the `map` group rather than a new verb) or why no retirement is possible.",
+      "text": "\u00a73 adds `imas map pull FACILITY --bundle PATH` (a CLI subcommand plus option) and new node and change-record classes, while the supplied figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, and the section names nothing it retires or merges and states no reason nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c289c279acaf2b7b0b08a992eeb413953de223a82f236946189465ac1c861f9b",
+  "plan_slug": "external-map-rules",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261009T012303855091-plan-review-of-external-map-rules",
+  "reviewed_blob_sha": "e722cd112de5eba8c2a498b7de640f14041f962b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the capability lands as one new module (`imas_codex/ids/external_maps.py`) whose shape \u00a72 is the node that settles, and the read-side consumers extend existing owners (`discovery/signals/conventions.py`, `ids/slot_context.py`) rather than each wrapping the same machinery.",
+    "duplicate_owner": "a finding \u2014 \u00a73 joins a rule to a source and target without naming the `SignalSource` edges that already own that join, and \u00a71/\u00a74 call a pulled rule \"evidence\" without naming the `Evidence`/`MappingEvidence` classes that own evidence.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds a CLI subcommand and option plus node/edge classes and neither names what it retires or merges nor states why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites the DD and standard-name change idioms but never searched `imas_codex/cocos/`, the package that already owns COCOS sign/class semantics, nor the existing `imas map` CLI namespace.",
+    "thin_wrapper": "pass \u2014 \u00a74 extends the conventions module owned by `signal-cocos-conventions` \u00a77 and the existing `ids/slot_context.py` instead of writing a parallel evidence reader, which is the extension the item asks for; no thin wrapper is proposed."
+  },
+  "section_digests": {
+    "_document": "f8388cfe0ad744d2658ed72e4d38142aa6f2c125052509f3921e3a0e8eff6488",
+    "s1": "ef78a5c94f22eb2b53a7bed7d304a79e5fc45402f603f934a1263773963f6fac",
+    "s2": "59b92aac2f6eb1c84d9217bd115e2c65f2a324d837ce292daef0ec65f05e22fb",
+    "s3": "c184a2934bfb504ee937a28f5773aaf70a9a9598cd1014db8e2e4495caf68c88",
+    "s4": "cb3aa4452aaaa229c75a91cfccf3a3eaf730efd020b43d6cc8ff3ddab40c301d",
+    "s5": "25ac90cb7cf213398fff630a6edef590907508c710984273c15aca36f93a20d8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:31:43.080739+00:00"
+}
