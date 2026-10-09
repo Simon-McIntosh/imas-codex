@@ -1,0 +1,25 @@
+<section id="validation-gates-persistence" data-reckon="evidence">
+  <h2 id="validation-gates-persistence-heading">Only bindings that pass validation are persisted</h2>
+  <table id="validation-gates-persistence-measure-table">
+    <caption>Gate: <code>uv run --no-sync pytest -p no:cacheprovider tests/ids/</code></caption>
+    <thead>
+      <tr><th>Arm</th><th>Establishes</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr id="validation-gates-persistence-head-row">
+        <td>head</td>
+        <td>A binding whose target does not exist and one whose units are
+            incompatible are removed from the <code>bindings</code> returned by
+            <code>validate_mappings</code> and carried as escalations naming the
+            failed check, while a passing sibling is kept</td>
+        <td>pass (598 passed, 5 skipped, 8 deselected; exit 0)</td>
+      </tr>
+      <tr id="validation-gates-persistence-neg-row">
+        <td>negative control</td>
+        <td>Keep every binding regardless of its checks; the removal tests then
+            fail</td>
+        <td>3 failed, incl. <code>test_a_binding_with_a_missing_target_is_removed_and_escalated</code> (exit 1)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

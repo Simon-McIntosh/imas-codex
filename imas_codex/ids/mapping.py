@@ -1876,6 +1876,28 @@ def validate_mappings(
     report = validate_mapping(all_bindings, gc=gc, sign_flip_paths=flip_paths)
     all_escalations.extend(report.escalations)
 
+    # Validation is a gate, not a report: a binding that fails any of the four
+    # checks (source exists, target exists, transform executes, units
+    # compatible) is removed from the persisted set, so a non-existent target
+    # or an incompatible unit never reaches the graph write. Each failed check
+    # is already recorded as an escalation naming it, one per binding that
+    # carries errors, and the corrections note below stays as a summary. A
+    # binding with no matching check is kept, so a caller that supplies no
+    # per-binding checks keeps every binding.
+    surviving_bindings: list[ValidatedSignalMapping] = []
+    for index, binding in enumerate(all_bindings):
+        check = (
+            report.binding_checks[index] if index < len(report.binding_checks) else None
+        )
+        if check is None or (
+            check.source_exists
+            and check.target_exists
+            and check.transform_executes
+            and check.units_compatible
+        ):
+            surviving_bindings.append(binding)
+    all_bindings = surviving_bindings
+
     # Coverage threshold check
     coverage_escalations = check_coverage_threshold(
         ids_name,
