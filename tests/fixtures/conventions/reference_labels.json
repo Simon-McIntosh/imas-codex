@@ -1331,14 +1331,14 @@
       "half": "calibration"
     },
     {
-      "source_id": "jet:dpf(\"da/c2-pNNN\", NNN)",
+      "source_id": "jet:dpf(\"da/c2z-pNNN<tfe\", NNN)",
       "convention_dependent": true,
       "class": "one_like",
       "reason": "Oriented magnetic probe needs sensor geometry to fix its field sign.",
       "half": "held_out"
     },
     {
-      "source_id": "jet:dpf(\"da/c2-pNNN<tfe\", NNN)",
+      "source_id": "jet:dpf(\"da/c2z-pNNN<tfo\", NNN)",
       "convention_dependent": true,
       "class": "one_like",
       "reason": "Oriented magnetic probe needs sensor geometry to fix its field sign.",
@@ -1359,7 +1359,7 @@
       "half": "calibration"
     },
     {
-      "source_id": "jet:dpf(\"da/c2-tpNNN\", NNN)",
+      "source_id": "jet:dpf(\"da/c2z-tnNNN\", NNN)",
       "convention_dependent": true,
       "class": "one_like",
       "reason": "Oriented magnetic probe needs sensor geometry to fix its field sign.",
