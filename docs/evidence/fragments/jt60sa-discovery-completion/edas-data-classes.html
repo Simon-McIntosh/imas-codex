@@ -1,0 +1,24 @@
+<section id="edas-data-classes">
+  <h2 id="edas-data-classes-title">EDDB class readers</h2>
+  <p id="edas-data-classes-catalogue">
+    The recorded E101173 catalogue enumeration contains the letters
+    <code>T, O, P, A, C, G, J, K, M, N, V</code> across 6,240 rows.
+    The scanner takes each letter from <code>eddbreadTable</code>'s
+    <code>classlist</code>, rather than inferring it from a signal name.
+    The live graph has 3,770 rows currently interpreted as parameter;
+    this positive control confirms that P is present at scale in the
+    catalogue-derived data. P therefore retains its existing parameter
+    interpretation even though the access manual documents J rather than P.
+    A, C, K and V have no read-call definition in the EDDB access manual or
+    the English eDAS quick reference, so their interpreted class stays unset
+    while their raw letter is kept.
+  </p>
+  <p id="edas-data-classes-measure">
+    The baseline scanner check failed 11 of 11 selected cases: J, M, G and N
+    were unset, and no signal had a raw-letter slot. The edited scanner check
+    passed 16 cases, and a graph transaction confirmed that re-enumeration
+    refreshed accessor, interpreted class, raw letter, unit and catalogue text
+    while preserving the enriched description, name, domain, keywords,
+    status and claim. A J-to-unset mutation failed the J read-call test.
+  </p>
+</section>

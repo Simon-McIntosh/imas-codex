@@ -102,14 +102,21 @@ enums:
   SignalDataClass:
     description: >-
       EDDB data class of a signal. Determines which read call returns the
-      signal: a time series, a one-point value, or a configuration parameter.
+      signal: a time series, one-point value, condition parameter, image,
+      binary payload, or comment.
     permissible_values:
       time_series:
         description: Time-varying waveform; EDDB class T, read with eddbreadTime
       one_point:
         description: Single-point or condition value; EDDB class O, read with eddbreadOne
       parameter:
-        description: Configuration parameter; EDDB class P, read with eddbreadPara
+        description: Condition parameter; EDDB class J or catalogue class P, read with eddbreadPara
+      image:
+        description: Image data; EDDB class M, read with eddbreadImage
+      binary:
+        description: Preprocessed binary data; EDDB class G, read with eddbreadBinary
+      comment:
+        description: Comment data; EDDB class N, read with eddbreadComment
 
   DiagnosticCategory:
     description: Categories of fusion plasma diagnostics
@@ -2625,10 +2632,13 @@ classes:
         multivalued: true
       data_class:
         description: >-
-          Data class of the signal from the source catalogue, e.g. EDDB
-          class T (time series), O (one-point) or P (parameter). Selects the
-          read call that returns the signal.
+          Interpreted source data class. Selects the read call that returns
+          the signal when the catalogue letter has a documented meaning.
         range: SignalDataClass
+      data_class_letter:
+        description: >-
+          Raw EDDB class letter from the catalogue, including letters whose
+          meaning is unknown. Kept alongside the interpreted data class.
       shot_range:
         description: >-
           Shot validity range as the source reports it. EDDB form is

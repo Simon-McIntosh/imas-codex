@@ -58,8 +58,31 @@ DATA_CLASS_BY_EDDB_LETTER = {
     "T": "time_series",
     "O": "one_point",
     "P": "parameter",
+    "J": "parameter",
+    "M": "image",
+    "G": "binary",
+    "N": "comment",
 }
 EDDB_LETTER_BY_DATA_CLASS = {v: k for k, v in DATA_CLASS_BY_EDDB_LETTER.items()}
+EDDB_LETTER_BY_DATA_CLASS["parameter"] = "P"  # Existing rows lack the raw letter.
+
+
+def _eddb_accessor(data_class: str | None, shot: str, category: str, name: str) -> str:
+    """Build the catalogue class's native read expression."""
+    prefix = f"{shot!r}, {category!r}, {name!r}"
+    if data_class == "time_series":
+        return f"eddbreadTime({prefix}, t1, t2)"
+    if data_class == "one_point":
+        return f"eddbreadOne({prefix}, None, 0, 0)"
+    if data_class == "parameter":
+        return f"eddbreadPara({prefix}, None, 0, 0)"
+    if data_class in {"image", "binary", "comment"}:
+        suffix = {"image": "Image", "binary": "Binary", "comment": "Comment"}[
+            data_class
+        ]
+        return f"eddbread{suffix}({prefix}, 0)"
+    return ""
+
 
 EQDB_FIELDS = {
     "#GEO": ("RG", "ZG", "NSR", "NSZ"),
@@ -371,10 +394,7 @@ class EDASScanner:
             ),
             # eddbreadTime takes its time bounds as strings; omitting both
             # returns the whole record (measured 740,900 points for a coil current).
-            data_template=(
-                "ok, rtn = db.eddbreadTime('{shot}', '{category}', '{data_name}', '0', '99')\n"
-                "data = rtn['data'] if ok else None"
-            ),
+            data_template="ok, rtn = db.{accessor}\ndata = rtn['data'] if ok else None",
             cleanup_template="db.eddbClose()",
             setup_commands=config.get("setup_commands"),
         )
@@ -480,6 +500,7 @@ class EDASScanner:
             # data name, so the PID is the signal's name within the scheme.
             pid_keyed = bool(raw.get("pid_keyed"))
             pid = (raw.get("udp_id") or "").strip()
+            eddb_class = raw.get("data_class", "")
             if pid_keyed:
                 source_dname = raw.get("source_dname") or dname
                 signal_id = (
@@ -496,14 +517,8 @@ class EDASScanner:
             else:
                 source_dname = dname
                 signal_id = f"{facility}:general/{cat.lower()}_{dname.lower()}"
-                eddb_class = raw.get("data_class", "")
-                if eddb_class == "O":
-                    accessor = (
-                        f"eddbreadOne('{shot_str}', '{cat}', '{dname}', None, 0, 0)"
-                    )
-                else:
-                    accessor = f"eddbreadTime('{shot_str}', '{cat}', '{dname}', t1, t2)"
                 data_class = DATA_CLASS_BY_EDDB_LETTER.get(eddb_class)
+                accessor = _eddb_accessor(data_class, shot_str, cat, dname)
                 if eddb_class and data_class is None:
                     unknown_data_classes.add(eddb_class)
 
@@ -522,6 +537,7 @@ class EDASScanner:
                     description=description,  # May be Japanese
                     source_description=description,
                     data_class=data_class,
+                    data_class_letter=eddb_class or None,
                     shot_range=raw.get("shot_range") or None,
                     pid=raw.get("udp_id") or None,
                     aliases=[raw["alias"]] if raw.get("alias") else None,
@@ -730,7 +746,7 @@ class EDASScanner:
                 )
                 continue
             if len(parts) == 2:
-                data_class = EDDB_LETTER_BY_DATA_CLASS.get(
+                data_class = s.data_class_letter or EDDB_LETTER_BY_DATA_CLASS.get(
                     getattr(s.data_class, "value", s.data_class), ""
                 )
                 batch.append(
