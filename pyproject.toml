@@ -390,40 +390,30 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 
 # ─── Discovery function seats ──────────────────────────────────────────────
 # One seat per discovery function so a model can be chosen per function, the
-# way the standard-names pipeline already does. The four text/vision seats and
-# IDS mapping run on the local lane through the ambix router; cluster labelling
-# and the two Jev seats (discovery-relevance, mapping-candidates) stay on
-# OpenRouter. reasoning-effort is left unset on the text/vision seats, which
-# keeps the local model's non-thinking behaviour; IDS mapping sets it high for
-# the escalated choice.
+# way the standard-names pipeline already does. The four text/vision seats run
+# the same DeepSeek v4.1 flash model through OpenRouter rather than the shared
+# local lane: their many short, unique prompts evicted agent sessions' long
+# cached prefixes and collapsed the lane's throughput. IDS mapping stays on the
+# local lane through the ambix router; cluster labelling and the two Jev seats
+# (discovery-relevance, mapping-candidates) stay on OpenRouter. reasoning-effort
+# is left unset on the text/vision seats; IDS mapping sets it high for the
+# escalated choice.
 
 [tool.imas-codex.discovery-triage]
 # Path triage and code-file triage.
-model = "local/deepseek-v4.1-flash"
-model-route = "ambix-local"
-api-key-env = "AMBIX_API_KEY"
-endpoint-class = "local-free"
+model = "openrouter/deepseek/deepseek-v4.1-flash"
 
 [tool.imas-codex.discovery-score]
 # Path scoring, code-file scoring, wiki page and wiki document scoring.
-model = "local/deepseek-v4.1-flash"
-model-route = "ambix-local"
-api-key-env = "AMBIX_API_KEY"
-endpoint-class = "local-free"
+model = "openrouter/deepseek/deepseek-v4.1-flash"
 
 [tool.imas-codex.discovery-describe]
 # Signal enrichment and static tree enrichment.
-model = "local/deepseek-v4.1-flash"
-model-route = "ambix-local"
-api-key-env = "AMBIX_API_KEY"
-endpoint-class = "local-free"
+model = "openrouter/deepseek/deepseek-v4.1-flash"
 
 [tool.imas-codex.discovery-vision]
 # Wiki and document image scoring.
-model = "local/deepseek-v4.1-flash"
-model-route = "ambix-local"
-api-key-env = "AMBIX_API_KEY"
-endpoint-class = "local-free"
+model = "openrouter/deepseek/deepseek-v4.1-flash"
 
 [tool.imas-codex.discovery-relevance]
 # Code-relevance judgements through the OpenRouter alpha decisions endpoint.
@@ -860,6 +850,13 @@ completion = 0.28
 cache-read = 0.028
 source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash"
 verified-at = "2026-08-11"
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4.1-flash"]
+prompt = 0.30
+completion = 1.20
+cache-read = 0.006
+source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4.1-flash"
+verified-at = "2026-10-09"
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.5"]
 prompt = 2.0
