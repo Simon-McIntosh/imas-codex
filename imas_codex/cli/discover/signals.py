@@ -46,7 +46,7 @@ class SignalsStageOptions:
     scanners: str | None = None
     categories: str | None = None
     reference_shot: int | None = None
-    enrich_workers: int = 2
+    enrich_workers: int = 8
     check_workers: int = 4
     reset_to: str | None = None
 

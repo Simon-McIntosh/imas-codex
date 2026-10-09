@@ -5426,7 +5426,7 @@ async def run_parallel_data_discovery(
     focus: str | None = None,
     focus_items: list[str] | None = None,
     categories: list[str] | None = None,
-    num_enrich_workers: int = 2,
+    num_enrich_workers: int = 8,
     num_check_workers: int = 1,
     discover_only: bool = False,
     enrich_only: bool = False,
