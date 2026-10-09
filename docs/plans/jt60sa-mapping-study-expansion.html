@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99">
 <meta name="plan-impl" content="0.4706">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -477,6 +477,9 @@
 </div>
 <div class="r-comment" data-section="s17" data-id="c-close-s17" data-who="reckon-build" data-when="2026-10-09T06:35:00Z">
     <div class="r-comment-body"><p>§17 landed: the two stale stage tests are replaced, so main is green again. Focus validation resolves array segments through <code>MEMBER_OF</code> as the claim does, and a live graph test pins the predicate (merge <code>205b68c99</code>). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s17">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-run-r-20261009T061528146758-focus-validation-agrees-with-claims" data-who="reckon-build" data-when="2026-10-09T06:30:52.861Z">
+    <div class="r-comment-body"><p>Focus validation now resolves a `data_source_path` array segment only through a `FacilitySignal` that is `MEMBER_OF` a `SignalSource`, exactly as `build_focus_predicate` does; the stage tests assert the new refusal and the `focus_items` pass-through, and a graph-marked test selects the 14 MDAC `magPbTCNNN` members through the rendered predicate (17 passed stage / 1 passed graph).</p></div>
 </div>
 </section>
 </main>
