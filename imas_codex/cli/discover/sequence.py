@@ -423,6 +423,18 @@ def _stage_function(stage: Stage):
     return getattr(module, function_name)
 
 
+def _stage_reset_to(stage: Stage, options: SequenceOptions) -> str | None:
+    """Return the reset target for the first stage of its domain that runs.
+
+    The signals domain is two stages, and its reset belongs to the first one
+    that runs: the scan, unless --flush excludes the scan, in which case the
+    enrich stage resets before it drains.
+    """
+    if stage.name == "signals enrich" and not options.flush:
+        return None
+    return options.reset_to
+
+
 def _stage_options(
     stage: Stage, options: SequenceOptions, cost: float, minutes: int | None
 ):
@@ -445,7 +457,7 @@ def _stage_options(
         "limit": options.limit,
         "focus": options.focus,
         "topic": options.topic,
-        "reset_to": options.reset_to if stage.name != "signals enrich" else None,
+        "reset_to": _stage_reset_to(stage, options),
         "rescan": options.rescan,
         "scan_only": options.scan_only,
         "flush": options.flush,

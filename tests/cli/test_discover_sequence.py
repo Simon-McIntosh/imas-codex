@@ -855,3 +855,18 @@ def test_dry_run_does_not_wait_for_an_unreachable_host(monkeypatch, healthy):
     )
     assert _outcome(outcomes, "code").outcome == sequence.UNREACHABLE
     assert waits == []
+
+
+def test_flush_reset_runs_in_the_enrich_stage() -> None:
+    """--flush excludes the signals scan, so the enrich stage carries the reset."""
+    from imas_codex.cli.discover import sequence
+
+    stages = {stage.name: stage for stage in sequence.STAGES}
+    flushed = sequence.SequenceOptions(
+        only=("signals",), reset_to="discovered", flush=True
+    )
+    whole = sequence.SequenceOptions(only=("signals",), reset_to="discovered")
+
+    assert sequence._stage_reset_to(stages["signals enrich"], flushed) == "discovered"
+    assert sequence._stage_reset_to(stages["signals enrich"], whole) is None
+    assert sequence._stage_reset_to(stages["signals scan"], whole) == "discovered"
