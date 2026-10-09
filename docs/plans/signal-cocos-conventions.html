@@ -24,7 +24,7 @@
   <title>Signal COCOS Conventions Before the Map | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -329,8 +329,9 @@
       <strong>Node</strong> <code>jt60sa-sensor-geometry</code>, role implement, 2 h, after
       <code>sensor-geometry-graph</code>. It ingests the SELENE decks from the facility through the same module, and
       cross-checks the result against the imas-ambix machine descriptions. Write path:
-      <code>docs/evidence/fragments/signal-cocos-conventions/jt60sa-sensor-geometry.html</code> beside the module's
-      deck reader. <strong>Done when</strong> each JT-60SA magnetic sensor the inventory joined carries geometry per
+      <code>imas_codex/discovery/static/geometry.py</code>, where its SELENE deck reader goes,
+      <code>tests/discovery/test_sensor_geometry.py</code> and
+      <code>docs/evidence/fragments/signal-cocos-conventions/jt60sa-sensor-geometry.html</code>. <strong>Done when</strong> each JT-60SA magnetic sensor the inventory joined carries geometry per
       operation phase with its measurement kind, flux loop 7 reads absolute and the other 26 differential with loop 7 as
       reference, and the fragment lists every position or angle that differs from imas-ambix beyond 1 mm or 0.1°.
     </p>
@@ -395,8 +396,8 @@
     </p>
     <p>
       The graph does not group them that way. <code>detect_signal_sources</code> keys groups on digit runs in the
-      accessor, so loops 1 to 9 are one-member sources and loops 10 to 27 share one 25-member source; loop 7 stands alone
-      only by accident. The measurement kind comes from the sensor geometry §6 ingests: each <code>SensorGeometry</code>
+      accessor, so loops 1 to 9 are one-member sources and loops 10 to 34 share one 25-member source, of which 18 have
+      deck rows and 7 (loops 28 to 34) do not; loop 7 stands alone only by accident. The measurement kind comes from the sensor geometry §6 ingests: each <code>SensorGeometry</code>
       records whether its sensor is absolute or differential and, when differential, its reference sensor, with the
       evidence that says so. The 7 loops and 6 probes with no deck row keep an unknown kind and are not moved. The group
       key is owned by <code>detect_signal_sources</code> and its <code>_accessor_to_source_key</code> in

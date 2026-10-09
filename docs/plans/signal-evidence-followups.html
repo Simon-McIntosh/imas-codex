@@ -19,11 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-sprint" content="S17">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;signal-evidence-followups#s2&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>Signal Evidence Followups | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -35,7 +36,7 @@
       (<code>mapping-decision-chain</code> §5) both stop short of guessing: a judgment below its acceptance threshold, or
       a COCOS class factor the surviving conventions disagree on, is left open. Two records of an open result exist
       today. The map's <code>insufficient_context</code> disposition marks the source, and
-      <code>write_mapping_result</code> in <code>imas_codex/ids/models.py</code> writes each escalation as a
+      <code>persist_mapping_result</code> in <code>imas_codex/ids/models.py</code> writes each escalation as a
       <code>MappingEvidence</code> of type <code>escalation</code>, confidence 0, linked <code>HAS_EVIDENCE</code> from the
       source. Neither names the question, the stage or the open slot, neither has a status a person can move, and the
       conventions stage writes neither. So nobody is asked the question, and a fact someone finds has nowhere to go that
@@ -74,7 +75,7 @@
       distribution as JSON, a followup status (open, attached, resolved, dismissed), and when and by whom it was resolved.
       <code>raise_followup</code> in <code>imas_codex/discovery/signals/followups.py</code> writes one escalation
       idempotently on the source, stage and open slot, so a re-run that reaches the same open question updates the record
-      rather than adding a second. <code>write_mapping_result</code>'s escalation writer becomes a caller of it, so one
+      rather than adding a second. <code>persist_mapping_result</code>'s escalation writer becomes a caller of it, so one
       function owns escalation records. The same module owns listing, showing and attaching, which §3's terminal and
       MCP front ends call.
     </p>
@@ -87,7 +88,8 @@
       <strong>Node</strong> <code>signal-followup-record</code>, role implement, 2 h. Write paths:
       <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/signals/followups.py</code>,
       <code>imas_codex/ids/models.py</code> and <code>tests/discovery/test_signal_followups.py</code>.
-      <strong>Done when</strong>
+      <strong>Done when</strong> <code>uv run build-models --force</code> regenerates the models, so the new
+      <code>EvidenceType</code> value and properties reach the generated classes the tests import, and
       <code>uv run --no-sync pytest tests/discovery/test_signal_followups.py tests/ids -p no:cacheprovider</code> passes
       with tests showing an escalation followup round-trips through the generated models, a second raise of the same
       open slot updates the one record, a raise for a different slot of the same source adds a second, the map's
@@ -146,8 +148,10 @@
       and leaves the declaration in place; it never overwrites one.
     </p>
     <p>
-      <strong>Node</strong> <code>followup-evidence-in-state</code>, role implement, 1.5 h, after
-      <code>signal-cocos-conventions</code> §7 and <code>mapping-decision-chain</code> §5. Write paths:
+      <strong>Node</strong> <code>followup-evidence-in-state</code>, role implement, 1.5 h, after §2 (it calls
+      <code>raise_followup</code> and shares <code>imas_codex/ids/models.py</code>), <code>signal-cocos-conventions</code>
+      §7 and <code>mapping-decision-chain</code> §5. It also adds a source's <code>MappingEvidence</code> to the pool
+      <code>build_slot_context</code> reads, which today holds code, wiki, document and signal evidence only. Write paths:
       <code>imas_codex/discovery/signals/conventions.py</code>, <code>imas_codex/ids/slot_judgment.py</code>,
       <code>imas_codex/ids/slot_context.py</code>, <code>imas_codex/ids/mapping.py</code>,
       <code>imas_codex/ids/models.py</code> and <code>tests/discovery/test_followup_evidence_state.py</code>. The map's

@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-sprint" content="S17">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;external-map-rules#s2&quot;], &quot;s5&quot;: [&quot;external-map-rules#s3&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;external-map-rules#s2&quot;], &quot;s4&quot;: [&quot;external-map-rules#s3&quot;, &quot;signal-evidence-followups#s4&quot;], &quot;s5&quot;: [&quot;external-map-rules#s3&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>External Machine-Map Rules Pulled Into the Graph | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -33,8 +33,9 @@
 <section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       imas-ambix holds a JT-60SA machine map whose rules were validated against data: the bundle
-      <code>imas-alambic-jt60sa</code> under <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/</code>, 45 rules to
-      COCOS 17 for magnetics, PF, TF and equilibrium, each with a <code>channel_factor</code>, a
+      <code>imas-alambic-jt60sa</code> under <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/</code>: 61 signal rules
+      to COCOS 17 (45 for magnetics, 16 for PF, TF and equilibrium) and 432 machine-description bindings, each signal
+      rule with a <code>channel_factor</code>, a
       <code>validation_state</code> (corpus-validated or source-only) and an evidence string. It is the strongest
       external evidence the conventions stage (<code>signal-cocos-conventions</code>) and the map can read. It also moves:
       the bundle read <code>v0.2.0-rc3</code> and then <code>v0.2.0-rc4</code> on 2026-10-09, and its
@@ -124,6 +125,7 @@
       <strong>Node</strong> <code>external-map-pull</code>, role implement, 3 h, after §2. Write paths:
       <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/ids/external_maps.py</code>,
       <code>imas_codex/cli/map.py</code> and <code>tests/ids/test_external_maps.py</code>. <strong>Done when</strong>
+      <code>uv run build-models --force</code> regenerates the models with the new classes, and
       <code>uv run --no-sync pytest tests/ids/test_external_maps.py -p no:cacheprovider</code> passes with tests on two
       bundle fixtures showing one version node per pull, a change record for each changed rule and none for an unchanged
       one, a renamed rule keeping its identity, a re-pull of the same hashes writing nothing, a flux-loop rule carrying the
@@ -139,8 +141,10 @@
       Each source a current rule joins carries one <code>MappingEvidence</code> of type <code>sign_convention</code>
       through <code>HAS_EVIDENCE</code>, whose <code>source_node_id</code> names the rule revision and whose text gives
       the provider, version, validation state, target and channel factor; a later pull replaces it. The conventions
-      judgment and the map's slot context therefore read pulled rules through the evidence they already read, beside
-      attached evidence. A pull that changes a rule re-queues every source that rule joins for the conventions stage, and
+      judgment reads a source's <code>MappingEvidence</code> already. The map's slot context does not:
+      <code>build_slot_context</code> in <code>imas_codex/ids/slot_context.py</code> pools code, wiki, document and signal
+      evidence only, and <code>signal-evidence-followups</code> §4 adds a source's <code>MappingEvidence</code> to that
+      pool. This node runs after it, so pulled rules reach the map through the same pool as attached evidence. A pull that changes a rule re-queues every source that rule joins for the conventions stage, and
       raises a followup through <code>raise_followup</code> when the new rule disagrees with a convention already
       settled.
     </p>
@@ -152,8 +156,8 @@
       <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/ids/test_external_rule_evidence.py -p no:cacheprovider</code> passes with tests
       showing a joined source carrying one evidence record per current rule naming its revision, a re-pull replacing it,
-      a changed rule re-queuing its sources, a disagreeing rule raising one followup, and an unchanged re-pull re-queuing
-      nothing.
+      <code>build_slot_context</code> for that source surfacing the rule's evidence, a changed rule re-queuing its
+      sources, a disagreeing rule raising one followup, and an unchanged re-pull re-queuing nothing.
     </p>
 
     <h2 id="s5">§5 — Pull the JT-60SA history</h2>
