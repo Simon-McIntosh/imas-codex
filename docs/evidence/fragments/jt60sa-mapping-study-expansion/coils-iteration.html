@@ -1,0 +1,141 @@
+<!-- JT-60SA MMSYS coil-current mapping loop and its hand-off export. The
+     mapping engine persists one IMASMapping per IDS only when a single process
+     maps that IDS's whole source set, so the run was executed unbounded from
+     the main checkout once two engine defects were fixed; this node produced
+     the export and accounts for every cohort source. Run log:
+     /tmp/claude-39486/-home-ITER-mcintos-Code-imas-codex/e8e8b071-0bd3-4f32-a90b-3476d18716fe/tasks/bezlbvdfi.output
+     Export: /work/projects/imas_gpu/jt60sa/handoff/jt-60sa-coils-handoff.json -->
+<section id="coils-iteration" data-reckon="evidence">
+  <h2 id="coils-iteration-heading">MMSYS coil currents through the mapping loop</h2>
+
+  <p id="coils-iteration-intro">
+    The study maps the JT-60SA MMSYS coil-current signals onto <code>pf_active</code>
+    and <code>tf</code> and exports a hand-off document for imas-ambix. The MMSYS
+    group carries 28 coil-current sources — the TF (<code>cur1TFLKAT</code>,
+    <code>cur2TFLKAT</code>), the central solenoid (<code>curCS1</code>–<code>curCS4</code>),
+    the equilibrium field coils (<code>curEF1</code>–<code>curEF6</code>) and the
+    low/upper field-protection and disrupter coils (<code>curLFP*</code>,
+    <code>curUFP*</code>), each with a high-temperature and a low-temperature
+    winding where both exist — all read through
+    <code>eddbreadTime('E101173', 'MMSYS', '&lt;name&gt;', t1, t2)</code>. This node
+    ran the per-system loop of the plan (§8) over that cohort and produced the
+    hand-off export.
+  </p>
+
+  <h3 id="coils-iteration-loop-heading">The loop as it ran</h3>
+
+  <p id="coils-iteration-loop-text">
+    The candidate stage took the cohort as its focus —
+    <code>discover jt-60sa --only candidates --focus &lt;28 ids&gt;</code>. The plan
+    writes this stage as <code>--only map</code>, but the discovery sequence refuses
+    <code>map</code> as an unknown discovery domain and accepts only
+    <code>candidates</code> at that slot. The map loop then cleared and re-ran per
+    IDS on the local seat: <code>imas map clear jt-60sa &lt;ids&gt; --yes</code> then
+    <code>imas map run jt-60sa -i pf_active -i tf</code>, run unbounded from the
+    main checkout once two engine defects were fixed. The export then ran
+    <code>imas map export jt-60sa -i pf_active -i tf --out
+    /work/projects/imas_gpu/jt60sa/handoff/jt-60sa-coils-handoff.json</code>, and
+    the document passed <code>check_handoff_document</code> — <code>format
+    imas-codex-mapping-handoff</code>, version <code>1</code>, DD
+    <code>4.1.1</code>, both IDS <code>status generated</code>.
+  </p>
+
+  <p id="coils-iteration-seat">
+    The <code>ids-mapping</code> seat (<code>[tool.imas-codex.ids-mapping]</code> in
+    <code>pyproject.toml</code>) served every step: model
+    <code>local/deepseek-v4.1-flash</code>, model-route <code>ambix-local</code>,
+    endpoint-class <code>local-free</code>, reasoning-effort <code>high</code>. The
+    run spent $0.0000 — the seat is local and free.
+  </p>
+
+  <h3 id="coils-iteration-measure-heading">Measure — the exported document</h3>
+
+  <table id="coils-iteration-measure-table">
+    <caption>Hand-off export, jt-60sa <code>pf_active</code> + <code>tf</code>, 2026-10-09.</caption>
+    <thead>
+      <tr><th>Quantity</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <tr id="coils-iteration-m-pf">
+        <td><code>pf_active</code> signal rows, by structure</td>
+        <td>47 total — <code>coil</code> 22, <code>circuit</code> 17, <code>supply</code> 8</td>
+      </tr>
+      <tr id="coils-iteration-m-tf">
+        <td><code>tf</code> signal rows, by structure</td>
+        <td>3 total — <code>coil</code> 3</td>
+      </tr>
+      <tr id="coils-iteration-m-refused">
+        <td>Refused rows (validation rejected a chosen target)</td>
+        <td>0 in both IDS</td>
+      </tr>
+      <tr id="coils-iteration-m-unexpanded">
+        <td>Unexpanded rows (a binding whose facility member could not be expanded)</td>
+        <td>0 in both IDS</td>
+      </tr>
+      <tr id="coils-iteration-m-edges">
+        <td><code>MAPS_TO_IMAS</code> edges behind the export</td>
+        <td>50 — 47 across 26 <code>pf_active</code> sources, 3 across 2 <code>tf</code> sources</td>
+      </tr>
+      <tr id="coils-iteration-m-cohort">
+        <td>MMSYS coil-current cohort accounted for</td>
+        <td>28 of 28 — 23 as signal rows, 5 with a reason recorded below</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="coils-iteration-quoted-row">
+    One coil row, quoted from the export: the equilibrium-field coil
+    <code>curEF1HiTe</code> binds onto the coil's current data with an
+    <code>ip_like</code> COCOS label —
+    <code>source_id: jt-60sa:eddbreadTime('E101173', 'MMSYS', 'curEF1HiTe', t1, t2)</code>,
+    <code>target_path: pf_active/coil/current/data</code>,
+    <code>cocos_label: ip_like</code>, <code>cocos_label_source: xml</code>,
+    <code>transform_expression: value</code>, <code>source_units: A</code>,
+    <code>target_units: A</code>, <code>confidence: 0.9</code>. A current is the same
+    current under any COCOS convention, so the label travels as a sign convention
+    for the receiving side to honour; the value transform carries the amperes
+    unchanged.
+  </p>
+
+  <h3 id="coils-iteration-account-heading">Accounting for all 28 cohort sources</h3>
+
+  <p id="coils-iteration-account-text">
+    The export emits an unexpanded row only for a binding that fails to expand, so
+    a source the map stage bound nothing for appears in no row at all. The
+    remaining five cohort sources are therefore accounted here, from the run log
+    and the graph, not from the document.
+  </p>
+
+  <table id="coils-iteration-account-table">
+    <caption>MMSYS coil-current cohort, 28 sources.</caption>
+    <thead>
+      <tr><th>Sources</th><th>How accounted</th><th>Reason</th></tr>
+    </thead>
+    <tbody>
+      <tr id="coils-iteration-a-rows">
+        <td>23 sources</td>
+        <td>Signal row — 21 in <code>pf_active</code>, 2 (<code>cur1TFLKAT</code>, <code>cur2TFLKAT</code>) in <code>tf</code></td>
+        <td>Bound onto a coil, circuit or supply current</td>
+      </tr>
+      <tr id="coils-iteration-a-zerobind">
+        <td><code>curCS1LKAT</code>, <code>curCS4HiTe</code>, <code>curLFPdisr</code>, <code>curUFPdisr</code></td>
+        <td>No row — selected for <code>pf_active</code>, map stage returned 0 bindings</td>
+        <td>The seat chose no listed target for their values (<code>pf_active/coil: 0 bindings</code> for the two CS high/low coils, <code>pf_active/circuit: 0 bindings</code> for the two disrupter coils)</td>
+      </tr>
+      <tr id="coils-iteration-a-outside">
+        <td><code>curCS2HiTe</code></td>
+        <td>No row — outside this hand-off</td>
+        <td>Selected route is <code>equilibrium</code>, not <code>pf_active</code> or <code>tf</code>, so it belongs to that IDS's mapping, not this one</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="coils-iteration-negative">
+    Negative control: none. This is an operational run whose check is
+    <code>check_handoff_document</code> on its own output plus the per-source
+    coverage count above; there is no code under test to mutate. The document
+    passed the contract check, and the coverage table reads 28 of 28 with the five
+    exceptions named and given a reason, rather than the export's zero unexpanded
+    rows being read as full coverage on their own.
+  </p>
+</section>
