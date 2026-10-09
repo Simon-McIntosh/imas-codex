@@ -2,8 +2,8 @@
 
 Covers:
 - ValidatedSignalMapping model defaults and error-derived fields
-- derive_error_mappings: basic usage, skipping already-derived, empty input,
-  no errors in graph, multiple sources per target
+- derive_error_mappings: value targets with HAS_ERROR children yield no
+  binding, a source classified as an error signal still binds, empty input
 - classify_error_signals: uncertainty vs physics-error-field exclusion
 - match_error_signals_to_imas: cross-reference with existing data mappings
 - persist_mapping_result: error fields are persisted in MAPS_TO_IMAS relationships
@@ -126,91 +126,85 @@ def test_validated_signal_mapping_disposition_default():
 # ---------------------------------------------------------------------------
 
 
-def test_derive_error_mappings_basic(mock_gc):
-    """Basic error derivation from data mappings via HAS_ERROR."""
+def test_derive_error_mappings_value_target_with_error_children_is_unmapped(
+    mock_gc,
+):
+    """A direct value mapping's HAS_ERROR children yield no error binding.
+
+    The graph offers error children for the value target, but no error
+    signal stands behind them, so the stage binds none.
+    """
     from imas_codex.ids.mapping import derive_error_mappings
 
+    parent = "equilibrium/time_slice/global_quantities/ip"
     mock_gc.query.return_value = [
         {
-            "data_path": "equilibrium/time_slice/global_quantities/ip",
-            "error_path": "equilibrium/time_slice/global_quantities/ip_error_upper",
+            "data_path": parent,
+            "error_path": f"{parent}_error_upper",
             "error_type": "upper",
         },
         {
-            "data_path": "equilibrium/time_slice/global_quantities/ip",
-            "error_path": "equilibrium/time_slice/global_quantities/ip_error_lower",
+            "data_path": parent,
+            "error_path": f"{parent}_error_lower",
             "error_type": "lower",
         },
-        {
-            "data_path": "equilibrium/time_slice/global_quantities/ip",
-            "error_path": "equilibrium/time_slice/global_quantities/ip_error_index",
-            "error_type": "index",
-        },
-    ]
-
-    data_mappings = [_make_direct_mapping()]
-
-    error_mappings = derive_error_mappings(
-        data_mappings, gc=mock_gc, include_direct_error_signals=False
-    )
-
-    assert len(error_mappings) == 3
-    for em in error_mappings:
-        assert em.mapping_type == "error_derived"
-        assert em.derived_from == "equilibrium/time_slice/global_quantities/ip"
-        assert em.source_id == "jet:magnetics/ip"
-        assert em.confidence == pytest.approx(0.95)
-        assert em.source_units == "A"
-        assert em.target_units == "A"
-        assert em.transform_expression == "value"
-
-    types = {em.error_type for em in error_mappings}
-    assert types == {"upper", "lower", "index"}
-
-
-def test_derive_error_mappings_inherits_transform(mock_gc):
-    """Derived error mappings inherit the parent transform expression."""
-    from imas_codex.ids.mapping import derive_error_mappings
-
-    mock_gc.query.return_value = [
-        {
-            "data_path": "summary/global_quantities/ip/value",
-            "error_path": "summary/global_quantities/ip/value_error_upper",
-            "error_type": "upper",
-        },
-    ]
-
-    dm = _make_direct_mapping(
-        target_id="summary/global_quantities/ip/value",
-        transform_expression="value * 1e-6",
-    )
-    result = derive_error_mappings([dm], gc=mock_gc, include_direct_error_signals=False)
-
-    assert len(result) == 1
-    assert result[0].transform_expression == "value * 1e-6"
-
-
-def test_derive_error_mappings_skips_error_derived(mock_gc):
-    """Only processes direct mappings, not already-derived ones."""
-    from imas_codex.ids.mapping import derive_error_mappings
-
-    # No graph query should be issued because there are no direct mappings
-    mappings = [
-        ValidatedSignalMapping(
-            source_id="jet:magnetics/ip",
-            target_id="equilibrium/time_slice/global_quantities/ip_error_upper",
-            confidence=0.9,
-            mapping_type="error_derived",
-            error_type="upper",
-            derived_from="equilibrium/time_slice/global_quantities/ip",
-        )
     ]
 
     result = derive_error_mappings(
-        mappings, gc=mock_gc, include_direct_error_signals=False
+        [_make_direct_mapping(target_id=parent)],
+        gc=mock_gc,
+        include_direct_error_signals=False,
     )
+
     assert result == []
-    mock_gc.query.assert_not_called()
+
+
+def test_derive_error_mappings_error_signal_yields_binding(mock_gc):
+    """A source classified as an error signal still produces a binding."""
+    from imas_codex.ids.mapping import derive_error_mappings
+
+    parent = "equilibrium/time_slice/global_quantities/ip"
+    mock_gc.query.side_effect = [
+        # classify_error_signals: one uncertainty source
+        [
+            {
+                "id": "jet:magnetics/ip_error",
+                "group_key": "magnetics/ip_error",
+                "description": "Plasma current error upper",
+                "physics_domain": "magnetics",
+                "rep_name": "IP Error Upper",
+            }
+        ],
+        # match_error_signals_to_imas: existing direct data mapping
+        [
+            {
+                "source_id": "jet:magnetics/ip",
+                "source_group_key": "magnetics/ip",
+                "target_id": parent,
+                "source_units": "A",
+                "target_units": "A",
+                "confidence": 0.95,
+            }
+        ],
+        # HAS_ERROR children of the parent target
+        [
+            {
+                "data_path": parent,
+                "error_path": f"{parent}_error_upper",
+                "error_type": "upper",
+            }
+        ],
+    ]
+
+    result = derive_error_mappings(
+        [_make_direct_mapping(target_id=parent)], gc=mock_gc, facility="jet"
+    )
+
+    assert len(result) == 1
+    assert result[0].mapping_type == "error_derived"
+    assert result[0].source_id == "jet:magnetics/ip_error"
+    assert result[0].target_id == f"{parent}_error_upper"
+    assert result[0].error_type == "upper"
 
 
 def test_derive_error_mappings_empty(mock_gc):
@@ -220,110 +214,6 @@ def test_derive_error_mappings_empty(mock_gc):
     result = derive_error_mappings([], gc=mock_gc, include_direct_error_signals=False)
     assert result == []
     mock_gc.query.assert_not_called()
-
-
-def test_derive_error_mappings_no_errors(mock_gc):
-    """Returns empty when graph has no HAS_ERROR relationships."""
-    from imas_codex.ids.mapping import derive_error_mappings
-
-    mock_gc.query.return_value = []  # No HAS_ERROR edges found
-
-    data_mappings = [_make_direct_mapping()]
-    result = derive_error_mappings(
-        data_mappings, gc=mock_gc, include_direct_error_signals=False
-    )
-    assert result == []
-
-
-def test_derive_error_mappings_multiple_sources_same_target(mock_gc):
-    """Multiple sources mapped to the same target each get error mappings."""
-    from imas_codex.ids.mapping import derive_error_mappings
-
-    mock_gc.query.return_value = [
-        {
-            "data_path": "magnetics/flux_loop/flux",
-            "error_path": "magnetics/flux_loop/flux_error_upper",
-            "error_type": "upper",
-        },
-    ]
-
-    mappings = [
-        _make_direct_mapping(
-            source_id="jet:magnetics/fl_001",
-            target_id="magnetics/flux_loop/flux",
-            confidence=0.90,
-        ),
-        _make_direct_mapping(
-            source_id="jet:magnetics/fl_002",
-            target_id="magnetics/flux_loop/flux",
-            confidence=0.85,
-        ),
-    ]
-
-    result = derive_error_mappings(
-        mappings, gc=mock_gc, include_direct_error_signals=False
-    )
-
-    # Both sources should produce an error mapping for the same error path
-    assert len(result) == 2
-    source_ids = {r.source_id for r in result}
-    assert source_ids == {"jet:magnetics/fl_001", "jet:magnetics/fl_002"}
-    for r in result:
-        assert r.target_id == "magnetics/flux_loop/flux_error_upper"
-        assert r.error_type == "upper"
-
-
-def test_derive_error_mappings_mixed_types(mock_gc):
-    """Direct and error-derived mappings in input: only direct ones processed."""
-    from imas_codex.ids.mapping import derive_error_mappings
-
-    mock_gc.query.return_value = [
-        {
-            "data_path": "equilibrium/time_slice/global_quantities/ip",
-            "error_path": "equilibrium/time_slice/global_quantities/ip_error_upper",
-            "error_type": "upper",
-        },
-    ]
-
-    direct = _make_direct_mapping()
-    already_derived = ValidatedSignalMapping(
-        source_id="jet:magnetics/ip",
-        target_id="equilibrium/time_slice/global_quantities/ip_error_lower",
-        confidence=0.9,
-        mapping_type="error_derived",
-        error_type="lower",
-        derived_from="equilibrium/time_slice/global_quantities/ip",
-    )
-
-    result = derive_error_mappings(
-        [direct, already_derived], gc=mock_gc, include_direct_error_signals=False
-    )
-    # Only one new error mapping from the direct input
-    assert len(result) == 1
-    assert result[0].error_type == "upper"
-
-
-def test_derive_error_mappings_evidence_references_parent(mock_gc):
-    """Derived mapping evidence string references the parent data path."""
-    from imas_codex.ids.mapping import derive_error_mappings
-
-    parent_path = "equilibrium/time_slice/global_quantities/ip"
-    mock_gc.query.return_value = [
-        {
-            "data_path": parent_path,
-            "error_path": f"{parent_path}_error_upper",
-            "error_type": "upper",
-        },
-    ]
-
-    result = derive_error_mappings(
-        [_make_direct_mapping(target_id=parent_path)],
-        gc=mock_gc,
-        include_direct_error_signals=False,
-    )
-
-    assert len(result) == 1
-    assert parent_path in result[0].evidence
 
 
 # ---------------------------------------------------------------------------
@@ -841,19 +731,18 @@ def test_run_error_derivation_only_no_existing_mappings(mock_gc):
     assert result == []
 
 
-def test_run_error_derivation_only_derives_from_graph(mock_gc):
-    """Fetches existing data mappings and derives error mappings."""
+def test_run_error_derivation_only_matches_error_signals(mock_gc):
+    """Fetches existing data mappings then binds error fields from error signals."""
     from imas_codex.ids.mapping import run_error_derivation_only
 
-    # First query: fetch existing direct mappings
-    # Subsequent queries: HAS_ERROR traversal (batched)
+    parent = "equilibrium/time_slice/global_quantities/ip"
     mock_gc.query.side_effect = [
         # Existing MAPS_TO_IMAS direct mappings
         [
             {
                 "source_id": "jet:magnetics/ip",
                 "source_property": "value",
-                "target_id": "equilibrium/time_slice/global_quantities/ip",
+                "target_id": parent,
                 "transform_expression": "value",
                 "source_units": "A",
                 "target_units": "A",
@@ -861,21 +750,41 @@ def test_run_error_derivation_only_derives_from_graph(mock_gc):
                 "confidence": 0.95,
             }
         ],
-        # HAS_ERROR traversal
+        # classify_error_signals
         [
             {
-                "data_path": "equilibrium/time_slice/global_quantities/ip",
-                "error_path": "equilibrium/time_slice/global_quantities/ip_error_upper",
+                "id": "jet:magnetics/ip_error",
+                "group_key": "magnetics/ip_error",
+                "description": "Plasma current error upper",
+                "physics_domain": "magnetics",
+                "rep_name": "IP Error Upper",
+            }
+        ],
+        # match_error_signals_to_imas: existing direct data mapping
+        [
+            {
+                "source_id": "jet:magnetics/ip",
+                "source_group_key": "magnetics/ip",
+                "target_id": parent,
+                "source_units": "A",
+                "target_units": "A",
+                "confidence": 0.95,
+            }
+        ],
+        # HAS_ERROR children of the parent target
+        [
+            {
+                "data_path": parent,
+                "error_path": f"{parent}_error_upper",
                 "error_type": "upper",
             }
         ],
-        # classify_error_signals query (no error signals)
-        [],
     ]
 
     result = run_error_derivation_only("jet", "equilibrium", gc=mock_gc, dry_run=True)
 
-    assert len(result) >= 1
+    assert len(result) == 1
     assert result[0].mapping_type == "error_derived"
-    assert result[0].source_id == "jet:magnetics/ip"
+    assert result[0].source_id == "jet:magnetics/ip_error"
+    assert result[0].target_id == f"{parent}_error_upper"
     assert result[0].error_type == "upper"

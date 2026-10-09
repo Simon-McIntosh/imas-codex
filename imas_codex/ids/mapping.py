@@ -8,7 +8,7 @@ from facility signal sources:
   map_signals:           For each target, LLM generates signal mappings
   discover_assembly:     For each target, LLM discovers assembly patterns
   validate_mappings:     Programmatic validation (source/target existence, transforms, units)
-  derive_error_mappings: Derive error field mappings via HAS_ERROR graph traversal (no LLM)
+  derive_error_mappings: Derive error field mappings from error signals (no LLM)
   populate_metadata:     Populate ids_properties and code metadata (programmatic + LLM)
   persist:               Write to graph
 """
@@ -2011,27 +2011,25 @@ def derive_error_mappings(
     facility: str | None = None,
     include_direct_error_signals: bool = True,
 ) -> list[ValidatedSignalMapping]:
-    """Derive error field mappings from validated data mappings via HAS_ERROR.
+    """Derive error field mappings from facility error signals.
 
-    For each data mapping to an IMASNode, traverses HAS_ERROR relationships
-    to find associated error fields (_error_upper, _error_lower, _error_index).
-    Creates error_derived mappings inheriting transform, units, and confidence
-    from the parent data mapping.
-
-    When *facility* is provided and *include_direct_error_signals* is True,
-    also runs a direct-error pass: it identifies facility signal sources
-    that directly represent measurement uncertainties (e.g. "HRTS Electron Density Error")
-    and matches them to IMAS error fields via cross-reference with existing
-    data mappings.
+    An IMASNode target may carry HAS_ERROR children (_error_upper,
+    _error_lower, _error_index), but a measured value is not its own
+    uncertainty. An error field is bound only when a facility source that
+    really represents an uncertainty stands behind it, so this stage
+    identifies facility signal sources classified as error signals
+    (e.g. "HRTS Electron Density Error") and matches them to IMAS error
+    fields via cross-reference with the existing data mappings. An error
+    field with no error signal behind it is left unmapped.
 
     Cost: Zero LLM tokens. Graph queries only (~10ms).
 
     Args:
         data_mappings: Validated data mappings from Stage 1.
         gc: GraphClient (created if None).
-        facility: Facility identifier (needed for direct error signal matching).
-        include_direct_error_signals: Whether to run the direct error
-            signal matching pass. Default True.
+        facility: Facility identifier (needed for error signal matching).
+        include_direct_error_signals: Whether to run the error signal
+            matching pass. Default True.
 
     Returns:
         List of error-derived ValidatedSignalMapping instances.
@@ -2039,87 +2037,21 @@ def derive_error_mappings(
     if gc is None:
         gc = GraphClient()
 
-    # Only process direct data mappings (not already-derived error mappings)
-    direct_mappings = [m for m in data_mappings if m.mapping_type == "direct"]
-
-    if not direct_mappings:
+    if not include_direct_error_signals or not facility:
         return []
 
-    # Batch query: get all error fields for all data mapping targets at once
-    target_paths = list({m.target_id for m in direct_mappings})
+    error_signals = classify_error_signals(facility, gc=gc)
+    if not error_signals:
+        return []
 
-    error_map: dict[str, list[dict]] = {}
-    # Batch in groups to avoid overly large IN clauses
-    batch_size = 500
-    for i in range(0, len(target_paths), batch_size):
-        batch = target_paths[i : i + batch_size]
-        results = gc.query(
-            """
-            MATCH (d:IMASNode)-[r:HAS_ERROR]->(e:IMASNode)
-            WHERE d.id IN $paths
-            RETURN d.id AS data_path, e.id AS error_path, r.error_type AS error_type
-            """,
-            paths=batch,
-        )
-        for row in results:
-            error_map.setdefault(row["data_path"], []).append(
-                {
-                    "error_path": row["error_path"],
-                    "error_type": row["error_type"],
-                }
-            )
-
-    # Create derived mappings
-    error_mappings: list[ValidatedSignalMapping] = []
-    for dm in direct_mappings:
-        errors = error_map.get(dm.target_id, [])
-        for err in errors:
-            error_mappings.append(
-                ValidatedSignalMapping(
-                    source_id=dm.source_id,
-                    source_property=dm.source_property,
-                    target_id=err["error_path"],
-                    transform_expression=dm.transform_expression,
-                    source_units=dm.source_units,
-                    target_units=dm.target_units,
-                    cocos_label=dm.cocos_label,
-                    confidence=dm.confidence,
-                    disposition=dm.disposition,
-                    evidence=f"Derived from data mapping to {dm.target_id}",
-                    mapping_type="error_derived",
-                    error_type=err["error_type"],
-                    derived_from=dm.target_id,
-                )
-            )
+    error_mappings = match_error_signals_to_imas(facility, error_signals, gc=gc)
 
     logger.info(
-        "Derived %d error mappings from %d data mappings (%d targets with errors)",
+        "Matched %d error signal mappings from %d error signals for %s",
         len(error_mappings),
-        len(direct_mappings),
-        len(error_map),
+        len(error_signals),
+        facility,
     )
-
-    # Direct error signal matching
-    if include_direct_error_signals and facility:
-        error_signals = classify_error_signals(facility, gc=gc)
-        if error_signals:
-            direct_error_mappings = match_error_signals_to_imas(
-                facility, error_signals, gc=gc
-            )
-            # Deduplicate: don't create direct mappings that overlap with derived
-            existing_targets = {(m.source_id, m.target_id) for m in error_mappings}
-            added = 0
-            for dm in direct_error_mappings:
-                if (dm.source_id, dm.target_id) not in existing_targets:
-                    error_mappings.append(dm)
-                    existing_targets.add((dm.source_id, dm.target_id))
-                    added += 1
-
-            logger.info(
-                "Added %d direct error signal mappings (after dedup) for %s",
-                added,
-                facility,
-            )
 
     return error_mappings
 
@@ -2139,7 +2071,7 @@ def run_error_derivation_only(
     """Run Stage 2 error derivation against existing data mappings.
 
     Fetches existing MAPS_TO_IMAS relationships with mapping_type='direct',
-    then derives error mappings via HAS_ERROR graph traversal.
+    then derives error mappings from facility error signals.
 
     Args:
         facility: Facility identifier (e.g. "tcv", "jet").

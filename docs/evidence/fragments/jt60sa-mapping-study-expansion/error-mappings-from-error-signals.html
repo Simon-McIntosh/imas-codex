@@ -1,0 +1,73 @@
+<!-- Error-mapping derivation: error bindings now come only from error signals.
+     Removal of the value-derived pass from derive_error_mappings in
+     imas_codex/ids/mapping.py. Gate log and negative-control log:
+     ~/.config/reckon/crew/runs/r-20261009T051638952042-error-mappings-from-error-signals/logs/ -->
+<section id="error-mappings-from-error-signals" data-reckon="evidence">
+  <h2 id="error-mappings-from-error-signals-heading">Error mappings come only from error signals</h2>
+
+  <p id="error-mappings-from-error-signals-intro">
+    <code>derive_error_mappings</code> in <code>imas_codex/ids/mapping.py</code> ran two passes.
+    The first walked every direct data mapping's IMASNode target to its <code>HAS_ERROR</code>
+    children and wrote an <code>error_derived</code> binding from the same value source onto
+    each error field — claiming a measured value is also its own uncertainty. The hand-off
+    export dropped those rows, but the stage still wrote them and every other consumer of the
+    graph saw them. This node removes that first pass and the deduplication that guarded
+    against it. The second pass, <code>match_error_signals_to_imas</code>, which maps sources
+    that really are uncertainties, is retained unchanged: an error field is now bound only
+    when a facility source classified as an error signal stands behind it, and an error field
+    with no such signal is left unmapped.
+  </p>
+
+  <p id="error-mappings-from-error-signals-guard">
+    The exclusion branch in <code>imas_codex/ids/handoff.py</code> classifies an
+    <code>error_derived</code> row as unexpanded when the field was filled from the
+    same signal that feeds its data field. It is left in place as a guard against
+    <code>error_derived</code> rows still present in older graphs, and the test that
+    exercises it (<code>test_builder_expands_members_and_keeps_missing_values_as_null</code>)
+    still passes in the gate above.
+  </p>
+
+  <h3 id="error-mappings-from-error-signals-measure-heading">Measure — the two controls and the gate</h3>
+  <table id="error-mappings-from-error-signals-measure-table">
+    <caption>Focused gate: <code>uv run --no-sync pytest -p no:cacheprovider tests/ids/test_error_derivation.py tests/ids/test_mapping_handoff.py</code></caption>
+    <thead>
+      <tr><th>Test</th><th>Establishes</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr id="error-mappings-from-error-signals-tables-neg">
+        <td><code>test_derive_error_mappings_value_target_with_error_children_is_unmapped</code></td>
+        <td>A direct value mapping whose target carries <code>HAS_ERROR</code> children yields no error binding</td>
+        <td>pass</td>
+      </tr>
+      <tr id="error-mappings-from-error-signals-tables-pos">
+        <td><code>test_derive_error_mappings_error_signal_yields_binding</code></td>
+        <td>A source classified as an error signal still yields an <code>error_derived</code> binding</td>
+        <td>pass</td>
+      </tr>
+      <tr id="error-mappings-from-error-signals-tables-handoff">
+        <td><code>tests/ids/test_mapping_handoff.py</code></td>
+        <td>The hand-off exclusion branch is unchanged and still passes</td>
+        <td>pass</td>
+      </tr>
+      <tr id="error-mappings-from-error-signals-tables-total">
+        <td>Focused gate total</td>
+        <td>Both files</td>
+        <td>33 passed</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="error-mappings-from-error-signals-negative">
+    The negative control restores the value-derived pass (declared mutation: "restore the
+    value-derived pass; the no-error-binding test must then fail"). With the pass restored,
+    <code>test_derive_error_mappings_value_target_with_error_children_is_unmapped</code> fails
+    and the run exits non-zero — the check is not vacuous:
+  </p>
+  <pre id="error-mappings-from-error-signals-negative-log"><code>FAILED tests/ids/test_error_derivation.py::test_derive_error_mappings_value_target_with_error_children_is_unmapped
+1 failed, 1 warning in 7.89s
+EXIT=1</code></pre>
+  <p id="error-mappings-from-error-signals-negative-path">
+    Log: <code>~/.config/reckon/crew/runs/r-20261009T051638952042-error-mappings-from-error-signals/logs/negctl.log</code>.
+    The gate log is <code>logs/head_gate.log</code> at the same path.
+  </p>
+</section>
