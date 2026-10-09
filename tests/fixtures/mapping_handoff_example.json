@@ -11,12 +11,12 @@
       "status": "generated",
       "signals": [
         {
-          "signal_id": "jt-60sa:magnetics/magPbTC10",
+          "signal_id": "jt-60sa:general/mdac_magpbtc10",
           "source_id": "jt-60sa:magnetics:pickup_probe",
           "data_source": "edas",
           "source_group": "MDAC",
           "source_array": "magPbTC10",
-          "member_identifier": "TC10",
+          "member_identifier": "10",
           "target_path": "magnetics/b_field_pol_probe/field/data",
           "transform_expression": null,
           "source_units": "T",
@@ -26,12 +26,12 @@
           "evidence": "EDAS MDAC pickup probe channel"
         },
         {
-          "signal_id": "jt-60sa:magnetics/magPbTC11",
+          "signal_id": "jt-60sa:general/mdac_magpbtc11",
           "source_id": "jt-60sa:magnetics:pickup_probe",
           "data_source": "edas",
           "source_group": "MDAC",
           "source_array": "magPbTC11",
-          "member_identifier": "TC11",
+          "member_identifier": "11",
           "target_path": "magnetics/b_field_pol_probe/field/data",
           "transform_expression": null,
           "source_units": "T",
@@ -55,12 +55,12 @@
       "status": "generated",
       "signals": [
         {
-          "signal_id": "jt-60sa:pf_active/curF1LKAT",
+          "signal_id": "jt-60sa:general/mmsys_curcs1lkat",
           "source_id": "jt-60sa:pf_active:coil_current",
           "data_source": "edas",
           "source_group": "MMSYS",
-          "source_array": "curF1LKAT",
-          "member_identifier": "F1",
+          "source_array": "curCS1LKAT",
+          "member_identifier": "1",
           "target_path": "pf_active/coil/current/data",
           "transform_expression": null,
           "source_units": "A",
@@ -70,12 +70,12 @@
           "evidence": "MMSYS PF coil current channel"
         },
         {
-          "signal_id": "jt-60sa:pf_active/curF2LKAT",
+          "signal_id": "jt-60sa:general/mmsys_curcs2lkat",
           "source_id": "jt-60sa:pf_active:coil_current",
           "data_source": "edas",
           "source_group": "MMSYS",
-          "source_array": "curF2LKAT",
-          "member_identifier": "F2",
+          "source_array": "curCS2LKAT",
+          "member_identifier": "2",
           "target_path": "pf_active/coil/current/data",
           "transform_expression": null,
           "source_units": "A",
