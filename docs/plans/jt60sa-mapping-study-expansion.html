@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca">
 <meta name="plan-impl" content="0.0714">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -356,6 +356,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261009T051638952042-error-mappings-from-error-signals" data-who="reckon-build" data-when="2026-10-09T05:29:18.295Z">
     <div class="r-comment-body"><p>Removed the value-derived pass from derive_error_mappings so error bindings come only from error signals; a value target with HAS_ERROR children now yields no binding. Gate: 33 passed (tests/ids/test_error_derivation.py + tests/ids/test_mapping_handoff.py).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261009T052927840877-review-of-error-mappings-from-error-signals" data-who="reckon-build" data-when="2026-10-09T05:43:27.780Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261009T051638952042-error-mappings-from-error-signals (commit ade2222b, base 02a98eb0e) is SOUND WITH FINDINGS: derive_error_mappings no longer writes a value-derived error binding, and error fields bind only from error signals; record stored with all six dimensions (total 108), reviewed_base_sha 02a98eb0e, reviewed_head_sha ade2222b, added_failure_count 0 over three follow-on findings.</p></div>
 </div>
 </section>
 </main>

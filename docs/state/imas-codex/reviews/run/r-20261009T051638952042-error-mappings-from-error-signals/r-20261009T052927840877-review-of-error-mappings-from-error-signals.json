@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured by the reviewer: base arm 02a98eb0e 38 passed EXIT=0, head arm ade2222b 33 passed EXIT=0; neither arm reports a FAILED or ERROR id, and the reviewed run's own manifest named no baseline_suite or after_suite",
+  "backend": "clive",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/ids/mapping.py:2127 (run_error_derivation_only)",
+    "imas_codex/ids/workers.py:1019 (validate_worker inline error derivation)",
+    "imas_codex/cli/map.py:317 (map --stage error)"
+  ],
+  "completed_at": "2026-10-09T05:43:27.780Z",
+  "dispatched_at": "2026-10-09T05:29:36Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/workers.py",
+      "line": "1019",
+      "severity": "follow-on",
+      "text": "follow-on: the pipeline calls derive_error_mappings with freshly validated bindings before persist_mapping_result runs at imas_codex/ids/workers.py:1060, but the retained pass reads only previously-persisted direct MAPS_TO_IMAS edges (imas_codex/ids/mapping.py:2079), so on a first pass over an IDS the stage now derives zero error mappings where the removed value-derived pass used to derive some, and the data_mappings argument that would carry those in-memory bindings is ignored (imas_codex/ids/mapping.py:2010)."
+    },
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "2012",
+      "severity": "follow-on",
+      "text": "follow-on: include_direct_error_signals now gates the entire function -- the early return at imas_codex/ids/mapping.py:2040 returns [] whenever it is False or facility is absent -- so a parameter named for a \"direct error signal\" pass misstates its role, and the required positional data_mappings argument (imas_codex/ids/mapping.py:2010, passed positionally by imas_codex/ids/workers.py:1019 and imas_codex/ids/mapping.py:2127) is never read."
+    },
+    {
+      "file": "tests/ids/test_error_derivation.py",
+      "line": "156",
+      "severity": "follow-on",
+      "text": "follow-on: the no-binding control passes include_direct_error_signals=False, which trips the early return at imas_codex/ids/mapping.py:2040 before any graph query, so the test asserts the flag's short-circuit rather than the absence of a HAS_ERROR traversal; it reddens only when the pass is restored together with the guard's removal (as the negctl mutation did), so reintroducing the traversal below the guard would leave it green."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against 02a98eb0e; the single commit removes the HAS_ERROR traversal and its dedup from derive_error_mappings, adds the early return unless include_direct_error_signals and facility are set, and replaces the tests that asserted the removed behavior, and hand-off.py's exclusion branch at imas_codex/ids/handoff.py:199-211 is left untouched.",
+    "done_when": "the node's measure is two unit tests plus the untouched hand-off test; the manifest records logs/head_gate.log at 33 passed EXIT=0 and a negative control at 1 failed EXIT=1, and I re-ran the named gate at both revisions myself -- 33 passed at ade2222b and 38 passed at the base 02a98eb0e -- so the gate asserts the two controls and the hand-off test.",
+    "goal": "the node's goal is that error bindings come only from error signals, so derive_error_mappings stops walking each value target's HAS_ERROR children and binds an error field only when a facility source classified as an error signal stands behind it; the diff removes the first pass at imas_codex/ids/mapping.py:2043-2068 and delegates the retained pass to match_error_signals_to_imas at imas_codex/ids/mapping.py:2044, so the stage meets the goal.",
+    "manifest": "read; it records status complete, the commit, the 33-passed gate with its cited log, a negative-control log whose FAILED id matches its note, and that data_mappings is now an unused signature parameter, but it records no baseline_suite or after_suite, so the added-failure count below comes from the two arms I ran rather than from the reviewed run.",
+    "write_paths": "the manifest declares imas_codex/ids/mapping.py, tests/ids/test_error_derivation.py and the evidence fragment; git show --stat ade2222b lists exactly those three files with no generated model and nothing else, so every landed path is inside the fence."
+  },
+  "justifications": {
+    "durability": "reinstating the removed pass reddens tests/ids/test_error_derivation.py:129 (logs/negctl.log shows 1 failed EXIT=1), so a full revert is caught, but the no-binding control calls the stage with include_direct_error_signals=False (tests/ids/test_error_derivation.py:156) and so trips the early return at imas_codex/ids/mapping.py:2040 before any graph query.",
+    "evidence": "the focused gate asserts the two controls, but the reviewed manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T051638952042-error-mappings-from-error-signals/manifest.md records no baseline_suite or after_suite, so the added-failure count had to be taken from arms the reviewer ran (33 passed head, 38 passed base).",
+    "fit": "the change keeps the module's logging and delegation idiom, but the parameter include_direct_error_signals at imas_codex/ids/mapping.py:2012 now gates the whole function and data_mappings at imas_codex/ids/mapping.py:2010 is never read, so two names no longer describe what they do.",
+    "goal_fidelity": "the deliverable is met at imas_codex/ids/mapping.py:2043-2044 where the value-derived pass is gone and the stage delegates to match_error_signals_to_imas, but the retained pass reads only graph-persisted mappings (imas_codex/ids/mapping.py:2079-2090) so on a first pipeline run it yields nothing.",
+    "reuse": "the diff extends the existing owners classify_error_signals and match_error_signals_to_imas (imas_codex/ids/mapping.py:2043-2044) rather than adding a mechanism, and it removes the duplicated value-derived pass rather than wrapping it.",
+    "scope_discipline": "git show --stat ade2222b lists only imas_codex/ids/mapping.py, tests/ids/test_error_derivation.py and the evidence fragment, exactly the declared write paths, with no generated model and no file outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 02a98eb0e6095873282bd8cb0b8b87fd3e41ad75\nreviewed_head_sha: ade2222b42dbe15fbd4de643c54a2590df77d000\nVERDICT goal: the node's goal is that error bindings come only from error signals, so derive_error_mappings stops walking each value target's HAS_ERROR children and binds an error field only when a facility source classified as an error signal stands behind it; the diff removes the first pass at imas_codex/ids/mapping.py:2043-2068 and delegates the retained pass to match_error_signals_to_imas at imas_codex/ids/mapping.py:2044, so the stage meets the goal.\nVERDICT done_when: the node's measure is two unit tests plus the untouched hand-off test; the manifest records logs/head_gate.log at 33 passed EXIT=0 and a negative control at 1 failed EXIT=1, and I re-ran the named gate at both revisions myself -- 33 passed at ade2222b and 38 passed at the base 02a98eb0e -- so the gate asserts the two controls and the hand-off test.\nVERDICT write_paths: the manifest declares imas_codex/ids/mapping.py, tests/ids/test_error_derivation.py and the evidence fragment; git show --stat ade2222b lists exactly those three files with no generated model and nothing else, so every landed path is inside the fence.\nVERDICT manifest: read; it records status complete, the commit, the 33-passed gate with its cited log, a negative-control log whose FAILED id matches its note, and that data_mappings is now an unused signature parameter, but it records no baseline_suite or after_suite, so the added-failure count below comes from the two arms I ran rather than from the reviewed run.\nVERDICT diff: read commit by commit against 02a98eb0e; the single commit removes the HAS_ERROR traversal and its dedup from derive_error_mappings, adds the early return unless include_direct_error_signals and facility are set, and replaces the tests that asserted the removed behavior, and hand-off.py's exclusion branch at imas_codex/ids/handoff.py:199-211 is left untouched.\nCALL_SITES: imas_codex/ids/mapping.py:2127 (run_error_derivation_only), imas_codex/ids/workers.py:1019 (validate_worker inline error derivation), imas_codex/cli/map.py:317 (map --stage error)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the deliverable is met at imas_codex/ids/mapping.py:2043-2044 where the value-derived pass is gone and the stage delegates to match_error_signals_to_imas, but the retained pass reads only graph-persisted mappings (imas_codex/ids/mapping.py:2079-2090) so on a first pipeline run it yields nothing.\nSCORE evidence: 16\nJUSTIFICATION evidence: the focused gate asserts the two controls, but the reviewed manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T051638952042-error-mappings-from-error-signals/manifest.md records no baseline_suite or after_suite, so the added-failure count had to be taken from arms the reviewer ran (33 passed head, 38 passed base).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat ade2222b lists only imas_codex/ids/mapping.py, tests/ids/test_error_derivation.py and the evidence fragment, exactly the declared write paths, with no generated model and no file outside the fence.\nSCORE durability: 17\nJUSTIFICATION durability: reinstating the removed pass reddens tests/ids/test_error_derivation.py:129 (logs/negctl.log shows 1 failed EXIT=1), so a full revert is caught, but the no-binding control calls the stage with include_direct_error_signals=False (tests/ids/test_error_derivation.py:156) and so trips the early return at imas_codex/ids/mapping.py:2040 before any graph query.\nSCORE fit: 17\nJUSTIFICATION fit: the change keeps the module's logging and delegation idiom, but the parameter include_direct_error_signals at imas_codex/ids/mapping.py:2012 now gates the whole function and data_mappings at imas_codex/ids/mapping.py:2010 is never read, so two names no longer describe what they do.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff extends the existing owners classify_error_signals and match_error_signals_to_imas (imas_codex/ids/mapping.py:2043-2044) rather than adding a mechanism, and it removes the duplicated value-derived pass rather than wrapping it.\nFINDING imas_codex/ids/workers.py:1019 follow-on: the pipeline calls derive_error_mappings with freshly validated bindings before persist_mapping_result runs at imas_codex/ids/workers.py:1060, but the retained pass reads only previously-persisted direct MAPS_TO_IMAS edges (imas_codex/ids/mapping.py:2079), so on a first pass over an IDS the stage now derives zero error mappings where the removed value-derived pass used to derive some, and the data_mappings argument that would carry those in-memory bindings is ignored (imas_codex/ids/mapping.py:2010).\nFINDING imas_codex/ids/mapping.py:2012 follow-on: include_direct_error_signals now gates the entire function -- the early return at imas_codex/ids/mapping.py:2040 returns [] whenever it is False or facility is absent -- so a parameter named for a \"direct error signal\" pass misstates its role, and the required positional data_mappings argument (imas_codex/ids/mapping.py:2010, passed positionally by imas_codex/ids/workers.py:1019 and imas_codex/ids/mapping.py:2127) is never read.\nFINDING tests/ids/test_error_derivation.py:156 follow-on: the no-binding control passes include_direct_error_signals=False, which trips the early return at imas_codex/ids/mapping.py:2040 before any graph query, so the test asserts the flag's short-circuit rather than the absence of a HAS_ERROR traversal; it reddens only when the pass is restored together with the guard's removal (as the negctl mutation did), so reintroducing the traversal below the guard would leave it green.\nFINAL: SOUND WITH FINDINGS. The landed change does what section 4 sets out: derive_error_mappings no longer manufactures an error_derived binding from a value source, and an error field is bound only through the retained error-signal matching pass, with the two named controls and the untouched hand-off test green (33 passed, EXIT=0 head; 38 passed, EXIT=0 base). The three findings are follow-ons, none blocking landing: the pipeline invokes the stage before its bindings are persisted so the retained pass is inert on a first run (workers.py:1019), the include_direct_error_signals parameter and the unused data_mappings argument no longer describe the function, and the no-binding control reddens through the new early return rather than through the removed traversal.",
+  "review_run_id": "r-20261009T052927840877-review-of-error-mappings-from-error-signals",
+  "reviewed_base_sha": "02a98eb0e6095873282bd8cb0b8b87fd3e41ad75",
+  "reviewed_head_sha": "ade2222b42dbe15fbd4de643c54a2590df77d000",
+  "reviewed_run_id": "r-20261009T051638952042-error-mappings-from-error-signals",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T05:40:46.660527+00:00",
+  "total": 108
+}
