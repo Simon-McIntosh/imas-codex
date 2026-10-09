@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-sprint" content="S17">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;external-map-rules#s2&quot;], &quot;s4&quot;: [&quot;external-map-rules#s3&quot;, &quot;signal-evidence-followups#s4&quot;], &quot;s5&quot;: [&quot;external-map-rules#s3&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;external-map-rules#s2&quot;, &quot;generated-map-handoff#s3&quot;], &quot;s4&quot;: [&quot;external-map-rules#s3&quot;, &quot;signal-evidence-followups#s4&quot;], &quot;s5&quot;: [&quot;external-map-rules#s3&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>External Machine-Map Rules Pulled Into the Graph | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -99,7 +99,8 @@
     <h2 id="s3">§3 — Pull a bundle version into the graph</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      <code>imas-codex imas map pull FACILITY --bundle PATH</code> reads one bundle, records its version and the sha256
+      <code>imas-codex map pull FACILITY --bundle PATH</code>, under the top-level <code>map</code> group that
+      <code>generated-map-handoff</code> §3 moves out of <code>imas</code>, reads one bundle, records its version and the sha256
       of every file read, writes or updates each rule under the §2 identity, joins it to its source and target, and
       writes a change record for every rule whose values differ from the previous pulled version. Pulling a version whose
       hashes are already recorded writes nothing. The schema follows the §2 design as adjusted by the lead.
@@ -117,12 +118,13 @@
       and proposal, and it reaches a source's evidence through <code>HAS_EVIDENCE</code> in §4.
     </p>
     <p>
-      <strong>What this adds.</strong> One subcommand under <code>imas map</code>, which owns source-to-IMAS bindings,
+      <strong>What this adds.</strong> One subcommand under <code>map</code>, which owns source-to-IMAS bindings,
       of which a pulled rule is one from another provider; no MCP tool; and four node classes, because no existing class
       records a provider's rule across versions. No evidence carrier is added: §4 reuses <code>MappingEvidence</code>.
     </p>
     <p>
-      <strong>Node</strong> <code>external-map-pull</code>, role implement, 3 h, after §2. Write paths:
+      <strong>Node</strong> <code>external-map-pull</code>, role implement, 3 h, after §2 and
+      <code>generated-map-handoff</code> §3, so the subcommand is written once under its final group. Write paths:
       <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/ids/external_maps.py</code>,
       <code>imas_codex/cli/map.py</code> and <code>tests/ids/test_external_maps.py</code>. <strong>Done when</strong>
       <code>uv run build-models --force</code> regenerates the models with the new classes, and
