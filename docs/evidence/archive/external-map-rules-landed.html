@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="external-map-rules-landed">
+  <meta name="plan-title" content="External Machine-Map Rules Pulled Into the Graph — landed record">
+  <meta name="plan-summary" content="Closure synthesis for External Machine-Map Rules Pulled Into the Graph: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="external-map-rules">
+  <meta name="plan-verdict" content="qualified">
+  <title>External Machine-Map Rules Pulled Into the Graph — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>External Machine-Map Rules Pulled Into the Graph — landed record</h1>
+  <p>Closure synthesis for External Machine-Map Rules Pulled Into the Graph: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2">
+    <h2>§2 — External rule record designed</h2>
+    <p>The design (<a href="/imas-codex/evidence/fragments/external-map-rules/external-map-record-design.html">fragment</a>, merged at <code>d80bfb497</code>) proposes four classes: <code>ExternalMapBundleVersion</code> keyed by the content digest of the exact files read, with a tag held as a label rather than an identity; <code>ExternalMapRule</code> carrying only an immutable selector identity; <code>ExternalMapRuleRevision</code> holding every provider field plus the raw JSON; and <code>ExternalMapRuleChange</code> holding field-level old and new values. A signal rule's identity is facility, provider and physical channel (source group and array). A machine binding adds phase, role and struct-array entry, with a differential pair canonicalised unordered, so the FL7-FL1 to FL1-FL7 rename keeps one rule id: across both phases that transition is 104 changes and no additions or removals. The bundle at <code>v0.2.0-rc4</code> holds 61 signal rules, not 45 (magnetics alone is 45). 60 of them join a SignalSource; the unjoined one is GEQDSK <code>PSI</code>, which has a candidate EQDB alias that is not adopted. All 61 signal rules and all 432 machine bindings join an IMASNode. The flux-loop ψ label sits on <code>magnetics/flux_loop/flux</code>, not on its <code>/data</code> leaf, so a class must be resolved through ancestors. A changed rule re-queues every source its old or new revision joins; bookkeeping alone does not.</p>
+  </section>
+
+</main>
+</body>
+</html>

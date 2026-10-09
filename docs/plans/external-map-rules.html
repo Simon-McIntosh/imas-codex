@@ -20,11 +20,11 @@
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-sprint" content="S17">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;external-map-rules#s2&quot;], &quot;s5&quot;: [&quot;external-map-rules#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>External Machine-Map Rules Pulled Into the Graph | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -72,7 +72,7 @@
     </p>
 
     <h2 id="s2">§2 — Design the record before writing it</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The record has to survive renames, re-groupings and sign corrections, so its identity rules are settled first.
       The design reads the bundle's own format (<code>bundle.json</code>, <code>machine_map.json</code> at schema version
@@ -175,15 +175,24 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-emr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build external-map-rules §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-emr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build external-map-rules §2" data-resolved-at="2026-10-09T01:25:54+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Design the external rule record</h4>
     <div class="r-fu-body">The rule identity and change types are settled before any schema is written, because the record has to survive renames and re-groupings.</div>
     <pre class="r-fu-prompt">/reckon-build external-map-rules §2</pre>
+    <p class="r-fu-outcome"><p>Design landed as §2; the schema and pull follow in §3.</p></p>
+    </article>
+<article class="r-fu" data-id="f-emr-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-09" data-recommends-skill="/reckon-build external-map-rules §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pull a bundle version into the graph</h4>
+    <div class="r-fu-body"><p>Build the §2 record as the schema and the <code>imas map pull</code> command, then pull the JT-60SA history.</p></div>
+    <pre class="r-fu-prompt">/reckon-build external-map-rules §3</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261009T005719546184-external-map-record-design" data-who="reckon-build" data-when="2026-10-09T01:09:03Z">
-    <div class="r-comment-body"><p>&lt;a href=&quot;/imas-codex/evidence/fragments/external-map-rules/external-map-record-design.html#external-map-record-design-record&quot;&gt;External rule record design&lt;/a&gt; defines bundle, rule, revision, and change classes with a stable differential-loop identity; the current 61 signal rules join 60 SignalSources and all 61 IMASNodes, and all 432 machine bindings join IMASNodes.</p></div>
+    <div class="r-comment-body"><p>&lt;a href="/imas-codex/evidence/fragments/external-map-rules/external-map-record-design.html#external-map-record-design-record"&gt;External rule record design&lt;/a&gt; defines bundle, rule, revision, and change classes with a stable differential-loop identity; the current 61 signal rules join 60 SignalSources and all 61 IMASNodes, and all 432 machine bindings join IMASNodes.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-09T01:30:00Z">
+    <div class="r-comment-body"><p>§2 landed: the external rule record design (commit <code>b5eeb7cf5</code>, merged <code>d80bfb497</code>). It defines bundle version, rule, revision and change classes with rule identity surviving renames; 60 of 61 signal rules join a SignalSource and all join their IMASNode. <a href="/imas-codex/evidence/archive/external-map-rules-landed.html#s2">evidence</a></p></div>
 </div>
 </section>
 </main>
