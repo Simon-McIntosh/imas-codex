@@ -9,44 +9,35 @@ from __future__ import annotations
 from functools import lru_cache
 
 
-@lru_cache(maxsize=4)
-def _dd_cocos_labels(dd_version: str | None) -> dict[str, str]:
-    """Read the DD's field labels once for each requested version."""
-    import imas.dd_zip
+@lru_cache(maxsize=4096)
+def dd_cocos_class(path: str) -> str | None:
+    """Read the deepest COCOS-labelled DD path or ancestor from the graph.
 
-    tree = imas.dd_zip.dd_etree(dd_version)
-    root = tree.getroot() if hasattr(tree, "getroot") else tree
-    labels: dict[str, str] = {}
-    for ids in root:
-        ids_name = ids.get("name")
-        if not ids_name:
-            continue
-        for field in ids.iter("field"):
-            path = field.get("path")
-            label = field.get("cocos_transformation_type") or field.get(
-                "cocos_label_transformation"
-            )
-            if path and label:
-                labels[f"{ids_name}/{path}"] = label
-    return labels
-
-
-def dd_cocos_class(path: str, *, dd_version: str | None = None) -> str | None:
-    """Resolve a DD field's COCOS class from its own or an ancestor's label.
-
-    ``path`` includes the IDS name. A signal's ``data`` leaf commonly inherits
-    the class of its enclosing signal structure.
+    ``path`` includes the IDS name. A signal's ``data`` leaf inherits the
+    class of its enclosing structure when it has no class of its own.
     """
-    labels = _dd_cocos_labels(dd_version)
+    from imas_codex.graph.client import GraphClient
+
     parts = path.strip("/").split("/")
-    for end in range(len(parts), 1, -1):
-        parent = "/".join(parts[:end])
-        if parent in labels:
-            return labels[parent]
-    # The published DD XML omits this label, although the flux is a ψ signal.
-    if len(parts) >= 3 and parts[:3] == ["magnetics", "flux_loop", "flux"]:
-        return "psi_like"
-    return None
+    if not parts or not parts[0]:
+        return None
+    prefixes = [
+        {"id": "/".join(parts[:depth]), "depth": depth}
+        for depth in range(1, len(parts) + 1)
+    ]
+    with GraphClient() as graph:
+        rows = graph.query(
+            """
+            UNWIND $paths AS candidate
+            MATCH (node:IMASNode {id: candidate.id})
+            WHERE node.cocos_transformation_type IS NOT NULL
+            RETURN node.cocos_transformation_type AS label
+            ORDER BY candidate.depth DESC
+            LIMIT 1
+            """,
+            paths=prefixes,
+        )
+    return rows[0]["label"] if rows else None
 
 
 @lru_cache(maxsize=1)

@@ -157,7 +157,7 @@ def cocos_from_dd_version(version: str) -> int:
 
 
 @dataclass(frozen=True)
-class ConventionObservation:
+class SignObservation:
     """A measured sign from one shot, before any convention is assigned.
 
     ``kind`` identifies the relation being measured. Flux and psi gradients
@@ -205,7 +205,7 @@ class COCOSSurvivorResult:
 
 
 def score_cocos_survivors(
-    observations: list[ConventionObservation],
+    observations: list[SignObservation],
     *,
     e_bp: Literal[0, 1] | None = None,
     sigma_r_phi_z: Literal[-1, 1] | None = None,
@@ -325,11 +325,11 @@ def determine_cocos(
     ip_sign = 1 if ip > 0 else -1
     b0_sign = 1 if b0 > 0 else -1
     observations = [
-        ConventionObservation(0, ip_sign, "psi_gradient", 1 if gradient > 0 else -1)
+        SignObservation(0, ip_sign, "psi_gradient", 1 if gradient > 0 else -1)
     ]
     if dp_dpsi is not None and math.isfinite(dp_dpsi) and dp_dpsi != 0:
         observations.append(
-            ConventionObservation(0, ip_sign, "dp_dpsi", 1 if dp_dpsi > 0 else -1)
+            SignObservation(0, ip_sign, "dp_dpsi", 1 if dp_dpsi > 0 else -1)
         )
     assumed: dict[str, int] = {}
     if e_bp is None:
@@ -340,7 +340,7 @@ def determine_cocos(
     rho_handedness = None
     if q is not None and math.isfinite(q) and q != 0:
         observations.append(
-            ConventionObservation(0, ip_sign, "q", 1 if q > 0 else -1, b0_sign)
+            SignObservation(0, ip_sign, "q", 1 if q > 0 else -1, b0_sign)
         )
     else:
         rho_handedness = 1

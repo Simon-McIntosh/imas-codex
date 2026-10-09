@@ -3,20 +3,20 @@
 import pytest
 
 from imas_codex.cocos import (
-    ConventionObservation,
+    SignObservation,
     dd_cocos_class,
     determine_cocos,
     score_cocos_survivors,
 )
 
 
-def mast_observations() -> list[ConventionObservation]:
+def mast_observations() -> list[SignObservation]:
     """Opposite flux response and q signs at each current polarity."""
     return [
-        ConventionObservation(101, 1, "flux_loop_response", -1),
-        ConventionObservation(101, 1, "q", -1, 1),
-        ConventionObservation(102, -1, "flux_loop_response", 1),
-        ConventionObservation(102, -1, "q", 1, 1),
+        SignObservation(101, 1, "flux_loop_response", -1),
+        SignObservation(101, 1, "q", -1, 1),
+        SignObservation(102, -1, "flux_loop_response", 1),
+        SignObservation(102, -1, "q", 1, 1),
     ]
 
 
@@ -51,7 +51,7 @@ def test_missing_current_polarity_lowers_confidence() -> None:
 
 def test_contradictory_signs_are_not_cocos_expressible() -> None:
     observations = mast_observations()
-    observations.append(ConventionObservation(103, 1, "flux_loop_response", 1))
+    observations.append(SignObservation(103, 1, "flux_loop_response", 1))
     result = score_cocos_survivors(observations, e_bp=0)
     assert result.survivors == frozenset()
     assert result.status == "not-cocos-expressible"
@@ -70,26 +70,64 @@ def test_determine_uses_unique_survivor_and_names_assumptions() -> None:
     )
 
 
-def test_dd_cocos_class_inherits_flux_label_only() -> None:
-    assert dd_cocos_class("magnetics/flux_loop/flux/data") == "psi_like"
-    assert dd_cocos_class("magnetics/flux_loop/flux") == "psi_like"
-    assert dd_cocos_class("magnetics/nonexistent/data") is None
+def mock_dd_graph(
+    monkeypatch: pytest.MonkeyPatch, labels: dict[str, str]
+) -> list[list[str]]:
+    """Supply graph labels while retaining the query's requested path prefixes."""
+    from imas_codex.graph import client
+
+    calls: list[list[str]] = []
+
+    class FakeGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def query(self, cypher: str, *, paths: list[dict[str, int | str]]):
+            assert "ORDER BY candidate.depth DESC" in cypher
+            assert "LIMIT 1" in cypher
+            calls.append([str(item["id"]) for item in paths])
+            labelled = [item for item in paths if item["id"] in labels]
+            if not labelled:
+                return []
+            deepest = max(labelled, key=lambda item: int(item["depth"]))
+            return [{"label": labels[str(deepest["id"])]}]
+
+    monkeypatch.setattr(client, "GraphClient", FakeGraph)
+    dd_cocos_class.cache_clear()
+    return calls
 
 
-def test_dd_cocos_class_reads_ancestor_metadata(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from imas_codex.cocos import transforms
+def test_dd_cocos_class_inherits_graph_label(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = mock_dd_graph(monkeypatch, {"magnetics/flux_loop/flux": "psi_like"})
+    path = "magnetics/flux_loop/flux/data"
+    assert dd_cocos_class(path) == "psi_like"
+    assert calls == [
+        ["magnetics", "magnetics/flux_loop", "magnetics/flux_loop/flux", path]
+    ]
+    assert dd_cocos_class(path) == "psi_like"
+    assert len(calls) == 1
 
-    monkeypatch.setattr(
-        transforms,
-        "_dd_cocos_labels",
-        lambda dd_version: {
-            "equilibrium/time_slice/global_quantities/psi_axis": "psi_like"
+
+def test_dd_cocos_class_prefers_deepest_label(monkeypatch: pytest.MonkeyPatch) -> None:
+    mock_dd_graph(
+        monkeypatch,
+        {
+            "equilibrium/time_slice": "ip_like",
+            "equilibrium/time_slice/global_quantities/psi_axis": "psi_like",
         },
     )
     assert (
         dd_cocos_class("equilibrium/time_slice/global_quantities/psi_axis/data")
         == "psi_like"
     )
-    assert dd_cocos_class("equilibrium/time_slice/global_quantities/ip") is None
+
+
+def test_dd_cocos_class_returns_none_without_label(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = mock_dd_graph(monkeypatch, {})
+    assert dd_cocos_class("magnetics/nonexistent/data") is None
+    assert len(calls) == 1
