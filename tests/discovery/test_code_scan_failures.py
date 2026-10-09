@@ -5,6 +5,7 @@ import json
 import subprocess
 from unittest.mock import patch
 
+from imas_codex.discovery.base import reachability
 from imas_codex.discovery.code import scanner, workers
 from imas_codex.discovery.code.state import FileDiscoveryState
 
@@ -163,7 +164,7 @@ def run_retrying_scan(monkeypatch, outcomes, monitor=None):
     )
     monkeypatch.setattr("imas_codex.graph.GraphClient", FacilityGraph)
     monkeypatch.setattr(scanner, "_get_pattern_categories", lambda _facility: {})
-    monkeypatch.setattr(workers, "_sleep_unless_stopped", record_wait)
+    monkeypatch.setattr(reachability, "_sleep_unless_stopped", record_wait)
     with (
         patch("imas_codex.discovery.base.facility.get_facility", return_value={}),
         patch(

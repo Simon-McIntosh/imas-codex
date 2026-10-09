@@ -30,15 +30,15 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
 from imas_codex.discovery.base.llm import ProviderBudgetExhausted
 from imas_codex.discovery.base.progress import WorkerStats
+from imas_codex.discovery.base.reachability import (
+    host_unreachable,
+    wait_for_reachable_host,
+)
 from imas_codex.discovery.base.state import DiscoveryStateBase
 from imas_codex.discovery.base.supervision import (
     OrphanRecoverySpec,
     PipelinePhase,
     is_infrastructure_error,
-)
-from imas_codex.discovery.code.workers import (
-    _host_unreachable,
-    _wait_for_reachable_host,
 )
 from imas_codex.discovery.paths.scorer import (
     CODE_BEARING_PURPOSES,
@@ -302,9 +302,8 @@ def has_pending_work(facility: str) -> bool:
                       THEN 'expand' ELSE null END AS exp,
                  CASE WHEN p.status = $triaged
                       AND NOT (p.path_purpose IN $excluded_purposes)
-                      AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
+                      AND (p.should_enrich = true OR (p.should_enrich IS NULL AND p.scan_relevance >= $minimum))
                       AND (p.is_enriched IS NULL OR p.is_enriched = false)
-                      AND coalesce(p.enrich_set_aside, false) = false
                       THEN 'enrich' ELSE null END AS enr,
                  CASE WHEN p.is_enriched = true
                       AND NOT (p.path_purpose IN $excluded_purposes)
@@ -419,10 +418,9 @@ def _has_pending_enrich_work(facility: str, threshold: float | None = None) -> b
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
-              AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
+              AND (p.should_enrich = true OR (p.should_enrich IS NULL AND p.scan_relevance >= $minimum))
               AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
-              AND coalesce(p.enrich_set_aside, false) = false
               {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
@@ -846,10 +844,9 @@ def claim_paths_for_enriching(
             f"""
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             WHERE p.status = $triaged
-              AND (p.should_enrich = true OR p.scan_relevance >= $auto_enrich_threshold)
+              AND (p.should_enrich = true OR (p.should_enrich IS NULL AND p.scan_relevance >= $auto_enrich_threshold))
               AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
-              AND coalesce(p.enrich_set_aside, false) = false
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               AND (p.total_dirs IS NULL OR p.total_dirs <= 500)
               {scope_clause}
@@ -1068,9 +1065,10 @@ def mark_enrichment_complete(
                 SET p.claimed_at = null,
                     p.enrich_error = item.error,
                     p.enrich_failures = failures,
-                    p.enrich_set_aside = item.permanent OR failures >= $failure_limit,
                     p.should_enrich = CASE WHEN item.permanent OR failures >= $failure_limit
-                        THEN false ELSE p.should_enrich END
+                        THEN false ELSE p.should_enrich END,
+                    p.enrich_skip_reason = CASE WHEN item.permanent OR failures >= $failure_limit
+                        THEN item.error ELSE p.enrich_skip_reason END
                 """,
                 items=error_items,
                 failure_limit=ENRICH_FAILURE_LIMIT,
@@ -1092,7 +1090,7 @@ def mark_enrichment_complete(
                     p.write_matches = item.write_matches,
                     p.enrich_warnings = item.enrich_warnings,
                     p.enrich_failures = 0,
-                    p.enrich_set_aside = false,
+                    p.enrich_skip_reason = null,
                     p.enrich_error = null,
                     p.claimed_at = null
                 """,
@@ -2261,9 +2259,9 @@ async def enrich_worker(
             logger.exception(f"Enrich error: {e}")
             state.enrich_stats.errors += len(paths)
             _revert_path_claims(state.facility, path_strs)
-            if _host_unreachable(e):
+            if host_unreachable(e):
                 unreachable_count += 1
-                await _wait_for_reachable_host(state, unreachable_count)
+                await wait_for_reachable_host(state, unreachable_count)
                 continue
             if is_infrastructure_error(e):
                 raise

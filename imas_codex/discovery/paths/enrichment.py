@@ -21,13 +21,14 @@ from __future__ import annotations
 import json
 import logging
 import re
+import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.config.discovery_config import get_discovery_config
 from imas_codex.discovery.base.facility import get_facility
-from imas_codex.discovery.code.workers import _host_unreachable
+from imas_codex.discovery.base.reachability import host_unreachable
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import async_run_python_script, run_python_script
 
@@ -279,8 +280,10 @@ def enrich_paths(
             python_command=environment.python_command,
             setup_commands=list(environment.setup_commands),
         )
+    except subprocess.TimeoutExpired as e:
+        return _timeout_results(e, paths)
     except Exception as e:
-        if _host_unreachable(e):
+        if host_unreachable(e):
             raise
         logger.warning(f"Enrichment failed for {facility}: {e}")
         return [EnrichmentResult(path=p, error=str(e)[:100]) for p in paths]
@@ -462,6 +465,18 @@ def _parse_enrich_output(
     return results
 
 
+def _timeout_results(
+    error: subprocess.TimeoutExpired, paths: list[str]
+) -> list[EnrichmentResult]:
+    """Keep complete path results and charge paths left unfinished at timeout."""
+    output = error.output or ""
+    if isinstance(output, bytes):
+        output = output.decode(errors="replace")
+    return _parse_enrich_output(
+        output, paths, fill_missing_error=f"timeout after {error.timeout}s"
+    )
+
+
 async def async_enrich_paths(
     facility: str,
     paths: list[str],
@@ -511,8 +526,10 @@ async def async_enrich_paths(
             )
     except asyncio.CancelledError:
         raise
+    except subprocess.TimeoutExpired as e:
+        return _timeout_results(e, paths)
     except Exception as e:
-        if _host_unreachable(e):
+        if host_unreachable(e):
             raise
         logger.warning(f"Enrichment failed for {facility}: {e}")
         return [EnrichmentResult(path=p, error=str(e)[:100]) for p in paths]
