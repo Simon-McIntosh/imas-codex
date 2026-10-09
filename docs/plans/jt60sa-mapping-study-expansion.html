@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc,0e1f1d382,43ee5a2e0,10d79f25b,615da419b">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="90">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -585,6 +585,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-09T11:05:00Z">
     <div class="r-comment-body"><p>§8 landed: the coil currents import 33 of 46 rows. On <code>pf_active/coil</code>, 6 agree and 6 name the same coil on the other acquisition chain, so 12 of 16 imported coil rows name the right coil. 12 rows are unplaced by design or by imas-ambix's model, and 1 deprecated path is refused (§25). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s8">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-s8-rescore-chains" data-who="reckon-build" data-when="2026-10-09T12:25:00Z">
+    <div class="r-comment-body"><p>imas-ambix rescored the 10:41:50Z coils export at imas-ambix main <code>6ccaade6</code>, after its ten coil-current rules declared the partner MMSYS chain with evidence (LKAT tracks HiTe at corr ≥ 0.994 on E101154); nothing is inferred from names. Totals: 46 exported, 33 imported, 7 agreeing, 0 conflicting, 6 chain-differs, 31 sign unscored, 12 unplaced, 1 refused. <code>pf_active/coil</code> scored 19/16/6/0/6/16/3/0 in the same order. The six EF1 to EF6 HiTe/LKAT pairs therefore read as chain-differs, not conflicts, so the coil iteration has no conflicting rows. This supersedes the "6 conflicting" wording in <code>docs/research/jt60sa-mapping-study.html</code>. Which chain is the reference remains the lead's decision.</p></div>
 </div>
 <div class="r-comment" data-section="s24" data-id="c-close-s24" data-who="reckon-build" data-when="2026-10-09T10:00:00Z">
     <div class="r-comment-body"><p>§24 landed: validation retargets a structure binding to its <code>data</code> or <code>time</code> child, or refuses it (merge <code>c792d5d1a</code>; 580 tests pass). The seven coils rows refused as "target is not a data field" will now land on <code>/data</code>. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s24">evidence</a></p></div>
