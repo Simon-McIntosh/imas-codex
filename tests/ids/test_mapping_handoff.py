@@ -48,7 +48,7 @@ def _graph() -> MagicMock:
         if "m.facility_id AS facility_id" in statement:
             return [
                 {
-                    "id": "jt-60sa:magnetics:4.1.1",
+                    "id": "jt-60sa:magnetics",
                     "facility_id": "jt-60sa",
                     "ids_name": "magnetics",
                     "dd_version": "4.1.1",
